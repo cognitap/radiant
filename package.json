@@ -32,7 +32,9 @@
       "types": "./dist/library/index.d.ts",
       "default": "./dist/library/index.js"
     },
-    "./styles.css": "./src/styles.css"
+    "./styles.css": "./dist/library/styles.css",
+    "./reset.css": "./dist/library/reset.css",
+    "./tailwind.css": "./src/styles.css"
   },
   "publishConfig": {
     "access": "public",
@@ -42,9 +44,10 @@
   "scripts": {
     "prepare": "husky",
     "storybook": "storybook dev --host 127.0.0.1 --port 6006 --no-open --disable-telemetry",
-    "build": "rimraf dist/library && tsc -p tsconfig.build.json",
+    "build": "rimraf dist/library && tsc -p tsconfig.build.json && pnpm build:css",
+    "build:css": "tailwindcss -i styles/library.css -o dist/library/styles.css --minify && tailwindcss -i styles/reset.css -o dist/library/reset.css --minify",
     "build:storybook": "storybook build --output-dir dist/storybook --disable-telemetry",
-    "test": "pnpm build && node --test tests/package.test.mjs && tsc -p tests/tsconfig.json && tsc -p tests/tsconfig.json --module ESNext --moduleResolution Bundler",
+    "test": "pnpm build && node --test tests/*.test.mjs && tsc -p tests/tsconfig.json && tsc -p tests/tsconfig.json --module ESNext --moduleResolution Bundler",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings",
     "fmt": "oxfmt",
@@ -58,6 +61,7 @@
     "@storybook/addon-a11y": "10.6.1",
     "@storybook/addon-docs": "10.6.1",
     "@storybook/react-vite": "10.6.1",
+    "@tailwindcss/cli": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
@@ -77,6 +81,11 @@
   "peerDependencies": {
     "react": "^19.3.0",
     "tailwindcss": "^4.3.3"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
   },
   "devEngines": {
     "runtime": {

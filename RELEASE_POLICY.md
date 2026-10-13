@@ -61,10 +61,11 @@ current peer ranges and runtime dependencies. Contributor Node, pnpm and
 TypeScript pins belong to development configuration and do not establish
 consumer runtime or declaration requirements.
 
-Ordinary consumers use compiled CSS without Tailwind. The current
-stylesheet still requires Tailwind processing; standalone CSS must ship before
-initial publication. Tailwind requirements then belong to the optional
-customization route.
+Ordinary consumers use compiled `styles.css` without Tailwind. The optional
+`reset.css` is a separate, global opt-in; importing components loads neither
+stylesheet automatically. Tailwind belongs to the optional `tailwind.css`
+customization route, which registers the library theme and sources for the
+application's own CSS generation. Choose one component stylesheet route.
 
 Cognitap pins exact published versions. Optional local integration installs a
 built package through the same compiled exports; normal consumption after

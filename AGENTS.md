@@ -7,8 +7,11 @@ exports to match the filename exactly, including case.
 
 Style components with Tailwind utilities. Keep complete class names in source
 so Tailwind can detect them. Define semantic tokens in `src/styles.css` and
-use their utilities in components. Storybook imports that file directly;
-consuming applications import `@cognitap/radiant/styles.css`.
+use their utilities in components. Storybook's stylesheet imports Tailwind and
+that source entry. Ordinary consumers import the compiled
+`@cognitap/radiant/styles.css`; the reset is a separate opt-in export.
+Tailwind consumers import `@cognitap/radiant/tailwind.css` alongside their own
+Tailwind entry, generating component utilities once in the application build.
 
 Write hover, active, and disabled utilities with those prefixes (`hover:`,
 `active:`, `disabled:`). Matching prefixes let a caller `className` replace

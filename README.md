@@ -5,8 +5,8 @@ this standalone repository.
 
 Radiant's source is available under the [MIT license](LICENSE). The library is
 experimental: the current implementation is a native Button proof of concept,
-and the npm package has not yet been published. Its stylesheet currently requires
-Tailwind processing; standalone compiled CSS is planned before npm publication.
+and the npm package has not yet been published. The build includes standalone
+component CSS, a separate optional reset and a Tailwind customization entry.
 See the
 [release policy](RELEASE_POLICY.md) for identity, compatibility, support and
 publication requirements, and the [changelog](CHANGELOG.md) for release changes.
@@ -52,9 +52,9 @@ From the repository root:
 pnpm build
 ```
 
-The build uses `rimraf` to remove `dist/library`, then `tsc` with
-`tsconfig.build.json` to compile the library. These are development tools; they
-are not runtime dependencies of Radiant.
+The build removes `dist/library`, compiles JavaScript and declarations with
+`tsc`, and compiles the two stylesheets with the Tailwind CLI. These are
+development tools; ordinary consumers need only React and the packaged CSS.
 
 TypeScript emits separate ES2022 ESM modules, `.d.ts` declarations, JavaScript
 maps with embedded source, and declaration maps into `dist/library`. Keeping
@@ -63,8 +63,8 @@ React is a peer dependency and `cn` is a runtime dependency. Relative source
 imports use `.js` extensions so emitted JavaScript and declarations work in Node
 and bundlers, following [TypeScript's library guidance](https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options#im-writing-a-library).
 
-Only `@cognitap/radiant` and `@cognitap/radiant/styles.css` are public exports.
-JavaScript and types resolve to compiled artifacts. Sources ship for editor
+The package root and three stylesheet entries are public exports. JavaScript,
+types, component styles and the reset resolve to compiled artifacts. Sources ship for editor
 navigation through declaration maps; stories, tests and Storybook output stay
 out of the archive. Rebuilding cleans only `dist/library`.
 
@@ -79,10 +79,10 @@ NodeNext and bundler resolution modes. The type fixture uses an independent
 TypeScript configuration without source aliases. Full installed-archive
 verification is tracked in DEV-41.
 
-Storybook reads component source directly for rapid editing. Optional Cognitap
-integration checkpoints explicitly build and install the package through its
-public exports. The stylesheet export remains Tailwind source until standalone
-compiled CSS is delivered in DEV-38.
+Storybook reads component source directly for rapid editing. Automatic local
+development in Cognitap is planned in DEV-39, using the same compiled public
+exports. See [stylesheet verification](https://github.com/cognitap/radiant/blob/main/docs/styles-verification.md) for the
+isolated no-Tailwind consumer and the build checks completed in DEV-38.
 
 ## Button
 
@@ -96,8 +96,26 @@ import { Button } from '@cognitap/radiant'
 
 `Button` accepts native React button props (`ButtonProps`), including `ref`,
 `className`, `aria-*`, and form attributes. It defaults to `type="button"` to
-avoid accidental form submission. Consumers import compiled JavaScript and
-generate the CSS through their Tailwind 4 integration.
+avoid accidental form submission. Import its stylesheet once in your application:
+
+```tsx
+import '@cognitap/radiant/styles.css'
+```
+
+This route needs no Tailwind installation or CSS compiler. Components do not
+import CSS themselves. The stylesheet contains component utilities and tokens;
+it does not reset headings, body margins or unrelated native controls. Button
+sets its own border style and box sizing and inherits the application's font.
+
+The optional reset is a separate, application-wide choice:
+
+```tsx
+import '@cognitap/radiant/reset.css'
+import '@cognitap/radiant/styles.css'
+```
+
+`reset.css` contains Tailwind Preflight, compiled and self-contained. It changes
+global element defaults; importing it is not required for Radiant components.
 
 Native button semantics provide keyboard activation and disabled behavior. Give
 every button an accessible name through its text or `aria-label`. Focus indicators
@@ -107,24 +125,36 @@ This PoC has one visual treatment, with no variants, sizes, loading state, or
 polymorphic rendering. The consumer owns actions and state. React 19.3+ is a peer
 dependency.
 
-## Tailwind
+## Tailwind customization
 
-Radiant owns its Tailwind 4 entry point and semantic design tokens in
-`src/styles.css`, exported as `@cognitap/radiant/styles.css`. Storybook imports
-the same source file via a relative import, following workspace import rules,
-and processes it with the Tailwind Vite plugin.
-
-Consuming applications should import the shared stylesheet once in their global
-stylesheet, processed by their Tailwind Vite or PostCSS integration:
+For an application with Tailwind 4.3.3+, use the source customization entry
+instead of the compiled component sheet. It provides the semantic theme and
+registers Radiant's shipped component sources for scanning; your application
+generates the utilities once with its own Tailwind integration:
 
 ```css
-@import '@cognitap/radiant/styles.css';
+@import 'tailwindcss';
+@import '@cognitap/radiant/tailwind.css';
 ```
 
-Radiant's stylesheet includes Tailwind's reset and registers its own component
-source with `@source '.'`. Tailwind's automatic scanning covers application source in
-ordinary setups. Add an explicit `@source` only for source paths that automatic
-scanning does not cover. Importing Button alone does not load global styles.
+The application's `tailwindcss` import includes Preflight. To keep the reset
+disabled, use [Tailwind's separate imports](https://tailwindcss.com/docs/preflight#disabling-preflight):
+
+```css
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import '@cognitap/radiant/tailwind.css';
+```
+
+Choose one component-style route: compiled `styles.css` or generated
+`tailwind.css`. Combining them duplicates the component utilities. The source
+entry does not import Tailwind or generate a second utility sheet. Its `@source`
+is relative to the installed source entry, so library scanning works inside
+`node_modules`; stories and tests are excluded. Application scanning belongs to
+your Tailwind setup. Configure its source base or add an application-relative
+`@source` when automatic scanning does not cover your files. See
+[Tailwind's source detection guide](https://tailwindcss.com/docs/detecting-classes-in-source-files).
 
 Tokens provide background, foreground, border, primary action states and foreground,
 disabled background and foreground, focus color, and control radius. Components
@@ -134,10 +164,14 @@ or a subtree; these defaults currently define a light theme.
 
 `src/cn.ts` registers the semantic control radius with `cn` so it participates in
 class conflict resolution. Components merge classes with this helper, passing the
-caller's `className` last so matching utilities override defaults. For example,
+caller's `className` last so matching utilities override defaults. In a Tailwind app, for example,
 `<Button className="rounded-full px-8 hover:bg-red-500">Continue</Button>` replaces
 the default corner radius, horizontal padding, and hover color. Disabled
-overrides use the same prefix, such as `disabled:bg-slate-300`.
+overrides use the same prefix, such as `disabled:bg-slate-300`. The compiled
+sheet only includes utilities used by library components; arbitrary caller
+utilities need your own generated CSS. Without Tailwind, use ordinary CSS
+classes or override the semantic variables. Unlayered application CSS takes
+precedence over Radiant's layered utilities.
 
 ## Storybook
 

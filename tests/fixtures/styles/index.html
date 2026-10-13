@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Radiant standalone stylesheet proof</title>
+    <link
+      rel="icon"
+      href="data:,"
+    />
+    <style>
+      body {
+        font-family: Georgia, serif;
+        font-size: 20px;
+      }
+      .theme {
+        --color-primary: #9d174d;
+      }
+      .custom {
+        border-radius: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Unreset heading</h1>
+    <button id="native">Unreset native button</button>
+    <div id="root"></div>
+    <script
+      type="module"
+      src="/main.js"
+    ></script>
+  </body>
+</html>
