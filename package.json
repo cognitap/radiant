@@ -44,7 +44,8 @@
   "scripts": {
     "prepare": "husky",
     "storybook": "storybook dev --host 127.0.0.1 --port 6006 --no-open --disable-telemetry",
-    "build": "rimraf dist/library && tsc -p tsconfig.build.json && pnpm build:css",
+    "build": "rimraf dist/library && pnpm build:js && pnpm build:css",
+    "build:js": "tsc -p tsconfig.build.json",
     "build:css": "tailwindcss -i styles/library.css -o dist/library/styles.css --minify && tailwindcss -i styles/reset.css -o dist/library/reset.css --minify",
     "watch": "pnpm run --parallel '/^watch:/'",
     "watch:js": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",

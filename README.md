@@ -30,6 +30,7 @@ loop. No Cognitap checkout or private configuration is required.
 | ------------------------------------------- | ---------------------------------------------------------------- |
 | `pnpm storybook`                            | Edit components in the local workshop                            |
 | `pnpm build`                                | Build library JavaScript, declarations, maps and CSS             |
+| `pnpm build:js`                             | Refresh JavaScript, declarations and maps without cleaning       |
 | `pnpm watch`                                | Watch JavaScript, declarations and both compiled stylesheets     |
 | `pnpm build:storybook`                      | Build the separate static workshop                               |
 | `pnpm typecheck`                            | Check source and Storybook types                                 |
@@ -56,6 +57,8 @@ pnpm build
 The build removes `dist/library`, compiles JavaScript and declarations with
 `tsc`, and compiles the two stylesheets with the Tailwind CLI. These are
 development tools; ordinary consumers need only React and the packaged CSS.
+Use `pnpm build:js` to refresh JavaScript and declarations during a watch session;
+it preserves the output directory and compiled stylesheets.
 
 TypeScript emits separate ES2022 ESM modules, `.d.ts` declarations, JavaScript
 maps with embedded source, and declaration maps into `dist/library`. Keeping
@@ -87,14 +90,19 @@ run `pnpm build` first when using the watcher on its own. It does not start Stor
 For live integration, install dependencies in this checkout and Cognitap once,
 then run `pnpm dev:radiant` from Cognitap. It defaults to a sibling `../radiant`
 checkout; an optional path selects another location. Cognitap builds this package,
-starts the watchers and both frontend apps, and temporarily links their package
-resolution. The apps consume compiled JavaScript/types and the documented public
-Tailwind entry. `Ctrl+C` stops the session and restores installed dependencies;
-after an uncatchable interruption, stop surviving servers/watchers and run
-`pnpm dev:radiant --restore` in Cognitap. See
+starts the watchers and both frontend apps, and selects this checkout's public
+exports for those processes. The apps consume compiled JavaScript and the
+documented Tailwind entry. Local Next.js development uses Webpack for external
+package watching; ordinary development keeps Turbopack. `Ctrl+C` stops the session.
+Installed dependencies, manifests and lockfiles stay unchanged; ordinary Cognitap
+checks and builds use its installed dependency even during a local session.
+
+Run `pnpm dev:radiant --typecheck [checkout-path]` from Cognitap to refresh the
+public declarations with `build:js` and check both apps against them. Local
+commands select temporary type configurations; editors normally read the ordinary
+app configurations, so use this command to validate new public types. See
 [Cognitap's development guide](https://github.com/cognitap/cognitap#live-radiant-development)
-for verified refresh behavior and recovery. Its manifests and lockfiles retain
-their ordinary dependency, and production commands reject a local session.
+for the frontend workflow. Trantor and Storybook run separately as needed.
 
 Independent Storybook development needs no Cognitap checkout. Live integration
 complements installed-archive and registry verification; it does not replace them.
