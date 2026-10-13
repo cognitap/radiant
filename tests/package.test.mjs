@@ -7,7 +7,7 @@ import { Button } from '@cognitap/radiant'
 
 test('public JavaScript imports and renders on the server', () => {
   const html = renderToStaticMarkup(createElement(Button, { disabled: true }, 'Save'))
-  assert.match(html, /^<button type="button"/)
+  assert.match(html, /^<button\b[^>]*\stype="button"/)
   assert.match(html, /disabled=""/)
   assert.match(html, />Save<\/button>/)
 })
