@@ -67,9 +67,12 @@ stylesheet automatically. Tailwind belongs to the optional `tailwind.css`
 customization route, which registers the library theme and sources for the
 application's own CSS generation. Choose one component stylesheet route.
 
-Cognitap pins exact published versions. Optional local integration installs a
-built package through the same compiled exports; normal consumption after
-migration does not require Radiant's source checkout.
+Cognitap pins exact published versions after its migration. Optional local
+development temporarily links this package and watches its public build. The
+apps use compiled JavaScript/types and the supported Tailwind entry; stopping
+restores their ordinary dependency. Normal consumption after migration requires
+only the published package. Local updates complement archive and registry
+verification and do not replace publication readiness checks.
 
 ## Support and upgrades
 

@@ -30,6 +30,7 @@ loop. No Cognitap checkout or private configuration is required.
 | ------------------------------------------- | ---------------------------------------------------------------- |
 | `pnpm storybook`                            | Edit components in the local workshop                            |
 | `pnpm build`                                | Build library JavaScript, declarations, maps and CSS             |
+| `pnpm watch`                                | Watch JavaScript, declarations and both compiled stylesheets     |
 | `pnpm build:storybook`                      | Build the separate static workshop                               |
 | `pnpm typecheck`                            | Check source and Storybook types                                 |
 | `pnpm test`                                 | Verify public imports, server rendering, declarations and styles |
@@ -79,9 +80,24 @@ NodeNext and bundler resolution modes. The type fixture uses an independent
 TypeScript configuration without source aliases. Full installed-archive
 verification is tracked in DEV-41.
 
-Storybook reads component source directly for rapid editing. Automatic local
-development in Cognitap is planned in DEV-39, using the same compiled public
-exports.
+Storybook reads component source directly for rapid editing. `pnpm watch` uses
+TypeScript and Tailwind's native watchers to update the public library artifacts;
+run `pnpm build` first when using the watcher on its own. It does not start Storybook.
+
+For live integration, install dependencies in this checkout and Cognitap once,
+then run `pnpm dev:radiant` from Cognitap. It defaults to a sibling `../radiant`
+checkout; an optional path selects another location. Cognitap builds this package,
+starts the watchers and both frontend apps, and temporarily links their package
+resolution. The apps consume compiled JavaScript/types and the documented public
+Tailwind entry. `Ctrl+C` stops the session and restores installed dependencies;
+after an uncatchable interruption, stop surviving servers/watchers and run
+`pnpm dev:radiant --restore` in Cognitap. See
+[Cognitap's development guide](https://github.com/cognitap/cognitap#live-radiant-development)
+for verified refresh behavior and recovery. Its manifests and lockfiles retain
+their ordinary dependency, and production commands reject a local session.
+
+Independent Storybook development needs no Cognitap checkout. Live integration
+complements installed-archive and registry verification; it does not replace them.
 
 ## Button
 
