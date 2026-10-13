@@ -7,12 +7,13 @@
   "bugs": {
     "url": "https://github.com/cognitap/radiant/issues"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cognitap/radiant.git"
   },
   "files": [
+    "LICENSE",
     "CHANGELOG.md",
     "RELEASE_POLICY.md",
     "dist/library",

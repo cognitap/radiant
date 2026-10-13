@@ -8,11 +8,13 @@ deployments; the owner and trusted maintainers control development and merges.
 This repository is the authoritative Radiant source. Its selected GitHub identity
 is `cognitap/radiant`; the npm package is `@cognitap/radiant`.
 
-MIT is the selected public license. Before opening the source or publishing,
-resolve corporate ownership after incorporation and add the complete MIT text
-with the owner's exact registered name in `LICENSE`. Until then, retain
-`private: true` and `license: "UNLICENSED"`; switch to `MIT` when the notice is
-finalized.
+The source is licensed under MIT. [LICENSE](LICENSE) contains the complete text
+and names Zoltán Cserei as the copyright holder. Corporate formation is not a
+prerequisite for source opening or npm publication. This decision supersedes
+DEV-84's initial incorporation gate.
+
+Keep `private: true` in the package manifest until npm publication prerequisites
+pass. This prevents package publication while public source development proceeds.
 
 ## Versions
 
@@ -59,7 +61,7 @@ current peer ranges and runtime dependencies. Contributor Node, pnpm and
 TypeScript pins belong to development configuration and do not establish
 consumer runtime or declaration requirements.
 
-Ordinary consumers use compiled CSS without Tailwind. The current private
+Ordinary consumers use compiled CSS without Tailwind. The current
 stylesheet still requires Tailwind processing; standalone CSS must ship before
 initial publication. Tailwind requirements then belong to the optional
 customization route.
@@ -82,8 +84,8 @@ removal is allowed with migration guidance.
 
 ## Publication readiness
 
-Public source opening requires resolved ownership, the finalized MIT notice,
-repository control and standalone tooling. Initial npm publication additionally
+Public source opening requires the finalized MIT notice, repository control and
+verified standalone tooling. Initial npm publication additionally
 requires scope permissions, compiled CSS, verified installed archives and an
 independent release workflow.
 

@@ -3,8 +3,11 @@
 Reusable React interaction components and presentation primitives, maintained in
 this standalone repository.
 
-Radiant is private and experimental. Public release under MIT awaits confirmed
-corporate ownership and a finalized license notice. See the
+Radiant's source is available under the [MIT license](LICENSE). The library is
+experimental: the current implementation is a native Button proof of concept,
+and the npm package has not yet been published. Its stylesheet currently requires
+Tailwind processing; standalone compiled CSS is planned before npm publication.
+See the
 [release policy](RELEASE_POLICY.md) for identity, compatibility, support and
 publication requirements, and the [changelog](CHANGELOG.md) for release changes.
 
