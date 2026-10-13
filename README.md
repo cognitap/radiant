@@ -81,8 +81,7 @@ verification is tracked in DEV-41.
 
 Storybook reads component source directly for rapid editing. Automatic local
 development in Cognitap is planned in DEV-39, using the same compiled public
-exports. See [stylesheet verification](https://github.com/cognitap/radiant/blob/main/docs/styles-verification.md) for the
-isolated no-Tailwind consumer and the build checks completed in DEV-38.
+exports.
 
 ## Button
 
