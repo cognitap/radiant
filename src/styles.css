@@ -1,5 +1,6 @@
-@import 'tailwindcss';
 @source '.';
+@source not './**/*.stories.*';
+@source not './**/*.test.*';
 
 @theme static {
   --color-background: #fff;
