@@ -18,8 +18,9 @@ tar -tzf dist/package/cognitap-radiant-0.1.0.tgz
 The six package tests, source and consumer declaration checks, formatting,
 lint and Storybook build passed. CSS tests require compiled styles/reset with
 no unresolved imports or Tailwind directives, component state utilities,
-exclusion of story-only utilities, and a customization entry that registers
-theme/sources without importing a second utility sheet.
+exclusion of story-only utilities, and a real customization build through the
+public export with automatic scanning disabled. The customization test discovers
+library and explicit application utilities once, without adding a reset.
 
 The archive contains the compiled JS/types/maps, `dist/library/styles.css`,
 `dist/library/reset.css`, `src/styles.css` for the `tailwind.css` export, library
@@ -64,7 +65,7 @@ the saved browser checks:
 
 | Check                               | Observed result                                                                                             |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Component import without stylesheet | Native appearance; no injected CSS/reset                                                                    |
+| Component import without stylesheet | Native appearance matches the native control; page defaults match the page before the React entry runs      |
 | Default compiled stylesheet         | Primary background/foreground, 8px radius, solid 1px border and border-box sizing                           |
 | Application font                    | Georgia at 20px inherited without Preflight                                                                 |
 | Hover/active/disabled               | Expected token colors; disabled treatment wins over hover                                                   |

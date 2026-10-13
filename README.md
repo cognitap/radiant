@@ -26,18 +26,18 @@ pnpm storybook
 Open [Storybook](http://localhost:6006) for the primary component development
 loop. No Cognitap checkout or private configuration is required.
 
-| Command                                     | Purpose                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| `pnpm storybook`                            | Edit components in the local workshop                              |
-| `pnpm build`                                | Build library JavaScript, declarations and maps                    |
-| `pnpm build:storybook`                      | Build the separate static workshop                                 |
-| `pnpm typecheck`                            | Check source and Storybook types                                   |
-| `pnpm test`                                 | Build and verify public imports, server rendering and declarations |
-| `pnpm lint`                                 | Check correctness and accessibility lint rules                     |
-| `pnpm fmt`                                  | Format repository files                                            |
-| `pnpm fmt:check`                            | Check formatting                                                   |
-| `pnpm check`                                | Run all checks, including the Storybook build                      |
-| `pnpm pack --pack-destination dist/package` | Create a package archive locally                                   |
+| Command                                     | Purpose                                                          |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| `pnpm storybook`                            | Edit components in the local workshop                            |
+| `pnpm build`                                | Build library JavaScript, declarations, maps and CSS             |
+| `pnpm build:storybook`                      | Build the separate static workshop                               |
+| `pnpm typecheck`                            | Check source and Storybook types                                 |
+| `pnpm test`                                 | Verify public imports, server rendering, declarations and styles |
+| `pnpm lint`                                 | Check correctness and accessibility lint rules                   |
+| `pnpm fmt`                                  | Format repository files                                          |
+| `pnpm fmt:check`                            | Check formatting                                                 |
+| `pnpm check`                                | Run all checks, including the Storybook build                    |
+| `pnpm pack --pack-destination dist/package` | Create a package archive locally                                 |
 
 CI installs the pinned dependencies with the committed lockfile and runs
 `pnpm check` and package creation. Installing dependencies registers the

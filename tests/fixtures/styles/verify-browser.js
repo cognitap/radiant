@@ -18,6 +18,7 @@ async page => {
         bodyMargin: getComputedStyle(document.body).margin,
         headingMargin: heading.marginTop,
         headingFont: heading.fontSize,
+        nativeBackground: native.backgroundColor,
         nativeBorder: native.borderTopStyle,
         nativeFont: native.fontSize
       }
@@ -41,10 +42,21 @@ async page => {
       }
     })
 
+  // Observe the page before its React entry runs, then allow component imports.
+  await page.route('**/main.js', route =>
+    route.fulfill({ body: '', contentType: 'text/javascript' })
+  )
+  await page.goto(origin)
+  const baseline = await globals()
+  await page.unroute('**/main.js')
   await visit('?unstyled')
   const before = await globals()
   const unstyled = await style('#default')
-  check(unstyled.background === 'rgb(239, 239, 239)', 'Component imports must not inject CSS')
+  check(
+    JSON.stringify(before) === JSON.stringify(baseline),
+    'Component imports must not reset the page'
+  )
+  check(unstyled.background === before.nativeBackground, 'Component imports must not inject CSS')
 
   await visit('')
   check(
