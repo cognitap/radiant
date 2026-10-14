@@ -37,8 +37,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install archive verification browser
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Check formatting, lint, types, package and Storybook
         run: pnpm check
-
-      - name: Verify package archive can be created
-        run: pnpm pack --pack-destination dist/package
