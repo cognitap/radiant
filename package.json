@@ -1,7 +1,6 @@
 {
   "name": "@cognitap/radiant",
   "version": "0.0.1",
-  "private": true,
   "description": "React interaction components and presentation primitives",
   "homepage": "https://github.com/cognitap/radiant#readme",
   "bugs": {

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Publish the verified archive (disabled until DEV-94)
+        description: Publish the verified archive with npm trusted publishing
         type: boolean
         default: false
 
