@@ -102,3 +102,91 @@ The selected publishing configuration uses public npm access and `latest`.
 Keep publication disabled until its prerequisites pass. Neither public source
 nor an experimental package establishes stable catalog readiness or conformance
 for an entire consumer application.
+
+## Release workflow
+
+Use native pnpm versioning and a reviewed changelog; no release framework is
+needed for this single package. Prepare a release in a normal pull request:
+
+```sh
+pnpm version patch --no-git-tag-version # or minor, following the policy above
+```
+
+Move the applicable Unreleased notes into a nonempty `## <version>` section in
+`CHANGELOG.md`, then commit the manifest, lockfile changes if any, and notes.
+The first experimental release already has version `0.1.0` and prepared notes;
+do not bump it just to publish it. Keep `private: true` until DEV-94 verifies npm
+scope access and enables publication through a reviewed source change.
+
+From a clean committed checkout, run:
+
+```sh
+pnpm release:prepare
+```
+
+This validates identity/version/notes, runs source checks, packs once, runs the
+installed consumer check against that exact archive, and dry-runs its
+publication. `dist/release/radiant.tgz` and `release.json` retain the candidate,
+source commit, version, registry, tag and SHA-512 integrity. Public consumer
+checks run once in this path. Dry-run does not prove authentication or namespace
+permissions. A failed preparation does not authorize publishing its outputs.
+Preparation replaces the previous local candidate; its receipt is written only
+after every check and the publication dry-run succeed.
+
+The **Release Radiant** GitHub Actions workflow accepts the committed version
+and defaults to `publish: false`. Select the reviewed `main` commit for a real
+release. Candidate artifacts are uploaded before a separate publishing job
+receives OIDC permission. The publishing job checks source/integrity, publishes
+the same archive, waits for registry availability, and compares npm's integrity
+with the receipt. It never removes `private` or repacks after verification.
+Workflow attempts retain separate artifacts. Rerunning only a failed publishing
+job reuses its original prepared candidate.
+
+Only ordinary experimental `0.x` releases under `latest` are currently enabled.
+Stable versions and formal previews are rejected. Enabling the first `1.0.0`
+requires a reviewed change to the release gate, linked to complete catalog,
+documentation and accessibility/compatibility evidence. No workflow checkbox
+can substitute for that audit.
+
+### npm setup and first publication (DEV-94)
+
+Confirm the authenticated account can publish within the `@cognitap` scope and
+recheck the full MIT notice naming Zoltán Cserei before removing `private`.
+Corporate formation is not required. Prepare and verify a new candidate after
+that source change; do not edit an existing archive to make it public.
+
+The package must exist before configuring npm trusted publishing. Perform the
+first authenticated publication of the exact candidate in DEV-94, then bind npm
+trust to GitHub organization `cognitap`, repository `radiant`, workflow filename
+`release.yml`, and environment `npm`. Enable the direct publish action. Configure
+that GitHub environment to allow only `main`, with maintainer-controlled
+protection. Complete the trusted publisher's first successful publication within
+two days of adding it; an unused configuration expires.
+
+Later workflow publishes use pnpm 12's native OIDC support and automatic
+provenance for this public repository/package; no stored write token is needed.
+The initial authenticated local publication has no CI provenance. Setup does
+not couple Radiant publication to any Cognitap deployment.
+
+See [pnpm publishing](https://pnpm.io/cli/publish) and
+[npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
+
+### Failed publication and follow-up fixes
+
+Retain the workflow's candidate and receipt. Authentication failures require
+checking scope access and the exact repository/workflow/environment trust
+configuration. Never change source or regenerate a candidate silently on retry.
+
+An availability timeout can occur after npm accepts the upload. Inspect the exact
+version's `dist.integrity` and compare it with `release.json` before any retry:
+
+```sh
+pnpm view @cognitap/radiant@0.1.0 dist.integrity --json
+```
+
+If the version exists with matching integrity, do not republish it; finish
+registry verification. If it differs, stop and investigate. If no version was
+accepted, retry the same reviewed candidate after correcting the failure.
+Published versions are immutable: consumer-facing fixes require a new version,
+new notes and a newly verified archive. Preserve release artifacts outside
+GitHub's 30-day retention window when a durable historical record is needed.

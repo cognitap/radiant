@@ -1,0 +1,116 @@
+name: Release Radiant
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version committed in package.json and CHANGELOG.md
+        required: true
+        type: string
+      publish:
+        description: Publish the verified archive (disabled until DEV-94)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: radiant-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      artifact-id: ${{ steps.candidate.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6.1.0
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Prepare and dry-run the exact candidate
+        run: pnpm release:prepare
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_PUBLISH: ${{ inputs.publish }}
+
+      - uses: actions/upload-artifact@v7.0.2
+        id: candidate
+        with:
+          name: radiant-${{ github.sha }}-${{ github.run_attempt }}
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    if: ${{ inputs.publish && github.repository == 'cognitap/radiant' && github.ref == 'refs/heads/main' }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6.1.0
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact-id }}
+          path: dist/release/
+
+      - name: Check the recorded source and artifact
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { createHash } from 'node:crypto'
+          import { readFileSync } from 'node:fs'
+          const receipt = JSON.parse(readFileSync('dist/release/release.json', 'utf8'))
+          assert.equal(receipt.sourceCommit, process.env.GITHUB_SHA)
+          assert.equal(receipt.integrity, `sha512-${createHash('sha512').update(readFileSync('dist/release/radiant.tgz')).digest('base64')}`)
+          NODE
+
+      - name: Publish the verified archive with trusted publishing
+        run: pnpm publish dist/release/radiant.tgz --no-git-checks --ignore-scripts --access public --tag latest --registry https://registry.npmjs.org/ --publish-wait-timeout 300000
+
+      - name: Confirm registry integrity
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          pnpm view "@cognitap/radiant@$RELEASE_VERSION" dist.integrity --registry https://registry.npmjs.org/ --json > dist/release/registry-integrity.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { readFileSync } from 'node:fs'
+          const receipt = JSON.parse(readFileSync('dist/release/release.json', 'utf8'))
+          assert.equal(JSON.parse(readFileSync('dist/release/registry-integrity.json', 'utf8')), receipt.integrity)
+          NODE
+
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: publication-${{ github.sha }}-${{ github.run_attempt }}
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 30

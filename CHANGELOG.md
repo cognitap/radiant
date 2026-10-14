@@ -4,6 +4,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+## 0.1.0
+
 - Compiled `styles.css` for consumers without Tailwind, an optional compiled
   `reset.css` and a source `tailwind.css` customization entry. Tailwind is now
   an optional peer dependency.
