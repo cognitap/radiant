@@ -1,6 +1,6 @@
 {
   "name": "@cognitap/radiant",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "description": "React interaction components and presentation primitives",
   "homepage": "https://github.com/cognitap/radiant#readme",
@@ -57,7 +57,8 @@
     "lint": "oxlint --deny-warnings",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:storybook"
+    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:storybook",
+    "release:prepare": "node scripts/prepare-release.mjs"
   },
   "dependencies": {
     "cn": "0.4.0"

@@ -39,12 +39,16 @@ loop. No Cognitap checkout or private configuration is required.
 | `pnpm fmt`                                  | Format repository files                                      |
 | `pnpm fmt:check`                            | Check formatting                                             |
 | `pnpm check`                                | Run all checks, including the Storybook build                |
+| `pnpm release:prepare`                      | Pack and verify a release candidate; dry-run publication     |
 | `pnpm pack --pack-destination dist/package` | Create a package archive locally                             |
 
 CI installs the pinned dependencies with the committed lockfile and runs
 `pnpm check` and package creation. Installing dependencies registers the
 pre-commit hook, which formats staged files. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the maintainer workflow.
+
+Releases are independent of Cognitap; see the
+[release workflow](RELEASE_POLICY.md#release-workflow).
 
 ## Library build
 
