@@ -39,7 +39,7 @@ loop. No Cognitap checkout or private configuration is required.
 | `pnpm fmt`                                  | Format repository files                                      |
 | `pnpm fmt:check`                            | Check formatting                                             |
 | `pnpm check`                                | Run all checks, including the Storybook build                |
-| `pnpm release:prepare`                      | Verify and retain a release candidate; dry-run publication   |
+| `pnpm release:prepare`                      | Pack and verify a release candidate; dry-run publication     |
 | `pnpm pack --pack-destination dist/package` | Create a package archive locally                             |
 
 CI installs the pinned dependencies with the committed lockfile and runs
@@ -47,11 +47,8 @@ CI installs the pinned dependencies with the committed lockfile and runs
 pre-commit hook, which formats staged files. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the maintainer workflow.
 
-Releases are independent of Cognitap. Use `pnpm version patch --no-git-tag-version`
-(or `minor`), add matching versioned notes to `CHANGELOG.md`, and commit both
-before running `pnpm release:prepare`. The first release keeps the prepared
-`0.0.1` version. See [release preparation and publication](RELEASE_POLICY.md#release-workflow)
-for the dry-run workflow, npm setup and recovery procedures.
+Releases are independent of Cognitap; see the
+[release workflow](RELEASE_POLICY.md#release-workflow).
 
 ## Library build
 

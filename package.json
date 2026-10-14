@@ -51,15 +51,13 @@
     "watch:js": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "watch:styles": "tailwindcss -i styles/library.css -o dist/library/styles.css --watch=always",
     "build:storybook": "storybook build --output-dir dist/storybook --disable-telemetry",
-    "test:source": "pnpm build && node --test tests/*.test.mjs",
-    "test": "pnpm test:source && node scripts/verify-package.mjs",
+    "test": "pnpm build && node --test tests/*.test.mjs && node scripts/verify-package.mjs",
     "test:package": "pnpm build && node scripts/verify-package.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "check:source": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test:source && pnpm build:storybook",
-    "check": "pnpm check:source && node scripts/verify-package.mjs",
+    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:storybook",
     "release:prepare": "node scripts/prepare-release.mjs"
   },
   "dependencies": {

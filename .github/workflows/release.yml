@@ -3,10 +3,6 @@ name: Release Radiant
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: Version committed in package.json and CHANGELOG.md
-        required: true
-        type: string
       publish:
         description: Publish the verified archive (disabled until DEV-94)
         type: boolean
@@ -40,10 +36,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Prepare and dry-run the exact candidate
-        run: pnpm release:prepare
+      - run: pnpm release:prepare
         env:
-          RELEASE_VERSION: ${{ inputs.version }}
           RELEASE_PUBLISH: ${{ inputs.publish }}
 
       - uses: actions/upload-artifact@v7.0.2
@@ -52,7 +46,6 @@ jobs:
           name: radiant-${{ github.sha }}-${{ github.run_attempt }}
           path: dist/release/
           if-no-files-found: error
-          retention-days: 30
 
   publish:
     if: ${{ inputs.publish && github.repository == 'cognitap/radiant' && github.ref == 'refs/heads/main' }}
@@ -81,25 +74,11 @@ jobs:
           artifact-ids: ${{ needs.prepare.outputs.artifact-id }}
           path: dist/release/
 
-      - name: Check the recorded source and artifact
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
-        run: node scripts/prepare-release.mjs verify-candidate
-
-      - name: Publish the verified archive with trusted publishing
+      - name: Publish the prepared archive with trusted publishing
         run: pnpm publish dist/release/radiant.tgz --no-git-checks --ignore-scripts --access public --tag latest --registry https://registry.npmjs.org/ --publish-wait-timeout 300000
 
       - name: Confirm registry integrity
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
         run: |
-          pnpm view "@cognitap/radiant@$RELEASE_VERSION" dist.integrity --registry https://registry.npmjs.org/ --json > dist/release/registry-integrity.json
-          node scripts/prepare-release.mjs verify-registry
-
-      - uses: actions/upload-artifact@v7.0.2
-        if: always()
-        with:
-          name: publication-${{ github.sha }}-${{ github.run_attempt }}
-          path: dist/release/
-          if-no-files-found: error
-          retention-days: 30
+          version=$(jq -r .version dist/release/release.json)
+          published=$(pnpm view "@cognitap/radiant@$version" dist.integrity --registry https://registry.npmjs.org/ --json | jq -r .)
+          test "$published" = "$(jq -r .integrity dist/release/release.json)"
