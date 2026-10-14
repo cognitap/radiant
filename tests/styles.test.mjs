@@ -4,21 +4,6 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-const readExport = name =>
-  readFileSync(new URL(import.meta.resolve(`@cognitap/radiant/${name}`)), 'utf8')
-
-test('default styles and the optional reset are compiled and self-contained', () => {
-  for (const name of ['styles.css', 'reset.css']) {
-    const css = readExport(name)
-    assert.doesNotMatch(css, /@(import|theme|source|tailwind)\b/)
-  }
-  const styles = readExport('styles.css')
-  assert.match(styles, /--color-primary\s*:/)
-  assert.match(styles, /\.bg-primary(?=\s*[{,])/)
-  assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
-  assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)
-})
-
 test('the customization entry generates library and application utilities once without a reset', () => {
   const manifestURL = new URL(import.meta.resolve('@tailwindcss/cli/package.json'))
   const manifest = JSON.parse(readFileSync(manifestURL, 'utf8'))

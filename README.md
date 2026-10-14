@@ -34,7 +34,7 @@ loop. No Cognitap checkout or private configuration is required.
 | `pnpm build:storybook`                      | Build the separate static workshop                           |
 | `pnpm typecheck`                            | Check source and Storybook types                             |
 | `pnpm test`                                 | Verify builds and an independently installed archive         |
-| `pnpm test:archive`                         | Build, pack and verify an isolated consumer in Chromium      |
+| `pnpm test:archive`                         | Build, pack and verify an isolated installed package         |
 | `pnpm lint`                                 | Check correctness and accessibility lint rules               |
 | `pnpm fmt`                                  | Format repository files                                      |
 | `pnpm fmt:check`                            | Check formatting                                             |
@@ -83,39 +83,19 @@ archive in a temporary consumer outside this repository.
 
 ### Installed archive verification
 
-Install the test browser once, then run the focused check:
+`pnpm test:archive` builds and packs Radiant into `dist/package`, then installs
+the archive with npm in a temporary directory outside this repository. It reuses
+the existing package and type tests to check imports, server rendering, maps,
+compiled CSS and NodeNext/bundler declarations. The consumer has its own React
+and TypeScript dependencies, no Tailwind or source aliases, and shares one React
+with the installed library. License metadata and packaged documentation are
+checked too. The temporary directory is removed after success or failure.
 
-```sh
-pnpm exec playwright install chromium
-pnpm test:archive
-```
-
-This builds and packs Radiant into `dist/package`, then installs that archive
-with npm in a temporary directory. The consumer has its own React, React DOM,
-TypeScript and Vite dependencies, with no Tailwind, workspace configuration or
-source aliases. npm and registry access are required for this verification.
-The temporary consumer is removed after success or failure.
-
-The check inspects installed exports, metadata, MIT notice, source maps and
-archive exclusions; verifies one shared React and both declaration-resolution
-modes; server-renders Button in Node; and builds a production consumer that
-hydrates in Chromium. Browser checks cover consumer-provided accessible names,
-mouse and keyboard activation, default button/form behavior, disabled behavior,
-focus indication, standalone styles and preservation of page defaults.
-Hydration and browser console errors fail the check.
-
-`pnpm test` and `pnpm check` include this verification. CI installs Chromium and
-its system dependencies before running the checks. The output records the
-package version, browser version, archive path and SHA-256. To verify an existing
-release candidate without rebuilding or repacking it:
-
-```sh
-node tests/archive.mjs /absolute/path/to/candidate.tgz
-```
-
-This is a Button distribution check in Chromium, not the complete catalog or
-browser/assistive-technology audit. Registry publication and installation remain
-separate verification in DEV-94.
+`pnpm test` and `pnpm check` include this check; npm and registry access are
+required. Output records the package version, archive path and SHA-256.
+Use `node tests/archive.mjs /absolute/path/to/candidate.tgz` to verify an existing
+release candidate. Browser interaction/hydration evidence and registry
+publication remain separate from this package smoke check.
 
 Storybook reads component source directly for rapid editing. `pnpm watch` uses
 TypeScript and Tailwind's native watchers to update JavaScript, declarations and

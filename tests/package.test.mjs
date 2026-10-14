@@ -13,7 +13,7 @@ test('public JavaScript imports and renders on the server', () => {
 })
 
 test('public JavaScript and declaration exports have source maps', () => {
-  const root = new URL('../', import.meta.url)
+  const root = new URL('../../', import.meta.resolve('@cognitap/radiant'))
   const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
   for (const artifact of Object.values(manifest.exports['.'])) {
     assert.ok(existsSync(new URL(artifact, root)), `Missing public artifact: ${artifact}`)
@@ -27,4 +27,17 @@ test('exports reject implementation deep imports', async () => {
       code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
     })
   }
+})
+
+test('default styles and the optional reset are compiled and self-contained', () => {
+  const readExport = name =>
+    readFileSync(new URL(import.meta.resolve(`@cognitap/radiant/${name}`)), 'utf8')
+  for (const name of ['styles.css', 'reset.css']) {
+    assert.doesNotMatch(readExport(name), /@(import|theme|source|tailwind)\b/)
+  }
+  const styles = readExport('styles.css')
+  assert.match(styles, /--color-primary\s*:/)
+  assert.match(styles, /\.bg-primary(?=\s*[{,])/)
+  assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
+  assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)
 })
