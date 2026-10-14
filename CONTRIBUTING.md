@@ -26,5 +26,5 @@ versions; subsequent Radiant changes originate here.
 
 Follow [AGENTS.md](AGENTS.md) for component and styling conventions and
 [RELEASE_POLICY.md](RELEASE_POLICY.md) for compatibility and publication rules.
-The source is available under [MIT](LICENSE). npm publication remains disabled
-until its package verification and release workflow are ready.
+The source is available under [MIT](LICENSE). Experimental npm releases use the
+independent release workflow and verified package archives.

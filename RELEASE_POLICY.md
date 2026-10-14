@@ -130,11 +130,13 @@ receipt. Preparation refuses to publish while the manifest is `private`.
 
 Confirm the npm account can publish to the `@cognitap` scope and recheck the MIT
 notice, then remove `private` in a reviewed change. Publish the first candidate
-manually, since trusted publishing needs an existing package. Then add an npm
-trusted publisher for repository `cognitap/radiant`, workflow `release.yml` and
-environment `npm`, restrict that GitHub environment to `main`, and publish
-through it within two days before the unused configuration expires. Later
-releases publish from the workflow with provenance and no stored token.
+manually, since trusted publishing needs an existing package. When the next
+release is ready, add an npm trusted publisher for repository
+`cognitap/radiant`, workflow `release.yml` and environment `npm`, enable direct
+publishing, restrict that GitHub environment to `main`, and publish through it
+within two days before the unused configuration expires. Published versions cannot be republished to test
+the setup. Later releases publish from the workflow with provenance and no
+stored token; the first authenticated local publication has no CI provenance.
 
 ### Failed publication and fixes
 

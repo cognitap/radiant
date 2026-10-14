@@ -4,12 +4,20 @@ Reusable React interaction components and presentation primitives, maintained in
 this standalone repository.
 
 Radiant's source is available under the [MIT license](LICENSE). The library is
-experimental: the current implementation is a native Button proof of concept,
-and the npm package has not yet been published. The build includes standalone
-component CSS, a separate optional reset and a Tailwind customization entry.
+experimental: version `0.0.1` is a native Button proof of concept. The build
+includes standalone component CSS, a separate optional reset and a Tailwind
+customization entry.
 See the
 [release policy](RELEASE_POLICY.md) for identity, compatibility, support and
 publication requirements, and the [changelog](CHANGELOG.md) for release changes.
+
+Install the experimental package in a React application:
+
+```sh
+pnpm add --save-exact @cognitap/radiant@0.0.1
+```
+
+Import `@cognitap/radiant/styles.css` once; see [Button](#button) for usage.
 
 ## Getting started
 
