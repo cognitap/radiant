@@ -34,7 +34,7 @@ loop. No Cognitap checkout or private configuration is required.
 | `pnpm build:storybook`                      | Build the separate static workshop                           |
 | `pnpm typecheck`                            | Check source and Storybook types                             |
 | `pnpm test`                                 | Verify builds and an independently installed archive         |
-| `pnpm test:archive`                         | Build, pack and verify an isolated installed package         |
+| `pnpm test:package`                         | Build, pack and verify an isolated installed package         |
 | `pnpm lint`                                 | Check correctness and accessibility lint rules               |
 | `pnpm fmt`                                  | Format repository files                                      |
 | `pnpm fmt:check`                            | Check formatting                                             |
@@ -75,27 +75,23 @@ discard unused modules; CSS is explicitly marked as having side effects so
 stylesheet imports are retained. Browser interactions belong in the component's
 lifecycle, and client-dependent modules need their own `use client` directive.
 
-`pnpm test` builds the library, then checks its actual public JavaScript imports,
-server rendering, mapped exports, blocked deep imports, and declarations in
-NodeNext and bundler resolution modes. The type fixture uses an independent
-TypeScript configuration without source aliases. It also verifies the packed
-archive in a temporary consumer outside this repository.
+`pnpm test` builds the library, checks the Tailwind customization route locally,
+and verifies the public package through an isolated installation.
 
 ### Installed archive verification
 
-`pnpm test:archive` builds and packs Radiant into `dist/package`, then installs
-the archive with npm in a temporary directory outside this repository. It reuses
-the existing package and type tests to check imports, server rendering, maps,
-compiled CSS and NodeNext/bundler declarations. The consumer has its own React
-and TypeScript dependencies, no Tailwind or source aliases, and shares one React
-with the installed library. License metadata and packaged documentation are
-checked too. The temporary directory is removed after success or failure.
+`pnpm test:package` builds Radiant, packs it into a temporary directory and
+installs the archive there with npm. The small `tests/consumer` fixture owns
+the public import/SSR, CSS, map, metadata and React-peer checks, plus independent
+NodeNext and bundler declaration checks. It uses the repository's pinned React
+and TypeScript versions, with no Tailwind or source aliases. Public package
+checks run once, against installed artifacts. The directory and archive are
+removed after success or failure.
 
-`pnpm test` and `pnpm check` include this check; npm and registry access are
-required. Output records the package version, archive path and SHA-256.
-Use `node tests/archive.mjs /absolute/path/to/candidate.tgz` to verify an existing
-release candidate. Browser interaction/hydration evidence and registry
-publication remain separate from this package smoke check.
+`pnpm test` and `pnpm check` include this verification; npm and registry access
+are required. Use `node scripts/verify-package.mjs /absolute/path/to/candidate.tgz`
+to verify an existing release candidate without rebuilding or repacking it.
+Browser interaction/hydration evidence and registry publication remain separate.
 
 Storybook reads component source directly for rapid editing. `pnpm watch` uses
 TypeScript and Tailwind's native watchers to update JavaScript, declarations and

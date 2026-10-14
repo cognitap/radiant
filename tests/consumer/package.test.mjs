@@ -1,9 +1,14 @@
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Button } from '@cognitap/radiant'
+
+const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
+const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
+const require = createRequire(import.meta.url)
 
 test('public JavaScript imports and renders on the server', () => {
   const html = renderToStaticMarkup(createElement(Button, { disabled: true }, 'Save'))
@@ -12,12 +17,17 @@ test('public JavaScript imports and renders on the server', () => {
   assert.match(html, />Save<\/button>/)
 })
 
-test('public JavaScript and declaration exports have source maps', () => {
-  const root = new URL('../../', import.meta.resolve('@cognitap/radiant'))
-  const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
+test('public JavaScript and declaration maps point to shipped sources', () => {
   for (const artifact of Object.values(manifest.exports['.'])) {
     assert.ok(existsSync(new URL(artifact, root)), `Missing public artifact: ${artifact}`)
-    assert.ok(existsSync(new URL(`${artifact}.map`, root)), `Missing source map: ${artifact}`)
+    const mapURL = new URL(`${artifact}.map`, root)
+    const map = JSON.parse(readFileSync(mapURL, 'utf8'))
+    for (const source of map.sources) {
+      assert.ok(
+        existsSync(new URL(`${map.sourceRoot ?? ''}${source}`, mapURL)),
+        `Missing mapped source: ${source}`
+      )
+    }
   }
 })
 
@@ -40,4 +50,21 @@ test('default styles and the optional reset are compiled and self-contained', ()
   assert.match(styles, /\.bg-primary(?=\s*[{,])/)
   assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
   assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)
+})
+
+test('the installed package declares shared React and needs no Tailwind', () => {
+  const libraryRequire = createRequire(import.meta.resolve('@cognitap/radiant'))
+  assert.equal(typeof manifest.peerDependencies?.react, 'string')
+  assert.equal(libraryRequire.resolve('react'), require.resolve('react'))
+  assert.equal(manifest.peerDependenciesMeta?.tailwindcss?.optional, true)
+  assert.throws(() => require.resolve('tailwindcss'), { code: 'MODULE_NOT_FOUND' })
+})
+
+test('the archive includes MIT licensing and public documentation', () => {
+  assert.equal(manifest.name, '@cognitap/radiant')
+  assert.equal(manifest.license, 'MIT')
+  assert.match(readFileSync(new URL('LICENSE', root), 'utf8'), /MIT License[\s\S]*Zoltán Cserei/)
+  for (const file of ['README.md', 'CHANGELOG.md', 'RELEASE_POLICY.md']) {
+    assert.ok(readFileSync(new URL(file, root), 'utf8').trim().length > 0, file)
+  }
 })
