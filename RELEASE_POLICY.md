@@ -18,7 +18,7 @@ pass. This prevents package publication while public source development proceeds
 
 ## Versions
 
-Start with ordinary `0.1.0` and publish experimental `0.x` releases under
+Start with ordinary `0.0.1` and publish experimental `0.x` releases under
 `latest`. Make experimental status clear in the README and release notes.
 The first stable release is `1.0.0`, after the complete 31-family catalog,
 documentation and agreed accessibility and compatibility verification pass.
@@ -114,7 +114,7 @@ pnpm version patch --no-git-tag-version # or minor, following the policy above
 
 Move the applicable Unreleased notes into a nonempty `## <version>` section in
 `CHANGELOG.md`, then commit the manifest, lockfile changes if any, and notes.
-The first experimental release already has version `0.1.0` and prepared notes;
+The first experimental release already has version `0.0.1` and prepared notes;
 do not bump it just to publish it. Keep `private: true` until DEV-94 verifies npm
 scope access and enables publication through a reviewed source change.
 
@@ -181,7 +181,7 @@ An availability timeout can occur after npm accepts the upload. Inspect the exac
 version's `dist.integrity` and compare it with `release.json` before any retry:
 
 ```sh
-pnpm view @cognitap/radiant@0.1.0 dist.integrity --json
+pnpm view @cognitap/radiant@0.0.1 dist.integrity --json
 ```
 
 If the version exists with matching integrity, do not republish it; finish

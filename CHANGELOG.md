@@ -4,7 +4,7 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
-## 0.1.0
+## 0.0.1
 
 - Compiled `styles.css` for consumers without Tailwind, an optional compiled
   `reset.css` and a source `tailwind.css` customization entry. Tailwind is now
@@ -20,4 +20,4 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 - Initial experimental Button with ESM JavaScript, TypeScript declarations and
   source maps.
 - Public package identity, release policy and publishing metadata prepared for
-  the first `0.1.0` release.
+  the first `0.0.1` release.

@@ -50,7 +50,7 @@ pre-commit hook, which formats staged files. See
 Releases are independent of Cognitap. Use `pnpm version patch --no-git-tag-version`
 (or `minor`), add matching versioned notes to `CHANGELOG.md`, and commit both
 before running `pnpm release:prepare`. The first release keeps the prepared
-`0.1.0` version. See [release preparation and publication](RELEASE_POLICY.md#release-workflow)
+`0.0.1` version. See [release preparation and publication](RELEASE_POLICY.md#release-workflow)
 for the dry-run workflow, npm setup and recovery procedures.
 
 ## Library build
