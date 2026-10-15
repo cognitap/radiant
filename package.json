@@ -54,9 +54,9 @@
     "test:package": "pnpm build && node scripts/verify-package.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
-    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:storybook",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:storybook",
     "release:prepare": "node scripts/prepare-release.mjs"
   },
   "dependencies": {

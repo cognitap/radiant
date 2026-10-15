@@ -44,8 +44,8 @@ loop. No Cognitap checkout or private configuration is required.
 | `pnpm test`                                 | Verify builds and an independently installed archive         |
 | `pnpm test:package`                         | Build, pack and verify an isolated installed package         |
 | `pnpm lint`                                 | Check correctness and accessibility lint rules               |
-| `pnpm fmt`                                  | Format repository files                                      |
-| `pnpm fmt:check`                            | Check formatting                                             |
+| `pnpm format`                               | Format repository files                                      |
+| `pnpm format:check`                         | Check formatting                                             |
 | `pnpm check`                                | Run all checks, including the Storybook build                |
 | `pnpm release:prepare`                      | Pack and verify a release candidate; dry-run publication     |
 | `pnpm pack --pack-destination dist/package` | Create a package archive locally                             |
