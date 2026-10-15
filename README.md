@@ -2,13 +2,13 @@
 
 React interaction components and presentation primitives, published as
 [`@cognitap/radiant`](https://www.npmjs.com/package/@cognitap/radiant) under the
-[MIT license](LICENSE). Radiant is experimental: `0.0.1` contains a single native
+[MIT license](LICENSE). Radiant is experimental: `0.0.2` contains a single native
 Button.
 
 ## Usage
 
 ```sh
-pnpm add --save-exact @cognitap/radiant@0.0.1
+pnpm add --save-exact @cognitap/radiant@0.0.2
 ```
 
 Import the stylesheet once in your application. It needs no Tailwind and only
