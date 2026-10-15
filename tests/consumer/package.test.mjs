@@ -63,7 +63,7 @@ test('the installed package declares shared React and needs no Tailwind', () => 
 test('the archive includes MIT licensing and public documentation', () => {
   assert.equal(manifest.name, '@cognitap/radiant')
   assert.equal(manifest.license, 'MIT')
-  assert.match(readFileSync(new URL('LICENSE', root), 'utf8'), /MIT License[\s\S]*Zoltán Cserei/)
+  assert.match(readFileSync(new URL('LICENSE', root), 'utf8'), /MIT License[\s\S]*Cserei Zoltán/)
   for (const file of ['README.md', 'CHANGELOG.md', 'RELEASE_POLICY.md']) {
     assert.ok(readFileSync(new URL(file, root), 'utf8').trim().length > 0, file)
   }

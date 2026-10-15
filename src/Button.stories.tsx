@@ -17,8 +17,7 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component:
-          'A native button with baseline styling. Defaults to type="button" and accepts native button props, including ref, disabled, and explicit submit/reset types.'
+        component: 'A placeholder button component.'
       }
     }
   }
