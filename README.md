@@ -37,14 +37,14 @@ button. Use a link for navigation.
 <Button iconOnly aria-label="Close"><CloseIcon /></Button>
 ```
 
-| Prop        | Values                                                               | Default                             |
-| ----------- | -------------------------------------------------------------------- | ----------------------------------- |
-| `variant`   | `primary`, `secondary`, `warning`, `destructive`, `outline`, `ghost` | `primary`                           |
-| `size`      | `small`, `default`, `large`                                          | `default`                           |
-| `radius`    | `--button-radius`                                                    | `var(--radius-control)`, `0.625rem` |
-| `iconOnly`  | Squares the button at its size. Pass `aria-label`.                   | `false`                             |
-| `fullWidth` | Fills the container width.                                           | `false`                             |
-| `pending`   | Shows a spinner over the label and ignores activation.               | `false`                             |
+| Prop        | Values                                                               | Default                           |
+| ----------- | -------------------------------------------------------------------- | --------------------------------- |
+| `variant`   | `primary`, `secondary`, `warning`, `destructive`, `outline`, `ghost` | `primary`                         |
+| `size`      | `small`, `default`, `large`                                          | `default`                         |
+| `radius`    | `--button-radius`                                                    | `var(--radius-control)`, `0.5rem` |
+| `iconOnly`  | Squares the button at its size. Pass `aria-label`.                   | `false`                           |
+| `fullWidth` | Fills the container width.                                           | `false`                           |
+| `pending`   | Shows a spinner over the label and ignores activation.               | `false`                           |
 
 The style prop is `variant`, because `type` stays the native attribute. An omitted
 `type` is `button` even when `formAction` is set. Pass `type="submit"` to submit.
@@ -95,44 +95,44 @@ motion use them, and colors use `colorDuration`. `--ease-spring`, `--ease-snap`,
 and `--ease-settle` are ready to use, and any `cubic-bezier()` or `linear()` value
 works.
 
-| `buttonTheme` key    | Variable                        | Default                                                                 |
-| -------------------- | ------------------------------- | ----------------------------------------------------------------------- |
-| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.625rem`                                     |
-| `radiusPressed`      | `--button-radius-pressed`       | 80% of the resting radius                                               |
-| `cornerShape`        | `--button-corner-shape`         | `squircle`                                                              |
-| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape                                                |
-| `height`             | `--button-height`               | `2.5rem`                                                                |
-| `heightSmall`        | `--button-height-small`         | `2rem`                                                                  |
-| `heightLarge`        | `--button-height-large`         | `3rem`                                                                  |
-| `padding`            | `--button-padding`              | `1rem`                                                                  |
-| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                                                               |
-| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                                                              |
-| `fontWeight`         | `--button-font-weight`          | `550`                                                                   |
-| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                                                              |
-| `shadow`             | `--button-shadow`               | a translucent 1px edge, a bottom inner shade, and two soft drop shadows |
-| `shadowPressed`      | `--button-shadow-pressed`       | the edge and a small inner shadow                                       |
-| `highlight`          | `--button-highlight`            | `0.2` (top edge white alpha)                                            |
-| `sheen`              | `--button-sheen`                | `0.06` (top-to-bottom white gradient)                                   |
-| `glow`               | `--button-glow`                 | `0%` (colored glow strength)                                            |
-| `glowHover`          | `--button-glow-hover`           | the resting glow                                                        |
-| `backdrop`           | `--button-backdrop`             | `none` (a `backdrop-filter`)                                            |
-| `stateColor`         | `--button-state-color`          | per variant, see above                                                  |
-| `hoverLayer`         | `--button-hover-layer`          | `5%`                                                                    |
-| `pressLayer`         | `--button-press-layer`          | `8%`                                                                    |
-| `hoverLift`          | `--button-hover-lift`           | `0px`                                                                   |
-| `pressScale`         | `--button-press-scale`          | `0.98`                                                                  |
-| `pressShift`         | `--button-press-shift`          | `0px`                                                                   |
-| `pressDuration`      | `--button-press-duration`       | `100ms`                                                                 |
-| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                                                      |
-| `releaseDuration`    | `--button-release-duration`     | `400ms`                                                                 |
-| `releaseEase`        | `--button-release-ease`         | `var(--ease-spring)`                                                    |
-| `colorDuration`      | `--button-color-duration`       | `150ms`                                                                 |
-| `disabledOpacity`    | `--button-disabled-opacity`     | `0.5`                                                                   |
+| `buttonTheme` key    | Variable                        | Default                            |
+| -------------------- | ------------------------------- | ---------------------------------- |
+| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.5rem`  |
+| `radiusPressed`      | `--button-radius-pressed`       | the resting radius                 |
+| `cornerShape`        | `--button-corner-shape`         | `round`                            |
+| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape           |
+| `height`             | `--button-height`               | `2.5rem`                           |
+| `heightSmall`        | `--button-height-small`         | `2rem`                             |
+| `heightLarge`        | `--button-height-large`         | `3rem`                             |
+| `padding`            | `--button-padding`              | `1rem`                             |
+| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                          |
+| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                         |
+| `fontWeight`         | `--button-font-weight`          | `550`                              |
+| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                         |
+| `shadow`             | `--button-shadow`               | one soft drop shadow               |
+| `shadowPressed`      | `--button-shadow-pressed`       | the resting shadow                 |
+| `highlight`          | `--button-highlight`            | `0` (top edge white alpha)         |
+| `sheen`              | `--button-sheen`                | `0` (top-to-bottom white gradient) |
+| `glow`               | `--button-glow`                 | `0%` (colored glow strength)       |
+| `glowHover`          | `--button-glow-hover`           | the resting glow                   |
+| `backdrop`           | `--button-backdrop`             | `none` (a `backdrop-filter`)       |
+| `stateColor`         | `--button-state-color`          | per variant, see above             |
+| `hoverLayer`         | `--button-hover-layer`          | `5%`                               |
+| `pressLayer`         | `--button-press-layer`          | `8%`                               |
+| `hoverLift`          | `--button-hover-lift`           | `0px`                              |
+| `pressScale`         | `--button-press-scale`          | `0.98`                             |
+| `pressShift`         | `--button-press-shift`          | `0px`                              |
+| `pressDuration`      | `--button-press-duration`       | `80ms`                             |
+| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                 |
+| `releaseDuration`    | `--button-release-duration`     | `160ms`                            |
+| `releaseEase`        | `--button-release-ease`         | `var(--ease-settle)`               |
+| `colorDuration`      | `--button-color-duration`       | `150ms`                            |
+| `disabledOpacity`    | `--button-disabled-opacity`     | `0.5`                              |
 
-Filled variants sit slightly raised: a top highlight, a faint sheen, a bottom
-inner shade, and soft drop shadows. Pressing sinks them, with a small inner shadow
-and the highlight removed. Secondary is a raised white key, outline draws
-`--color-border` as a real border, and ghost has no surface until hover. `shadow` takes a full `box-shadow` list. Use `0 0 #0000`
+The default faces are flat. Filled variants have a hairline edge in a darker
+shade of their own color and one soft drop shadow. Pressing darkens the face and
+scales it to 97%. Secondary and outline draw `--color-border`, and ghost has no
+surface until hover. `shadow` takes a full `box-shadow` list. Use `0 0 #0000`
 for no shadow, not `none`, because the glow is appended to it. `cornerShape` takes
 [`corner-shape`](https://developer.mozilla.org/docs/Web/CSS/corner-shape) values
 such as `squircle` or `round`. Browsers without `corner-shape` draw round corners,

@@ -6,7 +6,7 @@
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.24 0.012 270);
   --color-border: oklch(0.89 0.008 270);
-  --color-primary: oklch(0.53 0.15 276);
+  --color-primary: oklch(0.486 0.086 178);
   --color-primary-foreground: oklch(0.99 0 0);
   --color-secondary: oklch(0.995 0 0);
   --color-secondary-foreground: oklch(0.24 0.012 270);
@@ -14,8 +14,8 @@
   --color-warning-foreground: oklch(0.3 0.07 55);
   --color-destructive: oklch(0.56 0.19 25);
   --color-destructive-foreground: oklch(0.99 0 0);
-  --color-focus: oklch(0.6 0.16 276);
-  --radius-control: 0.625rem;
+  --color-focus: oklch(0.55 0.09 178);
+  --radius-control: 0.5rem;
   --ease-spring: linear(
     0,
     0.009,
