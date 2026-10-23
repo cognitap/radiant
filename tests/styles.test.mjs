@@ -40,7 +40,6 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
   assert.match(pressScale[0], /motion-safe/)
   const motionSafe = css.indexOf('@media (prefers-reduced-motion:no-preference)')
   assert.ok(motionSafe > 0 && motionSafe < css.indexOf(pressScale[0]))
-  assert.match(css, /@property --_btn-angle/)
   assert.match(
     css,
     /@media\s*\(\s*forced-colors:\s*active\s*\)\s*\{[\s\S]*border-color:\s*buttontext[\s\S]*:disabled\s*\{[^}]*border-color:\s*graytext[\s\S]*:disabled\s*\{[^}]*color:\s*graytext/i
