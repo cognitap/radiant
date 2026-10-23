@@ -4,29 +4,29 @@ import { cn } from './cn.js'
 
 const buttonVariants = cva(
   [
-    'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--button-border-style)] [border-width:var(--button-border-width)] [border-color:var(--button-border-color,var(--_btn-edge))] text-center [font-family:var(--button-font-family,inherit)] [text-transform:var(--button-text-transform,none)] antialiased',
-    '[font-weight:var(--button-font-weight)] [letter-spacing:var(--button-letter-spacing)] [font-size:var(--_btn-fs)]',
+    'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--button-border-style,solid)] [border-width:var(--button-border-width,1px)] [border-color:var(--button-border-color,var(--_btn-edge))] text-center [font-family:var(--button-font-family,inherit)] [text-transform:var(--button-text-transform,none)] antialiased',
+    '[font-weight:var(--button-font-weight,550)] [letter-spacing:var(--button-letter-spacing,-0.011em)] [font-size:var(--_btn-fs)]',
     'min-h-(--_btn-h) px-(--_btn-px) bg-(--_btn-bg) text-(--_btn-fg)',
     'bg-[linear-gradient(to_bottom,rgb(255_255_255/var(--_btn-sheen)),rgb(255_255_255/0))]',
-    '[--_btn-corner:var(--button-corner-shape)] rounded-(--_btn-radius) [corner-shape:var(--_btn-corner)]',
+    '[--_btn-corner:var(--button-corner-shape,round)] rounded-(--_btn-radius) [corner-shape:var(--_btn-corner)]',
     '[--_btn-radius-pressed:var(--button-radius-pressed,var(--_btn-radius))]',
-    '[--_btn-glow:var(--button-glow,0%)] shadow-(--_btn-shadow) inset-shadow-[0_1px_0_0_rgb(255_255_255/var(--_btn-highlight))] [backdrop-filter:var(--button-backdrop)]',
-    '[--_btn-rd:var(--button-release-duration)] [--_btn-re:var(--button-release-ease)]',
-    '[--_btn-pd:var(--button-press-duration)] [--_btn-pe:var(--button-press-ease)]',
-    '[--_btn-cd:var(--button-color-duration)]',
+    '[--_btn-glow:var(--button-glow,0%)] shadow-(--_btn-shadow) inset-shadow-[0_1px_0_0_rgb(255_255_255/var(--_btn-highlight))] [backdrop-filter:var(--button-backdrop,none)]',
+    '[--_btn-rd:var(--button-release-duration,160ms)] [--_btn-re:var(--button-release-ease,var(--ease-settle))]',
+    '[--_btn-pd:var(--button-press-duration,80ms)] [--_btn-pe:var(--button-press-ease,var(--ease-snap))]',
+    '[--_btn-cd:var(--button-color-duration,150ms)]',
     'cursor-pointer transition-[scale,translate,border-radius,corner-shape,box-shadow,background-color,color]',
     'duration-[var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-cd),var(--_btn-cd),var(--_btn-cd)]',
     'ease-[var(--_btn-re),var(--_btn-re),var(--_btn-re),var(--_btn-re),ease-out,ease-out,ease-out]',
     'active:duration-[var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd)]',
     'active:ease-[var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe)]',
     'enabled:not-aria-busy:hover:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-hover-state))_var(--button-hover-layer,5%))]',
-    'enabled:not-aria-busy:motion-safe:hover:translate-y-[var(--button-hover-lift)]',
+    'enabled:not-aria-busy:motion-safe:hover:translate-y-[var(--button-hover-lift,0px)]',
     'enabled:not-aria-busy:active:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-press-state))_var(--button-press-layer,8%))]',
-    'enabled:not-aria-busy:motion-safe:active:scale-[var(--button-press-scale)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--button-press-shift)] enabled:not-aria-busy:motion-safe:active:translate-x-[var(--button-press-shift-x)]',
+    'enabled:not-aria-busy:motion-safe:active:scale-[var(--button-press-scale,0.97)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--button-press-shift,0px)] enabled:not-aria-busy:motion-safe:active:translate-x-[var(--button-press-shift-x,0px)]',
     'enabled:not-aria-busy:active:rounded-(--_btn-radius-pressed) enabled:not-aria-busy:active:[corner-shape:var(--button-corner-shape-pressed,var(--_btn-corner))]',
     'enabled:not-aria-busy:active:[--_btn-highlight:0] enabled:not-aria-busy:active:[--_btn-sheen:0] enabled:not-aria-busy:active:shadow-[var(--button-shadow-pressed,var(--_btn-shadow-pressed))]',
-    'focus-visible:outline-solid focus-visible:[outline-color:var(--color-focus)] focus-visible:[outline-width:var(--button-focus-width)] focus-visible:[outline-offset:var(--button-focus-offset)] focus-visible:[outline-style:var(--button-focus-style)]',
-    'disabled:cursor-not-allowed disabled:opacity-[var(--button-disabled-opacity)]',
+    'focus-visible:outline-solid focus-visible:[outline-color:var(--color-focus)] focus-visible:[outline-width:var(--button-focus-width,2px)] focus-visible:[outline-offset:var(--button-focus-offset,2px)] focus-visible:[outline-style:var(--button-focus-style,solid)]',
+    'disabled:cursor-not-allowed disabled:opacity-[var(--button-disabled-opacity,0.5)]',
     'aria-busy:cursor-progress',
     'motion-reduce:transition-[background-color,color]',
     'forced-colors:border-[ButtonText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:text-[GrayText] forced-colors:disabled:opacity-100'
@@ -35,30 +35,30 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          '[--_btn-bg:var(--color-primary)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--color-primary-foreground)] [--_btn-hover-state:white] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen)] [--_btn-highlight:var(--button-highlight)] [--_btn-shadow:var(--button-shadow),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed)]',
+          '[--_btn-bg:var(--color-primary)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--color-primary-foreground)] [--_btn-hover-state:white] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         secondary:
-          '[--_btn-bg:var(--color-secondary)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-secondary-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen)] [--_btn-highlight:var(--button-highlight)] [--_btn-shadow:var(--button-shadow)] [--_btn-shadow-pressed:var(--button-shadow-pressed)]',
+          '[--_btn-bg:var(--color-secondary)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-secondary-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         warning:
-          '[--_btn-bg:var(--color-warning)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_12%)] [--_btn-fg:var(--color-warning-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen)] [--_btn-highlight:var(--button-highlight)] [--_btn-shadow:var(--button-shadow),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed)]',
+          '[--_btn-bg:var(--color-warning)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_12%)] [--_btn-fg:var(--color-warning-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         destructive:
-          '[--_btn-bg:var(--color-destructive)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--color-destructive-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen)] [--_btn-highlight:var(--button-highlight)] [--_btn-shadow:var(--button-shadow),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed)]',
+          '[--_btn-bg:var(--color-destructive)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--color-destructive-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         outline:
-          '[--_btn-bg:var(--color-background)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen)] [--_btn-highlight:var(--button-highlight)] [--_btn-shadow:var(--button-shadow)] [--_btn-shadow-pressed:var(--button-shadow-pressed)]',
+          '[--_btn-bg:var(--color-background)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         ghost:
-          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen)] [--_btn-highlight:var(--button-highlight)] [--_btn-shadow:var(--button-ghost-shadow)] [--_btn-shadow-pressed:var(--button-ghost-shadow-pressed)]'
+          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-ghost-shadow,0_0_#0000)] [--_btn-shadow-pressed:var(--button-ghost-shadow-pressed,0_0_#0000)]'
       },
       size: {
         small:
-          '[--_btn-h:var(--button-height-small)] [--_btn-px:var(--button-padding-small)] [--_btn-fs:var(--button-font-size-small)] [&_svg]:size-3.5',
+          '[--_btn-h:var(--button-height-small,2rem)] [--_btn-px:var(--button-padding-small,0.75rem)] [--_btn-fs:var(--button-font-size-small,0.8125rem)] [&_svg]:size-3.5',
         default:
-          '[--_btn-h:var(--button-height)] [--_btn-px:var(--button-padding)] [--_btn-fs:var(--button-font-size)] [&_svg]:size-4',
+          '[--_btn-h:var(--button-height,2.5rem)] [--_btn-px:var(--button-padding,1rem)] [--_btn-fs:var(--button-font-size,0.875rem)] [&_svg]:size-4',
         large:
-          '[--_btn-h:var(--button-height-large)] [--_btn-px:var(--button-padding-large)] [--_btn-fs:var(--button-font-size-large)] [&_svg]:size-[1.125rem]'
+          '[--_btn-h:var(--button-height-large,3rem)] [--_btn-px:var(--button-padding-large,1.375rem)] [--_btn-fs:var(--button-font-size-large,0.9375rem)] [&_svg]:size-[1.125rem]'
       },
       radius: {
         none: '[--_btn-radius:0px]',
         small: '[--_btn-radius:0.375rem]',
-        default: '[--_btn-radius:var(--button-radius)]',
+        default: '[--_btn-radius:var(--button-radius,var(--radius-control))]',
         large: '[--_btn-radius:1rem]',
         full: '[--_btn-radius:calc(var(--_btn-h)/2)] [--_btn-corner:round]'
       },

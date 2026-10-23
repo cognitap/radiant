@@ -23,10 +23,9 @@ import { Button } from '@cognitap/radiant'
 <Button type="submit">Save</Button>
 ```
 
-Button is headless: it ships with no colors, sizes, radius, shadows, or motion
-of its own. A theme of CSS variables gives it a look (see
-[Adapting Button](#adapting-button-to-a-design-system)). Until then it renders
-as a plain native button, or however your own CSS presents buttons.
+Button ships with a neutral baseline: sensible sizes, type, an ink-and-gray
+palette, a focus ring, and a quiet press. A theme of CSS variables overrides
+any of it (see [Adapting Button](#adapting-button-to-a-design-system)).
 
 For a global reset (Tailwind Preflight), also import `@cognitap/radiant/reset.css`
 before `styles.css`. React 19.3+ is a peer dependency.
@@ -59,9 +58,9 @@ motion keeps the label and hides the spinner. Child SVGs are sized to the button
 
 ### Adapting Button to a design system
 
-Button ships unstyled. Every design decision is a CSS variable with no built-in
-value, so a design system, or an agent reading a design.md, sets values instead
-of rewriting classes.
+Every design decision is a CSS variable, so a design system, or an agent
+reading a design.md, sets values instead of rewriting classes. The built-in
+values are deliberately neutral; a theme replaces them wholesale.
 Set the variables on `:root`, a subtree, or `[data-slot="button"]`. Button also
 exposes `data-variant` and `data-size`, so a rule such as
 `[data-variant="destructive"] { --button-glow: 50% }` targets one variant.
@@ -101,54 +100,54 @@ motion use them, and colors use `colorDuration`. `--ease-spring`, `--ease-snap`,
 and `--ease-settle` are ready to use, and any `cubic-bezier()` or `linear()` value
 works.
 
-| `buttonTheme` key    | Variable                        | Default                      |
-| -------------------- | ------------------------------- | ---------------------------- |
-| `radius`             | `--button-radius`               | unset                        |
-| `radiusPressed`      | `--button-radius-pressed`       | the resting radius           |
-| `cornerShape`        | `--button-corner-shape`         | unset                        |
-| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape     |
-| `height`             | `--button-height`               | unset                        |
-| `heightSmall`        | `--button-height-small`         | unset                        |
-| `heightLarge`        | `--button-height-large`         | unset                        |
-| `padding`            | `--button-padding`              | unset                        |
-| `paddingSmall`       | `--button-padding-small`        | unset                        |
-| `paddingLarge`       | `--button-padding-large`        | unset                        |
-| `fontWeight`         | `--button-font-weight`          | unset                        |
-| `letterSpacing`      | `--button-letter-spacing`       | unset                        |
-| `shadow`             | `--button-shadow`               | unset                        |
-| `shadowPressed`      | `--button-shadow-pressed`       | unset                        |
-| `highlight`          | `--button-highlight`            | unset                        |
-| `sheen`              | `--button-sheen`                | unset                        |
-| `glow`               | `--button-glow`                 | `0%` (colored glow strength) |
-| `glowHover`          | `--button-glow-hover`           | unset                        |
-| `backdrop`           | `--button-backdrop`             | unset                        |
-| `stateColor`         | `--button-state-color`          | per variant, see above       |
-| `hoverLayer`         | `--button-hover-layer`          | `5%`                         |
-| `pressLayer`         | `--button-press-layer`          | `8%`                         |
-| `hoverLift`          | `--button-hover-lift`           | `0px`                        |
-| `pressScale`         | `--button-press-scale`          | unset                        |
-| `pressShift`         | `--button-press-shift`          | `0px`                        |
-| `pressShiftX`        | `--button-press-shift-x`        | `0px`                        |
-| `borderWidth`        | `--button-border-width`         | unset                        |
-| `borderColor`        | `--button-border-color`         | each variant's edge color    |
-| `ghostShadow`        | `--button-ghost-shadow`         | no shadow                    |
-| `ghostShadowPressed` | `--button-ghost-shadow-pressed` | no shadow                    |
-| `fontSize`           | `--button-font-size`            | unset                        |
-| `fontSizeSmall`      | `--button-font-size-small`      | unset                        |
-| `fontSizeLarge`      | `--button-font-size-large`      | unset                        |
-| `fontFamily`         | `--button-font-family`          | the inherited font           |
-| `textTransform`      | `--button-text-transform`       | `none`                       |
-| `borderStyle`        | `--button-border-style`         | unset                        |
-| `focusColor`         | `--color-focus`                 | unset                        |
-| `focusWidth`         | `--button-focus-width`          | unset                        |
-| `focusOffset`        | `--button-focus-offset`         | unset                        |
-| `focusStyle`         | `--button-focus-style`          | unset                        |
-| `pressDuration`      | `--button-press-duration`       | unset                        |
-| `pressEase`          | `--button-press-ease`           | unset                        |
-| `releaseDuration`    | `--button-release-duration`     | unset                        |
-| `releaseEase`        | `--button-release-ease`         | unset                        |
-| `colorDuration`      | `--button-color-duration`       | unset                        |
-| `disabledOpacity`    | `--button-disabled-opacity`     | unset                        |
+| `buttonTheme` key    | Variable                        | Default                           |
+| -------------------- | ------------------------------- | --------------------------------- |
+| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.5rem` |
+| `radiusPressed`      | `--button-radius-pressed`       | the resting radius                |
+| `cornerShape`        | `--button-corner-shape`         | `round`                           |
+| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape          |
+| `height`             | `--button-height`               | `2.5rem`                          |
+| `heightSmall`        | `--button-height-small`         | `2rem`                            |
+| `heightLarge`        | `--button-height-large`         | `3rem`                            |
+| `padding`            | `--button-padding`              | `1rem`                            |
+| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                         |
+| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                        |
+| `fontWeight`         | `--button-font-weight`          | `550`                             |
+| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                        |
+| `shadow`             | `--button-shadow`               | one soft drop shadow              |
+| `shadowPressed`      | `--button-shadow-pressed`       | the resting shadow                |
+| `highlight`          | `--button-highlight`            | `0`                               |
+| `sheen`              | `--button-sheen`                | `0`                               |
+| `glow`               | `--button-glow`                 | `0%` (colored glow strength)      |
+| `glowHover`          | `--button-glow-hover`           | unset                             |
+| `backdrop`           | `--button-backdrop`             | `none`                            |
+| `stateColor`         | `--button-state-color`          | per variant, see above            |
+| `hoverLayer`         | `--button-hover-layer`          | `5%`                              |
+| `pressLayer`         | `--button-press-layer`          | `8%`                              |
+| `hoverLift`          | `--button-hover-lift`           | `0px`                             |
+| `pressScale`         | `--button-press-scale`          | `0.97`                            |
+| `pressShift`         | `--button-press-shift`          | `0px`                             |
+| `pressShiftX`        | `--button-press-shift-x`        | `0px`                             |
+| `borderWidth`        | `--button-border-width`         | `1px`                             |
+| `borderColor`        | `--button-border-color`         | each variant's edge color         |
+| `ghostShadow`        | `--button-ghost-shadow`         | no shadow                         |
+| `ghostShadowPressed` | `--button-ghost-shadow-pressed` | no shadow                         |
+| `fontSize`           | `--button-font-size`            | `0.875rem`                        |
+| `fontSizeSmall`      | `--button-font-size-small`      | `0.8125rem`                       |
+| `fontSizeLarge`      | `--button-font-size-large`      | `0.9375rem`                       |
+| `fontFamily`         | `--button-font-family`          | the inherited font                |
+| `textTransform`      | `--button-text-transform`       | `none`                            |
+| `borderStyle`        | `--button-border-style`         | `solid`                           |
+| `focusColor`         | `--color-focus`                 | `oklch(0.55 0.13 255)`            |
+| `focusWidth`         | `--button-focus-width`          | `2px`                             |
+| `focusOffset`        | `--button-focus-offset`         | `2px`                             |
+| `focusStyle`         | `--button-focus-style`          | `solid`                           |
+| `pressDuration`      | `--button-press-duration`       | `80ms`                            |
+| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                |
+| `releaseDuration`    | `--button-release-duration`     | `160ms`                           |
+| `releaseEase`        | `--button-release-ease`         | `var(--ease-settle)`              |
+| `colorDuration`      | `--button-color-duration`       | `150ms`                           |
+| `disabledOpacity`    | `--button-disabled-opacity`     | `0.5`                             |
 
 Filled variants derive a hairline edge in a darker shade of their own color
 unless `borderColor` is set. Secondary and outline draw `--color-border`, and
@@ -172,8 +171,8 @@ such as `squircle` or `round`. Browsers without `corner-shape` draw round corner
 which look rounder at the same radius. `radius="full"` always uses round corners.
 A disabled button keeps its variant and fades to `disabledOpacity`.
 
-Colors come from these variables, none of which Radiant sets. Each takes any
-CSS color, including `oklch()` and translucent values.
+Colors come from these variables. Radiant sets a neutral palette; each takes
+any CSS color, including `oklch()` and translucent values.
 
 - `--color-primary`, `--color-secondary`, `--color-warning`, `--color-destructive`,
   each with `-foreground`

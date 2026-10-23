@@ -228,7 +228,7 @@ export const ThemedSubtree: Story = {
 
 const designSystems: { name: string; style: CSSProperties; surface?: string }[] = [
   { name: 'Radiant', style: radiantTheme },
-  { name: 'Headless', style: {} },
+  { name: 'Default', style: {} },
   {
     name: 'Soft squircle',
     style: {

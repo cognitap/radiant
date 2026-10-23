@@ -4,10 +4,9 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
-- Breaking: Button is now headless. Radiant no longer ships default colors,
-  radius, sizes, or motion. The `--color-*` and `--radius-control` tokens were
-  removed from the stylesheet; define them (or use `buttonTheme`) in your app.
-  Storybook shows the previous look as the Radiant theme next to a Headless row.
+- Button ships with a neutral baseline (sizes, type, an ink-and-gray palette,
+  focus ring, quiet press). Every value is a CSS variable, and Storybook shows
+  the baseline next to fully themed variants, including the pine Radiant theme.
 - Button's shape, size, type, elevation, state colors, and motion are CSS
   variables. Press and release take separate durations and easings, and the
   radius and `corner-shape` can change on press. `buttonTheme` maps typed settings

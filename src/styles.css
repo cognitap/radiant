@@ -3,6 +3,19 @@
 @source not './**/*.test.*';
 
 @theme static {
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.21 0.006 286);
+  --color-border: oklch(0.885 0.005 286);
+  --color-primary: oklch(0.21 0.006 286);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-secondary: oklch(0.955 0.004 286);
+  --color-secondary-foreground: oklch(0.21 0.006 286);
+  --color-warning: oklch(0.8 0.14 78);
+  --color-warning-foreground: oklch(0.3 0.07 55);
+  --color-destructive: oklch(0.56 0.19 25);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-focus: oklch(0.55 0.13 255);
+  --radius-control: 0.5rem;
   --ease-spring: linear(
     0,
     0.009,
