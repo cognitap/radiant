@@ -14,9 +14,11 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
   `--button-hover-layer` and `--button-press-layer`. `--color-disabled` and
   `--color-disabled-foreground` are removed. A disabled button fades to
   `--button-disabled-opacity`. `--radius-control` is now `0.75rem`.
-- Default Button: OKLCH colors, squircle corners that tighten on press, a faint
-  sheen and top highlight, a 1px edge with layered shadows, a 120ms snap press,
-  and a 450ms spring release. Reduced motion keeps color changes and drops scale.
+- Default Button: a vivid OKLCH indigo palette. Filled variants have a
+  hue-shifted gradient, a colored glow, a faint sheen, and a 1px edge. Hover lifts
+  the button, turns the gradient, and brightens the glow. Corners are squircles
+  that tighten on press, with a 120ms snap press and a 450ms spring release.
+  Reduced motion keeps color changes and drops scale and movement.
 - Button adds `variant` (primary, secondary, warning, destructive, outline,
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.

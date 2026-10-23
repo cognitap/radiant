@@ -7,44 +7,45 @@ const buttonVariants = cva(
     'relative box-border inline-flex shrink-0 select-none items-center justify-center border border-solid border-(--_btn-edge) text-center font-[family-name:inherit] antialiased',
     '[font-weight:var(--button-font-weight,550)] tracking-[var(--button-letter-spacing,-0.011em)]',
     'min-h-(--_btn-h) px-(--_btn-px) bg-(--_btn-bg) text-(--_btn-fg)',
-    'bg-[linear-gradient(to_bottom,rgb(255_255_255/var(--_btn-sheen)),rgb(255_255_255/0))]',
+    'button-surface [--_btn-angle:var(--button-aurora-angle,150deg)] [--_btn-glow:var(--button-glow,55%)]',
     '[--_btn-corner:var(--button-corner-shape,squircle)] rounded-(--_btn-radius) [corner-shape:var(--_btn-corner)]',
     '[--_btn-radius-pressed:var(--button-radius-pressed,calc(var(--_btn-radius)*0.75))]',
     'shadow-(--_btn-shadow) inset-shadow-[0_1px_0_0_rgb(255_255_255/var(--_btn-highlight))] [backdrop-filter:var(--button-backdrop,none)]',
     '[--_btn-rd:var(--button-release-duration,450ms)] [--_btn-re:var(--button-release-ease,var(--ease-spring))]',
     '[--_btn-pd:var(--button-press-duration,120ms)] [--_btn-pe:var(--button-press-ease,var(--ease-snap))]',
-    '[--_btn-cd:var(--button-color-duration,150ms)]',
-    'cursor-pointer transition-[scale,translate,border-radius,corner-shape,box-shadow,background-color,color]',
-    'duration-[var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-cd),var(--_btn-cd),var(--_btn-cd)]',
-    'ease-[var(--_btn-re),var(--_btn-re),var(--_btn-re),var(--_btn-re),ease-out,ease-out,ease-out]',
-    'active:duration-[var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd)]',
-    'active:ease-[var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe)]',
-    'enabled:not-aria-busy:hover:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-hover-state))_var(--button-hover-layer,7%))] enabled:not-aria-busy:hover:translate-y-[var(--button-hover-lift,0px)]',
+    '[--_btn-cd:var(--button-color-duration,150ms)] [--_btn-sd:var(--button-shadow-duration,300ms)] [--_btn-ad:var(--button-aurora-duration,700ms)]',
+    'cursor-pointer transition-[scale,translate,border-radius,corner-shape,box-shadow,background-color,color,--_btn-angle]',
+    'duration-[var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-sd),var(--_btn-cd),var(--_btn-cd),var(--_btn-ad)]',
+    'ease-[var(--_btn-re),var(--_btn-re),var(--_btn-re),var(--_btn-re),var(--ease-settle),ease-out,ease-out,var(--ease-settle)]',
+    'active:duration-[var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-ad)]',
+    'active:ease-[var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--ease-settle)]',
+    'enabled:not-aria-busy:hover:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-hover-state))_var(--button-hover-layer,7%))] enabled:not-aria-busy:motion-safe:hover:translate-y-[var(--button-hover-lift,-1px)]',
+    'enabled:not-aria-busy:hover:[--_btn-glow:var(--button-glow-hover,85%)] enabled:not-aria-busy:hover:[--_btn-angle:var(--button-aurora-angle-hover,240deg)]',
     'enabled:not-aria-busy:active:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-press-state))_var(--button-press-layer,12%))]',
-    'enabled:not-aria-busy:active:scale-[var(--button-press-scale,0.97)] enabled:not-aria-busy:active:translate-y-[var(--button-press-shift,0px)]',
+    'enabled:not-aria-busy:motion-safe:active:scale-[var(--button-press-scale,0.97)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--button-press-shift,0px)]',
     'enabled:not-aria-busy:active:rounded-(--_btn-radius-pressed) enabled:not-aria-busy:active:[corner-shape:var(--button-corner-shape-pressed,var(--_btn-corner))]',
     'enabled:not-aria-busy:active:[--_btn-highlight:0] enabled:not-aria-busy:active:shadow-[var(--button-shadow-pressed,var(--_btn-shadow-pressed))]',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
     'disabled:cursor-not-allowed disabled:opacity-[var(--button-disabled-opacity,0.45)]',
     'aria-busy:cursor-progress',
-    'motion-reduce:transition-[background-color,color] motion-reduce:active:scale-100 motion-reduce:active:translate-y-0 motion-reduce:hover:translate-y-0',
+    'motion-reduce:transition-[background-color,color]',
     'forced-colors:border-[ButtonText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:text-[GrayText] forced-colors:disabled:opacity-100'
   ],
   {
     variants: {
       variant: {
         primary:
-          '[--_btn-bg:var(--color-primary)] [--_btn-edge:transparent] [--_btn-fg:var(--color-primary-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0.1)] [--_btn-highlight:var(--button-highlight,0.14)] [--_btn-shadow:var(--button-shadow,0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_30%),0_1px_2px_0_rgb(0_0_0/0.14),0_3px_8px_-3px_rgb(0_0_0/0.22)),0_6px_18px_-6px_color-mix(in_oklch,var(--_btn-bg)_var(--button-glow,0%),transparent)] [--_btn-shadow-pressed:0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_30%)]',
+          '[--_btn-bg:var(--color-primary)] [--_btn-edge:transparent] [--_btn-fg:var(--color-primary-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0.08)] [--_btn-highlight:var(--button-highlight,0.22)] [--_btn-shift:var(--button-hue-shift,60)] [--_btn-aurora:var(--button-aurora,0.9)] [--_btn-shadow:var(--button-shadow,0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_22%),0_1px_2px_0_rgb(0_0_0/0.12)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_22%),0_2px_8px_-4px_color-mix(in_oklch,var(--_btn-bg)_50%,transparent)]',
         secondary:
-          '[--_btn-bg:var(--color-secondary)] [--_btn-edge:transparent] [--_btn-fg:var(--color-secondary-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shadow:var(--button-shadow,0_0_#0000)] [--_btn-shadow-pressed:0_0_#0000]',
+          '[--_btn-bg:var(--color-secondary)] [--_btn-edge:transparent] [--_btn-fg:var(--color-secondary-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shift:0] [--_btn-aurora:0] [--_btn-shadow:var(--button-shadow,0_0_#0000)] [--_btn-shadow-pressed:0_0_#0000]',
         warning:
-          '[--_btn-bg:var(--color-warning)] [--_btn-edge:transparent] [--_btn-fg:var(--color-warning-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0.1)] [--_btn-highlight:var(--button-highlight,0.3)] [--_btn-shadow:var(--button-shadow,0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_18%),0_1px_2px_0_rgb(0_0_0/0.1),0_3px_8px_-3px_rgb(0_0_0/0.16)),0_6px_18px_-6px_color-mix(in_oklch,var(--_btn-bg)_var(--button-glow,0%),transparent)] [--_btn-shadow-pressed:0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_18%)]',
+          '[--_btn-bg:var(--color-warning)] [--_btn-edge:transparent] [--_btn-fg:var(--color-warning-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0.08)] [--_btn-highlight:var(--button-highlight,0.35)] [--_btn-shift:var(--button-hue-shift,-28)] [--_btn-aurora:var(--button-aurora,0.9)] [--_btn-shadow:var(--button-shadow,0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_14%),0_1px_2px_0_rgb(0_0_0/0.12)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_20%),0_2px_8px_-4px_color-mix(in_oklch,var(--_btn-bg)_50%,transparent)]',
         destructive:
-          '[--_btn-bg:var(--color-destructive)] [--_btn-edge:transparent] [--_btn-fg:var(--color-destructive-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0.1)] [--_btn-highlight:var(--button-highlight,0.2)] [--_btn-shadow:var(--button-shadow,0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_25%),0_1px_2px_0_rgb(0_0_0/0.12),0_3px_8px_-3px_rgb(0_0_0/0.2)),0_6px_18px_-6px_color-mix(in_oklch,var(--_btn-bg)_var(--button-glow,0%),transparent)] [--_btn-shadow-pressed:0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_25%)]',
+          '[--_btn-bg:var(--color-destructive)] [--_btn-edge:transparent] [--_btn-fg:var(--color-destructive-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0.08)] [--_btn-highlight:var(--button-highlight,0.22)] [--_btn-shift:var(--button-hue-shift,-35)] [--_btn-aurora:var(--button-aurora,0.9)] [--_btn-shadow:var(--button-shadow,0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_14%),0_1px_2px_0_rgb(0_0_0/0.12)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:0_0_0_1px_color-mix(in_oklch,var(--_btn-bg),black_20%),0_2px_8px_-4px_color-mix(in_oklch,var(--_btn-bg)_50%,transparent)]',
         outline:
-          '[--_btn-bg:var(--color-background)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:0_0_#0000]',
+          '[--_btn-bg:var(--color-background)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--color-primary)] [--_btn-press-state:var(--color-primary)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shift:0] [--_btn-aurora:0] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:0_0_#0000]',
         ghost:
-          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shadow:0_0_#0000] [--_btn-shadow-pressed:0_0_#0000]'
+          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--color-primary)] [--_btn-press-state:var(--color-primary)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shift:0] [--_btn-aurora:0] [--_btn-shadow:0_0_#0000] [--_btn-shadow-pressed:0_0_#0000]'
       },
       size: {
         small:
@@ -113,6 +114,12 @@ export type ButtonTheme = {
   highlight?: number
   sheen?: number
   glow?: string
+  glowHover?: string
+  aurora?: number
+  auroraAngle?: string
+  auroraAngleHover?: string
+  auroraDuration?: string
+  hueShift?: number
   backdrop?: string
   stateColor?: string
   hoverLayer?: string
@@ -125,6 +132,7 @@ export type ButtonTheme = {
   releaseDuration?: string
   releaseEase?: string
   colorDuration?: string
+  shadowDuration?: string
   disabledOpacity?: number
 }
 
@@ -146,6 +154,12 @@ const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
   highlight: '--button-highlight',
   sheen: '--button-sheen',
   glow: '--button-glow',
+  glowHover: '--button-glow-hover',
+  aurora: '--button-aurora',
+  auroraAngle: '--button-aurora-angle',
+  auroraAngleHover: '--button-aurora-angle-hover',
+  auroraDuration: '--button-aurora-duration',
+  hueShift: '--button-hue-shift',
   backdrop: '--button-backdrop',
   stateColor: '--button-state-color',
   hoverLayer: '--button-hover-layer',
@@ -158,6 +172,7 @@ const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
   releaseDuration: '--button-release-duration',
   releaseEase: '--button-release-ease',
   colorDuration: '--button-color-duration',
+  shadowDuration: '--button-shadow-duration',
   disabledOpacity: '--button-disabled-opacity'
 }
 

@@ -95,40 +95,50 @@ motion use them, and colors use `colorDuration`. `--ease-spring`, `--ease-snap`,
 and `--ease-settle` are ready to use, and any `cubic-bezier()` or `linear()` value
 works.
 
-| `buttonTheme` key    | Variable                        | Default                              |
-| -------------------- | ------------------------------- | ------------------------------------ |
-| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.75rem`   |
-| `radiusPressed`      | `--button-radius-pressed`       | 75% of the resting radius            |
-| `cornerShape`        | `--button-corner-shape`         | `squircle`                           |
-| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape             |
-| `height`             | `--button-height`               | `2.5rem`                             |
-| `heightSmall`        | `--button-height-small`         | `2rem`                               |
-| `heightLarge`        | `--button-height-large`         | `3rem`                               |
-| `padding`            | `--button-padding`              | `1rem`                               |
-| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                            |
-| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                           |
-| `fontWeight`         | `--button-font-weight`          | `550`                                |
-| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                           |
-| `shadow`             | `--button-shadow`               | a 1px edge and two soft drop shadows |
-| `shadowPressed`      | `--button-shadow-pressed`       | the 1px edge only                    |
-| `highlight`          | `--button-highlight`            | `0.14` (top edge white alpha)        |
-| `sheen`              | `--button-sheen`                | `0.1` (top-to-bottom white gradient) |
-| `glow`               | `--button-glow`                 | `0%` (colored glow strength)         |
-| `backdrop`           | `--button-backdrop`             | `none` (a `backdrop-filter`)         |
-| `stateColor`         | `--button-state-color`          | per variant, see above               |
-| `hoverLayer`         | `--button-hover-layer`          | `7%`                                 |
-| `pressLayer`         | `--button-press-layer`          | `12%`                                |
-| `hoverLift`          | `--button-hover-lift`           | `0px`                                |
-| `pressScale`         | `--button-press-scale`          | `0.97`                               |
-| `pressShift`         | `--button-press-shift`          | `0px`                                |
-| `pressDuration`      | `--button-press-duration`       | `120ms`                              |
-| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                   |
-| `releaseDuration`    | `--button-release-duration`     | `450ms`                              |
-| `releaseEase`        | `--button-release-ease`         | `var(--ease-spring)`                 |
-| `colorDuration`      | `--button-color-duration`       | `150ms`                              |
-| `disabledOpacity`    | `--button-disabled-opacity`     | `0.45`                               |
+| `buttonTheme` key    | Variable                        | Default                                                                |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.75rem`                                     |
+| `radiusPressed`      | `--button-radius-pressed`       | 75% of the resting radius                                              |
+| `cornerShape`        | `--button-corner-shape`         | `squircle`                                                             |
+| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape                                               |
+| `height`             | `--button-height`               | `2.5rem`                                                               |
+| `heightSmall`        | `--button-height-small`         | `2rem`                                                                 |
+| `heightLarge`        | `--button-height-large`         | `3rem`                                                                 |
+| `padding`            | `--button-padding`              | `1rem`                                                                 |
+| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                                                              |
+| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                                                             |
+| `fontWeight`         | `--button-font-weight`          | `550`                                                                  |
+| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                                                             |
+| `shadow`             | `--button-shadow`               | a 1px edge and a soft drop shadow                                      |
+| `shadowPressed`      | `--button-shadow-pressed`       | the 1px edge and a tight glow                                          |
+| `highlight`          | `--button-highlight`            | `0.22` (top edge white alpha)                                          |
+| `sheen`              | `--button-sheen`                | `0.08` (top-to-bottom white gradient)                                  |
+| `glow`               | `--button-glow`                 | `55%` (colored glow strength)                                          |
+| `glowHover`          | `--button-glow-hover`           | `85%`                                                                  |
+| `aurora`             | `--button-aurora`               | `0.9` (hue-shifted light strength)                                     |
+| `hueShift`           | `--button-hue-shift`            | `60` primary, `-28` warning, `-35` destructive (hue degrees, unitless) |
+| `auroraAngle`        | `--button-aurora-angle`         | `150deg`                                                               |
+| `auroraAngleHover`   | `--button-aurora-angle-hover`   | `240deg`                                                               |
+| `auroraDuration`     | `--button-aurora-duration`      | `700ms`                                                                |
+| `backdrop`           | `--button-backdrop`             | `none` (a `backdrop-filter`)                                           |
+| `stateColor`         | `--button-state-color`          | per variant, see above                                                 |
+| `hoverLayer`         | `--button-hover-layer`          | `7%`                                                                   |
+| `pressLayer`         | `--button-press-layer`          | `12%`                                                                  |
+| `hoverLift`          | `--button-hover-lift`           | `-1px`                                                                 |
+| `pressScale`         | `--button-press-scale`          | `0.97`                                                                 |
+| `pressShift`         | `--button-press-shift`          | `0px`                                                                  |
+| `pressDuration`      | `--button-press-duration`       | `120ms`                                                                |
+| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                                                     |
+| `releaseDuration`    | `--button-release-duration`     | `450ms`                                                                |
+| `releaseEase`        | `--button-release-ease`         | `var(--ease-spring)`                                                   |
+| `colorDuration`      | `--button-color-duration`       | `150ms`                                                                |
+| `shadowDuration`     | `--button-shadow-duration`      | `300ms`                                                                |
+| `disabledOpacity`    | `--button-disabled-opacity`     | `0.45`                                                                 |
 
-Sheen, highlight, glow, and the default shadow apply to the filled variants.
+Filled variants carry the light. A hue-shifted gradient crosses the face from
+`auroraAngle`, and hover turns it to `auroraAngleHover`, lifts the button, and
+brightens the colored glow. Sheen, highlight, glow, and the default shadow apply
+to the filled variants. Outline and ghost hover with a wash of `--color-primary`.
 Secondary is flat, outline draws `--color-border` as a real border, and ghost has
 no surface until hover. `shadow` takes a full `box-shadow` list. Use `0 0 #0000`
 for no shadow, not `none`, because the glow is appended to it. `cornerShape` takes
@@ -138,7 +148,7 @@ which look rounder at the same radius. `radius="full"` always uses round corners
 A disabled button keeps its variant and fades to `disabledOpacity`.
 
 Colors come from these variables. Each takes any CSS color, including `oklch()`
-and translucent values. The defaults are OKLCH.
+and translucent values. The defaults are an OKLCH indigo palette.
 
 - `--color-primary`, `--color-secondary`, `--color-warning`, `--color-destructive`,
   each with `-foreground`

@@ -2,19 +2,35 @@
 @source not './**/*.stories.*';
 @source not './**/*.test.*';
 
+@property --_btn-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 150deg;
+}
+
+@utility button-surface {
+  background-image:
+    linear-gradient(to bottom, rgb(255 255 255 / var(--_btn-sheen)), rgb(255 255 255 / 0) 60%),
+    linear-gradient(
+      var(--_btn-angle),
+      oklch(from var(--_btn-bg) l c calc(h + var(--_btn-shift)) / var(--_btn-aurora)),
+      transparent 95%
+    );
+}
+
 @theme static {
   --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.21 0.006 286);
-  --color-border: oklch(0.885 0.005 286);
-  --color-primary: oklch(0.21 0.006 286);
-  --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.955 0.004 286);
-  --color-secondary-foreground: oklch(0.21 0.006 286);
-  --color-warning: oklch(0.84 0.16 84);
-  --color-warning-foreground: oklch(0.32 0.08 60);
-  --color-destructive: oklch(0.58 0.22 27);
-  --color-destructive-foreground: oklch(0.985 0 0);
-  --color-focus: oklch(0.62 0.19 255);
+  --color-foreground: oklch(0.28 0.06 277);
+  --color-border: oklch(0.87 0.04 277);
+  --color-primary: oklch(0.54 0.25 277);
+  --color-primary-foreground: oklch(0.99 0 0);
+  --color-secondary: oklch(0.95 0.035 277);
+  --color-secondary-foreground: oklch(0.45 0.2 277);
+  --color-warning: oklch(0.8 0.17 70);
+  --color-warning-foreground: oklch(0.29 0.08 45);
+  --color-destructive: oklch(0.57 0.23 22);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-focus: oklch(0.6 0.22 277);
   --radius-control: 0.75rem;
   --ease-spring: linear(
     0,

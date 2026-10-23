@@ -37,6 +37,11 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
   assert.match(css, /--ease-spring:\s*linear\(/)
   assert.match(
     css,
+    /@media\s*\(prefers-reduced-motion:\s*no-preference\)\s*\{[^@]*--button-press-scale/
+  )
+  assert.match(css, /@property --_btn-angle/)
+  assert.match(
+    css,
     /@media\s*\(\s*forced-colors:\s*active\s*\)\s*\{[\s\S]*border-color:\s*buttontext[\s\S]*:disabled\s*\{[^}]*border-color:\s*graytext[\s\S]*:disabled\s*\{[^}]*color:\s*graytext/i
   )
 })
