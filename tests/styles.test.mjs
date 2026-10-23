@@ -30,10 +30,10 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
   const css = readFileSync(new URL('../dist/library/styles.css', import.meta.url), 'utf8')
 
   assert.match(css, /:focus-visible\s*\{[^}]*outline-color:\s*var\(\s*--color-focus\s*\)/)
-  assert.match(css, /:disabled\s*\{[^}]*--_btn-bg:\s*var\(\s*--color-disabled\s*\)/)
-  assert.match(css, /:disabled\s*\{[^}]*--_btn-fg:\s*var\(\s*--color-disabled-foreground\s*\)/)
+  assert.match(css, /:disabled\s*\{[^}]*opacity:\s*var\(--button-disabled-opacity/)
   assert.match(css, /:enabled:not\(\[aria-busy=true\]\):hover/)
-  assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--button-press-ease/)
+  assert.match(css, /--_btn-pe:\s*var\(--button-press-ease/)
+  assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--_btn-pe\)/)
   assert.match(css, /--ease-spring:\s*linear\(/)
   assert.match(
     css,

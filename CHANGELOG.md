@@ -11,9 +11,12 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 - `--ease-spring`, `--ease-snap`, and `--ease-settle` are new easing tokens.
 - Migration: `--color-primary-hover` and `--color-primary-active` are removed.
   Hover and press colors are derived from `--color-primary`. Tune them with
-  `--button-hover-layer` and `--button-press-layer`.
-- The default Button is near-black with a faint top highlight and a soft shadow.
-  Pressing it scales to 97%. Reduced motion keeps color changes and drops scale.
+  `--button-hover-layer` and `--button-press-layer`. `--color-disabled` and
+  `--color-disabled-foreground` are removed. A disabled button fades to
+  `--button-disabled-opacity`. `--radius-control` is now `0.75rem`.
+- Default Button: OKLCH colors, squircle corners that tighten on press, a faint
+  sheen and top highlight, a 1px edge with layered shadows, a 120ms snap press,
+  and a 450ms spring release. Reduced motion keeps color changes and drops scale.
 - Button adds `variant` (primary, secondary, warning, destructive, outline,
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.

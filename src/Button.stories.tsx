@@ -211,6 +211,8 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
         padding: '1.5rem',
         radius: '1.5rem',
         radiusPressed: '0.75rem',
+        cornerShape: 'round',
+        sheen: 0,
         fontWeight: 600,
         letterSpacing: '0',
         shadow: '0 0 #0000',

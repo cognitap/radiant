@@ -83,54 +83,66 @@ const soft = buttonTheme({
 </div>
 ```
 
-Hover and press colors are derived from each variant's base color. Hover mixes in
-`hoverLayer` of the foreground color and press mixes in `pressLayer`, so one color
-per variant is enough. Press and release run separate durations and easings. The
-press values apply while the button is held, and the release values apply on the
-way back. `--ease-spring`, `--ease-snap`, and `--ease-settle` are ready to use, and
-any `cubic-bezier()` or `linear()` value works.
+Hover and press colors are derived from each variant's base color, so one color
+per variant is enough. Hover mixes in `hoverLayer` of a state color and press mixes
+in `pressLayer`. By default, primary lightens on hover and darkens on press,
+warning and destructive darken on both, and the neutral variants mix in their
+label color. `stateColor` sets one state color for every variant.
 
-| `buttonTheme` key    | Variable                        | Default                          |
-| -------------------- | ------------------------------- | -------------------------------- |
-| `radius`             | `--button-radius`               | `var(--radius-control)`          |
-| `radiusPressed`      | `--button-radius-pressed`       | the resting radius               |
-| `cornerShape`        | `--button-corner-shape`         | `round`                          |
-| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape         |
-| `height`             | `--button-height`               | `2.5rem`                         |
-| `heightSmall`        | `--button-height-small`         | `2rem`                           |
-| `heightLarge`        | `--button-height-large`         | `3rem`                           |
-| `padding`            | `--button-padding`              | `1rem`                           |
-| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                        |
-| `paddingLarge`       | `--button-padding-large`        | `1.5rem`                         |
-| `fontWeight`         | `--button-font-weight`          | `500`                            |
-| `letterSpacing`      | `--button-letter-spacing`       | `-0.01em`                        |
-| `shadow`             | `--button-shadow`               | a 1px soft drop shadow           |
-| `shadowPressed`      | `--button-shadow-pressed`       | none                             |
-| `highlight`          | `--button-highlight`            | `0.16` (top edge white alpha)    |
-| `glow`               | `--button-glow`                 | `0%` (colored glow strength)     |
-| `backdrop`           | `--button-backdrop`             | `none` (a `backdrop-filter`)     |
-| `hoverLayer`         | `--button-hover-layer`          | `8%`                             |
-| `pressLayer`         | `--button-press-layer`          | `14%`                            |
-| `hoverLift`          | `--button-hover-lift`           | `0px`                            |
-| `pressScale`         | `--button-press-scale`          | `0.97`                           |
-| `pressShift`         | `--button-press-shift`          | `0px`                            |
-| `pressDuration`      | `--button-press-duration`       | `80ms`                           |
-| `pressEase`          | `--button-press-ease`           | `cubic-bezier(0.3, 0, 0.6, 1)`   |
-| `releaseDuration`    | `--button-release-duration`     | `160ms`                          |
-| `releaseEase`        | `--button-release-ease`         | `cubic-bezier(0.2, 0.8, 0.2, 1)` |
+Press and release run separate durations and easings. The press values apply
+while the button is held, and the release values apply on the way back. Shape and
+motion use them, and colors use `colorDuration`. `--ease-spring`, `--ease-snap`,
+and `--ease-settle` are ready to use, and any `cubic-bezier()` or `linear()` value
+works.
 
-`shadow` takes a full `box-shadow` list. Use `0 0 #0000` for no shadow, not
-`none`, because the glow is appended to it. `cornerShape` takes
+| `buttonTheme` key    | Variable                        | Default                              |
+| -------------------- | ------------------------------- | ------------------------------------ |
+| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.75rem`   |
+| `radiusPressed`      | `--button-radius-pressed`       | 75% of the resting radius            |
+| `cornerShape`        | `--button-corner-shape`         | `squircle`                           |
+| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape             |
+| `height`             | `--button-height`               | `2.5rem`                             |
+| `heightSmall`        | `--button-height-small`         | `2rem`                               |
+| `heightLarge`        | `--button-height-large`         | `3rem`                               |
+| `padding`            | `--button-padding`              | `1rem`                               |
+| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                            |
+| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                           |
+| `fontWeight`         | `--button-font-weight`          | `550`                                |
+| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                           |
+| `shadow`             | `--button-shadow`               | a 1px edge and two soft drop shadows |
+| `shadowPressed`      | `--button-shadow-pressed`       | the 1px edge only                    |
+| `highlight`          | `--button-highlight`            | `0.14` (top edge white alpha)        |
+| `sheen`              | `--button-sheen`                | `0.1` (top-to-bottom white gradient) |
+| `glow`               | `--button-glow`                 | `0%` (colored glow strength)         |
+| `backdrop`           | `--button-backdrop`             | `none` (a `backdrop-filter`)         |
+| `stateColor`         | `--button-state-color`          | per variant, see above               |
+| `hoverLayer`         | `--button-hover-layer`          | `7%`                                 |
+| `pressLayer`         | `--button-press-layer`          | `12%`                                |
+| `hoverLift`          | `--button-hover-lift`           | `0px`                                |
+| `pressScale`         | `--button-press-scale`          | `0.97`                               |
+| `pressShift`         | `--button-press-shift`          | `0px`                                |
+| `pressDuration`      | `--button-press-duration`       | `120ms`                              |
+| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                   |
+| `releaseDuration`    | `--button-release-duration`     | `450ms`                              |
+| `releaseEase`        | `--button-release-ease`         | `var(--ease-spring)`                 |
+| `colorDuration`      | `--button-color-duration`       | `150ms`                              |
+| `disabledOpacity`    | `--button-disabled-opacity`     | `0.45`                               |
+
+Sheen, highlight, glow, and the default shadow apply to the filled variants.
+Secondary is flat, outline draws `--color-border` as a real border, and ghost has
+no surface until hover. `shadow` takes a full `box-shadow` list. Use `0 0 #0000`
+for no shadow, not `none`, because the glow is appended to it. `cornerShape` takes
 [`corner-shape`](https://developer.mozilla.org/docs/Web/CSS/corner-shape) values
-such as `squircle`. Browsers without `corner-shape` keep round corners.
+such as `squircle` or `round`. Browsers without `corner-shape` draw round corners,
+which look rounder at the same radius. `radius="full"` always uses round corners.
+A disabled button keeps its variant and fades to `disabledOpacity`.
 
 Colors come from these variables. Each takes any CSS color, including `oklch()`
-and translucent values.
+and translucent values. The defaults are OKLCH.
 
 - `--color-primary`, `--color-secondary`, `--color-warning`, `--color-destructive`,
   each with `-foreground`
 - `--color-background`, `--color-foreground`, `--color-border` (outline and ghost)
-- `--color-disabled`, `--color-disabled-foreground`
 - `--color-focus`
 
 Reduced motion keeps color changes and drops scale and movement. Variables
