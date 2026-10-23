@@ -22,8 +22,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.
 - `buttonTheme` adds `fontFamily`, `textTransform`, and `borderStyle`. The
-  DesignSystems story replaces Midnight and Clay with System 95 (beveled,
-  monospace, uppercase) and Ticket (scooped corners, dashed border).
+  DesignSystems story replaces Midnight and Clay with Jelly (squircle pills,
+  deep squishy press, spring release) and Ticket (scooped corners, dashed border).
 - `buttonTheme` adds `borderWidth`, `borderColor`, `pressShiftX`,
   `ghostShadow`, and `ghostShadowPressed`. The
   DesignSystems story adds a Sharp 3D theme with square corners, 2px borders,
