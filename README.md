@@ -127,6 +127,9 @@ works.
 | `borderColor`        | `--button-border-color`         | each variant's edge color          |
 | `ghostShadow`        | `--button-ghost-shadow`         | no shadow                          |
 | `ghostShadowPressed` | `--button-ghost-shadow-pressed` | no shadow                          |
+| `fontFamily`         | `--button-font-family`          | the inherited font                 |
+| `textTransform`      | `--button-text-transform`       | `none`                             |
+| `borderStyle`        | `--button-border-style`         | `solid`                            |
 | `focusColor`         | `--color-focus`                 | `oklch(0.55 0.09 178)`             |
 | `focusWidth`         | `--button-focus-width`          | `2px`                              |
 | `focusOffset`        | `--button-focus-offset`         | `2px`                              |

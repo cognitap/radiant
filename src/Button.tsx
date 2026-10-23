@@ -4,7 +4,7 @@ import { cn } from './cn.js'
 
 const buttonVariants = cva(
   [
-    'relative box-border inline-flex shrink-0 select-none items-center justify-center border-solid [border-width:var(--button-border-width,1px)] [border-color:var(--button-border-color,var(--_btn-edge))] text-center font-[family-name:inherit] antialiased',
+    'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--button-border-style,solid)] [border-width:var(--button-border-width,1px)] [border-color:var(--button-border-color,var(--_btn-edge))] text-center [font-family:var(--button-font-family,inherit)] [text-transform:var(--button-text-transform,none)] antialiased',
     '[font-weight:var(--button-font-weight,550)] tracking-[var(--button-letter-spacing,-0.011em)]',
     'min-h-(--_btn-h) px-(--_btn-px) bg-(--_btn-bg) text-(--_btn-fg)',
     'bg-[linear-gradient(to_bottom,rgb(255_255_255/var(--_btn-sheen)),rgb(255_255_255/0))]',
@@ -128,6 +128,9 @@ export type ButtonTheme = {
   ghostShadow?: string
   ghostShadowPressed?: string
   focusColor?: string
+  fontFamily?: string
+  textTransform?: string
+  borderStyle?: string
   focusWidth?: string
   focusOffset?: string
   focusStyle?: string
@@ -171,6 +174,9 @@ const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
   ghostShadow: '--button-ghost-shadow',
   ghostShadowPressed: '--button-ghost-shadow-pressed',
   focusColor: '--color-focus',
+  fontFamily: '--button-font-family',
+  textTransform: '--button-text-transform',
+  borderStyle: '--button-border-style',
   focusWidth: '--button-focus-width',
   focusOffset: '--button-focus-offset',
   focusStyle: '--button-focus-style',
