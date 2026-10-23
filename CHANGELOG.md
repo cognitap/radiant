@@ -21,7 +21,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 - Button adds `variant` (primary, secondary, warning, destructive, outline,
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.
-- `buttonTheme` adds `borderWidth`, `borderColor`, and `pressShiftX`. The
+- `buttonTheme` adds `borderWidth`, `borderColor`, `pressShiftX`,
+  `ghostShadow`, and `ghostShadowPressed`. The
   DesignSystems story adds a Sharp 3D theme with square corners, 2px borders,
   and hard offset shadows.
 - `class-variance-authority` 0.7.1 is a new runtime dependency.

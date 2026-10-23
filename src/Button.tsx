@@ -45,7 +45,7 @@ const buttonVariants = cva(
         outline:
           '[--_btn-bg:var(--color-background)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         ghost:
-          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shadow:0_0_#0000] [--_btn-shadow-pressed:0_0_#0000]'
+          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:0] [--_btn-highlight:0] [--_btn-shadow:var(--button-ghost-shadow,0_0_#0000)] [--_btn-shadow-pressed:var(--button-ghost-shadow-pressed,0_0_#0000)]'
       },
       size: {
         small:
@@ -125,6 +125,8 @@ export type ButtonTheme = {
   pressShiftX?: string
   borderWidth?: string
   borderColor?: string
+  ghostShadow?: string
+  ghostShadowPressed?: string
   pressDuration?: string
   pressEase?: string
   releaseDuration?: string
@@ -162,6 +164,8 @@ const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
   pressShiftX: '--button-press-shift-x',
   borderWidth: '--button-border-width',
   borderColor: '--button-border-color',
+  ghostShadow: '--button-ghost-shadow',
+  ghostShadowPressed: '--button-ghost-shadow-pressed',
   pressDuration: '--button-press-duration',
   pressEase: '--button-press-ease',
   releaseDuration: '--button-release-duration',

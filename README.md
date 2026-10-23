@@ -125,6 +125,8 @@ works.
 | `pressShiftX`        | `--button-press-shift-x`        | `0px`                              |
 | `borderWidth`        | `--button-border-width`         | `1px`                              |
 | `borderColor`        | `--button-border-color`         | each variant's edge color          |
+| `ghostShadow`        | `--button-ghost-shadow`         | no shadow                          |
+| `ghostShadowPressed` | `--button-ghost-shadow-pressed` | no shadow                          |
 | `pressDuration`      | `--button-press-duration`       | `80ms`                             |
 | `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                 |
 | `releaseDuration`    | `--button-release-duration`     | `160ms`                            |

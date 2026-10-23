@@ -290,6 +290,8 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
         borderColor: '#111111',
         shadow: '4px 4px 0 0 #111111',
         shadowPressed: '1px 1px 0 0 #111111',
+        ghostShadow: '4px 4px 0 0 #111111',
+        ghostShadowPressed: '1px 1px 0 0 #111111',
         sheen: 0,
         highlight: 0,
         glow: '0%',
