@@ -247,6 +247,7 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
         height: '2.75rem',
         padding: '1.25rem',
         radius: '1.375rem',
+        cornerShape: 'squircle',
         fontWeight: 590,
         shadow: 'inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 10px 30px -10px rgb(30 20 60 / 0.35)',
         shadowPressed:
