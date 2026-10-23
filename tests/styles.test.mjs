@@ -18,7 +18,8 @@ test('the customization entry generates library and application utilities once w
 @source inline('px-8');`
   })
 
-  assert.match(css, /--color-primary\s*:/)
+  assert.doesNotMatch(css, /--color-primary\s*:/)
+  assert.match(css, /--ease-spring:\s*linear\(/)
   for (const selector of [/\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
     assert.equal(css.match(selector)?.length, 1, `Expected one generated ${selector}`)
   }

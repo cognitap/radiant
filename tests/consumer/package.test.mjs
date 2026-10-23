@@ -49,7 +49,7 @@ test('settings pick classes and stay off the DOM', () => {
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
   assert.match(classAttribute, /\[--_btn-bg:var\(--color-destructive\)\]/)
   assert.doesNotMatch(classAttribute, /--color-primary\)/)
-  assert.match(classAttribute, /\[--_btn-h:var\(--button-height-small,2rem\)\]/)
+  assert.match(classAttribute, /\[--_btn-h:var\(--button-height-small\)\]/)
   assert.match(classAttribute, /\[--_btn-radius:calc\(var\(--_btn-h\)\/2\)\]/)
   assert.match(classAttribute, /\bw-full\b/)
   assert.match(html, /\sdata-slot="button"/)
@@ -137,7 +137,7 @@ test('default styles and the optional reset are compiled and self-contained', ()
     assert.doesNotMatch(readExport(name), /@(import|theme|source|tailwind)\b/)
   }
   const styles = readExport('styles.css')
-  assert.match(styles, /--color-primary\s*:/)
+  assert.doesNotMatch(styles, /--color-primary\s*:/)
   assert.match(styles, /\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/)
   assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
   assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)

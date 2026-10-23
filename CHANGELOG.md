@@ -4,6 +4,10 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Breaking: Button is now headless. Radiant no longer ships default colors,
+  radius, sizes, or motion. The `--color-*` and `--radius-control` tokens were
+  removed from the stylesheet; define them (or use `buttonTheme`) in your app.
+  Storybook shows the previous look as the Radiant theme next to a Headless row.
 - Button's shape, size, type, elevation, state colors, and motion are CSS
   variables. Press and release take separate durations and easings, and the
   radius and `corner-shape` can change on press. `buttonTheme` maps typed settings
@@ -13,11 +17,7 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
   Hover and press colors are derived from `--color-primary`. Tune them with
   `--button-hover-layer` and `--button-press-layer`. `--color-disabled` and
   `--color-disabled-foreground` are removed. A disabled button fades to
-  `--button-disabled-opacity`. `--radius-control` is now `0.75rem`.
-- Default Button: a flat pine primary, a normal 8px radius, a hairline edge, and
-  one soft drop shadow. Pressing darkens the face and scales it to 97%, with an
-  80ms press and a 160ms settle release. Sheen, highlight, and glow default to
-  off. Reduced motion keeps color changes and drops scale and movement.
+  `--button-disabled-opacity` when a theme sets it.
 - Button adds `variant` (primary, secondary, warning, destructive, outline,
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.

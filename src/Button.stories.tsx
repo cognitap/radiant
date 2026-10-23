@@ -20,6 +20,52 @@ const variants: ButtonVariant[] = [
 const sizes: ButtonSize[] = ['small', 'default', 'large']
 const radii: ButtonRadius[] = ['none', 'small', 'default', 'large', 'full']
 
+const radiantTheme: CSSProperties = {
+  '--color-primary': 'oklch(0.486 0.086 178)',
+  '--color-primary-foreground': 'oklch(0.99 0 0)',
+  '--color-secondary': 'oklch(0.995 0 0)',
+  '--color-secondary-foreground': 'oklch(0.24 0.012 270)',
+  '--color-warning': 'oklch(0.8 0.14 78)',
+  '--color-warning-foreground': 'oklch(0.3 0.07 55)',
+  '--color-destructive': 'oklch(0.56 0.19 25)',
+  '--color-destructive-foreground': 'oklch(0.99 0 0)',
+  '--color-background': 'oklch(1 0 0)',
+  '--color-border': 'oklch(0.89 0.008 270)',
+  '--color-foreground': 'oklch(0.24 0.012 270)',
+  ...buttonTheme({
+    fontFamily: "'Inter', system-ui, sans-serif",
+    fontSize: '0.875rem',
+    fontSizeSmall: '0.8125rem',
+    fontSizeLarge: '0.9375rem',
+    fontWeight: 550,
+    letterSpacing: '-0.011em',
+    height: '2.5rem',
+    heightSmall: '2rem',
+    heightLarge: '3rem',
+    padding: '1rem',
+    paddingSmall: '0.75rem',
+    paddingLarge: '1.375rem',
+    radius: '0.5rem',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    shadow: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+    shadowPressed: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+    sheen: 0,
+    highlight: 0,
+    disabledOpacity: 0.5,
+    pressScale: 0.97,
+    pressDuration: '80ms',
+    pressEase: 'var(--ease-snap)',
+    releaseDuration: '160ms',
+    releaseEase: 'var(--ease-settle)',
+    colorDuration: '150ms',
+    focusColor: 'oklch(0.55 0.09 178)',
+    focusWidth: '2px',
+    focusOffset: '2px',
+    focusStyle: 'solid'
+  })
+} as CSSProperties
+
 const meta = {
   title: 'Components/Button',
   component: Button,
@@ -42,10 +88,20 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native button with variant, size, radius, icon-only, full-width, and pending settings.'
+          'A headless native button. It ships unstyled; a theme of CSS variables gives it a look.'
       }
     }
-  }
+  },
+  decorators: [
+    (Story, { id }) =>
+      id.endsWith('--design-systems') ? (
+        <Story />
+      ) : (
+        <div style={radiantTheme}>
+          <Story />
+        </div>
+      )
+  ]
 } satisfies Meta<typeof Button>
 
 export default meta
@@ -171,10 +227,8 @@ export const ThemedSubtree: Story = {
 }
 
 const designSystems: { name: string; style: CSSProperties; surface?: string }[] = [
-  {
-    name: 'Radiant default',
-    style: { ...buttonTheme({ fontFamily: "'Inter', system-ui, sans-serif" }) }
-  },
+  { name: 'Radiant', style: radiantTheme },
+  { name: 'Headless', style: {} },
   {
     name: 'Soft squircle',
     style: {
@@ -183,6 +237,12 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
       '--color-secondary-foreground': 'oklch(0.45 0.2 258)',
       '--color-destructive': 'oklch(0.6 0.22 25)',
       ...buttonTheme({
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        fontSize: '0.875rem',
+        fontSizeSmall: '0.8125rem',
+        fontSizeLarge: '0.9375rem',
+        focusWidth: '2px',
         height: '2.75rem',
         padding: '1.125rem',
         radius: '1rem',
@@ -216,6 +276,11 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
       '--color-border': 'oklch(0.8 0.06 290)',
       '--color-foreground': 'oklch(0.32 0.15 290)',
       ...buttonTheme({
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        fontSize: '0.875rem',
+        fontSizeSmall: '0.8125rem',
+        fontSizeLarge: '0.9375rem',
         height: '3rem',
         padding: '1.5rem',
         radius: '1.5rem',
@@ -254,6 +319,12 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
       '--color-background': 'rgb(255 255 255 / 0.12)',
       '--color-border': 'rgb(255 255 255 / 0.6)',
       ...buttonTheme({
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        fontSize: '0.875rem',
+        fontSizeSmall: '0.8125rem',
+        fontSizeLarge: '0.9375rem',
+        focusWidth: '2px',
         height: '2.75rem',
         padding: '1.25rem',
         radius: '1.375rem',
@@ -294,6 +365,10 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
       '--color-border': '#111111',
       '--color-foreground': '#111111',
       ...buttonTheme({
+        borderStyle: 'solid',
+        fontSize: '0.875rem',
+        fontSizeSmall: '0.8125rem',
+        fontSizeLarge: '0.9375rem',
         height: '2.75rem',
         padding: '1.25rem',
         radius: '0px',
@@ -341,6 +416,11 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
       '--color-border': 'oklch(0.88 0.05 320)',
       '--color-foreground': 'oklch(0.4 0.1 330)',
       ...buttonTheme({
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        fontSize: '0.875rem',
+        fontSizeSmall: '0.8125rem',
+        fontSizeLarge: '0.9375rem',
         height: '3rem',
         padding: '1.5rem',
         radius: '1.5rem',
@@ -379,6 +459,9 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
       '--color-border': 'oklch(0.35 0.08 50)',
       '--color-foreground': 'oklch(0.35 0.08 50)',
       ...buttonTheme({
+        fontSize: '0.875rem',
+        fontSizeSmall: '0.8125rem',
+        fontSizeLarge: '0.9375rem',
         height: '2.75rem',
         padding: '1.5rem',
         radius: '0.875rem',
