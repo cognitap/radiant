@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Button } from '@cognitap/radiant'
+import { Button, buttonTheme, themes } from '@cognitap/radiant'
 
 const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
 const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
@@ -14,7 +14,108 @@ test('public JavaScript imports and renders on the server', () => {
   const html = renderToStaticMarkup(createElement(Button, { disabled: true }, 'Save'))
   assert.match(html, /^<button\b[^>]*\stype="button"/)
   assert.match(html, /disabled=""/)
-  assert.match(html, />Save<\/button>/)
+  assert.match(html, /Save/)
+})
+
+test('an omitted type stays button when formAction is set', () => {
+  const html = renderToStaticMarkup(createElement(Button, { formAction: '/publish' }, 'Publish'))
+  assert.match(html, /\stype="button"/)
+  assert.match(html, /formAction="\/publish"/)
+  assert.match(html, /Publish/)
+})
+
+test('an explicit type submit stays submit', () => {
+  const html = renderToStaticMarkup(createElement(Button, { type: 'submit' }, 'Save'))
+  assert.match(html, /\stype="submit"/)
+  assert.match(html, /Save/)
+})
+
+test('pending keeps the label, blocks the disabled attribute, and marks the button busy', () => {
+  const html = renderToStaticMarkup(createElement(Button, { pending: true }, 'Save'))
+  assert.match(html, /aria-busy="true"/)
+  assert.doesNotMatch(html, /\sdisabled(?=[\s>=])/)
+  assert.match(html, /Save/)
+  assert.match(html, /animate-spin/)
+})
+
+test('settings pick classes and stay off the DOM', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Button,
+      { variant: 'destructive', size: 'small', radius: 'full', fullWidth: true },
+      'Delete'
+    )
+  )
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\[--_btn-bg:var\(--color-destructive\)\]/)
+  assert.doesNotMatch(classAttribute, /--color-primary\)/)
+  assert.match(classAttribute, /\[--_btn-h:var\(--button-height-small,2rem\)\]/)
+  assert.match(classAttribute, /\[--_btn-radius:calc\(var\(--_btn-h\)\/2\)\]/)
+  assert.match(classAttribute, /\bw-full\b/)
+  assert.match(html, /\sdata-slot="button"/)
+  assert.match(html, /\sdata-variant="destructive"/)
+  assert.match(html, /\sdata-size="small"/)
+  assert.doesNotMatch(html, /\s(variant|size|radius|fullwidth|fullWidth|icononly|iconOnly)=/)
+})
+
+test('iconOnly squares the button at its size', () => {
+  const html = renderToStaticMarkup(
+    createElement(Button, { iconOnly: true, size: 'large', 'aria-label': 'Close' }, 'x')
+  )
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bsize-\(--_btn-h\)/)
+  assert.match(classAttribute, /\bpx-0\b/)
+  assert.doesNotMatch(classAttribute, /\bpx-\(--_btn-px\)/)
+})
+
+test('rounded-full replaces the themed radius on the class attribute', () => {
+  const html = renderToStaticMarkup(createElement(Button, { className: 'rounded-full' }, 'Save'))
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\brounded-full\b/)
+  assert.doesNotMatch(classAttribute, /(^|\s)rounded-\(--_btn-radius\)/)
+  assert.match(html, /Save/)
+})
+
+test('buttonTheme maps typed settings to Button variables', () => {
+  assert.deepEqual(
+    buttonTheme({
+      radius: '1rem',
+      radiusPressed: '0.25rem',
+      cornerShape: 'squircle',
+      borderWidth: '2px',
+      borderColor: '#111111',
+      pressShiftX: '3px',
+      focusColor: '#111111',
+      focusOffset: '0px',
+      pressScale: 0.96,
+      pressEase: 'var(--ease-snap)',
+      releaseEase: 'var(--ease-spring)',
+      glow: undefined
+    }),
+    {
+      '--button-radius': '1rem',
+      '--button-radius-pressed': '0.25rem',
+      '--button-corner-shape': 'squircle',
+      '--button-border-width': '2px',
+      '--button-border-color': '#111111',
+      '--button-press-shift-x': '3px',
+      '--color-focus': '#111111',
+      '--button-focus-offset': '0px',
+      '--button-press-scale': 0.96,
+      '--button-press-ease': 'var(--ease-snap)',
+      '--button-release-ease': 'var(--ease-spring)'
+    }
+  )
+})
+
+test('themes are shared presets with color and button tokens', () => {
+  assert.deepEqual(
+    themes.map(theme => theme.name),
+    ['Radiant', 'Default', 'Soft squircle', 'Expressive', 'Glass', 'Sharp 3D', 'Jelly', 'Ticket']
+  )
+  const ticket = themes.find(theme => theme.name === 'Ticket')
+  assert.equal(ticket?.style['--color-primary'], 'oklch(0.55 0.19 35)')
+  assert.equal(ticket?.style['--button-corner-shape'], 'scoop')
 })
 
 test('public JavaScript and declaration maps point to shipped sources', () => {
@@ -47,7 +148,7 @@ test('default styles and the optional reset are compiled and self-contained', ()
   }
   const styles = readExport('styles.css')
   assert.match(styles, /--color-primary\s*:/)
-  assert.match(styles, /\.bg-primary(?=\s*[{,])/)
+  assert.match(styles, /\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/)
   assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
   assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)
 })

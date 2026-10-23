@@ -60,6 +60,7 @@
     "release:prepare": "node scripts/prepare-release.mjs"
   },
   "dependencies": {
+    "class-variance-authority": "0.7.1",
     "cn": "0.4.0"
   },
   "devDependencies": {

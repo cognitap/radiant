@@ -23,18 +23,179 @@ import { Button } from '@cognitap/radiant'
 <Button type="submit">Save</Button>
 ```
 
+Button ships with a neutral baseline: sensible sizes, type, an ink-and-gray
+palette, a focus ring, and a quiet press. A theme of CSS variables overrides
+any of it (see [Adapting Button](#adapting-button-to-a-design-system)).
+
 For a global reset (Tailwind Preflight), also import `@cognitap/radiant/reset.css`
 before `styles.css`. React 19.3+ is a peer dependency.
 
 `Button` takes native button props, including `ref`, `aria-*` and form attributes,
 and defaults to `type="button"`. Give every button an accessible name through its
-text or `aria-label`, and use a link for navigation. There are no variants, sizes,
-or loading state yet.
+text, `aria-label`, or `aria-labelledby`. The type does not reject a nameless
+button. Use a link for navigation.
 
-Components use semantic tokens such as `bg-primary` and `rounded-control`.
-Override their CSS variables to theme an application or a subtree; the defaults
-are a light theme. Unlayered application CSS takes precedence over Radiant's
-styles.
+```tsx
+<Button variant="destructive" size="small">Delete</Button>
+<Button variant="outline" radius="full">Next</Button>
+<Button iconOnly aria-label="Close"><CloseIcon /></Button>
+```
+
+| Prop        | Values                                                               | Default   |
+| ----------- | -------------------------------------------------------------------- | --------- |
+| `variant`   | `primary`, `secondary`, `warning`, `destructive`, `outline`, `ghost` | `primary` |
+| `size`      | `small`, `default`, `large`                                          | `default` |
+| `radius`    | `none`, `small`, `default`, `large`, `full`                          | `default` |
+| `iconOnly`  | Squares the button at its size. Pass `aria-label`.                   | `false`   |
+| `fullWidth` | Fills the container width.                                           | `false`   |
+| `pending`   | Shows a spinner over the label and ignores activation.               | `false`   |
+
+The style prop is `variant`, because `type` stays the native attribute. An omitted
+`type` is `button` even when `formAction` is set. Pass `type="submit"` to submit.
+While `pending` is set, the label stays in place, a spinner covers it, and
+activation does not run. It does not set `disabled`, so focus stays. Reduced
+motion keeps the label and hides the spinner. Child SVGs are sized to the button.
+
+### Adapting Button to a design system
+
+Every design decision is a CSS variable, so a design system, or an agent
+reading a design.md, sets values instead of rewriting classes. The built-in
+values are deliberately neutral; a theme replaces them wholesale.
+Set the variables on `:root`, a subtree, or `[data-slot="button"]`. Button also
+exposes `data-variant` and `data-size`, so a rule such as
+`[data-variant="destructive"] { --button-glow: 50% }` targets one variant.
+
+Radiant also exports shared theme presets, so every component can wear the same
+design system. Apply one to a wrapper and all Radiant components inside follow:
+
+```tsx
+import { themes } from '@cognitap/radiant'
+
+;<div style={themes.find(theme => theme.name === 'Ticket')?.style}>...</div>
+```
+
+`buttonTheme` takes typed settings and returns the matching variables as a style
+object. Unknown keys are a type error:
+
+```tsx
+import { Button, buttonTheme } from '@cognitap/radiant'
+
+// "Softly rounded squircles that straighten when pressed. Snap in, spring out."
+const soft = buttonTheme({
+  radius: '1rem',
+  radiusPressed: '0.375rem',
+  cornerShape: 'squircle',
+  pressScale: 0.96,
+  pressDuration: '90ms',
+  pressEase: 'var(--ease-snap)',
+  releaseDuration: '520ms',
+  releaseEase: 'var(--ease-spring)'
+})
+
+<div style={soft}>
+  <Button>Continue</Button>
+</div>
+```
+
+Hover and press colors are derived from each variant's base color, so one color
+per variant is enough. Hover mixes in `hoverLayer` of a state color and press mixes
+in `pressLayer`. By default, primary lightens on hover and darkens on press,
+warning and destructive darken on both, and the neutral variants mix in their
+label color. `stateColor` sets one state color for every variant.
+
+Press and release run separate durations and easings. The press values apply
+while the button is held, and the release values apply on the way back. Shape and
+motion use them, and colors use `colorDuration`. `--ease-spring`, `--ease-snap`,
+and `--ease-settle` are ready to use, and any `cubic-bezier()` or `linear()` value
+works.
+
+| `buttonTheme` key    | Variable                        | Default                           |
+| -------------------- | ------------------------------- | --------------------------------- |
+| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.5rem` |
+| `radiusPressed`      | `--button-radius-pressed`       | the resting radius                |
+| `cornerShape`        | `--button-corner-shape`         | `round`                           |
+| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape          |
+| `height`             | `--button-height`               | `2.5rem`                          |
+| `heightSmall`        | `--button-height-small`         | `2rem`                            |
+| `heightLarge`        | `--button-height-large`         | `3rem`                            |
+| `padding`            | `--button-padding`              | `1rem`                            |
+| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                         |
+| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                        |
+| `fontWeight`         | `--button-font-weight`          | `550`                             |
+| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                        |
+| `shadow`             | `--button-shadow`               | one soft drop shadow              |
+| `shadowPressed`      | `--button-shadow-pressed`       | the resting shadow                |
+| `highlight`          | `--button-highlight`            | `0`                               |
+| `sheen`              | `--button-sheen`                | `0`                               |
+| `glow`               | `--button-glow`                 | `0%` (colored glow strength)      |
+| `glowHover`          | `--button-glow-hover`           | unset                             |
+| `backdrop`           | `--button-backdrop`             | `none`                            |
+| `stateColor`         | `--button-state-color`          | per variant, see above            |
+| `hoverLayer`         | `--button-hover-layer`          | `5%`                              |
+| `pressLayer`         | `--button-press-layer`          | `8%`                              |
+| `hoverLift`          | `--button-hover-lift`           | `0px`                             |
+| `pressScale`         | `--button-press-scale`          | `0.97`                            |
+| `pressShift`         | `--button-press-shift`          | `0px`                             |
+| `pressShiftX`        | `--button-press-shift-x`        | `0px`                             |
+| `borderWidth`        | `--button-border-width`         | `1px`                             |
+| `borderColor`        | `--button-border-color`         | each variant's edge color         |
+| `ghostShadow`        | `--button-ghost-shadow`         | no shadow                         |
+| `ghostShadowPressed` | `--button-ghost-shadow-pressed` | no shadow                         |
+| `fontSize`           | `--button-font-size`            | `0.875rem`                        |
+| `fontSizeSmall`      | `--button-font-size-small`      | `0.8125rem`                       |
+| `fontSizeLarge`      | `--button-font-size-large`      | `0.9375rem`                       |
+| `fontFamily`         | `--button-font-family`          | the inherited font                |
+| `textTransform`      | `--button-text-transform`       | `none`                            |
+| `borderStyle`        | `--button-border-style`         | `solid`                           |
+| `focusColor`         | `--color-focus`                 | `oklch(0.55 0.13 255)`            |
+| `focusWidth`         | `--button-focus-width`          | `2px`                             |
+| `focusOffset`        | `--button-focus-offset`         | `2px`                             |
+| `focusStyle`         | `--button-focus-style`          | `solid`                           |
+| `pressDuration`      | `--button-press-duration`       | `80ms`                            |
+| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                |
+| `releaseDuration`    | `--button-release-duration`     | `160ms`                           |
+| `releaseEase`        | `--button-release-ease`         | `var(--ease-settle)`              |
+| `colorDuration`      | `--button-color-duration`       | `150ms`                           |
+| `disabledOpacity`    | `--button-disabled-opacity`     | `0.5`                             |
+
+Filled variants derive a hairline edge in a darker shade of their own color
+unless `borderColor` is set. Secondary and outline draw `--color-border`, and
+ghost has no surface until hover. A minimal theme is a handful of variables:
+
+```css
+:root {
+  --color-primary: oklch(0.486 0.086 178);
+  --color-primary-foreground: oklch(0.99 0 0);
+  --button-height: 2.5rem;
+  --button-padding: 1rem;
+  --button-radius: 0.5rem;
+  --button-font-size: 0.875rem;
+}
+```
+
+`shadow` takes a full `box-shadow` list. Use `0 0 #0000`
+for no shadow, not `none`, because the glow is appended to it. `cornerShape` takes
+[`corner-shape`](https://developer.mozilla.org/docs/Web/CSS/corner-shape) values
+such as `squircle` or `round`. Browsers without `corner-shape` draw round corners,
+which look rounder at the same radius. `radius="full"` always uses round corners.
+A disabled button keeps its variant and fades to `disabledOpacity`.
+
+Colors come from these variables. Radiant sets a neutral palette; each takes
+any CSS color, including `oklch()` and translucent values.
+
+- `--color-primary`, `--color-secondary`, `--color-warning`, `--color-destructive`,
+  each with `-foreground`
+- `--color-background`, `--color-foreground`, `--color-border` (outline and ghost)
+- `--color-focus`
+
+Reduced motion keeps color changes and drops scale and movement. Variables
+starting with `--_btn-` are internal and may change.
+
+Caller utilities such as `rounded-full` paint only on the Tailwind route. That
+route is the `@cognitap/radiant/tailwind.css` import. Do not import
+`@cognitap/radiant/styles.css` and `@cognitap/radiant/tailwind.css` together.
+`cn` is not a public export, so a wrapper passes `className` as a string.
+Unlayered application CSS takes precedence over Radiant's styles.
 
 ### With Tailwind
 
