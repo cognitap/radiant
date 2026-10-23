@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { fn } from 'storybook/test'
 import { Button, type ButtonRadius, type ButtonSize, type ButtonVariant } from './Button'
-import { radiantTheme, themes } from './themes'
+import { radiantTheme, themes } from './themes/index.js'
 
 const variants: ButtonVariant[] = [
   'primary',
