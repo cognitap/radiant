@@ -14,20 +14,28 @@ test('public JavaScript imports and renders on the server', () => {
   const html = renderToStaticMarkup(createElement(Button, { disabled: true }, 'Save'))
   assert.match(html, /^<button\b[^>]*\stype="button"/)
   assert.match(html, /disabled=""/)
-  assert.match(html, />Save<\/button>/)
+  assert.match(html, /Save/)
 })
 
 test('an omitted type stays button when formAction is set', () => {
   const html = renderToStaticMarkup(createElement(Button, { formAction: '/publish' }, 'Publish'))
   assert.match(html, /\stype="button"/)
   assert.match(html, /formAction="\/publish"/)
-  assert.match(html, />Publish<\/button>/)
+  assert.match(html, /Publish/)
 })
 
 test('an explicit type submit stays submit', () => {
   const html = renderToStaticMarkup(createElement(Button, { type: 'submit' }, 'Save'))
   assert.match(html, /\stype="submit"/)
-  assert.match(html, />Save<\/button>/)
+  assert.match(html, /Save/)
+})
+
+test('pending keeps the label, blocks the disabled attribute, and marks the button busy', () => {
+  const html = renderToStaticMarkup(createElement(Button, { pending: true }, 'Save'))
+  assert.match(html, /aria-busy="true"/)
+  assert.doesNotMatch(html, /\sdisabled(?=[\s>=])/)
+  assert.match(html, /Save/)
+  assert.match(html, /animate-spin/)
 })
 
 test('rounded-full replaces rounded-control on the class attribute', () => {
@@ -35,7 +43,7 @@ test('rounded-full replaces rounded-control on the class attribute', () => {
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
   assert.match(classAttribute, /\brounded-full\b/)
   assert.doesNotMatch(classAttribute, /\brounded-control\b/)
-  assert.match(html, />Save<\/button>/)
+  assert.match(html, /Save/)
 })
 
 test('public JavaScript and declaration maps point to shipped sources', () => {

@@ -13,13 +13,14 @@ const meta = {
   },
   argTypes: {
     children: { control: 'text' },
-    disabled: { control: 'boolean' }
+    disabled: { control: 'boolean' },
+    pending: { control: 'boolean' }
   },
   parameters: {
     docs: {
       description: {
         component:
-          '`Button` adds no props, and an omitted `type` is `button` even when `formAction` or another submitter attribute is set.'
+          'A native button with a press and a pending wait. It adds pending, and nothing else.'
       }
     }
   }
@@ -32,6 +33,10 @@ export const Default: Story = {}
 
 export const Disabled: Story = {
   args: { disabled: true }
+}
+
+export const Pending: Story = {
+  args: { pending: true }
 }
 
 export const CustomClasses: Story = {

@@ -4,6 +4,7 @@ import { Button, type ButtonProps } from '@cognitap/radiant'
 const props: ButtonProps = {
   type: 'submit',
   disabled: true,
+  pending: true,
   'aria-label': 'Save',
   ref: createRef<HTMLButtonElement>()
 }

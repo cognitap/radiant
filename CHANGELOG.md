@@ -4,11 +4,12 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
-- The public Button contract is now documented as the native button with no
-  extra props. Runtime markup is unchanged from 0.0.2.
+- Button is a blue key with a 4px lip. Pressing it travels down onto that lip.
+  The motion is removed when the user prefers reduced motion.
+- `pending` keeps the label's space, shows a spinner, and ignores activation.
+  It does not set `disabled`, so focus can stay on the button.
 - Keyboard, focus, and screen reader checks were not run in this change.
   Storybook has no interaction runner yet, and Button is not marked ready.
-  DEV-44, DEV-46, and DEV-47 are why those checks are still open.
 
 ## 0.0.2
 
