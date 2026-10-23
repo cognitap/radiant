@@ -68,7 +68,7 @@ export const ThemedSubtree: Story = {
     <div
       style={
         {
-          '--color-primary': '#1e3a8a',
+          '--color-primary': '#1d4ed8',
           '--color-primary-hover': '#1e40af',
           '--color-primary-active': '#1e3a8a',
           '--color-primary-foreground': '#fff'

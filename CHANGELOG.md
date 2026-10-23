@@ -4,8 +4,9 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
-- Button is a blue key with a 4px lip. Pressing it travels down onto that lip.
-  The motion is removed when the user prefers reduced motion.
+- Button is a near-black control with a faint top highlight and a soft shadow.
+  Pressing it scales to 97% and darkens. The motion is removed when the user
+  prefers reduced motion.
 - `pending` keeps the label's space, shows a spinner, and ignores activation.
   It does not set `disabled`, so focus can stay on the button.
 - Keyboard, focus, and screen reader checks were not run in this change.

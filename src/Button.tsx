@@ -18,15 +18,15 @@ export function Button({
       type={type}
       aria-busy={pending || undefined}
       className={cn(
-        'relative box-border inline-flex min-h-11 select-none items-center justify-center rounded-control border border-solid border-transparent bg-primary px-5 py-2.5 text-center font-[family-name:inherit] text-[length:inherit] font-semibold leading-6 text-primary-foreground',
-        'shadow-[0_4px_0_0_var(--color-primary-active)]',
-        'cursor-pointer transition-[translate,box-shadow,background-color] duration-150 ease-out',
+        'relative box-border inline-flex min-h-10 select-none items-center justify-center rounded-control border border-solid border-transparent bg-primary px-4 py-2 text-center font-[family-name:inherit] text-[length:inherit] font-medium leading-6 tracking-[-0.01em] text-primary-foreground',
+        'shadow-[0_1px_2px_0_rgb(0_0_0/0.2),0_0_0_1px_var(--color-primary-active)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.16)]',
+        'cursor-pointer transition-[scale,box-shadow,background-color] duration-100 ease-out',
         'hover:bg-primary-hover',
-        'active:translate-y-1 active:bg-primary-active active:shadow-none',
-        'focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-focus',
-        'disabled:translate-none disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-foreground disabled:shadow-none',
-        'aria-busy:translate-none aria-busy:cursor-progress aria-busy:shadow-none aria-busy:hover:translate-none aria-busy:active:translate-none',
-        'motion-reduce:transition-none motion-reduce:hover:translate-none motion-reduce:active:translate-none',
+        'active:scale-97 active:bg-primary-active active:inset-shadow-none',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+        'disabled:scale-none disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-foreground disabled:shadow-none disabled:inset-shadow-none',
+        'aria-busy:scale-none aria-busy:cursor-progress aria-busy:hover:bg-primary aria-busy:active:bg-primary',
+        'motion-reduce:transition-none motion-reduce:active:scale-none',
         'forced-colors:border-[ButtonText] forced-colors:shadow-none forced-colors:disabled:border-[GrayText] forced-colors:disabled:text-[GrayText]',
         className
       )}
