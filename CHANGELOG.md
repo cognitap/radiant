@@ -21,7 +21,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 - Button adds `variant` (primary, secondary, warning, destructive, outline,
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.
-- `buttonTheme` adds `fontFamily`, `textTransform`, and `borderStyle`. The
+- `buttonTheme` adds `fontFamily`, `textTransform`, and `borderStyle`. Each DesignSystems theme
+  now sets a matching Google Font, loaded in Storybook. The
   DesignSystems story replaces Midnight and Clay with Jelly (squircle pills,
   deep squishy press, spring release) and Ticket (scooped corners, dashed border).
 - `buttonTheme` adds `borderWidth`, `borderColor`, `pressShiftX`,
