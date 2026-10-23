@@ -1,5 +1,11 @@
 import { createElement, createRef } from 'react'
-import { Button, type ButtonProps } from '@cognitap/radiant'
+import { Button, buttonTheme, type ButtonProps, type ButtonTheme } from '@cognitap/radiant'
+
+const theme: ButtonTheme = { cornerShape: 'squircle', radiusPressed: '0.25rem', pressScale: 0.96 }
+createElement('div', { style: buttonTheme(theme) })
+
+// @ts-expect-error Theme keys are a closed set.
+buttonTheme({ radiusOnPress: '0.25rem' })
 
 const props: ButtonProps = {
   type: 'submit',

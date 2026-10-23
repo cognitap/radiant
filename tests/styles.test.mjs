@@ -19,7 +19,7 @@ test('the customization entry generates library and application utilities once w
   })
 
   assert.match(css, /--color-primary\s*:/)
-  for (const selector of [/\.bg-primary(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
+  for (const selector of [/\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
     assert.equal(css.match(selector)?.length, 1, `Expected one generated ${selector}`)
   }
   assert.doesNotMatch(css, /@(import|theme|source|tailwind)\b/)
@@ -30,8 +30,11 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
   const css = readFileSync(new URL('../dist/library/styles.css', import.meta.url), 'utf8')
 
   assert.match(css, /:focus-visible\s*\{[^}]*outline-color:\s*var\(\s*--color-focus\s*\)/)
-  assert.match(css, /:disabled\s*\{[^}]*background-color:\s*var\(\s*--color-disabled\s*\)/)
-  assert.match(css, /:disabled\s*\{[^}]*color:\s*var\(\s*--color-disabled-foreground\s*\)/)
+  assert.match(css, /:disabled\s*\{[^}]*--_btn-bg:\s*var\(\s*--color-disabled\s*\)/)
+  assert.match(css, /:disabled\s*\{[^}]*--_btn-fg:\s*var\(\s*--color-disabled-foreground\s*\)/)
+  assert.match(css, /:enabled:not\(\[aria-busy=true\]\):hover/)
+  assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--button-press-ease/)
+  assert.match(css, /--ease-spring:\s*linear\(/)
   assert.match(
     css,
     /@media\s*\(\s*forced-colors:\s*active\s*\)\s*\{[\s\S]*border-color:\s*buttontext[\s\S]*:disabled\s*\{[^}]*border-color:\s*graytext[\s\S]*:disabled\s*\{[^}]*color:\s*graytext/i

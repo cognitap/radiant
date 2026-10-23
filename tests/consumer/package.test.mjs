@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Button } from '@cognitap/radiant'
+import { Button, buttonTheme } from '@cognitap/radiant'
 
 const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
 const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
@@ -47,11 +47,14 @@ test('settings pick classes and stay off the DOM', () => {
     )
   )
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\bbg-destructive\b/)
-  assert.doesNotMatch(classAttribute, /\bbg-primary\b/)
-  assert.match(classAttribute, /\bmin-h-8\b/)
-  assert.match(classAttribute, /\brounded-full\b/)
+  assert.match(classAttribute, /\[--_btn-bg:var\(--color-destructive\)\]/)
+  assert.doesNotMatch(classAttribute, /--color-primary\)/)
+  assert.match(classAttribute, /\[--_btn-h:var\(--button-height-small,2rem\)\]/)
+  assert.match(classAttribute, /\[--_btn-radius:calc\(var\(--_btn-h\)\/2\)\]/)
   assert.match(classAttribute, /\bw-full\b/)
+  assert.match(html, /\sdata-slot="button"/)
+  assert.match(html, /\sdata-variant="destructive"/)
+  assert.match(html, /\sdata-size="small"/)
   assert.doesNotMatch(html, /\s(variant|size|radius|fullwidth|fullWidth|icononly|iconOnly)=/)
 })
 
@@ -60,16 +63,39 @@ test('iconOnly squares the button at its size', () => {
     createElement(Button, { iconOnly: true, size: 'large', 'aria-label': 'Close' }, 'x')
   )
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\bsize-12\b/)
-  assert.doesNotMatch(classAttribute, /\bpx-6\b/)
+  assert.match(classAttribute, /\bsize-\(--_btn-h\)/)
+  assert.match(classAttribute, /\bpx-0\b/)
+  assert.doesNotMatch(classAttribute, /\bpx-\(--_btn-px\)/)
 })
 
-test('rounded-full replaces rounded-control on the class attribute', () => {
+test('rounded-full replaces the themed radius on the class attribute', () => {
   const html = renderToStaticMarkup(createElement(Button, { className: 'rounded-full' }, 'Save'))
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
   assert.match(classAttribute, /\brounded-full\b/)
-  assert.doesNotMatch(classAttribute, /\brounded-control\b/)
+  assert.doesNotMatch(classAttribute, /(^|\s)rounded-\(--_btn-radius\)/)
   assert.match(html, /Save/)
+})
+
+test('buttonTheme maps typed settings to Button variables', () => {
+  assert.deepEqual(
+    buttonTheme({
+      radius: '1rem',
+      radiusPressed: '0.25rem',
+      cornerShape: 'squircle',
+      pressScale: 0.96,
+      pressEase: 'var(--ease-snap)',
+      releaseEase: 'var(--ease-spring)',
+      glow: undefined
+    }),
+    {
+      '--button-radius': '1rem',
+      '--button-radius-pressed': '0.25rem',
+      '--button-corner-shape': 'squircle',
+      '--button-press-scale': 0.96,
+      '--button-press-ease': 'var(--ease-snap)',
+      '--button-release-ease': 'var(--ease-spring)'
+    }
+  )
 })
 
 test('public JavaScript and declaration maps point to shipped sources', () => {
@@ -102,7 +128,7 @@ test('default styles and the optional reset are compiled and self-contained', ()
   }
   const styles = readExport('styles.css')
   assert.match(styles, /--color-primary\s*:/)
-  assert.match(styles, /\.bg-primary(?=\s*[{,])/)
+  assert.match(styles, /\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/)
   assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
   assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)
 })

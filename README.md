@@ -52,28 +52,96 @@ While `pending` is set, the label stays in place, a spinner covers it, and
 activation does not run. It does not set `disabled`, so focus stays. Reduced
 motion keeps the label and hides the spinner. Child SVGs are sized to the button.
 
-The classes read these variables. The variables work on the compiled stylesheet.
-`default` radius reads `--radius-control`. Outline and ghost hover with
-`--color-accent` and press with `--color-accent-active`.
+### Adapting Button to a design system
+
+Button has no fixed look. Every design decision is a CSS variable, so a design
+system, or an agent reading a design.md, sets values instead of rewriting classes.
+Set the variables on `:root`, a subtree, or `[data-slot="button"]`. Button also
+exposes `data-variant` and `data-size`, so a rule such as
+`[data-variant="destructive"] { --button-glow: 50% }` targets one variant.
+
+`buttonTheme` takes typed settings and returns the matching variables as a style
+object. Unknown keys are a type error:
+
+```tsx
+import { Button, buttonTheme } from '@cognitap/radiant'
+
+// "Softly rounded squircles that straighten when pressed. Snap in, spring out."
+const soft = buttonTheme({
+  radius: '1rem',
+  radiusPressed: '0.375rem',
+  cornerShape: 'squircle',
+  pressScale: 0.96,
+  pressDuration: '90ms',
+  pressEase: 'var(--ease-snap)',
+  releaseDuration: '520ms',
+  releaseEase: 'var(--ease-spring)'
+})
+
+<div style={soft}>
+  <Button>Continue</Button>
+</div>
+```
+
+Hover and press colors are derived from each variant's base color. Hover mixes in
+`hoverLayer` of the foreground color and press mixes in `pressLayer`, so one color
+per variant is enough. Press and release run separate durations and easings. The
+press values apply while the button is held, and the release values apply on the
+way back. `--ease-spring`, `--ease-snap`, and `--ease-settle` are ready to use, and
+any `cubic-bezier()` or `linear()` value works.
+
+| `buttonTheme` key    | Variable                        | Default                          |
+| -------------------- | ------------------------------- | -------------------------------- |
+| `radius`             | `--button-radius`               | `var(--radius-control)`          |
+| `radiusPressed`      | `--button-radius-pressed`       | the resting radius               |
+| `cornerShape`        | `--button-corner-shape`         | `round`                          |
+| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape         |
+| `height`             | `--button-height`               | `2.5rem`                         |
+| `heightSmall`        | `--button-height-small`         | `2rem`                           |
+| `heightLarge`        | `--button-height-large`         | `3rem`                           |
+| `padding`            | `--button-padding`              | `1rem`                           |
+| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                        |
+| `paddingLarge`       | `--button-padding-large`        | `1.5rem`                         |
+| `fontWeight`         | `--button-font-weight`          | `500`                            |
+| `letterSpacing`      | `--button-letter-spacing`       | `-0.01em`                        |
+| `shadow`             | `--button-shadow`               | a 1px soft drop shadow           |
+| `shadowPressed`      | `--button-shadow-pressed`       | none                             |
+| `highlight`          | `--button-highlight`            | `0.16` (top edge white alpha)    |
+| `glow`               | `--button-glow`                 | `0%` (colored glow strength)     |
+| `backdrop`           | `--button-backdrop`             | `none` (a `backdrop-filter`)     |
+| `hoverLayer`         | `--button-hover-layer`          | `8%`                             |
+| `pressLayer`         | `--button-press-layer`          | `14%`                            |
+| `hoverLift`          | `--button-hover-lift`           | `0px`                            |
+| `pressScale`         | `--button-press-scale`          | `0.97`                           |
+| `pressShift`         | `--button-press-shift`          | `0px`                            |
+| `pressDuration`      | `--button-press-duration`       | `80ms`                           |
+| `pressEase`          | `--button-press-ease`           | `cubic-bezier(0.3, 0, 0.6, 1)`   |
+| `releaseDuration`    | `--button-release-duration`     | `160ms`                          |
+| `releaseEase`        | `--button-release-ease`         | `cubic-bezier(0.2, 0.8, 0.2, 1)` |
+
+`shadow` takes a full `box-shadow` list. Use `0 0 #0000` for no shadow, not
+`none`, because the glow is appended to it. `cornerShape` takes
+[`corner-shape`](https://developer.mozilla.org/docs/Web/CSS/corner-shape) values
+such as `squircle`. Browsers without `corner-shape` keep round corners.
+
+Colors come from these variables. Each takes any CSS color, including `oklch()`
+and translucent values.
 
 - `--color-primary`, `--color-secondary`, `--color-warning`, `--color-destructive`,
-  each with `-hover`, `-active`, and `-foreground`
-- `--color-accent`, `--color-accent-active`
-- `--color-background`, `--color-foreground`, `--color-border`
+  each with `-foreground`
+- `--color-background`, `--color-foreground`, `--color-border` (outline and ghost)
 - `--color-disabled`, `--color-disabled-foreground`
 - `--color-focus`
-- `--radius-control`
+
+Reduced motion keeps color changes and drops scale and movement. Variables
+starting with `--_btn-` are internal and may change.
 
 Caller utilities such as `rounded-full` paint only on the Tailwind route. That
 route is the `@cognitap/radiant/tailwind.css` import. Do not import
 `@cognitap/radiant/styles.css` and `@cognitap/radiant/tailwind.css` together.
 `cn` is not a public export, so a wrapper passes `className` as a string. The
-package has no dark-theme block.
-
-Components use semantic tokens such as `bg-primary` and `rounded-control`.
-Override their CSS variables to theme an application or a subtree; the defaults
-are a light theme. Unlayered application CSS takes precedence over Radiant's
-styles.
+package has no dark-theme block. The defaults are a light theme, and unlayered
+application CSS takes precedence over Radiant's styles.
 
 ### With Tailwind
 

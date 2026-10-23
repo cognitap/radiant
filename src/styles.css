@@ -4,28 +4,47 @@
 
 @theme static {
   --color-background: #fff;
-  --color-foreground: #0f172a;
+  --color-foreground: #18181b;
   --color-border: #d4d4d8;
-  --color-accent: #f4f4f5;
-  --color-accent-active: #e4e4e7;
   --color-primary: #18181b;
-  --color-primary-hover: #27272a;
-  --color-primary-active: #09090b;
   --color-primary-foreground: #fff;
   --color-secondary: #f4f4f5;
-  --color-secondary-hover: #e4e4e7;
-  --color-secondary-active: #d4d4d8;
   --color-secondary-foreground: #18181b;
   --color-warning: #fbbf24;
-  --color-warning-hover: #f59e0b;
-  --color-warning-active: #d97706;
   --color-warning-foreground: #451a03;
   --color-destructive: #dc2626;
-  --color-destructive-hover: #b91c1c;
-  --color-destructive-active: #991b1b;
   --color-destructive-foreground: #fff;
   --color-disabled: #e2e8f0;
   --color-disabled-foreground: #475569;
   --color-focus: #2563eb;
   --radius-control: 0.5rem;
+  --ease-spring: linear(
+    0,
+    0.009,
+    0.035 2.1%,
+    0.141,
+    0.281 6.7%,
+    0.723 12.9%,
+    0.938 16.7%,
+    1.017,
+    1.077,
+    1.121,
+    1.149 24.3%,
+    1.159,
+    1.163,
+    1.161,
+    1.154 29.9%,
+    1.129 32.8%,
+    1.051 39.6%,
+    1.017 43.1%,
+    0.991,
+    0.977 51%,
+    0.974 53.8%,
+    0.975 57.1%,
+    0.997 69.8%,
+    1.003 76.9%,
+    1
+  );
+  --ease-snap: cubic-bezier(0.3, 0, 0, 1);
+  --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
 }

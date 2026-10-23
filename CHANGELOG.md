@@ -4,9 +4,16 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
-- Button is a near-black control with a faint top highlight and a soft shadow.
-  Pressing it scales to 97% and darkens. The motion is removed when the user
-  prefers reduced motion.
+- Button's shape, size, type, elevation, state colors, and motion are CSS
+  variables. Press and release take separate durations and easings, and the
+  radius and `corner-shape` can change on press. `buttonTheme` maps typed settings
+  to those variables. Button sets `data-slot`, `data-variant`, and `data-size`.
+- `--ease-spring`, `--ease-snap`, and `--ease-settle` are new easing tokens.
+- Migration: `--color-primary-hover` and `--color-primary-active` are removed.
+  Hover and press colors are derived from `--color-primary`. Tune them with
+  `--button-hover-layer` and `--button-press-layer`.
+- The default Button is near-black with a faint top highlight and a soft shadow.
+  Pressing it scales to 97%. Reduced motion keeps color changes and drops scale.
 - Button adds `variant` (primary, secondary, warning, destructive, outline,
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.
