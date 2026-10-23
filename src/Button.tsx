@@ -127,6 +127,7 @@ export type ButtonTheme = {
   borderColor?: string
   ghostShadow?: string
   ghostShadowPressed?: string
+  focusColor?: string
   pressDuration?: string
   pressEase?: string
   releaseDuration?: string
@@ -166,6 +167,7 @@ const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
   borderColor: '--button-border-color',
   ghostShadow: '--button-ghost-shadow',
   ghostShadowPressed: '--button-ghost-shadow-pressed',
+  focusColor: '--color-focus',
   pressDuration: '--button-press-duration',
   pressEase: '--button-press-ease',
   releaseDuration: '--button-release-duration',

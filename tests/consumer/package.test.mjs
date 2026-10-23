@@ -85,6 +85,7 @@ test('buttonTheme maps typed settings to Button variables', () => {
       borderWidth: '2px',
       borderColor: '#111111',
       pressShiftX: '3px',
+      focusColor: '#111111',
       pressScale: 0.96,
       pressEase: 'var(--ease-snap)',
       releaseEase: 'var(--ease-spring)',
@@ -97,6 +98,7 @@ test('buttonTheme maps typed settings to Button variables', () => {
       '--button-border-width': '2px',
       '--button-border-color': '#111111',
       '--button-press-shift-x': '3px',
+      '--color-focus': '#111111',
       '--button-press-scale': 0.96,
       '--button-press-ease': 'var(--ease-snap)',
       '--button-release-ease': 'var(--ease-spring)'
