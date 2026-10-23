@@ -1,15 +1,75 @@
 import type { ComponentProps, MouseEvent } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from './cn.js'
 
-export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'warning'
-  | 'destructive'
-  | 'outline'
-  | 'ghost'
-export type ButtonSize = 'small' | 'default' | 'large'
-export type ButtonRadius = 'none' | 'small' | 'default' | 'large' | 'full'
+const buttonVariants = cva(
+  [
+    'relative box-border inline-flex shrink-0 select-none items-center justify-center border border-solid border-transparent text-center font-[family-name:inherit] font-medium tracking-[-0.01em]',
+    'cursor-pointer transition-[scale,box-shadow,background-color,color] duration-100 ease-out',
+    'active:scale-97',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+    'disabled:scale-none disabled:cursor-not-allowed disabled:text-disabled-foreground disabled:shadow-none disabled:inset-shadow-none',
+    'aria-busy:scale-none aria-busy:cursor-progress',
+    'motion-reduce:transition-none motion-reduce:active:scale-none',
+    'forced-colors:border-[ButtonText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:text-[GrayText]'
+  ],
+  {
+    variants: {
+      variant: {
+        primary:
+          'bg-primary text-primary-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.2),0_0_0_1px_var(--color-primary-active)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.16)] hover:bg-primary-hover active:bg-primary-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-primary aria-busy:active:bg-primary',
+        secondary:
+          'bg-secondary text-secondary-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.06),0_0_0_1px_rgb(0_0_0/0.06)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.6)] hover:bg-secondary-hover active:bg-secondary-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-secondary aria-busy:active:bg-secondary',
+        warning:
+          'bg-warning text-warning-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.15),0_0_0_1px_var(--color-warning-active)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.3)] hover:bg-warning-hover active:bg-warning-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-warning aria-busy:active:bg-warning',
+        destructive:
+          'bg-destructive text-destructive-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.2),0_0_0_1px_var(--color-destructive-active)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.16)] hover:bg-destructive-hover active:bg-destructive-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-destructive aria-busy:active:bg-destructive',
+        outline:
+          'border-border bg-background text-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.05)] hover:bg-accent active:bg-accent-active disabled:border-disabled disabled:bg-transparent aria-busy:hover:bg-background aria-busy:active:bg-background',
+        ghost:
+          'bg-transparent text-foreground hover:bg-accent active:bg-accent-active disabled:bg-transparent aria-busy:hover:bg-transparent aria-busy:active:bg-transparent'
+      },
+      size: {
+        small: 'min-h-8 px-3 py-1 text-sm leading-5 [&_svg]:size-3.5',
+        default: 'min-h-10 px-4 py-1.5 text-[length:inherit] leading-6 [&_svg]:size-4',
+        large: 'min-h-12 px-6 py-2.5 text-base leading-6 [&_svg]:size-5'
+      },
+      radius: {
+        none: 'rounded-none',
+        small: 'rounded-sm',
+        default: 'rounded-control',
+        large: 'rounded-xl',
+        full: 'rounded-full'
+      },
+      iconOnly: {
+        true: 'p-0',
+        false: ''
+      },
+      fullWidth: {
+        true: 'w-full',
+        false: ''
+      }
+    },
+    compoundVariants: [
+      { iconOnly: true, size: 'small', class: 'size-8' },
+      { iconOnly: true, size: 'default', class: 'size-10' },
+      { iconOnly: true, size: 'large', class: 'size-12' }
+    ],
+    defaultVariants: {
+      variant: 'primary',
+      size: 'default',
+      radius: 'default',
+      iconOnly: false,
+      fullWidth: false
+    }
+  }
+)
+
+type ButtonVariants = VariantProps<typeof buttonVariants>
+
+export type ButtonVariant = NonNullable<ButtonVariants['variant']>
+export type ButtonSize = NonNullable<ButtonVariants['size']>
+export type ButtonRadius = NonNullable<ButtonVariants['radius']>
 
 export type ButtonProps = ComponentProps<'button'> & {
   variant?: ButtonVariant
@@ -20,48 +80,13 @@ export type ButtonProps = ComponentProps<'button'> & {
   pending?: boolean
 }
 
-const variants: Record<ButtonVariant, string> = {
-  primary:
-    'bg-primary text-primary-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.2),0_0_0_1px_var(--color-primary-active)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.16)] hover:bg-primary-hover active:bg-primary-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-primary aria-busy:active:bg-primary',
-  secondary:
-    'bg-secondary text-secondary-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.06),0_0_0_1px_rgb(0_0_0/0.06)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.6)] hover:bg-secondary-hover active:bg-secondary-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-secondary aria-busy:active:bg-secondary',
-  warning:
-    'bg-warning text-warning-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.15),0_0_0_1px_var(--color-warning-active)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.3)] hover:bg-warning-hover active:bg-warning-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-warning aria-busy:active:bg-warning',
-  destructive:
-    'bg-destructive text-destructive-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.2),0_0_0_1px_var(--color-destructive-active)] inset-shadow-[0_1px_0_0_rgb(255_255_255/0.16)] hover:bg-destructive-hover active:bg-destructive-active active:inset-shadow-none disabled:bg-disabled aria-busy:hover:bg-destructive aria-busy:active:bg-destructive',
-  outline:
-    'border-border bg-background text-foreground shadow-[0_1px_2px_0_rgb(0_0_0/0.05)] hover:bg-accent active:bg-accent-active disabled:border-disabled disabled:bg-transparent aria-busy:hover:bg-background aria-busy:active:bg-background',
-  ghost:
-    'bg-transparent text-foreground hover:bg-accent active:bg-accent-active disabled:bg-transparent aria-busy:hover:bg-transparent aria-busy:active:bg-transparent'
-}
-
-const sizes: Record<ButtonSize, string> = {
-  small: 'min-h-8 px-3 py-1 text-sm leading-5 [&_svg]:size-3.5',
-  default: 'min-h-10 px-4 py-1.5 text-[length:inherit] leading-6 [&_svg]:size-4',
-  large: 'min-h-12 px-6 py-2.5 text-base leading-6 [&_svg]:size-5'
-}
-
-const iconSizes: Record<ButtonSize, string> = {
-  small: 'size-8 p-0 text-sm leading-5 [&_svg]:size-3.5',
-  default: 'size-10 p-0 text-[length:inherit] leading-6 [&_svg]:size-4',
-  large: 'size-12 p-0 text-base leading-6 [&_svg]:size-5'
-}
-
-const radii: Record<ButtonRadius, string> = {
-  none: 'rounded-none',
-  small: 'rounded-sm',
-  default: 'rounded-control',
-  large: 'rounded-xl',
-  full: 'rounded-full'
-}
-
 export function Button({
   type = 'button',
-  variant = 'primary',
-  size = 'default',
-  radius = 'default',
-  iconOnly = false,
-  fullWidth = false,
+  variant,
+  size,
+  radius,
+  iconOnly,
+  fullWidth,
   className,
   pending = false,
   onClick,
@@ -72,21 +97,7 @@ export function Button({
     <button
       type={type}
       aria-busy={pending || undefined}
-      className={cn(
-        'relative box-border inline-flex shrink-0 select-none items-center justify-center border border-solid border-transparent text-center font-[family-name:inherit] font-medium tracking-[-0.01em]',
-        'cursor-pointer transition-[scale,box-shadow,background-color,color] duration-100 ease-out',
-        'active:scale-97',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-        'disabled:scale-none disabled:cursor-not-allowed disabled:text-disabled-foreground disabled:shadow-none disabled:inset-shadow-none',
-        'aria-busy:scale-none aria-busy:cursor-progress',
-        'motion-reduce:transition-none motion-reduce:active:scale-none',
-        'forced-colors:border-[ButtonText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:text-[GrayText]',
-        variants[variant],
-        iconOnly ? iconSizes[size] : sizes[size],
-        radii[radius],
-        fullWidth && 'w-full',
-        className
-      )}
+      className={cn(buttonVariants({ variant, size, radius, iconOnly, fullWidth }), className)}
       onClick={(event: MouseEvent<HTMLButtonElement>) => {
         if (pending) {
           event.preventDefault()
