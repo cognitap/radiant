@@ -7,6 +7,9 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 - Button is a near-black control with a faint top highlight and a soft shadow.
   Pressing it scales to 97% and darkens. The motion is removed when the user
   prefers reduced motion.
+- Button adds `variant` (primary, secondary, warning, destructive, outline,
+  ghost), `size` (small, default, large), `radius` (none, small, default, large,
+  full), `iconOnly`, and `fullWidth`. New color tokens back each variant.
 - `pending` keeps the label's space, shows a spinner, and ignores activation.
   It does not set `disabled`, so focus can stay on the button.
 - Keyboard, focus, and screen reader checks were not run in this change.

@@ -38,6 +38,32 @@ test('pending keeps the label, blocks the disabled attribute, and marks the butt
   assert.match(html, /animate-spin/)
 })
 
+test('settings pick classes and stay off the DOM', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Button,
+      { variant: 'destructive', size: 'small', radius: 'full', fullWidth: true },
+      'Delete'
+    )
+  )
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bbg-destructive\b/)
+  assert.doesNotMatch(classAttribute, /\bbg-primary\b/)
+  assert.match(classAttribute, /\bmin-h-8\b/)
+  assert.match(classAttribute, /\brounded-full\b/)
+  assert.match(classAttribute, /\bw-full\b/)
+  assert.doesNotMatch(html, /\s(variant|size|radius|fullwidth|fullWidth|icononly|iconOnly)=/)
+})
+
+test('iconOnly squares the button at its size', () => {
+  const html = renderToStaticMarkup(
+    createElement(Button, { iconOnly: true, size: 'large', 'aria-label': 'Close' }, 'x')
+  )
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bsize-12\b/)
+  assert.doesNotMatch(classAttribute, /\bpx-6\b/)
+})
+
 test('rounded-full replaces rounded-control on the class attribute', () => {
   const html = renderToStaticMarkup(createElement(Button, { className: 'rounded-full' }, 'Save'))
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''

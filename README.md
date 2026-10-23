@@ -27,23 +27,40 @@ For a global reset (Tailwind Preflight), also import `@cognitap/radiant/reset.cs
 before `styles.css`. React 19.3+ is a peer dependency.
 
 `Button` takes native button props, including `ref`, `aria-*` and form attributes,
-and defaults to `type="button"`. It adds one prop, `pending`. Give every button an
-accessible name through its text, `aria-label`, or `aria-labelledby`. The type does
-not reject a nameless button. Use a link for navigation.
+and defaults to `type="button"`. Give every button an accessible name through its
+text, `aria-label`, or `aria-labelledby`. The type does not reject a nameless
+button. Use a link for navigation.
 
-An omitted `type` is `button` even when `formAction` is set. Pass `type="submit"` to
-submit. While `pending` is set, the label stays in place, a spinner covers it, and
-activation does not run. Reduced motion keeps the label and hides the spinner.
-There is no variant or size prop.
+```tsx
+<Button variant="destructive" size="small">Delete</Button>
+<Button variant="outline" radius="full">Next</Button>
+<Button iconOnly aria-label="Close"><CloseIcon /></Button>
+```
+
+| Prop        | Values                                                               | Default   |
+| ----------- | -------------------------------------------------------------------- | --------- |
+| `variant`   | `primary`, `secondary`, `warning`, `destructive`, `outline`, `ghost` | `primary` |
+| `size`      | `small`, `default`, `large`                                          | `default` |
+| `radius`    | `none`, `small`, `default`, `large`, `full`                          | `default` |
+| `iconOnly`  | Squares the button at its size. Pass `aria-label`.                   | `false`   |
+| `fullWidth` | Fills the container width.                                           | `false`   |
+| `pending`   | Shows a spinner over the label and ignores activation.               | `false`   |
+
+The style prop is `variant`, because `type` stays the native attribute. An omitted
+`type` is `button` even when `formAction` is set. Pass `type="submit"` to submit.
+While `pending` is set, the label stays in place, a spinner covers it, and
+activation does not run. It does not set `disabled`, so focus stays. Reduced
+motion keeps the label and hides the spinner. Child SVGs are sized to the button.
 
 The classes read these variables. The variables work on the compiled stylesheet.
+`default` radius reads `--radius-control`. Outline and ghost hover with
+`--color-accent` and press with `--color-accent-active`.
 
-- `--color-primary`
-- `--color-primary-hover`
-- `--color-primary-active`
-- `--color-primary-foreground`
-- `--color-disabled`
-- `--color-disabled-foreground`
+- `--color-primary`, `--color-secondary`, `--color-warning`, `--color-destructive`,
+  each with `-hover`, `-active`, and `-foreground`
+- `--color-accent`, `--color-accent-active`
+- `--color-background`, `--color-foreground`, `--color-border`
+- `--color-disabled`, `--color-disabled-foreground`
 - `--color-focus`
 - `--radius-control`
 
