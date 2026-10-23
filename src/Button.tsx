@@ -4,7 +4,7 @@ import { cn } from './cn.js'
 
 const buttonVariants = cva(
   [
-    'relative box-border inline-flex shrink-0 select-none items-center justify-center border border-solid border-(--_btn-edge) text-center font-[family-name:inherit] antialiased',
+    'relative box-border inline-flex shrink-0 select-none items-center justify-center border-solid [border-width:var(--button-border-width,1px)] [border-color:var(--button-border-color,var(--_btn-edge))] text-center font-[family-name:inherit] antialiased',
     '[font-weight:var(--button-font-weight,550)] tracking-[var(--button-letter-spacing,-0.011em)]',
     'min-h-(--_btn-h) px-(--_btn-px) bg-(--_btn-bg) text-(--_btn-fg)',
     'bg-[linear-gradient(to_bottom,rgb(255_255_255/var(--_btn-sheen)),rgb(255_255_255/0))]',
@@ -22,7 +22,7 @@ const buttonVariants = cva(
     'enabled:not-aria-busy:hover:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-hover-state))_var(--button-hover-layer,5%))]',
     'enabled:not-aria-busy:hover:[--_btn-glow:var(--button-glow-hover,var(--button-glow,0%))] enabled:not-aria-busy:motion-safe:hover:translate-y-[var(--button-hover-lift,0px)]',
     'enabled:not-aria-busy:active:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-press-state))_var(--button-press-layer,8%))]',
-    'enabled:not-aria-busy:motion-safe:active:scale-[var(--button-press-scale,0.97)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--button-press-shift,0px)]',
+    'enabled:not-aria-busy:motion-safe:active:scale-[var(--button-press-scale,0.97)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--button-press-shift,0px)] enabled:not-aria-busy:motion-safe:active:translate-x-[var(--button-press-shift-x,0px)]',
     'enabled:not-aria-busy:active:rounded-(--_btn-radius-pressed) enabled:not-aria-busy:active:[corner-shape:var(--button-corner-shape-pressed,var(--_btn-corner))]',
     'enabled:not-aria-busy:active:[--_btn-highlight:0] enabled:not-aria-busy:active:[--_btn-sheen:0] enabled:not-aria-busy:active:shadow-[var(--button-shadow-pressed,var(--_btn-shadow-pressed))]',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
@@ -122,6 +122,9 @@ export type ButtonTheme = {
   hoverLift?: string
   pressScale?: number
   pressShift?: string
+  pressShiftX?: string
+  borderWidth?: string
+  borderColor?: string
   pressDuration?: string
   pressEase?: string
   releaseDuration?: string
@@ -156,6 +159,9 @@ const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
   hoverLift: '--button-hover-lift',
   pressScale: '--button-press-scale',
   pressShift: '--button-press-shift',
+  pressShiftX: '--button-press-shift-x',
+  borderWidth: '--button-border-width',
+  borderColor: '--button-border-color',
   pressDuration: '--button-press-duration',
   pressEase: '--button-press-ease',
   releaseDuration: '--button-release-duration',
