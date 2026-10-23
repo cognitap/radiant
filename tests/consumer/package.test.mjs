@@ -17,6 +17,27 @@ test('public JavaScript imports and renders on the server', () => {
   assert.match(html, />Save<\/button>/)
 })
 
+test('an omitted type stays button when formAction is set', () => {
+  const html = renderToStaticMarkup(createElement(Button, { formAction: '/publish' }, 'Publish'))
+  assert.match(html, /\stype="button"/)
+  assert.match(html, /formAction="\/publish"/)
+  assert.match(html, />Publish<\/button>/)
+})
+
+test('an explicit type submit stays submit', () => {
+  const html = renderToStaticMarkup(createElement(Button, { type: 'submit' }, 'Save'))
+  assert.match(html, /\stype="submit"/)
+  assert.match(html, />Save<\/button>/)
+})
+
+test('rounded-full replaces rounded-control on the class attribute', () => {
+  const html = renderToStaticMarkup(createElement(Button, { className: 'rounded-full' }, 'Save'))
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\brounded-full\b/)
+  assert.doesNotMatch(classAttribute, /\brounded-control\b/)
+  assert.match(html, />Save<\/button>/)
+})
+
 test('public JavaScript and declaration maps point to shipped sources', () => {
   for (const artifact of Object.values(manifest.exports['.'])) {
     assert.ok(existsSync(new URL(artifact, root)), `Missing public artifact: ${artifact}`)

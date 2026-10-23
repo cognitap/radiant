@@ -25,3 +25,15 @@ test('the customization entry generates library and application utilities once w
   assert.doesNotMatch(css, /@(import|theme|source|tailwind)\b/)
   assert.doesNotMatch(css, /h1\s*,\s*h2\s*,\s*h3\b/)
 })
+
+test('the compiled stylesheet includes focus, disabled, and forced-colors rules', () => {
+  const css = readFileSync(new URL('../dist/library/styles.css', import.meta.url), 'utf8')
+
+  assert.match(css, /:focus-visible\s*\{[^}]*outline-color:\s*var\(\s*--color-focus\s*\)/)
+  assert.match(css, /:disabled\s*\{[^}]*background-color:\s*var\(\s*--color-disabled\s*\)/)
+  assert.match(css, /:disabled\s*\{[^}]*color:\s*var\(\s*--color-disabled-foreground\s*\)/)
+  assert.match(
+    css,
+    /@media\s*\(\s*forced-colors:\s*active\s*\)\s*\{[\s\S]*border-color:\s*buttontext[\s\S]*:disabled\s*\{[^}]*border-color:\s*graytext[\s\S]*:disabled\s*\{[^}]*color:\s*graytext/i
+  )
+})
