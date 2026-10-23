@@ -128,6 +128,9 @@ works.
 | `ghostShadow`        | `--button-ghost-shadow`         | no shadow                          |
 | `ghostShadowPressed` | `--button-ghost-shadow-pressed` | no shadow                          |
 | `focusColor`         | `--color-focus`                 | `oklch(0.55 0.09 178)`             |
+| `focusWidth`         | `--button-focus-width`          | `2px`                              |
+| `focusOffset`        | `--button-focus-offset`         | `2px`                              |
+| `focusStyle`         | `--button-focus-style`          | `solid`                            |
 | `pressDuration`      | `--button-press-duration`       | `80ms`                             |
 | `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                 |
 | `releaseDuration`    | `--button-release-duration`     | `160ms`                            |

@@ -296,6 +296,8 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
         shadowPressed: '1px 1px 0 0 #111111',
         ghostShadow: '4px 4px 0 0 #111111',
         focusColor: '#111111',
+        focusWidth: '2px',
+        focusOffset: '0px',
         ghostShadowPressed: '1px 1px 0 0 #111111',
         sheen: 0,
         highlight: 0,

@@ -25,7 +25,7 @@ const buttonVariants = cva(
     'enabled:not-aria-busy:motion-safe:active:scale-[var(--button-press-scale,0.97)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--button-press-shift,0px)] enabled:not-aria-busy:motion-safe:active:translate-x-[var(--button-press-shift-x,0px)]',
     'enabled:not-aria-busy:active:rounded-(--_btn-radius-pressed) enabled:not-aria-busy:active:[corner-shape:var(--button-corner-shape-pressed,var(--_btn-corner))]',
     'enabled:not-aria-busy:active:[--_btn-highlight:0] enabled:not-aria-busy:active:[--_btn-sheen:0] enabled:not-aria-busy:active:shadow-[var(--button-shadow-pressed,var(--_btn-shadow-pressed))]',
-    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+    'focus-visible:outline-solid focus-visible:outline-focus focus-visible:[outline-width:var(--button-focus-width,2px)] focus-visible:[outline-offset:var(--button-focus-offset,2px)] focus-visible:[outline-style:var(--button-focus-style,solid)]',
     'disabled:cursor-not-allowed disabled:opacity-[var(--button-disabled-opacity,0.5)]',
     'aria-busy:cursor-progress',
     'motion-reduce:transition-[background-color,color]',
@@ -128,6 +128,9 @@ export type ButtonTheme = {
   ghostShadow?: string
   ghostShadowPressed?: string
   focusColor?: string
+  focusWidth?: string
+  focusOffset?: string
+  focusStyle?: string
   pressDuration?: string
   pressEase?: string
   releaseDuration?: string
@@ -168,6 +171,9 @@ const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
   ghostShadow: '--button-ghost-shadow',
   ghostShadowPressed: '--button-ghost-shadow-pressed',
   focusColor: '--color-focus',
+  focusWidth: '--button-focus-width',
+  focusOffset: '--button-focus-offset',
+  focusStyle: '--button-focus-style',
   pressDuration: '--button-press-duration',
   pressEase: '--button-press-ease',
   releaseDuration: '--button-release-duration',
