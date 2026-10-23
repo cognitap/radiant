@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Button, buttonTheme } from '@cognitap/radiant'
+import { Button, buttonTheme, themes } from '@cognitap/radiant'
 
 const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
 const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
@@ -106,6 +106,16 @@ test('buttonTheme maps typed settings to Button variables', () => {
       '--button-release-ease': 'var(--ease-spring)'
     }
   )
+})
+
+test('themes are shared presets with color and button tokens', () => {
+  assert.deepEqual(
+    themes.map(theme => theme.name),
+    ['Radiant', 'Default', 'Soft squircle', 'Expressive', 'Glass', 'Sharp 3D', 'Jelly', 'Ticket']
+  )
+  const ticket = themes.find(theme => theme.name === 'Ticket')
+  assert.equal(ticket?.style['--color-primary'], 'oklch(0.55 0.19 35)')
+  assert.equal(ticket?.style['--button-corner-shape'], 'scoop')
 })
 
 test('public JavaScript and declaration maps point to shipped sources', () => {

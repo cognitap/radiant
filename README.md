@@ -65,6 +65,15 @@ Set the variables on `:root`, a subtree, or `[data-slot="button"]`. Button also
 exposes `data-variant` and `data-size`, so a rule such as
 `[data-variant="destructive"] { --button-glow: 50% }` targets one variant.
 
+Radiant also exports shared theme presets, so every component can wear the same
+design system. Apply one to a wrapper and all Radiant components inside follow:
+
+```tsx
+import { themes } from '@cognitap/radiant'
+
+;<div style={themes.find(theme => theme.name === 'Ticket')?.style}>...</div>
+```
+
 `buttonTheme` takes typed settings and returns the matching variables as a style
 object. Unknown keys are a type error:
 

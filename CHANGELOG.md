@@ -4,6 +4,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Themes moved to a shared `themes` export (with a `Theme` type), so future
+  components wear the same design systems. Button stories consume the registry.
 - Button ships with a neutral baseline (sizes, type, an ink-and-gray palette,
   focus ring, quiet press). Every value is a CSS variable, and Storybook shows
   the baseline next to fully themed variants, including the pine Radiant theme.

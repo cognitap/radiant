@@ -1,5 +1,15 @@
 import { createElement, createRef } from 'react'
-import { Button, buttonTheme, type ButtonProps, type ButtonTheme } from '@cognitap/radiant'
+import {
+  Button,
+  buttonTheme,
+  themes,
+  type ButtonProps,
+  type ButtonTheme,
+  type Theme
+} from '@cognitap/radiant'
+
+const shared: Theme | undefined = themes[0]
+createElement('div', { style: shared?.style })
 
 const theme: ButtonTheme = { cornerShape: 'squircle', radiusPressed: '0.25rem', pressScale: 0.96 }
 createElement('div', { style: buttonTheme(theme) })
