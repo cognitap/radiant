@@ -316,6 +316,77 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
         releaseEase: 'var(--ease-settle)'
       })
     } as CSSProperties
+  },
+  {
+    name: 'Midnight',
+    surface: '#131316',
+    style: {
+      color: '#e8e8ec',
+      '--color-primary': 'oklch(0.92 0.01 270)',
+      '--color-primary-foreground': '#131316',
+      '--color-secondary': 'oklch(0.27 0.01 270)',
+      '--color-secondary-foreground': 'oklch(0.92 0.01 270)',
+      '--color-warning': 'oklch(0.8 0.14 78)',
+      '--color-warning-foreground': 'oklch(0.25 0.05 60)',
+      '--color-destructive': 'oklch(0.62 0.2 25)',
+      '--color-destructive-foreground': 'oklch(0.98 0 0)',
+      '--color-background': 'oklch(0.22 0.01 270)',
+      '--color-border': 'oklch(0.38 0.01 270)',
+      '--color-foreground': 'oklch(0.92 0.01 270)',
+      ...buttonTheme({
+        height: '2.5rem',
+        padding: '1rem',
+        radius: '0.75rem',
+        cornerShape: 'squircle',
+        fontWeight: 550,
+        shadow: '0 1px 2px rgb(0 0 0 / 0.4), 0 8px 20px -8px rgb(0 0 0 / 0.5)',
+        shadowPressed: '0 1px 2px rgb(0 0 0 / 0.4)',
+        sheen: 0.05,
+        highlight: 0.1,
+        pressScale: 0.98,
+        focusColor: 'rgb(255 255 255 / 0.9)',
+        focusOffset: '4px',
+        releaseDuration: '300ms',
+        releaseEase: 'var(--ease-settle)'
+      })
+    } as CSSProperties
+  },
+  {
+    name: 'Clay',
+    surface: '#faf5ee',
+    style: {
+      '--color-primary': 'oklch(0.52 0.15 46)',
+      '--color-primary-foreground': 'oklch(0.99 0.01 80)',
+      '--color-secondary': 'oklch(0.93 0.03 75)',
+      '--color-secondary-foreground': 'oklch(0.4 0.1 50)',
+      '--color-warning': 'oklch(0.75 0.14 80)',
+      '--color-warning-foreground': 'oklch(0.3 0.07 55)',
+      '--color-destructive': 'oklch(0.55 0.18 28)',
+      '--color-destructive-foreground': 'oklch(0.99 0 0)',
+      '--color-background': 'oklch(0.99 0.01 80)',
+      '--color-border': 'oklch(0.85 0.04 70)',
+      '--color-foreground': 'oklch(0.35 0.06 55)',
+      ...buttonTheme({
+        height: '2.75rem',
+        padding: '1.25rem',
+        radius: '0.875rem',
+        radiusPressed: '0.625rem',
+        cornerShape: 'round',
+        fontWeight: 560,
+        shadow: '0 1px 2px rgb(120 70 20 / 0.12), 0 6px 16px -6px rgb(120 70 20 / 0.25)',
+        shadowPressed: '0 1px 2px rgb(120 70 20 / 0.12)',
+        sheen: 0.06,
+        highlight: 0.2,
+        glow: '30%',
+        glowHover: '45%',
+        pressScale: 0.97,
+        releaseDuration: '450ms',
+        releaseEase: 'var(--ease-spring)',
+        focusColor: 'oklch(0.45 0.12 46)',
+        focusStyle: 'dotted',
+        focusOffset: '3px'
+      })
+    } as CSSProperties
   }
 ]
 
