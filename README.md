@@ -28,8 +28,28 @@ before `styles.css`. React 19.3+ is a peer dependency.
 
 `Button` takes native button props, including `ref`, `aria-*` and form attributes,
 and defaults to `type="button"`. Give every button an accessible name through its
-text or `aria-label`, and use a link for navigation. There are no variants, sizes,
-or loading state yet.
+text or `aria-label`, and use a link for navigation. `Button` adds no props, and
+an omitted `type` is `button` even when `formAction` or another submitter
+attribute is set. Pass `type="submit"` to submit. The accessible name is the
+caller's text, `aria-label`, or `aria-labelledby`. The `ButtonProps` type does
+not reject a nameless button.
+
+The classes read these variables. The variables work on the compiled stylesheet.
+
+- `--color-primary`
+- `--color-primary-hover`
+- `--color-primary-active`
+- `--color-primary-foreground`
+- `--color-disabled`
+- `--color-disabled-foreground`
+- `--color-focus`
+- `--radius-control`
+
+Caller utilities such as `rounded-full` paint only on the Tailwind route. That
+route is the `@cognitap/radiant/tailwind.css` import. Do not import
+`@cognitap/radiant/styles.css` and `@cognitap/radiant/tailwind.css` together.
+`cn` is not a public export, so a wrapper passes `className` as a string. There
+is no variant, size, or loading prop. The package has no dark-theme block.
 
 Components use semantic tokens such as `bg-primary` and `rounded-control`.
 Override their CSS variables to theme an application or a subtree; the defaults
