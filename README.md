@@ -56,6 +56,53 @@ While `pending` is set, the label stays in place, a spinner covers it, and
 activation does not run. It does not set `disabled`, so focus stays. Reduced
 motion keeps the label and hides the spinner. Child SVGs are sized to the button.
 
+### Link
+
+`Link` is for navigation: a real anchor with `href`, `target`, `download`, and
+native click semantics untouched, so modified clicks and keyboard activation
+behave normally. Three forms: an underlined accent link for running text, a
+subtle link that underlines on hover, and a button-styled link that reuses the
+button variants.
+
+```tsx
+import { Link } from '@cognitap/radiant'
+
+<p>Read the <Link href="/guide">guide</Link> first.</p>
+<Link href="/settings" variant="subtle">Settings</Link>
+<Link href="/start" variant="button" tone="destructive" size="small">Delete space</Link>
+<Link href="https://example.com" external>Example</Link>
+```
+
+| Prop       | Values                                                             | Default   |
+| ---------- | ------------------------------------------------------------------ | --------- |
+| `variant`  | `inline`, `subtle`, `button`                                       | `inline`  |
+| `tone`     | Button variants, for `variant="button"`                            | `primary` |
+| `size`     | `small`, `default`, `large`, for `variant="button"`                | `default` |
+| `radius`   | Button radii, for `variant="button"`                               | `default` |
+| `external` | Adds `target="_blank"` and `rel="noopener noreferrer"` when unset. | `false`   |
+| `render`   | Replace the anchor element; see below.                             | —         |
+
+Links paint from `--link-color` and `--link-hover-color` (falling back to the
+primary token) and from the shared focus variables, so a design-system theme
+styles links and buttons together. `linkTheme` sets them with typed keys:
+`color`, `hoverColor`, `underlineOffset`, `decorationThickness`,
+`decorationThicknessHover`, `colorDuration`, and `focusColor`, `focusWidth`,
+`focusOffset`, `focusStyle`.
+
+Routers stay outside the core. Pass `render` to hand the anchor props —
+`href`, `className`, `children`, and every native attribute — to your router's
+own link component:
+
+```tsx
+<Link
+  href="/docs"
+  render={props => <RouterLink {...props} />}
+/>
+```
+
+The adapter must forward `href`, `className`, and `children`, and keep native
+anchor semantics. When `render` is absent, `Link` renders a plain `<a>`.
+
 ### Adapting Button to a design system
 
 Every design decision is a CSS variable, so a design system, or an agent

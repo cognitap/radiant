@@ -2,7 +2,7 @@ import type { ComponentProps, CSSProperties, MouseEvent } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from './cn.js'
 
-const buttonVariants = cva(
+export const buttonVariants = cva(
   [
     'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--button-border-style,solid)] [border-width:var(--button-border-width,1px)] [border-color:var(--button-border-color,var(--_btn-edge))] text-center [font-family:var(--button-font-family,inherit)] [text-transform:var(--button-text-transform,none)] antialiased',
     '[font-weight:var(--button-font-weight,550)] [letter-spacing:var(--button-letter-spacing,-0.011em)] [font-size:var(--_btn-fs)]',

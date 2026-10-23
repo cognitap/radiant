@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Button, buttonTheme, themes } from '@cognitap/radiant'
+import { Button, buttonTheme, Link, linkTheme, themes } from '@cognitap/radiant'
 
 const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
 const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
@@ -104,6 +104,82 @@ test('buttonTheme maps typed settings to Button variables', () => {
       '--button-press-scale': 0.96,
       '--button-press-ease': 'var(--ease-snap)',
       '--button-release-ease': 'var(--ease-spring)'
+    }
+  )
+})
+
+test('links render as native anchors with native attributes intact', () => {
+  const html = renderToStaticMarkup(
+    createElement(Link, { href: '/guide', download: true }, 'Read the guide')
+  )
+  assert.match(html, /^<a\b[^>]*\shref="\/guide"/)
+  assert.match(html, /\sdownload=""/)
+  assert.match(html, /\sdata-slot="link"/)
+  assert.match(html, /\sdata-variant="inline"/)
+  assert.match(html, /Read the guide/)
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bunderline\b/)
+  assert.doesNotMatch(html, /\s(variant|tone|size|external|render)=/)
+})
+
+test('external links gain safe target and rel unless the consumer set them', () => {
+  const external = renderToStaticMarkup(
+    createElement(Link, { href: 'https://example.com', external: true }, 'Example')
+  )
+  assert.match(external, /\starget="_blank"/)
+  assert.match(external, /\srel="noopener noreferrer"/)
+  const custom = renderToStaticMarkup(
+    createElement(
+      Link,
+      { href: 'https://example.com', external: true, target: '_self', rel: 'author' },
+      'Example'
+    )
+  )
+  assert.match(custom, /\starget="_self"/)
+  assert.match(custom, /\srel="author"/)
+})
+
+test('button-styled links reuse the Button variant classes', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Link,
+      { href: '/delete', variant: 'button', tone: 'destructive', size: 'small' },
+      'Delete space'
+    )
+  )
+  assert.match(html, /^<a\b/)
+  assert.match(html, /\sdata-variant="button"/)
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\[--_btn-bg:var\(--color-destructive\)\]/)
+  assert.match(classAttribute, /\[--_btn-h:var\(--button-height-small,2rem\)\]/)
+  assert.doesNotMatch(classAttribute, /\bunderline\b/)
+  assert.doesNotMatch(html, /\s(tone|size)=/)
+})
+
+test('the render prop hands anchor props to a router adapter', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Link,
+      {
+        href: '/docs',
+        render: props => createElement('a', { ...props, 'data-router-link': 'true' })
+      },
+      'Routed docs'
+    )
+  )
+  assert.match(html, /\sdata-router-link="true"/)
+  assert.match(html, /\shref="\/docs"/)
+  assert.match(html, /\sdata-slot="link"/)
+  assert.match(html, /Routed docs/)
+})
+
+test('linkTheme maps typed settings to Link variables', () => {
+  assert.deepEqual(
+    linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
+    {
+      '--link-color': 'oklch(0.5 0.1 250)',
+      '--link-underline-offset': '0.3em',
+      '--link-focus-width': 3
     }
   )
 })

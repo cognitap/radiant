@@ -4,6 +4,13 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Link` joins the library: a native anchor for navigation with `inline`,
+  `subtle`, and `button` variants (the button form reuses Button's variants via
+  `tone`, `size`, and `radius`). `external` adds a safe target and rel when the
+  consumer has not set them. A `render` prop hands the anchor props to a router
+  adapter, keeping routers outside the core. `linkTheme` maps typed settings to
+  `--link-*` variables, and links share the button focus variables and the shared
+  themes. Keyboard, focus, and screen reader checks were not run for Link either.
 - Themes moved to a shared `themes` export (with a `Theme` type), so future
   components wear the same design systems. Button stories consume the registry.
 - Button ships with a neutral baseline (sizes, type, an ink-and-gray palette,
