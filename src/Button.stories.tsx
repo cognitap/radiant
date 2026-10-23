@@ -349,6 +349,7 @@ const designSystems: { name: string; style: CSSProperties; surface?: string }[] 
         releaseDuration: '700ms',
         releaseEase: 'var(--ease-spring)',
         focusColor: 'oklch(0.55 0.2 330)',
+        focusWidth: '4px',
         focusOffset: '3px'
       })
     } as CSSProperties
