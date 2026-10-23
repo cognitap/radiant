@@ -21,6 +21,9 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 - Button adds `variant` (primary, secondary, warning, destructive, outline,
   ghost), `size` (small, default, large), `radius` (none, small, default, large,
   full), `iconOnly`, and `fullWidth`. New color tokens back each variant.
+- `buttonTheme` adds `borderWidth`, `borderColor`, and `pressShiftX`. The
+  DesignSystems story adds a Sharp 3D theme with square corners, 2px borders,
+  and hard offset shadows.
 - `class-variance-authority` 0.7.1 is a new runtime dependency.
 - `pending` keeps the label's space, shows a spinner, and ignores activation.
   It does not set `disabled`, so focus can stay on the button.

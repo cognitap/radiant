@@ -120,8 +120,11 @@ works.
 | `hoverLayer`         | `--button-hover-layer`          | `5%`                               |
 | `pressLayer`         | `--button-press-layer`          | `8%`                               |
 | `hoverLift`          | `--button-hover-lift`           | `0px`                              |
-| `pressScale`         | `--button-press-scale`          | `0.98`                             |
+| `pressScale`         | `--button-press-scale`          | `0.97`                             |
 | `pressShift`         | `--button-press-shift`          | `0px`                              |
+| `pressShiftX`        | `--button-press-shift-x`        | `0px`                              |
+| `borderWidth`        | `--button-border-width`         | `1px`                              |
+| `borderColor`        | `--button-border-color`         | each variant's edge color          |
 | `pressDuration`      | `--button-press-duration`       | `80ms`                             |
 | `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                 |
 | `releaseDuration`    | `--button-release-duration`     | `160ms`                            |
