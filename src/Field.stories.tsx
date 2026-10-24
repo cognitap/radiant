@@ -2,23 +2,8 @@ import { useState, type CSSProperties, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 import { Field, useField } from './Field'
+import { Input } from './Input'
 import { radiantTheme, themes } from './themes/index.js'
-
-const controlChrome = `
-  [data-slot="field"] input:not([type='checkbox']):not([type='radio']) {
-    box-sizing: border-box;
-    width: 100%;
-    height: 2.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-control);
-    padding-inline: 0.75rem;
-    background: var(--color-background);
-    color: var(--color-foreground);
-  }
-  [data-slot="field"][data-invalid] input:not([type='checkbox']):not([type='radio']) {
-    border-color: var(--field-error-color, var(--color-destructive));
-  }
-`
 
 function ToneInput(props: ComponentProps<'input'>) {
   const field = useField()
@@ -47,7 +32,7 @@ function FormExample() {
         label="Email"
         required
       >
-        <input
+        <Input
           autoComplete="email"
           name="email"
           type="email"
@@ -89,7 +74,6 @@ const meta = {
         <Story />
       ) : (
         <div style={{ ...radiantTheme, maxWidth: '20rem' }}>
-          <style>{controlChrome}</style>
           <Story />
         </div>
       )
@@ -102,7 +86,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: args => (
     <Field {...args}>
-      <input
+      <Input
         autoComplete="email"
         name="email"
         type="email"
@@ -115,7 +99,7 @@ export const Invalid: Story = {
   args: { error: 'Enter an email.' },
   render: args => (
     <Field {...args}>
-      <input
+      <Input
         autoComplete="email"
         name="email"
         type="email"
@@ -158,11 +142,11 @@ export const Disabled: Story = {
   args: { disabled: true, required: false, description: 'Locked by an admin' },
   render: args => (
     <Field {...args}>
-      <input
+      <Input
+        defaultValue="ada@example.com"
         name="email"
-        type="email"
-        value="ada@example.com"
         readOnly
+        type="email"
       />
     </Field>
   )
@@ -195,7 +179,6 @@ const themeFrame = (surface: string | undefined): CSSProperties => ({
 export const Themes: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
-      <style>{controlChrome}</style>
       {themes.map(theme => (
         <div
           key={theme.name}
@@ -208,7 +191,7 @@ export const Themes: Story = {
             label="Email"
             required
           >
-            <input
+            <Input
               name="email"
               type="email"
             />

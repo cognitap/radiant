@@ -9,6 +9,8 @@ import {
   buttonTheme,
   Field,
   fieldTheme,
+  Input,
+  inputTheme,
   Link,
   linkTheme,
   themes,
@@ -358,6 +360,89 @@ test('fieldTheme maps typed settings to Field variables', () => {
   )
 })
 
+test('inputs preserve native attributes and the character-width size', () => {
+  const html = renderToStaticMarkup(
+    createElement(Input, {
+      name: 'email',
+      type: 'email',
+      autoComplete: 'email',
+      defaultValue: 'ada@example.com',
+      placeholder: 'you@example.com',
+      size: 24,
+      required: true,
+      id: 'email'
+    })
+  )
+  assert.match(html, /^<input\b/)
+  assert.match(html, /\stype="email"/)
+  assert.match(html, /\sname="email"/)
+  assert.match(html, /\sautoComplete="email"/)
+  assert.match(html, /\svalue="ada@example.com"/)
+  assert.match(html, /\splaceholder="you@example.com"/)
+  assert.match(html, /\ssize="24"/)
+  assert.match(html, /\srequired=""/)
+  assert.match(html, /\sid="email"/)
+  assert.match(html, /\sdata-slot="input"/)
+  const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /--input-height/)
+  assert.doesNotMatch(html, /\s(inputTheme)=/)
+})
+
+test('an input takes its accessible relationships from Field', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Email', description: 'Work address', error: 'Enter an email.', required: true },
+      createElement(Input, {
+        name: 'email',
+        type: 'email',
+        id: 'custom',
+        'aria-describedby': 'hint'
+      })
+    )
+  )
+  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(html)?.[1]
+  assert.ok(id)
+  assert.notEqual(id, 'custom')
+  assert.match(html, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
+  assert.match(html, /aria-invalid="true"/)
+  assert.match(html, /\sdata-invalid=""/)
+  assert.match(html, /\sname="email"/)
+  const describedBy = /<input\b[^>]*\saria-describedby="([^"]+)"/.exec(html)?.[1] ?? ''
+  assert.equal(describedBy.split(' ').length, 3)
+  assert.ok(describedBy.split(' ').includes('hint'))
+})
+
+test('an input inside a group keeps its own description', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Field,
+      { layout: 'group', label: 'Plan', description: 'Pick one' },
+      createElement(Input, { name: 'plan' })
+    )
+  )
+  assert.match(html, /^<fieldset\b/)
+  assert.doesNotMatch(html, /<input\b[^>]*\saria-describedby=/)
+  assert.doesNotMatch(html, /<input\b[^>]*\saria-invalid=/)
+})
+
+test('inputTheme maps typed settings to Input variables', () => {
+  assert.deepEqual(
+    inputTheme({
+      height: '3rem',
+      radius: '999px',
+      invalidBorder: 'oklch(0.5 0.2 25)',
+      fontWeight: 400
+    }),
+    {
+      '--input-height': '3rem',
+      '--input-radius': '999px',
+      '--input-invalid-border': 'oklch(0.5 0.2 25)',
+      '--input-font-weight': 400
+    }
+  )
+})
+
 test('linkTheme maps typed settings to Link variables', () => {
   assert.deepEqual(
     linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
@@ -397,6 +482,7 @@ test('exports reject implementation deep imports', async () => {
   for (const path of [
     'src/Button.tsx',
     'src/Field.tsx',
+    'src/Input.tsx',
     'dist/library/Button.js',
     'cn',
     'package.json'

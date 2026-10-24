@@ -4,6 +4,8 @@ import {
   buttonTheme,
   Field,
   fieldTheme,
+  Input,
+  inputTheme,
   Link,
   linkTheme,
   themes,
@@ -11,6 +13,7 @@ import {
   type ButtonProps,
   type ButtonTheme,
   type FieldProps,
+  type InputProps,
   type LinkProps,
   type Theme
 } from '@cognitap/radiant'
@@ -89,3 +92,19 @@ fieldTheme({ gapSize: '1rem' })
 // @ts-expect-error Field layouts are a closed set.
 const invalidFieldLayout: FieldProps = { layout: 'inline', label: 'Email' }
 createElement(Field, invalidFieldLayout)
+
+createElement('div', { style: inputTheme({ height: '3rem', radius: '999px' }) })
+
+const inputProps: InputProps = {
+  name: 'email',
+  type: 'email',
+  autoComplete: 'email',
+  defaultValue: 'ada@example.com',
+  size: 24,
+  required: true,
+  ref: createRef<HTMLInputElement>()
+}
+createElement(Input, inputProps)
+
+// @ts-expect-error Input theme keys are a closed set.
+inputTheme({ heightPx: '3rem' })
