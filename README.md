@@ -496,6 +496,60 @@ button radius and corner shape. `collapsibleTheme` maps `radius`,
 sets `data-slot="collapsible"`. The summary and content set
 `collapsible-trigger` and `collapsible-content`.
 
+### Accordion
+
+`Accordion` is a group of `Collapsible` sections. Each trigger is that
+section's `<summary>`, and each panel is its content. The accordion chooses
+which sections are open. The summary still toggles, and `open` is still the
+disclosure's open state.
+
+```tsx
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@cognitap/radiant'
+
+;<Accordion defaultValue="shipping">
+  <AccordionItem value="shipping">
+    <AccordionTrigger>Shipping</AccordionTrigger>
+    <AccordionContent>Ships in two days.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="returns">
+    <AccordionTrigger>Returns</AccordionTrigger>
+    <AccordionContent>Returns are free for 30 days.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+| Mode       | What stays open                                       |
+| ---------- | ----------------------------------------------------- |
+| `single`   | One section. Opening another closes the previous one. |
+| `multiple` | Each section, on its own.                             |
+
+`single` is the default. Omit `value` and pass `defaultValue` for an
+uncontrolled group. Pass `value` and update it from `onValueChange` for a
+controlled group. If `value` does not change, the open sections do not change
+either. Sections do not share a `name`: the accordion passes `open` to each
+section, so a controlled value can restore the disclosure without fighting
+the browser's exclusive group. Closed content stays mounted, so a field
+inside a closed section is still part of an ancestor form.
+
+The trigger label is a level-3 heading inside the summary. Set `level` to
+another heading level, or `level={null}` for text with no heading. The summary
+has to stay a direct child of `<details>`, so the heading cannot wrap the
+summary. Do not put a button or link inside the trigger. The marker is
+decorative. `useAccordion()` reads the value and can open or close a section.
+It returns `null` outside `Accordion`.
+
+Tab moves between summaries and into open content. Space and Enter toggle the
+focused summary and leave focus there. ArrowDown leaves focus on the summary.
+A disabled summary is removed from the tab order and does not toggle. A nested
+disclosure does not change the accordion selection.
+
+`className` merges onto the part it is passed to. Section surface, radius,
+and motion come from `Collapsible`; set `collapsibleTheme` on the accordion
+and the variables inherit. `accordionTheme` maps `gap` to `--accordion-gap`,
+the space between sections. The group sets `data-slot="accordion"` and
+`data-type="single"` or `"multiple"`. Each section keeps the Collapsible
+slots.
+
 ### Adapting Button to a design system
 
 Every design decision is a CSS variable, so a design system, or an agent

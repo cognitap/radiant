@@ -5,6 +5,11 @@ import {
   Checkbox,
   checkboxTheme,
   Field,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  accordionTheme,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -28,6 +33,7 @@ import {
   type CheckboxProps,
   type FieldProps,
   type InputProps,
+  type AccordionProps,
   type CollapsibleProps,
   type DialogContentProps,
   type DialogProps,
@@ -219,6 +225,50 @@ createElement(
 
 // @ts-expect-error Collapsible theme keys are a closed set.
 collapsibleTheme({ panel: '1rem' })
+
+createElement('div', { style: accordionTheme({ gap: '0.5rem' }) })
+
+const accordionProps: AccordionProps = {
+  type: 'single',
+  value: 'shipping',
+  defaultValue: null,
+  disabled: false,
+  onValueChange(value: string | null) {
+    void value
+  }
+}
+createElement(
+  Accordion,
+  accordionProps,
+  createElement(
+    AccordionItem,
+    { value: 'shipping', disabled: true },
+    createElement(AccordionTrigger, { level: 3 }, 'Shipping'),
+    createElement(AccordionContent, null, 'Ships in two days.')
+  )
+)
+createElement(
+  Accordion,
+  {
+    type: 'multiple',
+    value: ['shipping'],
+    onValueChange(value: string[]) {
+      void value
+    }
+  },
+  createElement(
+    AccordionItem,
+    { value: 'shipping' },
+    createElement(AccordionTrigger, { level: null }, 'Shipping')
+  )
+)
+
+// @ts-expect-error A single accordion value is one section, not a list.
+const invalidAccordion: AccordionProps = { type: 'single', value: ['shipping'] }
+createElement(Accordion, invalidAccordion)
+
+// @ts-expect-error Accordion theme keys are a closed set.
+accordionTheme({ radius: '1rem' })
 
 // @ts-expect-error The dialog open attribute is owned by showModal.
 const invalidDialog: DialogContentProps = { open: true }
