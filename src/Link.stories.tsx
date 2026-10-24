@@ -1,6 +1,51 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button, Link, type LinkProps } from './index.js'
+import { expect, userEvent, within } from 'storybook/test'
+import { Button, Link, type LinkProps, type LinkRenderProps } from './index.js'
+
+// This belongs to the consumer router, not Link: an ordinary same-origin click
+// may route in the application while other activations keep native navigation.
+function RouterAnchor({
+  navigate,
+  onClick,
+  href,
+  target,
+  download,
+  children,
+  ...props
+}: LinkRenderProps & {
+  navigate: (href: string) => void
+}) {
+  return (
+    <a
+      {...props}
+      href={href}
+      target={target}
+      download={download}
+      onClick={event => {
+        onClick?.(event)
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          (target && target !== '_self') ||
+          (download !== undefined && download !== false) ||
+          !href ||
+          new URL(href, event.currentTarget.ownerDocument.baseURI).origin !==
+            event.currentTarget.ownerDocument.location.origin
+        )
+          return
+        event.preventDefault()
+        navigate(href)
+      }}
+    >
+      {children}
+    </a>
+  )
+}
 
 function LinkDestination({
   args,
@@ -16,6 +61,7 @@ function LinkDestination({
   router?: boolean
 }) {
   const id = useId()
+  const [route, setRoute] = useState<string | null>(null)
 
   return (
     <div style={{ display: 'grid', gap: '1.25rem', maxWidth: '24rem' }}>
@@ -27,19 +73,18 @@ function LinkDestination({
           render={
             args.render ??
             (router
-              ? ({ children, ...props }) => (
-                  <a
-                    data-router-link=""
+              ? props => (
+                  <RouterAnchor
                     {...props}
-                  >
-                    {children}
-                  </a>
+                    navigate={setRoute}
+                  />
                 )
               : undefined)
           }
         />
         {continuation}
       </p>
+      {router ? <output>{route ? 'Guide opened.' : 'Guide not opened yet.'}</output> : null}
       <section
         id={`${id}-destination`}
         tabIndex={-1}
@@ -163,6 +208,22 @@ export const Composition: Story = {
 
 export const Customisation: Story = {
   args: { children: 'Routed docs' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A consumer-owned router forwards the resolved anchor props and ref. It calls onClick once before routing; cancellation, modified clicks, target and download keep their native meanings.'
+      }
+    }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const anchor = canvas.getByRole('link', { name: 'Routed docs' })
+    await expect(anchor).toHaveAttribute('data-slot', 'link')
+    await expect(canvas.getByRole('status')).toHaveTextContent('Guide not opened yet.')
+    await userEvent.click(anchor)
+    await expect(canvas.getByRole('status')).toHaveTextContent('Guide opened.')
+  },
   render: args => (
     <LinkDestination
       args={args}

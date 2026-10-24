@@ -4,6 +4,19 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- **Breaking: Link replacement contract (DEV-118).** `render` returns one
+  compatible `ReactElement`; null, text, arrays, fragments and direct native
+  hosts other than anchors are rejected. Return your router element directly
+  and forward its resolved native props to one anchor. `LinkRenderProps` now
+  exposes the real anchor ref and required, typed resolved presentation attributes.
+- Link protects its computed identity and presentation attributes from caller
+  overrides. Native handlers/attributes/ref and merged presentation reach
+  default and router anchors unchanged, including React callback-ref cleanup.
+- Real Chromium checks cover Link click/Enter/Space, form behaviour, consumer
+  cancellation, router interception, modified/middle-click tabs, external
+  targets and downloads in Light/Dark. Storybook's router example now performs
+  visible navigation and verifies it under every theme/mode.
+
 - **Breaking: action presentation API (DEV-117).** Button and action-shaped
   Link use `variant="solid|soft|outline|ghost"`, `tone="accent|neutral|warning|danger"`
   and `controlSize="small|medium|large"`. Button defaults to solid/accent/medium;

@@ -102,6 +102,31 @@ own link component:
 
 The adapter must forward `href`, `className`, and `children`, and keep native
 anchor semantics. When `render` is absent, `Link` renders a plain `<a>`.
+Adapt router-specific destination props inside your adapter, and forward native
+attributes and the ref to its final anchor.
+
+`LinkRenderProps` includes the native anchor `ref` (object or callback, including
+React's cleanup return), handlers, style, accessibility attributes and resolved
+presentation. Forward that ref to the same anchor; Link adds no ref wrapper or
+activation handler. Caller classes merge after defaults and caller style wins.
+Identity and presentation attributes are protected: `data-slot="link"`,
+`data-variant`, `data-tone` and `data-control-size` reflect the actual props.
+
+A router adapter calls the supplied `onClick` once before its own navigation,
+and honours `event.defaultPrevented`. It only intercepts the navigation its
+router owns: modified/middle clicks, a different target, downloads and external
+URLs must retain browser behaviour. Native click/Enter navigates; Space keeps
+anchor behaviour. Links never acquire Button's disabled, pending or form-submit
+semantics. `external` supplies `_blank` and `noopener noreferrer` only when the
+corresponding attributes are omitted; explicit `target` and `rel` win.
+
+**Breaking replacement contract:** `render` must return one anchor element or
+one router component that forwards all resolved props/ref to an anchor. Null,
+text, arrays, fragments and other direct native hosts now throw a descriptive
+error; the return type is `ReactElement`. Link cannot inspect a router
+component's implementation, so preserving the anchor remains the adapter's
+responsibility. Migrate a fragment/wrapper by returning the router element
+directly and placing surrounding layout outside Link.
 
 ### Action API migration (breaking)
 

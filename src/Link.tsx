@@ -1,4 +1,10 @@
-import type { AnchorHTMLAttributes, ComponentProps, CSSProperties, ReactNode } from 'react'
+import {
+  Fragment,
+  isValidElement,
+  type ComponentProps,
+  type CSSProperties,
+  type ReactElement
+} from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
 import { actionTone, actionVariants } from './actionStyles.js'
@@ -33,12 +39,11 @@ type LinkVariants = VariantProps<typeof linkVariants>
 
 export type LinkVariant = NonNullable<LinkVariants['variant']> | ButtonVariant
 
-export type LinkRenderProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-  children?: ReactNode
-  'data-slot'?: string
-  'data-variant'?: string
-  'data-tone'?: string
-  'data-control-size'?: string
+export type LinkRenderProps = ComponentProps<'a'> & {
+  'data-slot': 'link'
+  'data-variant': LinkVariant
+  'data-tone': Tone
+  'data-control-size': ControlSize
 }
 
 export type LinkProps = ComponentProps<'a'> & {
@@ -46,7 +51,7 @@ export type LinkProps = ComponentProps<'a'> & {
   tone?: Tone
   controlSize?: ControlSize
   external?: boolean
-  render?: (props: LinkRenderProps) => ReactNode
+  render?: (props: LinkRenderProps) => ReactElement
 }
 
 export type LinkTheme = NonNullable<ThemeComponentOverrides['link']>
@@ -69,6 +74,7 @@ export function Link({
   ...props
 }: LinkProps) {
   const anchorProps: LinkRenderProps = {
+    ...props,
     href,
     target: target ?? (external ? '_blank' : undefined),
     rel: rel ?? (external ? 'noopener noreferrer' : undefined),
@@ -80,11 +86,20 @@ export function Link({
     'data-variant': variant,
     'data-tone': tone,
     'data-control-size': controlSize,
-    ...props,
     children
   }
   if (render) {
-    return render(anchorProps)
+    const element = render(anchorProps)
+    if (
+      !isValidElement(element) ||
+      element.type === Fragment ||
+      (typeof element.type === 'string' && element.type !== 'a')
+    ) {
+      throw new Error(
+        'Link render must return one anchor or a component that forwards props to an anchor.'
+      )
+    }
+    return element
   }
   return <a {...anchorProps}>{children}</a>
 }

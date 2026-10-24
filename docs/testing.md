@@ -38,6 +38,12 @@ server hydration in light and dark. It uses Vitest's Playwright-backed input,
 because synthetic keyboard events in a story cannot prove native Escape, Tab,
 summary activation, or `method="dialog"` behavior.
 
+Link scenarios also observe actual new-tab and download events. The platform
+project's narrow server commands perform trusted clicks, return the observed
+URL/filename, and close the new page/delete the download. Destinations are local
+fixtures; no router dependency or external site is required. These checks prove
+browser navigation rather than inferring it from event flags or DOM attributes.
+
 JUnit results identify the preset/mode project and story in
 `output/browser/junit.xml`. Failure screenshots are saved under
 `output/browser/attachments/`. CI uploads both as **browser-results**, even

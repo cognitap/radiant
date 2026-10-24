@@ -8,6 +8,11 @@ Shared themes and default Dialog action composition have landed in the
 foundation/Storybook work. DEV-117 implements the action vocabulary below;
 remaining family and replacement contracts still require their migrations.
 
+DEV-118 implements Link's resolved native anchor/ref replacement contract.
+Adapters return one compatible element and preserve the forwarded props/ref;
+invalid direct return shapes now fail explicitly. See the README's Link section
+for migration details. Dialog replacement presentation remains with DEV-119.
+
 The baseline is the ten current families in `src/index.ts`: Button, Link, Field,
 Input, Checkbox, RadioGroup (including Radio), Dialog, Collapsible, Accordion,
 and Card. Preserve flat PascalCase component exports and their named parts.
