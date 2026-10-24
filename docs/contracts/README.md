@@ -10,6 +10,8 @@ contracts below remain targets for their owning stages. DEV-48 now implements
 the [shared React runtime seams](../react-bindings.md); family-specific public
 anatomy and replacement migrations remain with their named owners. DEV-117 now
 implements the Button/Link action vocabulary and default Dialog action props.
+DEV-118 now implements Link's native anchor/ref replacement contract; Dialog's
+fully resolved replacement presentation remains with DEV-119.
 
 Read [the glossary](../../GLOSSARY.md) for terminology,
 [the migration inventory](./migration.md) for current-to-target mappings, and

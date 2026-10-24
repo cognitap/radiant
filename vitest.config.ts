@@ -3,6 +3,7 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 import tailwindcss from '@tailwindcss/vite'
+import { observeLinkDownload, observeLinkPopup } from './tests/browser/navigationCommands.js'
 import { themes } from './src/themes/index.js'
 
 export default defineConfig({
@@ -45,6 +46,7 @@ export default defineConfig({
           name: 'browser-platform',
           include: ['tests/browser/**/*.test.tsx'],
           browser: {
+            commands: { observeLinkDownload, observeLinkPopup },
             enabled: true,
             provider: playwright(),
             headless: true,

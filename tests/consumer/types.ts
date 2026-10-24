@@ -57,6 +57,7 @@ import {
   type RadioGroupProps,
   type RadioProps,
   type LinkProps,
+  type LinkRenderProps,
   type Theme
 } from '@cognitap/radiant'
 
@@ -107,6 +108,29 @@ const linkProps: LinkProps = {
   ref: createRef<HTMLAnchorElement>()
 }
 createElement(Link, linkProps)
+
+createElement(Link, {
+  ref: createRef<HTMLAnchorElement>(),
+  render: resolved => {
+    const native: LinkRenderProps = resolved
+    const ref: LinkProps['ref'] = native.ref
+    void ref
+    // @ts-expect-error Presentation props have been resolved into native props.
+    void native.tone
+    return createElement('a', native)
+  }
+})
+// @ts-expect-error A replacement must return one element.
+createElement(Link, { render: () => 'text' })
+// @ts-expect-error A replacement cannot disappear.
+createElement(Link, { render: () => null })
+// @ts-expect-error A replacement is not a list of elements.
+createElement(Link, { render: () => [createElement('a')] })
+// @ts-expect-error Link has native anchor semantics, without disabled state.
+const disabledLink: LinkProps = { disabled: true }
+// @ts-expect-error Pending actions belong to Button.
+const pendingLink: LinkProps = { pending: true }
+void [disabledLink, pendingLink]
 
 // @ts-expect-error Link variants are a closed set.
 const invalidLinkVariant: LinkProps = { variant: 'button' }
