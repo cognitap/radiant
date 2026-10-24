@@ -25,7 +25,7 @@ for (const key of [
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
-const { act, createElement, createRef, useState } = await import('react')
+const { act, createElement, createRef, useEffect, useState } = await import('react')
 const { createRoot, hydrateRoot } = await import('react-dom/client')
 const { renderToString } = await import('react-dom/server')
 const { useForm } = await import('@tanstack/react-form')
@@ -156,7 +156,9 @@ test('TanStack Form drives value, blur, submit, and reset through Input', async 
         seen.submitted = value
       }
     })
-    seen.submit = () => form.handleSubmit()
+    useEffect(() => {
+      seen.submit = () => form.handleSubmit()
+    })
     return createElement(
       'form',
       {

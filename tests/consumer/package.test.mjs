@@ -7,6 +7,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import {
   Button,
   buttonTheme,
+  Checkbox,
+  checkboxTheme,
   Field,
   fieldTheme,
   Input,
@@ -443,6 +445,74 @@ test('inputTheme maps typed settings to Input variables', () => {
   )
 })
 
+test('checkboxes preserve name, value, and checked state', () => {
+  const html = renderToStaticMarkup(
+    createElement(Checkbox, {
+      label: 'Email',
+      name: 'channels',
+      value: 'email',
+      defaultChecked: true
+    })
+  )
+  assert.match(html, /<label\b/)
+  assert.match(html, /type="checkbox"/)
+  assert.match(html, /name="channels"/)
+  assert.match(html, /value="email"/)
+  assert.match(html, /\schecked=""/)
+  assert.match(html, /Email/)
+  assert.match(html, /\sdata-slot="checkbox"/)
+  assert.doesNotMatch(html, /\sindeterminate=/)
+  assert.doesNotMatch(html, /\stype="(?!checkbox")/)
+})
+
+test('a checkbox takes a single-control Field name and keeps group identity', () => {
+  const single = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Accept terms', required: true, error: 'Required' },
+      createElement(Checkbox, { name: 'accept', id: 'custom' })
+    )
+  )
+  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(single)?.[1]
+  assert.ok(id)
+  assert.notEqual(id, 'custom')
+  assert.match(single, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
+  assert.match(single, /aria-invalid="true"/)
+  assert.match(single, /\srequired=""/)
+
+  const group = renderToStaticMarkup(
+    createElement(
+      Field,
+      { layout: 'group', label: 'Notifications', description: 'Choose any' },
+      createElement(Checkbox, { label: 'Email', name: 'channels', value: 'email' })
+    )
+  )
+  assert.match(group, /^<fieldset\b/)
+  assert.match(group, /data-slot="checkbox-label"/)
+  assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
+})
+
+test('replacing appearance leaves the checkbox class and element', () => {
+  const html = renderToStaticMarkup(
+    createElement(Checkbox, { label: 'Email', className: 'appearance-auto' })
+  )
+  const classAttribute = /<input\b[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bappearance-auto\b/)
+  assert.doesNotMatch(classAttribute, /\bappearance-none\b/)
+  assert.match(html, /type="checkbox"/)
+})
+
+test('checkboxTheme maps typed settings to Checkbox variables', () => {
+  assert.deepEqual(
+    checkboxTheme({ size: '1.25rem', checkedBackground: 'oklch(0.5 0.2 250)', mark: 'white' }),
+    {
+      '--checkbox-size': '1.25rem',
+      '--checkbox-checked-background': 'oklch(0.5 0.2 250)',
+      '--checkbox-mark': 'white'
+    }
+  )
+})
+
 test('linkTheme maps typed settings to Link variables', () => {
   assert.deepEqual(
     linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
@@ -483,6 +553,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Button.tsx',
     'src/Field.tsx',
     'src/Input.tsx',
+    'src/Checkbox.tsx',
     'dist/library/Button.js',
     'cn',
     'package.json'
