@@ -31,6 +31,7 @@ const preview: Preview = {
   initialGlobals: { theme: 'radiant', mode: 'system' },
   decorators: [withTheme],
   parameters: {
+    a11y: { test: 'error' },
     docs: { container: ThemedDocsContainer },
     layout: 'centered',
     controls: {

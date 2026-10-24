@@ -307,7 +307,8 @@ selected radio, or the first enabled radio when none is selected, and the next
 Tab leaves the group. Arrow keys move among enabled radios that share the name
 and skip a disabled choice. The group does not set `role="radiogroup"`, and
 it does not put `aria-invalid` or `aria-required` on the radios. The fieldset
-owns those relationships. A required group sets the native `required`
+owns its description and invalid state; `aria-required` is not supported on a
+fieldset. A required group sets each radio's native `required`
 attribute, and an invalid group paints the disks from the field's invalid
 state.
 
@@ -691,6 +692,7 @@ pinned in `package.json`:
 nvm install && nvm use
 npm install --global pnpm
 pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
 pnpm storybook
 ```
 
@@ -700,23 +702,26 @@ across component stories and Docs. Defaults are Radiant and System.
 See the [Storybook guide](docs/storybook.md) for the shared story
 structure and verification workflow.
 
-| Command                | Purpose                                                         |
-| ---------------------- | --------------------------------------------------------------- |
-| `pnpm storybook`       | Develop components in Storybook.                                |
-| `pnpm build`           | Build JavaScript, declarations, and CSS into `dist/library`.    |
-| `pnpm watch`           | Rebuild on change, except `reset.css` (run `pnpm build` first). |
-| `pnpm build:storybook` | Build static Storybook into `dist/storybook`.                   |
-| `pnpm lint`            | Run Oxlint, including accessibility rules.                      |
-| `pnpm format`          | Format with Oxfmt (`format:check` to check only).               |
-| `pnpm typecheck`       | Check TypeScript.                                               |
-| `pnpm test`            | Run style tests and verify the packed, installed package.       |
-| `pnpm test:package`    | Verify the packed, installed package only.                      |
-| `pnpm check`           | Run formatting, lint, types, tests, and builds, as CI does.     |
-| `pnpm release:prepare` | Pack and verify a release candidate, then dry-run publishing.   |
+| Command                | Purpose                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `pnpm storybook`       | Develop components in Storybook.                                                    |
+| `pnpm build`           | Build JavaScript, declarations, and CSS into `dist/library`.                        |
+| `pnpm watch`           | Rebuild on change, except `reset.css` (run `pnpm build` first).                     |
+| `pnpm build:storybook` | Build static Storybook into `dist/storybook`.                                       |
+| `pnpm lint`            | Run Oxlint, including accessibility rules.                                          |
+| `pnpm format`          | Format with Oxfmt (`format:check` to check only).                                   |
+| `pnpm typecheck`       | Check TypeScript.                                                                   |
+| `pnpm test`            | Run style tests and verify the packed, installed package.                           |
+| `pnpm test:package`    | Verify the packed, installed package only.                                          |
+| `pnpm test:browser`    | Run Storybook plays and axe in every theme/mode, plus native browser scenarios.     |
+| `pnpm check`           | Run formatting, lint, types, runtime/package/browser tests, and builds, as CI does. |
+| `pnpm release:prepare` | Pack and verify a release candidate, then dry-run publishing.                       |
 
 Package verification installs the archive with npm, so it needs network access.
 A Husky pre-commit hook formats staged files with Oxfmt.
 [CI](.github/workflows/ci.yml) runs `pnpm check`.
+See [verification conventions](docs/testing.md) for focused browser runs,
+failure artifacts, and the evidence required by migration issues.
 
 Modules must stay free of import-time side effects, and client-dependent modules
 need their own `use client` directive. Add `*.stories.tsx` next to each component,

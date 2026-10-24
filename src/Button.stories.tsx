@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { fn } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import { Button, Link, type ButtonProps, type ButtonVariant, type ThemeStyle } from './index.js'
 
 const variants: ButtonVariant[] = [
@@ -113,6 +113,19 @@ function ButtonComposition(args: ButtonProps) {
 }
 
 export const States: Story = {
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const unavailable = canvas.getByRole('button', { name: 'Unavailable' })
+    const saving = canvas.getByRole('button', { name: 'Saving' })
+    await expect(unavailable).toBeDisabled()
+    await expect(saving).toHaveAttribute('aria-busy', 'true')
+    await expect(saving).not.toBeDisabled()
+    await userEvent.click(unavailable)
+    await userEvent.click(saving)
+    await userEvent.keyboard('{Enter} ')
+    await expect(saving).toHaveFocus()
+    await expect(args.onClick).not.toHaveBeenCalled()
+  },
   render: args => (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
       <Button
@@ -132,6 +145,18 @@ export const States: Story = {
 }
 
 export const Composition: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const next = canvas.getByRole('button', { name: 'Next' })
+    await expect(next).toHaveAttribute('type', 'button')
+    await userEvent.click(next)
+    await userEvent.keyboard('{Enter}')
+    await expect(canvas.getByRole('status')).toHaveTextContent('Next activated 2 times')
+    await userEvent.tab()
+    await expect(canvas.getByRole('button', { name: 'Close' })).toHaveFocus()
+    await userEvent.keyboard(' ')
+    await expect(canvas.getByRole('status')).toHaveTextContent('Close activated 1 time')
+  },
   render: args => <ButtonComposition {...args} />
 }
 

@@ -37,5 +37,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check formatting, lint, types, package and Storybook
+      - name: Install Chromium and system dependencies
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Check library, package, Storybook interactions and accessibility
         run: pnpm check
+
+      - name: Save browser results and failure screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: browser-results
+          path: output/browser/
+          if-no-files-found: ignore
+          retention-days: 14

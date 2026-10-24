@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, within } from 'storybook/test'
 import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Checkbox, Field, type ThemeStyle } from './index.js'
 
@@ -107,7 +108,26 @@ export const States: Story = {
   )
 }
 
-export const Composition: Story = { render: () => <NativeForm /> }
+export const Composition: Story = {
+  render: () => <NativeForm />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const email = canvas.getByRole('checkbox', { name: 'Email' })
+    const sms = canvas.getByRole('checkbox', { name: 'SMS' })
+    await expect(email).toBeChecked()
+    await expect(sms).not.toBeChecked()
+    await userEvent.click(email)
+    await userEvent.tab()
+    await expect(sms).toHaveFocus()
+    await userEvent.keyboard(' ')
+    await expect(sms).toBeChecked()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await expect(canvas.getByText('sms', { exact: true })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }))
+    await expect(email).toBeChecked()
+    await expect(sms).not.toBeChecked()
+  }
+}
 
 export const Customisation: Story = {
   render: args => {
