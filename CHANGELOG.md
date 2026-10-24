@@ -4,12 +4,26 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Checkbox` is a native checkbox. Uncontrolled boxes use `defaultChecked` and
+  `form.reset()`. Controlled boxes use `checked` and `onChange`. `indeterminate`
+  is a visual mixed state on the DOM property, not a submitted value. A `label`
+  wraps the input so the text toggles it, and a single-control Field supplies
+  the accessible name. `checkboxTheme` maps typed settings to `--checkbox-*`
+  variables. Space activation was checked in Storybook. Screen reader checks
+  were not run.
+- `Input` is a native text field. Uncontrolled inputs use `defaultValue` and
+  `form.reset()`. Controlled inputs use `value` and `onChange`; `onBlur` stays
+  the native event. Inside Field it takes the label, description, and error
+  relationships. `inputTheme` maps typed settings to `--input-*` variables, which
+  fall back to the button metrics. The native `size` attribute stays the
+  character width. A plain form and a TanStack Form 1.33.5 reference (value,
+  change, blur, reset) were verified. TanStack Form is not a package dependency.
+  Keyboard, focus, and screen reader checks were not run.
 - `Field` is the form anatomy for one control or a group. A host control receives
   its label, description, and error relationships; component controls read them
   with `useField()`. The consumer owns the error message. `fieldTheme` maps typed
   settings to `--field-*` variables. Keyboard, focus, and screen reader checks
-  were not run. A native form submit was verified; a TanStack Form adapter was
-  not, because that contract is still deferred.
+  were not run. A native form submit was verified.
 - `Link` joins the library: a native anchor for navigation with `inline`,
   `subtle`, and `button` variants (the button form reuses Button's variants via
   `tone`, `size`, and `radius`). `external` adds a safe target and rel when the

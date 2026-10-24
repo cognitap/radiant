@@ -130,8 +130,8 @@ import { Field } from '@cognitap/radiant'
 
 A single host control (`input`, `textarea`, `select`) receives `id`,
 `required`, `disabled`, `aria-invalid`, `aria-required`, and
-`aria-describedby`. The label uses that `id`. A component child, such as the
-upcoming Input, calls `useField()` and forwards `controlProps`. A render
+`aria-describedby`. The label uses that `id`. A component child calls
+`useField()` and forwards `controlProps`. `Input` does this already. A render
 function receives the same props, for an adapter that is not a host element:
 
 ```tsx
@@ -180,11 +180,122 @@ and required marker are all consumer content.
 `field-error`, and `field-required`. Style a control from the field, for
 example `[data-slot="field"][data-invalid] input`.
 
-A native `<form>` is the verified integration: leave the input uncontrolled,
-give it a `name`, and on submit pass the message back through `error`.
-TanStack Form is the compatibility reference named in the charter. The detailed
-form-library contract is still deferred, so this release does not claim a
-TanStack adapter.
+A native `<form>` leaves the control uncontrolled: give it a `name`, and on
+submit pass the message back through `error`. Text controls follow the value
+contract documented on Input.
+
+### Input
+
+`Input` is a native `<input>` with the text-field metrics. It keeps every
+native attribute, including `name`, `type`, `autoComplete`, `placeholder`,
+`size` (the character width), `defaultValue`, `value`, `onChange`, `onBlur`,
+and `ref`. Inside a single-control Field it takes the field id, required,
+disabled, and description relationships. Inside a group it keeps its own
+identity, because the fieldset owns the description.
+
+```tsx
+import { Field, Input } from '@cognitap/radiant'
+
+;<Field
+  label="Email"
+  description="Work address"
+  error={error}
+  required
+>
+  <Input
+    name="email"
+    type="email"
+    autoComplete="email"
+    defaultValue="ada@example.com"
+  />
+</Field>
+```
+
+| Mode         | How the value moves                                                                    | Reset                                                                                             |
+| ------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Uncontrolled | Omit `value`. `defaultValue` is the initial value. Read it from `FormData` or the ref. | `form.reset()` restores `defaultValue`.                                                           |
+| Controlled   | Pass `value` and update it from `onChange`.                                            | The browser reset does not change React state. Reset the state, or call the form library's reset. |
+
+`onChange` and `onBlur` are the native events. Radiant does not store the value
+and does not validate on blur. The native `size` attribute stays the character
+width. Visual size is `--input-height`, padding, and font tokens, which fall
+back to the button metrics so a theme sizes both together.
+
+`inputTheme` maps `height`, `padding`, `fontFamily`, `fontSize`, `fontWeight`,
+`color`, `background`, `borderWidth`, `borderStyle`, `borderColor`, `radius`,
+`cornerShape`, `shadow`, `placeholder`, `invalidBorder`, `disabledBackground`,
+`focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. An invalid field
+uses the destructive border. The element sets `data-slot="input"`.
+
+TanStack Form is a reference integration, not a dependency. Drive Input in
+controlled mode and pass the library's message to Field:
+
+```tsx
+<form.Field
+  name="email"
+  validators={{ onBlur: ({ value }) => (value.trim() ? undefined : 'Enter an email.') }}
+>
+  {field => (
+    <Field
+      label="Email"
+      error={field.state.meta.errors[0]}
+    >
+      <Input
+        name={field.name}
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={event => field.handleChange(event.target.value)}
+      />
+    </Field>
+  )}
+</form.Field>
+```
+
+Checkbox, radio, and file inputs are separate families. `type` still accepts
+any native value.
+
+### Checkbox
+
+`Checkbox` is a native checkbox. `type` is always `checkbox`. The visible box
+is drawn on that input, so keyboard activation, form submission, reset, and
+label clicks stay the platform's.
+
+```tsx
+import { Checkbox, Field } from '@cognitap/radiant'
+
+;<Checkbox label="Email" name="channels" value="email" defaultChecked />
+
+<Field label="Notifications" layout="group" description="Choose any">
+  <Checkbox label="Email" name="channels" value="email" />
+  <Checkbox label="SMS" name="channels" value="sms" />
+</Field>
+```
+
+| Mode         | How the check moves                                    | Reset                                        |
+| ------------ | ------------------------------------------------------ | -------------------------------------------- |
+| Uncontrolled | Omit `checked`. `defaultChecked` is the initial check. | `form.reset()` restores `defaultChecked`.    |
+| Controlled   | Pass `checked` and update it from `onChange`.          | A browser reset does not change React state. |
+
+`indeterminate` is the mixed state. It is a visual mark for a partial
+selection, applied to the DOM property after mount. It is not a third submitted
+value and not an HTML attribute. The form submits `checked`. A checked box
+submits its `value`, or `on` when `value` is omitted. An unchecked box submits
+nothing.
+
+`label` wraps the input, so the text toggles it. Inside a single-control Field
+the field id wins, and that label is the accessible name. Inside a group, each
+checkbox keeps the `label` beside it and the fieldset keeps the caption. Pass
+one name for the option, not both.
+
+`className` merges onto the input. Replacing `appearance-none` puts the native
+glyph back; the input stays in the tab order and in the form. The check and
+dash are decorative and do not receive clicks.
+
+`checkboxTheme` maps `size`, `radius`, `cornerShape`, `borderWidth`,
+`borderStyle`, `borderColor`, `background`, `checkedBackground`,
+`checkedBorder`, `mark`, `invalidBorder`, `gap`, `labelColor`, `labelSize`,
+`disabledBorder`, `disabledBackground`, `focusColor`, `focusWidth`,
+`focusOffset`, and `focusStyle`. The input sets `data-slot="checkbox"`.
 
 ### Adapting Button to a design system
 

@@ -2,15 +2,21 @@ import { createElement, createRef } from 'react'
 import {
   Button,
   buttonTheme,
+  Checkbox,
+  checkboxTheme,
   Field,
   fieldTheme,
+  Input,
+  inputTheme,
   Link,
   linkTheme,
   themes,
   useField,
   type ButtonProps,
   type ButtonTheme,
+  type CheckboxProps,
   type FieldProps,
+  type InputProps,
   type LinkProps,
   type Theme
 } from '@cognitap/radiant'
@@ -89,3 +95,39 @@ fieldTheme({ gapSize: '1rem' })
 // @ts-expect-error Field layouts are a closed set.
 const invalidFieldLayout: FieldProps = { layout: 'inline', label: 'Email' }
 createElement(Field, invalidFieldLayout)
+
+createElement('div', { style: inputTheme({ height: '3rem', radius: '999px' }) })
+
+const inputProps: InputProps = {
+  name: 'email',
+  type: 'email',
+  autoComplete: 'email',
+  defaultValue: 'ada@example.com',
+  size: 24,
+  required: true,
+  ref: createRef<HTMLInputElement>()
+}
+createElement(Input, inputProps)
+
+// @ts-expect-error Input theme keys are a closed set.
+inputTheme({ heightPx: '3rem' })
+
+createElement('div', { style: checkboxTheme({ size: '1.25rem', mark: 'white' }) })
+
+const checkboxProps: CheckboxProps = {
+  name: 'channels',
+  value: 'email',
+  defaultChecked: true,
+  indeterminate: true,
+  label: 'Email',
+  disabled: false,
+  ref: createRef<HTMLInputElement>()
+}
+createElement(Checkbox, checkboxProps)
+
+// @ts-expect-error Checkbox theme keys are a closed set.
+checkboxTheme({ boxSize: '1rem' })
+
+// @ts-expect-error Checkbox type is fixed.
+const invalidCheckbox: CheckboxProps = { type: 'radio' }
+createElement(Checkbox, invalidCheckbox)
