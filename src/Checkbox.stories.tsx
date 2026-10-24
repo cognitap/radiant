@@ -69,6 +69,14 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 export const States: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Checked, mixed, disabled, and explicitly invalid checkbox states. aria-invalid reflects consumer-owned validation; Group shows Field descriptions, errors, and required relationships.'
+      }
+    }
+  },
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       <Checkbox
@@ -88,13 +96,11 @@ export const States: Story = {
         defaultChecked
         name="disabled"
       />
-      <Field
-        label="Required agreement"
-        error="Accept the agreement."
-        required
-      >
-        <Checkbox name="agreement" />
-      </Field>
+      <Checkbox
+        label="Invalid"
+        name="invalid"
+        aria-invalid
+      />
     </div>
   )
 }

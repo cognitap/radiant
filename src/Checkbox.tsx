@@ -87,7 +87,7 @@ export function Checkbox({
   const control = field?.layout === 'control' ? field.controlProps : null
   const invalid = ariaInvalid ?? control?.['aria-invalid']
   const controlNode = (
-    <span className="inline-grid shrink-0">
+    <span className="inline-grid w-fit shrink-0">
       <input
         {...control}
         {...props}
