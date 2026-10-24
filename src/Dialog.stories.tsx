@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, waitFor } from 'storybook/test'
 import {
   Button,
   Dialog,
@@ -39,16 +40,7 @@ function ProfileForm() {
           </Field>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <Button type="submit">Save</Button>
-            <DialogClose
-              render={props => (
-                <Button
-                  {...props}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              )}
-            />
+            <DialogClose variant="outline">Cancel</DialogClose>
           </div>
         </DialogContent>
       </Dialog>
@@ -134,7 +126,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native `<dialog>`: Dialog owns open/defaultOpen and onOpenChange; DialogTrigger and DialogClose request changes, while DialogContent owns the dialog host/ref. DialogTitle and DialogDescription provide accessible relationships. Parts expose dialog-trigger, dialog-close, dialog, dialog-title and dialog-description slots. Native showModal supplies the modal layer; no portal or body scroll lock is added.'
+          'A native `<dialog>`: Dialog owns open/defaultOpen and onOpenChange; DialogTrigger and DialogClose compose Button by default and accept its presentation and pending props. DialogContent owns the dialog host/ref. DialogTitle and DialogDescription provide accessible relationships. Action slots include button plus dialog-trigger or dialog-close; other parts expose dialog, dialog-title and dialog-description. Native showModal supplies the modal layer; no portal or body scroll lock is added.'
       }
     }
   }
@@ -144,6 +136,45 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    await waitFor(async () => {
+      const view = canvasElement.ownerDocument.defaultView!
+      const reference = canvasElement.querySelector<HTMLButtonElement>('[data-slot="button"]')
+      await expect(reference).not.toBeNull()
+      const expected = view.getComputedStyle(reference!)
+      for (const slot of ['dialog-trigger', 'dialog-close']) {
+        const action = canvasElement.querySelector<HTMLButtonElement>(`[data-slot~="${slot}"]`)
+        await expect(action).not.toBeNull()
+        const actual = view.getComputedStyle(action!)
+        const properties = [
+          'font-family',
+          'font-size',
+          'font-weight',
+          'letter-spacing',
+          'text-transform',
+          'border-top-width',
+          'border-top-style'
+        ]
+        if (
+          !action!.matches(':hover, :active, :focus-visible') &&
+          !reference!.matches(':hover, :active')
+        ) {
+          properties.push(
+            'background-color',
+            'background-image',
+            'color',
+            'box-shadow',
+            'border-radius',
+            'corner-shape',
+            'backdrop-filter'
+          )
+        }
+        for (const property of properties) {
+          await expect(actual.getPropertyValue(property)).toBe(expected.getPropertyValue(property))
+        }
+      }
+    })
+  },
   render: () => (
     <Dialog>
       <DialogTrigger>Edit profile</DialogTrigger>
@@ -193,22 +224,13 @@ export const Customisation: Story = {
     docs: {
       description: {
         story:
-          'The current render callback adapts Dialog action props to Button; default action composition is tracked separately.'
+          'Use Button presentation props directly on Dialog actions. The close control demonstrates the existing native render callback with an explicit Button replacement; forward its props to one button.'
       }
     }
   },
   render: () => (
     <Dialog>
-      <DialogTrigger
-        render={props => (
-          <Button
-            {...props}
-            variant="outline"
-          >
-            Open narrow panel
-          </Button>
-        )}
-      />
+      <DialogTrigger variant="outline">Open narrow panel</DialogTrigger>
       <DialogContent style={{ width: '24rem' }}>
         <DialogTitle>Narrow panel</DialogTitle>
         <DialogDescription>Local geometry and explicit action replacement.</DialogDescription>

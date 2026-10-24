@@ -67,6 +67,22 @@ interaction corrections in this PR were included in the baseline inspection.
 
 ## Ongoing checks
 
+The initial audit missed Dialog's default action composition. Dialog still
+rendered a separate button recipe, while the theme comparison explicitly
+replaced its actions with Button. The audit verified theme rendering and
+interaction without comparing the default actions to Button, and incorrectly
+treated the known DEV-119 work as outside the visual review's scope.
+
+The follow-up removes that recipe: default DialogTrigger and DialogClose now
+compose Button, and the theme comparison uses those defaults. Dialog Default
+has a read-only rendered-style comparison against a canonical Button in the
+same scope. Its play rejects the old styling. Browser checks cover all eight
+themes in both modes, Canvas and Docs, including hover, press, keyboard focus,
+modal opening/closing, and focus restoration. Runtime tests cover presentation,
+pending/disabled guards, cancellation, refs, replacement compatibility, and
+compound part identities. A complete visual audit must include default
+composition; screenshot counts alone do not establish that contract.
+
 The existing comparison play checks canvases, component palettes, Sharp 3D
 effects, and nested Card control bounds. New read-only plays guard disabled selected indicators and the native
 Field customisation. Run these in a browser in addition to `pnpm check`, which

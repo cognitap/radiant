@@ -3,6 +3,7 @@
 import type { ComponentProps, CSSProperties, MouseEvent, ReactNode, Ref } from 'react'
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { cva } from 'class-variance-authority'
+import { Button, type ButtonProps } from './Button.js'
 import { cn } from './cn.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
@@ -48,25 +49,6 @@ const dialogDescriptionVariants = cva([
   'forced-colors:text-[CanvasText]'
 ])
 
-const dialogActionVariants = cva([
-  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)]',
-  'inline-flex cursor-pointer items-center justify-center',
-  'min-h-[var(--rad-control-medium-height,2.5rem)] px-[var(--rad-control-medium-padding-inline,1rem)]',
-  '[font-size:var(--rad-control-medium-font-size,0.875rem)] [font-weight:var(--rad-typography-label-weight,550)]',
-  'rounded-[var(--rad-dialog-radius,var(--rad-surface-radius,0.75rem))]',
-  '[corner-shape:var(--rad-dialog-corner-shape,var(--rad-surface-corner-shape,round))]',
-  '[border-width:var(--rad-control-border-width,1px)]',
-  '[border-style:var(--rad-control-border-style,solid)]',
-  '[border-color:var(--rad-color-border,oklch(0.885_0.005_286))]',
-  'bg-[var(--rad-color-surface,oklch(1_0_0))] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-dialog-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-dialog-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-dialog-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-dialog-focus-style,var(--rad-focus-style,solid))]',
-  'forced-colors:border-[ButtonText] forced-colors:text-[ButtonText]'
-])
-
 export type DialogProps = {
   open?: boolean
   defaultOpen?: boolean
@@ -96,8 +78,8 @@ export type DialogRenderProps = ComponentProps<'button'> & {
   'data-slot'?: string
 }
 
-export type DialogTriggerProps = Omit<ComponentProps<'button'>, 'children'> & {
-  children?: ReactNode
+export type DialogTriggerProps = ButtonProps & {
+  /** Explicit native replacement; Button presentation options configure the default host. */
   render?: (props: DialogRenderProps) => ReactNode
 }
 
@@ -107,10 +89,7 @@ export type DialogTitleProps = ComponentProps<'h2'>
 
 export type DialogDescriptionProps = ComponentProps<'p'>
 
-export type DialogCloseProps = Omit<ComponentProps<'button'>, 'children'> & {
-  children?: ReactNode
-  render?: (props: DialogRenderProps) => ReactNode
-}
+export type DialogCloseProps = DialogTriggerProps
 
 export type DialogTheme = NonNullable<ThemeComponentOverrides['dialog']>
 
@@ -169,24 +148,60 @@ export function Dialog({
   )
 }
 
-export function DialogTrigger({ render, className, children, ...props }: DialogTriggerProps) {
+function DialogAction({
+  action,
+  render,
+  variant,
+  size,
+  radius,
+  iconOnly,
+  fullWidth,
+  pending,
+  ...props
+}: DialogTriggerProps & { action: 'open' | 'close' }) {
   const dialog = useDialogContext()
   const buttonProps: DialogRenderProps = {
     ...props,
     type: props.type ?? 'button',
-    'aria-haspopup': 'dialog',
-    'aria-expanded': dialog.open,
-    'aria-controls': dialog.contentId,
-    className: render ? className : cn(dialogActionVariants(), className),
-    'data-slot': 'dialog-trigger',
+    ...(action === 'open'
+      ? {
+          'aria-haspopup': 'dialog',
+          'aria-expanded': dialog.open,
+          'aria-controls': dialog.contentId
+        }
+      : {}),
+    'aria-busy': pending || props['aria-busy'],
+    'data-slot': action === 'open' ? 'button dialog-trigger' : 'button dialog-close',
     onClick: event => {
+      if (pending || event.currentTarget.matches(':disabled')) {
+        event.preventDefault()
+        return
+      }
       props.onClick?.(event)
-      if (!event.defaultPrevented) dialog.setOpen(true)
-    },
-    children
+      if (!event.defaultPrevented) dialog.setOpen(action === 'open')
+    }
   }
   if (render) return render(buttonProps)
-  return <button {...buttonProps} />
+  return (
+    <Button
+      {...buttonProps}
+      variant={variant}
+      size={size}
+      radius={radius}
+      iconOnly={iconOnly}
+      fullWidth={fullWidth}
+      pending={pending}
+    />
+  )
+}
+
+export function DialogTrigger(props: DialogTriggerProps) {
+  return (
+    <DialogAction
+      {...props}
+      action="open"
+    />
+  )
 }
 
 export function DialogContent({
@@ -285,21 +300,13 @@ export function DialogDescription({ className, ...props }: DialogDescriptionProp
   )
 }
 
-export function DialogClose({ render, className, children, ...props }: DialogCloseProps) {
-  const dialog = useDialogContext()
-  const buttonProps: DialogRenderProps = {
-    ...props,
-    type: props.type ?? 'button',
-    className: render ? className : cn(dialogActionVariants(), className),
-    'data-slot': 'dialog-close',
-    onClick: event => {
-      props.onClick?.(event)
-      if (!event.defaultPrevented) dialog.setOpen(false)
-    },
-    children
-  }
-  if (render) return render(buttonProps)
-  return <button {...buttonProps} />
+export function DialogClose(props: DialogCloseProps) {
+  return (
+    <DialogAction
+      {...props}
+      action="close"
+    />
+  )
 }
 
 function assignRef(ref: Ref<HTMLDialogElement> | undefined, node: HTMLDialogElement | null) {

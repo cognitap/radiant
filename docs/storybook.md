@@ -71,6 +71,10 @@ initially open state.
 Use the existing **Accessibility** panel alongside keyboard, focus, and contrast
 checks. Automated accessibility checks cover only part of WCAG.
 
+Dialog Default compares its unadapted Trigger and Close with a canonical Button
+in the same scope. This guards the actual default call site; a comparison that
+manually replaces every action with Button would hide a broken default.
+
 The comparison story's play function checks the actual rendered canvases,
 component palettes, Sharp 3D borders/shadows, and controls inside Card content
 and footers. Checkbox and RadioGroup States
@@ -93,6 +97,11 @@ Review screenshots as well as dimensions and computed colors. Add narrow
 viewport checks, then exercise hover, press, keyboard focus, disabled selection,
 native form reset, nested disclosures, and modal opening on the affected
 families. Check translucent controls against their actual painted background.
+Check default composition against the shared component contract as well as
+visual legibility. A known default-action violation must be fixed or explicitly
+reported as unresolved; a future migration issue is not a reason to call the
+audit complete. Keep ordinary comparisons on default composition so explicit
+replacement callbacks cannot mask missing component reuse.
 Recheck corrected combinations after the source change. The
 [October 2026 audit](storybook-audit-2026-10.md) records the first complete pass.
 

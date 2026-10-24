@@ -1,9 +1,12 @@
 # Harmonisation migration inventory
 
 This is the migration map for DEV-104/DEV-105. The [canonical contract](./README.md)
-defines the target. **Every target below is unimplemented:** this document changes
-neither the runtime API nor the current README examples. Later harmonisation
-issues own the code, compatibility decisions, tests, and consumer migration.
+defines the target. This inventory records the original baseline and migration
+destinations; delivery proceeds through the linked harmonisation issues.
+The current README and package declarations describe the implemented API.
+Shared themes and default Dialog action composition have landed in the
+foundation/Storybook work; the complete target vocabulary and replacement
+contract still require their remaining migrations.
 
 The baseline is the ten current families in `src/index.ts`: Button, Link, Field,
 Input, Checkbox, RadioGroup (including Radio), Dialog, Collapsible, Accordion,

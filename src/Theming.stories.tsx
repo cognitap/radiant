@@ -239,22 +239,17 @@ export const Comparison: Story = {
               </Link>
               <Dialog>
                 <DialogTrigger
-                  render={props => (
-                    <Button
-                      {...props}
-                      variant="outline"
-                      style={actionStyle}
-                    >
-                      Inspect dialog
-                    </Button>
-                  )}
-                />
+                  variant="outline"
+                  style={actionStyle}
+                >
+                  Inspect dialog
+                </DialogTrigger>
                 <DialogContent>
                   <DialogTitle>{theme.name} dialog</DialogTitle>
                   <DialogDescription>
                     The native top-layer dialog remains in this theme scope.
                   </DialogDescription>
-                  <DialogClose render={props => <Button {...props}>Close dialog</Button>} />
+                  <DialogClose>Close dialog</DialogClose>
                 </DialogContent>
               </Dialog>
             </CardFooter>

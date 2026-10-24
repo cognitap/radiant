@@ -4,6 +4,15 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- DialogTrigger and DialogClose now compose Button by default, inheriting its
+  presentation options, theme effects, interaction states, and pending behavior.
+  The separate Dialog action style recipe is removed. Action slots now include
+  both identities (`button dialog-trigger` / `button dialog-close`); migrate
+  equality selectors to `[data-slot~="dialog-trigger"]` / `[data-slot~="dialog-close"]`.
+  Existing native render callbacks retain their explicit presentation ownership.
+- Dialog's default Storybook play compares its actual rendered actions against
+  Button. The theme comparison uses default Dialog composition rather than
+  manually opting into Button, exposing future drift at the default call site.
 - A complete Storybook audit covers all 58 stories and 11 Docs pages across
   eight themes in light and dark. Form controls have clearer outlines, Checkbox
   keeps a box shape, and disabled checked/mixed marks remain visible, including
