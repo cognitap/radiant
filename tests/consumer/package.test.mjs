@@ -14,6 +14,13 @@ import {
   AccordionItem,
   AccordionTrigger,
   accordionTheme,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  cardTheme,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -694,6 +701,45 @@ test('accordionTheme maps the stack gap to an Accordion variable', () => {
   assert.deepEqual(accordionTheme({ gap: '0.5rem' }), { '--accordion-gap': '0.5rem' })
 })
 
+test('a card groups content without becoming a control', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Card,
+      { className: 'bg-transparent' },
+      createElement(
+        CardHeader,
+        null,
+        createElement(CardTitle, null, 'Shipping'),
+        createElement(CardDescription, null, 'Leaves the studio tomorrow.')
+      ),
+      createElement(CardContent, null, 'Ships in two days.'),
+      createElement(CardFooter, null, createElement('a', { href: '/orders/1' }, 'Details'))
+    )
+  )
+  const opening = /<div\b[^>]*data-slot="card"[^>]*>/.exec(html)?.[0] ?? ''
+  assert.match(opening, /data-slot="card"/)
+  assert.doesNotMatch(opening, /\srole=/)
+  assert.doesNotMatch(opening, /tabindex/i)
+  assert.match(html, /<h2\b[^>]*>Shipping<\/h2>/)
+  assert.match(html, /data-slot="card-description"/)
+  assert.match(html, /data-slot="card-footer"/)
+  assert.match(html, /<a\b[^>]*href="\/orders\/1"/)
+  const classAttribute =
+    /<div\b[^>]*data-slot="card"[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ??
+    /<div\b[^>]*\sclass="([^"]*)"[^>]*data-slot="card"/.exec(html)?.[1] ??
+    ''
+  assert.match(classAttribute, /\bbg-transparent\b/)
+  assert.doesNotMatch(classAttribute, /card-background/)
+})
+
+test('cardTheme maps typed settings to Card variables', () => {
+  assert.deepEqual(cardTheme({ radius: '1rem', padding: '0', titleWeight: 550 }), {
+    '--card-radius': '1rem',
+    '--card-padding': '0',
+    '--card-title-weight': 550
+  })
+})
+
 test('collapsibleTheme maps typed settings to Collapsible variables', () => {
   assert.deepEqual(collapsibleTheme({ radius: '1rem', duration: '0ms', contentSize: '1rem' }), {
     '--collapsible-radius': '1rem',
@@ -755,6 +801,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Dialog.tsx',
     'src/Collapsible.tsx',
     'src/Accordion.tsx',
+    'src/Card.tsx',
     'dist/library/Button.js',
     'cn',
     'package.json'

@@ -550,6 +550,54 @@ the space between sections. The group sets `data-slot="accordion"` and
 `data-type="single"` or `"multiple"`. Each section keeps the Collapsible
 slots.
 
+### Card
+
+`Card` is a grouped surface. It renders a `<div>`. It is not a button, a link,
+or a region. Put a `Button` or a `Link` inside it when the card needs an
+action. Those controls keep their own keyboard behavior. The card itself is
+not in the tab order.
+
+```tsx
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Link
+} from '@cognitap/radiant'
+
+;<Card>
+  <CardHeader>
+    <CardTitle>Shipping</CardTitle>
+    <CardDescription>Leaves the studio tomorrow.</CardDescription>
+  </CardHeader>
+  <CardContent>Ships in two days.</CardContent>
+  <CardFooter>
+    <Button type="button">Track</Button>
+    <Link href="/orders/1">Details</Link>
+  </CardFooter>
+</Card>
+```
+
+The title is a level-2 heading. Set `level` when the page outline needs a
+different one. The description is a paragraph. Header, content, footer, and
+title can be omitted or reordered. The consumer owns the words.
+
+To name a region, wrap the card in a `<section>` and point
+`aria-labelledby` at the title's `id`. The card does not add that role.
+
+`className` merges onto the part it is passed to. The surface inherits the
+button radius and corner shape. `cardTheme` maps `radius`, `cornerShape`,
+`background`, `color`, `borderWidth`, `borderStyle`, `borderColor`,
+`padding`, `gap`, `headerGap`, `footerGap`, `shadow`, `titleSize`,
+`titleWeight`, `descriptionColor`, and `descriptionSize`. The card sets
+`data-slot="card"`. The header, title, description, content, and footer set
+`card-header`, `card-title`, `card-description`, `card-content`, and
+`card-footer`.
+
 ### Adapting Button to a design system
 
 Every design decision is a CSS variable, so a design system, or an agent

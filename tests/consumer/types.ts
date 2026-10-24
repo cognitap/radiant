@@ -10,6 +10,13 @@ import {
   AccordionItem,
   AccordionTrigger,
   accordionTheme,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  cardTheme,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -34,6 +41,8 @@ import {
   type FieldProps,
   type InputProps,
   type AccordionProps,
+  type CardProps,
+  type CardTitleProps,
   type CollapsibleProps,
   type DialogContentProps,
   type DialogProps,
@@ -269,6 +278,22 @@ createElement(Accordion, invalidAccordion)
 
 // @ts-expect-error Accordion theme keys are a closed set.
 accordionTheme({ radius: '1rem' })
+
+createElement('div', { style: cardTheme({ radius: '1rem', padding: '0', titleWeight: 550 }) })
+
+const cardProps: CardProps = { role: 'region', 'aria-labelledby': 'ship' }
+const cardTitleProps: CardTitleProps = { id: 'ship', level: 3 }
+createElement(
+  Card,
+  cardProps,
+  createElement(CardHeader, null, createElement(CardTitle, cardTitleProps, 'Shipping')),
+  createElement(CardDescription, null, 'Leaves the studio tomorrow.'),
+  createElement(CardContent, null, 'Ships in two days.'),
+  createElement(CardFooter, null, 'Track')
+)
+
+// @ts-expect-error Card theme keys are a closed set.
+cardTheme({ panel: '1rem' })
 
 // @ts-expect-error The dialog open attribute is owned by showModal.
 const invalidDialog: DialogContentProps = { open: true }

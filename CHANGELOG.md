@@ -4,6 +4,18 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Card` is a grouped surface. It is a `<div>`, not a button, link, or region.
+  The title is a level-2 heading unless `level` says otherwise. Actions inside
+  the card stay real controls. In Storybook on Chrome 155, the accessibility
+  tree exposed the title as a level-2 heading, the description as a paragraph,
+  and the footer actions as a button and a link. The card itself had no role.
+  The first Tab landed on Track, and the next Tab landed on the Details link.
+  Tab on a card with no actions moved to the document body. A consumer
+  section labelled by the title was exposed as a region. The Radiant surface
+  was 384px wide in a 24rem frame, with an 8px radius, an 18px title at
+  weight 550, and a shadow of 0 1px 2px at 6% black. The Ticket surface used
+  the scooped corner. The card does not set a transition. Screen reader
+  checks were not run.
 - `Accordion` groups `Collapsible` sections. `single` keeps one section open,
   and `multiple` toggles each section on its own. The trigger is the summary,
   and its label is a level-3 heading unless `level` says otherwise. A disabled
