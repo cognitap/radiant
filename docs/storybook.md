@@ -72,7 +72,8 @@ Use the existing **Accessibility** panel alongside keyboard, focus, and contrast
 checks. Automated accessibility checks cover only part of WCAG.
 
 The comparison story's play function checks the actual rendered canvases,
-component palettes, and Sharp 3D borders/shadows. Checkbox and RadioGroup States
+component palettes, Sharp 3D borders/shadows, and controls inside Card content
+and footers. Checkbox and RadioGroup States
 check disabled selection visibility and alignment; Field Customisation checks
 the native host's visible boundary and forwarded relationships. These checks
 read the rendered result without moving focus in Docs. Plays run when a Canvas

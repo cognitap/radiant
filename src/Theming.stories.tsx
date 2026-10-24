@@ -43,6 +43,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+const actionStyle = { maxWidth: '100%' }
+
 export const Comparison: Story = {
   play: async ({ canvasElement }) => {
     const palettes = {
@@ -105,6 +107,19 @@ export const Comparison: Story = {
           }
         })
       }
+      await waitFor(async () => {
+        for (const part of row.querySelectorAll(
+          '[data-slot="card-content"], [data-slot="card-footer"]'
+        )) {
+          const bounds = part.getBoundingClientRect()
+          for (const control of part.querySelectorAll('input, button, summary, a')) {
+            const box = control.getBoundingClientRect()
+            if (box.width === 0) continue
+            await expect(box.left).toBeGreaterThanOrEqual(bounds.left - 0.5)
+            await expect(box.right).toBeLessThanOrEqual(bounds.right + 0.5)
+          }
+        }
+      })
     }
   },
   render: () => (
@@ -116,13 +131,19 @@ export const Comparison: Story = {
           key={theme.id}
           theme={theme}
           data-testid={`theme-${theme.id}`}
-          style={{ display: 'grid', gap: '1.5rem', padding: '1.5rem', borderRadius: '1.25rem' }}
+          style={{
+            display: 'grid',
+            gap: '1.5rem',
+            padding: 'clamp(0.5rem, 3vw, 1.5rem)',
+            borderRadius: '1.25rem'
+          }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             {(['primary', 'secondary', 'destructive', 'outline', 'ghost'] as const).map(variant => (
               <Button
                 key={variant}
                 variant={variant}
+                style={actionStyle}
               >
                 {variant}
               </Button>
@@ -138,7 +159,7 @@ export const Comparison: Story = {
             <CardContent>
               <form
                 onSubmit={event => event.preventDefault()}
-                style={{ display: 'grid', gap: '1.5rem' }}
+                style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '1.5rem' }}
               >
                 <Field
                   label="Email"
@@ -187,9 +208,24 @@ export const Comparison: Story = {
                   </CollapsibleContent>
                 </Collapsible>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <Button type="submit">Save profile</Button>
-                  <Button disabled>Unavailable</Button>
-                  <Button pending>Saving</Button>
+                  <Button
+                    type="submit"
+                    style={actionStyle}
+                  >
+                    Save profile
+                  </Button>
+                  <Button
+                    disabled
+                    style={actionStyle}
+                  >
+                    Unavailable
+                  </Button>
+                  <Button
+                    pending
+                    style={actionStyle}
+                  >
+                    Saving
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -206,6 +242,7 @@ export const Comparison: Story = {
                     <Button
                       {...props}
                       variant="outline"
+                      style={actionStyle}
                     >
                       Inspect dialog
                     </Button>

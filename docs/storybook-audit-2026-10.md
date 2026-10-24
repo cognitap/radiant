@@ -51,6 +51,8 @@ widths after the fixes.
 - FullWidth Button did not actually fill its demonstration frame. Fixed-width
   disclosure examples overflowed narrow screens, and centered Docs frames could
   clip the left side of examples. Layouts now respect the available frame.
+  The theme comparison also uses responsive padding, a shrinkable form grid,
+  and bounded actions so Sharp 3D controls retain the Card's inner inset.
 - Docs boolean labels and toolbar links used unsuitable fixed or accent colors.
   They now use readable semantic colors. Prop tables scroll inside their
   container while retaining native table semantics.
@@ -65,8 +67,8 @@ interaction corrections in this PR were included in the baseline inspection.
 
 ## Ongoing checks
 
-The existing comparison play checks canvases, component palettes, and Sharp 3D
-effects. New read-only plays guard disabled selected indicators and the native
+The existing comparison play checks canvases, component palettes, Sharp 3D
+effects, and nested Card control bounds. New read-only plays guard disabled selected indicators and the native
 Field customisation. Run these in a browser in addition to `pnpm check`, which
 builds Storybook and checks the package but does not execute browser plays.
 See [the inspection guide](storybook.md#verification) for the repeatable review
