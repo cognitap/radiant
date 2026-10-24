@@ -8,9 +8,10 @@ const fieldVariants = cva(
   [
     '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
     'grid min-w-0 [gap:var(--rad-field-gap,var(--rad-spacing-field-gap,0.375rem))]',
-    // A disabled Field dims its visual unit; descendants must not dim it again.
+    // Dim controls/labels once; help and error text must stay readable.
     'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1]',
-    'data-[disabled]:opacity-[var(--_rad-disabled-opacity,var(--rad-field-disabled-opacity,var(--rad-state-disabled-opacity,0.5)))]',
+    '[&[data-disabled]>:not([data-slot=field-description],[data-slot=field-error])]:opacity-[var(--_rad-disabled-opacity,var(--rad-field-disabled-opacity,var(--rad-state-disabled-opacity,0.5)))]',
+    'forced-colors:[&[data-disabled]>:not([data-slot=field-description],[data-slot=field-error])]:opacity-100',
     'forced-colors:data-[disabled]:text-[GrayText] forced-colors:data-[disabled]:opacity-100'
   ],
   {
@@ -193,7 +194,6 @@ export function Field(props: FieldProps) {
     'aria-describedby':
       layout === 'group' ? joinIds(describedBy, ariaDescribedBy) : ariaDescribedBy,
     'aria-invalid': layout === 'group' && invalid ? true : undefined,
-    'aria-required': layout === 'group' && required ? true : undefined,
     className: cn(fieldVariants({ layout }), className),
     'data-disabled': disabled ? '' : undefined,
     'data-invalid': invalid ? '' : undefined,

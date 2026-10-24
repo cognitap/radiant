@@ -2,6 +2,7 @@ node_modules/
 .scratch/
 dist/
 coverage/
+output/
 *.tsbuildinfo
 *.log
 .env

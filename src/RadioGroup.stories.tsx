@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, within } from 'storybook/test'
 import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Radio, RadioGroup, type ThemeStyle } from './index.js'
 
@@ -151,7 +152,26 @@ export const States: Story = {
   )
 }
 
-export const Composition: Story = { render: () => <NativeForm /> }
+export const Composition: Story = {
+  render: () => <NativeForm />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const pro = canvas.getByRole('radio', { name: 'Pro' })
+    const team = canvas.getByRole('radio', { name: 'Team' })
+    const retired = canvas.getByRole('radio', { name: 'Retired' })
+    await expect(pro).toBeChecked()
+    await expect(retired).toBeDisabled()
+    await userEvent.click(pro)
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(team).toBeChecked()
+    await expect(team).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await expect(canvas.getByText('team', { exact: true })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }))
+    await expect(pro).toBeChecked()
+    await expect(team).not.toBeChecked()
+  }
+}
 
 export const Customisation: Story = {
   args: { name: 'custom-plan' },

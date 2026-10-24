@@ -1,6 +1,6 @@
 import { useState, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, waitFor, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { Button, Checkbox, Field, useField, Input } from './index.js'
 
 function ToneInput(props: ComponentProps<'input'>) {
@@ -32,6 +32,7 @@ function FormExample() {
   const [error, setError] = useState<string | undefined>()
   return (
     <form
+      noValidate
       onSubmit={event => {
         event.preventDefault()
         const email = new FormData(event.currentTarget).get('email')
@@ -125,7 +126,26 @@ export const States: Story = {
   )
 }
 
-export const Composition: Story = { render: () => <FormExample /> }
+export const Composition: Story = {
+  render: () => <FormExample />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', { name: 'Email' })
+    const id = input.id
+    await expect(input).toBeRequired()
+    await expect(input).toHaveAccessibleDescription('Work address')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Enter an email.')
+    await expect(input).toHaveAttribute('aria-invalid', 'true')
+    await expect(input).toHaveAccessibleDescription('Work address Enter an email.')
+    await userEvent.type(input, 'ada@example.com')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+    await expect(input).not.toHaveAttribute('aria-invalid')
+    await expect(input).toHaveAccessibleDescription('Work address')
+    await expect(input.id).toBe(id)
+  }
+}
 
 export const Customisation: Story = {
   play: async ({ canvasElement, args }) => {

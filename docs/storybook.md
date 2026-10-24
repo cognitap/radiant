@@ -68,8 +68,14 @@ initially open state.
 
 ## Verification
 
-Use the existing **Accessibility** panel alongside keyboard, focus, and contrast
-checks. Automated accessibility checks cover only part of WCAG.
+Use the **Accessibility** panel and testing widget alongside keyboard, focus,
+and contrast checks. `pnpm test:browser` renders every story, runs its play and
+fails on axe violations in all eight themes and both explicit modes. It also
+runs native keyboard, modal, cancellation/ref, lifecycle and hydration scenarios.
+`pnpm check` and CI require this browser matrix alongside runtime/package checks
+and the Storybook build. See [verification conventions](testing.md) for setup,
+focused runs, failure artifacts and migration evidence. Automated accessibility
+checks cover only part of WCAG.
 
 Dialog Default compares its unadapted Trigger and Close with a canonical Button
 in the same scope. This guards the actual default call site; a comparison that
@@ -82,9 +88,8 @@ check disabled selection visibility and alignment; Field Customisation checks
 the native host's visible boundary and forwarded relationships. These checks
 read the rendered result without moving focus in Docs. Plays run when a Canvas
 story is opened in a browser; Docs requires opting into autoplay or invoking
-them explicitly. `pnpm check` builds Storybook and runs the package/runtime
-checks; it does not execute browser play functions. Browser test infrastructure
-is tracked separately.
+them explicitly. The browser test integration executes these same plays in CI;
+it does not require visiting each story manually.
 
 When changing global application, verify toolbar selection and navigation,
 Canvas and Docs, Ticket to Default reset, explicit modes versus System, ghost

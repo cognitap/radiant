@@ -266,7 +266,9 @@ export function DialogContent({
       onClose={event => {
         if (event.target !== event.currentTarget) return
         onClose?.(event)
-        if (unmounting.current || !dialog.open) return
+        // close() queues its event. StrictMode cleanup or a consumer can reopen
+        // this same native dialog before that event arrives.
+        if (unmounting.current || !dialog.open || dialogIsOpen(event.currentTarget)) return
         dialog.setOpen(false)
         if (dialog.controlled) setGeneration(current => current + 1)
       }}

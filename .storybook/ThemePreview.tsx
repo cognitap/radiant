@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from 'react'
+import { useLayoutEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import type { PropsWithChildren } from 'react'
 import type { Decorator } from '@storybook/react-vite'
 import { DocsContainer } from '@storybook/addon-docs/blocks'
@@ -18,15 +18,49 @@ function selection(globals: Globals) {
   return { theme, mode }
 }
 
+function StoryTheme({
+  globals,
+  canvas,
+  children
+}: PropsWithChildren<{ globals: Globals; canvas: boolean }>) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { theme, mode } = selection(globals)
+  useLayoutEffect(() => {
+    if (!canvas || !ref.current) return
+    const node = ref.current
+    const body = node.ownerDocument.body
+    const previous = { background: body.style.background, colorScheme: body.style.colorScheme }
+    // Paint the actual Canvas ancestor once, including behind translucent controls.
+    // A pseudo-element looks right but axe cannot use it as the text's background.
+    const styles = node.ownerDocument.defaultView!.getComputedStyle(node)
+    body.style.colorScheme = styles.colorScheme
+    body.style.background = styles.getPropertyValue('--rad-surface-canvas')
+    return () => {
+      body.style.background = previous.background
+      body.style.colorScheme = previous.colorScheme
+    }
+  }, [canvas, theme, mode])
+  return (
+    <ThemeScope
+      theme={theme}
+      mode={mode}
+      ref={ref}
+      className="radiant-preview"
+      data-rad-preview="story"
+    >
+      {children}
+    </ThemeScope>
+  )
+}
+
 /** Canvas and Docs stories consume the same public theme/mode contract as an application. */
 export const withTheme: Decorator = (Story, context) => (
-  <ThemeScope
-    {...selection(context.globals)}
-    className="radiant-preview"
-    data-rad-preview="story"
+  <StoryTheme
+    globals={context.globals}
+    canvas={context.viewMode === 'story'}
   >
     <Story />
-  </ThemeScope>
+  </StoryTheme>
 )
 
 function docsGlobals(context: DocsContainerProps['context']): Globals {

@@ -445,6 +445,8 @@ test('Escape and backdrop dismissal follow the dialog flags', async () => {
 
   await act(async () => host.querySelector('[data-slot~="dialog-trigger"]').click())
   const closeEvent = new dom.window.Event('close', { bubbles: true })
+  // The native browser removes open before delivering close.
+  dialog.removeAttribute('open')
   await act(async () => dialog.dispatchEvent(closeEvent))
   assert.equal(dialog.hasAttribute('open'), false)
   await act(async () => root.unmount())
@@ -583,6 +585,7 @@ test('a custom trigger uses useDialog and nested close leaves the outer open', a
   await act(async () => host.querySelector('[data-slot~="dialog-trigger"]').click())
   assert.equal(inner.hasAttribute('open'), true)
   await act(async () => {
+    inner.removeAttribute('open')
     inner.dispatchEvent(new dom.window.Event('close', { bubbles: true }))
   })
   assert.equal(inner.hasAttribute('open'), false)

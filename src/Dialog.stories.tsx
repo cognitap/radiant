@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, waitFor } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import {
   Button,
   Dialog,
@@ -217,7 +217,22 @@ export const States: Story = {
   )
 }
 
-export const Composition: Story = { render: () => <ProfileForm /> }
+export const Composition: Story = {
+  render: () => <ProfileForm />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit profile' }))
+    const dialog = canvas.getByRole('dialog', { name: 'Edit profile' })
+    const name = within(dialog).getByRole('textbox', { name: 'Name' })
+    await expect(name).toHaveFocus()
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Grace')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+    await expect(canvas.getByText('Grace', { exact: true })).toBeVisible()
+    // Leave the panel open so the automatic accessibility scan includes its parts.
+    await expect(dialog).toBeVisible()
+  }
+}
 
 export const Customisation: Story = {
   parameters: {

@@ -4,6 +4,17 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Storybook plays and axe now run as a required part of `pnpm check` and CI,
+  across every preset in Light and Dark. Native Chromium scenarios cover modal
+  keyboard/focus, cancellation, refs, StrictMode cleanup and hydration. CI saves
+  JUnit results and failure screenshots; see the verification guide.
+- Field groups no longer emit unsupported `aria-required` on fieldsets. Native
+  radio `required` behavior is preserved. Disabled Field help/error text remains
+  readable while its controls and labels dim once.
+- Dialog ignores a queued native close notification when the same element has
+  already reopened, preventing StrictMode effect cleanup from dismissing it.
+- Storybook paints the real Canvas page background once instead of using a
+  pseudo-element, so accessibility checks resolve the same backdrop as viewers.
 - DialogTrigger and DialogClose now compose Button by default, inheriting its
   presentation options, theme effects, interaction states, and pending behavior.
   The separate Dialog action style recipe is removed. Action slots now include
@@ -22,8 +33,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
   avoid clipping; Docs controls follow the selected palette and open dialogs no
   longer scroll the page on load. Demo actions and navigation show useful results.
 - Browser play checks guard disabled selection visibility/alignment and the
-  custom native Field input. These complement the existing theme comparison;
-  package checks build the plays but do not execute them in a browser.
+  custom native Field input. These complement the theme comparison and now run
+  in the required browser matrix.
 - Ticket checkboxes use a compact solid outline instead of inheriting the
   scooped, dashed shape intended for larger controls and surfaces.
 - Button-styled links share Button hover and pressed feedback while retaining
