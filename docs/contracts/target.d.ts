@@ -4,7 +4,7 @@
  * examples. It is not a complete replacement for the package declarations.
  */
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
-import type { ThemeStyle } from '../../src/index.js'
+import type { ButtonProps, ButtonVariant, ControlSize, ThemeStyle } from '../../src/index.js'
 
 // DEV-44 now owns the executable theme contract. Keep these sketches tied to it.
 export { defineTheme, ThemeScope } from '../../src/index.js'
@@ -18,22 +18,11 @@ export type {
   ThemeStyle
 } from '../../src/index.js'
 
-export type ControlSize = 'small' | 'medium' | 'large'
-export type Variant = 'solid' | 'soft' | 'outline' | 'ghost'
-export type Tone = 'accent' | 'neutral' | 'warning' | 'danger'
+// DEV-117 now owns the executable action vocabulary; examples check real exports.
+export { Button, Link } from '../../src/index.js'
+export type { ButtonProps, LinkProps, ControlSize, Tone } from '../../src/index.js'
+export type Variant = ButtonVariant
 type Styled<P> = Omit<P, 'style'> & { style?: ThemeStyle }
-
-type Presentation = { controlSize?: ControlSize; variant?: Variant; tone?: Tone }
-export type ButtonProps = Styled<ComponentProps<'button'>> &
-  Presentation & { pending?: boolean; iconOnly?: boolean; fullWidth?: boolean }
-export declare function Button(props: ButtonProps): ReactElement
-export type LinkProps = Styled<ComponentProps<'a'>> &
-  Omit<Presentation, 'variant'> & {
-    variant?: Variant | 'inline' | 'subtle'
-    external?: boolean
-    render?: (props: Styled<ComponentProps<'a'>> & { 'data-slot'?: string }) => ReactElement
-  }
-export declare function Link(props: LinkProps): ReactElement
 
 export interface FieldControlProps {
   id: string

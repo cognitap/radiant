@@ -40,7 +40,12 @@ function ProfileForm() {
           </Field>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <Button type="submit">Save</Button>
-            <DialogClose variant="outline">Cancel</DialogClose>
+            <DialogClose
+              variant="outline"
+              tone="neutral"
+            >
+              Cancel
+            </DialogClose>
           </div>
         </DialogContent>
       </Dialog>
@@ -245,7 +250,12 @@ export const Customisation: Story = {
   },
   render: () => (
     <Dialog>
-      <DialogTrigger variant="outline">Open narrow panel</DialogTrigger>
+      <DialogTrigger
+        variant="outline"
+        tone="neutral"
+      >
+        Open narrow panel
+      </DialogTrigger>
       <DialogContent style={{ width: '24rem' }}>
         <DialogTitle>Narrow panel</DialogTitle>
         <DialogDescription>Local geometry and explicit action replacement.</DialogDescription>

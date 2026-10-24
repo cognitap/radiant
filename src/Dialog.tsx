@@ -160,8 +160,8 @@ function DialogAction({
   action,
   render,
   variant,
-  size,
-  radius,
+  tone,
+  controlSize,
   iconOnly,
   fullWidth,
   pending,
@@ -191,8 +191,8 @@ function DialogAction({
     <Button
       {...buttonProps}
       variant={variant}
-      size={size}
-      radius={radius}
+      tone={tone}
+      controlSize={controlSize}
       iconOnly={iconOnly}
       fullWidth={fullWidth}
       pending={pending}

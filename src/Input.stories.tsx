@@ -32,6 +32,7 @@ function NativeForm() {
         <Button
           type="reset"
           variant="outline"
+          tone="neutral"
         >
           Reset
         </Button>

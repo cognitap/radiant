@@ -4,6 +4,24 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- **Breaking: action presentation API (DEV-117).** Button and action-shaped
+  Link use `variant="solid|soft|outline|ghost"`, `tone="accent|neutral|warning|danger"`
+  and `controlSize="small|medium|large"`. Button defaults to solid/accent/medium;
+  Link defaults to inline/accent/medium and also retains subtle decoration.
+  Dialog actions inherit these props. `size`, `radius`, Link's `button` variant,
+  and the old colour-named variants/tones are removed. Replace `ButtonSize` with
+  `ControlSize`; remove `ButtonRadius` and use theme/local CSS. `ButtonVariant`
+  and `LinkVariant` reflect the new vocabulary; `Tone` is a shared export.
+  Selectors migrate from `data-size` to `data-control-size`, with `data-tone`
+  recording palette independently. See the README's action migration table.
+- Soft actions support all four tones; unfilled action/text-link ink derives
+  from the selected palette and scope foreground. Neutral soft/outline/ghost
+  preserve the previous neutral palette. The private shared recipe retains
+  theme shape, motion, focus and elevation for both native buttons and anchors.
+- Storybook controls and examples use the new API. Button's treatment/tone and
+  size comparisons verify matching Link presentation across every theme/mode;
+  inline/subtle links have a corresponding tone comparison.
+
 - Shared private React bindings now preserve composed callback-ref cleanup,
   deduplicate owned/external description IDs and apply one cancellable activation
   order. Disabled Accordion activation guards run before consumer handlers.

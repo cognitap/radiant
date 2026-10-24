@@ -36,19 +36,19 @@ text, `aria-label`, or `aria-labelledby`. The type does not reject a nameless
 button. Use a link for navigation.
 
 ```tsx
-<Button variant="destructive" size="small">Delete</Button>
-<Button variant="outline" radius="full">Next</Button>
+<Button variant="solid" tone="danger" controlSize="small">Delete</Button>
+<Button variant="outline" tone="neutral" className="rounded-full">Next</Button>
 <Button iconOnly aria-label="Close"><CloseIcon /></Button>
 ```
 
-| Prop        | Values                                                               | Default   |
-| ----------- | -------------------------------------------------------------------- | --------- |
-| `variant`   | `primary`, `secondary`, `warning`, `destructive`, `outline`, `ghost` | `primary` |
-| `size`      | `small`, `default`, `large`                                          | `default` |
-| `radius`    | `none`, `small`, `default`, `large`, `full`                          | `default` |
-| `iconOnly`  | Squares the button at its size. Pass `aria-label`.                   | `false`   |
-| `fullWidth` | Fills the container width.                                           | `false`   |
-| `pending`   | Shows a spinner over the label and ignores activation.               | `false`   |
+| Prop          | Values                                                 | Default  |
+| ------------- | ------------------------------------------------------ | -------- |
+| `variant`     | `solid`, `soft`, `outline`, `ghost`                    | `solid`  |
+| `tone`        | `accent`, `neutral`, `warning`, `danger`               | `accent` |
+| `controlSize` | `small`, `medium`, `large`                             | `medium` |
+| `iconOnly`    | Squares the button at its size. Pass `aria-label`.     | `false`  |
+| `fullWidth`   | Fills the container width.                             | `false`  |
+| `pending`     | Shows a spinner over the label and ignores activation. | `false`  |
 
 The style prop is `variant`, because `type` stays the native attribute. An omitted
 `type` is `button` even when `formAction` is set. Pass `type="submit"` to submit.
@@ -60,31 +60,31 @@ motion keeps the label and hides the spinner. Child SVGs are sized to the button
 
 `Link` is for navigation: a real anchor with `href`, `target`, `download`, and
 native click semantics untouched, so modified clicks and keyboard activation
-behave normally. Three forms: an underlined accent link for running text, a
-subtle link that underlines on hover, and a button-styled link that reuses the
-button variants.
+behave normally. Use inline decoration for running text, subtle decoration that
+underlines on hover, or the same solid/soft/outline/ghost treatments as Button. Tone always
+selects a palette; controlSize selects dimensions for action-shaped links.
+Inline and subtle links inherit the surrounding text size.
 
 ```tsx
 import { Link } from '@cognitap/radiant'
 
 <p>Read the <Link href="/guide">guide</Link> first.</p>
 <Link href="/settings" variant="subtle">Settings</Link>
-<Link href="/start" variant="button" tone="destructive" size="small">Delete space</Link>
+<Link href="/deletion" variant="solid" tone="danger" controlSize="small">Review deletion</Link>
 <Link href="https://example.com" external>Example</Link>
 ```
 
-| Prop       | Values                                                             | Default   |
-| ---------- | ------------------------------------------------------------------ | --------- |
-| `variant`  | `inline`, `subtle`, `button`                                       | `inline`  |
-| `tone`     | Button variants, for `variant="button"`                            | `primary` |
-| `size`     | `small`, `default`, `large`, for `variant="button"`                | `default` |
-| `radius`   | Button radii, for `variant="button"`                               | `default` |
-| `external` | Adds `target="_blank"` and `rel="noopener noreferrer"` when unset. | `false`   |
-| `render`   | Replace the anchor element; see below.                             | —         |
+| Prop          | Values                                                             | Default  |
+| ------------- | ------------------------------------------------------------------ | -------- |
+| `variant`     | `inline`, `subtle`, `solid`, `soft`, `outline`, `ghost`            | `inline` |
+| `tone`        | `accent`, `neutral`, `warning`, `danger`                           | `accent` |
+| `controlSize` | `small`, `medium`, `large` (action dimensions)                     | `medium` |
+| `external`    | Adds `target="_blank"` and `rel="noopener noreferrer"` when unset. | `false`  |
+| `render`      | Replace the anchor element; see below.                             | —        |
 
 Links paint from `--rad-link-color` and `--rad-link-hover-color` (falling back to
-the shared accent role) and from the shared focus variables, so a theme
-styles links and buttons together. `linkTheme` sets them with typed keys:
+readable ink derived from the selected tone and shared foreground) and from the
+shared focus variables, so a theme styles links and buttons together. `linkTheme` sets them with typed keys:
 `color`, `hoverColor`, `underlineOffset`, `decorationThickness`,
 `decorationThicknessHover`, `colorDuration`, and `focusColor`, `focusWidth`,
 `focusOffset`, `focusStyle`.
@@ -102,6 +102,35 @@ own link component:
 
 The adapter must forward `href`, `className`, and `children`, and keep native
 anchor semantics. When `render` is absent, `Link` renders a plain `<a>`.
+
+### Action API migration (breaking)
+
+Button, Link, DialogTrigger and DialogClose share `variant`, `tone` and
+`controlSize`. `soft` is a quiet filled treatment in any tone. Unfilled and soft
+actions mix tone colour toward the shared foreground to retain readable ink in
+light and dark; solid uses the selected palette's foreground pair. Neutral
+soft, outline and ghost preserve the previous neutral treatments. Theme action
+effects, including Glass and Sharp 3D, apply to both Button and action-shaped Link.
+
+| Previous API                                    | Replacement                                                                             |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Button `variant="primary"`                      | `variant="solid" tone="accent"` (the defaults)                                          |
+| Button `variant="secondary"`                    | `variant="soft" tone="neutral"`                                                         |
+| Button `variant="warning"` / `"destructive"`    | `variant="solid" tone="warning"` / `"danger"`                                           |
+| Button `variant="outline"` / `"ghost"`          | Same variant, add `tone="neutral"` to retain the previous palette                       |
+| Link `variant="button" tone={oldButtonVariant}` | Use the matching variant/tone pair above directly                                       |
+| `size="small" / "default" / "large"`            | `controlSize="small" / "medium" / "large"`                                              |
+| `radius="full"`                                 | `className="rounded-full"`, or a local `ThemeStyle`/`components.button.radius` override |
+| `ButtonSize` / `ButtonRadius` types             | `ControlSize`; radius is a CSS/theme decision                                           |
+| `[data-size]`                                   | `[data-control-size]`; presentation also exposes `data-variant` and `data-tone`         |
+
+The exported `ButtonVariant` and `LinkVariant` types use the new treatments;
+`Tone` and `ControlSize` are shared public types. The old props/values/types are
+removed during the experimental 0.x series. Native Input's numeric `size`,
+Button form attributes, accessible names and pending behaviour remain available.
+Link remains an anchor with native navigation. Existing native Dialog `render`
+callbacks still own their replacement's presentation; the fully resolved
+replacement contract is a separate migration.
 
 ### Field
 

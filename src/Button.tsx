@@ -1,22 +1,18 @@
 'use client'
 
 import type { ComponentProps, CSSProperties } from 'react'
-import type { VariantProps } from 'class-variance-authority'
 import { actionVariants } from './actionStyles.js'
+import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
 import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
-type ButtonVariants = VariantProps<typeof actionVariants>
-
-export type ButtonVariant = NonNullable<ButtonVariants['variant']>
-export type ButtonSize = NonNullable<ButtonVariants['size']>
-export type ButtonRadius = NonNullable<ButtonVariants['radius']>
+export type { ButtonVariant } from './presentation.js'
 
 export type ButtonProps = ComponentProps<'button'> & {
   variant?: ButtonVariant
-  size?: ButtonSize
-  radius?: ButtonRadius
+  tone?: Tone
+  controlSize?: ControlSize
   iconOnly?: boolean
   fullWidth?: boolean
   pending?: boolean
@@ -33,9 +29,9 @@ export function buttonTheme(theme: ButtonTheme): CSSProperties {
 
 export function Button({
   type = 'button',
-  variant,
-  size,
-  radius,
+  variant = 'solid',
+  tone = 'accent',
+  controlSize = 'medium',
   iconOnly,
   fullWidth,
   className,
@@ -49,9 +45,10 @@ export function Button({
       type={type}
       aria-busy={pending || undefined}
       data-slot="button"
-      data-variant={variant ?? 'primary'}
-      data-size={size ?? 'default'}
-      className={cn(actionVariants({ variant, size, radius, iconOnly, fullWidth }), className)}
+      data-variant={variant}
+      data-tone={tone}
+      data-control-size={controlSize}
+      className={cn(actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }), className)}
       onClick={composeAction(
         onClick,
         undefined,
