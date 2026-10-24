@@ -19,9 +19,30 @@ test('the customization entry generates library and application utilities once w
   })
 
   assert.match(css, /--color-primary\s*:/)
-  for (const selector of [/\.bg-primary(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
+  assert.match(css, /--ease-spring:\s*linear\(/)
+  for (const selector of [/\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
     assert.equal(css.match(selector)?.length, 1, `Expected one generated ${selector}`)
   }
   assert.doesNotMatch(css, /@(import|theme|source|tailwind)\b/)
   assert.doesNotMatch(css, /h1\s*,\s*h2\s*,\s*h3\b/)
+})
+
+test('the compiled stylesheet includes focus, disabled, and forced-colors rules', () => {
+  const css = readFileSync(new URL('../dist/library/styles.css', import.meta.url), 'utf8')
+
+  assert.match(css, /:focus-visible\s*\{[^}]*outline-color:\s*var\(\s*--color-focus\s*\)/)
+  assert.match(css, /:disabled\s*\{[^}]*opacity:\s*var\(--button-disabled-opacity/)
+  assert.match(css, /:enabled:not\(\[aria-busy=true\]\):hover/)
+  assert.match(css, /--_btn-pe:\s*var\(--button-press-ease/)
+  assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--_btn-pe\)/)
+  assert.match(css, /--ease-spring:\s*linear\(/)
+  const pressScale = css.match(/([^{}]*)\{scale:var\(--button-press-scale/g) ?? []
+  assert.equal(pressScale.length, 1, 'Expected one press scale rule')
+  assert.match(pressScale[0], /motion-safe/)
+  const motionSafe = css.indexOf('@media (prefers-reduced-motion:no-preference)')
+  assert.ok(motionSafe > 0 && motionSafe < css.indexOf(pressScale[0]))
+  assert.match(
+    css,
+    /@media\s*\(\s*forced-colors:\s*active\s*\)\s*\{[\s\S]*border-color:\s*buttontext[\s\S]*:disabled\s*\{[^}]*border-color:\s*graytext[\s\S]*:disabled\s*\{[^}]*color:\s*graytext/i
+  )
 })
