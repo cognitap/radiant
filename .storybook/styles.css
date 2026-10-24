@@ -2,8 +2,9 @@
 @import 'tailwindcss';
 @import '../src/styles.css';
 
-/* Paint the iframe viewport from the same scope without changing the manager or document. */
+/* Canvas uses the viewport layer below; Docs uses its frame. Avoid repainting behind the story. */
 .radiant-preview {
+  background: transparent;
   isolation: isolate;
 }
 
