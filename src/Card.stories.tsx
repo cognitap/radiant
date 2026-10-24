@@ -1,10 +1,14 @@
-import type { CSSProperties } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './Card'
-import { Link } from './Link'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Link
+} from './index.js'
 
 const meta = {
   title: 'Components/Card',
@@ -13,23 +17,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'A grouped surface. It is not a button or a link. Put a heading in the title, and put actions in the footer as real controls.'
+          'A passive div surface with CardHeader, CardTitle, CardDescription, CardContent and CardFooter parts. Each part accepts native props, className/style and ref on its host; data-slot values are card, card-header, card-title, card-description, card-content and card-footer. Title defaults to h2 and accepts level. Put Button/Link actions inside; Card has no disabled, pending or open state.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope
-          theme={radiant}
-          style={{ width: '24rem' }}
-        >
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Card>
 
 export default meta
@@ -37,7 +28,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => (
-    <Card>
+    <Card style={{ maxWidth: '24rem' }}>
       <CardHeader>
         <CardTitle>Shipping</CardTitle>
         <CardDescription>Leaves the studio tomorrow.</CardDescription>
@@ -53,22 +44,10 @@ export const Default: Story = {
   )
 }
 
-export const Quiet: Story = {
-  render: () => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Studio note</CardTitle>
-        <CardDescription>No action on this card.</CardDescription>
-      </CardHeader>
-      <CardContent>The glaze fires overnight.</CardContent>
-    </Card>
-  )
-}
-
-export const Region: Story = {
+export const Composition: Story = {
   render: () => (
     <section aria-labelledby="pack-title">
-      <Card>
+      <Card style={{ maxWidth: '24rem' }}>
         <CardHeader>
           <CardTitle id="pack-title">Pack</CardTitle>
           <CardDescription>The consumer named this section.</CardDescription>
@@ -79,9 +58,9 @@ export const Region: Story = {
   )
 }
 
-export const Layout: Story = {
+export const Customisation: Story = {
   render: () => (
-    <Card>
+    <Card style={{ maxWidth: '24rem' }}>
       <div
         style={{
           height: '4.5rem',
@@ -95,30 +74,14 @@ export const Layout: Story = {
   )
 }
 
-const themeFrame = (): CSSProperties => ({
-  display: 'grid',
-  gap: '1rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
+export const Quiet: Story = {
   render: () => (
-    <div style={{ display: 'grid', gap: '1rem', width: '24rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>{theme.name}</CardTitle>
-              <CardDescription>Surface, radius, and corner from the theme.</CardDescription>
-            </CardHeader>
-          </Card>
-        </ThemeScope>
-      ))}
-    </div>
+    <Card style={{ maxWidth: '24rem' }}>
+      <CardHeader>
+        <CardTitle>Studio note</CardTitle>
+        <CardDescription>No action on this card.</CardDescription>
+      </CardHeader>
+      <CardContent>The glaze fires overnight.</CardContent>
+    </Card>
   )
 }

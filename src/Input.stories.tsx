@@ -1,10 +1,6 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
-import { Field } from './Field'
-import { Input } from './Input'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import { Button, Field, Input, type ThemeStyle } from './index.js'
 
 function NativeForm() {
   const [error, setError] = useState<string | undefined>()
@@ -67,7 +63,8 @@ const meta = {
     type: 'email',
     placeholder: 'you@example.com',
     autoComplete: 'email',
-    disabled: false
+    disabled: false,
+    'aria-label': 'Email'
   },
   argTypes: {
     name: { control: 'text' },
@@ -79,29 +76,63 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native text input. Omit value for an uncontrolled field; pass value and onChange to control it. Field supplies the label, description, and error.'
+          'A native `<input>` with native value/onChange, defaultValue, size (character width), form attributes and ref. Field supplies label, description, required and invalid relationships. className/style/ref target the input, identified by data-slot="input". Visual dimensions use shared control tokens rather than native size.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope
-          theme={radiant}
-          style={{ maxWidth: '20rem' }}
-        >
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Input>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const States: Story = {
+  render: args => (
+    <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '24rem' }}>
+      <Field
+        label="Email with error"
+        error="Enter an email."
+        required
+      >
+        <Input
+          {...args}
+          aria-label={undefined}
+        />
+      </Field>
+      <Field label="Locked email">
+        <Input
+          {...args}
+          aria-label={undefined}
+          disabled
+          defaultValue="ada@example.com"
+        />
+      </Field>
+    </div>
+  )
+}
+
+export const Composition: Story = { render: () => <NativeForm /> }
+
+export const Customisation: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A local component variable changes this input only; the selected global theme remains active.'
+      }
+    }
+  },
+  render: args => {
+    const local: ThemeStyle = { '--rad-input-radius': '999px' }
+    return (
+      <Input
+        {...args}
+        style={local}
+      />
+    )
+  }
+}
 
 export const WithField: Story = {
   render: args => (
@@ -115,64 +146,7 @@ export const WithField: Story = {
   )
 }
 
-export const Invalid: Story = {
-  render: args => (
-    <Field
-      description="Work address"
-      error="Enter an email."
-      label="Email"
-      required
-    >
-      <Input {...args} />
-    </Field>
-  )
-}
-
-export const Disabled: Story = {
-  args: { disabled: true, defaultValue: 'ada@example.com' }
-}
-
-export const NativeFormStory: Story = {
-  name: 'Native form',
-  render: () => <NativeForm />
-}
-
 export const ControlledStory: Story = {
   name: 'Controlled',
   render: () => <Controlled />
-}
-
-const themeFrame = (): CSSProperties => ({
-  display: 'grid',
-  gap: '0.75rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <span style={{ font: '500 0.8125rem system-ui', opacity: 0.7 }}>{theme.name}</span>
-          <Field
-            description="Work address"
-            error="Enter an email."
-            label="Email"
-            required
-          >
-            <Input
-              name="email"
-              placeholder="you@example.com"
-              type="email"
-            />
-          </Field>
-        </ThemeScope>
-      ))}
-    </div>
-  )
 }

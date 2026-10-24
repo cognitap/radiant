@@ -1,18 +1,16 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
 import {
+  Button,
   Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
-  DialogTrigger
-} from './Dialog'
-import { Field } from './Field'
-import { Input } from './Input'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+  DialogTrigger,
+  Field,
+  Input
+} from './index.js'
 
 function ProfileForm() {
   const [summary, setSummary] = useState('No save yet')
@@ -136,20 +134,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native dialog. showModal() provides the modal layer, focus containment, and focus restoration. The element stays in its document, so an ancestor form still owns its fields.'
+          'A native `<dialog>`: Dialog owns open/defaultOpen and onOpenChange; DialogTrigger and DialogClose request changes, while DialogContent owns the dialog host/ref. DialogTitle and DialogDescription provide accessible relationships. Parts expose dialog-trigger, dialog-close, dialog, dialog-title and dialog-description slots. Native showModal supplies the modal layer; no portal or body scroll lock is added.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope theme={radiant}>
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Dialog>
 
 export default meta
@@ -163,17 +151,70 @@ export const Default: Story = {
         <DialogClose className="justify-self-end">Close</DialogClose>
         <DialogTitle>Edit profile</DialogTitle>
         <DialogDescription>This name is visible to your team.</DialogDescription>
-        <button type="button">Continue</button>
+        <Button type="button">Continue</Button>
         <form method="dialog">
-          <button type="submit">Done</button>
+          <Button type="submit">Done</Button>
         </form>
       </DialogContent>
     </Dialog>
   )
 }
 
-export const Form: Story = {
-  render: () => <ProfileForm />
+export const States: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'An initially open nonmodal dialog. It stays in normal document interaction; the default example demonstrates opening a modal dialog.'
+      }
+    }
+  },
+  render: () => (
+    <Dialog
+      defaultOpen
+      modal={false}
+    >
+      <DialogContent style={{ position: 'static', margin: 0 }}>
+        <DialogTitle>Already open</DialogTitle>
+        <DialogDescription>
+          A nonmodal open state, without covering the documentation.
+        </DialogDescription>
+        <DialogClose>Close</DialogClose>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export const Composition: Story = { render: () => <ProfileForm /> }
+
+export const Customisation: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The current render callback adapts Dialog action props to Button; default action composition is tracked separately.'
+      }
+    }
+  },
+  render: () => (
+    <Dialog>
+      <DialogTrigger
+        render={props => (
+          <Button
+            {...props}
+            variant="outline"
+          >
+            Open narrow panel
+          </Button>
+        )}
+      />
+      <DialogContent style={{ width: '24rem' }}>
+        <DialogTitle>Narrow panel</DialogTitle>
+        <DialogDescription>Local geometry and explicit action replacement.</DialogDescription>
+        <DialogClose render={props => <Button {...props}>Close</Button>} />
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 export const Nested: Story = {
@@ -181,44 +222,10 @@ export const Nested: Story = {
 }
 
 export const AbsentTrigger: Story = {
-  name: 'Absent trigger',
+  name: 'Native trigger interoperability',
   render: () => <OutsideControl />
 }
 
 export const Dismissal: Story = {
   render: () => <HeldOpen />
-}
-
-const themeFrame = (): CSSProperties => ({
-  display: 'grid',
-  gap: '1rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <Dialog
-            defaultOpen
-            modal={false}
-          >
-            <DialogContent style={{ position: 'static', margin: 0, width: '100%' }}>
-              <DialogTitle>{theme.name}</DialogTitle>
-              <DialogDescription>
-                Panel surface, radius, and corner from the theme.
-              </DialogDescription>
-              <DialogClose>Close</DialogClose>
-            </DialogContent>
-          </Dialog>
-        </ThemeScope>
-      ))}
-    </div>
-  )
 }

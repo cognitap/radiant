@@ -1,3 +1,97 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Baloo+2:wght@500..800&family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400..800&family=Manrope:wght@500..800&family=Nunito:wght@600..1000&family=Poppins:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Baloo+2:wght@400..800&family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400..800&family=Manrope:wght@400..800&family=Nunito:wght@400..1000&family=Poppins:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import '../src/styles.css';
+
+/* Paint the iframe viewport from the same scope without changing the manager or document. */
+.radiant-preview {
+  isolation: isolate;
+}
+
+.radiant-preview::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--rad-surface-canvas);
+}
+
+.radiant-docs,
+.radiant-docs .sbdocs-wrapper {
+  min-height: 100vh;
+  background: var(--rad-surface-canvas);
+  color: var(--rad-color-foreground);
+}
+
+.radiant-docs .sbdocs-content {
+  font-family: var(--rad-typography-family);
+  color: var(--rad-color-foreground);
+}
+
+/* Storybook chrome has its own explicit colors. Adapt it without overriding inspected stories. */
+.radiant-docs
+  .sbdocs-content
+  :where(h1, h2, h3, h4, h5, h6, p, li, th, td, label, .sbdocs-subtitle):not(
+    [data-rad-preview='story'] *
+  ) {
+  font-family: var(--rad-typography-family);
+  color: var(--rad-color-foreground);
+}
+
+.radiant-docs .sbdocs-content :where(a):not([data-rad-preview='story'] *) {
+  color: var(--rad-color-accent);
+}
+
+.radiant-docs .sbdocs-preview,
+.radiant-docs .sbdocs-preview-actions,
+.radiant-docs .docblock-argstable,
+.radiant-docs .sbdocs-preview > :not(.docs-story) {
+  background: var(--rad-color-surface);
+  color: var(--rad-color-foreground);
+  border-color: var(--rad-color-border);
+}
+
+.radiant-docs .docblock-argstable :where(tr, th, td):not([data-rad-preview='story'] *) {
+  background: var(--rad-color-surface);
+  color: var(--rad-color-foreground);
+  border-color: var(--rad-color-border);
+}
+
+.radiant-docs
+  :where(.sbdocs-preview-actions, .docblock-argstable)
+  :where(button, input, select, textarea):not([data-rad-preview='story'] *) {
+  background: var(--rad-color-surface);
+  color: var(--rad-color-foreground);
+  border-color: var(--rad-color-border);
+}
+
+.radiant-docs .sbdocs-content :where(pre, code):not([data-rad-preview='story'] *) {
+  background: var(--rad-color-neutral);
+  color: var(--rad-color-foreground);
+  border-color: var(--rad-color-border);
+}
+
+.radiant-docs .sbdocs-content pre :where(*):not([data-rad-preview='story'] *) {
+  color: var(--rad-color-foreground);
+}
+
+/* Inline Docs examples paint their own frame, not the entire documentation viewport. */
+.radiant-docs .radiant-preview::before {
+  content: none;
+}
+
+/* The preview toolbar is a direct sibling of the inspected .docs-story frame. */
+.radiant-docs .sbdocs-preview > :not(.docs-story) :where(button) {
+  color: var(--rad-color-foreground);
+  border-color: var(--rad-color-border);
+}
+
+/* Type summaries use explicit Storybook span colors rather than inherited table text. */
+.radiant-docs .docblock-argstable :where(span, div):not([data-rad-preview='story'] *) {
+  color: var(--rad-color-foreground);
+}
+
+/* The whole inline example uses the canvas; its surrounding toolbar remains a surface. */
+.radiant-docs .docs-story {
+  background: var(--rad-surface-canvas);
+}

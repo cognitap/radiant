@@ -681,7 +681,10 @@ pnpm storybook
 ```
 
 Storybook runs at [localhost:6006](http://localhost:6006) and needs no Cognitap
-checkout.
+checkout. Choose **Theme** and **Mode** in its toolbar; the selection applies
+across component stories and Docs. Defaults are Radiant and System.
+See the [Storybook guide](docs/storybook.md) for the shared story
+structure and verification workflow.
 
 | Command                | Purpose                                                         |
 | ---------------------- | --------------------------------------------------------------- |

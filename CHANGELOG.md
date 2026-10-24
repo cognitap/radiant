@@ -4,6 +4,11 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Storybook has global **Theme** and **Mode** controls, backed by the public
+  preset registry and `ThemeScope`. Canvas and Docs share the selection.
+  Ordinary stories inherit it; one system comparison replaces repeated family
+  theme galleries. Stories use a shared default/state/composition/customisation
+  structure and public imports.
 - **Breaking: shared theme system (DEV-44).** `defineTheme` now authors typed
   semantic tokens, optional component overrides, and light/dark layers.
   `ThemeScope` applies a theme and independent light/dark/system mode to a

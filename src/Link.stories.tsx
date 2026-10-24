@@ -1,8 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
-import { Link } from './Link'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import { Button, Link } from './index.js'
 
 const meta = {
   title: 'Components/Link',
@@ -26,20 +23,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native anchor for navigation. Inline, subtle, and button-styled forms, themed by the shared variables.'
+          'A native `<a>` for navigation, with inline, subtle and button variants. Button styling uses tone, size and radius; Link has no invented disabled or pending state. className, style and ref target the anchor (data-slot="link"). render receives anchor props for a consumer-owned router adapter.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope theme={radiant}>
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Link>
 
 export default meta
@@ -54,11 +41,7 @@ export const Default: Story = {
   )
 }
 
-export const Subtle: Story = {
-  args: { variant: 'subtle', children: 'Settings', href: '/settings' }
-}
-
-export const AsButton: Story = {
+export const Composition: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
       <Link
@@ -80,11 +63,7 @@ export const AsButton: Story = {
   )
 }
 
-export const External: Story = {
-  args: { href: 'https://example.com', external: true, children: 'Example (external)' }
-}
-
-export const RouterAdapter: Story = {
+export const Customisation: Story = {
   render: () => (
     <p style={{ lineHeight: 1.6 }}>
       Rendered by an application router:{' '}
@@ -105,40 +84,10 @@ export const RouterAdapter: Story = {
   )
 }
 
-export const Themes: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            padding: '1.5rem',
-            borderRadius: '1.25rem'
-          }}
-        >
-          <span style={{ width: '8rem', font: '500 0.8125rem system-ui', opacity: 0.7 }}>
-            {theme.name}
-          </span>
-          <Link href="/guide">Guide</Link>
-          <Link
-            href="/settings"
-            variant="subtle"
-          >
-            Settings
-          </Link>
-          <Link
-            href="/start"
-            variant="button"
-            size="small"
-          >
-            Get started
-          </Link>
-        </ThemeScope>
-      ))}
-    </div>
-  )
+export const Subtle: Story = {
+  args: { variant: 'subtle', children: 'Settings', href: '/settings' }
+}
+
+export const External: Story = {
+  args: { href: 'https://example.com', external: true, children: 'Example (external)' }
 }

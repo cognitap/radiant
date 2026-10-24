@@ -6,6 +6,7 @@ const config: StorybookConfig = {
   stories: ['../src/**/*.stories.@(ts|tsx)'],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y'],
   framework: '@storybook/react-vite',
+  features: { backgrounds: false },
   viteFinal(config) {
     return mergeConfig(config, { plugins: [tailwindcss()] })
   },
