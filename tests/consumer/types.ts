@@ -2,9 +2,12 @@ import { createElement, createRef } from 'react'
 import {
   Button,
   buttonTheme,
+  Link,
+  linkTheme,
   themes,
   type ButtonProps,
   type ButtonTheme,
+  type LinkProps,
   type Theme
 } from '@cognitap/radiant'
 
@@ -38,3 +41,25 @@ createElement(Button, invalidVariant)
 // @ts-expect-error Native button types must survive the public declaration export.
 const invalidProps: ButtonProps = { type: 'invalid' }
 createElement(Button, invalidProps)
+
+createElement('div', { style: linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: '3px' }) })
+
+// @ts-expect-error Link theme keys are a closed set.
+linkTheme({ background: 'red' })
+
+const linkProps: LinkProps = {
+  href: '/next',
+  target: '_blank',
+  download: true,
+  variant: 'button',
+  tone: 'destructive',
+  size: 'small',
+  radius: 'full',
+  external: true,
+  ref: createRef<HTMLAnchorElement>()
+}
+createElement(Link, linkProps)
+
+// @ts-expect-error Link variants are a closed set.
+const invalidLinkVariant: LinkProps = { variant: 'solid' }
+createElement(Link, invalidLinkVariant)
