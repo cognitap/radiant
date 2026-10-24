@@ -1,9 +1,10 @@
 'use client'
 
 import type { ComponentProps, CSSProperties, ToggleEvent } from 'react'
-import { createContext, useContext, useId, useRef, useState } from 'react'
+import { createContext, useContext, useId } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { useControllableState } from './react/useControllableState.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const collapsibleVariants = cva([
@@ -92,7 +93,7 @@ function useCollapsibleContext() {
 
 export function Collapsible({
   open,
-  defaultOpen = false,
+  defaultOpen,
   onOpenChange,
   onToggle,
   className,
@@ -100,14 +101,17 @@ export function Collapsible({
   ...props
 }: CollapsibleProps) {
   const contentId = useId()
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
-  const restoring = useRef(false)
-  const controlled = open !== undefined
-  const isOpen = controlled ? open : uncontrolledOpen
-  const setOpen = (next: boolean) => {
-    onOpenChange?.(next)
-    if (!controlled) setUncontrolledOpen(next)
-  }
+  const {
+    value: isOpen,
+    request: setOpen,
+    controlled
+  } = useControllableState({
+    name: 'Collapsible',
+    value: open,
+    defaultValue: defaultOpen,
+    initialValue: false,
+    onChange: onOpenChange
+  })
 
   return (
     <CollapsibleContext.Provider value={{ open: isOpen, contentId, setOpen }}>
@@ -118,20 +122,13 @@ export function Collapsible({
         data-state={isOpen ? 'open' : 'closed'}
         open={isOpen}
         onToggle={event => {
-          // toggle bubbles, and writing open below fires it again.
-          if (restoring.current || event.target !== event.currentTarget) return
+          // Native observations may follow prop synchronisation or restoration.
+          // Only a difference from owned state constitutes a semantic request.
+          if (event.target !== event.currentTarget) return
           onToggle?.(event)
           const next = event.currentTarget.open
-          if (!controlled) {
-            setUncontrolledOpen(next)
-            onOpenChange?.(next)
-            return
-          }
-          onOpenChange?.(next)
-          if (next === open) return
-          restoring.current = true
-          event.currentTarget.open = open
-          restoring.current = false
+          setOpen(next)
+          if (controlled && next !== isOpen) event.currentTarget.open = isOpen
         }}
       >
         {children}

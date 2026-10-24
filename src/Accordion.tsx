@@ -3,6 +3,9 @@
 import type { ComponentProps, CSSProperties, ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
 import { cn } from './cn.js'
+import { composeAction } from './internal/events.js'
+import { isItemOpen, nextSelection, sameSelection, type Selection } from './internal/selection.js'
+import { useControllableState } from './react/useControllableState.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './Collapsible.js'
 import type {
@@ -62,7 +65,7 @@ export type AccordionTriggerProps = CollapsibleTriggerProps & {
 
 export type AccordionContentProps = CollapsibleContentProps
 
-export type AccordionValue = string | null | string[]
+export type AccordionValue = Selection
 
 export type AccordionState = {
   type: 'single' | 'multiple'
@@ -101,18 +104,6 @@ function useAccordionItemContext() {
   return item
 }
 
-function isItemOpen(value: AccordionValue, itemValue: string) {
-  return Array.isArray(value) ? value.includes(itemValue) : value === itemValue
-}
-
-function sameValue(left: AccordionValue, right: AccordionValue) {
-  if (Array.isArray(left) || Array.isArray(right)) {
-    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false
-    return left.every((item, index) => item === right[index])
-  }
-  return left === right
-}
-
 function TriggerHeading({
   level,
   children
@@ -125,43 +116,38 @@ function TriggerHeading({
   return <Tag className={headingClass}>{children}</Tag>
 }
 
-export function Accordion({
-  type = 'single',
-  value,
-  defaultValue,
-  onValueChange,
-  disabled = false,
-  className,
-  children,
-  ...props
-}: AccordionProps) {
-  const [uncontrolled, setUncontrolled] = useState<AccordionValue>(() => {
-    if (defaultValue !== undefined) return defaultValue
-    return type === 'multiple' ? [] : null
+export function Accordion(allProps: AccordionProps) {
+  const {
+    type = 'single',
+    value,
+    defaultValue,
+    onValueChange: _onValueChange,
+    disabled = false,
+    className,
+    children,
+    ...props
+  } = allProps
+  const [initialType] = useState(type)
+  if (type !== initialType)
+    throw new TypeError('Accordion cannot change type during a mount. Remount with a new key.')
+  const { value: current, request } = useControllableState<AccordionValue>({
+    name: 'Accordion',
+    value,
+    defaultValue,
+    initialValue: type === 'multiple' ? [] : null,
+    equal: sameSelection,
+    onChange: next => {
+      if (allProps.type === 'multiple' && Array.isArray(next)) allProps.onValueChange?.(next)
+      else if (allProps.type !== 'multiple' && !Array.isArray(next)) allProps.onValueChange?.(next)
+    }
   })
-  const controlled = value !== undefined
-  const selected = controlled ? value : uncontrolled
-  const current: AccordionValue = selected ?? (type === 'multiple' ? [] : null)
+  if ((type === 'multiple') !== Array.isArray(current)) {
+    throw new TypeError('Accordion selection must match its single or multiple type.')
+  }
 
   const setItemOpen = (itemValue: string, open: boolean) => {
     if (disabled) return
-    const next =
-      type === 'multiple'
-        ? nextMultiple(Array.isArray(current) ? current : [], itemValue, open)
-        : nextSingle(
-            typeof current === 'string' || current === null ? current : null,
-            itemValue,
-            open
-          )
-    if (sameValue(current, next)) return
-    if (type === 'multiple') {
-      if (!Array.isArray(next)) return
-      ;(onValueChange as ((nextValue: string[]) => void) | undefined)?.(next)
-    } else {
-      if (Array.isArray(next)) return
-      ;(onValueChange as ((nextValue: string | null) => void) | undefined)?.(next)
-    }
-    if (!controlled) setUncontrolled(next)
+    request(current => nextSelection(current, itemValue, open))
   }
 
   return (
@@ -177,18 +163,6 @@ export function Accordion({
       </div>
     </AccordionContext.Provider>
   )
-}
-
-function nextMultiple(current: string[], itemValue: string, open: boolean) {
-  if (open) return current.includes(itemValue) ? current : [...current, itemValue]
-  return current.filter(item => item !== itemValue)
-}
-
-function nextSingle(current: string | null, itemValue: string, open: boolean) {
-  // A section reports closed when its open prop turns false after another
-  // section opens. That report is not a request to clear the selection.
-  if (open) return itemValue
-  return current === itemValue ? null : current
 }
 
 export function AccordionItem({
@@ -236,14 +210,12 @@ export function AccordionTrigger({
       className={cn(triggerClass, className)}
       data-disabled={item.disabled ? '' : undefined}
       tabIndex={item.disabled ? -1 : tabIndex}
-      onClick={event => {
-        onClick?.(event)
-        if (item.disabled) event.preventDefault()
-      }}
-      onKeyDown={event => {
-        onKeyDown?.(event)
-        if (item.disabled && (event.key === 'Enter' || event.key === ' ')) event.preventDefault()
-      }}
+      onClick={composeAction(onClick, undefined, () => item.disabled)}
+      onKeyDown={composeAction(
+        onKeyDown,
+        undefined,
+        event => item.disabled && (event.key === 'Enter' || event.key === ' ')
+      )}
     >
       <TriggerHeading level={level}>{children}</TriggerHeading>
     </CollapsibleTrigger>

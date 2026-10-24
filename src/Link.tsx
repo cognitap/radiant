@@ -1,6 +1,7 @@
 import type { AnchorHTMLAttributes, ComponentProps, CSSProperties, ReactNode } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { buttonVariants, type ButtonRadius, type ButtonSize, type ButtonVariant } from './Button.js'
+import type { ButtonRadius, ButtonSize, ButtonVariant } from './Button.js'
+import { actionVariants } from './actionStyles.js'
 import { cn } from './cn.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
@@ -73,7 +74,7 @@ export function Link({
     rel: rel ?? (external ? 'noopener noreferrer' : undefined),
     className:
       variant === 'button'
-        ? cn(buttonVariants({ variant: tone, size, radius }), className)
+        ? cn(actionVariants({ variant: tone, size, radius }), className)
         : cn(linkVariants({ variant }), className),
     'data-slot': 'link',
     'data-variant': variant,

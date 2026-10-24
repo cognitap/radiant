@@ -1,8 +1,17 @@
 'use client'
 
-import type { ComponentProps, CSSProperties, ReactNode, Ref } from 'react'
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode
+} from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
+import { useComposedRefs } from './react/useComposedRefs.js'
 import { controlBorderClass } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { useField } from './Field.js'
@@ -52,18 +61,6 @@ export type CheckboxProps = Omit<ComponentProps<'input'>, 'type'> & {
 
 export type CheckboxTheme = NonNullable<ThemeComponentOverrides['checkbox']>
 
-function joinIds(...parts: Array<string | undefined>) {
-  const ids = [...new Set(parts.flatMap(part => (part ? part.split(/\s+/) : [])).filter(Boolean))]
-  return ids.length > 0 ? ids.join(' ') : undefined
-}
-
-function assignRefs<T>(node: T | null, ...refs: Array<Ref<T> | undefined>) {
-  for (const ref of refs) {
-    if (typeof ref === 'function') ref(node)
-    else if (ref) ref.current = node
-  }
-}
-
 function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
 }
@@ -88,15 +85,24 @@ export function Checkbox({
   const field = useField()
   const control = field?.layout === 'control' ? field.controlProps : null
   const invalid = ariaInvalid ?? control?.['aria-invalid']
+  const nodeRef = useRef<HTMLInputElement>(null)
+  const initialise = useCallback(
+    (node: HTMLInputElement | null) => {
+      nodeRef.current = node
+      if (node) node.indeterminate = indeterminate
+    },
+    [indeterminate]
+  )
+  const hostRef = useComposedRefs(initialise, ref)
+  useLayoutEffect(() => {
+    if (nodeRef.current) nodeRef.current.indeterminate = indeterminate
+  })
   const controlNode = (
     <span className="inline-grid w-fit shrink-0">
       <input
         {...control}
         {...props}
-        ref={node => {
-          if (node) node.indeterminate = indeterminate
-          assignRefs(node, ref)
-        }}
+        ref={hostRef}
         aria-describedby={joinIds(control?.['aria-describedby'], ariaDescribedBy)}
         aria-invalid={invalid}
         aria-required={ariaRequired ?? control?.['aria-required']}

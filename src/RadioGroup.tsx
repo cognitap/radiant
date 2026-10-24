@@ -1,7 +1,11 @@
-import { createContext, useContext } from 'react'
-import type { ChangeEvent, ComponentProps, CSSProperties, ReactNode, Ref } from 'react'
+'use client'
+
+import { createContext, useCallback, useContext, useLayoutEffect, useRef } from 'react'
+import type { ChangeEvent, ComponentProps, CSSProperties, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
+import { useComposedRefs } from './react/useComposedRefs.js'
 import { controlBorderClass } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { Field, useField } from './Field.js'
@@ -73,20 +77,8 @@ export type RadioProps = Omit<ComponentProps<'input'>, 'type' | 'value'> & {
   value: string
 }
 
-function joinIds(...parts: Array<string | undefined>) {
-  const ids = [...new Set(parts.flatMap(part => (part ? part.split(/\s+/) : [])).filter(Boolean))]
-  return ids.length > 0 ? ids.join(' ') : undefined
-}
-
 function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
-}
-
-function assignRefs<T>(node: T | null, ...refs: Array<Ref<T> | undefined>) {
-  for (const ref of refs) {
-    if (typeof ref === 'function') ref(node)
-    else if (ref) ref.current = node
-  }
 }
 
 export function radioTheme(theme: RadioTheme): CSSProperties {
@@ -148,6 +140,19 @@ export function Radio({
   const selected = group?.value !== undefined ? group.value === value : checked
   const invalid = ariaInvalid ?? control?.['aria-invalid']
   const requiredFromAria = ariaRequired === true || ariaRequired === 'true' ? true : undefined
+  const nodeRef = useRef<HTMLInputElement>(null)
+  const initialise = useCallback(
+    (node: HTMLInputElement | null) => {
+      nodeRef.current = node
+      if (node && controlled) node.defaultChecked = !!selected
+    },
+    [controlled, selected]
+  )
+  const hostRef = useComposedRefs(initialise, ref)
+  useLayoutEffect(() => {
+    // Controlled resets preserve the current selection, rather than the first value.
+    if (nodeRef.current && controlled) nodeRef.current.defaultChecked = !!selected
+  }, [controlled, selected])
   const controlNode = (
     <span className="inline-grid shrink-0">
       <input
@@ -158,12 +163,7 @@ export function Radio({
           group?.onChange?.(event)
           group?.onValueChange?.(event.target.value)
         }}
-        ref={node => {
-          // React leaves defaultChecked at the first controlled value, so a
-          // later form reset would restore that instead of the current selection.
-          if (node && controlled) node.defaultChecked = !!selected
-          assignRefs(node, ref)
-        }}
+        ref={hostRef}
         checked={controlled ? selected : undefined}
         className={cn(radioVariants(), className)}
         data-invalid={invalid === true || invalid === 'true' ? '' : undefined}

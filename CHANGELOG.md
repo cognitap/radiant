@@ -4,6 +4,17 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Shared private React bindings now preserve composed callback-ref cleanup,
+  deduplicate owned/external description IDs and apply one cancellable activation
+  order. Disabled Accordion activation guards run before consumer handlers.
+- Dialog, Collapsible and Accordion share state ownership and no-op suppression.
+  Composite defaults remain initial snapshots; prop synchronisation/restoration
+  no longer emit semantic change requests. Ownership/type switches and supplying
+  a controlled value together with its default now throw a descriptive error;
+  remount with a new key for a new owner/type.
+- An open Dialog now responds to changes in `modal` and preserves cleanup when
+  rendered in another document. Interactive/context modules retain individual
+  client boundaries; the package entry and pure modules remain server-safe.
 - Storybook plays and axe now run as a required part of `pnpm check` and CI,
   across every preset in Light and Dark. Native Chromium scenarios cover modal
   keyboard/focus, cancellation, refs, StrictMode cleanup and hydration. CI saves

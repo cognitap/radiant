@@ -46,6 +46,73 @@ afterEach(async () => {
 })
 
 for (const mode of ['light', 'dark'] as const) {
+  test(`${mode}: changing modal and dismissal props reconciles the same native dialog`, async () => {
+    const requests = vi.fn()
+    const tree = (modal: boolean, closeOnEscape: boolean, open = true) => (
+      <ThemeScope mode={mode}>
+        <Dialog
+          open={open}
+          modal={modal}
+          closeOnEscape={closeOnEscape}
+          onOpenChange={requests}
+        >
+          <DialogContent>
+            <DialogTitle>Settings</DialogTitle>
+            <DialogDescription>Changing the modal policy preserves this session.</DialogDescription>
+            <DialogClose>Close settings</DialogClose>
+          </DialogContent>
+        </Dialog>
+      </ThemeScope>
+    )
+    const { node, root } = await mount(tree(true, false))
+    const dialog = node.querySelector('dialog')!
+    expect(dialog.matches(':modal')).toBe(true)
+    await act(async () => root.render(tree(false, false)))
+    expect(dialog.open).toBe(true)
+    expect(dialog.matches(':modal')).toBe(false)
+    await act(async () => root.render(tree(true, false)))
+    expect(dialog.matches(':modal')).toBe(true)
+    await act(async () => userEvent.keyboard('{Escape}'))
+    expect(dialog.open).toBe(true)
+    expect(requests).not.toHaveBeenCalled()
+    await act(async () => root.render(tree(true, true)))
+    await act(async () => userEvent.keyboard('{Escape}'))
+    await expect.poll(() => requests.mock.calls.length).toBe(1)
+    expect(requests).toHaveBeenCalledWith(false)
+    await expect.poll(() => dialog.matches(':modal')).toBe(true)
+    await act(async () => root.render(tree(true, true, false)))
+    await act(async () => new Promise(requestAnimationFrame))
+    expect(dialog.open).toBe(false)
+    expect(requests).toHaveBeenCalledTimes(1)
+  })
+
+  test(`${mode}: native disclosure restoration and prop updates emit one request`, async () => {
+    const requests = vi.fn()
+    const observations = vi.fn()
+    const tree = (open: boolean) => (
+      <ThemeScope mode={mode}>
+        <Collapsible
+          open={open}
+          onOpenChange={requests}
+          onToggle={observations}
+        >
+          <CollapsibleTrigger>Shipping details</CollapsibleTrigger>
+          <CollapsibleContent>Ships in two days.</CollapsibleContent>
+        </Collapsible>
+      </ThemeScope>
+    )
+    const { node, root } = await mount(tree(false))
+    const details = node.querySelector('details')!
+    await act(async () => userEvent.click(page.getByText('Shipping details', { exact: true })))
+    await expect.poll(() => requests.mock.calls.length).toBe(1)
+    await expect.poll(() => details.open).toBe(false)
+    await act(async () => root.render(tree(true)))
+    await act(async () => new Promise(requestAnimationFrame))
+    expect(details.open).toBe(true)
+    expect(requests).toHaveBeenCalledExactlyOnceWith(true)
+    expect(observations).toHaveBeenCalled()
+  })
+
   test(`${mode}: native modal keyboard, cancellation, focus return and method=dialog`, async () => {
     let vetoTrigger = true
     let vetoClose = true
@@ -219,3 +286,35 @@ for (const mode of ['light', 'dark'] as const) {
     expect(errors).toEqual([])
   })
 }
+
+test('mounted dialog effects and cleanup use the host document inside an iframe', async () => {
+  const holder = host()
+  const iframe = document.createElement('iframe')
+  iframe.title = 'Independent preview'
+  holder.append(iframe)
+  const owner = iframe.contentDocument!
+  const foreignHost = owner.createElement('div')
+  owner.body.append(foreignHost)
+  const released = vi.fn()
+  const root = createRoot(foreignHost)
+  roots.push(root)
+  await act(async () =>
+    root.render(
+      <Dialog defaultOpen>
+        <DialogContent ref={node => (node ? () => released(node) : undefined)}>
+          <DialogTitle>Independent panel</DialogTitle>
+          <DialogDescription>This panel belongs to its own document.</DialogDescription>
+          <DialogClose>Close independent panel</DialogClose>
+        </DialogContent>
+      </Dialog>
+    )
+  )
+  const dialog = owner.querySelector('dialog')!
+  expect(dialog.ownerDocument).toBe(owner)
+  expect(dialog.matches(':modal')).toBe(true)
+  expect(document.querySelector(':modal')).toBeNull()
+  expect(owner.activeElement).toBe(owner.querySelector('button'))
+  await act(async () => root.render(null))
+  expect(dialog.open).toBe(false)
+  expect(released).toHaveBeenCalledExactlyOnceWith(dialog)
+})

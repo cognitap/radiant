@@ -14,6 +14,11 @@ and Card. Preserve flat PascalCase component exports and their named parts.
 
 ## Public API migration
 
+The shared runtime conventions now ship through DEV-48: ID reference merging,
+cancellable activation, callback-ref cleanup and state ownership/lifecycle for
+Dialog, Collapsible and Accordion. See [the binding guide](../react-bindings.md)
+for current consumers and the remaining family-specific migration work.
+
 | Current API                                                        | Target migration                                                                                  |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
 | Button `variant="primary"`                                         | `variant="solid" tone="accent"`                                                                   |

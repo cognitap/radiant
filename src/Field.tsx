@@ -1,7 +1,10 @@
+'use client'
+
 import { cloneElement, createContext, isValidElement, useContext, useId } from 'react'
 import type { ComponentProps, CSSProperties, ReactElement, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const fieldVariants = cva(
@@ -99,11 +102,6 @@ export function fieldTheme(theme: FieldTheme): CSSProperties {
 
 function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
-}
-
-function joinIds(...parts: Array<string | undefined>) {
-  const ids = [...new Set(parts.flatMap(part => (part ? part.split(/\s+/) : [])).filter(Boolean))]
-  return ids.length > 0 ? ids.join(' ') : undefined
 }
 
 function isHostElement(
