@@ -4,7 +4,16 @@ import { createRequire } from 'node:module'
 import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Button, buttonTheme, Link, linkTheme, themes } from '@cognitap/radiant'
+import {
+  Button,
+  buttonTheme,
+  Field,
+  fieldTheme,
+  Link,
+  linkTheme,
+  themes,
+  useField
+} from '@cognitap/radiant'
 
 const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
 const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
@@ -173,6 +182,182 @@ test('the render prop hands anchor props to a router adapter', () => {
   assert.match(html, /Routed docs/)
 })
 
+function ReadingControl() {
+  const field = useField()
+  return createElement('input', {
+    ...field?.controlProps,
+    'data-layout': field?.layout ?? 'outside',
+    'data-control': field?.controlProps ? 'set' : 'none'
+  })
+}
+
+test('a field labels a host control and keeps native attributes', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Email', description: 'Work address', required: true },
+      createElement('input', { name: 'email', type: 'email', autoComplete: 'email' })
+    )
+  )
+  const inputId = /<input\b[^>]*\sid="([^"]+)"/.exec(html)?.[1]
+  assert.ok(inputId)
+  assert.match(html, new RegExp(`<label\\b[^>]*\\sfor="${inputId}"`))
+  assert.match(html, /name="email"/)
+  assert.match(html, /type="email"/)
+  assert.match(html, /autoComplete="email"/)
+  assert.match(html, /\srequired=""/)
+  assert.match(html, /aria-required="true"/)
+  assert.match(html, /aria-describedby="[^"]+"/)
+  assert.match(html, /Work address/)
+  assert.match(html, /\sdata-slot="field"/)
+  assert.match(html, /\sdata-layout="control"/)
+  assert.match(html, /\sdata-required=""/)
+  assert.match(html, /\sdata-slot="field-required"/)
+  assert.match(html, /aria-hidden="true"/)
+  assert.doesNotMatch(html, /aria-invalid/)
+  assert.doesNotMatch(html, /\sdata-invalid=/)
+  assert.doesNotMatch(html, /\s(label|description|error|layout|requiredIndicator)=/)
+})
+
+test('an error marks the control invalid without changing its id', () => {
+  const props = { label: 'Email', description: 'Work address' }
+  const input = createElement('input', { name: 'email' })
+  const calm = renderToStaticMarkup(createElement(Field, props, input))
+  const invalid = renderToStaticMarkup(
+    createElement(Field, { ...props, error: 'Enter an email.' }, input)
+  )
+  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(calm)?.[1]
+  assert.ok(id)
+  assert.match(invalid, new RegExp(`id="${id}"`))
+  assert.match(invalid, /aria-invalid="true"/)
+  assert.match(invalid, /\sdata-invalid=""/)
+  assert.match(invalid, /\srole="alert"/)
+  assert.match(invalid, /Enter an email\./)
+  const describedBy = /aria-describedby="([^"]+)"/.exec(invalid)?.[1] ?? ''
+  assert.equal(describedBy.split(' ').length, 2)
+  assert.match(calm, new RegExp(`aria-describedby="${describedBy.split(' ')[0]}"`))
+})
+
+test('an empty error clears the invalid state', () => {
+  const html = renderToStaticMarkup(
+    createElement(Field, { label: 'Email', error: '' }, createElement('input', { name: 'email' }))
+  )
+  assert.doesNotMatch(html, /aria-invalid/)
+  assert.doesNotMatch(html, /\srole="alert"/)
+})
+
+test('a host id and describedby are kept', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Email', description: 'Work address' },
+      createElement('input', { id: 'email', 'aria-describedby': 'hint' })
+    )
+  )
+  assert.match(html, /<label\b[^>]*\sfor="email"/)
+  assert.match(html, /<input\b[^>]*\sid="email"/)
+  const describedBy = /<input\b[^>]*\saria-describedby="([^"]+)"/.exec(html)?.[1] ?? ''
+  assert.ok(describedBy.split(' ').includes('hint'))
+  assert.ok(describedBy.split(' ').length >= 2)
+})
+
+test('a group uses a fieldset and does not label each control', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Field,
+      {
+        layout: 'group',
+        label: 'Notifications',
+        description: 'Choose any',
+        error: 'Pick at least one.',
+        required: true,
+        disabled: true
+      },
+      createElement('input', { type: 'checkbox', name: 'channels' })
+    )
+  )
+  assert.match(html, /^<fieldset\b/)
+  assert.match(html, /<legend\b/)
+  assert.match(html, /\sdisabled=""/)
+  assert.match(html, /aria-invalid="true"/)
+  assert.match(html, /aria-required="true"/)
+  assert.match(html, /aria-describedby="[^"]+"/)
+  assert.match(html, /\sdata-layout="group"/)
+  assert.doesNotMatch(html, /<legend\b[^>]*\sfor=/)
+  assert.doesNotMatch(html, /<input\b[^>]*\sid=/)
+  assert.doesNotMatch(html, /<input\b[^>]*\saria-invalid/)
+  assert.doesNotMatch(html, /\srequired=""/)
+})
+
+test('a render function receives the control props', () => {
+  const html = renderToStaticMarkup(
+    createElement(Field, { label: 'Email', error: 'Missing' }, control =>
+      createElement('input', { ...control, name: 'email' })
+    )
+  )
+  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(html)?.[1]
+  assert.ok(id)
+  assert.match(html, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
+  assert.match(html, /aria-invalid="true"/)
+  assert.match(html, /name="email"/)
+})
+
+test('useField wires a component child and is null outside a field', () => {
+  const inside = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Email', description: 'Work address' },
+      createElement(ReadingControl)
+    )
+  )
+  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(inside)?.[1]
+  assert.ok(id)
+  assert.match(inside, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
+  assert.match(inside, /data-layout="control"/)
+  assert.match(inside, /data-control="set"/)
+  const outside = renderToStaticMarkup(createElement(ReadingControl))
+  assert.match(outside, /data-layout="outside"/)
+  assert.match(outside, /data-control="none"/)
+})
+
+test('the required marker is replaceable and stays out of the accessible name', () => {
+  const custom = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Email', required: true, requiredIndicator: '(required)' },
+      createElement('input', { name: 'email' })
+    )
+  )
+  assert.match(custom, /\(required\)/)
+  assert.match(custom, /aria-hidden="true"/)
+  const hidden = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Email', required: true, requiredIndicator: null },
+      createElement('input', { name: 'email' })
+    )
+  )
+  assert.doesNotMatch(hidden, /data-slot="field-required"/)
+  assert.match(hidden, /\srequired=""/)
+})
+
+test('fieldTheme maps typed settings to Field variables', () => {
+  assert.deepEqual(
+    fieldTheme({
+      gap: '0.5rem',
+      labelWeight: 650,
+      errorColor: 'oklch(0.5 0.2 25)',
+      disabledOpacity: 0.4
+    }),
+    {
+      '--field-gap': '0.5rem',
+      '--field-label-weight': 650,
+      '--field-error-color': 'oklch(0.5 0.2 25)',
+      '--field-disabled-opacity': 0.4
+    }
+  )
+})
+
 test('linkTheme maps typed settings to Link variables', () => {
   assert.deepEqual(
     linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
@@ -209,7 +394,13 @@ test('public JavaScript and declaration maps point to shipped sources', () => {
 })
 
 test('exports reject implementation deep imports', async () => {
-  for (const path of ['src/Button.tsx', 'dist/library/Button.js', 'cn', 'package.json']) {
+  for (const path of [
+    'src/Button.tsx',
+    'src/Field.tsx',
+    'dist/library/Button.js',
+    'cn',
+    'package.json'
+  ]) {
     await assert.rejects(import(`@cognitap/radiant/${path}`), {
       code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
     })

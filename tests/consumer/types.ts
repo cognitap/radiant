@@ -2,11 +2,15 @@ import { createElement, createRef } from 'react'
 import {
   Button,
   buttonTheme,
+  Field,
+  fieldTheme,
   Link,
   linkTheme,
   themes,
+  useField,
   type ButtonProps,
   type ButtonTheme,
+  type FieldProps,
   type LinkProps,
   type Theme
 } from '@cognitap/radiant'
@@ -63,3 +67,25 @@ createElement(Link, linkProps)
 // @ts-expect-error Link variants are a closed set.
 const invalidLinkVariant: LinkProps = { variant: 'solid' }
 createElement(Link, invalidLinkVariant)
+
+createElement('div', { style: fieldTheme({ gap: '0.5rem', labelWeight: 650 }) })
+useField()
+
+const fieldProps: FieldProps = {
+  label: 'Email',
+  description: 'Work address',
+  error: 'Missing',
+  required: true,
+  disabled: false,
+  requiredIndicator: '(required)',
+  children: control => createElement('input', control)
+}
+createElement(Field, fieldProps)
+createElement(Field, { layout: 'group', label: 'Plan', role: 'radiogroup' })
+
+// @ts-expect-error Field theme keys are a closed set.
+fieldTheme({ gapSize: '1rem' })
+
+// @ts-expect-error Field layouts are a closed set.
+const invalidFieldLayout: FieldProps = { layout: 'inline', label: 'Email' }
+createElement(Field, invalidFieldLayout)

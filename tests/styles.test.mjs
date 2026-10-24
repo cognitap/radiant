@@ -36,6 +36,7 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
   assert.match(css, /--_btn-pe:\s*var\(--button-press-ease/)
   assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--_btn-pe\)/)
   assert.match(css, /--ease-spring:\s*linear\(/)
+  assert.match(css, /--field-gap/)
   const pressScale = css.match(/([^{}]*)\{scale:var\(--button-press-scale/g) ?? []
   assert.equal(pressScale.length, 1, 'Expected one press scale rule')
   assert.match(pressScale[0], /motion-safe/)

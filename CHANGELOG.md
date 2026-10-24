@@ -4,6 +4,12 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Field` is the form anatomy for one control or a group. A host control receives
+  its label, description, and error relationships; component controls read them
+  with `useField()`. The consumer owns the error message. `fieldTheme` maps typed
+  settings to `--field-*` variables. Keyboard, focus, and screen reader checks
+  were not run. A native form submit was verified; a TanStack Form adapter was
+  not, because that contract is still deferred.
 - `Link` joins the library: a native anchor for navigation with `inline`,
   `subtle`, and `button` variants (the button form reuses Button's variants via
   `tone`, `size`, and `radius`). `external` adds a safe target and rel when the
