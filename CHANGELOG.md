@@ -4,6 +4,26 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Dialog` is a native `<dialog>`. `showModal()` supplies the modal layer, so
+  the component does not add a portal, a focus trap, or a body scroll lock.
+  Uncontrolled dialogs use `defaultOpen`. Controlled dialogs use `open` and
+  `onOpenChange`; if `open` stays true after the browser closes, the dialog
+  opens again. `closeOnBackdrop` and `closeOnEscape` default to true. A form
+  with `method="dialog"` closes it. The panel stays in its document, so an
+  ancestor form still owns its fields. `dialogTheme` maps typed settings to
+  `--dialog-*` variables, and the panel inherits the button radius and corner
+  shape. In Storybook on Chrome 155, the first focusable control was focused,
+  and an `autoFocus` field took focus instead. Shift+Tab wrapped from the first
+  control to the last. Tab from the last control focused the document body, and
+  the next Tab returned to the first control without focusing the trigger.
+  Escape closed the top dialog and restored the opener, including a nested
+  dialog and a dialog opened without a trigger. A backdrop click closed and
+  restored the trigger. Turning backdrop or Escape dismissal off left the
+  dialog open. Submitting `method="dialog"` closed it. A field inside the
+  dialog submitted with its ancestor form. A wheel and `scrollTo` still moved
+  the page behind the open dialog. The Radiant panel was 512px wide with an
+  8px radius, and the Ticket panel used the scooped corner. Screen reader
+  checks were not run.
 - `RadioGroup` is a fieldset of native radios. Uncontrolled groups use
   `defaultValue` and `form.reset()`. Controlled groups use `value` and
   `onValueChange` or `onChange`. Each `Radio` keeps its own label. A disabled

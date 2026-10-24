@@ -5,6 +5,10 @@ import {
   Checkbox,
   checkboxTheme,
   Field,
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  dialogTheme,
   Radio,
   RadioGroup,
   radioTheme,
@@ -20,6 +24,8 @@ import {
   type CheckboxProps,
   type FieldProps,
   type InputProps,
+  type DialogContentProps,
+  type DialogProps,
   type RadioGroupProps,
   type RadioProps,
   type LinkProps,
@@ -166,3 +172,29 @@ radioTheme({ diskSize: '1rem' })
 // @ts-expect-error Radio type is fixed.
 const invalidRadio: RadioProps = { type: 'checkbox', value: 'pro' }
 createElement(Radio, invalidRadio)
+
+createElement('div', { style: dialogTheme({ width: '24rem', backdrop: 'transparent' }) })
+
+const dialogProps: DialogProps = {
+  open: true,
+  defaultOpen: false,
+  modal: true,
+  closeOnBackdrop: true,
+  closeOnEscape: false,
+  onOpenChange(open: boolean) {
+    void open
+  }
+}
+createElement(
+  Dialog,
+  dialogProps,
+  createElement(DialogTrigger, null, 'Edit'),
+  createElement(DialogContent, { ref: createRef<HTMLDialogElement>() })
+)
+
+// @ts-expect-error Dialog theme keys are a closed set.
+dialogTheme({ size: '24rem' })
+
+// @ts-expect-error The dialog open attribute is owned by showModal.
+const invalidDialog: DialogContentProps = { open: true }
+createElement(DialogContent, invalidDialog)

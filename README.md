@@ -373,6 +373,83 @@ scoop does not pinch it. Checked fill still follows `--color-primary`.
 `data-slot="field"`. The options set `data-slot="radio-group"`, and each input
 sets `data-slot="radio"`.
 
+### Dialog
+
+`Dialog` is a native `<dialog>`. It stays in the document that rendered it, so
+an ancestor form still owns the fields inside. There is no portal. A modal
+dialog calls `showModal()`, which gives it the browser's top layer, inert
+background, focus containment, and focus restoration. `modal={false}` calls
+`show()` instead, for a dialog that leaves the rest of the page active.
+
+```tsx
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger
+} from '@cognitap/radiant'
+
+;<Dialog>
+  <DialogTrigger>Edit profile</DialogTrigger>
+  <DialogContent>
+    <DialogTitle>Edit profile</DialogTitle>
+    <DialogDescription>This name is visible to your team.</DialogDescription>
+    <DialogClose>Close</DialogClose>
+  </DialogContent>
+</Dialog>
+```
+
+| Mode         | How it opens and closes                        | After a browser close                           |
+| ------------ | ---------------------------------------------- | ----------------------------------------------- |
+| Uncontrolled | Omit `open`. `defaultOpen` opens after mount.  | React follows the browser.                      |
+| Controlled   | Pass `open` and update it from `onOpenChange`. | If `open` stays `true`, the dialog opens again. |
+
+`showModal()` and `close()` run after mount. Server markup never includes the
+`open` attribute, including when `defaultOpen` is set, so hydration matches.
+The file is marked `'use client'` because those DOM methods cannot be
+represented in HTML. `showModal()` puts the dialog in the top layer and makes
+the rest of the document inert. It does not lock document scrolling, and this
+component does not set `overflow: hidden` on the body. The panel scrolls its
+own overflow. Closed content stays mounted and hidden by the user agent. A
+field inside a closed dialog is still in an ancestor form.
+
+`DialogTrigger` is a button with `aria-haspopup="dialog"`, `aria-expanded`, and
+`aria-controls` pointing at the dialog. `render` hands those props to another
+button. `DialogClose` requests close. A `<form method="dialog">` inside the
+dialog also closes it, and the `close` event updates React. `closeOnBackdrop`
+and `closeOnEscape` default to true and apply to modal dialogs. Escape is the
+browser's cancel event. A backdrop click is a click on the dialog whose point
+lies outside its border box, so a click on the padding does not close it.
+
+`DialogTitle` names the dialog through `aria-labelledby`. Include it. The title
+is an `h2`. `DialogDescription` fills `aria-describedby`. The ids come from
+context, so the parts can be reordered. Omitting the description leaves
+`aria-describedby` pointing at a missing id. Pass `aria-label` on
+`DialogContent` when the dialog has no title; the labelled-by relationship is
+then left to the consumer.
+
+Focus is the platform's. An `autoFocus` control inside the dialog takes initial
+focus. Otherwise the browser focuses the first focusable control inside.
+Shift+Tab from that control wraps to the last control. Tab from the last
+control can land on the document body for one stop; the next Tab returns to
+the first control, and background controls stay unfocused. Closing restores
+the element that was focused when the dialog opened. A second dialog opened
+with `showModal()` stacks on the first, and Escape closes the top one. `close`
+and `cancel` bubble, and a parent ignores an event that started on a nested
+dialog. `useDialog()` lets another control open the same dialog. It returns
+`null` outside `Dialog`.
+
+`className` merges onto the part it is passed to. The panel inherits the button
+radius and corner shape, so a scoop or squircle theme shapes the surface.
+`dialogTheme` maps `width`, `padding`, `gap`, `radius`, `cornerShape`,
+`background`, `color`, `borderWidth`, `borderStyle`, `borderColor`, `shadow`,
+`backdrop`, `titleSize`, `titleWeight`, `descriptionColor`, `descriptionSize`,
+`focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. The dialog sets
+`data-slot="dialog"`. The trigger, title, description, and close control set
+`dialog-trigger`, `dialog-title`, `dialog-description`, and `dialog-close`.
+
 ### Adapting Button to a design system
 
 Every design decision is a CSS variable, so a design system, or an agent
