@@ -4,6 +4,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Button-styled links share Button hover and pressed feedback while retaining
+  native anchor navigation. Disabled and pending buttons keep suppressing it.
 - Checkbox check and mixed marks stay aligned with the native control when
   an unlabelled checkbox is placed in a stretched grid or Field.
 - Storybook has global **Theme** and **Mode** controls, backed by the public

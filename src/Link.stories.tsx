@@ -1,5 +1,59 @@
+import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button, Link } from './index.js'
+
+function LinkActions() {
+  const id = useId()
+  const [clicks, setClicks] = useState(0)
+  const destinationClass =
+    'target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]'
+
+  return (
+    <div style={{ display: 'grid', gap: '1.25rem', maxWidth: '38rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
+        <Link
+          href={`#${id}-start`}
+          variant="button"
+        >
+          Get started
+        </Link>
+        <Button
+          onClick={() => setClicks(count => count + 1)}
+          type="button"
+        >
+          Real button
+        </Button>
+        <Link
+          href={`#${id}-deletion`}
+          variant="button"
+          tone="destructive"
+          size="small"
+        >
+          Review deletion
+        </Link>
+      </div>
+      <output style={{ margin: 0 }}>
+        Button activated {clicks} {clicks === 1 ? 'time' : 'times'}.
+      </output>
+      <section
+        aria-label="Getting started"
+        className={destinationClass}
+        id={`${id}-start`}
+        tabIndex={-1}
+      >
+        Getting started: choose a theme and explore the components.
+      </section>
+      <section
+        aria-label="Deletion options"
+        className={destinationClass}
+        id={`${id}-deletion`}
+        tabIndex={-1}
+      >
+        Deletion options: review the consequences before confirming an action.
+      </section>
+    </div>
+  )
+}
 
 const meta = {
   title: 'Components/Link',
@@ -42,25 +96,15 @@ export const Default: Story = {
 }
 
 export const Composition: Story = {
-  render: () => (
-    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-      <Link
-        href="/start"
-        variant="button"
-      >
-        Get started
-      </Link>
-      <Button type="button">Real button</Button>
-      <Link
-        href="/delete"
-        variant="button"
-        tone="destructive"
-        size="small"
-      >
-        Delete space
-      </Link>
-    </div>
-  )
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Button-styled links share Button hover, pressed, and focus feedback. They remain native anchors: click or Enter navigates to a visible destination below. The native Button updates a counter.'
+      }
+    }
+  },
+  render: () => <LinkActions />
 }
 
 export const Customisation: Story = {

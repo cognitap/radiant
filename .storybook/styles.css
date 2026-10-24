@@ -2,6 +2,9 @@
 @import 'tailwindcss';
 @import '../src/styles.css';
 
+/* Story files are excluded from the library's utility scan. Keep destination feedback local. */
+@source inline('target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]');
+
 /* Canvas uses the viewport layer below; Docs uses its frame. Avoid repainting behind the story. */
 .radiant-preview {
   background: transparent;

@@ -38,7 +38,8 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
     css,
     /:disabled\s*\{[^}]*opacity:\s*var\(--_rad-disabled-opacity,var\(--rad-button-disabled-opacity/
   )
-  assert.match(css, /:enabled:not\(\[aria-busy=true\]\):hover/)
+  // Anchors share action styles but match neither :enabled nor :disabled.
+  assert.match(css, /:not\(:disabled\):not\(\[aria-busy=true\]\):hover/)
   assert.match(css, /--_btn-pe:\s*var\(--rad-button-press-ease/)
   assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--_btn-pe\)/)
   assert.match(css, /--ease-spring:\s*linear\(/)
