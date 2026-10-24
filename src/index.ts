@@ -9,6 +9,27 @@ export { Checkbox, checkboxTheme } from './Checkbox.js'
 export type { CheckboxProps, CheckboxTheme } from './Checkbox.js'
 export { Radio, RadioGroup, radioTheme } from './RadioGroup.js'
 export type { RadioGroupProps, RadioProps, RadioTheme } from './RadioGroup.js'
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+  dialogTheme,
+  useDialog
+} from './Dialog.js'
+export type {
+  DialogCloseProps,
+  DialogContentProps,
+  DialogDescriptionProps,
+  DialogProps,
+  DialogRenderProps,
+  DialogState,
+  DialogTheme,
+  DialogTitleProps,
+  DialogTriggerProps
+} from './Dialog.js'
 export { radiantTheme, themes } from './themes/index.js'
 export type { Theme } from './themes/index.js'
 export type { ButtonProps, ButtonRadius, ButtonSize, ButtonTheme, ButtonVariant } from './Button.js'

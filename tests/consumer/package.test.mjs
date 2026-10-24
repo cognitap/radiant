@@ -9,6 +9,13 @@ import {
   buttonTheme,
   Checkbox,
   checkboxTheme,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+  dialogTheme,
   Field,
   fieldTheme,
   Input,
@@ -583,6 +590,48 @@ test('radioTheme maps typed settings to Radio variables', () => {
   })
 })
 
+test('a dialog stays closed in server markup and names itself from its title', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Dialog,
+      { defaultOpen: true, closeOnBackdrop: false, closeOnEscape: false, onOpenChange() {} },
+      createElement(DialogTrigger, null, 'Edit'),
+      createElement(
+        DialogContent,
+        { className: 'bg-transparent' },
+        createElement(DialogClose, null, 'Close'),
+        createElement(DialogDescription, null, 'Visible to your team.'),
+        createElement(DialogTitle, null, 'Edit profile')
+      )
+    )
+  )
+  const dialogTag = /<dialog\b[^>]*>/.exec(html)?.[0] ?? ''
+  assert.doesNotMatch(dialogTag, /\sopen(?:=|\s|>)/)
+  assert.doesNotMatch(html, /closeOnBackdrop|closeOnEscape|onOpenChange/)
+  assert.match(dialogTag, /data-slot="dialog"/)
+  assert.match(html, /aria-haspopup="dialog"/)
+  assert.match(html, /aria-expanded="true"/)
+  const controls = /aria-controls="([^"]+)"/.exec(html)?.[1]
+  const labelledBy = /aria-labelledby="([^"]+)"/.exec(dialogTag)?.[1]
+  const describedBy = /aria-describedby="([^"]+)"/.exec(dialogTag)?.[1]
+  assert.ok(controls)
+  assert.match(dialogTag, new RegExp(`\\sid="${controls}"`))
+  assert.match(html, new RegExp(`<h2\\b[^>]*\\sid="${labelledBy}"`))
+  assert.match(html, new RegExp(`<p\\b[^>]*\\sid="${describedBy}"`))
+  assert.ok(html.indexOf('Visible to your team.') < html.indexOf('Edit profile'))
+  const classAttribute = /<dialog\b[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bbg-transparent\b/)
+  assert.doesNotMatch(classAttribute, /dialog-background/)
+})
+
+test('dialogTheme maps typed settings to Dialog variables', () => {
+  assert.deepEqual(dialogTheme({ width: '24rem', backdrop: 'transparent', titleWeight: 550 }), {
+    '--dialog-width': '24rem',
+    '--dialog-backdrop': 'transparent',
+    '--dialog-title-weight': 550
+  })
+})
+
 test('linkTheme maps typed settings to Link variables', () => {
   assert.deepEqual(
     linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
@@ -625,6 +674,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Input.tsx',
     'src/Checkbox.tsx',
     'src/RadioGroup.tsx',
+    'src/Dialog.tsx',
     'dist/library/Button.js',
     'cn',
     'package.json'
