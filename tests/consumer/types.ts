@@ -1,3 +1,4 @@
+import './theme-types.js'
 import { createElement, createRef } from 'react'
 import {
   Button,

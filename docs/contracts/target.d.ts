@@ -3,126 +3,25 @@
  * This names the normative token paths and representative APIs used by the
  * examples. It is not a complete replacement for the package declarations.
  */
-import type { ComponentProps, CSSProperties, ReactElement, ReactNode } from 'react'
+import type { ComponentProps, ReactElement, ReactNode } from 'react'
+import type { ThemeStyle } from '../../src/index.js'
+
+// DEV-44 now owns the executable theme contract. Keep these sketches tied to it.
+export { defineTheme, ThemeScope } from '../../src/index.js'
+export type {
+  SharedTokens,
+  Theme,
+  ThemeComponentOverrides as ComponentOverrides,
+  ThemeDefinition,
+  ThemeLayer,
+  ThemeMode as Mode,
+  ThemeStyle
+} from '../../src/index.js'
 
 export type ControlSize = 'small' | 'medium' | 'large'
 export type Variant = 'solid' | 'soft' | 'outline' | 'ghost'
 export type Tone = 'accent' | 'neutral' | 'warning' | 'danger'
-export type Mode = 'light' | 'dark' | 'system'
-export type ThemeStyle = CSSProperties & { [key: `--${string}`]: string | number | undefined }
 type Styled<P> = Omit<P, 'style'> & { style?: ThemeStyle }
-
-type PartialTree<T> = { [K in keyof T]?: T[K] extends object ? PartialTree<T[K]> : T[K] }
-type ControlMetrics = {
-  height: string
-  paddingInline: string
-  fontSize: string
-  indicatorSize: string
-}
-export interface SharedTokens {
-  color: {
-    accent: string
-    accentForeground: string
-    neutral: string
-    neutralForeground: string
-    warning: string
-    warningForeground: string
-    danger: string
-    dangerForeground: string
-    surface: string
-    foreground: string
-    mutedForeground: string
-    border: string
-    placeholder: string
-    disabledBackground: string
-    disabledBorder: string
-    invalid: string
-    focus: string
-  }
-  typography: {
-    family: string
-    bodySize: string
-    smallSize: string
-    headingSize: string
-    bodyWeight: string | number
-    labelWeight: string | number
-    headingWeight: string | number
-    letterSpacing: string
-  }
-  control: {
-    small: ControlMetrics
-    medium: ControlMetrics
-    large: ControlMetrics
-    radius: string
-    cornerShape: string
-    borderWidth: string
-    borderStyle: string
-  }
-  surface: {
-    radius: string
-    cornerShape: string
-    borderWidth: string
-    borderStyle: string
-    padding: string
-    gap: string
-    shadow: string
-    overlayShadow: string
-    backdrop: string
-    canvas: string
-  }
-  focus: { width: string; offset: string; style: string }
-  motion: {
-    pressDuration: string
-    pressEase: string
-    releaseDuration: string
-    releaseEase: string
-    colorDuration: string
-    disclosureDuration: string
-  }
-  spacing: {
-    labelGap: string
-    fieldGap: string
-    groupGap: string
-    headerGap: string
-    footerGap: string
-  }
-  state: { disabledOpacity: number }
-}
-
-/** Representative override keys; the full inventory belongs to DEV-44. */
-export interface ComponentOverrides {
-  button: { radius?: string; shadow?: string }
-  input: { radius?: string; background?: string; borderColor?: string }
-  checkbox: { radius?: string; size?: string }
-  radio: { size?: string }
-  field: { gap?: string }
-  dialog: { width?: string; radius?: string; background?: string }
-}
-type Overrides = { [K in keyof ComponentOverrides]?: ComponentOverrides[K] }
-export interface ThemeLayer {
-  tokens?: PartialTree<SharedTokens>
-  components?: Overrides
-}
-export interface ThemeDefinition extends ThemeLayer {
-  id: string
-  name: string
-  modes?: { light?: ThemeLayer; dark?: ThemeLayer }
-}
-/** Opaque resolved identity; consumers create themes through defineTheme. */
-declare const themeBrand: unique symbol
-export interface Theme {
-  readonly id: string
-  readonly name: string
-  readonly [themeBrand]: true
-}
-export declare function defineTheme(definition: ThemeDefinition): Theme
-export declare function ThemeScope(
-  props: Omit<ComponentProps<'div'>, 'style'> & {
-    theme?: Theme
-    mode?: Mode
-    style?: ThemeStyle
-  }
-): ReactElement
 
 type Presentation = { controlSize?: ControlSize; variant?: Variant; tone?: Tone }
 export type ButtonProps = Styled<ComponentProps<'button'>> &

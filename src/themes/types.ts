@@ -1,7 +1,10 @@
-import type { CSSProperties } from 'react'
-
-export type Theme = {
-  name: string
-  surface?: string
-  style: CSSProperties
-}
+export type {
+  SharedTokens,
+  Theme,
+  ThemeComponentOverrides,
+  ThemeDefinition,
+  ThemeLayer,
+  ThemeMode,
+  ThemeStyle,
+  ThemeTokens
+} from './defineTheme.js'

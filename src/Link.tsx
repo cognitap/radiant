@@ -2,22 +2,24 @@ import type { AnchorHTMLAttributes, ComponentProps, CSSProperties, ReactNode } f
 import { cva, type VariantProps } from 'class-variance-authority'
 import { buttonVariants, type ButtonRadius, type ButtonSize, type ButtonVariant } from './Button.js'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const linkVariants = cva(
   [
-    '[color:var(--_link-color)] [text-underline-offset:var(--link-underline-offset,0.1875rem)]',
-    'transition-colors duration-[var(--link-color-duration,var(--button-color-duration,150ms))]',
+    '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)]',
+    '[color:var(--_link-color)] [text-underline-offset:var(--rad-link-underline-offset,0.1875rem)]',
+    'transition-colors duration-[var(--rad-link-color-duration,var(--rad-motion-color-duration,150ms))]',
     'hover:[color:var(--_link-hover)]',
-    'focus-visible:outline-solid focus-visible:[outline-color:var(--link-focus-color,var(--color-focus))] focus-visible:[outline-width:var(--link-focus-width,var(--button-focus-width,2px))] focus-visible:[outline-offset:var(--link-focus-offset,var(--button-focus-offset,2px))] focus-visible:[outline-style:var(--link-focus-style,var(--button-focus-style,solid))]',
+    'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-link-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-link-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-link-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-link-focus-style,var(--rad-focus-style,solid))]',
     'motion-reduce:transition-none'
   ],
   {
     variants: {
       variant: {
         inline:
-          '[--_link-color:var(--link-color,var(--color-primary))] [--_link-hover:var(--link-hover-color,color-mix(in_oklch,var(--_link-color),black_18%))] underline [text-decoration-color:color-mix(in_oklch,var(--_link-color),transparent_40%)] [text-decoration-thickness:var(--link-decoration-thickness,0.0625rem)] hover:[text-decoration-thickness:var(--link-decoration-thickness-hover,0.125rem)]',
+          '[--_link-color:var(--rad-link-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_link-hover:var(--rad-link-hover-color,color-mix(in_oklch,var(--_link-color),black_18%))] underline [text-decoration-color:color-mix(in_oklch,var(--_link-color),transparent_40%)] [text-decoration-thickness:var(--rad-link-decoration-thickness,0.0625rem)] hover:[text-decoration-thickness:var(--rad-link-decoration-thickness-hover,0.125rem)]',
         subtle:
-          '[--_link-color:var(--link-color,var(--color-foreground))] [--_link-hover:var(--link-hover-color,var(--color-primary))] no-underline hover:underline [text-decoration-thickness:0.0625rem]'
+          '[--_link-color:var(--rad-link-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_link-hover:var(--rad-link-hover-color,var(--rad-color-accent,oklch(0.21_0.006_286)))] no-underline hover:underline [text-decoration-thickness:0.0625rem]'
       }
     },
     defaultVariants: {
@@ -45,40 +47,10 @@ export type LinkProps = ComponentProps<'a'> & {
   render?: (props: LinkRenderProps) => ReactNode
 }
 
-export type LinkTheme = {
-  color?: string
-  hoverColor?: string
-  underlineOffset?: string
-  decorationThickness?: string
-  decorationThicknessHover?: string
-  colorDuration?: string
-  focusColor?: string
-  focusWidth?: string
-  focusOffset?: string
-  focusStyle?: string
-}
-
-const linkThemeVariables: Record<keyof LinkTheme, string> = {
-  color: '--link-color',
-  hoverColor: '--link-hover-color',
-  underlineOffset: '--link-underline-offset',
-  decorationThickness: '--link-decoration-thickness',
-  decorationThicknessHover: '--link-decoration-thickness-hover',
-  colorDuration: '--link-color-duration',
-  focusColor: '--link-focus-color',
-  focusWidth: '--link-focus-width',
-  focusOffset: '--link-focus-offset',
-  focusStyle: '--link-focus-style'
-}
+export type LinkTheme = NonNullable<ThemeComponentOverrides['link']>
 
 export function linkTheme(theme: LinkTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) {
-      style[linkThemeVariables[key as keyof LinkTheme]] = value
-    }
-  }
-  return style as CSSProperties
+  return flattenComponents({ link: theme }) as CSSProperties
 }
 
 export function Link({

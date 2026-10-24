@@ -4,62 +4,65 @@ import type { ComponentProps, CSSProperties, MouseEvent, ReactNode, Ref } from '
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const dialogVariants = cva([
+  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
   'box-border text-start antialiased',
   '[&:not([open])]:hidden',
   'open:m-auto open:grid open:overflow-auto open:overscroll-contain',
   'open:max-h-[min(40rem,calc(100dvh-2rem))]',
-  'open:w-[min(calc(100%-2rem),var(--dialog-width,32rem))]',
-  'open:gap-[var(--dialog-gap,1rem)]',
-  'open:p-[var(--dialog-padding,1.5rem)]',
-  'rounded-[var(--dialog-radius,var(--button-radius,0.75rem))]',
-  '[corner-shape:var(--dialog-corner-shape,var(--button-corner-shape,unset))]',
-  '[border-width:var(--dialog-border-width,1px)]',
-  '[border-style:var(--dialog-border-style,solid)]',
-  '[border-color:var(--dialog-border-color,var(--color-border))]',
-  'bg-[var(--dialog-background,var(--color-background))]',
-  '[color:var(--dialog-color,var(--color-foreground))]',
-  '[box-shadow:var(--dialog-shadow,0_24px_80px_-24px_rgb(0_0_0/0.45))]',
-  'backdrop:bg-[var(--dialog-backdrop,oklch(0.21_0.006_286/0.4))]',
+  'open:w-[min(calc(100%-2rem),var(--rad-dialog-width,32rem))]',
+  'open:gap-[var(--rad-dialog-gap,var(--rad-surface-gap,1rem))]',
+  'open:p-[var(--rad-dialog-padding,var(--rad-surface-padding,1.5rem))]',
+  'rounded-[var(--rad-dialog-radius,var(--rad-surface-radius,0.75rem))]',
+  '[corner-shape:var(--rad-dialog-corner-shape,var(--rad-surface-corner-shape,round))]',
+  '[border-width:var(--rad-dialog-border-width,var(--rad-surface-border-width,1px))]',
+  '[border-style:var(--rad-dialog-border-style,var(--rad-surface-border-style,solid))]',
+  '[border-color:var(--rad-dialog-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+  'bg-[var(--rad-dialog-background,var(--rad-color-surface,oklch(1_0_0)))]',
+  '[color:var(--rad-dialog-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
+  '[box-shadow:var(--rad-dialog-shadow,var(--rad-surface-overlay-shadow,0_24px_64px_-16px_rgb(0_0_0/0.3)))]',
+  'backdrop:[background:var(--rad-dialog-backdrop,var(--rad-surface-backdrop,rgb(0_0_0/0.45)))]',
   'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--dialog-focus-color,var(--color-focus))]',
-  'focus-visible:[outline-width:var(--dialog-focus-width,2px)]',
-  'focus-visible:[outline-offset:var(--dialog-focus-offset,2px)]',
-  'focus-visible:[outline-style:var(--dialog-focus-style,solid)]',
+  'focus-visible:[outline-color:var(--rad-dialog-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
+  'focus-visible:[outline-width:var(--rad-dialog-focus-width,var(--rad-focus-width,2px))]',
+  'focus-visible:[outline-offset:var(--rad-dialog-focus-offset,var(--rad-focus-offset,2px))]',
+  'focus-visible:[outline-style:var(--rad-dialog-focus-style,var(--rad-focus-style,solid))]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
-  'forced-colors:backdrop:bg-[CanvasText]'
+  'forced-colors:backdrop:[background:CanvasText]'
 ])
 
 const dialogTitleVariants = cva([
   'm-0 min-w-0 break-words leading-snug',
-  '[font-size:var(--dialog-title-size,1.125rem)]',
-  '[font-weight:var(--dialog-title-weight,550)]',
+  '[font-size:var(--rad-dialog-title-size,var(--rad-typography-heading-size,1.125rem))]',
+  '[font-weight:var(--rad-dialog-title-weight,var(--rad-typography-heading-weight,600))]',
   'forced-colors:text-[CanvasText]'
 ])
 
 const dialogDescriptionVariants = cva([
   'm-0 min-w-0 break-words leading-snug',
-  '[color:var(--dialog-description-color,color-mix(in_oklch,var(--color-foreground),transparent_35%))]',
-  '[font-size:var(--dialog-description-size,0.8125rem)]',
+  '[color:var(--rad-dialog-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
+  '[font-size:var(--rad-dialog-description-size,var(--rad-typography-small-size,0.8125rem))]',
   'forced-colors:text-[CanvasText]'
 ])
 
 const dialogActionVariants = cva([
+  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)]',
   'inline-flex cursor-pointer items-center justify-center',
-  'min-h-[var(--button-height,2.5rem)] px-[var(--button-padding,0.75rem)]',
-  '[font-size:var(--button-font-size,0.875rem)] [font-weight:var(--button-font-weight,550)]',
-  'rounded-[var(--dialog-radius,var(--button-radius,var(--radius-control)))]',
-  '[corner-shape:var(--dialog-corner-shape,var(--button-corner-shape,unset))]',
-  '[border-width:var(--button-border-width,1px)]',
-  '[border-style:var(--button-border-style,solid)]',
-  '[border-color:var(--button-border-color,var(--color-border))]',
-  'bg-[var(--color-background)] [color:var(--color-foreground)]',
+  'min-h-[var(--rad-control-medium-height,2.5rem)] px-[var(--rad-control-medium-padding-inline,1rem)]',
+  '[font-size:var(--rad-control-medium-font-size,0.875rem)] [font-weight:var(--rad-typography-label-weight,550)]',
+  'rounded-[var(--rad-dialog-radius,var(--rad-surface-radius,0.75rem))]',
+  '[corner-shape:var(--rad-dialog-corner-shape,var(--rad-surface-corner-shape,round))]',
+  '[border-width:var(--rad-control-border-width,1px)]',
+  '[border-style:var(--rad-control-border-style,solid)]',
+  '[border-color:var(--rad-color-border,oklch(0.885_0.005_286))]',
+  'bg-[var(--rad-color-surface,oklch(1_0_0))] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]',
   'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--dialog-focus-color,var(--color-focus))]',
-  'focus-visible:[outline-width:var(--dialog-focus-width,2px)]',
-  'focus-visible:[outline-offset:var(--dialog-focus-offset,2px)]',
-  'focus-visible:[outline-style:var(--dialog-focus-style,solid)]',
+  'focus-visible:[outline-color:var(--rad-dialog-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
+  'focus-visible:[outline-width:var(--rad-dialog-focus-width,var(--rad-focus-width,2px))]',
+  'focus-visible:[outline-offset:var(--rad-dialog-focus-offset,var(--rad-focus-offset,2px))]',
+  'focus-visible:[outline-style:var(--rad-dialog-focus-style,var(--rad-focus-style,solid))]',
   'forced-colors:border-[ButtonText] forced-colors:text-[ButtonText]'
 ])
 
@@ -108,62 +111,12 @@ export type DialogCloseProps = Omit<ComponentProps<'button'>, 'children'> & {
   render?: (props: DialogRenderProps) => ReactNode
 }
 
-export type DialogTheme = {
-  width?: string
-  padding?: string
-  gap?: string
-  radius?: string
-  cornerShape?: string
-  background?: string
-  color?: string
-  borderWidth?: string
-  borderStyle?: string
-  borderColor?: string
-  shadow?: string
-  backdrop?: string
-  titleSize?: string
-  titleWeight?: string | number
-  descriptionColor?: string
-  descriptionSize?: string
-  focusColor?: string
-  focusWidth?: string
-  focusOffset?: string
-  focusStyle?: string
-}
-
-const dialogThemeVariables: Record<keyof DialogTheme, string> = {
-  width: '--dialog-width',
-  padding: '--dialog-padding',
-  gap: '--dialog-gap',
-  radius: '--dialog-radius',
-  cornerShape: '--dialog-corner-shape',
-  background: '--dialog-background',
-  color: '--dialog-color',
-  borderWidth: '--dialog-border-width',
-  borderStyle: '--dialog-border-style',
-  borderColor: '--dialog-border-color',
-  shadow: '--dialog-shadow',
-  backdrop: '--dialog-backdrop',
-  titleSize: '--dialog-title-size',
-  titleWeight: '--dialog-title-weight',
-  descriptionColor: '--dialog-description-color',
-  descriptionSize: '--dialog-description-size',
-  focusColor: '--dialog-focus-color',
-  focusWidth: '--dialog-focus-width',
-  focusOffset: '--dialog-focus-offset',
-  focusStyle: '--dialog-focus-style'
-}
+export type DialogTheme = NonNullable<ThemeComponentOverrides['dialog']>
 
 const DialogContext = createContext<DialogState | null>(null)
 
 export function dialogTheme(theme: DialogTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) {
-      style[dialogThemeVariables[key as keyof DialogTheme]] = value
-    }
-  }
-  return style as CSSProperties
+  return flattenComponents({ dialog: theme }) as CSSProperties
 }
 
 export function useDialog(): DialogState | null {

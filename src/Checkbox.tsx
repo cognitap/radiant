@@ -3,95 +3,52 @@
 import type { ComponentProps, CSSProperties, ReactNode, Ref } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { useField } from './Field.js'
 
 const checkboxVariants = cva([
   'peer col-start-1 row-start-1 m-0 box-border appearance-none',
-  'size-[var(--checkbox-size,1.5rem)]',
-  'rounded-[var(--checkbox-radius,var(--button-radius,0.375rem))]',
-  '[corner-shape:var(--checkbox-corner-shape,var(--button-corner-shape,unset))]',
-  '[border-width:var(--checkbox-border-width,var(--button-border-width,1px))]',
-  '[border-style:var(--checkbox-border-style,var(--button-border-style,solid))]',
-  '[border-color:var(--checkbox-border-color,var(--button-border-color,var(--color-border)))]',
-  'bg-[var(--checkbox-background,var(--color-background))]',
-  'checked:bg-[var(--checkbox-checked-background,var(--color-primary))]',
-  'checked:[border-color:var(--checkbox-checked-border,var(--checkbox-checked-background,var(--color-primary)))]',
-  'indeterminate:bg-[var(--checkbox-checked-background,var(--color-primary))]',
-  'indeterminate:[border-color:var(--checkbox-checked-border,var(--checkbox-checked-background,var(--color-primary)))]',
-  'aria-invalid:[border-color:var(--checkbox-invalid-border,var(--color-destructive))]',
+  'size-[var(--rad-checkbox-size,var(--rad-control-medium-indicator-size,1.125rem))]',
+  'rounded-[var(--rad-checkbox-radius,var(--rad-control-radius,0.5rem))]',
+  '[corner-shape:var(--rad-checkbox-corner-shape,var(--rad-control-corner-shape,round))]',
+  '[border-width:var(--rad-checkbox-border-width,var(--rad-control-border-width,1px))]',
+  '[border-style:var(--rad-checkbox-border-style,var(--rad-control-border-style,solid))]',
+  '[border-color:var(--rad-checkbox-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+  'bg-[var(--rad-checkbox-background,var(--rad-color-surface,oklch(1_0_0)))]',
+  'checked:bg-[var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
+  'checked:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  'indeterminate:bg-[var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
+  'indeterminate:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  'aria-invalid:[border-color:var(--rad-checkbox-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--checkbox-focus-color,var(--input-focus-color,var(--button-focus-color,var(--color-focus))))]',
-  'focus-visible:[outline-width:var(--checkbox-focus-width,var(--input-focus-width,var(--button-focus-width,2px)))]',
-  'focus-visible:[outline-offset:var(--checkbox-focus-offset,var(--input-focus-offset,var(--button-focus-offset,2px)))]',
-  'focus-visible:[outline-style:var(--checkbox-focus-style,var(--input-focus-style,var(--button-focus-style,solid)))]',
+  'focus-visible:[outline-color:var(--rad-checkbox-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
+  'focus-visible:[outline-width:var(--rad-checkbox-focus-width,var(--rad-focus-width,2px))]',
+  'focus-visible:[outline-offset:var(--rad-checkbox-focus-offset,var(--rad-focus-offset,2px))]',
+  'focus-visible:[outline-style:var(--rad-checkbox-focus-style,var(--rad-focus-style,solid))]',
   'disabled:cursor-not-allowed',
-  'disabled:[border-color:var(--checkbox-disabled-border,color-mix(in_oklch,var(--color-foreground),transparent_70%))]',
-  'disabled:checked:bg-[var(--checkbox-disabled-background,color-mix(in_oklch,var(--color-foreground),transparent_70%))]',
-  'disabled:indeterminate:bg-[var(--checkbox-disabled-background,color-mix(in_oklch,var(--color-foreground),transparent_70%))]',
+  'disabled:[border-color:var(--rad-checkbox-disabled-border,var(--rad-color-disabled-border,oklch(0.88_0.005_286)))]',
+  'disabled:checked:bg-[var(--rad-checkbox-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
+  'disabled:indeterminate:bg-[var(--rad-checkbox-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText]',
   'forced-colors:checked:bg-[Highlight] forced-colors:indeterminate:bg-[Highlight]',
   'forced-colors:disabled:border-[GrayText] forced-colors:disabled:bg-[Canvas]'
 ])
 
 const markClass =
-  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--checkbox-size,1.5rem)*0.65)] self-center justify-self-center [color:var(--checkbox-mark,var(--color-primary-foreground))] forced-colors:text-[HighlightText]'
+  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--rad-checkbox-size,var(--rad-control-medium-indicator-size,1.125rem))*0.65)] self-center justify-self-center [color:var(--rad-checkbox-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] forced-colors:text-[HighlightText]'
 
 const rowClass =
-  'inline-flex min-h-6 cursor-pointer items-center gap-[var(--checkbox-gap,0.5rem)] select-none has-disabled:cursor-not-allowed'
+  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-weight:var(--rad-typography-body-weight,400)] inline-flex min-h-6 cursor-pointer items-center gap-[var(--rad-checkbox-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 
 const labelClass =
-  'leading-snug [color:var(--checkbox-label-color,var(--color-foreground))] [font-size:var(--checkbox-label-size,0.875rem)]'
+  'leading-snug [color:var(--rad-checkbox-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-checkbox-label-size,var(--rad-typography-body-size,0.875rem))]'
 
 export type CheckboxProps = Omit<ComponentProps<'input'>, 'type'> & {
   label?: ReactNode
   indeterminate?: boolean
 }
 
-export type CheckboxTheme = {
-  size?: string
-  radius?: string
-  cornerShape?: string
-  borderWidth?: string
-  borderStyle?: string
-  borderColor?: string
-  background?: string
-  checkedBackground?: string
-  checkedBorder?: string
-  mark?: string
-  invalidBorder?: string
-  gap?: string
-  labelColor?: string
-  labelSize?: string
-  disabledBorder?: string
-  disabledBackground?: string
-  focusColor?: string
-  focusWidth?: string
-  focusOffset?: string
-  focusStyle?: string
-}
-
-const checkboxThemeVariables: Record<keyof CheckboxTheme, string> = {
-  size: '--checkbox-size',
-  radius: '--checkbox-radius',
-  cornerShape: '--checkbox-corner-shape',
-  borderWidth: '--checkbox-border-width',
-  borderStyle: '--checkbox-border-style',
-  borderColor: '--checkbox-border-color',
-  background: '--checkbox-background',
-  checkedBackground: '--checkbox-checked-background',
-  checkedBorder: '--checkbox-checked-border',
-  mark: '--checkbox-mark',
-  invalidBorder: '--checkbox-invalid-border',
-  gap: '--checkbox-gap',
-  labelColor: '--checkbox-label-color',
-  labelSize: '--checkbox-label-size',
-  disabledBorder: '--checkbox-disabled-border',
-  disabledBackground: '--checkbox-disabled-background',
-  focusColor: '--checkbox-focus-color',
-  focusWidth: '--checkbox-focus-width',
-  focusOffset: '--checkbox-focus-offset',
-  focusStyle: '--checkbox-focus-style'
-}
+export type CheckboxTheme = NonNullable<ThemeComponentOverrides['checkbox']>
 
 function joinIds(...parts: Array<string | undefined>) {
   const ids = [...new Set(parts.flatMap(part => (part ? part.split(/\s+/) : [])).filter(Boolean))]
@@ -110,11 +67,7 @@ function hasContent(value: ReactNode) {
 }
 
 export function checkboxTheme(theme: CheckboxTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) style[checkboxThemeVariables[key as keyof CheckboxTheme]] = value
-  }
-  return style as CSSProperties
+  return flattenComponents({ checkbox: theme }) as CSSProperties
 }
 
 export function Checkbox({

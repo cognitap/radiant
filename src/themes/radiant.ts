@@ -1,51 +1,132 @@
-import type { CSSProperties } from 'react'
-import { buttonTheme } from '../Button.js'
-import type { Theme } from './types.js'
+import { defineTheme } from './defineTheme.js'
+import { snap, settle } from './preset-values.js'
 
-export const radiantTheme: CSSProperties = {
-  '--color-primary': 'oklch(0.486 0.086 178)',
-  '--color-primary-foreground': 'oklch(0.99 0 0)',
-  '--color-secondary': 'oklch(0.995 0 0)',
-  '--color-secondary-foreground': 'oklch(0.24 0.012 270)',
-  '--color-warning': 'oklch(0.8 0.14 78)',
-  '--color-warning-foreground': 'oklch(0.3 0.07 55)',
-  '--color-destructive': 'oklch(0.56 0.19 25)',
-  '--color-destructive-foreground': 'oklch(0.99 0 0)',
-  '--color-background': 'oklch(1 0 0)',
-  '--color-border': 'oklch(0.89 0.008 270)',
-  '--color-foreground': 'oklch(0.24 0.012 270)',
-  ...buttonTheme({
-    fontFamily: "'Inter', system-ui, sans-serif",
-    fontSize: '0.875rem',
-    fontSizeSmall: '0.8125rem',
-    fontSizeLarge: '0.9375rem',
-    fontWeight: 550,
-    letterSpacing: '-0.011em',
-    height: '2.5rem',
-    heightSmall: '2rem',
-    heightLarge: '3rem',
-    padding: '1rem',
-    paddingSmall: '0.75rem',
-    paddingLarge: '1.375rem',
-    radius: '0.5rem',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    shadow: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
-    shadowPressed: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
-    sheen: 0,
-    highlight: 0,
-    disabledOpacity: 0.5,
-    pressScale: 0.97,
-    pressDuration: '80ms',
-    pressEase: 'var(--ease-snap)',
-    releaseDuration: '160ms',
-    releaseEase: 'var(--ease-settle)',
-    colorDuration: '150ms',
-    focusColor: 'oklch(0.55 0.09 178)',
-    focusWidth: '2px',
-    focusOffset: '2px',
-    focusStyle: 'solid'
-  })
-} as CSSProperties
+export const radiant = defineTheme({
+  id: 'radiant',
+  name: 'Radiant',
+  tokens: {
+    color: {
+      surface: '#ffffff',
+      foreground: '#292a31',
+      mutedForeground: '#60636e',
+      border: '#d6d8df',
+      accent: '#176e5e',
+      accentForeground: '#ffffff',
+      neutral: '#f0f3f2',
+      neutralForeground: '#293b36',
+      warning: '#efc355',
+      warningForeground: '#44300c',
+      danger: '#b52c34',
+      dangerForeground: '#ffffff',
+      focus: '#247b69',
+      placeholder: '#60636e',
+      disabledBackground: '#f0f3f2',
+      disabledBorder: '#d6d8df',
+      invalid: '#b52c34'
+    },
+    typography: {
+      family: "'Inter', system-ui, sans-serif",
+      bodySize: '1rem',
+      smallSize: '0.875rem',
+      headingSize: '1.25rem',
+      bodyWeight: 400,
+      labelWeight: 600,
+      headingWeight: 700,
+      letterSpacing: '-0.011em'
+    },
+    control: {
+      small: {
+        height: '2rem',
+        paddingInline: '0.75rem',
+        fontSize: '0.8125rem',
+        indicatorSize: '1rem'
+      },
+      medium: {
+        height: '2.5rem',
+        paddingInline: '1rem',
+        fontSize: '0.875rem',
+        indicatorSize: '1.125rem'
+      },
+      large: {
+        height: '3rem',
+        paddingInline: '1.375rem',
+        fontSize: '0.9375rem',
+        indicatorSize: '1.25rem'
+      },
+      radius: '0.5rem',
+      cornerShape: 'round',
+      borderWidth: '1px',
+      borderStyle: 'solid'
+    },
+    surface: {
+      canvas: '#f7faf9',
+      radius: '0.5rem',
+      cornerShape: 'round',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      padding: '1.5rem',
+      gap: '1rem',
+      shadow: '0 1px 3px rgb(0 0 0 / 0.08)',
+      overlayShadow: '0 20px 60px rgb(0 0 0 / 0.22)',
+      backdrop: 'rgb(15 12 25 / 0.45)'
+    },
+    focus: {
+      width: '2px',
+      offset: '2px',
+      style: 'solid'
+    },
+    motion: {
+      pressDuration: '80ms',
+      pressEase: snap,
+      releaseDuration: '160ms',
+      releaseEase: settle,
+      colorDuration: '150ms',
+      disclosureDuration: '180ms'
+    },
+    state: { disabledOpacity: 0.5 }
+  },
+  components: {
+    button: {
+      fontWeight: 550,
+      shadow: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+      shadowPressed: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+      sheen: 0,
+      highlight: 0,
+      pressScale: 0.97
+    }
+  },
+  modes: {
+    dark: {
+      tokens: {
+        color: {
+          surface: '#1a2322',
+          foreground: '#edf5f2',
+          mutedForeground: '#b0c1ba',
+          border: '#536760',
+          accent: '#78d8be',
+          accentForeground: '#102d25',
+          neutral: '#2a3e37',
+          neutralForeground: '#e1f3eb',
+          warning: '#efc355',
+          warningForeground: '#352507',
+          danger: '#ff9298',
+          dangerForeground: '#3c111a',
+          focus: '#85e0c6',
+          placeholder: '#b0c1ba',
+          disabledBackground: '#2a3e37',
+          disabledBorder: '#536760',
+          invalid: '#ff9298'
+        },
+        surface: {
+          canvas: '#101917',
+          shadow: '0 1px 4px rgb(0 0 0 / 0.4)',
+          overlayShadow: '0 20px 60px rgb(0 0 0 / 0.65)',
+          backdrop: 'rgb(0 0 0 / 0.65)'
+        }
+      }
+    }
+  }
+})
 
-export const radiant: Theme = { name: 'Radiant', style: radiantTheme }
+/** @deprecated Use radiant with ThemeScope instead of applying this style directly. */
+export const radiantTheme = radiant.style

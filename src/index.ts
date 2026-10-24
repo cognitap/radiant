@@ -81,6 +81,29 @@ export type {
   CardTheme,
   CardTitleProps
 } from './Card.js'
-export { radiantTheme, themes } from './themes/index.js'
-export type { Theme } from './themes/index.js'
+export {
+  defineTheme,
+  radiantTheme,
+  themes,
+  radiant,
+  defaultTheme,
+  soft,
+  expressive,
+  glass,
+  sharp,
+  jelly,
+  ticket
+} from './themes/index.js'
+export type {
+  SharedTokens,
+  Theme,
+  ThemeComponentOverrides,
+  ThemeDefinition,
+  ThemeLayer,
+  ThemeMode,
+  ThemeStyle,
+  ThemeTokens
+} from './themes/index.js'
+export { ThemeScope } from './ThemeScope.js'
+export type { ThemeScopeProps } from './ThemeScope.js'
 export type { ButtonProps, ButtonRadius, ButtonSize, ButtonTheme, ButtonVariant } from './Button.js'

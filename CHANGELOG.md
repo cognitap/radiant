@@ -4,6 +4,27 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- **Breaking: shared theme system (DEV-44).** `defineTheme` now authors typed
+  semantic tokens, optional component overrides, and light/dark layers.
+  `ThemeScope` applies a theme and independent light/dark/system mode to a
+  subtree. The stylesheet supplies a provider-free neutral baseline; nested
+  named themes reset omitted tokens and effects. Components consume shared
+  roles instead of Button's overrides, and Button focus overrides are local.
+- All eight presets have stable IDs and deliberate light/dark palettes. The
+  `themes` registry is readonly; individual presets are exported. Font loading
+  remains the application's responsibility, with system fallbacks supplied.
+- **Migration:** replace `{ name, style }` themes with `defineTheme` and
+  `theme.style` wrappers with `ThemeScope`. `Theme.style`, `Theme.surface`, and
+  `radiantTheme` remain deprecated compatibility exports. Family theme helpers
+  remain available but emit `--rad-<family>-*` variables; direct old CSS
+  overrides must migrate. Shared primary/secondary/destructive roles become
+  accent/neutral/danger. `radio.gap` moves to `radioGroup.gap`; inert
+  `glowHover` is rejected by the new theme API. See the
+  [theming guide](docs/theming.md) for defaults and the complete migration.
+
+Earlier batch entries below record behavior at delivery time; the theme
+migration above supersedes their token names and baseline measurements.
+
 - `Card` is a grouped surface. It is a `<div>`, not a button, link, or region.
   The title is a level-2 heading unless `level` says otherwise. Actions inside
   the card stay real controls. In Storybook on Chrome 155, the accessibility

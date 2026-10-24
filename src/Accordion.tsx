@@ -3,6 +3,7 @@
 import type { ComponentProps, CSSProperties, ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './Collapsible.js'
 import type {
   CollapsibleContentProps,
@@ -10,8 +11,10 @@ import type {
   CollapsibleTriggerProps
 } from './Collapsible.js'
 
-const accordionClass = 'grid w-full gap-[var(--accordion-gap,0.75rem)]'
-const triggerClass = 'data-disabled:cursor-not-allowed data-disabled:opacity-60'
+const accordionClass =
+  'grid w-full gap-[var(--rad-accordion-gap,var(--rad-spacing-group-gap,0.75rem))]'
+const triggerClass =
+  'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1] data-disabled:cursor-not-allowed data-disabled:opacity-[var(--_rad-disabled-opacity,var(--rad-state-disabled-opacity,0.5))] forced-colors:data-disabled:opacity-100'
 const headingClass = 'm-0 min-w-0 [font:inherit]'
 
 const headingTag = {
@@ -68,13 +71,7 @@ export type AccordionState = {
   setItemOpen: (value: string, open: boolean) => void
 }
 
-export type AccordionTheme = {
-  gap?: string
-}
-
-const accordionThemeVariables: Record<keyof AccordionTheme, string> = {
-  gap: '--accordion-gap'
-}
+export type AccordionTheme = NonNullable<ThemeComponentOverrides['accordion']>
 
 type AccordionItemState = {
   value: string
@@ -85,13 +82,7 @@ const AccordionContext = createContext<AccordionState | null>(null)
 const AccordionItemContext = createContext<AccordionItemState | null>(null)
 
 export function accordionTheme(theme: AccordionTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) {
-      style[accordionThemeVariables[key as keyof AccordionTheme]] = value
-    }
-  }
-  return style as CSSProperties
+  return flattenComponents({ accordion: theme }) as CSSProperties
 }
 
 export function useAccordion(): AccordionState | null {

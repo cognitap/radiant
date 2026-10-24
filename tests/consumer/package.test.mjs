@@ -42,6 +42,9 @@ import {
   radioTheme,
   linkTheme,
   themes,
+  ThemeScope,
+  defineTheme,
+  defaultTheme,
   useField
 } from '@cognitap/radiant'
 
@@ -86,9 +89,12 @@ test('settings pick classes and stay off the DOM', () => {
     )
   )
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\[--_btn-bg:var\(--color-destructive\)\]/)
-  assert.doesNotMatch(classAttribute, /--color-primary\)/)
-  assert.match(classAttribute, /\[--_btn-h:var\(--button-height-small,2rem\)\]/)
+  assert.match(classAttribute, /\[--_btn-bg:var\(--rad-color-danger,/)
+  assert.doesNotMatch(classAttribute, /--rad-color-accent,/)
+  assert.match(
+    classAttribute,
+    /\[--_btn-h:var\(--rad-button-height-small,var\(--rad-control-small-height,2rem\)\)\]/
+  )
   assert.match(classAttribute, /\[--_btn-radius:calc\(var\(--_btn-h\)\/2\)\]/)
   assert.match(classAttribute, /\bw-full\b/)
   assert.match(html, /\sdata-slot="button"/)
@@ -132,17 +138,17 @@ test('buttonTheme maps typed settings to Button variables', () => {
       glow: undefined
     }),
     {
-      '--button-radius': '1rem',
-      '--button-radius-pressed': '0.25rem',
-      '--button-corner-shape': 'squircle',
-      '--button-border-width': '2px',
-      '--button-border-color': '#111111',
-      '--button-press-shift-x': '3px',
-      '--color-focus': '#111111',
-      '--button-focus-offset': '0px',
-      '--button-press-scale': 0.96,
-      '--button-press-ease': 'var(--ease-snap)',
-      '--button-release-ease': 'var(--ease-spring)'
+      '--rad-button-radius': '1rem',
+      '--rad-button-radius-pressed': '0.25rem',
+      '--rad-button-corner-shape': 'squircle',
+      '--rad-button-border-width': '2px',
+      '--rad-button-border-color': '#111111',
+      '--rad-button-press-shift-x': '3px',
+      '--rad-button-focus-color': '#111111',
+      '--rad-button-focus-offset': '0px',
+      '--rad-button-press-scale': 0.96,
+      '--rad-button-press-ease': 'var(--ease-snap)',
+      '--rad-button-release-ease': 'var(--ease-spring)'
     }
   )
 })
@@ -189,8 +195,11 @@ test('button-styled links reuse the Button variant classes', () => {
   assert.match(html, /^<a\b/)
   assert.match(html, /\sdata-variant="button"/)
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\[--_btn-bg:var\(--color-destructive\)\]/)
-  assert.match(classAttribute, /\[--_btn-h:var\(--button-height-small,2rem\)\]/)
+  assert.match(classAttribute, /\[--_btn-bg:var\(--rad-color-danger,/)
+  assert.match(
+    classAttribute,
+    /\[--_btn-h:var\(--rad-button-height-small,var\(--rad-control-small-height,2rem\)\)\]/
+  )
   assert.doesNotMatch(classAttribute, /\bunderline\b/)
   assert.doesNotMatch(html, /\s(tone|size)=/)
 })
@@ -380,10 +389,10 @@ test('fieldTheme maps typed settings to Field variables', () => {
       disabledOpacity: 0.4
     }),
     {
-      '--field-gap': '0.5rem',
-      '--field-label-weight': 650,
-      '--field-error-color': 'oklch(0.5 0.2 25)',
-      '--field-disabled-opacity': 0.4
+      '--rad-field-gap': '0.5rem',
+      '--rad-field-label-weight': 650,
+      '--rad-field-error-color': 'oklch(0.5 0.2 25)',
+      '--rad-field-disabled-opacity': 0.4
     }
   )
 })
@@ -412,7 +421,7 @@ test('inputs preserve native attributes and the character-width size', () => {
   assert.match(html, /\sid="email"/)
   assert.match(html, /\sdata-slot="input"/)
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /--input-height/)
+  assert.match(classAttribute, /--rad-input-height/)
   assert.doesNotMatch(html, /\s(inputTheme)=/)
 })
 
@@ -463,10 +472,10 @@ test('inputTheme maps typed settings to Input variables', () => {
       fontWeight: 400
     }),
     {
-      '--input-height': '3rem',
-      '--input-radius': '999px',
-      '--input-invalid-border': 'oklch(0.5 0.2 25)',
-      '--input-font-weight': 400
+      '--rad-input-height': '3rem',
+      '--rad-input-radius': '999px',
+      '--rad-input-invalid-border': 'oklch(0.5 0.2 25)',
+      '--rad-input-font-weight': 400
     }
   )
 })
@@ -532,9 +541,9 @@ test('checkboxTheme maps typed settings to Checkbox variables', () => {
   assert.deepEqual(
     checkboxTheme({ size: '1.25rem', checkedBackground: 'oklch(0.5 0.2 250)', mark: 'white' }),
     {
-      '--checkbox-size': '1.25rem',
-      '--checkbox-checked-background': 'oklch(0.5 0.2 250)',
-      '--checkbox-mark': 'white'
+      '--rad-checkbox-size': '1.25rem',
+      '--rad-checkbox-checked-background': 'oklch(0.5 0.2 250)',
+      '--rad-checkbox-mark': 'white'
     }
   )
 })
@@ -600,9 +609,9 @@ test('replacing appearance leaves the radio class and element', () => {
 
 test('radioTheme maps typed settings to Radio variables', () => {
   assert.deepEqual(radioTheme({ size: '1.25rem', radius: '999px', mark: 'white' }), {
-    '--radio-size': '1.25rem',
-    '--radio-radius': '999px',
-    '--radio-mark': 'white'
+    '--rad-radio-size': '1.25rem',
+    '--rad-radio-radius': '999px',
+    '--rad-radio-mark': 'white'
   })
 })
 
@@ -698,7 +707,7 @@ test('an accordion opens its default section and keeps the rest closed', () => {
 })
 
 test('accordionTheme maps the stack gap to an Accordion variable', () => {
-  assert.deepEqual(accordionTheme({ gap: '0.5rem' }), { '--accordion-gap': '0.5rem' })
+  assert.deepEqual(accordionTheme({ gap: '0.5rem' }), { '--rad-accordion-gap': '0.5rem' })
 })
 
 test('a card groups content without becoming a control', () => {
@@ -734,25 +743,25 @@ test('a card groups content without becoming a control', () => {
 
 test('cardTheme maps typed settings to Card variables', () => {
   assert.deepEqual(cardTheme({ radius: '1rem', padding: '0', titleWeight: 550 }), {
-    '--card-radius': '1rem',
-    '--card-padding': '0',
-    '--card-title-weight': 550
+    '--rad-card-radius': '1rem',
+    '--rad-card-padding': '0',
+    '--rad-card-title-weight': 550
   })
 })
 
 test('collapsibleTheme maps typed settings to Collapsible variables', () => {
   assert.deepEqual(collapsibleTheme({ radius: '1rem', duration: '0ms', contentSize: '1rem' }), {
-    '--collapsible-radius': '1rem',
-    '--collapsible-duration': '0ms',
-    '--collapsible-content-size': '1rem'
+    '--rad-collapsible-radius': '1rem',
+    '--rad-collapsible-duration': '0ms',
+    '--rad-collapsible-content-size': '1rem'
   })
 })
 
 test('dialogTheme maps typed settings to Dialog variables', () => {
   assert.deepEqual(dialogTheme({ width: '24rem', backdrop: 'transparent', titleWeight: 550 }), {
-    '--dialog-width': '24rem',
-    '--dialog-backdrop': 'transparent',
-    '--dialog-title-weight': 550
+    '--rad-dialog-width': '24rem',
+    '--rad-dialog-backdrop': 'transparent',
+    '--rad-dialog-title-weight': 550
   })
 })
 
@@ -760,21 +769,49 @@ test('linkTheme maps typed settings to Link variables', () => {
   assert.deepEqual(
     linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
     {
-      '--link-color': 'oklch(0.5 0.1 250)',
-      '--link-underline-offset': '0.3em',
-      '--link-focus-width': 3
+      '--rad-link-color': 'oklch(0.5 0.1 250)',
+      '--rad-link-underline-offset': '0.3em',
+      '--rad-link-focus-width': 3
     }
   )
 })
 
-test('themes are shared presets with color and button tokens', () => {
+test('themes are shared presets selected by stable identity with resolved modes', () => {
   assert.deepEqual(
     themes.map(theme => theme.name),
     ['Radiant', 'Default', 'Soft squircle', 'Expressive', 'Glass', 'Sharp 3D', 'Jelly', 'Ticket']
   )
-  const ticket = themes.find(theme => theme.name === 'Ticket')
-  assert.equal(ticket?.style['--color-primary'], 'oklch(0.55 0.19 35)')
-  assert.equal(ticket?.style['--button-corner-shape'], 'scoop')
+  const ticket = themes.find(theme => theme.id === 'ticket')
+  assert.equal(ticket?.modes.light['--rad-color-accent'], '#a43e19')
+  assert.equal(ticket?.modes.light['--rad-control-corner-shape'], 'scoop')
+  assert.notEqual(
+    ticket?.modes.light['--rad-color-accent'],
+    ticket?.modes.dark['--rad-color-accent']
+  )
+})
+
+test('the installed public theme API supports serializable themes and nested baseline resets on the server', () => {
+  const theme = defineTheme({
+    id: 'consumer',
+    name: 'Consumer',
+    tokens: { control: { radius: '2rem' } },
+    components: { button: { fontFamily: 'serif' } }
+  })
+  const html = renderToStaticMarkup(
+    createElement(
+      ThemeScope,
+      { theme: JSON.parse(JSON.stringify(theme)), mode: 'dark' },
+      createElement(ThemeScope, { theme: defaultTheme }, 'Neutral')
+    )
+  )
+  assert.match(html, /data-rad-theme="consumer" data-rad-mode="dark"/)
+  assert.match(html, /data-rad-theme="default"/)
+  assert.match(html, /--rad-button-font-family:initial/)
+  assert.match(html, /--rad-control-radius:0.5rem/)
+  assert.throws(
+    () => defineTheme({ id: 'bad', name: 'Bad', tokens: { color: { primary: 'red' } } }),
+    TypeError
+  )
 })
 
 test('public JavaScript and declaration maps point to shipped sources', () => {
@@ -837,7 +874,7 @@ test('the archive includes MIT licensing and public documentation', () => {
   assert.equal(manifest.name, '@cognitap/radiant')
   assert.equal(manifest.license, 'MIT')
   assert.match(readFileSync(new URL('LICENSE', root), 'utf8'), /MIT License[\s\S]*Cserei Zoltán/)
-  for (const file of ['README.md', 'CHANGELOG.md', 'RELEASE_POLICY.md']) {
+  for (const file of ['README.md', 'CHANGELOG.md', 'RELEASE_POLICY.md', 'docs/theming.md']) {
     assert.ok(readFileSync(new URL(file, root), 'utf8').trim().length > 0, file)
   }
 })

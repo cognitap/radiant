@@ -3,12 +3,16 @@
 Decision baseline for [DEV-104](https://linear.app/cognitap/issue/DEV-104),
 24 October 2026. This is the canonical target for the harmonisation sequence,
 not a claim that these interfaces already ship. The current source and package
-retain their existing behavior until their owning migration issues land.
+retain their existing behavior until their owning migration issues land. DEV-44
+now implements the theme model; [the theming guide](../theming.md) describes its
+shipped API and concrete defaults. Component presentation and composition
+contracts below remain targets for their owning stages.
 
 Read [the glossary](../../GLOSSARY.md) for terminology,
 [the migration inventory](./migration.md) for current-to-target mappings, and
 [the acceptance sketches](./examples.tsx) for concrete usage. The sketches use
-[declarations](./target.d.ts), not a replacement implementation or package export.
+[declarations](./target.d.ts) for future component APIs and the real package
+types for the implemented theme API.
 
 ## Decisions at a glance
 
@@ -127,7 +131,7 @@ backgrounds, so canvas may be a gradient; Button's backdrop filter is a distinct
 component override. Lengths/durations/easings are CSS strings, and weights may be
 numbers or strings. `disabledOpacity` is a number from 0 to 1. Values may reference
 CSS variables; this contract does not promise to validate arbitrary CSS grammar.
-The implementation must document concrete default values before DEV-44 closes.
+Concrete default values are documented in [the theming guide](../theming.md).
 
 Shared custom properties use `--rad-` followed by the kebab-case token path,
 such as `--rad-color-accent` and `--rad-control-medium-height`. Component

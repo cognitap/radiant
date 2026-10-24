@@ -23,9 +23,9 @@ import { Button } from '@cognitap/radiant'
 <Button type="submit">Save</Button>
 ```
 
-Button ships with a neutral baseline: sensible sizes, type, an ink-and-gray
-palette, a focus ring, and a quiet press. A theme of CSS variables overrides
-any of it (see [Adapting Button](#adapting-button-to-a-design-system)).
+All components share a neutral light/dark baseline: control dimensions,
+typography, surfaces, focus, and motion. Use the [theme system](#theming) to
+customise the library or a subtree.
 
 For a global reset (Tailwind Preflight), also import `@cognitap/radiant/reset.css`
 before `styles.css`. React 19.3+ is a peer dependency.
@@ -82,8 +82,8 @@ import { Link } from '@cognitap/radiant'
 | `external` | Adds `target="_blank"` and `rel="noopener noreferrer"` when unset. | `false`   |
 | `render`   | Replace the anchor element; see below.                             | —         |
 
-Links paint from `--link-color` and `--link-hover-color` (falling back to the
-primary token) and from the shared focus variables, so a design-system theme
+Links paint from `--rad-link-color` and `--rad-link-hover-color` (falling back to
+the shared accent role) and from the shared focus variables, so a theme
 styles links and buttons together. `linkTheme` sets them with typed keys:
 `color`, `hoverColor`, `underlineOffset`, `decorationThickness`,
 `decorationThicknessHover`, `colorDuration`, and `focusColor`, `focusWidth`,
@@ -172,7 +172,7 @@ own `id` wins, and its `aria-describedby` is kept alongside the description and
 error. There is no built-in English sentence; the label, description, error,
 and required marker are all consumer content.
 
-`fieldTheme` maps typed keys to `--field-*` variables: `gap`, `labelColor`,
+`fieldTheme` maps typed keys to `--rad-field-*` variables: `gap`, `labelColor`,
 `labelSize`, `labelWeight`, `descriptionColor`, `descriptionSize`, `errorColor`,
 `errorSize`, `requiredColor`, and `disabledOpacity`. The root sets
 `data-slot="field"`, `data-layout`, `data-invalid`, `data-disabled`, and
@@ -218,8 +218,8 @@ import { Field, Input } from '@cognitap/radiant'
 
 `onChange` and `onBlur` are the native events. Radiant does not store the value
 and does not validate on blur. The native `size` attribute stays the character
-width. Visual size is `--input-height`, padding, and font tokens, which fall
-back to the button metrics so a theme sizes both together.
+width. Visual size is `--rad-input-height`, padding, and font tokens, which fall
+back to shared control metrics.
 
 `inputTheme` maps `height`, `padding`, `fontFamily`, `fontSize`, `fontWeight`,
 `color`, `background`, `borderWidth`, `borderStyle`, `borderColor`, `radius`,
@@ -361,13 +361,13 @@ choice stays visible and is skipped by the arrow keys.
 glyph back; the input stays in the tab order and in the form. The dot is
 decorative and does not receive clicks.
 
-The disk stays a circle. `--radio-radius` defaults to `999px` and
-`--radio-corner-shape` defaults to `unset`, so a button theme's squircle or
-scoop does not pinch it. Checked fill still follows `--color-primary`.
+The disk stays a circle. `--rad-radio-radius` defaults to `999px` and
+`--rad-radio-corner-shape` defaults to `unset`, so shared squircle or scoop
+control shapes do not pinch it. Checked fill follows `--rad-color-accent`.
 
 `radioTheme` maps `size`, `radius`, `cornerShape`, `borderWidth`,
 `borderStyle`, `borderColor`, `background`, `checkedBackground`,
-`checkedBorder`, `mark`, `invalidBorder`, `gap`, `labelGap`, `labelColor`,
+`checkedBorder`, `mark`, `invalidBorder`, `labelGap`, `labelColor`,
 `labelSize`, `disabledBorder`, `disabledBackground`, `focusColor`,
 `focusWidth`, `focusOffset`, and `focusStyle`. The fieldset keeps
 `data-slot="field"`. The options set `data-slot="radio-group"`, and each input
@@ -484,12 +484,12 @@ The summary's text is its accessible name. Do not put a button or link inside
 the summary. The marker is decorative. `useCollapsible()` reads the open state
 and can request a change. It returns `null` outside `Collapsible`.
 
-The panel height and the marker animate for 200ms. `prefers-reduced-motion`
+The panel height and the marker use shared disclosure motion timing. `prefers-reduced-motion`
 removes those transitions, so the state change is instant. `data-state` is
 `open` or `closed`.
 
 `className` merges onto the part it is passed to. The surface inherits the
-button radius and corner shape. `collapsibleTheme` maps `radius`,
+shared surface radius and corner shape. `collapsibleTheme` maps `radius`,
 `cornerShape`, `background`, `color`, `borderWidth`, `borderStyle`,
 `borderColor`, `padding`, `gap`, `contentColor`, `contentSize`, `duration`,
 `focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. The disclosure
@@ -590,7 +590,7 @@ To name a region, wrap the card in a `<section>` and point
 `aria-labelledby` at the title's `id`. The card does not add that role.
 
 `className` merges onto the part it is passed to. The surface inherits the
-button radius and corner shape. `cardTheme` maps `radius`, `cornerShape`,
+shared surface radius and corner shape. `cardTheme` maps `radius`, `cornerShape`,
 `background`, `color`, `borderWidth`, `borderStyle`, `borderColor`,
 `padding`, `gap`, `headerGap`, `footerGap`, `shadow`, `titleSize`,
 `titleWeight`, `descriptionColor`, and `descriptionSize`. The card sets
@@ -598,146 +598,51 @@ button radius and corner shape. `cardTheme` maps `radius`, `cornerShape`,
 `card-header`, `card-title`, `card-description`, `card-content`, and
 `card-footer`.
 
-### Adapting Button to a design system
+### Theming
 
-Every design decision is a CSS variable, so a design system, or an agent
-reading a design.md, sets values instead of rewriting classes. The built-in
-values are deliberately neutral; a theme replaces them wholesale.
-Set the variables on `:root`, a subtree, or `[data-slot="button"]`. Button also
-exposes `data-variant` and `data-size`, so a rule such as
-`[data-variant="destructive"] { --button-glow: 50% }` targets one variant.
-
-Radiant also exports shared theme presets, so every component can wear the same
-design system. Apply one to a wrapper and all Radiant components inside follow:
+Use `defineTheme` for shared semantic tokens and deliberate component
+exceptions, and `ThemeScope` to apply a named theme and mode to a subtree:
 
 ```tsx
-import { themes } from '@cognitap/radiant'
+import { Button, Field, Input, ThemeScope, defineTheme } from '@cognitap/radiant'
 
-;<div style={themes.find(theme => theme.name === 'Ticket')?.style}>...</div>
-```
-
-`buttonTheme` takes typed settings and returns the matching variables as a style
-object. Unknown keys are a type error:
-
-```tsx
-import { Button, buttonTheme } from '@cognitap/radiant'
-
-// "Softly rounded squircles that straighten when pressed. Snap in, spring out."
-const soft = buttonTheme({
-  radius: '1rem',
-  radiusPressed: '0.375rem',
-  cornerShape: 'squircle',
-  pressScale: 0.96,
-  pressDuration: '90ms',
-  pressEase: 'var(--ease-snap)',
-  releaseDuration: '520ms',
-  releaseEase: 'var(--ease-spring)'
+const brand = defineTheme({
+  id: 'garden',
+  name: 'Garden',
+  tokens: {
+    control: { radius: '0.75rem' },
+    typography: { family: 'system-ui, sans-serif' }
+  },
+  components: { button: { fontWeight: 650 } }
 })
 
-<div style={soft}>
-  <Button>Continue</Button>
-</div>
+;<ThemeScope
+  theme={brand}
+  mode="system"
+>
+  <Field label="Garden name">
+    <Input name="garden" />
+  </Field>
+  <Button>Save</Button>
+</ThemeScope>
 ```
 
-Hover and press colors are derived from each variant's base color, so one color
-per variant is enough. Hover mixes in `hoverLayer` of a state color and press mixes
-in `pressLayer`. By default, primary lightens on hover and darkens on press,
-warning and destructive darken on both, and the neutral variants mix in their
-label color. `stateColor` sets one state color for every variant.
+The stylesheet supplies the baseline without a provider. `ThemeScope` adds a
+normal `div`, applies canvas and body typography, and supports light, dark,
+and system appearance. Named themes reset omitted settings; partial local CSS
+overrides inherit within their scope. Component overrides resolve before
+shared tokens and never become another component's defaults.
 
-Press and release run separate durations and easings. The press values apply
-while the button is held, and the release values apply on the way back. Shape and
-motion use them, and colors use `colorDuration`. `--ease-spring`, `--ease-snap`,
-and `--ease-settle` are ready to use, and any `cubic-bezier()` or `linear()` value
-works.
+Built-in presets are available through the readonly `themes` registry and
+individual exports such as `radiant`, `defaultTheme`, and `ticket`. Select by
+stable `id`. Load preset fonts in your application; choosing a theme does not
+download them.
 
-| `buttonTheme` key    | Variable                        | Default                           |
-| -------------------- | ------------------------------- | --------------------------------- |
-| `radius`             | `--button-radius`               | `var(--radius-control)`, `0.5rem` |
-| `radiusPressed`      | `--button-radius-pressed`       | the resting radius                |
-| `cornerShape`        | `--button-corner-shape`         | `round`                           |
-| `cornerShapePressed` | `--button-corner-shape-pressed` | the resting corner shape          |
-| `height`             | `--button-height`               | `2.5rem`                          |
-| `heightSmall`        | `--button-height-small`         | `2rem`                            |
-| `heightLarge`        | `--button-height-large`         | `3rem`                            |
-| `padding`            | `--button-padding`              | `1rem`                            |
-| `paddingSmall`       | `--button-padding-small`        | `0.75rem`                         |
-| `paddingLarge`       | `--button-padding-large`        | `1.375rem`                        |
-| `fontWeight`         | `--button-font-weight`          | `550`                             |
-| `letterSpacing`      | `--button-letter-spacing`       | `-0.011em`                        |
-| `shadow`             | `--button-shadow`               | one soft drop shadow              |
-| `shadowPressed`      | `--button-shadow-pressed`       | the resting shadow                |
-| `highlight`          | `--button-highlight`            | `0`                               |
-| `sheen`              | `--button-sheen`                | `0`                               |
-| `glow`               | `--button-glow`                 | `0%` (colored glow strength)      |
-| `glowHover`          | `--button-glow-hover`           | unset                             |
-| `backdrop`           | `--button-backdrop`             | `none`                            |
-| `stateColor`         | `--button-state-color`          | per variant, see above            |
-| `hoverLayer`         | `--button-hover-layer`          | `5%`                              |
-| `pressLayer`         | `--button-press-layer`          | `8%`                              |
-| `hoverLift`          | `--button-hover-lift`           | `0px`                             |
-| `pressScale`         | `--button-press-scale`          | `0.97`                            |
-| `pressShift`         | `--button-press-shift`          | `0px`                             |
-| `pressShiftX`        | `--button-press-shift-x`        | `0px`                             |
-| `borderWidth`        | `--button-border-width`         | `1px`                             |
-| `borderColor`        | `--button-border-color`         | each variant's edge color         |
-| `ghostShadow`        | `--button-ghost-shadow`         | no shadow                         |
-| `ghostShadowPressed` | `--button-ghost-shadow-pressed` | no shadow                         |
-| `fontSize`           | `--button-font-size`            | `0.875rem`                        |
-| `fontSizeSmall`      | `--button-font-size-small`      | `0.8125rem`                       |
-| `fontSizeLarge`      | `--button-font-size-large`      | `0.9375rem`                       |
-| `fontFamily`         | `--button-font-family`          | the inherited font                |
-| `textTransform`      | `--button-text-transform`       | `none`                            |
-| `borderStyle`        | `--button-border-style`         | `solid`                           |
-| `focusColor`         | `--color-focus`                 | `oklch(0.55 0.13 255)`            |
-| `focusWidth`         | `--button-focus-width`          | `2px`                             |
-| `focusOffset`        | `--button-focus-offset`         | `2px`                             |
-| `focusStyle`         | `--button-focus-style`          | `solid`                           |
-| `pressDuration`      | `--button-press-duration`       | `80ms`                            |
-| `pressEase`          | `--button-press-ease`           | `var(--ease-snap)`                |
-| `releaseDuration`    | `--button-release-duration`     | `160ms`                           |
-| `releaseEase`        | `--button-release-ease`         | `var(--ease-settle)`              |
-| `colorDuration`      | `--button-color-duration`       | `150ms`                           |
-| `disabledOpacity`    | `--button-disabled-opacity`     | `0.5`                             |
-
-Filled variants derive a hairline edge in a darker shade of their own color
-unless `borderColor` is set. Secondary and outline draw `--color-border`, and
-ghost has no surface until hover. A minimal theme is a handful of variables:
-
-```css
-:root {
-  --color-primary: oklch(0.486 0.086 178);
-  --color-primary-foreground: oklch(0.99 0 0);
-  --button-height: 2.5rem;
-  --button-padding: 1rem;
-  --button-radius: 0.5rem;
-  --button-font-size: 0.875rem;
-}
-```
-
-`shadow` takes a full `box-shadow` list. Use `0 0 #0000`
-for no shadow, not `none`, because the glow is appended to it. `cornerShape` takes
-[`corner-shape`](https://developer.mozilla.org/docs/Web/CSS/corner-shape) values
-such as `squircle` or `round`. Browsers without `corner-shape` draw round corners,
-which look rounder at the same radius. `radius="full"` always uses round corners.
-A disabled button keeps its variant and fades to `disabledOpacity`.
-
-Colors come from these variables. Radiant sets a neutral palette; each takes
-any CSS color, including `oklch()` and translucent values.
-
-- `--color-primary`, `--color-secondary`, `--color-warning`, `--color-destructive`,
-  each with `-foreground`
-- `--color-background`, `--color-foreground`, `--color-border` (outline and ghost)
-- `--color-focus`
-
-Reduced motion keeps color changes and drops scale and movement. Variables
-starting with `--_btn-` are internal and may change.
-
-Caller utilities such as `rounded-full` paint only on the Tailwind route. That
-route is the `@cognitap/radiant/tailwind.css` import. Do not import
-`@cognitap/radiant/styles.css` and `@cognitap/radiant/tailwind.css` together.
-`cn` is not a public export, so a wrapper passes `className` as a string.
-Unlayered application CSS takes precedence over Radiant's styles.
+See the [theming guide](docs/theming.md) for the complete token/default reference,
+presets and fonts, nested scopes, mode inheritance, and migration from old
+CSS variables and theme wrappers. Existing family helpers remain local style
+compatibility conveniences; `Theme.style`, `Theme.surface`, and `radiantTheme`
+are deprecated in favour of `ThemeScope`.
 
 ### With Tailwind
 
@@ -759,8 +664,9 @@ Utilities passed in `className` replace matching defaults, including `hover:` an
 
 The [shared design and component contract](docs/contracts/README.md) records the
 DEV-104 harmonisation target, with a [migration inventory](docs/contracts/migration.md)
-and compile-only acceptance examples. It describes future interfaces, not
-additional APIs available in the current package. [GLOSSARY.md](GLOSSARY.md)
+and compile-only acceptance examples. The [theming guide](docs/theming.md)
+describes the implemented theme APIs; the remaining contract migrations are
+tracked separately. [GLOSSARY.md](GLOSSARY.md)
 defines the shared vocabulary. Run `pnpm typecheck:contracts` to check those
 specifications; the normal typecheck and CI include that check.
 

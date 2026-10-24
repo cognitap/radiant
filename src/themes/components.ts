@@ -1,0 +1,248 @@
+import { kebabCase } from './tokens.js'
+
+/** Explicit component slots; omitted slots reset to CSS fallback semantics. */
+export const componentRegistry = {
+  button: {
+    radius: 'css',
+    radiusPressed: 'css',
+    cornerShape: 'css',
+    cornerShapePressed: 'css',
+    height: 'css',
+    heightSmall: 'css',
+    heightLarge: 'css',
+    padding: 'css',
+    paddingSmall: 'css',
+    paddingLarge: 'css',
+    fontSize: 'css',
+    fontSizeSmall: 'css',
+    fontSizeLarge: 'css',
+    fontWeight: 'weight',
+    letterSpacing: 'css',
+    shadow: 'css',
+    shadowPressed: 'css',
+    highlight: 'opacity',
+    sheen: 'opacity',
+    glow: 'css',
+    backdrop: 'css',
+    stateColor: 'css',
+    hoverLayer: 'css',
+    pressLayer: 'css',
+    hoverLift: 'css',
+    pressScale: 'number',
+    pressShift: 'css',
+    pressShiftX: 'css',
+    borderWidth: 'css',
+    borderColor: 'css',
+    ghostShadow: 'css',
+    ghostShadowPressed: 'css',
+    focusColor: 'css',
+    fontFamily: 'css',
+    textTransform: 'css',
+    borderStyle: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css',
+    pressDuration: 'css',
+    pressEase: 'css',
+    releaseDuration: 'css',
+    releaseEase: 'css',
+    colorDuration: 'css',
+    disabledOpacity: 'opacity'
+  },
+  link: {
+    color: 'css',
+    hoverColor: 'css',
+    underlineOffset: 'css',
+    decorationThickness: 'css',
+    decorationThicknessHover: 'css',
+    colorDuration: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
+  field: {
+    gap: 'css',
+    labelColor: 'css',
+    labelSize: 'css',
+    labelWeight: 'weight',
+    descriptionColor: 'css',
+    descriptionSize: 'css',
+    errorColor: 'css',
+    errorSize: 'css',
+    requiredColor: 'css',
+    disabledOpacity: 'opacity'
+  },
+  input: {
+    height: 'css',
+    padding: 'css',
+    fontFamily: 'css',
+    fontSize: 'css',
+    fontWeight: 'weight',
+    color: 'css',
+    background: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    radius: 'css',
+    cornerShape: 'css',
+    shadow: 'css',
+    placeholder: 'css',
+    invalidBorder: 'css',
+    disabledBackground: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
+  checkbox: {
+    size: 'css',
+    radius: 'css',
+    cornerShape: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    background: 'css',
+    checkedBackground: 'css',
+    checkedBorder: 'css',
+    mark: 'css',
+    invalidBorder: 'css',
+    gap: 'css',
+    labelColor: 'css',
+    labelSize: 'css',
+    disabledBorder: 'css',
+    disabledBackground: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
+  radio: {
+    size: 'css',
+    radius: 'css',
+    cornerShape: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    background: 'css',
+    checkedBackground: 'css',
+    checkedBorder: 'css',
+    mark: 'css',
+    invalidBorder: 'css',
+    labelGap: 'css',
+    labelColor: 'css',
+    labelSize: 'css',
+    disabledBorder: 'css',
+    disabledBackground: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
+  dialog: {
+    width: 'css',
+    padding: 'css',
+    gap: 'css',
+    radius: 'css',
+    cornerShape: 'css',
+    background: 'css',
+    color: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    shadow: 'css',
+    backdrop: 'css',
+    titleSize: 'css',
+    titleWeight: 'weight',
+    descriptionColor: 'css',
+    descriptionSize: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
+  collapsible: {
+    radius: 'css',
+    cornerShape: 'css',
+    background: 'css',
+    color: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    padding: 'css',
+    gap: 'css',
+    contentColor: 'css',
+    contentSize: 'css',
+    duration: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
+  accordion: {
+    gap: 'css'
+  },
+  card: {
+    radius: 'css',
+    cornerShape: 'css',
+    background: 'css',
+    color: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    padding: 'css',
+    gap: 'css',
+    headerGap: 'css',
+    footerGap: 'css',
+    shadow: 'css',
+    titleSize: 'css',
+    titleWeight: 'weight',
+    descriptionColor: 'css',
+    descriptionSize: 'css'
+  },
+  radioGroup: { gap: 'css' }
+} as const
+
+type ValueKind = 'css' | 'weight' | 'number' | 'opacity'
+type KindValue<T> = T extends 'css' ? string : T extends 'weight' ? string | number : number
+export type ThemeComponentOverrides = {
+  readonly [F in keyof typeof componentRegistry]?: {
+    readonly [K in keyof (typeof componentRegistry)[F]]?: KindValue<
+      (typeof componentRegistry)[F][K]
+    >
+  }
+}
+
+export const componentVariables = Object.freeze(
+  Object.fromEntries(
+    Object.entries(componentRegistry).map(([family, keys]) => [
+      family,
+      Object.freeze(
+        Object.fromEntries(
+          Object.keys(keys).map(key => [key, `--rad-${kebabCase(family)}-${kebabCase(key)}`])
+        )
+      )
+    ])
+  )
+) as Readonly<Record<keyof typeof componentRegistry, Readonly<Record<string, `--rad-${string}`>>>>
+
+export function componentValueKind(family: string, key: string): ValueKind | undefined {
+  if (!Object.hasOwn(componentRegistry, family)) return undefined
+  const keys = componentRegistry[family as keyof typeof componentRegistry]
+  return Object.hasOwn(keys, key) ? (keys as Record<string, ValueKind>)[key] : undefined
+}
+
+export function flattenComponents(overrides: ThemeComponentOverrides = {}, reset = false) {
+  const result: Record<`--rad-${string}`, string | number> = {}
+  for (const [family, variables] of Object.entries(componentVariables)) {
+    const values = overrides[family as keyof ThemeComponentOverrides] as
+      | Record<string, string | number | undefined>
+      | undefined
+    for (const [key, variable] of Object.entries(variables)) {
+      const value = values?.[key]
+      if (value !== undefined) result[variable] = value
+      else if (reset) result[variable] = 'initial'
+    }
+  }
+  return result
+}
