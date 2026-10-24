@@ -103,6 +103,89 @@ own link component:
 The adapter must forward `href`, `className`, and `children`, and keep native
 anchor semantics. When `render` is absent, `Link` renders a plain `<a>`.
 
+### Field
+
+`Field` is the form anatomy: it connects a label, an optional description, and
+an optional error to one control, or captions a group. It does not validate and
+it does not read form state. The consumer owns the error. Pass the message when
+the value is invalid and clear it when the value recovers. An empty message
+removes the invalid state.
+
+```tsx
+import { Field } from '@cognitap/radiant'
+
+;<Field
+  label="Email"
+  description="Work address"
+  error={error}
+  required
+>
+  <input
+    name="email"
+    type="email"
+    autoComplete="email"
+  />
+</Field>
+```
+
+A single host control (`input`, `textarea`, `select`) receives `id`,
+`required`, `disabled`, `aria-invalid`, `aria-required`, and
+`aria-describedby`. The label uses that `id`. A component child, such as the
+upcoming Input, calls `useField()` and forwards `controlProps`. A render
+function receives the same props, for an adapter that is not a host element:
+
+```tsx
+<Field
+  label="Email"
+  error={error}
+>
+  {control => (
+    <input
+      {...control}
+      name="email"
+    />
+  )}
+</Field>
+```
+
+`useField()` returns `null` outside a Field. Inside a group, `controlProps` is
+`null`: the group element owns the description, and each control keeps its own
+label.
+
+| Prop                | Role                                                                          | Default   |
+| ------------------- | ----------------------------------------------------------------------------- | --------- |
+| `label`             | Accessible name. A `<label>` for one control, a `<legend>` for a group.       | —         |
+| `description`       | Help text, included in `aria-describedby` while present.                      | —         |
+| `error`             | Error message. Presence marks the field invalid and announces it as an alert. | —         |
+| `layout`            | `control` or `group` (`<fieldset>`).                                          | `control` |
+| `required`          | Sets the control's `required` and `aria-required`. The marker is visual.      | `false`   |
+| `disabled`          | Disables the control, or the whole `<fieldset>` for a group.                  | `false`   |
+| `requiredIndicator` | Replaceable visual marker, hidden from assistive tech. `null` hides it.       | `*`       |
+
+Group anatomy is a `<fieldset>` and `<legend>`, so a disabled group disables
+its descendants natively. Pass `role="radiogroup"` when a later radio group
+needs that role. Required and invalid on a group are relationships on the
+fieldset, not on each control.
+
+Ids come from `useId()`, so server markup and hydration agree. A host control's
+own `id` wins, and its `aria-describedby` is kept alongside the description and
+error. There is no built-in English sentence; the label, description, error,
+and required marker are all consumer content.
+
+`fieldTheme` maps typed keys to `--field-*` variables: `gap`, `labelColor`,
+`labelSize`, `labelWeight`, `descriptionColor`, `descriptionSize`, `errorColor`,
+`errorSize`, `requiredColor`, and `disabledOpacity`. The root sets
+`data-slot="field"`, `data-layout`, `data-invalid`, `data-disabled`, and
+`data-required`. Parts set `data-slot` to `field-label`, `field-description`,
+`field-error`, and `field-required`. Style a control from the field, for
+example `[data-slot="field"][data-invalid] input`.
+
+A native `<form>` is the verified integration: leave the input uncontrolled,
+give it a `name`, and on submit pass the message back through `error`.
+TanStack Form is the compatibility reference named in the charter. The detailed
+form-library contract is still deferred, so this release does not claim a
+TanStack adapter.
+
 ### Adapting Button to a design system
 
 Every design decision is a CSS variable, so a design system, or an agent
