@@ -128,9 +128,17 @@ still follow the cascade and inheritance appropriate to their host.
 
 Components resolve **local component override → shared semantic role → neutral
 baseline**. For example, `components.button.radius` overrides Button without
-changing Input; `tokens.control.radius` changes both. Radio stays circular by
-default, even under squircle or scoop control themes. Shared disabled opacity
-is applied once to the relevant visual unit.
+changing Input; `tokens.control.radius` changes both. Checkbox caps its inherited
+radius at a quarter of its indicator size so it remains a box; an explicit
+`components.checkbox.radius` still wins. Radio stays circular by default, even
+under squircle or scoop control themes. Shared disabled opacity is applied once
+to the relevant visual unit.
+
+Input, Checkbox, and Radio derive their default control outline from the shared
+border and foreground colors. This gives interactive boundaries more contrast
+than passive surface dividers. Their explicit `borderColor`, invalid, disabled,
+and focus overrides keep their normal precedence. Disabled selection marks use
+the muted foreground unless the component supplies its own `mark` color.
 
 Component overrides use the existing family configuration keys, grouped under
 `button`, `link`, `field`, `input`, `checkbox`, `radio`, `radioGroup`, `dialog`,
@@ -193,9 +201,13 @@ self-hosted `@font-face` rules before showing the themed UI. Defining or choosin
 a theme never downloads a font. Storybook's font loading belongs to Storybook,
 not the package. `Theme` has no `fonts` field or font-loading API.
 
-Glass uses a gradient `surface.canvas` and translucent `color.surface`; its
-Button backdrop-filter override is distinct from the dialog backdrop
-background. Shape uses CSS `corner-shape`; browsers that do not support it
+Glass uses a gradient `surface.canvas` and translucent `color.surface`.
+`components.dialog.backdropFilter` frosts content behind the dialog panel;
+`components.dialog.backdrop` paints the surrounding modal overlay. Button's
+existing `backdrop` override is also a filter and remains independent. Ticket
+uses a compact, solid checkbox outline so small indicators
+remain legible alongside its scooped, dashed controls and surfaces.
+Shape uses CSS `corner-shape`; browsers that do not support it
 retain ordinary rounded corners. A palette definition does not certify contrast
 for arbitrary content, custom backgrounds, or translucent combinations.
 
@@ -205,9 +217,9 @@ These 66 roles and concrete neutral defaults come from
 [`src/themes/tokens.ts`](../src/themes/tokens.ts). CSS names are `--rad-` plus the
 kebab-case dotted path. Values shown in both modes differ only where listed.
 `color` values are CSS colors; `surface.canvas` and `surface.backdrop` are full
-CSS backgrounds and may be gradients. `components.button.backdrop` is instead
-a CSS backdrop-filter value. Lengths and durations remain CSS strings; opacity
-is numeric.
+CSS backgrounds and may be gradients. `components.button.backdrop` and
+`components.dialog.backdropFilter` are CSS backdrop-filter values. Lengths and
+durations remain CSS strings; opacity is numeric.
 
 | Path                           | Light default                        | Dark default                         |
 | ------------------------------ | ------------------------------------ | ------------------------------------ |

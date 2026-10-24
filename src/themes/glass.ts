@@ -87,6 +87,7 @@ export const glass = defineTheme({
     state: { disabledOpacity: 0.5 }
   },
   components: {
+    dialog: { backdropFilter: 'blur(18px) saturate(190%)' },
     button: {
       fontWeight: 700,
       shadow: 'inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 10px 30px -10px rgb(30 20 60 / 0.35)',

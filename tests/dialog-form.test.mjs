@@ -26,10 +26,11 @@ for (const key of [
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
-const { act, createElement, useState } = await import('react')
+const { act, createElement, createRef, useState } = await import('react')
 const { createRoot, hydrateRoot } = await import('react-dom/client')
 const { renderToString } = await import('react-dom/server')
 const {
+  Button,
   Dialog,
   DialogClose,
   DialogContent,
@@ -62,6 +63,305 @@ function dialogTree(props = {}) {
   )
 }
 
+test('default dialog actions compose canonical Button presentation and pending markup', () => {
+  for (const presentation of [
+    {},
+    { variant: 'outline', size: 'small', radius: 'full', pending: true }
+  ]) {
+    const reference = document.createElement('div')
+    reference.innerHTML = renderToString(createElement(Button, presentation, 'Action'))
+    const button = reference.querySelector('button')
+    for (const [Action, identity] of [
+      [DialogTrigger, 'dialog-trigger'],
+      [DialogClose, 'dialog-close']
+    ]) {
+      const host = document.createElement('div')
+      host.innerHTML = renderToString(
+        createElement(Dialog, null, createElement(Action, presentation, 'Action'))
+      )
+      const action = host.querySelector('button')
+      assert.equal(action.className, button.className, `${identity} uses Button presentation`)
+      assert.equal(action.innerHTML, button.innerHTML, `${identity} uses Button pending markup`)
+      assert.equal(action.getAttribute('aria-busy'), presentation.pending ? 'true' : null)
+      assert.equal(action.type, 'button')
+      assert.deepEqual(new Set(action.dataset.slot.split(' ')), new Set(['button', identity]))
+      assert.equal(host.querySelectorAll('button').length, 1)
+    }
+  }
+})
+
+test('dialog action consumers can veto requests and a controlled owner can decline them', async () => {
+  const { host, root } = mount()
+  const events = []
+  let preventTrigger = true
+  let preventClose = true
+  let accept = false
+  let submits = 0
+  function Example() {
+    const [open, setOpen] = useState(false)
+    return createElement(
+      'form',
+      {
+        onSubmit(event) {
+          event.preventDefault()
+          submits++
+        }
+      },
+      createElement(
+        Dialog,
+        {
+          open,
+          onOpenChange(next) {
+            events.push(next)
+            if (accept) setOpen(next)
+          }
+        },
+        createElement(
+          DialogTrigger,
+          {
+            onClick(event) {
+              events.push('trigger')
+              if (preventTrigger) event.preventDefault()
+            },
+            'aria-haspopup': 'menu',
+            'aria-controls': 'caller-cannot-replace-content',
+            'aria-expanded': true,
+            'data-slot': 'caller-cannot-replace-identity'
+          },
+          'Edit'
+        ),
+        createElement(
+          DialogContent,
+          null,
+          createElement(DialogTitle, null, 'Edit profile'),
+          createElement(
+            DialogClose,
+            {
+              onClick(event) {
+                events.push('close')
+                if (preventClose) event.preventDefault()
+              }
+            },
+            'Close'
+          )
+        )
+      )
+    )
+  }
+  try {
+    await act(async () => root.render(createElement(Example)))
+    const trigger = host.querySelector('[data-slot~="dialog-trigger"]')
+    const close = host.querySelector('[data-slot~="dialog-close"]')
+    const dialog = host.querySelector('dialog')
+    assert.equal(trigger.getAttribute('aria-haspopup'), 'dialog')
+    assert.equal(trigger.getAttribute('aria-controls'), dialog.id)
+    assert.equal(trigger.getAttribute('aria-expanded'), 'false')
+    assert.equal(trigger.dataset.slot, 'button dialog-trigger')
+
+    await act(async () => trigger.click())
+    assert.deepEqual(events, ['trigger'])
+    assert.equal(dialog.hasAttribute('open'), false)
+    preventTrigger = false
+    await act(async () => trigger.click())
+    assert.deepEqual(events, ['trigger', 'trigger', true])
+    assert.equal(dialog.hasAttribute('open'), false)
+    accept = true
+    await act(async () => trigger.click())
+    assert.deepEqual(events, ['trigger', 'trigger', true, 'trigger', true])
+    assert.equal(dialog.hasAttribute('open'), true)
+    assert.equal(trigger.getAttribute('aria-expanded'), 'true')
+
+    await act(async () => close.click())
+    assert.equal(dialog.hasAttribute('open'), true)
+    preventClose = false
+    await act(async () => close.click())
+    assert.deepEqual(events, ['trigger', 'trigger', true, 'trigger', true, 'close', 'close', false])
+    assert.equal(dialog.hasAttribute('open'), false)
+    assert.equal(submits, 0, 'default action buttons do not submit the surrounding form')
+  } finally {
+    await act(async () => root.unmount())
+    host.remove()
+  }
+})
+
+test('pending and native disabled actions block consumers, requests and form submission', async () => {
+  for (const Action of [DialogTrigger, DialogClose]) {
+    for (const render of [undefined, props => createElement('button', props)]) {
+      const { host, root } = mount()
+      const initiallyOpen = Action === DialogClose
+      const requests = []
+      let clicks = 0
+      let submits = 0
+      function tree({ pending = false, disabled = false, fieldsetDisabled = false }) {
+        const action = createElement(
+          Action,
+          { pending, disabled, render, type: 'submit', onClick: () => clicks++ },
+          'Action'
+        )
+        return createElement(
+          'form',
+          {
+            onSubmit(event) {
+              event.preventDefault()
+              submits++
+            }
+          },
+          createElement(
+            'fieldset',
+            { disabled: fieldsetDisabled },
+            createElement(
+              Dialog,
+              { defaultOpen: initiallyOpen, onOpenChange: next => requests.push(next) },
+              initiallyOpen ? null : action,
+              createElement(
+                DialogContent,
+                null,
+                createElement(DialogTitle, null, 'Guarded action'),
+                initiallyOpen ? action : null
+              )
+            )
+          )
+        )
+      }
+      try {
+        await act(async () => root.render(tree({ pending: true })))
+        let action = host.querySelector('button')
+        const dialog = host.querySelector('dialog')
+        assert.equal(action.getAttribute('aria-busy'), 'true')
+        await act(async () => action.click())
+        assert.equal(clicks, 0)
+        assert.deepEqual(requests, [])
+        assert.equal(submits, 0)
+        assert.equal(dialog.hasAttribute('open'), initiallyOpen)
+
+        await act(async () => root.render(tree({ disabled: true })))
+        action = host.querySelector('button')
+        assert.equal(action.disabled, true)
+        await act(async () => action.click())
+        await act(async () => root.render(tree({ fieldsetDisabled: true })))
+        action = host.querySelector('button')
+        assert.equal(action.disabled, false)
+        assert.equal(action.matches(':disabled'), true)
+        await act(async () => {
+          action.click()
+          action.dispatchEvent(
+            new dom.window.MouseEvent('click', { bubbles: true, cancelable: true })
+          )
+        })
+        assert.equal(clicks, 0)
+        assert.deepEqual(requests, [])
+        assert.equal(submits, 0)
+
+        await act(async () => root.render(tree({})))
+        await act(async () => host.querySelector('button').click())
+        assert.equal(clicks, 1)
+        assert.deepEqual(requests, [!initiallyOpen])
+        assert.equal(dialog.hasAttribute('open'), !initiallyOpen)
+        assert.equal(submits, 1, 'an explicit submit type retains native form behavior')
+      } finally {
+        await act(async () => root.unmount())
+        host.remove()
+      }
+    }
+  }
+})
+
+test('dialog action refs reach the same native hosts and preserve callback cleanup', async () => {
+  for (const render of [undefined, props => createElement('button', props)]) {
+    const { host, root } = mount()
+    const triggerRef = createRef()
+    const attached = []
+    const cleaned = []
+    const closeRef = node => {
+      attached.push(node)
+      return () => {
+        cleaned.push(node)
+      }
+    }
+    await act(async () =>
+      root.render(
+        createElement(
+          Dialog,
+          null,
+          createElement(DialogTrigger, { ref: triggerRef, render }, 'Edit'),
+          createElement(DialogClose, { ref: closeRef, render }, 'Close')
+        )
+      )
+    )
+    const trigger = host.querySelector('[data-slot~="dialog-trigger"]')
+    const close = host.querySelector('[data-slot~="dialog-close"]')
+    assert.equal(triggerRef.current, trigger)
+    assert.deepEqual(attached, [close])
+    await act(async () => root.unmount())
+    assert.equal(triggerRef.current, null)
+    assert.deepEqual(attached, [close], 'a returned cleanup replaces the null callback')
+    assert.deepEqual(cleaned, [close])
+    host.remove()
+  }
+})
+
+test('action replacements receive native props and preserve explicit Button adaptation', () => {
+  let resolved
+  const ref = createRef()
+  const host = document.createElement('div')
+  host.innerHTML = renderToString(
+    createElement(
+      Dialog,
+      null,
+      createElement(DialogTrigger, {
+        variant: 'destructive',
+        size: 'large',
+        radius: 'full',
+        iconOnly: true,
+        fullWidth: true,
+        pending: true,
+        className: 'caller-class',
+        ref,
+        render: props => {
+          resolved = props
+          return createElement('button', props, 'Native replacement')
+        }
+      })
+    )
+  )
+  assert.equal(resolved.className, 'caller-class')
+  assert.equal(resolved.ref, ref)
+  assert.equal(resolved['aria-busy'], true)
+  assert.equal(resolved['data-slot'], 'button dialog-trigger')
+  assert.equal(resolved.type, 'button')
+  for (const name of ['variant', 'size', 'radius', 'iconOnly', 'fullWidth', 'pending']) {
+    assert.equal(Object.hasOwn(resolved, name), false, `${name} is not a native replacement prop`)
+    assert.equal(host.querySelector('button').hasAttribute(name.toLowerCase()), false)
+  }
+
+  const adapted = document.createElement('div')
+  adapted.innerHTML = renderToString(
+    createElement(
+      Dialog,
+      null,
+      createElement(
+        DialogClose,
+        {
+          variant: 'destructive',
+          className: 'rounded-none',
+          render: props => createElement(Button, { ...props, variant: 'outline' })
+        },
+        'Close'
+      )
+    )
+  )
+  const canonical = document.createElement('div')
+  canonical.innerHTML = renderToString(
+    createElement(Button, { variant: 'outline', className: 'rounded-none' }, 'Close')
+  )
+  assert.equal(
+    adapted.querySelector('button').className,
+    canonical.querySelector('button').className
+  )
+  assert.equal(adapted.querySelectorAll('button').length, 1)
+  assert.equal(adapted.querySelector('button').dataset.slot, 'button dialog-close')
+})
+
 test('a closed dialog hydrates without an open attribute', async () => {
   const html = renderToString(dialogTree({ defaultOpen: true }))
   const dialogTag = /<dialog\b[^>]*>/.exec(html)?.[0] ?? ''
@@ -88,7 +388,7 @@ test('a closed dialog hydrates without an open attribute', async () => {
 test('opening, closing, and a prevented trigger stay in React state', async () => {
   const { host, root } = mount()
   await act(async () => root.render(dialogTree()))
-  const trigger = host.querySelector('[data-slot="dialog-trigger"]')
+  const trigger = host.querySelector('[data-slot~="dialog-trigger"]')
   const dialog = host.querySelector('dialog')
   assert.equal(dialog.hasAttribute('open'), false)
   assert.equal(trigger.getAttribute('aria-expanded'), 'false')
@@ -98,7 +398,7 @@ test('opening, closing, and a prevented trigger stay in React state', async () =
   assert.equal(dialog.hasAttribute('open'), true)
   assert.equal(trigger.getAttribute('aria-expanded'), 'true')
 
-  await act(async () => host.querySelector('[data-slot="dialog-close"]').click())
+  await act(async () => host.querySelector('[data-slot~="dialog-close"]').click())
   assert.equal(dialog.hasAttribute('open'), false)
 
   trigger.addEventListener('click', event => event.preventDefault(), { capture: true })
@@ -143,7 +443,7 @@ test('Escape and backdrop dismissal follow the dialog flags', async () => {
   })
   assert.equal(dialog.hasAttribute('open'), false)
 
-  await act(async () => host.querySelector('[data-slot="dialog-trigger"]').click())
+  await act(async () => host.querySelector('[data-slot~="dialog-trigger"]').click())
   const closeEvent = new dom.window.Event('close', { bubbles: true })
   await act(async () => dialog.dispatchEvent(closeEvent))
   assert.equal(dialog.hasAttribute('open'), false)
@@ -280,7 +580,7 @@ test('a custom trigger uses useDialog and nested close leaves the outer open', a
   await act(async () => host.querySelector('button').click())
   const [outer, inner] = host.querySelectorAll('dialog')
   assert.equal(outer.hasAttribute('open'), true)
-  await act(async () => host.querySelector('[data-slot="dialog-trigger"]').click())
+  await act(async () => host.querySelector('[data-slot~="dialog-trigger"]').click())
   assert.equal(inner.hasAttribute('open'), true)
   await act(async () => {
     inner.dispatchEvent(new dom.window.Event('close', { bubbles: true }))

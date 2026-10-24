@@ -180,7 +180,7 @@ document, install a global provider or persist a preference.
   content elsewhere must explicitly propagate scope; portal support is not
   silently promised by this design.
 
-Storybook will consume this same registry/mechanism through one toolbar
+Storybook consumes this same registry/mechanism through one toolbar
 selector and central canvas/docs application. Its comparison page is the
 intentional nested-scope example, not a second theme implementation.
 

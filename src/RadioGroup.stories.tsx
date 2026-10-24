@@ -1,9 +1,7 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
-import { Radio, RadioGroup } from './RadioGroup'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
+import { Button, Radio, RadioGroup, type ThemeStyle } from './index.js'
 
 function NativeForm() {
   const [summary, setSummary] = useState('pro')
@@ -65,20 +63,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'A fieldset of native radios. The group owns the shared name and the selected value. Arrow keys move the selection. The disk stays a circle.'
+          'A Field fieldset of native radios: the group owns name and selection, and Radio supplies value and label. The disk stays circular. Group className/style reach the outer Field; data-slot="radio-group" identifies the inner options container. Radio className/style/ref target its input (data-slot="radio"); radio-label identifies its text.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope theme={radiant}>
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof RadioGroup>
 
 export default meta
@@ -87,116 +75,103 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: { defaultValue: 'pro' },
   render: args => (
-    <RadioGroup {...args}>
-      <Radio
-        label="Free"
-        value="free"
-      />
-      <Radio
-        label="Pro"
-        value="pro"
-      />
-      <Radio
-        label="Team"
-        value="team"
-      />
-    </RadioGroup>
+    <form onSubmit={event => event.preventDefault()}>
+      <RadioGroup {...args}>
+        <Radio
+          label="Free"
+          value="free"
+        />
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+        <Radio
+          label="Team"
+          value="team"
+        />
+      </RadioGroup>
+    </form>
   )
 }
 
-export const DisabledChoice: Story = {
-  args: { defaultValue: 'free' },
-  render: args => (
-    <RadioGroup {...args}>
-      <Radio
-        label="Free"
-        value="free"
-      />
-      <Radio
-        disabled
-        label="Retired"
-        value="retired"
-      />
-      <Radio
-        label="Team"
-        value="team"
-      />
-    </RadioGroup>
-  )
-}
-
-export const DisabledGroup: Story = {
-  args: { defaultValue: 'pro', disabled: true },
-  render: args => (
-    <RadioGroup {...args}>
-      <Radio
-        label="Free"
-        value="free"
-      />
-      <Radio
-        label="Pro"
-        value="pro"
-      />
-    </RadioGroup>
-  )
-}
-
-export const Invalid: Story = {
-  args: { error: 'Pick a plan.', required: true },
-  render: args => (
-    <RadioGroup {...args}>
-      <Radio
-        label="Free"
-        value="free"
-      />
-      <Radio
-        label="Pro"
-        value="pro"
-      />
-    </RadioGroup>
-  )
-}
-
-export const NativeFormStory: Story = {
-  name: 'Native form',
-  args: { label: 'Plan', name: 'plan' },
-  render: () => <NativeForm />
-}
-
-const themeFrame = (): CSSProperties => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  alignItems: 'center',
-  gap: '1rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
+export const States: Story = {
+  play: async ({ canvasElement }) => checkDisabledIndicators(canvasElement, 'radio'),
   render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <RadioGroup
-            defaultValue="on"
-            label={theme.name}
-            name={theme.name}
-          >
-            <Radio
-              label="Off"
-              value="off"
-            />
-            <Radio
-              label="On"
-              value="on"
-            />
-          </RadioGroup>
-        </ThemeScope>
-      ))}
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
+      <RadioGroup
+        label="One unavailable option"
+        name="disabled-choice"
+        defaultValue="free"
+      >
+        <Radio
+          label="Free"
+          value="free"
+        />
+        <Radio
+          label="Retired"
+          value="retired"
+          disabled
+        />
+        <Radio
+          label="Team"
+          value="team"
+        />
+      </RadioGroup>
+      <RadioGroup
+        label="Unavailable group"
+        name="disabled-group"
+        defaultValue="pro"
+        disabled
+      >
+        <Radio
+          label="Free"
+          value="free"
+        />
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+      </RadioGroup>
+      <RadioGroup
+        label="Required plan"
+        name="invalid-plan"
+        error="Pick a plan."
+        required
+      >
+        <Radio
+          label="Free"
+          value="free"
+        />
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+      </RadioGroup>
     </div>
   )
+}
+
+export const Composition: Story = { render: () => <NativeForm /> }
+
+export const Customisation: Story = {
+  args: { name: 'custom-plan' },
+  render: args => {
+    const local: ThemeStyle = { '--rad-radio-group-gap': '1rem', '--rad-radio-size': '1.5rem' }
+    return (
+      <RadioGroup
+        {...args}
+        style={local}
+        defaultValue="pro"
+      >
+        <Radio
+          label="Free"
+          value="free"
+        />
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+      </RadioGroup>
+    )
+  }
 }

@@ -1,15 +1,25 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './Collapsible'
-import { Field } from './Field'
-import { Input } from './Input'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import {
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Field,
+  Input,
+  type ThemeStyle
+} from './index.js'
 
 function ExclusiveGroup() {
   return (
-    <div style={{ display: 'grid', gap: '0.75rem', width: '24rem' }}>
+    <div
+      style={{
+        display: 'grid',
+        gap: '0.75rem',
+        width: 'min(24rem, calc(100vw - 2rem))',
+        maxWidth: '100%'
+      }}
+    >
       <Collapsible
         defaultOpen
         name="faq"
@@ -48,7 +58,13 @@ function InsideForm() {
         const note = new FormData(event.currentTarget).get('note')
         setSummary(typeof note === 'string' && note !== '' ? note : 'Empty')
       }}
-      style={{ display: 'grid', justifyItems: 'start', gap: '0.75rem', width: '24rem' }}
+      style={{
+        display: 'grid',
+        justifyItems: 'start',
+        gap: '0.75rem',
+        width: 'min(24rem, calc(100vw - 2rem))',
+        maxWidth: '100%'
+      }}
     >
       <Collapsible defaultOpen>
         <CollapsibleTrigger>Note</CollapsibleTrigger>
@@ -87,23 +103,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native details element. The summary toggles it. Space and Enter stay with the platform, and a shared name makes a group exclusive.'
+          'A native `<details>` root with CollapsibleTrigger as `<summary>` and CollapsibleContent as its panel. Root className/style/ref target details; part props target their host elements. Slots are collapsible, collapsible-trigger and collapsible-content. open/onOpenChange control state; defaultOpen initializes it, and name uses native exclusive grouping.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope
-          theme={radiant}
-          style={{ width: '24rem' }}
-        >
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Collapsible>
 
 export default meta
@@ -115,24 +118,41 @@ export const Default: Story = {
       <CollapsibleTrigger>Shipping</CollapsibleTrigger>
       <CollapsibleContent>
         <p style={{ margin: 0 }}>Ships in two days.</p>
-        <button
+        <Button
           style={{ marginTop: '0.75rem' }}
           type="button"
         >
           Track
-        </button>
+        </Button>
       </CollapsibleContent>
     </Collapsible>
   )
 }
 
-export const Open: Story = {
+export const States: Story = {
   render: () => (
     <Collapsible defaultOpen>
       <CollapsibleContent>The content can sit before the summary.</CollapsibleContent>
       <CollapsibleTrigger>Already open</CollapsibleTrigger>
     </Collapsible>
   )
+}
+
+export const Composition: Story = { render: () => <InsideForm /> }
+
+export const Customisation: Story = {
+  render: () => {
+    const local: ThemeStyle = { '--rad-collapsible-padding': '1.5rem' }
+    return (
+      <Collapsible
+        defaultOpen
+        style={local}
+      >
+        <CollapsibleTrigger>Roomier panel</CollapsibleTrigger>
+        <CollapsibleContent>Local padding preserves the current theme.</CollapsibleContent>
+      </Collapsible>
+    )
+  }
 }
 
 export const Exclusive: Story = {
@@ -143,38 +163,6 @@ export const Nested: Story = {
   render: () => <NestedSections />
 }
 
-export const Form: Story = {
-  render: () => <InsideForm />
-}
-
 export const Controlled: Story = {
   render: () => <HeldOpen />
-}
-
-const themeFrame = (): CSSProperties => ({
-  display: 'grid',
-  gap: '1rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger>{theme.name}</CollapsibleTrigger>
-            <CollapsibleContent>
-              Panel surface, radius, and corner from the theme.
-            </CollapsibleContent>
-          </Collapsible>
-        </ThemeScope>
-      ))}
-    </div>
-  )
 }

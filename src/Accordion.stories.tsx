@@ -1,12 +1,18 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './Accordion'
-import { Button } from './Button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './Collapsible'
-import { Field } from './Field'
-import { Input } from './Input'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Field,
+  Input,
+  type ThemeStyle
+} from './index.js'
 
 function ShippingSections({ multiple = false }: { multiple?: boolean }) {
   const sections = (
@@ -15,12 +21,12 @@ function ShippingSections({ multiple = false }: { multiple?: boolean }) {
         <AccordionTrigger>Shipping</AccordionTrigger>
         <AccordionContent>
           <p style={{ margin: 0 }}>Ships in two days.</p>
-          <button
+          <Button
             style={{ marginTop: '0.75rem' }}
             type="button"
           >
             Track
-          </button>
+          </Button>
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="returns">
@@ -137,23 +143,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'Labeled sections built from Collapsible. Single mode keeps one section open. Multiple mode toggles each section on its own. The summary remains the trigger.'
+          'Accordion renders a div with single or multiple value/defaultValue and onValueChange. AccordionItem builds on Collapsible; triggers remain summaries, with heading level 3 by default. Root className/style/ref target the accordion div (data-slot="accordion"). Item/trigger/content currently retain the underlying Collapsible slots. disabled suppresses item activation.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope
-          theme={radiant}
-          style={{ width: '24rem' }}
-        >
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<{
   type?: 'single'
   value?: string | null
@@ -169,54 +162,29 @@ export const Default: Story = {
   render: () => <ShippingSections />
 }
 
-export const Multiple: Story = {
-  render: () => <ShippingSections multiple />
+export const States: Story = { render: () => <DisabledSection /> }
+
+export const Composition: Story = { render: () => <InsideForm /> }
+
+export const Customisation: Story = {
+  render: () => {
+    const local: ThemeStyle = { '--rad-accordion-gap': '1.5rem' }
+    return (
+      <div style={local}>
+        <ShippingSections />
+      </div>
+    )
+  }
 }
 
-export const Disabled: Story = {
-  render: () => <DisabledSection />
+export const Multiple: Story = {
+  render: () => <ShippingSections multiple />
 }
 
 export const Controlled: Story = {
   render: () => <HeldValue />
 }
 
-export const Form: Story = {
-  render: () => <InsideForm />
-}
-
 export const Nested: Story = {
   render: () => <NestedSection />
-}
-
-const themeFrame = (): CSSProperties => ({
-  display: 'grid',
-  gap: '1rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <Accordion defaultValue="one">
-            <AccordionItem value="one">
-              <AccordionTrigger>{theme.name}</AccordionTrigger>
-              <AccordionContent>Panel surface, radius, and corner from the theme.</AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="two">
-              <AccordionTrigger>Second</AccordionTrigger>
-              <AccordionContent>Another section in the same group.</AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </ThemeScope>
-      ))}
-    </div>
-  )
 }

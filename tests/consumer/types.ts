@@ -23,6 +23,7 @@ import {
   CollapsibleTrigger,
   collapsibleTheme,
   Dialog,
+  DialogClose,
   DialogContent,
   DialogTrigger,
   dialogTheme,
@@ -46,6 +47,8 @@ import {
   type CardTitleProps,
   type CollapsibleProps,
   type DialogContentProps,
+  type DialogTriggerProps,
+  type DialogCloseProps,
   type DialogProps,
   type RadioGroupProps,
   type RadioProps,
@@ -212,6 +215,35 @@ createElement(
   createElement(DialogTrigger, null, 'Edit'),
   createElement(DialogContent, { ref: createRef<HTMLDialogElement>() })
 )
+
+const dialogTriggerProps: DialogTriggerProps = {
+  variant: 'outline',
+  size: 'small',
+  radius: 'full',
+  pending: true,
+  iconOnly: true,
+  fullWidth: true,
+  ref: createRef<HTMLButtonElement>()
+}
+createElement(DialogTrigger, dialogTriggerProps)
+const dialogCloseProps: DialogCloseProps = {
+  variant: 'ghost',
+  pending: true,
+  ref: node => {
+    node?.focus()
+    return () => {}
+  },
+  render: nativeProps => {
+    // @ts-expect-error Replacement props are native; Button-only presentation props are consumed.
+    void nativeProps.pending
+    return createElement(Button, { ...nativeProps, variant: 'outline' })
+  }
+}
+createElement(DialogClose, dialogCloseProps)
+
+// @ts-expect-error Dialog actions use the same closed variant vocabulary as Button.
+const invalidDialogAction: DialogTriggerProps = { variant: 'link' }
+createElement(DialogTrigger, invalidDialogAction)
 
 // @ts-expect-error Dialog theme keys are a closed set.
 dialogTheme({ size: '24rem' })

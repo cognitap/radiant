@@ -4,6 +4,37 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- DialogTrigger and DialogClose now compose Button by default, inheriting its
+  presentation options, theme effects, interaction states, and pending behavior.
+  The separate Dialog action style recipe is removed. Action slots now include
+  both identities (`button dialog-trigger` / `button dialog-close`); migrate
+  equality selectors to `[data-slot~="dialog-trigger"]` / `[data-slot~="dialog-close"]`.
+  Existing native render callbacks retain their explicit presentation ownership.
+- Dialog's default Storybook play compares its actual rendered actions against
+  Button. The theme comparison uses default Dialog composition rather than
+  manually opting into Button, exposing future drift at the default call site.
+- A complete Storybook audit covers all 58 stories and 11 Docs pages across
+  eight themes in light and dark. Form controls have clearer outlines, Checkbox
+  keeps a box shape, and disabled checked/mixed marks remain visible, including
+  forced colors. Nested disclosure arrows follow their own open state and focus
+  rings follow the themed shape. Glass dialogs frost underlying content, and
+  Sharp 3D links retain readable hover text. Responsive examples and Docs frames
+  avoid clipping; Docs controls follow the selected palette and open dialogs no
+  longer scroll the page on load. Demo actions and navigation show useful results.
+- Browser play checks guard disabled selection visibility/alignment and the
+  custom native Field input. These complement the existing theme comparison;
+  package checks build the plays but do not execute them in a browser.
+- Ticket checkboxes use a compact solid outline instead of inheriting the
+  scooped, dashed shape intended for larger controls and surfaces.
+- Button-styled links share Button hover and pressed feedback while retaining
+  native anchor navigation. Disabled and pending buttons keep suppressing it.
+- Checkbox check and mixed marks stay aligned with the native control when
+  an unlabelled checkbox is placed in a stretched grid or Field.
+- Storybook has global **Theme** and **Mode** controls, backed by the public
+  preset registry and `ThemeScope`. Canvas and Docs share the selection.
+  Ordinary stories inherit it; one system comparison replaces repeated family
+  theme galleries. Stories use a shared default/state/composition/customisation
+  structure and public imports.
 - **Breaking: shared theme system (DEV-44).** `defineTheme` now authors typed
   semantic tokens, optional component overrides, and light/dark layers.
   `ThemeScope` applies a theme and independent light/dark/system mode to a

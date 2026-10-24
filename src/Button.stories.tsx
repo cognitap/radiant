@@ -1,8 +1,7 @@
+import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, waitFor, within } from 'storybook/test'
-import { Button, type ButtonRadius, type ButtonSize, type ButtonVariant } from './Button'
-import { ThemeScope } from './ThemeScope.js'
-import { radiant, themes } from './themes/index.js'
+import { fn } from 'storybook/test'
+import { Button, Link, type ButtonProps, type ButtonVariant, type ThemeStyle } from './index.js'
 
 const variants: ButtonVariant[] = [
   'primary',
@@ -12,22 +11,16 @@ const variants: ButtonVariant[] = [
   'outline',
   'ghost'
 ]
-const sizes: ButtonSize[] = ['small', 'default', 'large']
-const radii: ButtonRadius[] = ['none', 'small', 'default', 'large', 'full']
 
 const meta = {
   title: 'Components/Button',
   component: Button,
-  args: {
-    children: 'Continue',
-    disabled: false,
-    onClick: fn()
-  },
+  args: { children: 'Continue', disabled: false, onClick: fn() },
   argTypes: {
     children: { control: 'text' },
     variant: { control: 'inline-radio', options: variants },
-    size: { control: 'inline-radio', options: sizes },
-    radius: { control: 'inline-radio', options: radii },
+    size: { control: 'inline-radio', options: ['small', 'default', 'large'] },
+    radius: { control: 'inline-radio', options: ['none', 'small', 'default', 'large', 'full'] },
     iconOnly: { control: 'boolean' },
     fullWidth: { control: 'boolean' },
     disabled: { control: 'boolean' },
@@ -37,20 +30,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native action with shared Radiant styles, theme presets, and local component overrides.'
+          'A native `<button>` with type="button" by default. variant, size and radius are visual props; disabled is native and pending suppresses activation while retaining focus. className, style and ref target the button; data-slot="button" identifies it. The inner label and pending mark preserve its accessible name.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--design-systems') ? (
-        <Story />
-      ) : (
-        <ThemeScope theme={radiant}>
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Button>
 
 export default meta
@@ -68,7 +51,6 @@ const close = (
     />
   </svg>
 )
-
 const arrow = (
   <svg
     viewBox="0 0 16 16"
@@ -85,55 +67,104 @@ const arrow = (
 
 export const Default: Story = {}
 
-export const Gallery: Story = {
-  render: args => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {sizes.map(size => (
-        <div
-          key={size}
-          style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}
+function ButtonComposition(args: ButtonProps) {
+  const id = useId()
+  const [activations, setActivations] = useState({ next: 0, close: 0 })
+
+  return (
+    <div style={{ display: 'grid', gap: '1.25rem', maxWidth: '32rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}>
+        <Button
+          {...args}
+          variant="outline"
+          onClick={event => {
+            args.onClick?.(event)
+            setActivations(counts => ({ ...counts, next: counts.next + 1 }))
+          }}
         >
-          {variants.map(variant => (
-            <Button
-              {...args}
-              key={variant}
-              variant={variant}
-              size={size}
-            >
-              {variant}
-            </Button>
-          ))}
-          <Button
-            {...args}
-            size={size}
-            iconOnly
-            aria-label="Close"
-          >
-            {close}
-          </Button>
-          <Button
-            {...args}
-            size={size}
-            variant="outline"
-          >
-            Next {arrow}
-          </Button>
-        </div>
-      ))}
+          Next {arrow}
+        </Button>
+        <Button
+          {...args}
+          iconOnly
+          aria-label="Close"
+          onClick={event => {
+            args.onClick?.(event)
+            setActivations(counts => ({ ...counts, close: counts.close + 1 }))
+          }}
+        >
+          {close}
+        </Button>
+        <Link href={`#${id}-guide`}>Read the guide</Link>
+      </div>
+      <output>
+        Next activated {activations.next} {activations.next === 1 ? 'time' : 'times'}. Close
+        activated {activations.close} {activations.close === 1 ? 'time' : 'times'}.
+      </output>
+      <section
+        id={`${id}-guide`}
+        tabIndex={-1}
+        className="target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]"
+      >
+        Guide: combine native buttons for actions with links for navigation.
+      </section>
     </div>
   )
 }
 
-export const Radii: Story = {
+export const States: Story = {
   render: args => (
-    <div style={{ display: 'flex', gap: '0.75rem' }}>
-      {radii.map(radius => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+      <Button
+        {...args}
+        disabled
+      >
+        Unavailable
+      </Button>
+      <Button
+        {...args}
+        pending
+      >
+        Saving
+      </Button>
+    </div>
+  )
+}
+
+export const Composition: Story = {
+  render: args => <ButtonComposition {...args} />
+}
+
+export const Customisation: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Local Button variables change this action without replacing the selected global theme. Caller utilities can replace matching default classes on the Tailwind route.'
+      }
+    }
+  },
+  render: args => {
+    const local: ThemeStyle = { '--rad-button-radius': '999px', '--rad-button-padding': '2rem' }
+    return (
+      <Button
+        {...args}
+        style={local}
+      />
+    )
+  }
+}
+
+export const Variants: Story = {
+  render: args => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+      {variants.map(variant => (
         <Button
           {...args}
-          key={radius}
-          radius={radius}
+          key={variant}
+          variant={variant}
         >
-          {radius}
+          {variant}
         </Button>
       ))}
     </div>
@@ -141,131 +172,10 @@ export const Radii: Story = {
 }
 
 export const FullWidth: Story = {
-  args: { fullWidth: true }
-}
-
-export const Disabled: Story = {
-  args: { disabled: true }
-}
-
-export const Pending: Story = {
-  args: { pending: true }
-}
-
-export const CustomClasses: Story = {
-  args: { className: 'rounded-full px-8 hover:bg-red-500' }
-}
-
-export const IconOnly: Story = {
-  args: { 'aria-label': 'Close', iconOnly: true, children: close }
-}
-
-export const ThemedSubtree: Story = {
+  args: { fullWidth: true },
   render: args => (
-    <ThemeScope
-      style={{
-        '--rad-color-accent': '#1d4ed8',
-        '--rad-color-accent-foreground': '#fff'
-      }}
-    >
+    <div style={{ width: 'min(24rem, calc(100vw - 2rem))', maxWidth: '100%' }}>
       <Button {...args} />
-    </ThemeScope>
-  )
-}
-
-export const DesignSystems: Story = {
-  play: async ({ canvasElement }) => {
-    const palettes = {
-      primary: ['accent', 'accent-foreground'],
-      secondary: ['neutral', 'neutral-foreground'],
-      destructive: ['danger', 'danger-foreground'],
-      outline: ['surface', 'foreground'],
-      ghost: [null, 'foreground']
-    } as const
-    const document = canvasElement.ownerDocument
-    const view = document.defaultView!
-    function normalize(property: 'color' | 'background', value: string) {
-      const probe = document.createElement('span')
-      probe.hidden = true
-      probe.style[property] = value
-      document.body.append(probe)
-      try {
-        const styles = view.getComputedStyle(probe)
-        return {
-          color: styles.color,
-          backgroundColor: styles.backgroundColor,
-          backgroundImage: styles.backgroundImage
-        }
-      } finally {
-        probe.remove()
-      }
-    }
-    for (const theme of themes) {
-      const row = within(canvasElement).getByTestId(`theme-${theme.id}`)
-      // Check the real canvas as well as component colors: valid dark colors on
-      // a stale light canvas still make ghost actions and hard shadows disappear.
-      await waitFor(async () => {
-        const styles = view.getComputedStyle(row)
-        const canvas = styles.getPropertyValue('--rad-surface-canvas').trim()
-        await expect(view.CSS.supports('background', canvas)).toBe(true)
-        const expected = normalize('background', canvas)
-        await expect(styles.backgroundColor).toBe(expected.backgroundColor)
-        await expect(styles.backgroundImage).toBe(expected.backgroundImage)
-      })
-      for (const variant of Object.keys(palettes) as Array<keyof typeof palettes>) {
-        const button = within(row).getByRole('button', { name: new RegExp(`^${variant}$`, 'i') })
-        await waitFor(async () => {
-          const styles = view.getComputedStyle(button)
-          const [backgroundRole, foregroundRole] = palettes[variant]
-          const background = backgroundRole
-            ? styles.getPropertyValue(`--rad-color-${backgroundRole}`).trim()
-            : 'transparent'
-          const foreground = styles.getPropertyValue(`--rad-color-${foregroundRole}`).trim()
-          // Missing mode flags concatenate light and dark colors into invalid CSS.
-          await expect(view.CSS.supports('color', background)).toBe(true)
-          await expect(view.CSS.supports('color', foreground)).toBe(true)
-          await expect(styles.color).toBe(normalize('color', foreground).color)
-          if (!button.matches(':hover, :active')) {
-            await expect(styles.backgroundColor).toBe(normalize('color', background).color)
-          }
-          if (theme.id === 'sharp-3d') {
-            const border = normalize('color', styles.getPropertyValue('--rad-color-border')).color
-            await expect(styles.borderTopColor).toBe(border)
-            await expect(styles.boxShadow).toContain('4px 4px 0px')
-          }
-        })
-      }
-    }
-  },
-  render: args => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(system => (
-        <ThemeScope
-          key={system.id}
-          theme={system}
-          data-testid={`theme-${system.id}`}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '1.5rem',
-            borderRadius: '1.25rem'
-          }}
-        >
-          <span style={{ width: '8rem', font: '500 0.8125rem system-ui', opacity: 0.7 }}>
-            {system.name}
-          </span>
-          {(['primary', 'secondary', 'destructive', 'outline', 'ghost'] as const).map(variant => (
-            <Button
-              {...args}
-              key={variant}
-              variant={variant}
-            >
-              {variant}
-            </Button>
-          ))}
-        </ThemeScope>
-      ))}
     </div>
   )
 }

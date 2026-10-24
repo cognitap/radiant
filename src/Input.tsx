@@ -1,10 +1,12 @@
 import type { ComponentProps, CSSProperties } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { controlBorderClass } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { useField } from './Field.js'
 
 const inputVariants = cva([
+  controlBorderClass,
   'box-border w-full min-w-0',
   'h-[var(--rad-input-height,var(--rad-control-medium-height,2.5rem))]',
   'px-[var(--rad-input-padding,var(--rad-control-medium-padding-inline,1rem))]',
@@ -15,7 +17,7 @@ const inputVariants = cva([
   'bg-[var(--rad-input-background,var(--rad-color-surface,oklch(1_0_0)))]',
   '[border-width:var(--rad-input-border-width,var(--rad-control-border-width,1px))]',
   '[border-style:var(--rad-input-border-style,var(--rad-control-border-style,solid))]',
-  '[border-color:var(--rad-input-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+  '[border-color:var(--rad-input-border-color,var(--_rad-control-border))]',
   'rounded-[var(--rad-input-radius,var(--rad-control-radius,0.5rem))]',
   '[corner-shape:var(--rad-input-corner-shape,var(--rad-control-corner-shape,round))]',
   '[box-shadow:var(--rad-input-shadow,none)]',

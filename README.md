@@ -415,9 +415,21 @@ component does not set `overflow: hidden` on the body. The panel scrolls its
 own overflow. Closed content stays mounted and hidden by the user agent. A
 field inside a closed dialog is still in an ancestor form.
 
-`DialogTrigger` is a button with `aria-haspopup="dialog"`, `aria-expanded`, and
-`aria-controls` pointing at the dialog. `render` hands those props to another
-button. `DialogClose` requests close. A `<form method="dialog">` inside the
+`DialogTrigger` and `DialogClose` compose `Button` by default, accepting its
+current `variant`, `size`, `radius`, `iconOnly`, `fullWidth`, and `pending` props.
+They inherit Button's typography, theme effects, hover, press, focus, and pending
+presentation. `DialogTrigger` adds `aria-haspopup="dialog"`, `aria-expanded`, and
+`aria-controls` pointing at the dialog; `DialogClose` requests close. Native
+disabled and pending guards run before the consumer click handler. A consumer
+can prevent the open/close request with `event.preventDefault()`.
+
+The existing `render` callback explicitly replaces the default Button. It
+receives native button props, ref, children, caller classes/styles, protected
+relationships, and guarded activation. It owns presentation; Button-only props
+are not leaked onto a native replacement. Existing adaptations such as
+`render={props => <Button {...props} variant="outline" />}` remain supported.
+Ordinary actions should set presentation props directly on `DialogTrigger` or
+`DialogClose`. A `<form method="dialog">` inside the
 dialog also closes it, and the `close` event updates React. `closeOnBackdrop`
 and `closeOnEscape` default to true and apply to modal dialogs. Escape is the
 browser's cancel event. A backdrop click is a click on the dialog whose point
@@ -441,14 +453,16 @@ and `cancel` bubble, and a parent ignores an event that started on a nested
 dialog. `useDialog()` lets another control open the same dialog. It returns
 `null` outside `Dialog`.
 
-`className` merges onto the part it is passed to. The panel inherits the button
+`className` merges onto the part it is passed to. The panel uses shared surface
 radius and corner shape, so a scoop or squircle theme shapes the surface.
 `dialogTheme` maps `width`, `padding`, `gap`, `radius`, `cornerShape`,
 `background`, `color`, `borderWidth`, `borderStyle`, `borderColor`, `shadow`,
-`backdrop`, `titleSize`, `titleWeight`, `descriptionColor`, `descriptionSize`,
+`backdrop`, `backdropFilter`, `titleSize`, `titleWeight`, `descriptionColor`, `descriptionSize`,
 `focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. The dialog sets
-`data-slot="dialog"`. The trigger, title, description, and close control set
-`dialog-trigger`, `dialog-title`, `dialog-description`, and `dialog-close`.
+`data-slot="dialog"`. The action identities are `button dialog-trigger` and
+`button dialog-close`; use membership selectors such as
+`[data-slot~="dialog-trigger"]`. Title and description retain `dialog-title`
+and `dialog-description`.
 
 ### Collapsible
 
@@ -681,7 +695,10 @@ pnpm storybook
 ```
 
 Storybook runs at [localhost:6006](http://localhost:6006) and needs no Cognitap
-checkout.
+checkout. Choose **Theme** and **Mode** in its toolbar; the selection applies
+across component stories and Docs. Defaults are Radiant and System.
+See the [Storybook guide](docs/storybook.md) for the shared story
+structure and verification workflow.
 
 | Command                | Purpose                                                         |
 | ---------------------- | --------------------------------------------------------------- |

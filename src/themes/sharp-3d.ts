@@ -106,6 +106,9 @@ export const sharp = defineTheme({
     }
   },
   modes: {
+    light: {
+      components: { link: { hoverColor: 'var(--rad-color-foreground)' } }
+    },
     dark: {
       tokens: {
         color: {

@@ -1,10 +1,7 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
-import { Checkbox } from './Checkbox'
-import { Field } from './Field'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
+import { Button, Checkbox, Field, type ThemeStyle } from './index.js'
 
 function NativeForm() {
   const [summary, setSummary] = useState('None selected')
@@ -61,20 +58,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native checkbox. Omit checked for an uncontrolled box; pass checked and onChange to control it. indeterminate is a visual mixed state and is not a submitted value.'
+          'A native checkbox: defaultChecked initializes uncontrolled state; checked/onChange controls it. indeterminate sets a visual mixed DOM state, not a third submitted value. className/style/ref target the input (data-slot="checkbox"); label wraps the control and checkbox-label identifies its text. Field can supply the accessible name instead.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope theme={radiant}>
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Checkbox>
 
 export default meta
@@ -82,16 +69,58 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-export const Checked: Story = {
-  args: { defaultChecked: true }
+export const States: Story = {
+  play: async ({ canvasElement }) => checkDisabledIndicators(canvasElement, 'checkbox'),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Checked, mixed, disabled, and explicitly invalid checkbox states. aria-invalid reflects consumer-owned validation; Group shows Field descriptions, errors, and required relationships.'
+      }
+    }
+  },
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      <Checkbox
+        label="Checked"
+        defaultChecked
+        name="checked"
+      />
+      <Checkbox
+        label="Mixed selection"
+        defaultChecked
+        indeterminate
+        name="mixed"
+      />
+      <Checkbox
+        label="Unavailable"
+        disabled
+        defaultChecked
+        name="disabled"
+      />
+      <Checkbox
+        label="Invalid"
+        name="invalid"
+        aria-invalid
+      />
+    </div>
+  )
 }
 
-export const Mixed: Story = {
-  args: { defaultChecked: true, indeterminate: true, label: 'Select all' }
-}
+export const Composition: Story = { render: () => <NativeForm /> }
 
-export const Disabled: Story = {
-  args: { disabled: true, defaultChecked: true }
+export const Customisation: Story = {
+  render: args => {
+    const local: ThemeStyle = {
+      '--rad-checkbox-size': '1.5rem',
+      '--rad-checkbox-radius': '0.25rem'
+    }
+    return (
+      <div style={local}>
+        <Checkbox {...args} />
+      </div>
+    )
+  }
 }
 
 export const Group: Story = {
@@ -114,52 +143,5 @@ export const Group: Story = {
         value="sms"
       />
     </Field>
-  )
-}
-
-export const NativeFormStory: Story = {
-  name: 'Native form',
-  render: () => <NativeForm />
-}
-
-const themeFrame = (): CSSProperties => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  alignItems: 'center',
-  gap: '1rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <span style={{ width: '8rem', font: '500 0.8125rem system-ui', opacity: 0.7 }}>
-            {theme.name}
-          </span>
-          <Checkbox
-            label="Off"
-            name={`${theme.name}-off`}
-          />
-          <Checkbox
-            defaultChecked
-            label="On"
-            name={`${theme.name}-on`}
-          />
-          <Checkbox
-            defaultChecked
-            indeterminate
-            label="Mixed"
-            name={`${theme.name}-mixed`}
-          />
-        </ThemeScope>
-      ))}
-    </div>
   )
 }

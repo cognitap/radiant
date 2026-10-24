@@ -1,11 +1,7 @@
-import { useState, type CSSProperties, type ComponentProps } from 'react'
+import { useState, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
-import { Checkbox } from './Checkbox'
-import { Field, useField } from './Field'
-import { Input } from './Input'
-import { ThemeScope } from './ThemeScope'
-import { radiant, themes } from './themes/index.js'
+import { expect, waitFor, within } from 'storybook/test'
+import { Button, Checkbox, Field, useField, Input } from './index.js'
 
 function ToneInput(props: ComponentProps<'input'>) {
   const field = useField()
@@ -13,6 +9,21 @@ function ToneInput(props: ComponentProps<'input'>) {
     <input
       {...field?.controlProps}
       {...props}
+      style={{
+        boxSizing: 'border-box',
+        width: '100%',
+        minWidth: 0,
+        height: 'var(--rad-control-medium-height)',
+        paddingInline: 'var(--rad-control-medium-padding-inline)',
+        fontFamily: 'var(--rad-typography-family)',
+        fontSize: 'var(--rad-control-medium-font-size)',
+        color: 'var(--rad-color-foreground)',
+        background: 'var(--rad-color-surface)',
+        borderBottom:
+          'var(--rad-control-border-width) var(--rad-control-border-style) var(--rad-color-accent)',
+        borderBottomColor: field?.invalid ? 'var(--rad-color-invalid)' : 'var(--rad-color-accent)',
+        ...props.style
+      }}
     />
   )
 }
@@ -66,23 +77,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'Label, description, and error relationships for one control or a group. Field does not validate; the consumer owns the error message.'
+          'Single-control Field renders a div with a label, description and error; layout="group" renders a fieldset and legend. The consumer owns validation. Root className/style target that container; data-slot values field-label, field-description, field-error and field-required identify its text parts. Host inputs receive relationships automatically; component controls call useField.'
       }
     }
-  },
-  decorators: [
-    (Story, { id }) =>
-      id.endsWith('--themes') ? (
-        <Story />
-      ) : (
-        <ThemeScope
-          theme={radiant}
-          style={{ maxWidth: '20rem' }}
-        >
-          <Story />
-        </ThemeScope>
-      )
-  ]
+  }
 } satisfies Meta<typeof Field>
 
 export default meta
@@ -100,11 +98,60 @@ export const Default: Story = {
   )
 }
 
-export const Invalid: Story = {
-  args: { error: 'Enter an email.' },
+export const States: Story = {
+  render: args => (
+    <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '24rem' }}>
+      <Field
+        {...args}
+        label="Email with error"
+        error="Enter an email."
+      >
+        <Input
+          name="invalid-email"
+          type="email"
+        />
+      </Field>
+      <Field
+        label="Locked email"
+        disabled
+        description="Locked by an admin"
+      >
+        <Input
+          name="locked-email"
+          defaultValue="ada@example.com"
+        />
+      </Field>
+    </div>
+  )
+}
+
+export const Composition: Story = { render: () => <FormExample /> }
+
+export const Customisation: Story = {
+  play: async ({ canvasElement, args }) => {
+    const input = within(canvasElement).getByRole('textbox')
+    await waitFor(async () => {
+      const styles = canvasElement.ownerDocument.defaultView!.getComputedStyle(input)
+      await expect(input.getBoundingClientRect().height).toBeGreaterThanOrEqual(32)
+      await expect(parseFloat(styles.borderBottomWidth)).toBeGreaterThan(0)
+      await expect(styles.borderBottomStyle).not.toBe('none')
+      if (args.layout !== 'group') {
+        await expect(input).toHaveAccessibleName()
+        if (args.required) await expect(input).toBeRequired()
+      }
+    })
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A consumer component reads useField and forwards controlProps to its native input. Its underline and surface use shared semantic roles; focus stays native. This is the explicit native interoperability example.'
+      }
+    }
+  },
   render: args => (
     <Field {...args}>
-      <Input
+      <ToneInput
         autoComplete="email"
         name="email"
         type="email"
@@ -134,69 +181,5 @@ export const Group: Story = {
         value="sms"
       />
     </Field>
-  )
-}
-
-export const Disabled: Story = {
-  args: { disabled: true, required: false, description: 'Locked by an admin' },
-  render: args => (
-    <Field {...args}>
-      <Input
-        defaultValue="ada@example.com"
-        name="email"
-        readOnly
-        type="email"
-      />
-    </Field>
-  )
-}
-
-export const NativeForm: Story = {
-  render: () => <FormExample />
-}
-
-export const CustomControl: Story = {
-  render: args => (
-    <Field {...args}>
-      <ToneInput
-        autoComplete="email"
-        name="email"
-        type="email"
-      />
-    </Field>
-  )
-}
-
-const themeFrame = (): CSSProperties => ({
-  display: 'grid',
-  gap: '0.75rem',
-  padding: '1.5rem',
-  borderRadius: '1.25rem'
-})
-
-export const Themes: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {themes.map(theme => (
-        <ThemeScope
-          key={theme.id}
-          theme={theme}
-          style={{ ...themeFrame() }}
-        >
-          <span style={{ font: '500 0.8125rem system-ui', opacity: 0.7 }}>{theme.name}</span>
-          <Field
-            description="Work address"
-            error="Enter an email."
-            label="Email"
-            required
-          >
-            <Input
-              name="email"
-              type="email"
-            />
-          </Field>
-        </ThemeScope>
-      ))}
-    </div>
   )
 }
