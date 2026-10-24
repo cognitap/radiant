@@ -254,6 +254,49 @@ controlled mode and pass the library's message to Field:
 Checkbox, radio, and file inputs are separate families. `type` still accepts
 any native value.
 
+### Checkbox
+
+`Checkbox` is a native checkbox. `type` is always `checkbox`. The visible box
+is drawn on that input, so keyboard activation, form submission, reset, and
+label clicks stay the platform's.
+
+```tsx
+import { Checkbox, Field } from '@cognitap/radiant'
+
+;<Checkbox label="Email" name="channels" value="email" defaultChecked />
+
+<Field label="Notifications" layout="group" description="Choose any">
+  <Checkbox label="Email" name="channels" value="email" />
+  <Checkbox label="SMS" name="channels" value="sms" />
+</Field>
+```
+
+| Mode         | How the check moves                                    | Reset                                        |
+| ------------ | ------------------------------------------------------ | -------------------------------------------- |
+| Uncontrolled | Omit `checked`. `defaultChecked` is the initial check. | `form.reset()` restores `defaultChecked`.    |
+| Controlled   | Pass `checked` and update it from `onChange`.          | A browser reset does not change React state. |
+
+`indeterminate` is the mixed state. It is a visual mark for a partial
+selection, applied to the DOM property after mount. It is not a third submitted
+value and not an HTML attribute. The form submits `checked`. A checked box
+submits its `value`, or `on` when `value` is omitted. An unchecked box submits
+nothing.
+
+`label` wraps the input, so the text toggles it. Inside a single-control Field
+the field id wins, and that label is the accessible name. Inside a group, each
+checkbox keeps the `label` beside it and the fieldset keeps the caption. Pass
+one name for the option, not both.
+
+`className` merges onto the input. Replacing `appearance-none` puts the native
+glyph back; the input stays in the tab order and in the form. The check and
+dash are decorative and do not receive clicks.
+
+`checkboxTheme` maps `size`, `radius`, `cornerShape`, `borderWidth`,
+`borderStyle`, `borderColor`, `background`, `checkedBackground`,
+`checkedBorder`, `mark`, `invalidBorder`, `gap`, `labelColor`, `labelSize`,
+`disabledBorder`, `disabledBackground`, `focusColor`, `focusWidth`,
+`focusOffset`, and `focusStyle`. The input sets `data-slot="checkbox"`.
+
 ### Adapting Button to a design system
 
 Every design decision is a CSS variable, so a design system, or an agent

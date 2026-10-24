@@ -1,6 +1,7 @@
 import { useState, type CSSProperties, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
+import { Checkbox } from './Checkbox'
 import { Field, useField } from './Field'
 import { Input } from './Input'
 import { radiantTheme, themes } from './themes/index.js'
@@ -118,22 +119,16 @@ export const Group: Story = {
   },
   render: args => (
     <Field {...args}>
-      <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-        <input
-          name="channels"
-          type="checkbox"
-          value="email"
-        />{' '}
-        Email
-      </label>
-      <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-        <input
-          name="channels"
-          type="checkbox"
-          value="sms"
-        />{' '}
-        SMS
-      </label>
+      <Checkbox
+        label="Email"
+        name="channels"
+        value="email"
+      />
+      <Checkbox
+        label="SMS"
+        name="channels"
+        value="sms"
+      />
     </Field>
   )
 }

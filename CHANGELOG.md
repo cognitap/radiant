@@ -4,6 +4,13 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Checkbox` is a native checkbox. Uncontrolled boxes use `defaultChecked` and
+  `form.reset()`. Controlled boxes use `checked` and `onChange`. `indeterminate`
+  is a visual mixed state on the DOM property, not a submitted value. A `label`
+  wraps the input so the text toggles it, and a single-control Field supplies
+  the accessible name. `checkboxTheme` maps typed settings to `--checkbox-*`
+  variables. Space activation was checked in Storybook. Screen reader checks
+  were not run.
 - `Input` is a native text field. Uncontrolled inputs use `defaultValue` and
   `form.reset()`. Controlled inputs use `value` and `onChange`; `onBlur` stays
   the native event. Inside Field it takes the label, description, and error
