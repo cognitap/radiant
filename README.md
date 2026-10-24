@@ -407,6 +407,11 @@ import {
 | Uncontrolled | Omit `open`. `defaultOpen` opens after mount.  | React follows the browser.                      |
 | Controlled   | Pass `open` and update it from `onOpenChange`. | If `open` stays `true`, the dialog opens again. |
 
+Dialog, Collapsible and Accordion keep one state owner for a mount. Omit the
+controlled prop when using its initial default; do not supply both. To change
+ownership or Accordion type, remount with a new key. No-op requests, prop
+synchronisation and native restoration do not emit semantic change callbacks.
+
 `showModal()` and `close()` run after mount. Server markup never includes the
 `open` attribute, including when `defaultOpen` is set, so hydration matches.
 The file is marked `'use client'` because those DOM methods cannot be
@@ -442,6 +447,10 @@ context, so the parts can be reordered. Omitting the description leaves
 `aria-describedby` pointing at a missing id. Pass `aria-label` on
 `DialogContent` when the dialog has no title; the labelled-by relationship is
 then left to the consumer.
+
+External `aria-describedby` IDs are deduplicated and appended to the owned
+DialogDescription ID. Changing `modal` on an open Dialog switches the same
+native host between `showModal()` and `show()` without requesting a state change.
 
 Focus is the platform's. An `autoFocus` control inside the dialog takes initial
 focus. Otherwise the browser focuses the first focusable control inside.
@@ -684,6 +693,10 @@ describes the implemented theme APIs; the remaining contract migrations are
 tracked separately. [GLOSSARY.md](GLOSSARY.md)
 defines the shared vocabulary. Run `pnpm typecheck:contracts` to check those
 specifications; the normal typecheck and CI include that check.
+
+The [shared React binding guide](docs/react-bindings.md) records the implemented
+ref, event, ID, state ownership and mounted lifecycle conventions, along with
+their private consumers and remaining family migrations.
 
 Use the Node.js version in `.nvmrc`. Any recent pnpm switches itself to the version
 pinned in `package.json`:

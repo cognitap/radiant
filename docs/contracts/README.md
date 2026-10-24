@@ -6,7 +6,9 @@ not a claim that these interfaces already ship. The current source and package
 retain their existing behavior until their owning migration issues land. DEV-44
 now implements the theme model; [the theming guide](../theming.md) describes its
 shipped API and concrete defaults. Component presentation and composition
-contracts below remain targets for their owning stages.
+contracts below remain targets for their owning stages. DEV-48 now implements
+the [shared React runtime seams](../react-bindings.md); family-specific public
+presentation, anatomy and replacement migrations remain with their named owners.
 
 Read [the glossary](../../GLOSSARY.md) for terminology,
 [the migration inventory](./migration.md) for current-to-target mappings, and

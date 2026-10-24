@@ -1,10 +1,14 @@
 'use client'
 
-import type { ComponentProps, CSSProperties, MouseEvent, ReactNode, Ref } from 'react'
+import type { ComponentProps, CSSProperties, MouseEvent, ReactNode } from 'react'
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { cva } from 'class-variance-authority'
 import { Button, type ButtonProps } from './Button.js'
 import { cn } from './cn.js'
+import { composeAction } from './internal/events.js'
+import { joinIds } from './internal/ids.js'
+import { useComposedRefs } from './react/useComposedRefs.js'
+import { useControllableState } from './react/useControllableState.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const dialogVariants = cva([
@@ -111,7 +115,7 @@ function useDialogContext() {
 
 export function Dialog({
   open,
-  defaultOpen = false,
+  defaultOpen,
   onOpenChange,
   modal = true,
   closeOnBackdrop = true,
@@ -121,13 +125,17 @@ export function Dialog({
   const contentId = useId()
   const titleId = useId()
   const descriptionId = useId()
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
-  const controlled = open !== undefined
-  const isOpen = controlled ? open : uncontrolledOpen
-  const setOpen = (next: boolean) => {
-    onOpenChange?.(next)
-    if (!controlled) setUncontrolledOpen(next)
-  }
+  const {
+    value: isOpen,
+    request: setOpen,
+    controlled
+  } = useControllableState({
+    name: 'Dialog',
+    value: open,
+    defaultValue: defaultOpen,
+    initialValue: false,
+    onChange: onOpenChange
+  })
 
   return (
     <DialogContext.Provider
@@ -172,14 +180,11 @@ function DialogAction({
       : {}),
     'aria-busy': pending || props['aria-busy'],
     'data-slot': action === 'open' ? 'button dialog-trigger' : 'button dialog-close',
-    onClick: event => {
-      if (pending || event.currentTarget.matches(':disabled')) {
-        event.preventDefault()
-        return
-      }
-      props.onClick?.(event)
-      if (!event.defaultPrevented) dialog.setOpen(action === 'open')
-    }
+    onClick: composeAction(
+      props.onClick,
+      () => dialog.setOpen(action === 'open'),
+      event => !!pending || event.currentTarget.matches(':disabled')
+    )
   }
   if (render) return render(buttonProps)
   return (
@@ -214,7 +219,9 @@ export function DialogContent({
 }: DialogContentProps) {
   const dialog = useDialogContext()
   const nodeRef = useRef<HTMLDialogElement>(null)
+  const hostRef = useComposedRefs(nodeRef, ref)
   const unmounting = useRef(false)
+  const previousModal = useRef(dialog.modal)
   // Bumps after the browser closes a dialog whose controlled `open` value is still true.
   const [generation, setGeneration] = useState(0)
 
@@ -230,6 +237,11 @@ export function DialogContent({
   useEffect(() => {
     const node = nodeRef.current
     if (!node || generation < 0) return
+    if (previousModal.current !== dialog.modal) {
+      // The platform cannot change an already-open dialog's modal mode in place.
+      closeDialog(node)
+      previousModal.current = dialog.modal
+    }
     if (dialog.open) {
       if (!dialogIsOpen(node)) openDialog(node, dialog.modal)
       return
@@ -242,11 +254,8 @@ export function DialogContent({
     // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       {...props}
-      ref={node => {
-        nodeRef.current = node
-        assignRef(ref, node)
-      }}
-      aria-describedby={props['aria-describedby'] ?? dialog.descriptionId}
+      ref={hostRef}
+      aria-describedby={joinIds(dialog.descriptionId, props['aria-describedby'])}
       aria-labelledby={props['aria-label'] ? props['aria-labelledby'] : dialog.titleId}
       className={cn(dialogVariants(), className)}
       data-slot="dialog"
@@ -257,12 +266,11 @@ export function DialogContent({
         onCancel?.(event)
         if (!dialog.closeOnEscape) event.preventDefault()
       }}
-      onClick={event => {
-        onClick?.(event)
-        if (event.defaultPrevented || !dialog.modal || !dialog.closeOnBackdrop) return
+      onClick={composeAction(onClick, event => {
+        if (!dialog.modal || !dialog.closeOnBackdrop) return
         if (!isBackdropClick(event)) return
         dialog.setOpen(false)
-      }}
+      })}
       onClose={event => {
         if (event.target !== event.currentTarget) return
         onClose?.(event)
@@ -309,14 +317,6 @@ export function DialogClose(props: DialogCloseProps) {
       action="close"
     />
   )
-}
-
-function assignRef(ref: Ref<HTMLDialogElement> | undefined, node: HTMLDialogElement | null) {
-  if (typeof ref === 'function') {
-    ref(node)
-    return
-  }
-  if (ref) ref.current = node
 }
 
 function dialogIsOpen(node: HTMLDialogElement) {

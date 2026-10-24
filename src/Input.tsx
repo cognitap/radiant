@@ -1,6 +1,9 @@
+'use client'
+
 import type { ComponentProps, CSSProperties } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
 import { controlBorderClass } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { useField } from './Field.js'
@@ -37,11 +40,6 @@ const inputVariants = cva([
 export type InputProps = ComponentProps<'input'>
 
 export type InputTheme = NonNullable<ThemeComponentOverrides['input']>
-
-function joinIds(...parts: Array<string | undefined>) {
-  const ids = [...new Set(parts.flatMap(part => (part ? part.split(/\s+/) : [])).filter(Boolean))]
-  return ids.length > 0 ? ids.join(' ') : undefined
-}
 
 export function inputTheme(theme: InputTheme): CSSProperties {
   return flattenComponents({ input: theme }) as CSSProperties
