@@ -43,7 +43,13 @@
 }
 
 .radiant-docs .sbdocs-content :where(a):not([data-rad-preview='story'] *) {
-  color: var(--rad-color-accent);
+  color: var(--rad-link-color, var(--rad-color-foreground));
+}
+
+/* Wide prop tables scroll inside Docs, retaining their native table semantics. */
+.radiant-docs .sbdocs-content div:has(> .docblock-argstable) {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .radiant-docs .sbdocs-preview,
@@ -95,7 +101,33 @@
   color: var(--rad-color-foreground);
 }
 
+/* Boolean controls supply fixed light colors for their track and selected label. */
+.radiant-docs .docblock-argstable label:has(> input[role='switch']) {
+  background: var(--rad-color-neutral);
+  color: var(--rad-color-neutral-foreground);
+}
+
+.radiant-docs .docblock-argstable label:has(> input[role='switch']) > span {
+  background: transparent;
+  color: var(--rad-color-neutral-foreground);
+}
+
+.radiant-docs
+  .docblock-argstable
+  label:has(> input[role='switch']:not(:checked))
+  > span:first-of-type,
+.radiant-docs .docblock-argstable label:has(> input[role='switch']:checked) > span:last-of-type {
+  background: var(--rad-color-surface);
+  color: var(--rad-color-foreground);
+}
+
 /* The whole inline example uses the canvas; its surrounding toolbar remains a surface. */
 .radiant-docs .docs-story {
   background: var(--rad-surface-canvas);
+}
+
+/* Let centered preview children shrink before overflowing the frame's left edge. */
+.radiant-docs .docs-story > div {
+  min-width: 0;
+  max-width: 100%;
 }

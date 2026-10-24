@@ -152,6 +152,7 @@ export const componentRegistry = {
     borderColor: 'css',
     shadow: 'css',
     backdrop: 'css',
+    backdropFilter: 'css',
     titleSize: 'css',
     titleWeight: 'weight',
     descriptionColor: 'css',

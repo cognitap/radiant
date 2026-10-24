@@ -148,7 +148,7 @@ export const Default: Story = {
     <Dialog>
       <DialogTrigger>Edit profile</DialogTrigger>
       <DialogContent>
-        <DialogClose className="justify-self-end">Close</DialogClose>
+        <DialogClose style={{ justifySelf: 'end' }}>Close</DialogClose>
         <DialogTitle>Edit profile</DialogTitle>
         <DialogDescription>This name is visible to your team.</DialogDescription>
         <Button type="button">Continue</Button>
@@ -165,15 +165,16 @@ export const States: Story = {
     docs: {
       description: {
         story:
-          'An initially open nonmodal dialog. It stays in normal document interaction; the default example demonstrates opening a modal dialog.'
+          'An initially open nonmodal dialog in Canvas. In Docs, open it with the trigger to keep the page at its starting position. It stays in normal document interaction; the default example demonstrates opening a modal dialog.'
       }
     }
   },
-  render: () => (
+  render: (_, { viewMode }) => (
     <Dialog
-      defaultOpen
+      defaultOpen={viewMode !== 'docs'}
       modal={false}
     >
+      {viewMode === 'docs' && <DialogTrigger>Open nonmodal dialog</DialogTrigger>}
       <DialogContent style={{ position: 'static', margin: 0 }}>
         <DialogTitle>Already open</DialogTitle>
         <DialogDescription>

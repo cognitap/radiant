@@ -54,14 +54,30 @@ Docs can render a story more than once. Give independent native radio examples
 their own form owners or unique group names, so selecting an option in one
 preview cannot silently clear another preview's selection.
 
+Keep example navigation inside the preview with unique native fragment targets,
+or use a deliberate external destination. Actions should expose a visible result.
+Preserve supplied callbacks and adjustable args. Layout wrappers must fit both
+Canvas and the narrower Docs frame; a percentage width alone can shrink to the
+intrinsic child width in a centered preview. Stories are excluded from the
+library utility scan: use inline layout styles, or explicitly register private
+example utilities in `.storybook/styles.css`.
+
+An initially open dialog can take focus and scroll the whole Docs page. Open
+nonmodal Docs examples from a trigger; Canvas can still demonstrate their
+initially open state.
+
 ## Verification
 
 Use the existing **Accessibility** panel alongside keyboard, focus, and contrast
 checks. Automated accessibility checks cover only part of WCAG.
 
 The comparison story's play function checks the actual rendered canvases,
-component palettes, and Sharp 3D borders/shadows. It runs when that story is
-opened in a browser. `pnpm check` builds Storybook and runs the package/runtime
+component palettes, and Sharp 3D borders/shadows. Checkbox and RadioGroup States
+check disabled selection visibility and alignment; Field Customisation checks
+the native host's visible boundary and forwarded relationships. These checks
+read the rendered result without moving focus in Docs. Plays run when a Canvas
+story is opened in a browser; Docs requires opting into autoplay or invoking
+them explicitly. `pnpm check` builds Storybook and runs the package/runtime
 checks; it does not execute browser play functions. Browser test infrastructure
 is tracked separately.
 
@@ -69,6 +85,15 @@ When changing global application, verify toolbar selection and navigation,
 Canvas and Docs, Ticket to Default reset, explicit modes versus System, ghost
 text against the actual canvas, and a native modal Dialog. Check the running
 Storybook, not only a separately constructed stylesheet fixture.
+
+For a shared styling change, inspect every story and Docs page in all eight
+themes, in explicit Light and Dark, after fonts and rendering have settled.
+Review screenshots as well as dimensions and computed colors. Add narrow
+viewport checks, then exercise hover, press, keyboard focus, disabled selection,
+native form reset, nested disclosures, and modal opening on the affected
+families. Check translucent controls against their actual painted background.
+Recheck corrected combinations after the source change. The
+[October 2026 audit](storybook-audit-2026-10.md) records the first complete pass.
 
 The configuration follows Storybook's [globals and toolbar interface](https://storybook.js.org/docs/essentials/toolbars-and-globals)
 and [custom documentation container interface](https://storybook.js.org/docs/writing-docs/autodocs#customize-the-docs-container).

@@ -4,6 +4,17 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- A complete Storybook audit covers all 58 stories and 11 Docs pages across
+  eight themes in light and dark. Form controls have clearer outlines, Checkbox
+  keeps a box shape, and disabled checked/mixed marks remain visible, including
+  forced colors. Nested disclosure arrows follow their own open state and focus
+  rings follow the themed shape. Glass dialogs frost underlying content, and
+  Sharp 3D links retain readable hover text. Responsive examples and Docs frames
+  avoid clipping; Docs controls follow the selected palette and open dialogs no
+  longer scroll the page on load. Demo actions and navigation show useful results.
+- Browser play checks guard disabled selection visibility/alignment and the
+  custom native Field input. These complement the existing theme comparison;
+  package checks build the plays but do not execute them in a browser.
 - Ticket checkboxes use a compact solid outline instead of inheriting the
   scooped, dashed shape intended for larger controls and surfaces.
 - Button-styled links share Button hover and pressed feedback while retaining

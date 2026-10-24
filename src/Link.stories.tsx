@@ -1,6 +1,55 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button, Link } from './index.js'
+import { Button, Link, type LinkProps } from './index.js'
+
+function LinkDestination({
+  args,
+  introduction,
+  continuation,
+  destination,
+  router = false
+}: {
+  args: LinkProps
+  introduction?: string
+  continuation?: string
+  destination: string
+  router?: boolean
+}) {
+  const id = useId()
+
+  return (
+    <div style={{ display: 'grid', gap: '1.25rem', maxWidth: '24rem' }}>
+      <p style={{ margin: 0, lineHeight: 1.6 }}>
+        {introduction}
+        <Link
+          {...args}
+          href={args.href ?? `#${id}-destination`}
+          render={
+            args.render ??
+            (router
+              ? ({ children, ...props }) => (
+                  <a
+                    data-router-link=""
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                )
+              : undefined)
+          }
+        />
+        {continuation}
+      </p>
+      <section
+        id={`${id}-destination`}
+        tabIndex={-1}
+        className="target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]"
+      >
+        {destination}
+      </section>
+    </div>
+  )
+}
 
 function LinkActions() {
   const id = useId()
@@ -60,7 +109,6 @@ const meta = {
   component: Link,
   args: {
     children: 'Read the guide',
-    href: '/guide',
     variant: 'inline'
   },
   argTypes: {
@@ -88,10 +136,12 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: args => (
-    <p style={{ maxWidth: '24rem', lineHeight: 1.6 }}>
-      Radiant keeps routers outside the core. Read the <Link {...args} /> to see how navigation
-      composes with your stack.
-    </p>
+    <LinkDestination
+      args={args}
+      introduction="Radiant keeps routers outside the core. "
+      continuation=" to see how navigation composes with your stack."
+      destination="Guide: anchors keep native navigation and can be adapted by your application router."
+    />
   )
 }
 
@@ -108,28 +158,25 @@ export const Composition: Story = {
 }
 
 export const Customisation: Story = {
-  render: () => (
-    <p style={{ lineHeight: 1.6 }}>
-      Rendered by an application router:{' '}
-      <Link
-        href="/docs"
-        render={({ children, ...props }) => (
-          <a
-            data-router-link=""
-            {...props}
-          >
-            {children}
-          </a>
-        )}
-      >
-        Routed docs
-      </Link>
-    </p>
+  args: { children: 'Routed docs' },
+  render: args => (
+    <LinkDestination
+      args={args}
+      introduction="Rendered by an application router: "
+      destination="Router destination: the application adapter forwards href, children, and native anchor props."
+      router
+    />
   )
 }
 
 export const Subtle: Story = {
-  args: { variant: 'subtle', children: 'Settings', href: '/settings' }
+  args: { variant: 'subtle', children: 'Settings' },
+  render: args => (
+    <LinkDestination
+      args={args}
+      destination="Settings: choose a theme and color mode from the Storybook toolbar."
+    />
+  )
 }
 
 export const External: Story = {

@@ -1,5 +1,6 @@
 import { useState, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, waitFor, within } from 'storybook/test'
 import { Button, Checkbox, Field, useField, Input } from './index.js'
 
 function ToneInput(props: ComponentProps<'input'>) {
@@ -8,6 +9,21 @@ function ToneInput(props: ComponentProps<'input'>) {
     <input
       {...field?.controlProps}
       {...props}
+      style={{
+        boxSizing: 'border-box',
+        width: '100%',
+        minWidth: 0,
+        height: 'var(--rad-control-medium-height)',
+        paddingInline: 'var(--rad-control-medium-padding-inline)',
+        fontFamily: 'var(--rad-typography-family)',
+        fontSize: 'var(--rad-control-medium-font-size)',
+        color: 'var(--rad-color-foreground)',
+        background: 'var(--rad-color-surface)',
+        borderBottom:
+          'var(--rad-control-border-width) var(--rad-control-border-style) var(--rad-color-accent)',
+        borderBottomColor: field?.invalid ? 'var(--rad-color-invalid)' : 'var(--rad-color-accent)',
+        ...props.style
+      }}
     />
   )
 }
@@ -112,11 +128,24 @@ export const States: Story = {
 export const Composition: Story = { render: () => <FormExample /> }
 
 export const Customisation: Story = {
+  play: async ({ canvasElement, args }) => {
+    const input = within(canvasElement).getByRole('textbox')
+    await waitFor(async () => {
+      const styles = canvasElement.ownerDocument.defaultView!.getComputedStyle(input)
+      await expect(input.getBoundingClientRect().height).toBeGreaterThanOrEqual(32)
+      await expect(parseFloat(styles.borderBottomWidth)).toBeGreaterThan(0)
+      await expect(styles.borderBottomStyle).not.toBe('none')
+      if (args.layout !== 'group') {
+        await expect(input).toHaveAccessibleName()
+        if (args.required) await expect(input).toBeRequired()
+      }
+    })
+  },
   parameters: {
     docs: {
       description: {
         story:
-          'A consumer component reads useField and forwards controlProps to its native input. This is the explicit native interoperability example.'
+          'A consumer component reads useField and forwards controlProps to its native input. Its underline and surface use shared semantic roles; focus stays native. This is the explicit native interoperability example.'
       }
     }
   },

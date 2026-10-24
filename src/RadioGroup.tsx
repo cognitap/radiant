@@ -2,18 +2,20 @@ import { createContext, useContext } from 'react'
 import type { ChangeEvent, ComponentProps, CSSProperties, ReactNode, Ref } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { controlBorderClass } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { Field, useField } from './Field.js'
 import type { FieldProps } from './Field.js'
 
 const radioVariants = cva([
+  controlBorderClass,
   'peer col-start-1 row-start-1 m-0 box-border appearance-none',
   'size-[var(--rad-radio-size,var(--rad-control-medium-indicator-size,1.125rem))]',
   'rounded-[var(--rad-radio-radius,999px)]',
   '[corner-shape:var(--rad-radio-corner-shape,unset)]',
   '[border-width:var(--rad-radio-border-width,var(--rad-control-border-width,1px))]',
   '[border-style:var(--rad-radio-border-style,var(--rad-control-border-style,solid))]',
-  '[border-color:var(--rad-radio-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+  '[border-color:var(--rad-radio-border-color,var(--_rad-control-border))]',
   'bg-[var(--rad-radio-background,var(--rad-color-surface,oklch(1_0_0)))]',
   'checked:bg-[var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
   'checked:[border-color:var(--rad-radio-checked-border,var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
@@ -33,7 +35,7 @@ const radioVariants = cva([
 ])
 
 const dotClass =
-  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--rad-radio-size,var(--rad-control-medium-indicator-size,1.125rem))*0.4)] self-center justify-self-center rounded-[var(--rad-radio-radius,999px)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText]'
+  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--rad-radio-size,var(--rad-control-medium-indicator-size,1.125rem))*0.4)] self-center justify-self-center rounded-[var(--rad-radio-radius,999px)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText] forced-colors:peer-disabled:bg-[GrayText]'
 
 const rowClass =
   '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-weight:var(--rad-typography-body-weight,400)] inline-flex min-h-6 cursor-pointer items-center gap-[var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'

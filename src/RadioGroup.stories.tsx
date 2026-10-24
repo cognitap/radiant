@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Radio, RadioGroup, type ThemeStyle } from './index.js'
 
 function NativeForm() {
@@ -94,6 +95,7 @@ export const Default: Story = {
 }
 
 export const States: Story = {
+  play: async ({ canvasElement }) => checkDisabledIndicators(canvasElement, 'radio'),
   render: () => (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
       <RadioGroup

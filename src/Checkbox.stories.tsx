@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Checkbox, Field, type ThemeStyle } from './index.js'
 
 function NativeForm() {
@@ -69,6 +70,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 export const States: Story = {
+  play: async ({ canvasElement }) => checkDisabledIndicators(canvasElement, 'checkbox'),
   parameters: {
     docs: {
       description: {

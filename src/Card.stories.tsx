@@ -1,3 +1,4 @@
+import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   Button,
@@ -26,22 +27,44 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  render: () => (
+function ShippingCard() {
+  const id = useId()
+  const [tracking, setTracking] = useState(false)
+
+  return (
     <Card style={{ maxWidth: '24rem' }}>
       <CardHeader>
         <CardTitle>Shipping</CardTitle>
         <CardDescription>Leaves the studio tomorrow.</CardDescription>
       </CardHeader>
       <CardContent>
-        <p style={{ margin: 0 }}>Ships in two days. The blue set is packed.</p>
+        <p
+          id={`${id}-details`}
+          tabIndex={-1}
+          className="target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]"
+          style={{ margin: 0 }}
+        >
+          Ships in two days. The blue set is packed.
+        </p>
+        <output style={{ display: 'block', marginTop: tracking ? '0.75rem' : 0 }}>
+          {tracking ? 'Tracking update: the package is being prepared for dispatch.' : null}
+        </output>
       </CardContent>
       <CardFooter>
-        <Button type="button">Track</Button>
-        <Link href="/orders/1">Details</Link>
+        <Button
+          type="button"
+          onClick={() => setTracking(true)}
+        >
+          Track
+        </Button>
+        <Link href={`#${id}-details`}>Details</Link>
       </CardFooter>
     </Card>
   )
+}
+
+export const Default: Story = {
+  render: () => <ShippingCard />
 }
 
 export const Composition: Story = {

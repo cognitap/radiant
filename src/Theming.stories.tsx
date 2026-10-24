@@ -194,7 +194,12 @@ export const Comparison: Story = {
               </form>
             </CardContent>
             <CardFooter>
-              <Link href="/guide">Read the guide</Link>
+              <Link
+                external
+                href="https://github.com/cognitap/radiant/blob/main/docs/theming.md"
+              >
+                Read the guide
+              </Link>
               <Dialog>
                 <DialogTrigger
                   render={props => (

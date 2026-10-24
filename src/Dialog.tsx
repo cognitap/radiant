@@ -21,6 +21,7 @@ const dialogVariants = cva([
   '[border-style:var(--rad-dialog-border-style,var(--rad-surface-border-style,solid))]',
   '[border-color:var(--rad-dialog-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
   'bg-[var(--rad-dialog-background,var(--rad-color-surface,oklch(1_0_0)))]',
+  '[backdrop-filter:var(--rad-dialog-backdrop-filter,none)]',
   '[color:var(--rad-dialog-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
   '[box-shadow:var(--rad-dialog-shadow,var(--rad-surface-overlay-shadow,0_24px_64px_-16px_rgb(0_0_0/0.3)))]',
   'backdrop:[background:var(--rad-dialog-backdrop,var(--rad-surface-backdrop,rgb(0_0_0/0.45)))]',

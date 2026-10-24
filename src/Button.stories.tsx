@@ -1,6 +1,7 @@
+import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { fn } from 'storybook/test'
-import { Button, Link, type ButtonVariant, type ThemeStyle } from './index.js'
+import { Button, Link, type ButtonProps, type ButtonVariant, type ThemeStyle } from './index.js'
 
 const variants: ButtonVariant[] = [
   'primary',
@@ -66,6 +67,51 @@ const arrow = (
 
 export const Default: Story = {}
 
+function ButtonComposition(args: ButtonProps) {
+  const id = useId()
+  const [activations, setActivations] = useState({ next: 0, close: 0 })
+
+  return (
+    <div style={{ display: 'grid', gap: '1.25rem', maxWidth: '32rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}>
+        <Button
+          {...args}
+          variant="outline"
+          onClick={event => {
+            args.onClick?.(event)
+            setActivations(counts => ({ ...counts, next: counts.next + 1 }))
+          }}
+        >
+          Next {arrow}
+        </Button>
+        <Button
+          {...args}
+          iconOnly
+          aria-label="Close"
+          onClick={event => {
+            args.onClick?.(event)
+            setActivations(counts => ({ ...counts, close: counts.close + 1 }))
+          }}
+        >
+          {close}
+        </Button>
+        <Link href={`#${id}-guide`}>Read the guide</Link>
+      </div>
+      <output>
+        Next activated {activations.next} {activations.next === 1 ? 'time' : 'times'}. Close
+        activated {activations.close} {activations.close === 1 ? 'time' : 'times'}.
+      </output>
+      <section
+        id={`${id}-guide`}
+        tabIndex={-1}
+        className="target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]"
+      >
+        Guide: combine native buttons for actions with links for navigation.
+      </section>
+    </div>
+  )
+}
+
 export const States: Story = {
   render: args => (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
@@ -86,24 +132,7 @@ export const States: Story = {
 }
 
 export const Composition: Story = {
-  render: args => (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}>
-      <Button
-        {...args}
-        variant="outline"
-      >
-        Next {arrow}
-      </Button>
-      <Button
-        {...args}
-        iconOnly
-        aria-label="Close"
-      >
-        {close}
-      </Button>
-      <Link href="/guide">Read the guide</Link>
-    </div>
-  )
+  render: args => <ButtonComposition {...args} />
 }
 
 export const Customisation: Story = {
@@ -145,7 +174,7 @@ export const Variants: Story = {
 export const FullWidth: Story = {
   args: { fullWidth: true },
   render: args => (
-    <div style={{ width: 'min(24rem, 100%)' }}>
+    <div style={{ width: 'min(24rem, calc(100vw - 2rem))', maxWidth: '100%' }}>
       <Button {...args} />
     </div>
   )

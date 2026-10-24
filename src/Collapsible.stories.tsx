@@ -12,7 +12,14 @@ import {
 
 function ExclusiveGroup() {
   return (
-    <div style={{ display: 'grid', gap: '0.75rem', width: '24rem' }}>
+    <div
+      style={{
+        display: 'grid',
+        gap: '0.75rem',
+        width: 'min(24rem, calc(100vw - 2rem))',
+        maxWidth: '100%'
+      }}
+    >
       <Collapsible
         defaultOpen
         name="faq"
@@ -51,7 +58,13 @@ function InsideForm() {
         const note = new FormData(event.currentTarget).get('note')
         setSummary(typeof note === 'string' && note !== '' ? note : 'Empty')
       }}
-      style={{ display: 'grid', justifyItems: 'start', gap: '0.75rem', width: '24rem' }}
+      style={{
+        display: 'grid',
+        justifyItems: 'start',
+        gap: '0.75rem',
+        width: 'min(24rem, calc(100vw - 2rem))',
+        maxWidth: '100%'
+      }}
     >
       <Collapsible defaultOpen>
         <CollapsibleTrigger>Note</CollapsibleTrigger>

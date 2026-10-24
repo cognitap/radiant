@@ -31,6 +31,8 @@ const collapsibleTriggerVariants = cva([
   'flex w-full cursor-pointer items-center gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))]',
   'list-none p-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))]',
   '[&::-webkit-details-marker]:hidden [&::marker]:content-none',
+  'focus-visible:rounded-[var(--rad-collapsible-radius,var(--rad-surface-radius,0.75rem))]',
+  'focus-visible:[corner-shape:var(--rad-collapsible-corner-shape,var(--rad-surface-corner-shape,round))]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-collapsible-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
   'focus-visible:[outline-width:var(--rad-collapsible-focus-width,var(--rad-focus-width,2px))]',
@@ -42,7 +44,7 @@ const collapsibleTriggerVariants = cva([
 const collapsibleMarkerVariants = cva([
   'size-4 shrink-0',
   'transition-transform duration-[var(--rad-collapsible-duration,var(--rad-motion-disclosure-duration,150ms))] ease-out',
-  'group-open:rotate-90',
+  '[details[open]>summary>&]:rotate-90',
   'motion-reduce:transition-none'
 ])
 
