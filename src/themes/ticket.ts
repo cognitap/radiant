@@ -86,6 +86,13 @@ export const ticket = defineTheme({
     state: { disabledOpacity: 0.5 }
   },
   components: {
+    // Small indicators need a legible box rather than the full-size ticket cutout.
+    checkbox: {
+      radius: '0.125rem',
+      cornerShape: 'round',
+      borderWidth: '2px',
+      borderStyle: 'solid'
+    },
     button: {
       radiusPressed: '0.5rem',
       textTransform: 'uppercase',

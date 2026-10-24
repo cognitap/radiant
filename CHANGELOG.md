@@ -4,6 +4,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Ticket checkboxes use a compact solid outline instead of inheriting the
+  scooped, dashed shape intended for larger controls and surfaces.
 - Button-styled links share Button hover and pressed feedback while retaining
   native anchor navigation. Disabled and pending buttons keep suppressing it.
 - Checkbox check and mixed marks stay aligned with the native control when

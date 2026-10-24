@@ -195,7 +195,9 @@ not the package. `Theme` has no `fonts` field or font-loading API.
 
 Glass uses a gradient `surface.canvas` and translucent `color.surface`; its
 Button backdrop-filter override is distinct from the dialog backdrop
-background. Shape uses CSS `corner-shape`; browsers that do not support it
+background. Ticket uses a compact, solid checkbox outline so small indicators
+remain legible alongside its scooped, dashed controls and surfaces.
+Shape uses CSS `corner-shape`; browsers that do not support it
 retain ordinary rounded corners. A palette definition does not certify contrast
 for arbitrary content, custom backgrounds, or translucent combinations.
 
