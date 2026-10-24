@@ -757,6 +757,13 @@ Utilities passed in `className` replace matching defaults, including `hover:` an
 
 ## Development
 
+The [shared design and component contract](docs/contracts/README.md) records the
+DEV-104 harmonisation target, with a [migration inventory](docs/contracts/migration.md)
+and compile-only acceptance examples. It describes future interfaces, not
+additional APIs available in the current package. [GLOSSARY.md](GLOSSARY.md)
+defines the shared vocabulary. Run `pnpm typecheck:contracts` to check those
+specifications; the normal typecheck and CI include that check.
+
 Use the Node.js version in `.nvmrc`. Any recent pnpm switches itself to the version
 pinned in `package.json`:
 
