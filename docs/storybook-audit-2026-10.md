@@ -67,6 +67,35 @@ interaction corrections in this PR were included in the baseline inspection.
 
 ## Ongoing checks
 
+### Default-composition closeout
+
+Completed 25 October 2026.
+
+The follow-up review also checked the remaining default paths against the
+composition contract, rather than assuming a themed screenshot proved reuse:
+
+| Family                 | Checked default path                                                        |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Button                 | Owns the native action host and shared action presentation.                 |
+| Link                   | Button-styled links reuse the action recipe and retain an anchor.           |
+| Dialog                 | Trigger/Close render Button with both part identities.                      |
+| Accordion              | Item/Trigger/Content compose Collapsible and retain native details/summary. |
+| RadioGroup             | Composes Field's fieldset; choices remain native labelled radios.           |
+| Field, Input, Checkbox | Native input hosts retain their Field label relationships.                  |
+| Card                   | Remains a passive surface; ordinary story actions use Button/Link.          |
+
+Source inspection found no other parallel action recipe. The only raw action
+buttons in stories are in Dialog's explicitly named native interoperability
+example. Public-export server-rendered checks verify canonical action
+presentation, single native hosts, disclosure composition, fieldset composition,
+label relationships, and passive Card actions. These supplement the earlier
+theme/mode screenshots and interaction results; they do not declare the later
+public API and part-targeting migrations complete.
+
+No further visual findings remain from the requested Chrome Storybook review.
+
+### Dialog correction and regression checks
+
 The initial audit missed Dialog's default action composition. Dialog still
 rendered a separate button recipe, while the theme comparison explicitly
 replaced its actions with Button. The audit verified theme rendering and
