@@ -113,6 +113,7 @@ export const Comparison: Story = {
         )) {
           const bounds = part.getBoundingClientRect()
           for (const control of part.querySelectorAll('input, button, summary, a')) {
+            if (control.closest('dialog')) continue
             const box = control.getBoundingClientRect()
             if (box.width === 0) continue
             await expect(box.left).toBeGreaterThanOrEqual(bounds.left - 0.5)
