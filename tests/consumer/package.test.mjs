@@ -9,6 +9,10 @@ import {
   buttonTheme,
   Checkbox,
   checkboxTheme,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  collapsibleTheme,
   Dialog,
   DialogClose,
   DialogContent,
@@ -624,6 +628,38 @@ test('a dialog stays closed in server markup and names itself from its title', (
   assert.doesNotMatch(classAttribute, /dialog-background/)
 })
 
+test('a disclosure renders a summary and keeps closed content in the document', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Collapsible,
+      { name: 'faq', onOpenChange() {}, className: 'bg-transparent' },
+      createElement(CollapsibleContent, null, 'Ships in two days.'),
+      createElement(CollapsibleTrigger, null, 'Shipping')
+    )
+  )
+  const details = /<details\b[^>]*>/.exec(html)?.[0] ?? ''
+  assert.match(details, /^<details\b/)
+  assert.doesNotMatch(details, /\sopen(?:=|\s|>)/)
+  assert.match(details, /data-slot="collapsible"/)
+  assert.match(details, /data-state="closed"/)
+  assert.match(details, /\sname="faq"/)
+  assert.doesNotMatch(html, /onOpenChange/)
+  assert.match(html, /<summary\b[^>]*data-slot="collapsible-trigger"/)
+  assert.match(html, /data-slot="collapsible-content"/)
+  assert.ok(html.indexOf('Ships in two days.') < html.indexOf('Shipping'))
+  const classAttribute = /<details\b[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bbg-transparent\b/)
+  assert.doesNotMatch(classAttribute, /collapsible-background/)
+})
+
+test('collapsibleTheme maps typed settings to Collapsible variables', () => {
+  assert.deepEqual(collapsibleTheme({ radius: '1rem', duration: '0ms', contentSize: '1rem' }), {
+    '--collapsible-radius': '1rem',
+    '--collapsible-duration': '0ms',
+    '--collapsible-content-size': '1rem'
+  })
+})
+
 test('dialogTheme maps typed settings to Dialog variables', () => {
   assert.deepEqual(dialogTheme({ width: '24rem', backdrop: 'transparent', titleWeight: 550 }), {
     '--dialog-width': '24rem',
@@ -675,6 +711,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Checkbox.tsx',
     'src/RadioGroup.tsx',
     'src/Dialog.tsx',
+    'src/Collapsible.tsx',
     'dist/library/Button.js',
     'cn',
     'package.json'

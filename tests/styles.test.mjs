@@ -41,6 +41,7 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
   assert.match(css, /--checkbox-size/)
   assert.match(css, /--radio-size/)
   assert.match(css, /--dialog-width/)
+  assert.match(css, /--collapsible-radius/)
   const pressScale = css.match(/([^{}]*)\{scale:var\(--button-press-scale/g) ?? []
   assert.equal(pressScale.length, 1, 'Expected one press scale rule')
   assert.match(pressScale[0], /motion-safe/)

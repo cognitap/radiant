@@ -5,6 +5,10 @@ import {
   Checkbox,
   checkboxTheme,
   Field,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  collapsibleTheme,
   Dialog,
   DialogContent,
   DialogTrigger,
@@ -24,6 +28,7 @@ import {
   type CheckboxProps,
   type FieldProps,
   type InputProps,
+  type CollapsibleProps,
   type DialogContentProps,
   type DialogProps,
   type RadioGroupProps,
@@ -194,6 +199,26 @@ createElement(
 
 // @ts-expect-error Dialog theme keys are a closed set.
 dialogTheme({ size: '24rem' })
+
+createElement('div', { style: collapsibleTheme({ radius: '1rem', duration: '0ms' }) })
+
+const collapsibleProps: CollapsibleProps = {
+  open: true,
+  defaultOpen: false,
+  name: 'faq',
+  onOpenChange(open: boolean) {
+    void open
+  }
+}
+createElement(
+  Collapsible,
+  collapsibleProps,
+  createElement(CollapsibleTrigger, null, 'Shipping'),
+  createElement(CollapsibleContent, null, 'Ships in two days.')
+)
+
+// @ts-expect-error Collapsible theme keys are a closed set.
+collapsibleTheme({ panel: '1rem' })
 
 // @ts-expect-error The dialog open attribute is owned by showModal.
 const invalidDialog: DialogContentProps = { open: true }

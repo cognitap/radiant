@@ -30,6 +30,20 @@ export type {
   DialogTitleProps,
   DialogTriggerProps
 } from './Dialog.js'
+export {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  collapsibleTheme,
+  useCollapsible
+} from './Collapsible.js'
+export type {
+  CollapsibleContentProps,
+  CollapsibleProps,
+  CollapsibleState,
+  CollapsibleTheme,
+  CollapsibleTriggerProps
+} from './Collapsible.js'
 export { radiantTheme, themes } from './themes/index.js'
 export type { Theme } from './themes/index.js'
 export type { ButtonProps, ButtonRadius, ButtonSize, ButtonTheme, ButtonVariant } from './Button.js'
