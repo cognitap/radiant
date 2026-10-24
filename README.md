@@ -163,9 +163,9 @@ label.
 | `requiredIndicator` | Replaceable visual marker, hidden from assistive tech. `null` hides it.       | `*`       |
 
 Group anatomy is a `<fieldset>` and `<legend>`, so a disabled group disables
-its descendants natively. Pass `role="radiogroup"` when a later radio group
-needs that role. Required and invalid on a group are relationships on the
-fieldset, not on each control.
+its descendants natively. A radio group uses `RadioGroup`, which is this
+fieldset of native radios, and does not add `role="radiogroup"`. Required and
+invalid on a group are relationships on the fieldset, not on each control.
 
 Ids come from `useId()`, so server markup and hydration agree. A host control's
 own `id` wins, and its `aria-describedby` is kept alongside the description and
@@ -252,7 +252,7 @@ controlled mode and pass the library's message to Field:
 ```
 
 Checkbox, radio, and file inputs are separate families. `type` still accepts
-any native value.
+any native value. Use `RadioGroup` for a mutually exclusive choice.
 
 ### Checkbox
 
@@ -296,6 +296,82 @@ dash are decorative and do not receive clicks.
 `checkedBorder`, `mark`, `invalidBorder`, `gap`, `labelColor`, `labelSize`,
 `disabledBorder`, `disabledBackground`, `focusColor`, `focusWidth`,
 `focusOffset`, and `focusStyle`. The input sets `data-slot="checkbox"`.
+
+### RadioGroup
+
+`RadioGroup` is a Field group: a `<fieldset>` and `<legend>` of native radios.
+The group owns `name`. Each `Radio` owns its `value` and `label`. The visible
+disk is drawn on the input, so arrow keys, focus entry, focus exit, form
+submission, reset, and label clicks stay the platform's. Tab lands on the
+selected radio, or the first enabled radio when none is selected, and the next
+Tab leaves the group. Arrow keys move among enabled radios that share the name
+and skip a disabled choice. The group does not set `role="radiogroup"`, and
+it does not put `aria-invalid` or `aria-required` on the radios. The fieldset
+owns those relationships. A required group sets the native `required`
+attribute, and an invalid group paints the disks from the field's invalid
+state.
+
+```tsx
+import { Radio, RadioGroup } from '@cognitap/radiant'
+
+;<RadioGroup
+  label="Plan"
+  name="plan"
+  defaultValue="pro"
+  description="Billed monthly"
+>
+  <Radio
+    label="Free"
+    value="free"
+  />
+  <Radio
+    label="Pro"
+    value="pro"
+  />
+  <Radio
+    label="Retired"
+    value="retired"
+    disabled
+  />
+  <Radio
+    label="Team"
+    value="team"
+  />
+</RadioGroup>
+```
+
+| Mode         | How the selection moves                                        | Reset                                        |
+| ------------ | -------------------------------------------------------------- | -------------------------------------------- |
+| Uncontrolled | Omit `value`. `defaultValue` checks the matching radio.        | `form.reset()` restores `defaultValue`.      |
+| Controlled   | Pass `value` and update it from `onValueChange` or `onChange`. | A browser reset does not change React state. |
+
+The checked radio submits `name=value`. When none is checked, the group submits
+nothing. `onChange` is the selected radio's change event, and `onValueChange`
+receives its value. React does not deliver a radio change through the
+fieldset, so the group listens on each radio. Inside the group, the group name
+and selection win, so a `checked` or `name` on `Radio` does not split the
+group. Outside a group, `Radio` is an ordinary radio: pass `name` and
+`defaultChecked` or `checked`.
+
+`label` wraps the input. Pass one name for the option, not a Field label as
+well. A disabled group disables every choice through the fieldset. A disabled
+choice stays visible and is skipped by the arrow keys.
+
+`className` merges onto the input. Replacing `appearance-none` puts the native
+glyph back; the input stays in the tab order and in the form. The dot is
+decorative and does not receive clicks.
+
+The disk stays a circle. `--radio-radius` defaults to `999px` and
+`--radio-corner-shape` defaults to `unset`, so a button theme's squircle or
+scoop does not pinch it. Checked fill still follows `--color-primary`.
+
+`radioTheme` maps `size`, `radius`, `cornerShape`, `borderWidth`,
+`borderStyle`, `borderColor`, `background`, `checkedBackground`,
+`checkedBorder`, `mark`, `invalidBorder`, `gap`, `labelGap`, `labelColor`,
+`labelSize`, `disabledBorder`, `disabledBackground`, `focusColor`,
+`focusWidth`, `focusOffset`, and `focusStyle`. The fieldset keeps
+`data-slot="field"`. The options set `data-slot="radio-group"`, and each input
+sets `data-slot="radio"`.
 
 ### Adapting Button to a design system
 
