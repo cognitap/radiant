@@ -44,6 +44,24 @@ export type {
   CollapsibleTheme,
   CollapsibleTriggerProps
 } from './Collapsible.js'
+export {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  accordionTheme,
+  useAccordion
+} from './Accordion.js'
+export type {
+  AccordionContentProps,
+  AccordionHeadingLevel,
+  AccordionItemProps,
+  AccordionProps,
+  AccordionState,
+  AccordionTheme,
+  AccordionTriggerProps,
+  AccordionValue
+} from './Accordion.js'
 export { radiantTheme, themes } from './themes/index.js'
 export type { Theme } from './themes/index.js'
 export type { ButtonProps, ButtonRadius, ButtonSize, ButtonTheme, ButtonVariant } from './Button.js'

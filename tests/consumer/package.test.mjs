@@ -9,6 +9,11 @@ import {
   buttonTheme,
   Checkbox,
   checkboxTheme,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  accordionTheme,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -652,6 +657,43 @@ test('a disclosure renders a summary and keeps closed content in the document', 
   assert.doesNotMatch(classAttribute, /collapsible-background/)
 })
 
+test('an accordion opens its default section and keeps the rest closed', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Accordion,
+      { className: 'bg-transparent', defaultValue: 'shipping', onValueChange() {} },
+      createElement(
+        AccordionItem,
+        { value: 'shipping' },
+        createElement(AccordionTrigger, null, 'Shipping'),
+        createElement(AccordionContent, null, 'Ships in two days.')
+      ),
+      createElement(
+        AccordionItem,
+        { disabled: true, value: 'returns' },
+        createElement(AccordionTrigger, null, 'Returns'),
+        createElement(AccordionContent, null, 'Returns are free for 30 days.')
+      )
+    )
+  )
+  const root = /<div\b[^>]*data-slot="accordion"[^>]*>/.exec(html)?.[0] ?? ''
+  const details = [...html.matchAll(/<details\b[^>]*>/g)].map(match => match[0])
+  assert.match(root, /data-type="single"/)
+  assert.match(root, /\bbg-transparent\b/)
+  assert.doesNotMatch(html, /onValueChange|defaultValue/)
+  assert.match(details[0], /\sopen=""/)
+  assert.match(details[0], /data-value="shipping"/)
+  assert.doesNotMatch(details[1], /\sopen(?:=|\s|>)/)
+  assert.match(details[1], /data-disabled/)
+  assert.match(html, /<summary\b[^>]*aria-disabled="true"[^>]*tabindex="-1"/)
+  assert.match(html, /<h3\b[^>]*>Shipping<\/h3>/)
+  assert.match(html, /data-slot="collapsible-content"/)
+})
+
+test('accordionTheme maps the stack gap to an Accordion variable', () => {
+  assert.deepEqual(accordionTheme({ gap: '0.5rem' }), { '--accordion-gap': '0.5rem' })
+})
+
 test('collapsibleTheme maps typed settings to Collapsible variables', () => {
   assert.deepEqual(collapsibleTheme({ radius: '1rem', duration: '0ms', contentSize: '1rem' }), {
     '--collapsible-radius': '1rem',
@@ -712,6 +754,7 @@ test('exports reject implementation deep imports', async () => {
     'src/RadioGroup.tsx',
     'src/Dialog.tsx',
     'src/Collapsible.tsx',
+    'src/Accordion.tsx',
     'dist/library/Button.js',
     'cn',
     'package.json'

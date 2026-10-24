@@ -4,6 +4,25 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Accordion` groups `Collapsible` sections. `single` keeps one section open,
+  and `multiple` toggles each section on its own. The trigger is the summary,
+  and its label is a level-3 heading unless `level` says otherwise. A disabled
+  summary stays out of the tab order and does not toggle. In Storybook on
+  Chrome 155, the accessibility tree exposed each trigger label as a level-3
+  heading. Space and Enter toggled the focused summary and left focus there.
+  Tab from a closed summary moved to the next summary. Tab from an open
+  summary reached a button in the content. ArrowDown left focus on the summary.
+  Opening one section in single mode closed the other. In multiple mode, Enter
+  opened a second section and left the first open. Clicking another summary
+  while focus was on a button inside the open section closed the first, opened
+  the second, and left focus on that summary. Tab skipped a disabled summary.
+  Space, Enter, and a click did not open it. Enter on a nested summary left
+  the parent section open. A controlled accordion followed `onValueChange`.
+  Submitting a form while the section was closed included the hidden field.
+  Reduced motion set `transition-property` to `none` on the panel and marker.
+  The Radiant surface was 384px wide in a 24rem frame, with an 8px radius.
+  The summary focus ring was a 2px solid outline, offset 2px. The Ticket
+  surface used the scooped corner. Screen reader checks were not run.
 - `Collapsible` is a native `<details>` element. The summary toggles it, and
   `open` is the browser's open state. Uncontrolled disclosures use
   `defaultOpen`. Controlled disclosures use `open` and `onOpenChange`; if
