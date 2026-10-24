@@ -205,13 +205,13 @@ export const Variants: Story = {
         await waitFor(async () => {
           const action = view.getComputedStyle(button)
           const navigation = view.getComputedStyle(link)
-          for (const property of [
-            'color',
-            'background-color',
-            'min-height',
-            'border-radius',
-            'box-shadow'
-          ]) {
+          const properties = ['color', 'min-height', 'font-family', 'font-size']
+          // A parked pointer can hover one host. State-dependent paints are
+          // comparable only when both hosts are in the same interaction state.
+          if ([':hover', ':active'].every(state => button.matches(state) === link.matches(state))) {
+            properties.push('background-color', 'border-radius', 'box-shadow')
+          }
+          for (const property of properties) {
             await expect(action.getPropertyValue(property)).toBe(
               navigation.getPropertyValue(property)
             )
