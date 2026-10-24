@@ -4,6 +4,24 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `Collapsible` is a native `<details>` element. The summary toggles it, and
+  `open` is the browser's open state. Uncontrolled disclosures use
+  `defaultOpen`. Controlled disclosures use `open` and `onOpenChange`; if
+  `open` stays unchanged, the disclosure restores that value. A shared `name`
+  is the native exclusive group. Closed content stays mounted, so a field
+  inside it still submits with an ancestor form. The panel height and marker
+  animate for 200ms, and `prefers-reduced-motion` sets `transition-property`
+  to `none`. In Storybook on Chrome 155, Space and Enter toggled the summary
+  and left focus there. Tab reached a button in the content only while open;
+  while closed, Tab moved to the document body. Clicking the summary while
+  focus was inside the content closed the disclosure and moved focus to the
+  summary. Enter on a second disclosure with the same `name` opened it and
+  closed the first. Enter on a nested summary left the parent open. A
+  controlled disclosure followed `onOpenChange`. Submitting a form while the
+  disclosure was closed included the hidden field. The Radiant surface was
+  384px wide in a 24rem frame, with an 8px radius. The Ticket surface used the
+  scooped corner. The summary focus ring was a 2px solid outline, offset 2px.
+  Screen reader checks were not run.
 - `Dialog` is a native `<dialog>`. `showModal()` supplies the modal layer, so
   the component does not add a portal, a focus trap, or a body scroll lock.
   Uncontrolled dialogs use `defaultOpen`. Controlled dialogs use `open` and

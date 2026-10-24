@@ -450,6 +450,52 @@ radius and corner shape, so a scoop or squircle theme shapes the surface.
 `data-slot="dialog"`. The trigger, title, description, and close control set
 `dialog-trigger`, `dialog-title`, `dialog-description`, and `dialog-close`.
 
+### Collapsible
+
+`Collapsible` is a native `<details>` element. `CollapsibleTrigger` is its
+`<summary>`. The browser toggles it with a click, Space, or Enter, and keeps
+focus on the summary. There is no separate open attribute to invent: `open` is
+the disclosure's open state. Closed content stays in the document and is hidden
+by the user agent, so a field inside a closed disclosure is still part of an
+ancestor form.
+
+```tsx
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@cognitap/radiant'
+
+;<Collapsible>
+  <CollapsibleTrigger>Shipping</CollapsibleTrigger>
+  <CollapsibleContent>Ships in two days.</CollapsibleContent>
+</Collapsible>
+```
+
+| Mode         | How it opens                                        | After the browser toggles                           |
+| ------------ | --------------------------------------------------- | --------------------------------------------------- |
+| Uncontrolled | Omit `open`. `defaultOpen` is in the server markup. | React follows the summary.                          |
+| Controlled   | Pass `open` and update it from `onOpenChange`.      | If `open` stays unchanged, the disclosure does too. |
+
+`defaultOpen` is the `open` attribute on the server, so hydration matches.
+The file is marked `'use client'` because the summary changes the DOM open
+state and React state has to follow it. Parts can be reordered; the summary
+still toggles every other child. `name` is the native exclusive group: opening
+one disclosure closes another with the same name. A nested disclosure does not
+toggle its parent.
+
+The summary's text is its accessible name. Do not put a button or link inside
+the summary. The marker is decorative. `useCollapsible()` reads the open state
+and can request a change. It returns `null` outside `Collapsible`.
+
+The panel height and the marker animate for 200ms. `prefers-reduced-motion`
+removes those transitions, so the state change is instant. `data-state` is
+`open` or `closed`.
+
+`className` merges onto the part it is passed to. The surface inherits the
+button radius and corner shape. `collapsibleTheme` maps `radius`,
+`cornerShape`, `background`, `color`, `borderWidth`, `borderStyle`,
+`borderColor`, `padding`, `gap`, `contentColor`, `contentSize`, `duration`,
+`focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. The disclosure
+sets `data-slot="collapsible"`. The summary and content set
+`collapsible-trigger` and `collapsible-content`.
+
 ### Adapting Button to a design system
 
 Every design decision is a CSS variable, so a design system, or an agent
