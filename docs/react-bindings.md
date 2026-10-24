@@ -62,12 +62,14 @@ native property before attaching a consumer ref must preserve that cleanup.
 Mounted property updates must also work without unrelated ref detach/reattach.
 
 The named native `render(props)` callbacks remain the public replacement
-convention. Link's action presentation and Dialog's fully resolved replacement
-presentation migrate in DEV-118/119; this shared-runtime change does not rename
-their public presentation props or replace their existing adapter contracts.
+convention. DEV-117 aligns Button/Link presentation as variant, tone and
+controlSize, inherited by default Dialog actions. DEV-118/119 retain native
+navigation/adapter verification and fully resolved Dialog replacement
+presentation; existing native Dialog adapters still own their presentation.
 The existing shared action recipe has moved to `src/actionStyles.ts` so static
-Link rendering does not call across Button's client boundary. DEV-118 consumes
-that private seam rather than extracting a second recipe.
+Link rendering does not call across Button's client boundary. The new
+presentation mapping consumes that private seam; later adapters must reuse it
+rather than extract another recipe.
 
 ## Mounted DOM work and server rendering
 

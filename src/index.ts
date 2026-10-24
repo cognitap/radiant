@@ -106,4 +106,5 @@ export type {
 } from './themes/index.js'
 export { ThemeScope } from './ThemeScope.js'
 export type { ThemeScopeProps } from './ThemeScope.js'
-export type { ButtonProps, ButtonRadius, ButtonSize, ButtonTheme, ButtonVariant } from './Button.js'
+export type { ButtonProps, ButtonTheme, ButtonVariant } from './Button.js'
+export type { ControlSize, Tone } from './presentation.js'

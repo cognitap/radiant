@@ -64,10 +64,7 @@ function dialogTree(props = {}) {
 }
 
 test('default dialog actions compose canonical Button presentation and pending markup', () => {
-  for (const presentation of [
-    {},
-    { variant: 'outline', size: 'small', radius: 'full', pending: true }
-  ]) {
+  for (const presentation of [{}, { variant: 'outline', controlSize: 'small', pending: true }]) {
     const reference = document.createElement('div')
     reference.innerHTML = renderToString(createElement(Button, presentation, 'Action'))
     const button = reference.querySelector('button')
@@ -309,9 +306,9 @@ test('action replacements receive native props and preserve explicit Button adap
       Dialog,
       null,
       createElement(DialogTrigger, {
-        variant: 'destructive',
-        size: 'large',
-        radius: 'full',
+        variant: 'solid',
+        tone: 'danger',
+        controlSize: 'large',
         iconOnly: true,
         fullWidth: true,
         pending: true,
@@ -329,7 +326,7 @@ test('action replacements receive native props and preserve explicit Button adap
   assert.equal(resolved['aria-busy'], true)
   assert.equal(resolved['data-slot'], 'button dialog-trigger')
   assert.equal(resolved.type, 'button')
-  for (const name of ['variant', 'size', 'radius', 'iconOnly', 'fullWidth', 'pending']) {
+  for (const name of ['variant', 'tone', 'controlSize', 'iconOnly', 'fullWidth', 'pending']) {
     assert.equal(Object.hasOwn(resolved, name), false, `${name} is not a native replacement prop`)
     assert.equal(host.querySelector('button').hasAttribute(name.toLowerCase()), false)
   }
@@ -342,7 +339,8 @@ test('action replacements receive native props and preserve explicit Button adap
       createElement(
         DialogClose,
         {
-          variant: 'destructive',
+          variant: 'solid',
+          tone: 'danger',
           className: 'rounded-none',
           render: props => createElement(Button, { ...props, variant: 'outline' })
         },

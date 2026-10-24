@@ -339,5 +339,10 @@ the same version; do not mix new theme data with an old compiled stylesheet.
 The old Tailwind utility aliases are implementation details, not an additional
 public theme vocabulary. The theme registry is readonly; choose a preset by
 `theme.id` rather than editing the registry or relying on its display name.
-Action prop harmonisation and the global Storybook theme selector are separate
-follow-up work; this migration does not rename Button/Link's existing props.
+Storybook's global Theme and Mode controls use this same preset registry.
+Button and Link now share `variant`, `tone`, and `controlSize`; see the
+[README action migration table](../README.md#action-api-migration-breaking).
+Action-only geometry, elevation and motion remain deliberate Button component
+overrides consumed by both Button and action-shaped Link. Inline/subtle Link
+retains its own decoration and focus overrides. Soft and unfilled ink mixes the
+selected tone toward the scope foreground; explicit Link colour overrides win.

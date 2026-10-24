@@ -5,8 +5,8 @@ defines the target. This inventory records the original baseline and migration
 destinations; delivery proceeds through the linked harmonisation issues.
 The current README and package declarations describe the implemented API.
 Shared themes and default Dialog action composition have landed in the
-foundation/Storybook work; the complete target vocabulary and replacement
-contract still require their remaining migrations.
+foundation/Storybook work. DEV-117 implements the action vocabulary below;
+remaining family and replacement contracts still require their migrations.
 
 The baseline is the ten current families in `src/index.ts`: Button, Link, Field,
 Input, Checkbox, RadioGroup (including Radio), Dialog, Collapsible, Accordion,
@@ -42,10 +42,10 @@ Button variants are solid, soft, outline, ghost; Link also supports inline and
 subtle. Tones are accent, neutral, warning, danger. Keep `iconOnly`, `fullWidth`,
 and `pending` on Button; keep `external` and anchor semantics on Link. Button
 remains a button and Link remains navigation even when they share presentation.
-Update public `ButtonVariant`, `ButtonSize`, `ButtonRadius`, `LinkVariant`, and
-related props/types with the runtime migration: the existing size/radius types
-cannot silently describe the new API. Shared visual-size types must use the
-canonical `controlSize` vocabulary rather than preserve `default` as a fourth size.
+`ButtonVariant` and `LinkVariant` now expose the new treatments. `ControlSize`
+replaces `ButtonSize`, and `ButtonRadius` is removed in favour of theme/local
+CSS. Shared visual sizing uses the canonical `controlSize` vocabulary;
+`default` is not a fourth size.
 
 ## Families, ownership, and parts
 

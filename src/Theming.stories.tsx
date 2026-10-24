@@ -48,11 +48,11 @@ const actionStyle = { maxWidth: '100%' }
 export const Comparison: Story = {
   play: async ({ canvasElement }) => {
     const palettes = {
-      primary: ['accent', 'accent-foreground'],
-      secondary: ['neutral', 'neutral-foreground'],
-      destructive: ['danger', 'danger-foreground'],
-      outline: ['surface', 'foreground'],
-      ghost: [null, 'foreground']
+      'solid accent': ['accent', 'accent-foreground'],
+      'soft neutral': ['neutral', 'neutral-foreground'],
+      'solid danger': ['danger', 'danger-foreground'],
+      'outline neutral': ['surface', 'neutral-foreground'],
+      'ghost neutral': [null, 'neutral-foreground']
     } as const
     const document = canvasElement.ownerDocument
     const view = document.defaultView!
@@ -140,13 +140,22 @@ export const Comparison: Story = {
           }}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-            {(['primary', 'secondary', 'destructive', 'outline', 'ghost'] as const).map(variant => (
+            {(
+              [
+                ['solid', 'accent'],
+                ['soft', 'neutral'],
+                ['solid', 'danger'],
+                ['outline', 'neutral'],
+                ['ghost', 'neutral']
+              ] as const
+            ).map(([variant, tone]) => (
               <Button
-                key={variant}
+                key={`${variant}-${tone}`}
                 variant={variant}
+                tone={tone}
                 style={actionStyle}
               >
-                {variant}
+                {variant} {tone}
               </Button>
             ))}
           </div>
@@ -240,6 +249,7 @@ export const Comparison: Story = {
               <Dialog>
                 <DialogTrigger
                   variant="outline"
+                  tone="neutral"
                   style={actionStyle}
                 >
                   Inspect dialog

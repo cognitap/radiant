@@ -5,16 +5,17 @@ Decision baseline for [DEV-104](https://linear.app/cognitap/issue/DEV-104),
 not a claim that these interfaces already ship. The current source and package
 retain their existing behavior until their owning migration issues land. DEV-44
 now implements the theme model; [the theming guide](../theming.md) describes its
-shipped API and concrete defaults. Component presentation and composition
+shipped API and concrete defaults. Remaining component presentation and composition
 contracts below remain targets for their owning stages. DEV-48 now implements
 the [shared React runtime seams](../react-bindings.md); family-specific public
-presentation, anatomy and replacement migrations remain with their named owners.
+anatomy and replacement migrations remain with their named owners. DEV-117 now
+implements the Button/Link action vocabulary and default Dialog action props.
 
 Read [the glossary](../../GLOSSARY.md) for terminology,
 [the migration inventory](./migration.md) for current-to-target mappings, and
 [the acceptance sketches](./examples.tsx) for concrete usage. The sketches use
 [declarations](./target.d.ts) for future component APIs and the real package
-types for the implemented theme API.
+types for the implemented theme and action APIs.
 
 ## Decisions at a glance
 

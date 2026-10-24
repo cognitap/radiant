@@ -1,16 +1,17 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, userEvent, within } from 'storybook/test'
-import { Button, Link, type ButtonProps, type ButtonVariant, type ThemeStyle } from './index.js'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
+import {
+  Button,
+  Link,
+  type ButtonProps,
+  type ButtonVariant,
+  type Tone,
+  type ThemeStyle
+} from './index.js'
 
-const variants: ButtonVariant[] = [
-  'primary',
-  'secondary',
-  'warning',
-  'destructive',
-  'outline',
-  'ghost'
-]
+const variants: ButtonVariant[] = ['solid', 'soft', 'outline', 'ghost']
+const tones: Tone[] = ['accent', 'neutral', 'warning', 'danger']
 
 const meta = {
   title: 'Components/Button',
@@ -19,8 +20,8 @@ const meta = {
   argTypes: {
     children: { control: 'text' },
     variant: { control: 'inline-radio', options: variants },
-    size: { control: 'inline-radio', options: ['small', 'default', 'large'] },
-    radius: { control: 'inline-radio', options: ['none', 'small', 'default', 'large', 'full'] },
+    tone: { control: 'inline-radio', options: tones },
+    controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] },
     iconOnly: { control: 'boolean' },
     fullWidth: { control: 'boolean' },
     disabled: { control: 'boolean' },
@@ -30,7 +31,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native `<button>` with type="button" by default. variant, size and radius are visual props; disabled is native and pending suppresses activation while retaining focus. className, style and ref target the button; data-slot="button" identifies it. The inner label and pending mark preserve its accessible name.'
+          'A native `<button>` with type="button" by default. variant selects treatment, tone selects palette, and controlSize selects visual dimensions; disabled is native and pending suppresses activation while retaining focus. className, style and ref target the button; data-slot="button" identifies it. The inner label and pending mark preserve its accessible name.'
       }
     }
   }
@@ -77,6 +78,7 @@ function ButtonComposition(args: ButtonProps) {
         <Button
           {...args}
           variant="outline"
+          tone="neutral"
           onClick={event => {
             args.onClick?.(event)
             setActivations(counts => ({ ...counts, next: counts.next + 1 }))
@@ -181,17 +183,121 @@ export const Customisation: Story = {
 }
 
 export const Variants: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Each treatment accepts every tone. Button and Link share the same action presentation; Link keeps anchor navigation.'
+      }
+    }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const view = canvasElement.ownerDocument.defaultView!
+    for (const variant of variants) {
+      for (const tone of tones) {
+        const name = `${variant} ${tone}`
+        const button = canvas.getByRole('button', { name })
+        const link = canvas.getByRole('link', { name })
+        await expect(button).toHaveAttribute('data-variant', variant)
+        await expect(button).toHaveAttribute('data-tone', tone)
+        await expect(button).toHaveAttribute('data-control-size', 'medium')
+        await waitFor(async () => {
+          const action = view.getComputedStyle(button)
+          const navigation = view.getComputedStyle(link)
+          for (const property of [
+            'color',
+            'background-color',
+            'min-height',
+            'border-radius',
+            'box-shadow'
+          ]) {
+            await expect(action.getPropertyValue(property)).toBe(
+              navigation.getPropertyValue(property)
+            )
+          }
+          await expect(action.color).not.toBe('rgba(0, 0, 0, 0)')
+          if (variant === 'solid' || variant === 'soft') {
+            await expect(action.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+            await expect(action.color).not.toBe(action.backgroundColor)
+          }
+        })
+      }
+    }
+  },
   render: args => (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
       {variants.map(variant => (
-        <Button
-          {...args}
+        <div
           key={variant}
-          variant={variant}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}
         >
-          {variant}
-        </Button>
+          {tones.map(tone => (
+            <div
+              key={tone}
+              style={{ display: 'grid', gap: '0.5rem' }}
+            >
+              <Button
+                {...args}
+                variant={variant}
+                tone={tone}
+                controlSize="medium"
+              >
+                {variant} {tone}
+              </Button>
+              <Link
+                href="#action-destination"
+                variant={variant}
+                tone={tone}
+              >
+                {variant} {tone}
+              </Link>
+            </div>
+          ))}
+        </div>
       ))}
+      <p id="action-destination">Action links navigate here.</p>
+    </div>
+  )
+}
+
+export const Sizes: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const heights = []
+    for (const controlSize of ['small', 'medium', 'large'] as const) {
+      const button = canvas.getByRole('button', { name: controlSize })
+      const link = canvas.getByRole('link', { name: controlSize })
+      await expect(button).toHaveAttribute('data-control-size', controlSize)
+      heights.push(button.getBoundingClientRect().height)
+      await expect(button.getBoundingClientRect().height).toBe(link.getBoundingClientRect().height)
+    }
+    await expect(heights[0]).toBeLessThan(heights[1]!)
+    await expect(heights[1]).toBeLessThan(heights[2]!)
+  },
+  render: args => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'start', gap: '1rem' }}>
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'grid', gap: '0.5rem' }}
+        >
+          <Button
+            {...args}
+            controlSize={controlSize}
+          >
+            {controlSize}
+          </Button>
+          <Link
+            href="#size-destination"
+            variant="solid"
+            controlSize={controlSize}
+          >
+            {controlSize}
+          </Link>
+        </div>
+      ))}
+      <span id="size-destination">Size link destination.</span>
     </div>
   )
 }

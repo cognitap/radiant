@@ -62,7 +62,7 @@ function LinkActions() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
         <Link
           href={`#${id}-start`}
-          variant="button"
+          variant="solid"
         >
           Get started
         </Link>
@@ -74,9 +74,9 @@ function LinkActions() {
         </Button>
         <Link
           href={`#${id}-deletion`}
-          variant="button"
-          tone="destructive"
-          size="small"
+          variant="solid"
+          tone="danger"
+          controlSize="small"
         >
           Review deletion
         </Link>
@@ -114,18 +114,22 @@ const meta = {
   argTypes: {
     children: { control: 'text' },
     href: { control: 'text' },
-    variant: { control: 'inline-radio', options: ['inline', 'subtle', 'button'] },
+    variant: {
+      control: 'inline-radio',
+      options: ['inline', 'subtle', 'solid', 'soft', 'outline', 'ghost']
+    },
     tone: {
       control: 'inline-radio',
-      options: ['primary', 'secondary', 'warning', 'destructive', 'outline', 'ghost']
+      options: ['accent', 'neutral', 'warning', 'danger']
     },
+    controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] },
     external: { control: 'boolean' }
   },
   parameters: {
     docs: {
       description: {
         component:
-          'A native `<a>` for navigation, with inline, subtle and button variants. Button styling uses tone, size and radius; Link has no invented disabled or pending state. className, style and ref target the anchor (data-slot="link"). render receives anchor props for a consumer-owned router adapter.'
+          'A native `<a>` for navigation, with inline/subtle decoration or solid/soft/outline/ghost action treatment. tone selects palette; controlSize selects action dimensions; Link has no invented disabled or pending state. className, style and ref target the anchor (data-slot="link"). render receives anchor props for a consumer-owned router adapter.'
       }
     }
   }
@@ -181,4 +185,35 @@ export const Subtle: Story = {
 
 export const External: Story = {
   args: { href: 'https://example.com', external: true, children: 'Example (external)' }
+}
+
+export const Tones: Story = {
+  render: args => (
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      {(['accent', 'neutral', 'warning', 'danger'] as const).map(tone => (
+        <p
+          key={tone}
+          style={{ margin: 0 }}
+        >
+          <Link
+            {...args}
+            href="#tone-destination"
+            tone={tone}
+          >
+            {tone} inline
+          </Link>
+          {' · '}
+          <Link
+            {...args}
+            href="#tone-destination"
+            variant="subtle"
+            tone={tone}
+          >
+            {tone} subtle
+          </Link>
+        </p>
+      ))}
+      <span id="tone-destination">Tone link destination.</span>
+    </div>
+  )
 }

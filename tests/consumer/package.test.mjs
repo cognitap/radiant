@@ -59,6 +59,38 @@ test('public JavaScript imports and renders on the server', () => {
   assert.match(html, /Save/)
 })
 
+test('action defaults and data attributes separate treatment, palette and visual size', () => {
+  for (const [Component, variant] of [
+    [Button, 'solid'],
+    [Link, 'inline']
+  ]) {
+    const html = renderToStaticMarkup(createElement(Component, null, 'Continue'))
+    assert.match(html, new RegExp(`data-variant="${variant}"`))
+    assert.match(html, /data-tone="accent"/)
+    assert.match(html, /data-control-size="medium"/)
+    assert.doesNotMatch(html, /\sdata-size=/)
+  }
+  const html = renderToStaticMarkup(
+    createElement(
+      Link,
+      {
+        href: '/download',
+        download: 'report.pdf',
+        variant: 'outline',
+        tone: 'danger',
+        controlSize: 'large'
+      },
+      'Report'
+    )
+  )
+  assert.match(html, /href="\/download"/)
+  assert.match(html, /download="report.pdf"/)
+  assert.match(html, /data-variant="outline"/)
+  assert.match(html, /data-tone="danger"/)
+  assert.match(html, /data-control-size="large"/)
+  assert.doesNotMatch(html, /\s(variant|tone|controlSize)=/)
+})
+
 test('an omitted type stays button when formAction is set', () => {
   const html = renderToStaticMarkup(createElement(Button, { formAction: '/publish' }, 'Publish'))
   assert.match(html, /\stype="button"/)
@@ -84,28 +116,31 @@ test('settings pick classes and stay off the DOM', () => {
   const html = renderToStaticMarkup(
     createElement(
       Button,
-      { variant: 'destructive', size: 'small', radius: 'full', fullWidth: true },
+      { variant: 'solid', tone: 'danger', controlSize: 'small', fullWidth: true },
       'Delete'
     )
   )
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\[--_btn-bg:var\(--rad-color-danger,/)
+  assert.match(classAttribute, /\[--_action-color:var\(--rad-color-danger,/)
   assert.doesNotMatch(classAttribute, /--rad-color-accent,/)
   assert.match(
     classAttribute,
     /\[--_btn-h:var\(--rad-button-height-small,var\(--rad-control-small-height,2rem\)\)\]/
   )
-  assert.match(classAttribute, /\[--_btn-radius:calc\(var\(--_btn-h\)\/2\)\]/)
+  assert.match(
+    classAttribute,
+    /\[--_btn-radius:var\(--rad-button-radius,var\(--rad-control-radius,/
+  )
   assert.match(classAttribute, /\bw-full\b/)
   assert.match(html, /\sdata-slot="button"/)
-  assert.match(html, /\sdata-variant="destructive"/)
-  assert.match(html, /\sdata-size="small"/)
-  assert.doesNotMatch(html, /\s(variant|size|radius|fullwidth|fullWidth|icononly|iconOnly)=/)
+  assert.match(html, /\sdata-variant="solid"/)
+  assert.match(html, /\sdata-control-size="small"/)
+  assert.doesNotMatch(html, /\s(variant|tone|controlSize|fullwidth|fullWidth|icononly|iconOnly)=/)
 })
 
 test('iconOnly squares the button at its size', () => {
   const html = renderToStaticMarkup(
-    createElement(Button, { iconOnly: true, size: 'large', 'aria-label': 'Close' }, 'x')
+    createElement(Button, { iconOnly: true, controlSize: 'large', 'aria-label': 'Close' }, 'x')
   )
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
   assert.match(classAttribute, /\bsize-\(--_btn-h\)/)
@@ -164,7 +199,7 @@ test('links render as native anchors with native attributes intact', () => {
   assert.match(html, /Read the guide/)
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
   assert.match(classAttribute, /\bunderline\b/)
-  assert.doesNotMatch(html, /\s(variant|tone|size|external|render)=/)
+  assert.doesNotMatch(html, /\s(variant|tone|controlSize|external|render)=/)
 })
 
 test('external links gain safe target and rel unless the consumer set them', () => {
@@ -188,20 +223,20 @@ test('button-styled links reuse the Button variant classes', () => {
   const html = renderToStaticMarkup(
     createElement(
       Link,
-      { href: '/delete', variant: 'button', tone: 'destructive', size: 'small' },
+      { href: '/delete', variant: 'solid', tone: 'danger', controlSize: 'small' },
       'Delete space'
     )
   )
   assert.match(html, /^<a\b/)
-  assert.match(html, /\sdata-variant="button"/)
+  assert.match(html, /\sdata-variant="solid"/)
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\[--_btn-bg:var\(--rad-color-danger,/)
+  assert.match(classAttribute, /\[--_action-color:var\(--rad-color-danger,/)
   assert.match(
     classAttribute,
     /\[--_btn-h:var\(--rad-button-height-small,var\(--rad-control-small-height,2rem\)\)\]/
   )
   assert.doesNotMatch(classAttribute, /\bunderline\b/)
-  assert.doesNotMatch(html, /\s(tone|size)=/)
+  assert.doesNotMatch(html, /\s(tone|controlSize)=/)
 })
 
 test('the render prop hands anchor props to a router adapter', () => {

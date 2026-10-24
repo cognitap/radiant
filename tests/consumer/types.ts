@@ -38,6 +38,10 @@ import {
   themes,
   useField,
   type ButtonProps,
+  type ButtonVariant,
+  type LinkVariant,
+  type Tone,
+  type ControlSize,
   type ButtonTheme,
   type CheckboxProps,
   type FieldProps,
@@ -69,9 +73,9 @@ const props: ButtonProps = {
   type: 'submit',
   disabled: true,
   pending: true,
-  variant: 'destructive',
-  size: 'large',
-  radius: 'full',
+  variant: 'solid',
+  tone: 'danger',
+  controlSize: 'large',
   iconOnly: true,
   fullWidth: true,
   'aria-label': 'Save',
@@ -96,17 +100,16 @@ const linkProps: LinkProps = {
   href: '/next',
   target: '_blank',
   download: true,
-  variant: 'button',
-  tone: 'destructive',
-  size: 'small',
-  radius: 'full',
+  variant: 'solid',
+  tone: 'danger',
+  controlSize: 'small',
   external: true,
   ref: createRef<HTMLAnchorElement>()
 }
 createElement(Link, linkProps)
 
 // @ts-expect-error Link variants are a closed set.
-const invalidLinkVariant: LinkProps = { variant: 'solid' }
+const invalidLinkVariant: LinkProps = { variant: 'button' }
 createElement(Link, invalidLinkVariant)
 
 createElement('div', { style: fieldTheme({ gap: '0.5rem', labelWeight: 650 }) })
@@ -218,8 +221,7 @@ createElement(
 
 const dialogTriggerProps: DialogTriggerProps = {
   variant: 'outline',
-  size: 'small',
-  radius: 'full',
+  controlSize: 'small',
   pending: true,
   iconOnly: true,
   fullWidth: true,
@@ -331,3 +333,49 @@ cardTheme({ panel: '1rem' })
 // @ts-expect-error The dialog open attribute is owned by showModal.
 const invalidDialog: DialogContentProps = { open: true }
 createElement(DialogContent, invalidDialog)
+
+// All action axes compose across both native hosts and Dialog actions.
+const actionVariants: ButtonVariant[] = ['solid', 'soft', 'outline', 'ghost']
+const actionTones: Tone[] = ['accent', 'neutral', 'warning', 'danger']
+const controlSizes: ControlSize[] = ['small', 'medium', 'large']
+for (const variant of actionVariants) {
+  for (const tone of actionTones) {
+    for (const controlSize of controlSizes) {
+      createElement(Button, { variant, tone, controlSize, type: 'reset', form: 'profile' })
+      createElement(Link, { variant, tone, controlSize, href: '/guide', download: 'guide.pdf' })
+      createElement(DialogTrigger, { variant, tone, controlSize })
+      createElement(DialogClose, { variant, tone, controlSize })
+    }
+  }
+}
+const linkVariants: LinkVariant[] = [...actionVariants, 'inline', 'subtle']
+for (const variant of linkVariants) createElement(Link, { variant, tone: 'warning' })
+
+// @ts-expect-error Colour names no longer stand for treatment.
+const oldButtonVariant: ButtonProps = { variant: 'primary' }
+// @ts-expect-error Tone is a palette role, not an appearance.
+const appearanceAsTone: LinkProps = { tone: 'outline' }
+// @ts-expect-error Visual sizing has one canonical vocabulary.
+const oldControlSize: ButtonProps = { controlSize: 'default' }
+// @ts-expect-error The old size prop is removed from actions.
+const oldButtonSize: ButtonProps = { size: 'small' }
+// @ts-expect-error The old size prop is removed from anchors too.
+const oldLinkSize: LinkProps = { size: 'small' }
+// @ts-expect-error Radius belongs to theme or local CSS.
+const oldButtonRadius: ButtonProps = { radius: 'full' }
+// @ts-expect-error Radius belongs to theme or local CSS on Link too.
+const oldLinkRadius: LinkProps = { radius: 'full' }
+// @ts-expect-error Replaced with ControlSize.
+import type { ButtonSize } from '@cognitap/radiant'
+// @ts-expect-error Removed in favour of theme or CSS.
+import type { ButtonRadius } from '@cognitap/radiant'
+export type RetiredActionExports = [ButtonSize, ButtonRadius]
+void [
+  oldButtonVariant,
+  appearanceAsTone,
+  oldControlSize,
+  oldButtonSize,
+  oldLinkSize,
+  oldButtonRadius,
+  oldLinkRadius
+]

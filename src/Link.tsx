@@ -1,7 +1,7 @@
 import type { AnchorHTMLAttributes, ComponentProps, CSSProperties, ReactNode } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import type { ButtonRadius, ButtonSize, ButtonVariant } from './Button.js'
-import { actionVariants } from './actionStyles.js'
+import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
+import { actionTone, actionVariants } from './actionStyles.js'
 import { cn } from './cn.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
@@ -18,9 +18,9 @@ const linkVariants = cva(
     variants: {
       variant: {
         inline:
-          '[--_link-color:var(--rad-link-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_link-hover:var(--rad-link-hover-color,color-mix(in_oklch,var(--_link-color),black_18%))] underline [text-decoration-color:color-mix(in_oklch,var(--_link-color),transparent_40%)] [text-decoration-thickness:var(--rad-link-decoration-thickness,0.0625rem)] hover:[text-decoration-thickness:var(--rad-link-decoration-thickness-hover,0.125rem)]',
+          '[--_link-color:var(--rad-link-color,var(--_action-ink))] [--_link-hover:var(--rad-link-hover-color,color-mix(in_oklch,var(--_link-color),black_18%))] underline [text-decoration-color:color-mix(in_oklch,var(--_link-color),transparent_40%)] [text-decoration-thickness:var(--rad-link-decoration-thickness,0.0625rem)] hover:[text-decoration-thickness:var(--rad-link-decoration-thickness-hover,0.125rem)]',
         subtle:
-          '[--_link-color:var(--rad-link-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_link-hover:var(--rad-link-hover-color,var(--rad-color-accent,oklch(0.21_0.006_286)))] no-underline hover:underline [text-decoration-thickness:0.0625rem]'
+          '[--_link-color:var(--rad-link-color,var(--_action-ink))] [--_link-hover:var(--rad-link-hover-color,color-mix(in_oklch,var(--_link-color),black_18%))] no-underline hover:underline [text-decoration-thickness:0.0625rem]'
       }
     },
     defaultVariants: {
@@ -31,19 +31,20 @@ const linkVariants = cva(
 
 type LinkVariants = VariantProps<typeof linkVariants>
 
-export type LinkVariant = NonNullable<LinkVariants['variant']> | 'button'
+export type LinkVariant = NonNullable<LinkVariants['variant']> | ButtonVariant
 
 export type LinkRenderProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   children?: ReactNode
   'data-slot'?: string
   'data-variant'?: string
+  'data-tone'?: string
+  'data-control-size'?: string
 }
 
 export type LinkProps = ComponentProps<'a'> & {
   variant?: LinkVariant
-  tone?: ButtonVariant
-  size?: ButtonSize
-  radius?: ButtonRadius
+  tone?: Tone
+  controlSize?: ControlSize
   external?: boolean
   render?: (props: LinkRenderProps) => ReactNode
 }
@@ -56,9 +57,8 @@ export function linkTheme(theme: LinkTheme): CSSProperties {
 
 export function Link({
   variant = 'inline',
-  tone = 'primary',
-  size,
-  radius,
+  tone = 'accent',
+  controlSize = 'medium',
   external = false,
   render,
   className,
@@ -73,11 +73,13 @@ export function Link({
     target: target ?? (external ? '_blank' : undefined),
     rel: rel ?? (external ? 'noopener noreferrer' : undefined),
     className:
-      variant === 'button'
-        ? cn(actionVariants({ variant: tone, size, radius }), className)
-        : cn(linkVariants({ variant }), className),
+      variant === 'inline' || variant === 'subtle'
+        ? cn(actionTone({ tone }), linkVariants({ variant }), className)
+        : cn(actionVariants({ variant, tone, controlSize }), className),
     'data-slot': 'link',
     'data-variant': variant,
+    'data-tone': tone,
+    'data-control-size': controlSize,
     ...props,
     children
   }

@@ -1,5 +1,24 @@
 import { cva } from 'class-variance-authority'
 
+// Palette and readable ink are shared by action-shaped and text links. Ink is
+// mixed toward the scope foreground so pale warning/accent fills stay readable
+// on an unfilled surface in either mode. Neutral preserves the quiet palette.
+const tones = {
+  accent:
+    '[--_action-color:var(--rad-color-accent,oklch(0.21_0.006_286))] [--_action-on-color:var(--rad-color-accent-foreground,oklch(0.985_0_0))] [--_action-ink:color-mix(in_oklab,var(--_action-color)_25%,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_action-soft:color-mix(in_oklab,var(--_action-color)_12%,var(--rad-color-surface,white))] [--_action-edge:color-mix(in_oklab,var(--_action-ink)_45%,var(--rad-color-border,oklch(0.885_0.005_286)))] [--_action-solid-state:white]',
+  neutral:
+    '[--_action-color:var(--rad-color-neutral,oklch(0.955_0.004_286))] [--_action-on-color:var(--rad-color-neutral-foreground,oklch(0.21_0.006_286))] [--_action-ink:var(--rad-color-neutral-foreground,oklch(0.21_0.006_286))] [--_action-soft:var(--rad-color-neutral,oklch(0.955_0.004_286))] [--_action-edge:var(--rad-color-border,oklch(0.885_0.005_286))] [--_action-solid-state:var(--_action-on-color)]',
+  warning:
+    '[--_action-color:var(--rad-color-warning,oklch(0.8_0.14_78))] [--_action-on-color:var(--rad-color-warning-foreground,oklch(0.3_0.07_55))] [--_action-ink:color-mix(in_oklab,var(--_action-color)_25%,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_action-soft:color-mix(in_oklab,var(--_action-color)_12%,var(--rad-color-surface,white))] [--_action-edge:color-mix(in_oklab,var(--_action-ink)_45%,var(--rad-color-border,oklch(0.885_0.005_286)))] [--_action-solid-state:black]',
+  danger:
+    '[--_action-color:var(--rad-color-danger,oklch(0.56_0.19_25))] [--_action-on-color:var(--rad-color-danger-foreground,oklch(0.99_0_0))] [--_action-ink:color-mix(in_oklab,var(--_action-color)_25%,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_action-soft:color-mix(in_oklab,var(--_action-color)_12%,var(--rad-color-surface,white))] [--_action-edge:color-mix(in_oklab,var(--_action-ink)_45%,var(--rad-color-border,oklch(0.885_0.005_286)))] [--_action-solid-state:black]'
+}
+
+export const actionTone = cva('', {
+  variants: { tone: tones },
+  defaultVariants: { tone: 'accent' }
+})
+
 export const actionVariants = cva(
   [
     'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--rad-button-border-style,var(--rad-control-border-style,solid))] [border-width:var(--rad-button-border-width,var(--rad-control-border-width,1px))] [border-color:var(--rad-button-border-color,var(--_btn-edge))] text-center [font-family:var(--rad-button-font-family,var(--rad-typography-family,system-ui,sans-serif))] [text-transform:var(--rad-button-text-transform,none)] antialiased',
@@ -7,7 +26,7 @@ export const actionVariants = cva(
     'min-h-(--_btn-h) px-(--_btn-px) bg-(--_btn-bg) text-(--_btn-fg)',
     'bg-[linear-gradient(to_bottom,rgb(255_255_255/var(--_btn-sheen)),rgb(255_255_255/0))]',
     '[--_btn-corner:var(--rad-button-corner-shape,var(--rad-control-corner-shape,round))] rounded-(--_btn-radius) [corner-shape:var(--_btn-corner)]',
-    '[--_btn-radius-pressed:var(--rad-button-radius-pressed,var(--_btn-radius))]',
+    '[--_btn-radius:var(--rad-button-radius,var(--rad-control-radius,0.5rem))] [--_btn-radius-pressed:var(--rad-button-radius-pressed,var(--_btn-radius))]',
     '[--_btn-glow:var(--rad-button-glow,0%)] shadow-(--_btn-shadow) inset-shadow-[0_1px_0_0_rgb(255_255_255/var(--_btn-highlight))] [backdrop-filter:var(--rad-button-backdrop,none)]',
     '[--_btn-rd:var(--rad-button-release-duration,var(--rad-motion-release-duration,160ms))] [--_btn-re:var(--rad-button-release-ease,var(--rad-motion-release-ease,cubic-bezier(0.2,0.8,0.2,1)))]',
     '[--_btn-pd:var(--rad-button-press-duration,var(--rad-motion-press-duration,80ms))] [--_btn-pe:var(--rad-button-press-ease,var(--rad-motion-press-ease,cubic-bezier(0.3,0,0,1)))]',
@@ -33,33 +52,22 @@ export const actionVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          '[--_btn-bg:var(--rad-color-accent,oklch(0.21_0.006_286))] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--rad-color-accent-foreground,oklch(0.985_0_0))] [--_btn-hover-state:white] [--_btn-press-state:black] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
-        secondary:
-          '[--_btn-bg:var(--rad-color-neutral,oklch(0.955_0.004_286))] [--_btn-edge:var(--rad-color-border,oklch(0.885_0.005_286))] [--_btn-fg:var(--rad-color-neutral-foreground,oklch(0.21_0.006_286))] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
-        warning:
-          '[--_btn-bg:var(--rad-color-warning,oklch(0.8_0.14_78))] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_12%)] [--_btn-fg:var(--rad-color-warning-foreground,oklch(0.3_0.07_55))] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
-        destructive:
-          '[--_btn-bg:var(--rad-color-danger,oklch(0.56_0.19_25))] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--rad-color-danger-foreground,oklch(0.99_0_0))] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+        solid:
+          '[--_btn-bg:var(--_action-color)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--_action-on-color)] [--_btn-hover-state:var(--_action-solid-state)] [--_btn-press-state:black] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+        soft: '[--_btn-bg:var(--_action-soft)] [--_btn-edge:var(--_action-edge)] [--_btn-fg:var(--_action-ink)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         outline:
-          '[--_btn-bg:var(--rad-color-surface,oklch(1_0_0))] [--_btn-edge:var(--rad-color-border,oklch(0.885_0.005_286))] [--_btn-fg:var(--rad-color-foreground,oklch(0.21_0.006_286))] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+          '[--_btn-bg:var(--rad-color-surface,oklch(1_0_0))] [--_btn-edge:var(--_action-edge)] [--_btn-fg:var(--_action-ink)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         ghost:
-          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--rad-color-foreground,oklch(0.21_0.006_286))] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-ghost-shadow,0_0_#0000)] [--_btn-shadow-pressed:var(--rad-button-ghost-shadow-pressed,0_0_#0000)]'
+          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--_action-ink)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-ghost-shadow,0_0_#0000)] [--_btn-shadow-pressed:var(--rad-button-ghost-shadow-pressed,0_0_#0000)]'
       },
-      size: {
+      tone: tones,
+      controlSize: {
         small:
           '[--_btn-h:var(--rad-button-height-small,var(--rad-control-small-height,2rem))] [--_btn-px:var(--rad-button-padding-small,var(--rad-control-small-padding-inline,0.75rem))] [--_btn-fs:var(--rad-button-font-size-small,var(--rad-control-small-font-size,0.8125rem))] [&_svg]:size-3.5',
-        default:
+        medium:
           '[--_btn-h:var(--rad-button-height,var(--rad-control-medium-height,2.5rem))] [--_btn-px:var(--rad-button-padding,var(--rad-control-medium-padding-inline,1rem))] [--_btn-fs:var(--rad-button-font-size,var(--rad-control-medium-font-size,0.875rem))] [&_svg]:size-4',
         large:
           '[--_btn-h:var(--rad-button-height-large,var(--rad-control-large-height,3rem))] [--_btn-px:var(--rad-button-padding-large,var(--rad-control-large-padding-inline,1.375rem))] [--_btn-fs:var(--rad-button-font-size-large,var(--rad-control-large-font-size,0.9375rem))] [&_svg]:size-[1.125rem]'
-      },
-      radius: {
-        none: '[--_btn-radius:0px]',
-        small: '[--_btn-radius:0.375rem]',
-        default: '[--_btn-radius:var(--rad-button-radius,var(--rad-control-radius,0.5rem))]',
-        large: '[--_btn-radius:1rem]',
-        full: '[--_btn-radius:calc(var(--_btn-h)/2)] [--_btn-corner:round]'
       },
       iconOnly: {
         true: 'size-(--_btn-h) px-0',
@@ -71,9 +79,9 @@ export const actionVariants = cva(
       }
     },
     defaultVariants: {
-      variant: 'primary',
-      size: 'default',
-      radius: 'default',
+      variant: 'solid',
+      tone: 'accent',
+      controlSize: 'medium',
       iconOnly: false,
       fullWidth: false
     }
