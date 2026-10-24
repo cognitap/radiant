@@ -1,8 +1,8 @@
-import type { CSSProperties } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { fn } from 'storybook/test'
+import { expect, fn, waitFor, within } from 'storybook/test'
 import { Button, type ButtonRadius, type ButtonSize, type ButtonVariant } from './Button'
-import { radiantTheme, themes } from './themes/index.js'
+import { ThemeScope } from './ThemeScope.js'
+import { radiant, themes } from './themes/index.js'
 
 const variants: ButtonVariant[] = [
   'primary',
@@ -37,7 +37,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A headless native button. It ships unstyled; a theme of CSS variables gives it a look.'
+          'A native action with shared Radiant styles, theme presets, and local component overrides.'
       }
     }
   },
@@ -46,9 +46,9 @@ const meta = {
       id.endsWith('--design-systems') ? (
         <Story />
       ) : (
-        <div style={radiantTheme}>
+        <ThemeScope theme={radiant}>
           <Story />
-        </div>
+        </ThemeScope>
       )
   ]
 } satisfies Meta<typeof Button>
@@ -162,33 +162,94 @@ export const IconOnly: Story = {
 
 export const ThemedSubtree: Story = {
   render: args => (
-    <div
-      style={
-        {
-          '--color-primary': '#1d4ed8',
-          '--color-primary-foreground': '#fff'
-        } as CSSProperties
-      }
+    <ThemeScope
+      style={{
+        '--rad-color-accent': '#1d4ed8',
+        '--rad-color-accent-foreground': '#fff'
+      }}
     >
       <Button {...args} />
-    </div>
+    </ThemeScope>
   )
 }
 
 export const DesignSystems: Story = {
+  play: async ({ canvasElement }) => {
+    const palettes = {
+      primary: ['accent', 'accent-foreground'],
+      secondary: ['neutral', 'neutral-foreground'],
+      destructive: ['danger', 'danger-foreground'],
+      outline: ['surface', 'foreground'],
+      ghost: [null, 'foreground']
+    } as const
+    const document = canvasElement.ownerDocument
+    const view = document.defaultView!
+    function normalize(property: 'color' | 'background', value: string) {
+      const probe = document.createElement('span')
+      probe.hidden = true
+      probe.style[property] = value
+      document.body.append(probe)
+      try {
+        const styles = view.getComputedStyle(probe)
+        return {
+          color: styles.color,
+          backgroundColor: styles.backgroundColor,
+          backgroundImage: styles.backgroundImage
+        }
+      } finally {
+        probe.remove()
+      }
+    }
+    for (const theme of themes) {
+      const row = within(canvasElement).getByTestId(`theme-${theme.id}`)
+      // Check the real canvas as well as component colors: valid dark colors on
+      // a stale light canvas still make ghost actions and hard shadows disappear.
+      await waitFor(async () => {
+        const styles = view.getComputedStyle(row)
+        const canvas = styles.getPropertyValue('--rad-surface-canvas').trim()
+        await expect(view.CSS.supports('background', canvas)).toBe(true)
+        const expected = normalize('background', canvas)
+        await expect(styles.backgroundColor).toBe(expected.backgroundColor)
+        await expect(styles.backgroundImage).toBe(expected.backgroundImage)
+      })
+      for (const variant of Object.keys(palettes) as Array<keyof typeof palettes>) {
+        const button = within(row).getByRole('button', { name: new RegExp(`^${variant}$`, 'i') })
+        await waitFor(async () => {
+          const styles = view.getComputedStyle(button)
+          const [backgroundRole, foregroundRole] = palettes[variant]
+          const background = backgroundRole
+            ? styles.getPropertyValue(`--rad-color-${backgroundRole}`).trim()
+            : 'transparent'
+          const foreground = styles.getPropertyValue(`--rad-color-${foregroundRole}`).trim()
+          // Missing mode flags concatenate light and dark colors into invalid CSS.
+          await expect(view.CSS.supports('color', background)).toBe(true)
+          await expect(view.CSS.supports('color', foreground)).toBe(true)
+          await expect(styles.color).toBe(normalize('color', foreground).color)
+          if (!button.matches(':hover, :active')) {
+            await expect(styles.backgroundColor).toBe(normalize('color', background).color)
+          }
+          if (theme.id === 'sharp-3d') {
+            const border = normalize('color', styles.getPropertyValue('--rad-color-border')).color
+            await expect(styles.borderTopColor).toBe(border)
+            await expect(styles.boxShadow).toContain('4px 4px 0px')
+          }
+        })
+      }
+    }
+  },
   render: args => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       {themes.map(system => (
-        <div
-          key={system.name}
+        <ThemeScope
+          key={system.id}
+          theme={system}
+          data-testid={`theme-${system.id}`}
           style={{
-            ...system.style,
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
             padding: '1.5rem',
-            borderRadius: '1.25rem',
-            background: system.surface ?? 'oklch(0.985 0.003 250)'
+            borderRadius: '1.25rem'
           }}
         >
           <span style={{ width: '8rem', font: '500 0.8125rem system-ui', opacity: 0.7 }}>
@@ -203,7 +264,7 @@ export const DesignSystems: Story = {
               {variant}
             </Button>
           ))}
-        </div>
+        </ThemeScope>
       ))}
     </div>
   )

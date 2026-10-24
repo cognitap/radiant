@@ -11,7 +11,8 @@ import {
 } from './Dialog'
 import { Field } from './Field'
 import { Input } from './Input'
-import { radiantTheme, themes } from './themes/index.js'
+import { ThemeScope } from './ThemeScope'
+import { radiant, themes } from './themes/index.js'
 
 function ProfileForm() {
   const [summary, setSummary] = useState('No save yet')
@@ -144,9 +145,9 @@ const meta = {
       id.endsWith('--themes') ? (
         <Story />
       ) : (
-        <div style={radiantTheme}>
+        <ThemeScope theme={radiant}>
           <Story />
-        </div>
+        </ThemeScope>
       )
   ]
 } satisfies Meta<typeof Dialog>
@@ -188,21 +189,21 @@ export const Dismissal: Story = {
   render: () => <HeldOpen />
 }
 
-const themeFrame = (surface: string | undefined): CSSProperties => ({
+const themeFrame = (): CSSProperties => ({
   display: 'grid',
   gap: '1rem',
   padding: '1.5rem',
-  borderRadius: '1.25rem',
-  background: surface ?? 'oklch(0.985 0.003 250)'
+  borderRadius: '1.25rem'
 })
 
 export const Themes: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       {themes.map(theme => (
-        <div
-          key={theme.name}
-          style={{ ...theme.style, ...themeFrame(theme.surface) }}
+        <ThemeScope
+          key={theme.id}
+          theme={theme}
+          style={{ ...themeFrame() }}
         >
           <Dialog
             defaultOpen
@@ -216,7 +217,7 @@ export const Themes: Story = {
               <DialogClose>Close</DialogClose>
             </DialogContent>
           </Dialog>
-        </div>
+        </ThemeScope>
       ))}
     </div>
   )

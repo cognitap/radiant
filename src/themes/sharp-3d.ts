@@ -87,6 +87,7 @@ export const sharp = defineTheme({
   },
   components: {
     button: {
+      borderColor: 'var(--rad-color-border)',
       radiusPressed: '0px',
       textTransform: 'uppercase',
       fontWeight: 400,

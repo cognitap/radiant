@@ -4,7 +4,8 @@ import { Button } from './Button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './Collapsible'
 import { Field } from './Field'
 import { Input } from './Input'
-import { radiantTheme, themes } from './themes/index.js'
+import { ThemeScope } from './ThemeScope'
+import { radiant, themes } from './themes/index.js'
 
 function ExclusiveGroup() {
   return (
@@ -95,9 +96,12 @@ const meta = {
       id.endsWith('--themes') ? (
         <Story />
       ) : (
-        <div style={{ ...radiantTheme, width: '24rem' }}>
+        <ThemeScope
+          theme={radiant}
+          style={{ width: '24rem' }}
+        >
           <Story />
-        </div>
+        </ThemeScope>
       )
   ]
 } satisfies Meta<typeof Collapsible>
@@ -147,21 +151,21 @@ export const Controlled: Story = {
   render: () => <HeldOpen />
 }
 
-const themeFrame = (surface: string | undefined): CSSProperties => ({
+const themeFrame = (): CSSProperties => ({
   display: 'grid',
   gap: '1rem',
   padding: '1.5rem',
-  borderRadius: '1.25rem',
-  background: surface ?? 'oklch(0.985 0.003 250)'
+  borderRadius: '1.25rem'
 })
 
 export const Themes: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       {themes.map(theme => (
-        <div
-          key={theme.name}
-          style={{ ...theme.style, ...themeFrame(theme.surface) }}
+        <ThemeScope
+          key={theme.id}
+          theme={theme}
+          style={{ ...themeFrame() }}
         >
           <Collapsible defaultOpen>
             <CollapsibleTrigger>{theme.name}</CollapsibleTrigger>
@@ -169,7 +173,7 @@ export const Themes: Story = {
               Panel surface, radius, and corner from the theme.
             </CollapsibleContent>
           </Collapsible>
-        </div>
+        </ThemeScope>
       ))}
     </div>
   )

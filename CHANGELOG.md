@@ -13,6 +13,9 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 - All eight presets have stable IDs and deliberate light/dark palettes. The
   `themes` registry is readonly; individual presets are exported. Font loading
   remains the application's responsibility, with system fallbacks supplied.
+- Storybook theme frames use `ThemeScope`, keeping canvases, ghost text and
+  shadows in the same mode. Sharp 3D retains its explicit hard borders. The
+  Button comparison story checks its rendered canvases, palettes and shadows.
 - **Migration:** replace `{ name, style }` themes with `defineTheme` and
   `theme.style` wrappers with `ThemeScope`. `Theme.style`, `Theme.surface`, and
   `radiantTheme` remain deprecated compatibility exports. Family theme helpers
