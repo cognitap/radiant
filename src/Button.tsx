@@ -1,32 +1,34 @@
 import type { ComponentProps, CSSProperties, MouseEvent } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 export const buttonVariants = cva(
   [
-    'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--button-border-style,solid)] [border-width:var(--button-border-width,1px)] [border-color:var(--button-border-color,var(--_btn-edge))] text-center [font-family:var(--button-font-family,inherit)] [text-transform:var(--button-text-transform,none)] antialiased',
-    '[font-weight:var(--button-font-weight,550)] [letter-spacing:var(--button-letter-spacing,-0.011em)] [font-size:var(--_btn-fs)]',
+    'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--rad-button-border-style,var(--rad-control-border-style,solid))] [border-width:var(--rad-button-border-width,var(--rad-control-border-width,1px))] [border-color:var(--rad-button-border-color,var(--_btn-edge))] text-center [font-family:var(--rad-button-font-family,var(--rad-typography-family,system-ui,sans-serif))] [text-transform:var(--rad-button-text-transform,none)] antialiased',
+    '[font-weight:var(--rad-button-font-weight,var(--rad-typography-label-weight,550))] [letter-spacing:var(--rad-button-letter-spacing,var(--rad-typography-letter-spacing,-0.011em))] [font-size:var(--_btn-fs)]',
     'min-h-(--_btn-h) px-(--_btn-px) bg-(--_btn-bg) text-(--_btn-fg)',
     'bg-[linear-gradient(to_bottom,rgb(255_255_255/var(--_btn-sheen)),rgb(255_255_255/0))]',
-    '[--_btn-corner:var(--button-corner-shape,round)] rounded-(--_btn-radius) [corner-shape:var(--_btn-corner)]',
-    '[--_btn-radius-pressed:var(--button-radius-pressed,var(--_btn-radius))]',
-    '[--_btn-glow:var(--button-glow,0%)] shadow-(--_btn-shadow) inset-shadow-[0_1px_0_0_rgb(255_255_255/var(--_btn-highlight))] [backdrop-filter:var(--button-backdrop,none)]',
-    '[--_btn-rd:var(--button-release-duration,160ms)] [--_btn-re:var(--button-release-ease,var(--ease-settle))]',
-    '[--_btn-pd:var(--button-press-duration,80ms)] [--_btn-pe:var(--button-press-ease,var(--ease-snap))]',
-    '[--_btn-cd:var(--button-color-duration,150ms)]',
+    '[--_btn-corner:var(--rad-button-corner-shape,var(--rad-control-corner-shape,round))] rounded-(--_btn-radius) [corner-shape:var(--_btn-corner)]',
+    '[--_btn-radius-pressed:var(--rad-button-radius-pressed,var(--_btn-radius))]',
+    '[--_btn-glow:var(--rad-button-glow,0%)] shadow-(--_btn-shadow) inset-shadow-[0_1px_0_0_rgb(255_255_255/var(--_btn-highlight))] [backdrop-filter:var(--rad-button-backdrop,none)]',
+    '[--_btn-rd:var(--rad-button-release-duration,var(--rad-motion-release-duration,160ms))] [--_btn-re:var(--rad-button-release-ease,var(--rad-motion-release-ease,cubic-bezier(0.2,0.8,0.2,1)))]',
+    '[--_btn-pd:var(--rad-button-press-duration,var(--rad-motion-press-duration,80ms))] [--_btn-pe:var(--rad-button-press-ease,var(--rad-motion-press-ease,cubic-bezier(0.3,0,0,1)))]',
+    '[--_btn-cd:var(--rad-button-color-duration,var(--rad-motion-color-duration,150ms))]',
     'cursor-pointer transition-[scale,translate,border-radius,corner-shape,box-shadow,background-color,color]',
     'duration-[var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-rd),var(--_btn-cd),var(--_btn-cd),var(--_btn-cd)]',
     'ease-[var(--_btn-re),var(--_btn-re),var(--_btn-re),var(--_btn-re),ease-out,ease-out,ease-out]',
     'active:duration-[var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd),var(--_btn-pd)]',
     'active:ease-[var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe),var(--_btn-pe)]',
-    'enabled:not-aria-busy:hover:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-hover-state))_var(--button-hover-layer,5%))]',
-    'enabled:not-aria-busy:motion-safe:hover:translate-y-[var(--button-hover-lift,0px)]',
-    'enabled:not-aria-busy:active:bg-[color-mix(in_oklch,var(--_btn-bg),var(--button-state-color,var(--_btn-press-state))_var(--button-press-layer,8%))]',
-    'enabled:not-aria-busy:motion-safe:active:scale-[var(--button-press-scale,0.97)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--button-press-shift,0px)] enabled:not-aria-busy:motion-safe:active:translate-x-[var(--button-press-shift-x,0px)]',
-    'enabled:not-aria-busy:active:rounded-(--_btn-radius-pressed) enabled:not-aria-busy:active:[corner-shape:var(--button-corner-shape-pressed,var(--_btn-corner))]',
-    'enabled:not-aria-busy:active:[--_btn-highlight:0] enabled:not-aria-busy:active:[--_btn-sheen:0] enabled:not-aria-busy:active:shadow-[var(--button-shadow-pressed,var(--_btn-shadow-pressed))]',
-    'focus-visible:outline-solid focus-visible:[outline-color:var(--color-focus)] focus-visible:[outline-width:var(--button-focus-width,2px)] focus-visible:[outline-offset:var(--button-focus-offset,2px)] focus-visible:[outline-style:var(--button-focus-style,solid)]',
-    'disabled:cursor-not-allowed disabled:opacity-[var(--button-disabled-opacity,0.5)]',
+    'enabled:not-aria-busy:hover:bg-[color-mix(in_oklch,var(--_btn-bg),var(--rad-button-state-color,var(--_btn-hover-state))_var(--rad-button-hover-layer,5%))]',
+    'enabled:not-aria-busy:motion-safe:hover:translate-y-[var(--rad-button-hover-lift,0px)]',
+    'enabled:not-aria-busy:active:bg-[color-mix(in_oklch,var(--_btn-bg),var(--rad-button-state-color,var(--_btn-press-state))_var(--rad-button-press-layer,8%))]',
+    'enabled:not-aria-busy:motion-safe:active:scale-[var(--rad-button-press-scale,0.97)] enabled:not-aria-busy:motion-safe:active:translate-y-[var(--rad-button-press-shift,0px)] enabled:not-aria-busy:motion-safe:active:translate-x-[var(--rad-button-press-shift-x,0px)]',
+    'enabled:not-aria-busy:active:rounded-(--_btn-radius-pressed) enabled:not-aria-busy:active:[corner-shape:var(--rad-button-corner-shape-pressed,var(--_btn-corner))]',
+    'enabled:not-aria-busy:active:[--_btn-highlight:0] enabled:not-aria-busy:active:[--_btn-sheen:0] enabled:not-aria-busy:active:shadow-[var(--rad-button-shadow-pressed,var(--_btn-shadow-pressed))]',
+    'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-button-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-button-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-button-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-button-focus-style,var(--rad-focus-style,solid))]',
+    'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1]',
+    'disabled:cursor-not-allowed disabled:opacity-[var(--_rad-disabled-opacity,var(--rad-button-disabled-opacity,var(--rad-state-disabled-opacity,0.5)))]',
     'aria-busy:cursor-progress',
     'motion-reduce:transition-[background-color,color]',
     'forced-colors:border-[ButtonText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:text-[GrayText] forced-colors:disabled:opacity-100'
@@ -35,30 +37,30 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          '[--_btn-bg:var(--color-primary)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--color-primary-foreground)] [--_btn-hover-state:white] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+          '[--_btn-bg:var(--rad-color-accent,oklch(0.21_0.006_286))] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--rad-color-accent-foreground,oklch(0.985_0_0))] [--_btn-hover-state:white] [--_btn-press-state:black] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         secondary:
-          '[--_btn-bg:var(--color-secondary)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-secondary-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+          '[--_btn-bg:var(--rad-color-neutral,oklch(0.955_0.004_286))] [--_btn-edge:var(--rad-color-border,oklch(0.885_0.005_286))] [--_btn-fg:var(--rad-color-neutral-foreground,oklch(0.21_0.006_286))] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         warning:
-          '[--_btn-bg:var(--color-warning)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_12%)] [--_btn-fg:var(--color-warning-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+          '[--_btn-bg:var(--rad-color-warning,oklch(0.8_0.14_78))] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_12%)] [--_btn-fg:var(--rad-color-warning-foreground,oklch(0.3_0.07_55))] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         destructive:
-          '[--_btn-bg:var(--color-destructive)] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--color-destructive-foreground)] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+          '[--_btn-bg:var(--rad-color-danger,oklch(0.56_0.19_25))] [--_btn-edge:color-mix(in_oklch,var(--_btn-bg),black_16%)] [--_btn-fg:var(--rad-color-danger-foreground,oklch(0.99_0_0))] [--_btn-hover-state:black] [--_btn-press-state:black] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06)),0_10px_26px_-10px_color-mix(in_oklch,var(--_btn-bg)_var(--_btn-glow),transparent)] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         outline:
-          '[--_btn-bg:var(--color-background)] [--_btn-edge:var(--color-border)] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
+          '[--_btn-bg:var(--rad-color-surface,oklch(1_0_0))] [--_btn-edge:var(--rad-color-border,oklch(0.885_0.005_286))] [--_btn-fg:var(--rad-color-foreground,oklch(0.21_0.006_286))] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-shadow,0_1px_2px_0_rgb(0_0_0/0.06))] [--_btn-shadow-pressed:var(--rad-button-shadow-pressed,0_1px_2px_0_rgb(0_0_0/0.06))]',
         ghost:
-          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--color-foreground)] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--button-sheen,0)] [--_btn-highlight:var(--button-highlight,0)] [--_btn-shadow:var(--button-ghost-shadow,0_0_#0000)] [--_btn-shadow-pressed:var(--button-ghost-shadow-pressed,0_0_#0000)]'
+          '[--_btn-bg:transparent] [--_btn-edge:transparent] [--_btn-fg:var(--rad-color-foreground,oklch(0.21_0.006_286))] [--_btn-hover-state:var(--_btn-fg)] [--_btn-press-state:var(--_btn-fg)] [--_btn-sheen:var(--rad-button-sheen,0)] [--_btn-highlight:var(--rad-button-highlight,0)] [--_btn-shadow:var(--rad-button-ghost-shadow,0_0_#0000)] [--_btn-shadow-pressed:var(--rad-button-ghost-shadow-pressed,0_0_#0000)]'
       },
       size: {
         small:
-          '[--_btn-h:var(--button-height-small,2rem)] [--_btn-px:var(--button-padding-small,0.75rem)] [--_btn-fs:var(--button-font-size-small,0.8125rem)] [&_svg]:size-3.5',
+          '[--_btn-h:var(--rad-button-height-small,var(--rad-control-small-height,2rem))] [--_btn-px:var(--rad-button-padding-small,var(--rad-control-small-padding-inline,0.75rem))] [--_btn-fs:var(--rad-button-font-size-small,var(--rad-control-small-font-size,0.8125rem))] [&_svg]:size-3.5',
         default:
-          '[--_btn-h:var(--button-height,2.5rem)] [--_btn-px:var(--button-padding,1rem)] [--_btn-fs:var(--button-font-size,0.875rem)] [&_svg]:size-4',
+          '[--_btn-h:var(--rad-button-height,var(--rad-control-medium-height,2.5rem))] [--_btn-px:var(--rad-button-padding,var(--rad-control-medium-padding-inline,1rem))] [--_btn-fs:var(--rad-button-font-size,var(--rad-control-medium-font-size,0.875rem))] [&_svg]:size-4',
         large:
-          '[--_btn-h:var(--button-height-large,3rem)] [--_btn-px:var(--button-padding-large,1.375rem)] [--_btn-fs:var(--button-font-size-large,0.9375rem)] [&_svg]:size-[1.125rem]'
+          '[--_btn-h:var(--rad-button-height-large,var(--rad-control-large-height,3rem))] [--_btn-px:var(--rad-button-padding-large,var(--rad-control-large-padding-inline,1.375rem))] [--_btn-fs:var(--rad-button-font-size-large,var(--rad-control-large-font-size,0.9375rem))] [&_svg]:size-[1.125rem]'
       },
       radius: {
         none: '[--_btn-radius:0px]',
         small: '[--_btn-radius:0.375rem]',
-        default: '[--_btn-radius:var(--button-radius,var(--radius-control))]',
+        default: '[--_btn-radius:var(--rad-button-radius,var(--rad-control-radius,0.5rem))]',
         large: '[--_btn-radius:1rem]',
         full: '[--_btn-radius:calc(var(--_btn-h)/2)] [--_btn-corner:round]'
       },
@@ -96,112 +98,13 @@ export type ButtonProps = ComponentProps<'button'> & {
   pending?: boolean
 }
 
-export type ButtonTheme = {
-  radius?: string
-  radiusPressed?: string
-  cornerShape?: string
-  cornerShapePressed?: string
-  height?: string
-  heightSmall?: string
-  heightLarge?: string
-  padding?: string
-  paddingSmall?: string
-  paddingLarge?: string
-  fontSize?: string
-  fontSizeSmall?: string
-  fontSizeLarge?: string
-  fontWeight?: string | number
-  letterSpacing?: string
-  shadow?: string
-  shadowPressed?: string
-  highlight?: number
-  sheen?: number
-  glow?: string
+export type ButtonTheme = NonNullable<ThemeComponentOverrides['button']> & {
+  /** @deprecated This legacy setting has no rendering effect. */
   glowHover?: string
-  backdrop?: string
-  stateColor?: string
-  hoverLayer?: string
-  pressLayer?: string
-  hoverLift?: string
-  pressScale?: number
-  pressShift?: string
-  pressShiftX?: string
-  borderWidth?: string
-  borderColor?: string
-  ghostShadow?: string
-  ghostShadowPressed?: string
-  focusColor?: string
-  fontFamily?: string
-  textTransform?: string
-  borderStyle?: string
-  focusWidth?: string
-  focusOffset?: string
-  focusStyle?: string
-  pressDuration?: string
-  pressEase?: string
-  releaseDuration?: string
-  releaseEase?: string
-  colorDuration?: string
-  disabledOpacity?: number
-}
-
-const buttonThemeVariables: Record<keyof ButtonTheme, string> = {
-  radius: '--button-radius',
-  radiusPressed: '--button-radius-pressed',
-  cornerShape: '--button-corner-shape',
-  cornerShapePressed: '--button-corner-shape-pressed',
-  height: '--button-height',
-  heightSmall: '--button-height-small',
-  heightLarge: '--button-height-large',
-  padding: '--button-padding',
-  paddingSmall: '--button-padding-small',
-  paddingLarge: '--button-padding-large',
-  fontSize: '--button-font-size',
-  fontSizeSmall: '--button-font-size-small',
-  fontSizeLarge: '--button-font-size-large',
-  fontWeight: '--button-font-weight',
-  letterSpacing: '--button-letter-spacing',
-  shadow: '--button-shadow',
-  shadowPressed: '--button-shadow-pressed',
-  highlight: '--button-highlight',
-  sheen: '--button-sheen',
-  glow: '--button-glow',
-  glowHover: '--button-glow-hover',
-  backdrop: '--button-backdrop',
-  stateColor: '--button-state-color',
-  hoverLayer: '--button-hover-layer',
-  pressLayer: '--button-press-layer',
-  hoverLift: '--button-hover-lift',
-  pressScale: '--button-press-scale',
-  pressShift: '--button-press-shift',
-  pressShiftX: '--button-press-shift-x',
-  borderWidth: '--button-border-width',
-  borderColor: '--button-border-color',
-  ghostShadow: '--button-ghost-shadow',
-  ghostShadowPressed: '--button-ghost-shadow-pressed',
-  focusColor: '--color-focus',
-  fontFamily: '--button-font-family',
-  textTransform: '--button-text-transform',
-  borderStyle: '--button-border-style',
-  focusWidth: '--button-focus-width',
-  focusOffset: '--button-focus-offset',
-  focusStyle: '--button-focus-style',
-  pressDuration: '--button-press-duration',
-  pressEase: '--button-press-ease',
-  releaseDuration: '--button-release-duration',
-  releaseEase: '--button-release-ease',
-  colorDuration: '--button-color-duration',
-  disabledOpacity: '--button-disabled-opacity'
 }
 
 export function buttonTheme(theme: ButtonTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) {
-      style[buttonThemeVariables[key as keyof ButtonTheme]] = value
-    }
-  }
-  return style as CSSProperties
+  return flattenComponents({ button: theme }) as CSSProperties
 }
 
 export function Button({

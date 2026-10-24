@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 import { Field } from './Field'
 import { Input } from './Input'
-import { radiantTheme, themes } from './themes/index.js'
+import { ThemeScope } from './ThemeScope'
+import { radiant, themes } from './themes/index.js'
 
 function NativeForm() {
   const [error, setError] = useState<string | undefined>()
@@ -87,9 +88,12 @@ const meta = {
       id.endsWith('--themes') ? (
         <Story />
       ) : (
-        <div style={{ ...radiantTheme, maxWidth: '20rem' }}>
+        <ThemeScope
+          theme={radiant}
+          style={{ maxWidth: '20rem' }}
+        >
           <Story />
-        </div>
+        </ThemeScope>
       )
   ]
 } satisfies Meta<typeof Input>
@@ -138,21 +142,21 @@ export const ControlledStory: Story = {
   render: () => <Controlled />
 }
 
-const themeFrame = (surface: string | undefined): CSSProperties => ({
+const themeFrame = (): CSSProperties => ({
   display: 'grid',
   gap: '0.75rem',
   padding: '1.5rem',
-  borderRadius: '1.25rem',
-  background: surface ?? 'oklch(0.985 0.003 250)'
+  borderRadius: '1.25rem'
 })
 
 export const Themes: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       {themes.map(theme => (
-        <div
-          key={theme.name}
-          style={{ ...theme.style, ...themeFrame(theme.surface) }}
+        <ThemeScope
+          key={theme.id}
+          theme={theme}
+          style={{ ...themeFrame() }}
         >
           <span style={{ font: '500 0.8125rem system-ui', opacity: 0.7 }}>{theme.name}</span>
           <Field
@@ -167,7 +171,7 @@ export const Themes: Story = {
               type="email"
             />
           </Field>
-        </div>
+        </ThemeScope>
       ))}
     </div>
   )

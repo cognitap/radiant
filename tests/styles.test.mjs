@@ -30,21 +30,27 @@ test('the customization entry generates library and application utilities once w
 test('the compiled stylesheet includes focus, disabled, and forced-colors rules', () => {
   const css = readFileSync(new URL('../dist/library/styles.css', import.meta.url), 'utf8')
 
-  assert.match(css, /:focus-visible\s*\{[^}]*outline-color:\s*var\(\s*--color-focus\s*\)/)
-  assert.match(css, /:disabled\s*\{[^}]*opacity:\s*var\(--button-disabled-opacity/)
+  assert.match(
+    css,
+    /:focus-visible\s*\{[^}]*outline-color:\s*var\(--rad-button-focus-color,var\(--rad-color-focus/
+  )
+  assert.match(
+    css,
+    /:disabled\s*\{[^}]*opacity:\s*var\(--_rad-disabled-opacity,var\(--rad-button-disabled-opacity/
+  )
   assert.match(css, /:enabled:not\(\[aria-busy=true\]\):hover/)
-  assert.match(css, /--_btn-pe:\s*var\(--button-press-ease/)
+  assert.match(css, /--_btn-pe:\s*var\(--rad-button-press-ease/)
   assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--_btn-pe\)/)
   assert.match(css, /--ease-spring:\s*linear\(/)
-  assert.match(css, /--field-gap/)
-  assert.match(css, /--input-height/)
-  assert.match(css, /--checkbox-size/)
-  assert.match(css, /--radio-size/)
-  assert.match(css, /--dialog-width/)
-  assert.match(css, /--collapsible-radius/)
-  assert.match(css, /--accordion-gap/)
-  assert.match(css, /--card-radius/)
-  const pressScale = css.match(/([^{}]*)\{scale:var\(--button-press-scale/g) ?? []
+  assert.match(css, /--rad-field-gap/)
+  assert.match(css, /--rad-input-height/)
+  assert.match(css, /--rad-checkbox-size/)
+  assert.match(css, /--rad-radio-size/)
+  assert.match(css, /--rad-dialog-width/)
+  assert.match(css, /--rad-collapsible-radius/)
+  assert.match(css, /--rad-accordion-gap/)
+  assert.match(css, /--rad-card-radius/)
+  const pressScale = css.match(/([^{}]*)\{scale:var\(--rad-button-press-scale/g) ?? []
   assert.equal(pressScale.length, 1, 'Expected one press scale rule')
   assert.match(pressScale[0], /motion-safe/)
   const motionSafe = css.indexOf('@media (prefers-reduced-motion:no-preference)')

@@ -2,11 +2,15 @@ import { cloneElement, createContext, isValidElement, useContext, useId } from '
 import type { ComponentProps, CSSProperties, ReactElement, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const fieldVariants = cva(
   [
-    'grid min-w-0 [gap:var(--field-gap,0.375rem)]',
-    'data-[disabled]:opacity-[var(--field-disabled-opacity,0.5)]',
+    '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
+    'grid min-w-0 [gap:var(--rad-field-gap,var(--rad-spacing-field-gap,0.375rem))]',
+    // A disabled Field dims its visual unit; descendants must not dim it again.
+    'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1]',
+    'data-[disabled]:opacity-[var(--_rad-disabled-opacity,var(--rad-field-disabled-opacity,var(--rad-state-disabled-opacity,0.5)))]',
     'forced-colors:data-[disabled]:text-[GrayText] forced-colors:data-[disabled]:opacity-100'
   ],
   {
@@ -21,16 +25,16 @@ const fieldVariants = cva(
 )
 
 const labelClass =
-  'min-w-0 break-words p-0 [color:var(--field-label-color,var(--color-foreground))] [font-size:var(--field-label-size,0.875rem)] [font-weight:var(--field-label-weight,550)] leading-snug forced-colors:text-[CanvasText]'
+  'min-w-0 break-words p-0 [color:var(--rad-field-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-field-label-size,var(--rad-typography-body-size,0.875rem))] [font-weight:var(--rad-field-label-weight,var(--rad-typography-label-weight,550))] leading-snug forced-colors:text-[CanvasText]'
 
 const descriptionClass =
-  'min-w-0 break-words [color:var(--field-description-color,color-mix(in_oklch,var(--color-foreground),transparent_35%))] [font-size:var(--field-description-size,0.8125rem)] leading-snug forced-colors:text-[CanvasText]'
+  'min-w-0 break-words [color:var(--rad-field-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] [font-size:var(--rad-field-description-size,var(--rad-typography-small-size,0.8125rem))] leading-snug forced-colors:text-[CanvasText]'
 
 const errorClass =
-  'min-w-0 break-words [color:var(--field-error-color,var(--color-destructive))] [font-size:var(--field-error-size,0.8125rem)] leading-snug forced-colors:text-[CanvasText]'
+  'min-w-0 break-words [color:var(--rad-field-error-color,var(--rad-color-invalid,oklch(0.56_0.19_25)))] [font-size:var(--rad-field-error-size,var(--rad-typography-small-size,0.8125rem))] leading-snug forced-colors:text-[CanvasText]'
 
 const requiredClass =
-  'ms-[0.25em] [color:var(--field-required-color,var(--color-destructive))] forced-colors:text-[CanvasText]'
+  'ms-[0.25em] [color:var(--rad-field-required-color,var(--rad-color-invalid,oklch(0.56_0.19_25)))] forced-colors:text-[CanvasText]'
 
 export type FieldLayout = 'control' | 'group'
 
@@ -56,18 +60,7 @@ export type FieldState = {
   controlProps: FieldControlProps | null
 }
 
-export type FieldTheme = {
-  gap?: string
-  labelColor?: string
-  labelSize?: string
-  labelWeight?: string | number
-  descriptionColor?: string
-  descriptionSize?: string
-  errorColor?: string
-  errorSize?: string
-  requiredColor?: string
-  disabledOpacity?: number
-}
+export type FieldTheme = NonNullable<ThemeComponentOverrides['field']>
 
 type FieldOwn = {
   label: ReactNode
@@ -93,19 +86,6 @@ type HostProps = {
   'aria-describedby'?: string
 }
 
-const fieldThemeVariables: Record<keyof FieldTheme, string> = {
-  gap: '--field-gap',
-  labelColor: '--field-label-color',
-  labelSize: '--field-label-size',
-  labelWeight: '--field-label-weight',
-  descriptionColor: '--field-description-color',
-  descriptionSize: '--field-description-size',
-  errorColor: '--field-error-color',
-  errorSize: '--field-error-size',
-  requiredColor: '--field-required-color',
-  disabledOpacity: '--field-disabled-opacity'
-}
-
 const FieldContext = createContext<FieldState | null>(null)
 
 export function useField(): FieldState | null {
@@ -113,11 +93,7 @@ export function useField(): FieldState | null {
 }
 
 export function fieldTheme(theme: FieldTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) style[fieldThemeVariables[key as keyof FieldTheme]] = value
-  }
-  return style as CSSProperties
+  return flattenComponents({ field: theme }) as CSSProperties
 }
 
 function hasContent(value: ReactNode) {

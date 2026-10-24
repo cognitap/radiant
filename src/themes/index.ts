@@ -8,10 +8,20 @@ import { jelly } from './jelly.js'
 import { ticket } from './ticket.js'
 import type { Theme } from './types.js'
 
-export type { Theme } from './types.js'
-export { radiantTheme }
+export type {
+  SharedTokens,
+  Theme,
+  ThemeComponentOverrides,
+  ThemeDefinition,
+  ThemeLayer,
+  ThemeMode,
+  ThemeStyle,
+  ThemeTokens
+} from './types.js'
+export { defineTheme } from './defineTheme.js'
+export { radiantTheme, radiant, defaultTheme, soft, expressive, glass, sharp, jelly, ticket }
 
-export const themes: Theme[] = [
+export const themes: readonly Theme[] = Object.freeze([
   radiant,
   defaultTheme,
   soft,
@@ -20,4 +30,4 @@ export const themes: Theme[] = [
   sharp,
   jelly,
   ticket
-]
+])

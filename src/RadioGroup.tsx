@@ -2,93 +2,49 @@ import { createContext, useContext } from 'react'
 import type { ChangeEvent, ComponentProps, CSSProperties, ReactNode, Ref } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { Field, useField } from './Field.js'
 import type { FieldProps } from './Field.js'
 
 const radioVariants = cva([
   'peer col-start-1 row-start-1 m-0 box-border appearance-none',
-  'size-[var(--radio-size,1.5rem)]',
-  'rounded-[var(--radio-radius,999px)]',
-  '[corner-shape:var(--radio-corner-shape,unset)]',
-  '[border-width:var(--radio-border-width,var(--button-border-width,1px))]',
-  '[border-style:var(--radio-border-style,var(--button-border-style,solid))]',
-  '[border-color:var(--radio-border-color,var(--button-border-color,var(--color-border)))]',
-  'bg-[var(--radio-background,var(--color-background))]',
-  'checked:bg-[var(--radio-checked-background,var(--color-primary))]',
-  'checked:[border-color:var(--radio-checked-border,var(--radio-checked-background,var(--color-primary)))]',
-  'data-invalid:[border-color:var(--radio-invalid-border,var(--color-destructive))]',
-  'in-data-invalid:[border-color:var(--radio-invalid-border,var(--color-destructive))]',
+  'size-[var(--rad-radio-size,var(--rad-control-medium-indicator-size,1.125rem))]',
+  'rounded-[var(--rad-radio-radius,999px)]',
+  '[corner-shape:var(--rad-radio-corner-shape,unset)]',
+  '[border-width:var(--rad-radio-border-width,var(--rad-control-border-width,1px))]',
+  '[border-style:var(--rad-radio-border-style,var(--rad-control-border-style,solid))]',
+  '[border-color:var(--rad-radio-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+  'bg-[var(--rad-radio-background,var(--rad-color-surface,oklch(1_0_0)))]',
+  'checked:bg-[var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
+  'checked:[border-color:var(--rad-radio-checked-border,var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  'data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'in-data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--radio-focus-color,var(--input-focus-color,var(--button-focus-color,var(--color-focus))))]',
-  'focus-visible:[outline-width:var(--radio-focus-width,var(--input-focus-width,var(--button-focus-width,2px)))]',
-  'focus-visible:[outline-offset:var(--radio-focus-offset,var(--input-focus-offset,var(--button-focus-offset,2px)))]',
-  'focus-visible:[outline-style:var(--radio-focus-style,var(--input-focus-style,var(--button-focus-style,solid)))]',
+  'focus-visible:[outline-color:var(--rad-radio-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
+  'focus-visible:[outline-width:var(--rad-radio-focus-width,var(--rad-focus-width,2px))]',
+  'focus-visible:[outline-offset:var(--rad-radio-focus-offset,var(--rad-focus-offset,2px))]',
+  'focus-visible:[outline-style:var(--rad-radio-focus-style,var(--rad-focus-style,solid))]',
   'disabled:cursor-not-allowed',
-  'disabled:[border-color:var(--radio-disabled-border,color-mix(in_oklch,var(--color-foreground),transparent_70%))]',
-  'disabled:checked:bg-[var(--radio-disabled-background,color-mix(in_oklch,var(--color-foreground),transparent_70%))]',
+  'disabled:[border-color:var(--rad-radio-disabled-border,var(--rad-color-disabled-border,oklch(0.88_0.005_286)))]',
+  'disabled:checked:bg-[var(--rad-radio-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText]',
   'forced-colors:checked:bg-[Highlight]',
   'forced-colors:disabled:border-[GrayText] forced-colors:disabled:bg-[Canvas]'
 ])
 
 const dotClass =
-  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--radio-size,1.5rem)*0.4)] self-center justify-self-center rounded-[var(--radio-radius,999px)] bg-[var(--radio-mark,var(--color-primary-foreground))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText]'
+  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--rad-radio-size,var(--rad-control-medium-indicator-size,1.125rem))*0.4)] self-center justify-self-center rounded-[var(--rad-radio-radius,999px)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText]'
 
 const rowClass =
-  'inline-flex min-h-6 cursor-pointer items-center gap-[var(--radio-label-gap,0.5rem)] select-none has-disabled:cursor-not-allowed'
+  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-weight:var(--rad-typography-body-weight,400)] inline-flex min-h-6 cursor-pointer items-center gap-[var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 
 const labelClass =
-  'leading-snug [color:var(--radio-label-color,var(--color-foreground))] [font-size:var(--radio-label-size,0.875rem)]'
+  'leading-snug [color:var(--rad-radio-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-radio-label-size,var(--rad-typography-body-size,0.875rem))]'
 
-const optionsClass = 'grid justify-items-start gap-[var(--radio-gap,0.5rem)]'
+const optionsClass =
+  'grid justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
 
-export type RadioTheme = {
-  size?: string
-  radius?: string
-  cornerShape?: string
-  borderWidth?: string
-  borderStyle?: string
-  borderColor?: string
-  background?: string
-  checkedBackground?: string
-  checkedBorder?: string
-  mark?: string
-  invalidBorder?: string
-  gap?: string
-  labelGap?: string
-  labelColor?: string
-  labelSize?: string
-  disabledBorder?: string
-  disabledBackground?: string
-  focusColor?: string
-  focusWidth?: string
-  focusOffset?: string
-  focusStyle?: string
-}
-
-const radioThemeVariables: Record<keyof RadioTheme, string> = {
-  size: '--radio-size',
-  radius: '--radio-radius',
-  cornerShape: '--radio-corner-shape',
-  borderWidth: '--radio-border-width',
-  borderStyle: '--radio-border-style',
-  borderColor: '--radio-border-color',
-  background: '--radio-background',
-  checkedBackground: '--radio-checked-background',
-  checkedBorder: '--radio-checked-border',
-  mark: '--radio-mark',
-  invalidBorder: '--radio-invalid-border',
-  gap: '--radio-gap',
-  labelGap: '--radio-label-gap',
-  labelColor: '--radio-label-color',
-  labelSize: '--radio-label-size',
-  disabledBorder: '--radio-disabled-border',
-  disabledBackground: '--radio-disabled-background',
-  focusColor: '--radio-focus-color',
-  focusWidth: '--radio-focus-width',
-  focusOffset: '--radio-focus-offset',
-  focusStyle: '--radio-focus-style'
-}
+export type RadioTheme = NonNullable<ThemeComponentOverrides['radio']> & { gap?: string }
 
 type RadioGroupContextValue = {
   name: string
@@ -132,11 +88,8 @@ function assignRefs<T>(node: T | null, ...refs: Array<Ref<T> | undefined>) {
 }
 
 export function radioTheme(theme: RadioTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) style[radioThemeVariables[key as keyof RadioTheme]] = value
-  }
-  return style as CSSProperties
+  const { gap, ...radio } = theme
+  return flattenComponents({ radio, radioGroup: { gap } }) as CSSProperties
 }
 
 export function RadioGroup({

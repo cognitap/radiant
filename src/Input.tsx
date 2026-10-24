@@ -1,83 +1,40 @@
 import type { ComponentProps, CSSProperties } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { useField } from './Field.js'
 
 const inputVariants = cva([
   'box-border w-full min-w-0',
-  'h-[var(--input-height,var(--button-height,2.5rem))]',
-  'px-[var(--input-padding,var(--button-padding,0.75rem))]',
-  '[font-family:var(--input-font-family,var(--button-font-family,inherit))]',
-  '[font-size:var(--input-font-size,var(--button-font-size,0.875rem))]',
-  '[font-weight:var(--input-font-weight,400)]',
-  '[color:var(--input-color,var(--color-foreground))]',
-  'bg-[var(--input-background,var(--color-background))]',
-  '[border-width:var(--input-border-width,var(--button-border-width,1px))]',
-  '[border-style:var(--input-border-style,var(--button-border-style,solid))]',
-  '[border-color:var(--input-border-color,var(--button-border-color,var(--color-border)))]',
-  'rounded-[var(--input-radius,var(--button-radius,var(--radius-control)))]',
-  '[corner-shape:var(--input-corner-shape,var(--button-corner-shape,unset))]',
-  '[box-shadow:var(--input-shadow,none)]',
-  'placeholder:[color:var(--input-placeholder,color-mix(in_oklch,var(--color-foreground),transparent_55%))]',
+  'h-[var(--rad-input-height,var(--rad-control-medium-height,2.5rem))]',
+  'px-[var(--rad-input-padding,var(--rad-control-medium-padding-inline,1rem))]',
+  '[font-family:var(--rad-input-font-family,var(--rad-typography-family,system-ui,sans-serif))] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)]',
+  '[font-size:var(--rad-input-font-size,var(--rad-control-medium-font-size,0.875rem))]',
+  '[font-weight:var(--rad-input-font-weight,var(--rad-typography-body-weight,400))]',
+  '[color:var(--rad-input-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
+  'bg-[var(--rad-input-background,var(--rad-color-surface,oklch(1_0_0)))]',
+  '[border-width:var(--rad-input-border-width,var(--rad-control-border-width,1px))]',
+  '[border-style:var(--rad-input-border-style,var(--rad-control-border-style,solid))]',
+  '[border-color:var(--rad-input-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+  'rounded-[var(--rad-input-radius,var(--rad-control-radius,0.5rem))]',
+  '[corner-shape:var(--rad-input-corner-shape,var(--rad-control-corner-shape,round))]',
+  '[box-shadow:var(--rad-input-shadow,none)]',
+  'placeholder:[color:var(--rad-input-placeholder,var(--rad-color-placeholder,oklch(0.5_0.01_286)))]',
   'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--input-focus-color,var(--button-focus-color,var(--color-focus)))]',
-  'focus-visible:[outline-width:var(--input-focus-width,var(--button-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--input-focus-offset,var(--button-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--input-focus-style,var(--button-focus-style,solid))]',
-  'aria-invalid:[border-color:var(--input-invalid-border,var(--color-destructive))]',
+  'focus-visible:[outline-color:var(--rad-input-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
+  'focus-visible:[outline-width:var(--rad-input-focus-width,var(--rad-focus-width,2px))]',
+  'focus-visible:[outline-offset:var(--rad-input-focus-offset,var(--rad-focus-offset,2px))]',
+  'focus-visible:[outline-style:var(--rad-input-focus-style,var(--rad-focus-style,solid))]',
+  'aria-invalid:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'disabled:cursor-not-allowed',
-  'disabled:[background:var(--input-disabled-background,color-mix(in_oklch,var(--color-foreground),transparent_94%))]',
+  'disabled:[background:var(--rad-input-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText] forced-colors:text-[CanvasText]',
   'forced-colors:disabled:bg-[Canvas] forced-colors:disabled:text-[GrayText]'
 ])
 
 export type InputProps = ComponentProps<'input'>
 
-export type InputTheme = {
-  height?: string
-  padding?: string
-  fontFamily?: string
-  fontSize?: string
-  fontWeight?: string | number
-  color?: string
-  background?: string
-  borderWidth?: string
-  borderStyle?: string
-  borderColor?: string
-  radius?: string
-  cornerShape?: string
-  shadow?: string
-  placeholder?: string
-  invalidBorder?: string
-  disabledBackground?: string
-  focusColor?: string
-  focusWidth?: string
-  focusOffset?: string
-  focusStyle?: string
-}
-
-const inputThemeVariables: Record<keyof InputTheme, string> = {
-  height: '--input-height',
-  padding: '--input-padding',
-  fontFamily: '--input-font-family',
-  fontSize: '--input-font-size',
-  fontWeight: '--input-font-weight',
-  color: '--input-color',
-  background: '--input-background',
-  borderWidth: '--input-border-width',
-  borderStyle: '--input-border-style',
-  borderColor: '--input-border-color',
-  radius: '--input-radius',
-  cornerShape: '--input-corner-shape',
-  shadow: '--input-shadow',
-  placeholder: '--input-placeholder',
-  invalidBorder: '--input-invalid-border',
-  disabledBackground: '--input-disabled-background',
-  focusColor: '--input-focus-color',
-  focusWidth: '--input-focus-width',
-  focusOffset: '--input-focus-offset',
-  focusStyle: '--input-focus-style'
-}
+export type InputTheme = NonNullable<ThemeComponentOverrides['input']>
 
 function joinIds(...parts: Array<string | undefined>) {
   const ids = [...new Set(parts.flatMap(part => (part ? part.split(/\s+/) : [])).filter(Boolean))]
@@ -85,11 +42,7 @@ function joinIds(...parts: Array<string | undefined>) {
 }
 
 export function inputTheme(theme: InputTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) style[inputThemeVariables[key as keyof InputTheme]] = value
-  }
-  return style as CSSProperties
+  return flattenComponents({ input: theme }) as CSSProperties
 }
 
 export function Input({

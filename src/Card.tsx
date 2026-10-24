@@ -1,41 +1,45 @@
 import type { ComponentProps, CSSProperties } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const cardVariants = cva([
-  'box-border grid w-full gap-[var(--card-gap,1rem)] text-start antialiased',
-  'rounded-[var(--card-radius,var(--button-radius,0.75rem))]',
-  '[corner-shape:var(--card-corner-shape,var(--button-corner-shape,unset))]',
-  '[border-width:var(--card-border-width,1px)]',
-  '[border-style:var(--card-border-style,solid)]',
-  '[border-color:var(--card-border-color,var(--color-border))]',
-  'bg-[var(--card-background,var(--color-background))]',
-  '[color:var(--card-color,var(--color-foreground))]',
-  'p-[var(--card-padding,1.25rem)]',
-  '[box-shadow:var(--card-shadow,0_1px_2px_0_rgb(0_0_0/0.06))]',
+  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
+  'box-border grid w-full gap-[var(--rad-card-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
+  'rounded-[var(--rad-card-radius,var(--rad-surface-radius,0.75rem))]',
+  '[corner-shape:var(--rad-card-corner-shape,var(--rad-surface-corner-shape,round))]',
+  '[border-width:var(--rad-card-border-width,var(--rad-surface-border-width,1px))]',
+  '[border-style:var(--rad-card-border-style,var(--rad-surface-border-style,solid))]',
+  '[border-color:var(--rad-card-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+  'bg-[var(--rad-card-background,var(--rad-color-surface,oklch(1_0_0)))]',
+  '[color:var(--rad-card-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
+  'p-[var(--rad-card-padding,var(--rad-surface-padding,1.5rem))]',
+  '[box-shadow:var(--rad-card-shadow,var(--rad-surface-shadow,0_1px_2px_0_rgb(0_0_0/0.06)))]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:shadow-none'
 ])
 
-const cardHeaderVariants = cva(['grid min-w-0 gap-[var(--card-header-gap,0.25rem)]'])
+const cardHeaderVariants = cva([
+  'grid min-w-0 gap-[var(--rad-card-header-gap,var(--rad-spacing-header-gap,0.375rem))]'
+])
 
 const cardTitleVariants = cva([
   'm-0 min-w-0 break-words leading-snug',
-  '[font-size:var(--card-title-size,1.125rem)]',
-  '[font-weight:var(--card-title-weight,550)]',
+  '[font-size:var(--rad-card-title-size,var(--rad-typography-heading-size,1.125rem))]',
+  '[font-weight:var(--rad-card-title-weight,var(--rad-typography-heading-weight,600))]',
   'forced-colors:text-[CanvasText]'
 ])
 
 const cardDescriptionVariants = cva([
   'm-0 min-w-0 break-words leading-snug',
-  '[color:var(--card-description-color,color-mix(in_oklch,var(--color-foreground),transparent_35%))]',
-  '[font-size:var(--card-description-size,0.8125rem)]',
+  '[color:var(--rad-card-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
+  '[font-size:var(--rad-card-description-size,var(--rad-typography-small-size,0.8125rem))]',
   'forced-colors:text-[CanvasText]'
 ])
 
 const cardContentVariants = cva(['min-w-0 break-words'])
 
 const cardFooterVariants = cva([
-  'flex min-w-0 flex-wrap items-center gap-[var(--card-footer-gap,0.75rem)]'
+  'flex min-w-0 flex-wrap items-center gap-[var(--rad-card-footer-gap,var(--rad-spacing-footer-gap,0.5rem))]'
 ])
 
 const headingTag = {
@@ -63,52 +67,10 @@ export type CardContentProps = ComponentProps<'div'>
 
 export type CardFooterProps = ComponentProps<'div'>
 
-export type CardTheme = {
-  radius?: string
-  cornerShape?: string
-  background?: string
-  color?: string
-  borderWidth?: string
-  borderStyle?: string
-  borderColor?: string
-  padding?: string
-  gap?: string
-  headerGap?: string
-  footerGap?: string
-  shadow?: string
-  titleSize?: string
-  titleWeight?: number | string
-  descriptionColor?: string
-  descriptionSize?: string
-}
-
-const cardThemeVariables: Record<keyof CardTheme, string> = {
-  radius: '--card-radius',
-  cornerShape: '--card-corner-shape',
-  background: '--card-background',
-  color: '--card-color',
-  borderWidth: '--card-border-width',
-  borderStyle: '--card-border-style',
-  borderColor: '--card-border-color',
-  padding: '--card-padding',
-  gap: '--card-gap',
-  headerGap: '--card-header-gap',
-  footerGap: '--card-footer-gap',
-  shadow: '--card-shadow',
-  titleSize: '--card-title-size',
-  titleWeight: '--card-title-weight',
-  descriptionColor: '--card-description-color',
-  descriptionSize: '--card-description-size'
-}
+export type CardTheme = NonNullable<ThemeComponentOverrides['card']>
 
 export function cardTheme(theme: CardTheme): CSSProperties {
-  const style: Record<string, string | number> = {}
-  for (const [key, value] of Object.entries(theme)) {
-    if (value !== undefined) {
-      style[cardThemeVariables[key as keyof CardTheme]] = value
-    }
-  }
-  return style as CSSProperties
+  return flattenComponents({ card: theme }) as CSSProperties
 }
 
 export function Card({ className, ...props }: CardProps) {

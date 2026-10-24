@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 import { Link } from './Link'
-import { radiantTheme, themes } from './themes/index.js'
+import { ThemeScope } from './ThemeScope'
+import { radiant, themes } from './themes/index.js'
 
 const meta = {
   title: 'Components/Link',
@@ -34,9 +35,9 @@ const meta = {
       id.endsWith('--themes') ? (
         <Story />
       ) : (
-        <div style={radiantTheme}>
+        <ThemeScope theme={radiant}>
           <Story />
-        </div>
+        </ThemeScope>
       )
   ]
 } satisfies Meta<typeof Link>
@@ -108,16 +109,15 @@ export const Themes: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       {themes.map(theme => (
-        <div
-          key={theme.name}
+        <ThemeScope
+          key={theme.id}
+          theme={theme}
           style={{
-            ...theme.style,
             display: 'flex',
             alignItems: 'center',
             gap: '1rem',
             padding: '1.5rem',
-            borderRadius: '1.25rem',
-            background: theme.surface ?? 'oklch(0.985 0.003 250)'
+            borderRadius: '1.25rem'
           }}
         >
           <span style={{ width: '8rem', font: '500 0.8125rem system-ui', opacity: 0.7 }}>
@@ -137,7 +137,7 @@ export const Themes: Story = {
           >
             Get started
           </Link>
-        </div>
+        </ThemeScope>
       ))}
     </div>
   )

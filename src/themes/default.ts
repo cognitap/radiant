@@ -1,3 +1,4 @@
-import type { Theme } from './types.js'
+import { defineTheme } from './defineTheme.js'
 
-export const defaultTheme: Theme = { name: 'Default', style: {} }
+// One neutral baseline, including dark mode, is maintained in the token registry.
+export const defaultTheme = defineTheme({ id: 'default', name: 'Default' })

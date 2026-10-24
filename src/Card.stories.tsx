@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './Card'
 import { Link } from './Link'
-import { radiantTheme, themes } from './themes/index.js'
+import { ThemeScope } from './ThemeScope'
+import { radiant, themes } from './themes/index.js'
 
 const meta = {
   title: 'Components/Card',
@@ -21,9 +22,12 @@ const meta = {
       id.endsWith('--themes') ? (
         <Story />
       ) : (
-        <div style={{ ...radiantTheme, width: '24rem' }}>
+        <ThemeScope
+          theme={radiant}
+          style={{ width: '24rem' }}
+        >
           <Story />
-        </div>
+        </ThemeScope>
       )
   ]
 } satisfies Meta<typeof Card>
@@ -91,21 +95,21 @@ export const Layout: Story = {
   )
 }
 
-const themeFrame = (surface: string | undefined): CSSProperties => ({
+const themeFrame = (): CSSProperties => ({
   display: 'grid',
   gap: '1rem',
   padding: '1.5rem',
-  borderRadius: '1.25rem',
-  background: surface ?? 'oklch(0.985 0.003 250)'
+  borderRadius: '1.25rem'
 })
 
 export const Themes: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem', width: '24rem' }}>
       {themes.map(theme => (
-        <div
-          key={theme.name}
-          style={{ ...theme.style, ...themeFrame(theme.surface) }}
+        <ThemeScope
+          key={theme.id}
+          theme={theme}
+          style={{ ...themeFrame() }}
         >
           <Card>
             <CardHeader>
@@ -113,7 +117,7 @@ export const Themes: Story = {
               <CardDescription>Surface, radius, and corner from the theme.</CardDescription>
             </CardHeader>
           </Card>
-        </div>
+        </ThemeScope>
       ))}
     </div>
   )

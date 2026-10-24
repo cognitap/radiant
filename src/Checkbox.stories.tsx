@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 import { Checkbox } from './Checkbox'
 import { Field } from './Field'
-import { radiantTheme, themes } from './themes/index.js'
+import { ThemeScope } from './ThemeScope'
+import { radiant, themes } from './themes/index.js'
 
 function NativeForm() {
   const [summary, setSummary] = useState('None selected')
@@ -69,9 +70,9 @@ const meta = {
       id.endsWith('--themes') ? (
         <Story />
       ) : (
-        <div style={radiantTheme}>
+        <ThemeScope theme={radiant}>
           <Story />
-        </div>
+        </ThemeScope>
       )
   ]
 } satisfies Meta<typeof Checkbox>
@@ -121,23 +122,23 @@ export const NativeFormStory: Story = {
   render: () => <NativeForm />
 }
 
-const themeFrame = (surface: string | undefined): CSSProperties => ({
+const themeFrame = (): CSSProperties => ({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
   gap: '1rem',
   padding: '1.5rem',
-  borderRadius: '1.25rem',
-  background: surface ?? 'oklch(0.985 0.003 250)'
+  borderRadius: '1.25rem'
 })
 
 export const Themes: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       {themes.map(theme => (
-        <div
-          key={theme.name}
-          style={{ ...theme.style, ...themeFrame(theme.surface) }}
+        <ThemeScope
+          key={theme.id}
+          theme={theme}
+          style={{ ...themeFrame() }}
         >
           <span style={{ width: '8rem', font: '500 0.8125rem system-ui', opacity: 0.7 }}>
             {theme.name}
@@ -157,7 +158,7 @@ export const Themes: Story = {
             label="Mixed"
             name={`${theme.name}-mixed`}
           />
-        </div>
+        </ThemeScope>
       ))}
     </div>
   )
