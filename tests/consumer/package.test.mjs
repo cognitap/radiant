@@ -14,6 +14,9 @@ import {
   Input,
   inputTheme,
   Link,
+  Radio,
+  RadioGroup,
+  radioTheme,
   linkTheme,
   themes,
   useField
@@ -513,6 +516,73 @@ test('checkboxTheme maps typed settings to Checkbox variables', () => {
   )
 })
 
+test('a radio group shares one name and checks the default value', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      RadioGroup,
+      { label: 'Plan', name: 'plan', defaultValue: 'pro', description: 'Billed monthly' },
+      createElement(Radio, { label: 'Free', value: 'free' }),
+      createElement(Radio, { label: 'Pro', value: 'pro' })
+    )
+  )
+  assert.match(html, /^<fieldset\b/)
+  assert.doesNotMatch(html, /role="radiogroup"/)
+  assert.match(html, /<legend\b[^>]*>Plan/)
+  assert.equal(html.match(/type="radio"/g)?.length, 2)
+  assert.equal(html.match(/name="plan"/g)?.length, 2)
+  assert.equal(html.match(/\schecked=""/g)?.length, 1)
+  assert.match(html, /value="pro"[^>]*\schecked=""|checked=""[^>]*value="pro"/)
+  assert.match(html, /data-slot="radio-group"/)
+  assert.match(html, /data-slot="radio"/)
+  const fieldset = /^<fieldset\b[^>]*>/.exec(html)?.[0] ?? ''
+  assert.doesNotMatch(fieldset, /\sname=/)
+})
+
+test('a radio takes a single-control Field name and a group keeps option labels', () => {
+  const single = renderToStaticMarkup(
+    createElement(
+      Field,
+      { label: 'Agree', required: true },
+      createElement(Radio, { value: 'yes', id: 'custom' })
+    )
+  )
+  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(single)?.[1]
+  assert.ok(id)
+  assert.notEqual(id, 'custom')
+  assert.match(single, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
+  assert.match(single, /\srequired=""/)
+
+  const group = renderToStaticMarkup(
+    createElement(
+      RadioGroup,
+      { label: 'Plan', name: 'plan', description: 'Choose one', required: true },
+      createElement(Radio, { label: 'Pro', value: 'pro' })
+    )
+  )
+  assert.match(group, /aria-required="true"/)
+  assert.match(group, /data-slot="radio-label"/)
+  assert.match(group, /<input\b[^>]*\srequired=""/)
+  assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
+})
+
+test('replacing appearance leaves the radio class and element', () => {
+  const html = renderToStaticMarkup(
+    createElement(Radio, { label: 'Pro', name: 'plan', value: 'pro', className: 'appearance-auto' })
+  )
+  const classAttribute = /<input\b[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ?? ''
+  assert.match(classAttribute, /\bappearance-auto\b/)
+  assert.doesNotMatch(classAttribute, /\bappearance-none\b/)
+  assert.match(html, /type="radio"/)
+})
+
+test('radioTheme maps typed settings to Radio variables', () => {
+  assert.deepEqual(radioTheme({ size: '1.25rem', radius: '999px', mark: 'white' }), {
+    '--radio-size': '1.25rem',
+    '--radio-radius': '999px',
+    '--radio-mark': 'white'
+  })
+})
+
 test('linkTheme maps typed settings to Link variables', () => {
   assert.deepEqual(
     linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
@@ -554,6 +624,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Field.tsx',
     'src/Input.tsx',
     'src/Checkbox.tsx',
+    'src/RadioGroup.tsx',
     'dist/library/Button.js',
     'cn',
     'package.json'

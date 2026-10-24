@@ -4,6 +4,15 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- `RadioGroup` is a fieldset of native radios. Uncontrolled groups use
+  `defaultValue` and `form.reset()`. Controlled groups use `value` and
+  `onValueChange` or `onChange`. Each `Radio` keeps its own label. A disabled
+  choice stays in the group and is not selected. `radioTheme` maps typed
+  settings to `--radio-*` variables. The disk stays a circle instead of
+  inheriting the button corner shape. Arrow keys, focus entry, and focus exit
+  were checked in Storybook: Tab entered on the selected radio, ArrowDown and
+  ArrowUp skipped a disabled choice, and Tab left the group. Screen reader
+  checks were not run.
 - `Checkbox` is a native checkbox. Uncontrolled boxes use `defaultChecked` and
   `form.reset()`. Controlled boxes use `checked` and `onChange`. `indeterminate`
   is a visual mixed state on the DOM property, not a submitted value. A `label`

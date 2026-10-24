@@ -5,6 +5,9 @@ import {
   Checkbox,
   checkboxTheme,
   Field,
+  Radio,
+  RadioGroup,
+  radioTheme,
   fieldTheme,
   Input,
   inputTheme,
@@ -17,6 +20,8 @@ import {
   type CheckboxProps,
   type FieldProps,
   type InputProps,
+  type RadioGroupProps,
+  type RadioProps,
   type LinkProps,
   type Theme
 } from '@cognitap/radiant'
@@ -131,3 +136,33 @@ checkboxTheme({ boxSize: '1rem' })
 // @ts-expect-error Checkbox type is fixed.
 const invalidCheckbox: CheckboxProps = { type: 'radio' }
 createElement(Checkbox, invalidCheckbox)
+
+createElement('div', { style: radioTheme({ size: '1.25rem', radius: '999px' }) })
+
+const radioGroupProps: RadioGroupProps = {
+  label: 'Plan',
+  name: 'plan',
+  defaultValue: 'pro',
+  value: 'pro',
+  required: true,
+  onValueChange(value: string) {
+    void value
+  }
+}
+createElement(RadioGroup, radioGroupProps, createElement(Radio, { label: 'Pro', value: 'pro' }))
+
+const radioProps: RadioProps = {
+  name: 'plan',
+  value: 'pro',
+  defaultChecked: true,
+  label: 'Pro',
+  ref: createRef<HTMLInputElement>()
+}
+createElement(Radio, radioProps)
+
+// @ts-expect-error Radio theme keys are a closed set.
+radioTheme({ diskSize: '1rem' })
+
+// @ts-expect-error Radio type is fixed.
+const invalidRadio: RadioProps = { type: 'checkbox', value: 'pro' }
+createElement(Radio, invalidRadio)
