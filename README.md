@@ -2,13 +2,20 @@
 
 React interaction components and presentation primitives, published as
 [`@cognitap/radiant`](https://www.npmjs.com/package/@cognitap/radiant) under the
-[MIT license](LICENSE). Radiant is experimental: `0.0.2` contains a single native
-Button.
+[MIT license](LICENSE). Radiant is experimental during 0.x. The current source
+combines ten families through shared themes, native controls and composed actions
+and surfaces.
+
+Start with the [Radiant system guide](docs/system.md) for setup, theme/mode rules,
+public anatomy, state ownership and canonical form/Dialog/Card examples. This
+README is the detailed component reference. It describes the current source;
+changes under [Unreleased](CHANGELOG.md#unreleased) need a release before npm
+consumers can use them. Check your installed version's release notes.
 
 ## Usage
 
 ```sh
-pnpm add --save-exact @cognitap/radiant@0.0.2
+pnpm add --save-exact @cognitap/radiant
 ```
 
 Import the stylesheet once in your application. It needs no Tailwind and only
@@ -16,19 +23,29 @@ styles Radiant components:
 
 ```tsx
 import '@cognitap/radiant/styles.css'
-import { Button } from '@cognitap/radiant'
+import { Field, Input } from '@cognitap/radiant'
 
-<Button onClick={handleContinue}>Continue</Button>
-<Button disabled>Unavailable</Button>
-<Button type="submit">Save</Button>
+;<Field label="Email">
+  <Input
+    name="email"
+    type="email"
+    autoComplete="email"
+  />
+</Field>
 ```
 
 All components share a neutral light/dark baseline: control dimensions,
-typography, surfaces, focus, and motion. Use the [theme system](#theming) to
-customise the library or a subtree.
+typography, surfaces, focus, and motion. Follow the
+[system guide](docs/system.md#set-up-styles-and-themes) to choose or author a
+theme, or the [canonical recipes](docs/system.md#reuse-the-canonical-examples)
+to compose controls into a form, Card or Dialog.
 
 For a global reset (Tailwind Preflight), also import `@cognitap/radiant/reset.css`
 before `styles.css`. React 19.3+ is a peer dependency.
+
+## Component reference
+
+### Button
 
 `Button` takes native button props, including `ref`, `aria-*` and form attributes,
 and defaults to `type="button"`. Give every button an accessible name through its
@@ -36,6 +53,8 @@ text, `aria-label`, or `aria-labelledby`. The type does not reject a nameless
 button. Use a link for navigation.
 
 ```tsx
+import { Button } from '@cognitap/radiant'
+
 <Button variant="solid" tone="danger" controlSize="small">Delete</Button>
 <Button variant="outline" tone="neutral" className="rounded-full">Next</Button>
 <Button iconOnly aria-label="Close"><CloseIcon /></Button>
@@ -326,7 +345,7 @@ Dialog form closes it and restores trigger focus; reset leaves the Dialog open.
 
 TanStack is an optional development/example dependency. Neither the recipes nor
 the integration are exported by the library. The ownership decisions are in
-[the shared form contract](docs/contracts/README.md#4-state-and-forms) (DEV-43).
+[the system guide](docs/system.md#state-and-forms).
 
 ### Input
 
@@ -882,52 +901,19 @@ placement; these share the same fields and actions rather than separate demos.
 
 ### Theming
 
-Use `defineTheme` for shared semantic tokens and deliberate component
-exceptions, and `ThemeScope` to apply a named theme and mode to a subtree:
+Use `defineTheme` for shared semantic tokens and deliberate `components`
+exceptions; apply its result with `ThemeScope`. Theme and light/dark/system mode
+are independent. The [system guide](docs/system.md#set-up-styles-and-themes)
+explains scopes, precedence, fonts and local styling; the
+[theming reference](docs/theming.md) contains the canonical authoring example,
+complete token defaults and preset reference.
 
-```tsx
-import { Button, Field, Input, ThemeScope, defineTheme } from '@cognitap/radiant'
-
-const brand = defineTheme({
-  id: 'garden',
-  name: 'Garden',
-  tokens: {
-    control: { radius: '0.75rem' },
-    typography: { family: 'system-ui, sans-serif' }
-  },
-  components: { button: { fontWeight: 650 } }
-})
-
-;<ThemeScope
-  theme={brand}
-  mode="system"
->
-  <Field label="Garden name">
-    <Input name="garden" />
-  </Field>
-  <Button>Save</Button>
-</ThemeScope>
-```
-
-The stylesheet supplies the baseline without a provider. `ThemeScope` adds a
-normal `div`, applies canvas and body typography, and supports light, dark,
-and system appearance. Named themes reset omitted settings; partial local CSS
-overrides inherit within their scope. Component overrides resolve before
-shared tokens and never become another component's defaults.
-
-Built-in presets are available through the readonly `themes` registry and
-individual exports such as `radiant`, `defaultTheme`, and `ticket`. Select by
-stable `id`. Load preset fonts in your application; choosing a theme does not
-download them.
-
-See the [theming guide](docs/theming.md) for the complete token/default reference,
-presets and fonts, nested scopes, mode inheritance, and migration from old
-CSS variables and theme wrappers. Family theme helpers and their `*Theme` type
-aliases, `Theme.style`, `Theme.surface`, and `radiantTheme` have been removed.
-Use `ThemeComponentOverrides` for reusable component configuration and
-`ThemeStyle` for local `--rad-*` overrides on a host or named part. Legacy
-Tailwind color/radius aliases and ambient easing variables are also removed;
-see the [migration steps](docs/theming.md#migration-from-button-centred-themes).
+Migrating older code? Follow the
+[theme migration steps](docs/theming.md#migration-from-button-centred-themes)
+and [action migration table](#action-api-migration-breaking). Family theme
+helpers/types, `Theme.style`, `Theme.surface`, `radiantTheme` and old CSS aliases
+are removed. Use `ThemeComponentOverrides` for reusable configuration and
+`ThemeStyle` for local `--rad-*` styles.
 
 ### With Tailwind
 
@@ -947,17 +933,16 @@ Utilities passed in `className` replace matching defaults, including `hover:` an
 
 ## Development
 
-The [shared design and component contract](docs/contracts/README.md) records the
-DEV-104 harmonisation target, with a [migration inventory](docs/contracts/migration.md)
-and compile-only acceptance examples. The [theming guide](docs/theming.md)
-describes the implemented theme APIs; the remaining contract migrations are
-tracked separately. [GLOSSARY.md](GLOSSARY.md)
-defines the shared vocabulary. Run `pnpm typecheck:contracts` to check those
-specifications; the normal typecheck and CI include that check.
+The [system guide](docs/system.md) defines the current ten-family consumer
+contract and canonical sources. [GLOSSARY.md](GLOSSARY.md) defines the shared
+vocabulary. The [harmonisation design record](docs/contracts/README.md) and
+[migration inventory](docs/contracts/migration.md) preserve the original decisions
+and compile-only acceptance sketches. `pnpm typecheck:contracts` checks those
+sketches' type consistency; runtime and browser checks establish behavior.
 
-The [shared React binding guide](docs/react-bindings.md) records the implemented
-ref, event, ID, state ownership and mounted lifecycle conventions, along with
-their private consumers and remaining family migrations.
+The [React binding reference](docs/react-bindings.md) details the implemented
+ref, event, ID, state ownership and mounted lifecycle conventions and their
+private consumers.
 
 Use the Node.js version in `.nvmrc`. Any recent pnpm switches itself to the version
 pinned in `package.json`:
@@ -1013,6 +998,9 @@ for other checkouts and type checking.
 
 ## Further reading
 
+- [System guide](docs/system.md): the current ten-family theming, composition and customisation contract
+- [Theming reference](docs/theming.md): token defaults, presets, fonts and migration steps
+- [Storybook inspection](docs/storybook.md): global Theme/Mode controls and canonical live recipes
 - [Release policy](RELEASE_POLICY.md): versioning, compatibility, and the release workflow
 - [Changelog](CHANGELOG.md): consumer-facing changes per release
 - [CONTRIBUTING.md](CONTRIBUTING.md): maintainer workflow and bug reports

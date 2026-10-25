@@ -1,8 +1,9 @@
 # Shared React composition and lifecycle
 
-DEV-48 implements the private runtime seams approved by the
-[shared contract](contracts/README.md). They ship inside the single Radiant
-package and are not public exports or supported import subpaths.
+The [system guide](system.md) describes public state, event and ref conventions.
+This reference covers the private runtime seams delivered by DEV-48 under the
+[harmonisation design record](contracts/README.md). They ship inside the single
+Radiant package and are not public exports or supported import subpaths.
 
 | Module                              | Responsibility                                                              | Current consumers                                  |
 | ----------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- |
@@ -42,8 +43,8 @@ must not manufacture another request. Nested toggle/close events do not change
 their parent owner.
 
 Text and selection inputs retain React/browser state, change, blur and reset
-behavior. The shared state hook is not a replacement reset engine. The remaining
-RadioGroup chooses one name/selection owner; null clears a controlled group,
+behavior. The shared state hook is not a replacement reset engine. RadioGroup
+chooses one name/selection owner; null clears a controlled group,
 while an empty string remains a real option value. Its uncontrolled default is
 an initial snapshot, with native radio selection and reset. Group options may
 not supply a competing name or checked/defaultChecked owner. Group change

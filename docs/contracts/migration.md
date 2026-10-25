@@ -1,7 +1,7 @@
 # Harmonisation migration inventory
 
-This is the migration map for DEV-104/DEV-105. The [canonical contract](./README.md)
-defines the target. This inventory records the original baseline and migration
+This is the migration map for DEV-104/DEV-105. The [design record](./README.md)
+defines the original target; the [system guide](../system.md) describes current usage. This inventory records the original baseline and migration
 destinations; delivery proceeds through the linked harmonisation issues.
 The current README and package declarations describe the implemented API.
 The ten-family harmonisation through DEV-130 is implemented. DEV-132 removes
