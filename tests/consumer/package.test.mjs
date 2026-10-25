@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import * as Radiant from '@cognitap/radiant'
 import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -1053,4 +1054,25 @@ test('installed workshop data round trips and selectively updates the existing T
   assert.match(html, /data-rad-theme="default"/)
   assert.match(html, /--rad-button-press-scale:initial/)
   assert.throws(() => parseThemeDocument({ ...edited, version: 2 }), /Unsupported document.version/)
+})
+
+test('the installed color entry generates portable walls without React or browser access', () => {
+  const script = `
+    import assert from 'node:assert/strict';
+    import { registerHooks } from 'node:module';
+    registerHooks({ resolve(specifier, context, next) {
+      assert.ok(!/^react(?:-dom)?(?:\\/|$)/.test(specifier), 'Color entry imported React');
+      return next(specifier, context);
+    } });
+    for (const key of ['window', 'document', 'localStorage']) Object.defineProperty(globalThis, key, { get() { throw new Error('Color entry read ' + key); } });
+    const { generateColorWall } = await import('@cognitap/radiant/color');
+    const wall = generateColorWall({ brand: '#FFFF00' });
+    assert.equal(wall.color.palettes.length, 18);
+    assert.equal(wall.color.anchor.stop, 200);
+    assert.deepEqual(generateColorWall(JSON.parse(JSON.stringify(wall.input))), wall);
+  `
+  execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+    cwd: new URL('.', import.meta.url),
+    stdio: 'pipe'
+  })
 })
