@@ -217,6 +217,7 @@ export function FormInDialog({ allowOpen = true }: { allowOpen?: boolean }) {
           <DialogClose
             variant="ghost"
             tone="neutral"
+            render={props => <button {...props}>{props.children}</button>}
           >
             Cancel
           </DialogClose>

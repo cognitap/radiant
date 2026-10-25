@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
   DialogTrigger,
+  type DialogRenderProps,
   Field,
   Input
 } from './index.js'
@@ -239,12 +240,17 @@ export const Composition: Story = {
   }
 }
 
+// Consumer-owned adapter; the resolved ref, handler and children reach this one host.
+function ProfileAction({ children, ...props }: DialogRenderProps) {
+  return <button {...props}>{children}</button>
+}
+
 export const Customisation: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'Use Button presentation props directly on Dialog actions. The close control demonstrates the existing native render callback with an explicit Button replacement; forward its props to one button.'
+          'Choose Button presentation on the Dialog action, then forward resolved native props, ref and children to one button. The trigger uses a consumer component; the close action uses a native replacement. Both inherit Button styling and activation without a nested Button.'
       }
     }
   },
@@ -253,16 +259,28 @@ export const Customisation: Story = {
       <DialogTrigger
         variant="outline"
         tone="neutral"
+        render={props => <ProfileAction {...props} />}
       >
         Open narrow panel
       </DialogTrigger>
       <DialogContent style={{ width: '24rem' }}>
         <DialogTitle>Narrow panel</DialogTitle>
-        <DialogDescription>Local geometry and explicit action replacement.</DialogDescription>
-        <DialogClose render={props => <Button {...props}>Close</Button>} />
+        <DialogDescription>Custom hosts inherit Button presentation.</DialogDescription>
+        <DialogClose
+          variant="outline"
+          tone="neutral"
+          render={props => <button {...props}>{props.children}</button>}
+        >
+          Close panel
+        </DialogClose>
       </DialogContent>
     </Dialog>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Open narrow panel' }))
+    await expect(canvas.getByRole('dialog', { name: 'Narrow panel' })).toBeVisible()
+  }
 }
 
 export const Nested: Story = {

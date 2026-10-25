@@ -5,6 +5,7 @@ import {
   Button,
   Link,
   type ButtonProps,
+  type ButtonRenderProps,
   type ButtonVariant,
   type Tone,
   type ThemeStyle
@@ -25,13 +26,14 @@ const meta = {
     iconOnly: { control: 'boolean' },
     fullWidth: { control: 'boolean' },
     disabled: { control: 'boolean' },
-    pending: { control: 'boolean' }
+    pending: { control: 'boolean' },
+    render: { control: false }
   },
   parameters: {
     docs: {
       description: {
         component:
-          'A native `<button>` with type="button" by default. variant selects treatment, tone selects palette, and controlSize selects visual dimensions; disabled is native and pending suppresses activation while retaining focus. className, style and ref target the button; data-slot="button" identifies it. The inner label and pending mark preserve its accessible name.'
+          'A native `<button>` with type="button" by default. variant selects treatment, tone selects palette, and controlSize selects visual dimensions; disabled is native and pending suppresses activation while retaining focus. className, style and ref target the button; data-slot="button" identifies it. The inner label and pending mark preserve its accessible name. render receives resolved native props/ref/children for one custom button host; Dialog actions inherit that same Button interface.'
       }
     }
   }
@@ -68,6 +70,10 @@ const arrow = (
 
 export const Default: Story = {}
 
+function ConsumerButton({ children, ...props }: ButtonRenderProps) {
+  return <button {...props}>{children}</button>
+}
+
 function ButtonComposition(args: ButtonProps) {
   const id = useId()
   const [activations, setActivations] = useState({ next: 0, close: 0 })
@@ -83,6 +89,7 @@ function ButtonComposition(args: ButtonProps) {
             args.onClick?.(event)
             setActivations(counts => ({ ...counts, next: counts.next + 1 }))
           }}
+          render={props => <ConsumerButton {...props} />}
         >
           Next {arrow}
         </Button>

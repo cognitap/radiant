@@ -1,5 +1,5 @@
 import './theme-types.js'
-import { createElement, createRef } from 'react'
+import { createElement, createRef, type Ref } from 'react'
 import {
   Button,
   buttonTheme,
@@ -38,6 +38,7 @@ import {
   themes,
   useField,
   type ButtonProps,
+  type ButtonRenderProps,
   type ButtonVariant,
   type LinkVariant,
   type Tone,
@@ -83,6 +84,28 @@ const props: ButtonProps = {
   ref: createRef<HTMLButtonElement>()
 }
 createElement(Button, props)
+
+const renderButton = (resolved: ButtonRenderProps) => {
+  const ref: Ref<HTMLButtonElement> | undefined = resolved.ref
+  const variant: ButtonVariant = resolved['data-variant']
+  const tone: Tone = resolved['data-tone']
+  const size: ControlSize = resolved['data-control-size']
+  void [ref, variant, tone, size]
+  // @ts-expect-error Button consumes presentation props before host replacement.
+  void resolved.pending
+  // @ts-expect-error Button owns the render callback; it never reaches the host.
+  void resolved.render
+  return createElement('button', resolved)
+}
+createElement(Button, { render: renderButton })
+createElement(DialogTrigger, { render: renderButton })
+createElement(DialogClose, { render: renderButton })
+// @ts-expect-error Button replacement returns one compatible element.
+createElement(Button, { render: () => 'text' })
+// @ts-expect-error A replacement must retain a host.
+createElement(Button, { render: () => null })
+// @ts-expect-error A replacement cannot return an array of hosts.
+createElement(Button, { render: () => [createElement('button')] })
 
 // @ts-expect-error Variants are a closed set.
 const invalidVariant: ButtonProps = { variant: 'link' }
@@ -259,14 +282,9 @@ const dialogCloseProps: DialogCloseProps = {
     node?.focus()
     return () => {}
   },
-  render: nativeProps => {
-    // @ts-expect-error Replacement props are native; Button-only presentation props are consumed.
-    void nativeProps.pending
-    return createElement(Button, { ...nativeProps, variant: 'outline' })
-  }
+  render: renderButton
 }
 createElement(DialogClose, dialogCloseProps)
-
 // @ts-expect-error Dialog actions use the same closed variant vocabulary as Button.
 const invalidDialogAction: DialogTriggerProps = { variant: 'link' }
 createElement(DialogTrigger, invalidDialogAction)

@@ -4,6 +4,21 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- **Button-owned host replacement (DEV-119).** Button now accepts
+  `render(resolvedNativeProps)` and exports ButtonRenderProps. DialogTrigger/Close
+  inherit ButtonProps and compose Button in both default and replacement paths.
+  Button owns resolved presentation and compatible-host validation.
+- **Breaking: Dialog action replacement contract (DEV-119).** `render` now
+  receives Button's resolved native presentation, including merged classes,
+  children/pending markup, native attributes/ref and protected Dialog semantics.
+  Set presentation props on DialogTrigger/Close and forward to one native/custom
+  button; replace render→Button adapters, which would style and wrap children
+  twice. Null, text, arrays, fragments and direct non-button hosts are rejected.
+  `DialogRenderProps` exposes required, typed resolved presentation attributes.
+- Both Dialog paths compose Button; guards run before the consumer once and
+  then uncancelled Dialog requests. Pending busy state and computed presentation attributes are protected;
+  composed actions retain both Button and Dialog part identities.
+
 - **Breaking: Link replacement contract (DEV-118).** `render` returns one
   compatible `ReactElement`; null, text, arrays, fragments and direct native
   hosts other than anchors are rejected. Return your router element directly
@@ -62,7 +77,7 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
   The separate Dialog action style recipe is removed. Action slots now include
   both identities (`button dialog-trigger` / `button dialog-close`); migrate
   equality selectors to `[data-slot~="dialog-trigger"]` / `[data-slot~="dialog-close"]`.
-  Existing native render callbacks retain their explicit presentation ownership.
+  DEV-119 subsequently migrates native render callbacks to resolved presentation.
 - Dialog's default Storybook play compares its actual rendered actions against
   Button. The theme comparison uses default Dialog composition rather than
   manually opting into Button, exposing future drift at the default call site.

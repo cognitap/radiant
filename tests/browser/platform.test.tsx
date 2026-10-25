@@ -5,6 +5,7 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import {
   Button,
+  type ButtonRenderProps,
   Checkbox,
   Collapsible,
   CollapsibleContent,
@@ -44,6 +45,11 @@ afterEach(async () => {
   for (const root of roots.splice(0)) await act(async () => root.unmount())
   for (const node of hosts.splice(0)) node.remove()
 })
+
+function ConsumerButton({ children, ...props }: ButtonRenderProps) {
+  return <button {...props}>{children}</button>
+}
+const renderButton = (props: ButtonRenderProps) => <ConsumerButton {...props} />
 
 for (const mode of ['light', 'dark'] as const) {
   test(`${mode}: changing modal and dismissal props reconciles the same native dialog`, async () => {
@@ -113,7 +119,10 @@ for (const mode of ['light', 'dark'] as const) {
     expect(observations).toHaveBeenCalled()
   })
 
-  test(`${mode}: native modal keyboard, cancellation, focus return and method=dialog`, async () => {
+  test.each([
+    { host: 'default', render: undefined },
+    { host: 'replacement', render: renderButton }
+  ])(`${mode}: native modal actions ($host)`, async ({ render }) => {
     let vetoTrigger = true
     let vetoClose = true
     const clicked = vi.fn()
@@ -121,6 +130,7 @@ for (const mode of ['light', 'dark'] as const) {
       <ThemeScope mode={mode}>
         <Dialog>
           <DialogTrigger
+            render={render}
             onClick={event => {
               clicked()
               if (vetoTrigger) event.preventDefault()
@@ -132,6 +142,7 @@ for (const mode of ['light', 'dark'] as const) {
             <DialogTitle>Edit profile</DialogTitle>
             <DialogDescription>Visible to your team.</DialogDescription>
             <DialogClose
+              render={render}
               onClick={event => {
                 if (vetoClose) event.preventDefault()
               }}
@@ -139,7 +150,12 @@ for (const mode of ['light', 'dark'] as const) {
               Close
             </DialogClose>
             <form method="dialog">
-              <Button type="submit">Done</Button>
+              <Button
+                type="submit"
+                render={render}
+              >
+                Done
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -173,6 +189,52 @@ for (const mode of ['light', 'dark'] as const) {
     await act(async () => userEvent.click(page.getByRole('button', { name: 'Done' })))
     await expect.poll(() => dialog.open).toBe(false)
     expect(node.querySelector('[aria-expanded]')?.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  test(`${mode}: replacement Button retains native form submission and reset`, async () => {
+    const submitted = vi.fn()
+    await mount(
+      <ThemeScope mode={mode}>
+        <form
+          onSubmit={event => {
+            event.preventDefault()
+            submitted(new FormData(event.currentTarget).get('draft'))
+          }}
+        >
+          <label>
+            Draft{' '}
+            <input
+              name="draft"
+              defaultValue="Original"
+            />
+          </label>
+          <Button render={renderButton}>Action</Button>
+          <Button
+            render={renderButton}
+            type="submit"
+          >
+            Save
+          </Button>
+          <Button
+            render={renderButton}
+            type="reset"
+          >
+            Reset
+          </Button>
+        </form>
+      </ThemeScope>
+    )
+    const draft = page.getByRole('textbox', { name: 'Draft' })
+    await act(async () =>
+      userEvent.click(page.getByRole('button', { name: 'Action', exact: true }))
+    )
+    expect(submitted).not.toHaveBeenCalled()
+    await act(async () => userEvent.fill(draft, 'Edited'))
+    await act(async () => userEvent.click(page.getByRole('button', { name: 'Save', exact: true })))
+    expect(submitted).toHaveBeenCalledExactlyOnceWith('Edited')
+    await act(async () => userEvent.click(page.getByRole('button', { name: 'Reset', exact: true })))
+    await expect.element(draft).toHaveValue('Original')
+    expect(submitted).toHaveBeenCalledTimes(1)
   })
 
   test(`${mode}: StrictMode unmount closes the modal and releases action refs before remount`, async () => {

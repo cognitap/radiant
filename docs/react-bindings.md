@@ -66,8 +66,20 @@ convention. DEV-117 aligns Button/Link presentation as variant, tone and
 controlSize, inherited by default Dialog actions. DEV-118 implements Link's
 resolved native anchor/ref contract and native navigation/adapter verification.
 Link forwards the ref and handlers directly; its router owns any interception.
-DEV-119 retains fully resolved Dialog replacement presentation; existing native
-Dialog adapters still own their presentation.
+DEV-119 makes Button own `render(resolvedNativeProps)` and compatible button-host
+validation. Button prepares its merged classes, guarded activation and rendered
+children once, then renders its default host or calls the replacement callback.
+DialogTrigger/Close inherit ButtonProps and always compose Button, adding only
+protected Dialog relationships, action identities and cancellable open/close
+requests. DialogRenderProps aliases ButtonRenderProps; there is no parallel
+replacement implementation or cross-family presentation resolver.
+
+Select variant/tone/controlSize on Button or the Dialog action, then forward the
+resolved props/ref/children to one button. Do not pass resolved children through
+another Button or compose its handler again. Button retains its base identity
+when composed slots are added; Dialog protects its accumulated identities and
+native relationships.
+
 The existing shared action recipe has moved to `src/actionStyles.ts` so static
 Link rendering does not call across Button's client boundary. The new
 presentation mapping consumes that private seam; later adapters must reuse it
