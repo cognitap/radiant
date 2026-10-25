@@ -2,7 +2,6 @@ import type { CSSProperties } from 'react'
 import {
   flattenTokens,
   freezeTree,
-  modeStyle,
   tokenDefaults,
   type ThemeTokens,
   type ThemeVariableValues
@@ -15,7 +14,6 @@ import {
 } from './components.js'
 
 export type { SharedTokens, ThemeTokens } from './tokens.js'
-export { modeStyle } from './tokens.js'
 export type { ThemeComponentOverrides } from './components.js'
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type ThemeStyle = CSSProperties & {
@@ -39,10 +37,6 @@ export interface Theme {
     readonly light: Readonly<ThemeVariableValues>
     readonly dark: Readonly<ThemeVariableValues>
   }
-  /** @deprecated Apply themes with ThemeScope; this compatibility map follows inherited mode. */
-  readonly style: ThemeStyle
-  /** @deprecated ThemeScope applies the mode-appropriate canvas. */
-  readonly surface: string
 }
 
 function assertRecord(value: unknown, path: string): asserts value is Record<string, unknown> {
@@ -146,8 +140,6 @@ export function defineTheme(definition: ThemeDefinition): Theme {
   return freezeTree({
     id: definition.id,
     name: definition.name,
-    modes,
-    style: modeStyle(modes.light, modes.dark),
-    surface: String(modes.light['--rad-surface-canvas'])
+    modes
   })
 }

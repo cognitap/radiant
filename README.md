@@ -107,7 +107,7 @@ import { Link } from '@cognitap/radiant'
 
 Links paint from `--rad-link-color` and `--rad-link-hover-color` (falling back to
 readable ink derived from the selected tone and shared foreground) and from the
-shared focus variables, so a theme styles links and buttons together. `linkTheme` sets them with typed keys:
+shared focus variables, so a theme styles links and buttons together. `defineTheme({ components: { link: { ... } } })` sets typed Link overrides:
 `color`, `hoverColor`, `underlineOffset`, `decorationThickness`,
 `decorationThicknessHover`, `colorDuration`, and `focusColor`, `focusWidth`,
 `focusOffset`, `focusStyle`.
@@ -260,7 +260,7 @@ are ordinary nodes. `className` and `style` target that root. Use
 part. These hooks accept only styling: Field keeps each part's ID, label
 association, alert role and hidden required marker.
 
-`fieldTheme` maps typed keys to `--rad-field-*` variables: `gap`, `labelColor`,
+`components.field` in `defineTheme` maps typed keys to `--rad-field-*` variables: `gap`, `labelColor`,
 `labelSize`, `labelWeight`, `descriptionColor`, `descriptionSize`, `errorColor`,
 `errorSize`, `requiredColor`, and `disabledOpacity`. The root sets
 `data-slot="field"`, `data-layout`, `data-invalid`, `data-disabled`, and
@@ -376,7 +376,7 @@ owners propagate through nested Fields; a child `disabled={false}` cannot
 re-enable them. Native fieldsets retain the platform's first-legend exception
 for arbitrary native content.
 
-`inputTheme` maps `height`, `padding`, `fontFamily`, `fontSize`, `fontWeight`,
+`components.input` in `defineTheme` accepts `height`, `padding`, `fontFamily`, `fontSize`, `fontWeight`,
 `color`, `background`, `borderWidth`, `borderStyle`, `borderColor`, `radius`,
 `cornerShape`, `shadow`, `placeholder`, `invalidBorder`, `disabledBackground`,
 `focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. An invalid field
@@ -441,7 +441,7 @@ required choice.
 glyph back; the input stays in the tab order and in the form. The check and
 dash are decorative and do not receive clicks.
 
-`checkboxTheme` maps `size`, `radius`, `cornerShape`, `borderWidth`,
+`components.checkbox` in `defineTheme` accepts `size`, `radius`, `cornerShape`, `borderWidth`,
 `borderStyle`, `borderColor`, `background`, `checkedBackground`,
 `checkedBorder`, `mark`, `invalidBorder`, `gap`, `labelColor`, `labelSize`,
 `disabledBorder`, `disabledBackground`, `focusColor`, `focusWidth`,
@@ -529,7 +529,7 @@ The disk stays a circle. `--rad-radio-radius` defaults to `999px` and
 `--rad-radio-corner-shape` defaults to `unset`, so shared squircle or scoop
 control shapes do not pinch it. Checked fill follows `--rad-color-accent`.
 
-`radioTheme` maps `size`, `radius`, `cornerShape`, `borderWidth`,
+`components.radio` in `defineTheme` accepts `size`, `radius`, `cornerShape`, `borderWidth`,
 `borderStyle`, `borderColor`, `background`, `checkedBackground`,
 `checkedBorder`, `mark`, `invalidBorder`, `labelGap`, `labelColor`,
 `labelSize`, `disabledBorder`, `disabledBackground`, `focusColor`,
@@ -681,7 +681,7 @@ dialog. `useDialog()` lets another control open the same dialog. It returns
 
 `className` merges onto the part it is passed to. The panel uses shared surface
 radius and corner shape, so a scoop or squircle theme shapes the surface.
-`dialogTheme` maps `width`, `padding`, `gap`, `radius`, `cornerShape`,
+`components.dialog` in `defineTheme` accepts `width`, `padding`, `gap`, `radius`, `cornerShape`,
 `background`, `color`, `borderWidth`, `borderStyle`, `borderColor`, `shadow`,
 `backdrop`, `backdropFilter`, `titleSize`, `titleWeight`, `descriptionColor`, `descriptionSize`,
 `focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. The dialog sets
@@ -729,7 +729,7 @@ removes those transitions, so the state change is instant. `data-state` is
 `open` or `closed`.
 
 `className` merges onto the part it is passed to. The surface inherits the
-shared surface radius and corner shape. `collapsibleTheme` maps `radius`,
+shared surface radius and corner shape. `components.collapsible` in `defineTheme` accepts `radius`,
 `cornerShape`, `background`, `color`, `borderWidth`, `borderStyle`,
 `borderColor`, `padding`, `gap`, `contentColor`, `contentSize`, `duration`,
 `focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. The disclosure
@@ -791,8 +791,8 @@ A disabled summary is removed from the tab order and does not toggle. A nested
 disclosure does not change the accordion selection.
 
 `className` merges onto the part it is passed to. Section surface, radius,
-and motion come from `Collapsible`; set `collapsibleTheme` on the accordion
-and the variables inherit. `accordionTheme` maps `gap` to `--rad-accordion-gap`,
+and motion come from `Collapsible`; set `components.collapsible` in the scoped
+theme and the variables inherit. `components.accordion.gap` maps to `--rad-accordion-gap`,
 the space between sections. The group sets `data-slot="accordion"` and
 `data-type="single"` or `"multiple"`. Part props, styles and refs target the same native hosts as Collapsible:
 
@@ -852,7 +852,7 @@ To name a region, wrap the card in a `<section>` and point
 `aria-labelledby` at the title's `id`. The card does not add that role.
 
 `className` merges onto the part it is passed to. The surface inherits the
-shared surface radius and corner shape. `cardTheme` maps `radius`, `cornerShape`,
+shared surface radius and corner shape. `components.card` in `defineTheme` accepts `radius`, `cornerShape`,
 `background`, `color`, `borderWidth`, `borderStyle`, `borderColor`,
 `padding`, `gap`, `headerGap`, `footerGap`, `shadow`, `titleSize`,
 `titleWeight`, `descriptionColor`, and `descriptionSize`. The card sets
@@ -922,9 +922,12 @@ download them.
 
 See the [theming guide](docs/theming.md) for the complete token/default reference,
 presets and fonts, nested scopes, mode inheritance, and migration from old
-CSS variables and theme wrappers. Existing family helpers remain local style
-compatibility conveniences; `Theme.style`, `Theme.surface`, and `radiantTheme`
-are deprecated in favour of `ThemeScope`.
+CSS variables and theme wrappers. Family theme helpers and their `*Theme` type
+aliases, `Theme.style`, `Theme.surface`, and `radiantTheme` have been removed.
+Use `ThemeComponentOverrides` for reusable component configuration and
+`ThemeStyle` for local `--rad-*` overrides on a host or named part. Legacy
+Tailwind color/radius aliases and ambient easing variables are also removed;
+see the [migration steps](docs/theming.md#migration-from-button-centred-themes).
 
 ### With Tailwind
 

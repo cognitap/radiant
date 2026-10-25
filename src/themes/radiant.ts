@@ -127,6 +127,3 @@ export const radiant = defineTheme({
     }
   }
 })
-
-/** @deprecated Use radiant with ThemeScope instead of applying this style directly. */
-export const radiantTheme = radiant.style

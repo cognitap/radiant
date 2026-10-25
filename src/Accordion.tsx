@@ -1,6 +1,6 @@
 'use client'
 
-import type { ComponentProps, CSSProperties, ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
@@ -8,7 +8,6 @@ import type { ThemeStyle } from './themes/defineTheme.js'
 import { composeAction } from './internal/events.js'
 import { isItemOpen, nextSelection, sameSelection, type Selection } from './internal/selection.js'
 import { useControllableState } from './react/useControllableState.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './Collapsible.js'
 import type {
   CollapsibleContentProps,
@@ -80,8 +79,6 @@ export type AccordionState = {
   setItemOpen: (value: string, open: boolean) => void
 }
 
-export type AccordionTheme = NonNullable<ThemeComponentOverrides['accordion']>
-
 type AccordionItemState = {
   value: string
   disabled: boolean
@@ -89,10 +86,6 @@ type AccordionItemState = {
 
 const AccordionContext = createContext<AccordionState | null>(null)
 const AccordionItemContext = createContext<AccordionItemState | null>(null)
-
-export function accordionTheme(theme: AccordionTheme): CSSProperties {
-  return flattenComponents({ accordion: theme }) as CSSProperties
-}
 
 export function useAccordion(): AccordionState | null {
   return useContext(AccordionContext)

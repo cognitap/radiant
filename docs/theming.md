@@ -297,31 +297,44 @@ the same version; do not mix new theme data with an old compiled stylesheet.
 
 1. Replace wrappers such as `<div style={theme.style}>` with
    `<ThemeScope theme={theme}>`. `Theme.style`, `Theme.surface`, and the
-   `radiantTheme` style alias remain deprecated compatibility exports. The
-   `.surface` compatibility field describes the light canvas; ThemeScope chooses
-   the canvas for the active mode. A hand-written `{ name, style }` object is no
-   longer a `Theme`: author it with `defineTheme`.
+   `radiantTheme` style alias are removed. Use `radiant` with `ThemeScope`, which
+   chooses the canvas for the active mode. A hand-written `{ name, style }`
+   object is no longer a `Theme`: author it with `defineTheme`.
 2. Move shared settings out of `buttonTheme` into `tokens`: font family into
    `typography.family`, heights/padding/font sizes into the matching `control`
    size group, radius/shape/borders into `control` and `surface`, focus into
    `color.focus`/`focus`, and timing into `motion`. Input, Checkbox, Radio,
    Dialog, Collapsible, Card, and Link no longer fall back through Button's
    overrides. Input's native numeric `size` attribute is unchanged.
-3. Move component exceptions into `components.<family>`. Existing
-   `buttonTheme`, `linkTheme`, `fieldTheme`, `inputTheme`, `checkboxTheme`,
-   `radioTheme`, `dialogTheme`, `collapsibleTheme`, `accordionTheme`, and
-   `cardTheme` helpers remain compatibility conveniences for local styles.
-   They now emit the prefixed component variables. Prefer `defineTheme` for
-   library-wide theme authoring.
-4. Rename direct CSS overrides using the following map. Button `focusColor`
-   now emits `--rad-button-focus-color`; it no longer changes shared focus.
-   Author group spacing with
-   `defineTheme({ id, name, components: { radioGroup: { gap } } })`; the legacy
-   `radioTheme({ gap })` shortcut still maps to that group variable.
-5. Remove `glowHover`: it never had a rendering effect. The legacy Button helper
-   may accept it for compatibility, but the new theme authoring API rejects it.
-   Supply literal `cubic-bezier(...)`/`linear(...)` motion values or your own
-   application variables rather than relying on old ambient easing names.
+3. Replace the removed `buttonTheme`, `linkTheme`, `fieldTheme`, `inputTheme`,
+   `checkboxTheme`, `radioTheme`, `dialogTheme`, `collapsibleTheme`,
+   `accordionTheme`, and `cardTheme` helpers with `components.<family>` in
+   `defineTheme`. Their corresponding `*Theme` type aliases are removed; use
+   `ThemeComponentOverrides` or an indexed family type such as
+   `NonNullable<ThemeComponentOverrides['button']>` for reusable configuration.
+   For a one-off host or named part, use `style` with typed `--rad-*` variables:
+
+   ```tsx
+   import { Button, type ThemeStyle } from '@cognitap/radiant'
+
+   const local: ThemeStyle = { '--rad-button-radius': '1rem' }
+
+   ;<Button style={local}>Save</Button>
+   ```
+
+   A local style is a partial override; a named `ThemeScope` deliberately resets
+   omitted settings to the shared baseline. Do not spread a resolved mode map
+   onto a wrapper as a replacement for ThemeScope's theme/mode inheritance.
+
+4. Rename direct CSS overrides using the following map. Button's `focusColor`
+   maps to `--rad-button-focus-color`; it no longer changes shared focus.
+   Move the old `radioTheme({ gap })` group shortcut to
+   `components.radioGroup.gap`; `components.radio.labelGap` remains option-local.
+5. Remove `glowHover`: it never had a rendering effect and is rejected by
+   `defineTheme`. The library no longer supplies `--ease-spring`, `--ease-snap`,
+   or `--ease-settle`; put the required literal `linear(...)`/`cubic-bezier(...)`
+   curve in the motion token or a deliberate component exception. Application
+   CSS variables are also supported when your application defines them.
 
 | Old variable                                                   | Replacement                                                                       |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
@@ -336,8 +349,13 @@ the same version; do not mix new theme data with an old compiled stylesheet.
 | `--radio-gap`                                                  | `--rad-radio-group-gap`                                                           |
 | `--button-focus-color` (stale consumers)                       | `--rad-color-focus` for shared focus; `--rad-button-focus-color` for Button alone |
 
-The old Tailwind utility aliases are implementation details, not an additional
-public theme vocabulary. The theme registry is readonly; choose a preset by
+The source stylesheet no longer registers `background`, `foreground`, `border`,
+`primary`, `secondary`, `warning`, `destructive`, or `focus` color aliases, or the
+`control` radius alias. Replace classes such as `bg-primary` with
+`bg-(--rad-color-accent)` and `rounded-control` with
+`rounded-(--rad-control-radius)`, or define your own application aliases.
+
+The theme registry is readonly; choose a preset by
 `theme.id` rather than editing the registry or relying on its display name.
 Storybook's global Theme and Mode controls use this same preset registry.
 Button and Link now share `variant`, `tone`, and `controlSize`; see the
@@ -346,3 +364,26 @@ Action-only geometry, elevation and motion remain deliberate Button component
 overrides consumed by both Button and action-shaped Link. Inline/subtle Link
 retains its own decoration and focus overrides. Soft and unfilled ink mixes the
 selected tone toward the scope foreground; explicit Link colour overrides win.
+
+### Cleanup inventory (DEV-132)
+
+| Area                                                                        | Disposition                                                                                  |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Ten family helpers/types, `radiantTheme`, resolved `style`/`surface` fields | Removed directly under the experimental 0.x policy; replacements above                       |
+| Old unprefixed color/radius aliases and ambient easing variables            | Removed from the source and compiled styling routes                                          |
+| Old action variants, `size`/`radius` presentation props and `data-size`     | Already retired by the action/form migrations; no compatibility path restored                |
+| Shared semantic tokens and typed `components` overrides                     | Retained as the canonical theme authoring contract                                           |
+| `ThemeStyle`, native props, named parts, state hooks and `render`           | Retained for local styling and native composition                                            |
+| Button and action-shaped Link presentation                                  | One private `actionStyles` implementation; action-only Button slots are intentionally shared |
+| Dialog actions and Accordion sections                                       | Compose Button and Collapsible respectively; no parallel action/disclosure paint             |
+
+Every component slot in the registry has a reader. Input, Field, Checkbox,
+Radio, Dialog, Collapsible and Card resolve their own override, then a shared
+role or neutral default. Only Button and action-shaped Link consume action
+slots; inline/subtle Link keeps its own decoration/focus contract. Existing
+preset values and light/dark mode maps are unchanged by this cleanup.
+
+This removes compatibility paths without publishing a package. The next
+release must carry these breaking migration notes under the
+[release policy](../RELEASE_POLICY.md); earlier changelog entries describe their
+delivery-time behavior.

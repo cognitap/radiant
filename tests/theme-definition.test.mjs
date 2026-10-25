@@ -101,7 +101,7 @@ test('the preset registry has stable identities and readonly theme values', () =
   assert.ok(Object.isFrozen(themes))
   assert.throws(() => themes.push(defaultTheme), TypeError)
   for (const theme of themes) {
-    for (const value of [theme, theme.modes, theme.modes.light, theme.modes.dark, theme.style]) {
+    for (const value of [theme, theme.modes, theme.modes.light, theme.modes.dark]) {
       assert.ok(Object.isFrozen(value), `${theme.id} must be immutable`)
     }
     assert.deepEqual(JSON.parse(JSON.stringify(theme)), theme)
@@ -115,7 +115,7 @@ test('every preset materialises complete light and dark tokens without legacy va
   const expectedKeys = Object.keys(defaultTheme.modes.light).sort()
   for (const theme of themes) {
     assert.ok(theme.name.trim())
-    assert.deepEqual(Object.keys(theme.style).sort(), expectedKeys)
+    assert.deepEqual(Object.keys(theme).sort(), ['id', 'modes', 'name'])
     for (const mode of ['light', 'dark']) {
       assert.deepEqual(Object.keys(theme.modes[mode]).sort(), expectedKeys, `${theme.id}/${mode}`)
       for (const [key, value] of Object.entries(theme.modes[mode])) {

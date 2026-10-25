@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import * as Radiant from '@cognitap/radiant'
 import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { test } from 'node:test'
@@ -6,41 +7,31 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import {
   Button,
-  buttonTheme,
   Checkbox,
-  checkboxTheme,
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  accordionTheme,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  cardTheme,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  collapsibleTheme,
   Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
   DialogTrigger,
-  dialogTheme,
   Field,
-  fieldTheme,
   Input,
-  inputTheme,
   Link,
   Radio,
   RadioGroup,
-  radioTheme,
-  linkTheme,
   themes,
   ThemeScope,
   defineTheme,
@@ -57,6 +48,12 @@ test('public JavaScript imports and renders on the server', () => {
   assert.match(html, /^<button\b[^>]*\stype="button"/)
   assert.match(html, /disabled=""/)
   assert.match(html, /Save/)
+  assert.deepEqual(
+    Object.keys(Radiant)
+      .filter(name => name.endsWith('Theme'))
+      .sort(),
+    ['defaultTheme', 'defineTheme']
+  )
 })
 
 test('action defaults and data attributes separate treatment, palette and visual size', () => {
@@ -154,38 +151,6 @@ test('rounded-full replaces the themed radius on the class attribute', () => {
   assert.match(classAttribute, /\brounded-full\b/)
   assert.doesNotMatch(classAttribute, /(^|\s)rounded-\(--_btn-radius\)/)
   assert.match(html, /Save/)
-})
-
-test('buttonTheme maps typed settings to Button variables', () => {
-  assert.deepEqual(
-    buttonTheme({
-      radius: '1rem',
-      radiusPressed: '0.25rem',
-      cornerShape: 'squircle',
-      borderWidth: '2px',
-      borderColor: '#111111',
-      pressShiftX: '3px',
-      focusColor: '#111111',
-      focusOffset: '0px',
-      pressScale: 0.96,
-      pressEase: 'var(--ease-snap)',
-      releaseEase: 'var(--ease-spring)',
-      glow: undefined
-    }),
-    {
-      '--rad-button-radius': '1rem',
-      '--rad-button-radius-pressed': '0.25rem',
-      '--rad-button-corner-shape': 'squircle',
-      '--rad-button-border-width': '2px',
-      '--rad-button-border-color': '#111111',
-      '--rad-button-press-shift-x': '3px',
-      '--rad-button-focus-color': '#111111',
-      '--rad-button-focus-offset': '0px',
-      '--rad-button-press-scale': 0.96,
-      '--rad-button-press-ease': 'var(--ease-snap)',
-      '--rad-button-release-ease': 'var(--ease-spring)'
-    }
-  )
 })
 
 test('links render as native anchors with native attributes intact', () => {
@@ -465,23 +430,6 @@ test('the required marker is replaceable and stays out of the accessible name', 
   assert.match(hidden, /\srequired=""/)
 })
 
-test('fieldTheme maps typed settings to Field variables', () => {
-  assert.deepEqual(
-    fieldTheme({
-      gap: '0.5rem',
-      labelWeight: 650,
-      errorColor: 'oklch(0.5 0.2 25)',
-      disabledOpacity: 0.4
-    }),
-    {
-      '--rad-field-gap': '0.5rem',
-      '--rad-field-label-weight': 650,
-      '--rad-field-error-color': 'oklch(0.5 0.2 25)',
-      '--rad-field-disabled-opacity': 0.4
-    }
-  )
-})
-
 test('inputs preserve native attributes and the character-width size', () => {
   const html = renderToStaticMarkup(
     createElement(Input, {
@@ -510,7 +458,6 @@ test('inputs preserve native attributes and the character-width size', () => {
   assert.match(html, /\sdata-slot="input"/)
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
   assert.match(classAttribute, /--rad-input-height/)
-  assert.doesNotMatch(html, /\s(inputTheme)=/)
 })
 
 test('Field protects owned relationships across the native control families', () => {
@@ -572,23 +519,6 @@ test('an input inside a group keeps its own description', () => {
   assert.match(html, /^<fieldset\b/)
   assert.doesNotMatch(html, /<input\b[^>]*\saria-describedby=/)
   assert.doesNotMatch(html, /<input\b[^>]*\saria-invalid=/)
-})
-
-test('inputTheme maps typed settings to Input variables', () => {
-  assert.deepEqual(
-    inputTheme({
-      height: '3rem',
-      radius: '999px',
-      invalidBorder: 'oklch(0.5 0.2 25)',
-      fontWeight: 400
-    }),
-    {
-      '--rad-input-height': '3rem',
-      '--rad-input-radius': '999px',
-      '--rad-input-invalid-border': 'oklch(0.5 0.2 25)',
-      '--rad-input-font-weight': 400
-    }
-  )
 })
 
 test('checkboxes preserve name, value, and checked state', () => {
@@ -675,17 +605,6 @@ for (const [Control, slot] of [
   })
 }
 
-test('checkboxTheme maps typed settings to Checkbox variables', () => {
-  assert.deepEqual(
-    checkboxTheme({ size: '1.25rem', checkedBackground: 'oklch(0.5 0.2 250)', mark: 'white' }),
-    {
-      '--rad-checkbox-size': '1.25rem',
-      '--rad-checkbox-checked-background': 'oklch(0.5 0.2 250)',
-      '--rad-checkbox-mark': 'white'
-    }
-  )
-})
-
 test('a radio group shares one name and checks the default value', () => {
   const html = renderToStaticMarkup(
     createElement(
@@ -721,14 +640,6 @@ test('a required RadioGroup keeps native option labels and validity', () => {
   assert.match(group, /data-slot="radio-label"/)
   assert.match(group, /<input\b[^>]*\srequired=""/)
   assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
-})
-
-test('radioTheme maps typed settings to Radio variables', () => {
-  assert.deepEqual(radioTheme({ size: '1.25rem', radius: '999px', mark: 'white' }), {
-    '--rad-radio-size': '1.25rem',
-    '--rad-radio-radius': '999px',
-    '--rad-radio-mark': 'white'
-  })
 })
 
 test('a dialog stays closed in server markup and names itself from its title', () => {
@@ -872,10 +783,6 @@ test('an accordion opens its default section and keeps the rest closed', () => {
   assert.doesNotMatch(html, /data-state="wrong"/)
 })
 
-test('accordionTheme maps the stack gap to an Accordion variable', () => {
-  assert.deepEqual(accordionTheme({ gap: '0.5rem' }), { '--rad-accordion-gap': '0.5rem' })
-})
-
 test('a card groups content without becoming a control', () => {
   const html = renderToStaticMarkup(
     createElement(
@@ -929,41 +836,6 @@ test('a card groups content without becoming a control', () => {
   assert.match(html, /data-slot="link"/)
 })
 
-test('cardTheme maps typed settings to Card variables', () => {
-  assert.deepEqual(cardTheme({ radius: '1rem', padding: '0', titleWeight: 550 }), {
-    '--rad-card-radius': '1rem',
-    '--rad-card-padding': '0',
-    '--rad-card-title-weight': 550
-  })
-})
-
-test('collapsibleTheme maps typed settings to Collapsible variables', () => {
-  assert.deepEqual(collapsibleTheme({ radius: '1rem', duration: '0ms', contentSize: '1rem' }), {
-    '--rad-collapsible-radius': '1rem',
-    '--rad-collapsible-duration': '0ms',
-    '--rad-collapsible-content-size': '1rem'
-  })
-})
-
-test('dialogTheme maps typed settings to Dialog variables', () => {
-  assert.deepEqual(dialogTheme({ width: '24rem', backdrop: 'transparent', titleWeight: 550 }), {
-    '--rad-dialog-width': '24rem',
-    '--rad-dialog-backdrop': 'transparent',
-    '--rad-dialog-title-weight': 550
-  })
-})
-
-test('linkTheme maps typed settings to Link variables', () => {
-  assert.deepEqual(
-    linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: 3, underlineOffset: '0.3em' }),
-    {
-      '--rad-link-color': 'oklch(0.5 0.1 250)',
-      '--rad-link-underline-offset': '0.3em',
-      '--rad-link-focus-width': 3
-    }
-  )
-})
-
 test('themes are shared presets selected by stable identity with resolved modes', () => {
   assert.deepEqual(
     themes.map(theme => theme.name),
@@ -983,7 +855,19 @@ test('the installed public theme API supports serializable themes and nested bas
     id: 'consumer',
     name: 'Consumer',
     tokens: { control: { radius: '2rem' } },
-    components: { button: { fontFamily: 'serif' } }
+    components: {
+      button: { fontFamily: 'serif' },
+      link: { underlineOffset: '0.3em' },
+      field: { labelWeight: 650 },
+      input: { height: '3rem' },
+      checkbox: { size: '1.25rem' },
+      radio: { labelGap: '0.5rem' },
+      radioGroup: { gap: '1rem' },
+      dialog: { width: '24rem' },
+      collapsible: { duration: '0ms' },
+      accordion: { gap: '0.5rem' },
+      card: { titleWeight: 550 }
+    }
   })
   const html = renderToStaticMarkup(
     createElement(
@@ -992,6 +876,22 @@ test('the installed public theme API supports serializable themes and nested bas
       createElement(ThemeScope, { theme: defaultTheme }, 'Neutral')
     )
   )
+  for (const [variable, value] of Object.entries({
+    '--rad-button-font-family': 'serif',
+    '--rad-link-underline-offset': '0.3em',
+    '--rad-field-label-weight': 650,
+    '--rad-input-height': '3rem',
+    '--rad-checkbox-size': '1.25rem',
+    '--rad-radio-label-gap': '0.5rem',
+    '--rad-radio-group-gap': '1rem',
+    '--rad-dialog-width': '24rem',
+    '--rad-collapsible-duration': '0ms',
+    '--rad-accordion-gap': '0.5rem',
+    '--rad-card-title-weight': 550
+  })) {
+    for (const mode of ['light', 'dark']) assert.equal(theme.modes[mode][variable], value)
+  }
+  assert.deepEqual(Object.keys(theme).sort(), ['id', 'modes', 'name'])
   assert.match(html, /data-rad-theme="consumer" data-rad-mode="dark"/)
   assert.match(html, /data-rad-theme="default"/)
   assert.match(html, /--rad-button-font-family:initial/)
@@ -1044,7 +944,8 @@ test('default styles and the optional reset are compiled and self-contained', ()
     assert.doesNotMatch(readExport(name), /@(import|theme|source|tailwind)\b/)
   }
   const styles = readExport('styles.css')
-  assert.match(styles, /--color-primary\s*:/)
+  assert.match(styles, /--rad-color-accent\s*:/)
+  assert.doesNotMatch(styles, /--(?:color-primary|color-background|radius-control|ease-spring)\s*:/)
   assert.match(styles, /\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/)
   assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
   assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)

@@ -1,11 +1,10 @@
 'use client'
 
 import { createContext, useContext, useId } from 'react'
-import type { ComponentProps, CSSProperties, ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import type { PartStyle } from './presentation.js'
 
@@ -65,8 +64,6 @@ export type FieldState = {
   describedBy?: string
   controlProps: FieldControlProps | null
 }
-
-export type FieldTheme = NonNullable<ThemeComponentOverrides['field']>
 
 type FieldOwn = {
   /** Additional identities; Field always retains its base identity. */
@@ -135,10 +132,6 @@ export function useFieldControl({
     'aria-required': isRequired ? true : ariaRequired,
     'aria-describedby': joinIds(control?.['aria-describedby'], ariaDescribedBy)
   }
-}
-
-export function fieldTheme(theme: FieldTheme): CSSProperties {
-  return flattenComponents({ field: theme }) as CSSProperties
 }
 
 function hasContent(value: ReactNode) {

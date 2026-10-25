@@ -1,13 +1,17 @@
+import type * as Radiant from '@cognitap/radiant'
 import { createElement, createRef, type ComponentProps } from 'react'
 import {
   Button,
+  Link,
   ThemeScope,
   defaultTheme,
   defineTheme,
   radiant,
   themes,
   type Theme,
-  type ThemeDefinition
+  type ThemeDefinition,
+  type ThemeComponentOverrides,
+  type ThemeStyle
 } from '@cognitap/radiant'
 
 const definition: ThemeDefinition = {
@@ -23,7 +27,15 @@ const definition: ThemeDefinition = {
   },
   components: {
     button: { fontWeight: 650, pressScale: 0.97 },
-    input: { shadow: 'none' },
+    link: { color: 'oklch(0.5 0.1 250)', focusWidth: '3px' },
+    field: { gap: '0.5rem', labelWeight: 650 },
+    input: { shadow: 'none', height: '3rem' },
+    checkbox: { size: '1.25rem', mark: 'white' },
+    radio: { size: '1.25rem', radius: '999px' },
+    dialog: { width: '24rem', backdrop: 'transparent' },
+    collapsible: { radius: '1rem', duration: '0ms' },
+    accordion: { gap: '0.5rem' },
+    card: { radius: '1rem', padding: '0', titleWeight: 550 },
     radioGroup: { gap: '1rem' }
   },
   modes: {
@@ -84,3 +96,39 @@ brand.id = 'changed'
 themes.push(brand)
 // @ts-expect-error Resolved mode values are readonly.
 brand.modes.dark['--rad-color-accent'] = 'pink'
+
+// Local overrides use native styles and the same prefixed variable vocabulary.
+const local: ThemeStyle = { '--rad-button-radius': '1rem', margin: '1rem' }
+createElement(Button, { style: local })
+createElement(Button, { style: { '--rad-button-radius': '1rem' } })
+createElement(Link, { style: { '--rad-link-color': 'rebeccapurple' } })
+// @ts-expect-error The deprecated resolved style map has been removed.
+void brand.style
+// @ts-expect-error ThemeScope owns mode-appropriate canvas selection.
+void brand.surface
+// @ts-expect-error Family aliases have been replaced by ThemeComponentOverrides.
+export type RemovedButtonTheme = Radiant.ButtonTheme
+// @ts-expect-error Radio group layout is no longer hidden in a RadioTheme alias.
+export type RemovedRadioTheme = Radiant.RadioTheme
+
+const invalid: ThemeComponentOverrides = {
+  // @ts-expect-error Link override keys remain closed.
+  link: { background: 'red' },
+  // @ts-expect-error Field override keys remain closed.
+  field: { gapSize: '1rem' },
+  // @ts-expect-error Input override keys remain closed.
+  input: { heightPx: '3rem' },
+  // @ts-expect-error Checkbox override keys remain closed.
+  checkbox: { boxSize: '1rem' },
+  // @ts-expect-error Radio override keys remain closed.
+  radio: { diskSize: '1rem' },
+  // @ts-expect-error Dialog override keys remain closed.
+  dialog: { size: '24rem' },
+  // @ts-expect-error Collapsible override keys remain closed.
+  collapsible: { panel: '1rem' },
+  // @ts-expect-error Accordion layout stays independent from Collapsible shape.
+  accordion: { radius: '1rem' },
+  // @ts-expect-error Card override keys remain closed.
+  card: { panel: '1rem' }
+}
+void invalid

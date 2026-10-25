@@ -1,11 +1,10 @@
 'use client'
 
-import type { ComponentProps, CSSProperties } from 'react'
+import type { ComponentProps } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { controlBorderClass, controlMetrics } from './controlStyles.js'
 import { useNativeOwner, type ValueOwner } from './react/useNativeOwner.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import type { ControlSize } from './presentation.js'
 import { useFieldControl } from './Field.js'
@@ -44,12 +43,6 @@ export type InputProps = Omit<ComponentProps<'input'>, 'value' | 'defaultValue' 
     controlSize?: ControlSize
     style?: ThemeStyle
   }
-
-export type InputTheme = NonNullable<ThemeComponentOverrides['input']>
-
-export function inputTheme(theme: InputTheme): CSSProperties {
-  return flattenComponents({ input: theme }) as CSSProperties
-}
 
 export function Input({
   className,

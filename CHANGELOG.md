@@ -4,6 +4,22 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- **Breaking: remove superseded theme paths (DEV-132).** Remove all ten family
+  `*Theme()` helpers and their corresponding type aliases, `radiantTheme`, and
+  the resolved `Theme.style`/`Theme.surface` compatibility fields. Author shared
+  themes with `defineTheme`, apply them with `ThemeScope`, and use
+  `ThemeComponentOverrides` for reusable exceptions or `ThemeStyle` for local
+  `--rad-*` styles. The old Radio gap shortcut moves to `components.radioGroup.gap`.
+- Remove unused unprefixed Tailwind color/radius aliases and ambient
+  `--ease-spring`, `--ease-snap`, `--ease-settle` variables. Use prefixed roles
+  directly and define literal motion curves or application-owned variables.
+  See the [migration steps and cleanup inventory](docs/theming.md#migration-from-button-centred-themes).
+  Preset mode values, native composition and shared action styling are preserved.
+  Button/Link local styles now accept typed CSS custom properties directly.
+
+Earlier entries below record behavior at delivery time; DEV-132 supersedes their
+compatibility-export and ambient-token availability notes.
+
 - **Button-owned host replacement (DEV-119).** Button now accepts
   `render(resolvedNativeProps)` and exports ButtonRenderProps. DialogTrigger/Close
   inherit ButtonProps and compose Button in both default and replacement paths.

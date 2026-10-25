@@ -1,9 +1,8 @@
-import type { ComponentProps, CSSProperties } from 'react'
+import type { ComponentProps } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -79,12 +78,6 @@ export type CardDescriptionProps = CardPartProps<'p'>
 export type CardContentProps = CardPartProps<'div'>
 
 export type CardFooterProps = CardPartProps<'div'>
-
-export type CardTheme = NonNullable<ThemeComponentOverrides['card']>
-
-export function cardTheme(theme: CardTheme): CSSProperties {
-  return flattenComponents({ card: theme }) as CSSProperties
-}
 
 export function Card({ className, ...props }: CardProps) {
   return (

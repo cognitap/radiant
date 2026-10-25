@@ -1,4 +1,4 @@
-import { radiant, radiantTheme } from './radiant.js'
+import { radiant } from './radiant.js'
 import { defaultTheme } from './default.js'
 import { soft } from './soft-squircle.js'
 import { expressive } from './expressive.js'
@@ -19,7 +19,7 @@ export type {
   ThemeTokens
 } from './types.js'
 export { defineTheme } from './defineTheme.js'
-export { radiantTheme, radiant, defaultTheme, soft, expressive, glass, sharp, jelly, ticket }
+export { radiant, defaultTheme, soft, expressive, glass, sharp, jelly, ticket }
 
 export const themes: readonly Theme[] = Object.freeze([
   radiant,

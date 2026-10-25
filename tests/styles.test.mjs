@@ -18,8 +18,11 @@ test('the customization entry generates library and application utilities once w
 @source inline('px-8');`
   })
 
-  assert.match(css, /--color-primary\s*:/)
-  assert.match(css, /--ease-spring:\s*linear\(/)
+  assert.match(css, /--rad-color-accent\s*:/)
+  assert.doesNotMatch(
+    css,
+    /--(?:color-primary|color-background|radius-control|ease-spring|ease-snap|ease-settle)\s*:/
+  )
   for (const selector of [/\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
     assert.equal(css.match(selector)?.length, 1, `Expected one generated ${selector}`)
   }
@@ -42,7 +45,10 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
   assert.match(css, /:not\(:disabled\):not\(\[aria-busy=true\]\):hover/)
   assert.match(css, /--_btn-pe:\s*var\(--rad-button-press-ease/)
   assert.match(css, /:active\s*\{[^}]*transition-timing-function:\s*var\(--_btn-pe\)/)
-  assert.match(css, /--ease-spring:\s*linear\(/)
+  assert.doesNotMatch(
+    css,
+    /--(?:color-primary|color-background|radius-control|ease-spring|ease-snap|ease-settle)\s*:/
+  )
   assert.match(css, /--rad-field-gap/)
   assert.match(css, /--rad-input-height/)
   assert.match(css, /--rad-checkbox-size/)
