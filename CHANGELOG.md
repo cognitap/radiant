@@ -4,6 +4,15 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+## 0.0.3
+
+Experimental release of the harmonised ten-family system. **Breaking changes**
+to component props, composition and theme interfaces are detailed below, with
+migration guidance in `docs/system.md` and `docs/theming.md`. Version 0.0.3 is
+explicitly selected for this experimental release. Automated installed-consumer
+checks cover native/TanStack flows; actual VoiceOver verification is deferred
+and is not claimed by this release.
+
 - Verify the canonical native/TanStack forms and ten-family Workspace composition
   through an installed production archive (DEV-57), including hydration, native
   keyboard/form/reset behavior and modal cleanup. Add an opt-in Cognitap
