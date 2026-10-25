@@ -18,5 +18,4 @@ Write hover, active, and disabled utilities with those prefixes (`hover:`,
 them, and `disabled:` wins over `hover:` and `active:` in the cascade.
 
 Register each new non-color token in `src/cn.ts` under its utility group.
-`rounded-control` is registered on `rounded` so `rounded-full` replaces it.
 Color utilities already share a conflict group.

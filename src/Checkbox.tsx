@@ -1,19 +1,11 @@
 'use client'
 
-import {
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  type ComponentProps,
-  type CSSProperties,
-  type ReactNode
-} from 'react'
+import { useCallback, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useNativeOwner, type CheckedOwner } from './react/useNativeOwner.js'
 import { controlBorderClass, controlMetrics } from './controlStyles.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import type { ControlSize, ControlParts } from './presentation.js'
 import { useFieldControl } from './Field.js'
@@ -68,14 +60,8 @@ export type CheckboxProps = Omit<
     parts?: ControlParts
   }
 
-export type CheckboxTheme = NonNullable<ThemeComponentOverrides['checkbox']>
-
 function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
-}
-
-export function checkboxTheme(theme: CheckboxTheme): CSSProperties {
-  return flattenComponents({ checkbox: theme }) as CSSProperties
 }
 
 export function Checkbox({

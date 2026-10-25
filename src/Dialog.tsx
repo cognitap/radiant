@@ -1,6 +1,6 @@
 'use client'
 
-import type { ComponentProps, CSSProperties, MouseEvent, ReactNode } from 'react'
+import type { ComponentProps, MouseEvent, ReactNode } from 'react'
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { cva } from 'class-variance-authority'
 import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
@@ -9,7 +9,6 @@ import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 const colorMotionClass =
@@ -100,13 +99,7 @@ export type DialogDescriptionProps = Omit<ComponentProps<'p'>, 'style'> & { styl
 
 export type DialogCloseProps = DialogTriggerProps
 
-export type DialogTheme = NonNullable<ThemeComponentOverrides['dialog']>
-
 const DialogContext = createContext<DialogState | null>(null)
-
-export function dialogTheme(theme: DialogTheme): CSSProperties {
-  return flattenComponents({ dialog: theme }) as CSSProperties
-}
 
 export function useDialog(): DialogState | null {
   return useContext(DialogContext)

@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react'
 import type { ComponentProps } from 'react'
 import { cn } from './cn.js'
 import { defaultTheme } from './themes/default.js'
-import { modeStyle } from './themes/defineTheme.js'
+import { modeStyle } from './themes/tokens.js'
 import type { Theme, ThemeMode, ThemeStyle } from './themes/defineTheme.js'
 
 type ScopeState = { theme: Theme; overrides: ThemeStyle }

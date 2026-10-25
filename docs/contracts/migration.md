@@ -4,9 +4,13 @@ This is the migration map for DEV-104/DEV-105. The [canonical contract](./README
 defines the target. This inventory records the original baseline and migration
 destinations; delivery proceeds through the linked harmonisation issues.
 The current README and package declarations describe the implemented API.
-Shared themes and default Dialog action composition have landed in the
-foundation/Storybook work. DEV-117 implements the action vocabulary below;
-remaining family and replacement contracts still require their migrations.
+The ten-family harmonisation through DEV-130 is implemented. DEV-132 removes
+the remaining compatibility helpers/types, `radiantTheme`, `Theme.style`,
+`Theme.surface`, old utility aliases and ambient easing variables. The tables
+below preserve the original baseline-to-target mapping; helper names and
+"Current" columns describe that baseline, not supported exports. Use the
+[current migration steps](../theming.md#migration-from-button-centred-themes)
+for the supported replacements.
 
 DEV-118 implements Link's resolved native anchor/ref replacement contract.
 Adapters return one compatible element and preserve the forwarded props/ref;
@@ -17,7 +21,7 @@ Button in both host paths. Set presentation on the owner, then forward resolved 
 props/ref/children to one button. Replace render→Button adaptations with native
 or custom button adapters; resolved children already contain Button's label and
 pending mark. Direct null/text/array/fragment/non-button outputs are rejected.
-Dialog surface and lifecycle alignment remain with DEV-127.
+DEV-127 delivered Dialog surface and lifecycle alignment.
 
 The baseline is the ten current families in `src/index.ts`: Button, Link, Field,
 Input, Checkbox, RadioGroup (including Radio), Dialog, Collapsible, Accordion,
@@ -89,7 +93,7 @@ and ARIA attributes remain the source of their respective platform behavior.
 
 ## Theme helper keys
 
-The inventory below covers every current helper key. Each grouped destination
+The inventory below covers every original helper key. Each grouped destination
 is a semantic role, not permission to copy all existing Button values into the
 shared theme. Theme authors explicitly choose shared defaults; a value intended
 for one family stays in `components.<family>` under its existing camelCase key.
@@ -98,7 +102,7 @@ Shared CSS variables use `--rad-`, for example `--rad-color-accent`,
 `--rad-control-radius`, and `--rad-focus-width`. Component overrides use
 `--rad-<family>-<key>`, e.g. `--rad-button-radius`. An override falls back to a
 shared role or its documented component default, never another family's token.
-Except for Button's `focusColor` exception below, current helper keys serialize
+Except for Button's original `focusColor` exception below, baseline helper keys serialized
 as `--<family>-<kebab-key>`; all old variable consumers require migration.
 
 ### Button: `buttonTheme` / `ButtonTheme`
@@ -122,8 +126,8 @@ as `--<family>-<kebab-key>`; all old variable consumers require migration.
 | `stateColor`, `hoverLayer`, `pressLayer`, `hoverLift`, `pressScale`, `pressShift`, `pressShiftX` | `components.button`, interaction effects                                                            |
 | `glowHover`                                                                                      | Retire: the emitted `--button-glow-hover` has no runtime reader                                     |
 
-Current `buttonTheme({ focusColor })` writes `--color-focus`, changing the
-shared focus color. Its target Button override must become local; deliberate
+The original `buttonTheme({ focusColor })` wrote `--color-focus`, changing the
+shared focus color. The migrated Button override is local; deliberate
 theme-wide focus changes go through the shared token instead.
 
 ### Link: `linkTheme` / `LinkTheme`
@@ -261,8 +265,8 @@ theme-wide colors independently.
 `themes` becomes one typed readonly preset registry used by consumers and
 Storybook. Keep display names human-readable; never use them as persistent
 identity. Fonts need documented loading and fallbacks. Theme mode is independent
-of identity, and preset light/dark completeness is verified in the later preset
-issue rather than claimed by this inventory.
+of identity. Preset completeness is covered by the runtime and browser checks;
+this original inventory alone is not verification evidence.
 
 ## Removal and verification ledger
 

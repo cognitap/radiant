@@ -1,24 +1,26 @@
 'use client'
 
-import type { ComponentProps, CSSProperties, ReactElement } from 'react'
+import type { ComponentProps, ReactElement } from 'react'
 import { Fragment, isValidElement } from 'react'
 import { actionVariants } from './actionStyles.js'
 import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { composeAction } from './internal/events.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type { ButtonVariant } from './presentation.js'
 
-export type ButtonRenderProps = ComponentProps<'button'> & {
+export type ButtonRenderProps = Omit<ComponentProps<'button'>, 'style'> & {
+  style?: ThemeStyle
   'data-slot': string
   'data-variant': ButtonVariant
   'data-tone': Tone
   'data-control-size': ControlSize
 }
 
-export type ButtonProps = ComponentProps<'button'> & {
+export type ButtonProps = Omit<ComponentProps<'button'>, 'style'> & {
+  style?: ThemeStyle
   /** Additional composed identities; the button token is always retained. */
   'data-slot'?: string
   /** Forward resolved presentation, children, native attributes and ref to one button host. */
@@ -29,15 +31,6 @@ export type ButtonProps = ComponentProps<'button'> & {
   iconOnly?: boolean
   fullWidth?: boolean
   pending?: boolean
-}
-
-export type ButtonTheme = NonNullable<ThemeComponentOverrides['button']> & {
-  /** @deprecated This legacy setting has no rendering effect. */
-  glowHover?: string
-}
-
-export function buttonTheme(theme: ButtonTheme): CSSProperties {
-  return flattenComponents({ button: theme }) as CSSProperties
 }
 
 export function Button({

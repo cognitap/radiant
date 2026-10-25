@@ -1,13 +1,12 @@
 'use client'
 
-import type { ComponentProps, CSSProperties, ToggleEvent } from 'react'
+import type { ComponentProps, ToggleEvent } from 'react'
 import { createContext, useContext, useId } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import { useControllableState } from './react/useControllableState.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -88,13 +87,7 @@ export type CollapsibleContentProps = Omit<ComponentProps<'div'>, 'style'> & {
   'data-slot'?: string
 }
 
-export type CollapsibleTheme = NonNullable<ThemeComponentOverrides['collapsible']>
-
 const CollapsibleContext = createContext<CollapsibleState | null>(null)
-
-export function collapsibleTheme(theme: CollapsibleTheme): CSSProperties {
-  return flattenComponents({ collapsible: theme }) as CSSProperties
-}
 
 export function useCollapsible(): CollapsibleState | null {
   return useContext(CollapsibleContext)

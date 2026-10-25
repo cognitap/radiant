@@ -1,14 +1,13 @@
 'use client'
 
 import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
-import type { ChangeEvent, ComponentProps, CSSProperties, ReactNode } from 'react'
+import type { ChangeEvent, ComponentProps, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from './react/useNativeOwner.js'
 import { controlBorderClass, controlMetrics } from './controlStyles.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import { Field, useFieldControl } from './Field.js'
 import type { FieldProps } from './Field.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
@@ -53,8 +52,6 @@ const labelClass =
 const optionsClass =
   'grid justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
 
-export type RadioTheme = NonNullable<ThemeComponentOverrides['radio']> & { gap?: string }
-
 type RadioGroupContextValue = {
   name: string
   value?: string | null
@@ -95,11 +92,6 @@ export type RadioProps = Omit<
 
 function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
-}
-
-export function radioTheme(theme: RadioTheme): CSSProperties {
-  const { gap, ...radio } = theme
-  return flattenComponents({ radio, radioGroup: { gap } }) as CSSProperties
 }
 
 export function RadioGroup({

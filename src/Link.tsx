@@ -1,15 +1,9 @@
-import {
-  Fragment,
-  isValidElement,
-  type ComponentProps,
-  type CSSProperties,
-  type ReactElement
-} from 'react'
+import { Fragment, isValidElement, type ComponentProps, type ReactElement } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
 import { actionTone, actionVariants } from './actionStyles.js'
 import { cn } from './cn.js'
-import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
 
 const linkVariants = cva(
   [
@@ -39,25 +33,21 @@ type LinkVariants = VariantProps<typeof linkVariants>
 
 export type LinkVariant = NonNullable<LinkVariants['variant']> | ButtonVariant
 
-export type LinkRenderProps = ComponentProps<'a'> & {
+export type LinkRenderProps = Omit<ComponentProps<'a'>, 'style'> & {
+  style?: ThemeStyle
   'data-slot': 'link'
   'data-variant': LinkVariant
   'data-tone': Tone
   'data-control-size': ControlSize
 }
 
-export type LinkProps = ComponentProps<'a'> & {
+export type LinkProps = Omit<ComponentProps<'a'>, 'style'> & {
+  style?: ThemeStyle
   variant?: LinkVariant
   tone?: Tone
   controlSize?: ControlSize
   external?: boolean
   render?: (props: LinkRenderProps) => ReactElement
-}
-
-export type LinkTheme = NonNullable<ThemeComponentOverrides['link']>
-
-export function linkTheme(theme: LinkTheme): CSSProperties {
-  return flattenComponents({ link: theme }) as CSSProperties
 }
 
 export function Link({

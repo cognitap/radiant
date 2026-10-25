@@ -2,42 +2,31 @@ import './theme-types.js'
 import { createElement, createRef, type Ref } from 'react'
 import {
   Button,
-  buttonTheme,
   Checkbox,
-  checkboxTheme,
   Field,
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  accordionTheme,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  cardTheme,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  collapsibleTheme,
   Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
   DialogTrigger,
-  dialogTheme,
   Radio,
   RadioGroup,
-  radioTheme,
-  fieldTheme,
   Input,
-  inputTheme,
   Link,
-  linkTheme,
-  themes,
   useField,
   type ButtonProps,
   type ButtonRenderProps,
@@ -45,7 +34,6 @@ import {
   type LinkVariant,
   type Tone,
   type ControlSize,
-  type ButtonTheme,
   type CheckboxProps,
   type FieldProps,
   type InputProps,
@@ -60,18 +48,8 @@ import {
   type RadioGroupProps,
   type RadioProps,
   type LinkProps,
-  type LinkRenderProps,
-  type Theme
+  type LinkRenderProps
 } from '@cognitap/radiant'
-
-const shared: Theme | undefined = themes[0]
-createElement('div', { style: shared?.style })
-
-const theme: ButtonTheme = { cornerShape: 'squircle', radiusPressed: '0.25rem', pressScale: 0.96 }
-createElement('div', { style: buttonTheme(theme) })
-
-// @ts-expect-error Theme keys are a closed set.
-buttonTheme({ radiusOnPress: '0.25rem' })
 
 const props: ButtonProps = {
   type: 'submit',
@@ -117,11 +95,6 @@ createElement(Button, invalidVariant)
 const invalidProps: ButtonProps = { type: 'invalid' }
 createElement(Button, invalidProps)
 
-createElement('div', { style: linkTheme({ color: 'oklch(0.5 0.1 250)', focusWidth: '3px' }) })
-
-// @ts-expect-error Link theme keys are a closed set.
-linkTheme({ background: 'red' })
-
 const linkProps: LinkProps = {
   href: '/next',
   target: '_blank',
@@ -161,7 +134,6 @@ void [disabledLink, pendingLink]
 const invalidLinkVariant: LinkProps = { variant: 'button' }
 createElement(Link, invalidLinkVariant)
 
-createElement('div', { style: fieldTheme({ gap: '0.5rem', labelWeight: 650 }) })
 useField()
 
 const fieldProps: FieldProps = {
@@ -204,14 +176,9 @@ const groupAdapter: FieldProps = { layout: 'group', label: 'Plan', children: () 
 const fieldPartId: FieldProps = { label: 'Email', parts: { label: { htmlFor: 'other' } } }
 void [controlForm, groupRef, controlRef, groupControlId, groupAdapter, fieldPartId]
 
-// @ts-expect-error Field theme keys are a closed set.
-fieldTheme({ gapSize: '1rem' })
-
 // @ts-expect-error Field layouts are a closed set.
 const invalidFieldLayout: FieldProps = { layout: 'inline', label: 'Email' }
 createElement(Field, invalidFieldLayout)
-
-createElement('div', { style: inputTheme({ height: '3rem', radius: '999px' }) })
 
 const inputProps: InputProps = {
   name: 'email',
@@ -225,11 +192,6 @@ const inputProps: InputProps = {
   ref: createRef<HTMLInputElement>()
 }
 createElement(Input, inputProps)
-
-// @ts-expect-error Input theme keys are a closed set.
-inputTheme({ heightPx: '3rem' })
-
-createElement('div', { style: checkboxTheme({ size: '1.25rem', mark: 'white' }) })
 
 const checkboxProps: CheckboxProps = {
   name: 'channels',
@@ -248,14 +210,9 @@ const checkboxProps: CheckboxProps = {
 }
 createElement(Checkbox, checkboxProps)
 
-// @ts-expect-error Checkbox theme keys are a closed set.
-checkboxTheme({ boxSize: '1rem' })
-
 // @ts-expect-error Checkbox type is fixed.
 const invalidCheckbox: CheckboxProps = { type: 'radio' }
 createElement(Checkbox, invalidCheckbox)
-
-createElement('div', { style: radioTheme({ size: '1.25rem', radius: '999px' }) })
 
 const radioGroupProps: RadioGroupProps = {
   label: 'Plan',
@@ -334,14 +291,9 @@ void [
   nullInput
 ]
 
-// @ts-expect-error Radio theme keys are a closed set.
-radioTheme({ diskSize: '1rem' })
-
 // @ts-expect-error Radio type is fixed.
 const invalidRadio: RadioProps = { type: 'checkbox', value: 'pro' }
 createElement(Radio, invalidRadio)
-
-createElement('div', { style: dialogTheme({ width: '24rem', backdrop: 'transparent' }) })
 
 const dialogProps: DialogProps = {
   open: true,
@@ -407,11 +359,6 @@ createElement(DialogClose, dialogCloseProps)
 const invalidDialogAction: DialogTriggerProps = { variant: 'link' }
 createElement(DialogTrigger, invalidDialogAction)
 
-// @ts-expect-error Dialog theme keys are a closed set.
-dialogTheme({ size: '24rem' })
-
-createElement('div', { style: collapsibleTheme({ radius: '1rem', duration: '0ms' }) })
-
 const collapsibleProps: CollapsibleProps = {
   open: true,
   style: { '--rad-motion-color-duration': '0ms' },
@@ -435,11 +382,6 @@ createElement(
     'Ships in two days.'
   )
 )
-
-// @ts-expect-error Collapsible theme keys are a closed set.
-collapsibleTheme({ panel: '1rem' })
-
-createElement('div', { style: accordionTheme({ gap: '0.5rem' }) })
 
 const accordionProps: AccordionProps = {
   type: 'single',
@@ -481,11 +423,6 @@ createElement(
 const invalidAccordion: AccordionProps = { type: 'single', value: ['shipping'] }
 createElement(Accordion, invalidAccordion)
 
-// @ts-expect-error Accordion theme keys are a closed set.
-accordionTheme({ radius: '1rem' })
-
-createElement('div', { style: cardTheme({ radius: '1rem', padding: '0', titleWeight: 550 }) })
-
 const cardProps: CardProps = {
   role: 'region',
   'aria-labelledby': 'ship',
@@ -523,9 +460,6 @@ createElement(
     'Track'
   )
 )
-
-// @ts-expect-error Card theme keys are a closed set.
-cardTheme({ panel: '1rem' })
 
 // @ts-expect-error The dialog open attribute is owned by showModal.
 const invalidDialog: DialogContentProps = { open: true }
