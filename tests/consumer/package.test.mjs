@@ -1065,11 +1065,16 @@ test('the installed color entry generates portable walls without React or browse
       return next(specifier, context);
     } });
     for (const key of ['window', 'document', 'localStorage']) Object.defineProperty(globalThis, key, { get() { throw new Error('Color entry read ' + key); } });
-    const { generateColorWall } = await import('@cognitap/radiant/color');
+    const { generateColorWall, recommendColorPalette } = await import('@cognitap/radiant/color');
     const wall = generateColorWall({ brand: '#FFFF00' });
     assert.equal(wall.color.palettes.length, 18);
     assert.equal(wall.color.anchor.stop, 200);
     assert.deepEqual(generateColorWall(JSON.parse(JSON.stringify(wall.input))), wall);
+    const palette = recommendColorPalette(wall);
+    assert.equal(palette.pass, true);
+    assert.equal(palette.color.brand.value, '#FFFF00');
+    assert.equal(palette.color.palettes.length, 18);
+    assert.ok(palette.checks.some(check => check.mode === 'dark' && check.foregroundRole === 'accentForeground'));
   `
   execFileSync(process.execPath, ['--input-type=module', '-e', script], {
     cwd: new URL('.', import.meta.url),

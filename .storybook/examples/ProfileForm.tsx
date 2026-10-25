@@ -24,7 +24,7 @@ import {
 export type FormOwner = 'native' | 'tanstack'
 export type FormPlacement = 'standalone' | 'card' | 'dialog'
 type Profile = { email: string; updates: boolean; plan: string }
-type FormCallbacks = { onSaved: (profile: Profile) => void; onReset: () => void }
+type FormCallbacks = { onSaved: (profile: Profile) => void; onReset: () => void; label?: string }
 
 const defaults: Profile = { email: '', updates: true, plan: 'free' }
 const formStyle = { display: 'grid', gap: 'var(--rad-spacing-group-gap, 1rem)', minWidth: 0 }
@@ -101,13 +101,13 @@ function Actions() {
   )
 }
 
-function NativeProfileForm({ onSaved, onReset }: FormCallbacks) {
+function NativeProfileForm({ onSaved, onReset, label = 'Profile' }: FormCallbacks) {
   const emailRef = useRef<HTMLInputElement>(null)
   const touched = useRef(false)
   const [error, setError] = useState<string>()
   return (
     <form
-      aria-label="Profile"
+      aria-label={label}
       noValidate
       style={formStyle}
       onSubmit={event => {
@@ -163,7 +163,7 @@ function NativeProfileForm({ onSaved, onReset }: FormCallbacks) {
   )
 }
 
-function TanStackProfileForm({ onSaved, onReset }: FormCallbacks) {
+function TanStackProfileForm({ onSaved, onReset, label = 'Profile' }: FormCallbacks) {
   const emailRef = useRef<HTMLInputElement>(null)
   const form = useForm({
     defaultValues: defaults,
@@ -172,7 +172,7 @@ function TanStackProfileForm({ onSaved, onReset }: FormCallbacks) {
   })
   return (
     <form
-      aria-label="Profile"
+      aria-label={label}
       noValidate
       style={formStyle}
       onSubmit={event => {
@@ -252,16 +252,19 @@ function TanStackProfileForm({ onSaved, onReset }: FormCallbacks) {
 /** The owner changes; the form is reused unchanged in each surface. */
 export function ProfileExample({
   owner,
-  placement
+  placement,
+  label = 'Profile'
 }: {
   owner: FormOwner
   placement: FormPlacement
+  label?: string
 }) {
   const [saved, setSaved] = useState<Profile>()
   const [open, setOpen] = useState(false)
   const Form = owner === 'native' ? NativeProfileForm : TanStackProfileForm
   const content = (
     <Form
+      label={label}
       onSaved={profile => {
         setSaved(profile)
         setOpen(false)

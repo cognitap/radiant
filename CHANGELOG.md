@@ -4,6 +4,12 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add working-palette recommendations and semantic light/dark mapping (DEV-154).
+  `recommendColorPalette` preserves the exact source and full wall, supports
+  deliberate family/role overrides and reports unrounded contrast for named
+  pairs, including explicit inactive-control exceptions. Return existing color
+  and canvas token layers; inspect real component states using the canonical form.
+
 - Add the deterministic OKLCH color-wall generator (DEV-153), available through
   the package root and a React-free `@cognitap/radiant/color` entry. It emits 16
   hue families plus Brand and Neutral ramps, defaults to exact source anchoring

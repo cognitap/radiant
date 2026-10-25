@@ -198,7 +198,7 @@ validation with a regeneration/replacement instruction. An unanchored ramp omits
 
 This schema preserves the exact-anchoring decision; it does not generate ramps,
 parse color syntax, check gamut claims, measure contrast or prove balanced swatches.
-Those belong to the subsequent color engine and semantic role mapping. A P3 source
+Use the color generator and semantic mapper below for those separate responsibilities. A P3 source
 and labeled fallback can be retained as data without claiming P3 generation support.
 Changing source/fidelity alongside an existing anchor requires a coherent replacement
 or regenerated palette; the compiler never silently adjusts the source.
@@ -286,11 +286,94 @@ change subsequent results or retain an unbounded history of user colors.
 
 A color wall is palette data. It does not select semantic text/action/state
 roles, guarantee contrast on arbitrary surfaces or certify chart distinctions.
-Those decisions follow in DEV-154. `compileThemeDocument` continues to use only
+Use `recommendColorPalette` below for working sets and named role-pair checks.
+`compileThemeDocument` continues to use only
 semantic `values`/`modes`; adding this metadata alone does not change a rendered
 theme. In Storybook, **System → Color Wall → Reference** exposes the accepted
 12 inputs and controls for visual inspection; the public workshop UI remains
 separate documentation-application work.
+
+## Recommend a working palette and semantic roles
+
+```ts
+import { generateColorWall, recommendColorPalette } from '@cognitap/radiant/color'
+import { updateThemeDocument, compileThemeDocument } from '@cognitap/radiant'
+
+const wall = generateColorWall({ brand: '#7C3AED' })
+const palette = recommendColorPalette(wall, {
+  working: { support: 'teal' },
+  modes: { dark: { focus: '#ABCDEF' } }
+})
+
+// Replace the complete color section, preserving the original source and all ramps.
+// Merge the canvas layer to retain surface radius, spacing and other authored values.
+const colored = updateThemeDocument(document, { color: palette.color }, 'replace')
+const themed = updateThemeDocument(colored, { surface: palette.surface })
+const theme = compileThemeDocument(themed)
+const failures = palette.checks.filter(check => check.pass === false)
+```
+
+`recommendColorPalette(wall, options?)` consumes a complete version-1 sRGB wall.
+It returns deeply frozen, detached, JSON-safe recommendations. The original
+brand, fidelity, anchor and all 18 ramps remain unchanged in `palette.color`.
+The result has five parts:
+
+- `working`: primary, support, neutral, success, warning and danger, each with a
+  wall `paletteId` and independently selected light/dark background/foreground pairs.
+- `color`: the original wall metadata plus complete light/dark maps for the
+  existing shared color roles. No common-mode values are needed.
+- `surface`: light/dark `canvas` layers, using the existing surface token group.
+- `checks`: measured pairs with mode, role names, exact colors, unrounded ratio,
+  minimum, pass/fail and an actionable failure message.
+- `pass`: whether every listed required pair passes. This is a scoped contrast
+  result, not a complete accessibility or arbitrary-theme certification.
+
+Defaults use Brand as primary, Neutral for surfaces, Emerald for success, Amber
+for warning and Red for danger. The support family is nearest to primary hue +
+120°. Low-chroma candidates use the wall's explicit hue direction and nominal
+family geometry rather than numerical hue noise. `working` can replace any of
+these family IDs with another existing wall family. Duplicate families are
+allowed deliberately; color alone does not establish status meaning or chart
+separation. Use labels/icons as appropriate.
+
+Light canvas/surface start at Neutral 50/100, dark at 950/900. Foreground,
+secondary text, borders, focus, invalid state and action shades are selected
+against the actual emitted opaque surfaces, independently for each mode. Solid
+pairs target a 6:1 internal text margin where available, with 4.5:1 as the reported
+minimum. Primary fill also targets 3:1 against both surfaces because it identifies
+checked Checkbox/Radio state. Exact source identity stays separate: yellow may
+remain the exact Brand 200 while a darker related shade supplies the light action.
+Black/white ink can be selected when it gives the strongest text contrast.
+
+`options.version` defaults to 1. `options.modes.light`/`dark` can override any
+existing color role and `canvas`, using opaque six-digit sRGB hex. Provided
+surfaces drive automatic dependent choices; explicit foregrounds and other role
+colors are retained even if they fail. Unsupported fields, palette IDs, versions,
+non-opaque colors and incomplete walls fail with a path or available ID list.
+Recipes remain ordinary serializable options; the existing theme document stores
+mapped values and wall metadata, without adding an untyped recipe field.
+
+Contrast uses the [WCAG sRGB luminance formula](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)
+on final hex values. Normal text (including secondary text, placeholder and invalid
+text) is checked at 4.5:1 on canvas and surface; solid action/working-palette ink
+is checked at 4.5:1 on its fill. Meaningful border, offset focus ring and primary
+checked-state fill are checked at 3:1 on both surfaces. These are Radiant's
+conservative role policies, not a requirement that every decorative boundary or
+hover/rest color differ by 3:1. See [non-text contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html).
+
+Disabled token pairs have `minimum: null` and `pass: null`, explicitly reflecting
+the inactive-control exception. Their informational ratios exclude component
+opacity/effects. Pending actions remain active and are not exempt. Support/success
+are working-palette pairs; the current component tones remain accent, neutral,
+warning and danger. No new component tones or runtime token roles are introduced.
+
+Apply color and canvas together before relying on the report. A color-only import,
+component/local override, gradient/translucent surface or rendered hover/pressed
+effect can change the effective pair. Recheck those contexts in the browser; this
+base-pair report does not silently certify them. **System → Color Palette →
+Reference** reuses the canonical profile form and inspects invalid, disabled,
+checked, pending and keyboard-focus states in both modes. DEV-155 owns the wider
+theme-editor integration; the public editor itself remains in radiant-docs.
 
 ## Scopes, mode, and overrides
 
