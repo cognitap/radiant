@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the exhaustive theme and installed-consumer audit
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -13,42 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Source, runtime and Storybook checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up pinned pnpm
-        uses: pnpm/action-setup@v6.1.0
-        with:
-          run_install: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7.0.0
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check generated theme, formatting, lint and types
-        run: pnpm theme:check && pnpm format:check && pnpm lint && pnpm typecheck
-
-      - name: Build library and run runtime tests
-        run: pnpm build && node --test tests/*.test.mjs
-
-      - name: Build Storybook
-        run: pnpm build:storybook
-
-  consumers:
-    name: Installed package, styles and compositions
+  check:
+    name: Library checks
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -75,77 +47,19 @@ jobs:
       - name: Install Chromium and system dependencies
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Check installed package, production styles and compositions
-        run: pnpm test:package --styles --compositions
+      - name: Check library, package, Storybook and representative browser coverage
+        if: ${{ !inputs.full }}
+        run: pnpm check:ci
 
-      - name: Save installed consumer results and screenshots
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: installed-consumer-results
-          path: output/browser/
-          if-no-files-found: ignore
-          retention-days: 14
-
-  browser:
-    name: Browser interactions and accessibility (${{ matrix.shard }}/4)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up pinned pnpm
-        uses: pnpm/action-setup@v6.1.0
-        with:
-          run_install: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7.0.0
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Chromium and system dependencies
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Check Storybook interactions, accessibility and browser platform
-        run: pnpm test:browser --shard=${{ matrix.shard }}/4
+      - name: Audit all themes, installed styles and compositions
+        if: ${{ inputs.full }}
+        run: pnpm check
 
       - name: Save browser results and failure screenshots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: browser-results-${{ matrix.shard }}
+          name: browser-results
           path: output/browser/
           if-no-files-found: ignore
           retention-days: 14
-
-  check:
-    name: Library checks
-    if: ${{ always() }}
-    needs: [quality, consumers, browser]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Require every check to pass
-        env:
-          JOB_RESULTS: ${{ toJSON(needs) }}
-        run: |
-          node -e '
-            const results = JSON.parse(process.env.JOB_RESULTS)
-            for (const [job, { result }] of Object.entries(results)) {
-              console.log(`${job}: ${result}`)
-              if (result !== "success") process.exitCode = 1
-            }
-          '

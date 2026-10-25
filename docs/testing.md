@@ -1,14 +1,19 @@
 # Verification for component migrations
 
-`pnpm check` is the complete local gate. It runs formatting, lint, source
-and contract types, runtime tests, the installed consumer suite, a Storybook
-build, and real Chromium tests. The installed check also builds and renders
-production consumers of both styling routes and the canonical compositions.
-CI runs the same stages in parallel: source/runtime checks and the Storybook
-build, installed package/style/composition checks, and four shards of the full
-Storybook/platform browser matrix. CI's **Library checks** job requires every
-job and shard to succeed, including when another job fails or is skipped. Keep
-that status required when configuring repository merge rules.
+`pnpm check:ci` is the routine local and CI gate. It checks generated themes,
+formatting, lint, source/contract types, all runtime tests, installed package
+exports/types without Tailwind, and the Storybook production build. It then
+runs every story's interaction/accessibility checks in Radiant Light and Dark,
+plus the complete browser platform project. The platform Appearance cases still
+exercise every preset in both modes. CI's **Library checks** job fails if any
+stage fails. Keep that status required when configuring repository merge rules.
+
+`pnpm check` remains the exhaustive audit: it additionally builds and renders
+production consumers of both styling routes and the canonical compositions,
+and repeats every story across all presets in Light and Dark. Use it for
+theme/styling/composition changes and release verification. Run it locally or
+select **Run workflow → full** in GitHub Actions. Routine PR/main CI does not
+run this larger matrix.
 
 Pull requests run CI on their merge revision; pushes to `main` verify the merged
 result. Feature branch pushes use the pull request run, avoiding duplicate
@@ -35,11 +40,13 @@ Linux CI installs the browser's system dependencies with
 pinned by the lockfile. A running Storybook server is not required, and tests do
 not take over the development server on port 6006.
 
-`vitest.config.ts` reads the same public preset registry as the Storybook toolbar.
+The full `pnpm test:browser` suite in `vitest.config.ts` reads the same public preset registry as the Storybook toolbar.
 Every story runs once for each preset in explicit Light and Dark. New presets
 and stories join that matrix automatically. Each run renders the shared preview,
 executes its play function, and runs axe with `a11y.test: 'error'`. There are no
-theme exclusions, retries, or blanket accessibility rule suppressions.
+theme exclusions, retries, or blanket accessibility rule suppressions in the
+full suite. `pnpm test:browser:smoke` selects Radiant Light, Radiant Dark and
+the browser platform project for routine CI; it does not change the full suite.
 
 For a focused loop:
 
@@ -74,20 +81,11 @@ recorder or the current Chromium suite.
 
 JUnit results identify the preset/mode project and story in
 `output/browser/junit.xml`. Failure screenshots are saved under
-`output/browser/attachments/`. Each CI shard uploads its own receipt, JUnit and
-screenshots as **browser-results-1** through **browser-results-4**, even when a
-test fails. Download each artifact into its own directory to retain all four
-receipts and reports. Shards keep running when another fails, preserving the
-complete diagnostic results. To reproduce a shard locally:
-
-```sh
-pnpm test:browser --shard=1/4
-```
-
-Artifacts expire after 14 days; preserve the environment and
+`output/browser/attachments/`. CI uploads both as **browser-results**, even
+when a test fails. Artifacts expire after 14 days; preserve the environment and
 result summary/captures in a reviewed evidence record before expiry. Story failures also link to the corresponding local Canvas.
 Use the Storybook testing widget to run and debug plays interactively; use the
-command above for the complete required matrix.
+command above for the complete audit matrix.
 
 ## Where a regression belongs
 
@@ -126,12 +124,13 @@ build both documented Tailwind entries. Vite production bundles import the
 installed public package; no repository source or Storybook stylesheet is used.
 Each route exercises all presets in light/dark, provider-free/default/nested
 scopes, component/local/caller overrides, and native Dialog/disclosure visibility.
-The same checks run inside `pnpm check` through `pnpm test --styles --compositions`.
+The same checks run in the full audit through `pnpm check`; routine CI uses
+the package/type check without these production browser fixtures.
 
 `output/browser/installed-styles/results.json` records its own environment,
 archive integrity, build tools, observed styles and pass/fail cases. Production
-bundles and representative Glass/Sharp 3D captures are beside it; CI's
-**installed-consumer-results** artifact includes them. This receipt belongs to the installed run,
+bundles and representative Glass/Sharp 3D captures are beside it; a full CI
+audit includes them in **browser-results**. This receipt belongs to the installed run,
 separately from the subsequent Storybook/platform JUnit report. Review/preserve
 the [artifact evidence record](verification/2026-10-25-installed-styles.md)
 before the same 14-day expiry. Ordinary `pnpm test`/`test:package` and release
@@ -154,8 +153,8 @@ disclosures, Link navigation and open-modal unmount/remount. All presets run in
 both modes, including an inherited input override and an independent default scope.
 
 Results, environment/package integrity, the production page and representative
-captures are in `output/browser/installed-compositions/`, included in CI's
-**installed-consumer-results** artifact. The required gate includes this check. Serve the retained
+captures are in `output/browser/installed-compositions/`, included in a full CI
+audit's **browser-results** artifact. The full audit includes this check. Serve the retained
 page for manual browser/AT testing:
 
 ```sh

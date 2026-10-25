@@ -61,13 +61,16 @@
     "lint": "oxlint --deny-warnings",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test --styles --compositions && pnpm build:storybook && pnpm test:browser",
+    "check:source": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm typecheck",
+    "check:ci": "pnpm check:source && pnpm test && pnpm build:storybook && pnpm test:browser:smoke",
+    "check": "pnpm check:source && pnpm test --styles --compositions && pnpm build:storybook && pnpm test:browser",
     "test:compositions": "pnpm build && node scripts/verify-package.mjs --compositions",
     "release:prepare": "node scripts/prepare-release.mjs",
     "theme:generate": "node scripts/generate-theme-css.mjs",
     "theme:check": "node scripts/generate-theme-css.mjs --check",
     "watch:theme": "node scripts/generate-theme-css.mjs --watch",
-    "test:browser": "pnpm theme:generate && node scripts/record-browser-environment.mjs && vitest run"
+    "test:browser": "pnpm theme:generate && node scripts/record-browser-environment.mjs && vitest run",
+    "test:browser:smoke": "pnpm test:browser --project=storybook-radiant-light --project=storybook-radiant-dark --project=browser-platform"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",
