@@ -31,3 +31,25 @@ export const themes: readonly Theme[] = Object.freeze([
   jelly,
   ticket
 ])
+
+export {
+  defineThemeDocument,
+  parseThemeDocument,
+  compileThemeDocument,
+  updateThemeDocument,
+  exportThemeSections,
+  themeDocumentFromDefinition
+} from './themeDocument.js'
+export type {
+  ThemeDocument,
+  ThemeSectionExport,
+  ThemeSections,
+  ThemeSectionName,
+  ThemeSection,
+  ThemeColorSection,
+  ThemeColorStop,
+  ThemeBrandSource,
+  ThemePalette,
+  ThemeTypographySection,
+  ThemeFontMetadata
+} from './themeDocument.js'
