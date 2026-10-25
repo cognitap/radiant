@@ -18,6 +18,7 @@ import {
   DialogTrigger,
   Field,
   Input,
+  Link,
   ThemeScope
 } from '../../src/index.js'
 import '../../.storybook/styles.css'
@@ -25,6 +26,7 @@ import '../../.storybook/styles.css'
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
 const roots: Root[] = []
 const hosts: HTMLDivElement[] = []
+const originalURL = location.href
 
 function host() {
   const node = document.createElement('div')
@@ -44,6 +46,7 @@ async function mount(children: ReactNode) {
 afterEach(async () => {
   for (const root of roots.splice(0)) await act(async () => root.unmount())
   for (const node of hosts.splice(0)) node.remove()
+  history.replaceState(history.state, '', originalURL)
 })
 
 function ConsumerButton({ children, ...props }: ButtonRenderProps) {
@@ -191,9 +194,9 @@ for (const mode of ['light', 'dark'] as const) {
     expect(node.querySelector('[aria-expanded]')?.getAttribute('aria-expanded')).toBe('false')
   })
 
-  test(`${mode}: replacement Button retains native form submission and reset`, async () => {
+  test(`${mode}: composed actions preserve ancestor form values and Dialog state`, async () => {
     const submitted = vi.fn()
-    await mount(
+    const { node } = await mount(
       <ThemeScope mode={mode}>
         <form
           onSubmit={event => {
@@ -201,39 +204,77 @@ for (const mode of ['light', 'dark'] as const) {
             submitted(new FormData(event.currentTarget).get('draft'))
           }}
         >
-          <label>
-            Draft{' '}
-            <input
-              name="draft"
-              defaultValue="Original"
-            />
-          </label>
-          <Button render={renderButton}>Action</Button>
-          <Button
-            render={renderButton}
-            type="submit"
-          >
-            Save
-          </Button>
-          <Button
-            render={renderButton}
-            type="reset"
-          >
-            Reset
-          </Button>
+          <Dialog>
+            <DialogTrigger render={renderButton}>Edit draft</DialogTrigger>
+            <DialogContent>
+              <DialogTitle>Edit draft</DialogTitle>
+              <DialogDescription>Actions share the surrounding form.</DialogDescription>
+              <label>
+                Draft{' '}
+                <input
+                  name="draft"
+                  defaultValue="Original"
+                />
+              </label>
+              <Button render={renderButton}>Action</Button>
+              <Button
+                render={renderButton}
+                type="submit"
+              >
+                Save
+              </Button>
+              <Button
+                render={renderButton}
+                type="reset"
+              >
+                Reset
+              </Button>
+              <Link
+                href="#draft-help"
+                variant="outline"
+              >
+                Draft help
+              </Link>
+              <p
+                id="draft-help"
+                tabIndex={-1}
+              >
+                Changes are saved with the surrounding form.
+              </p>
+              <DialogClose render={renderButton}>Close draft</DialogClose>
+            </DialogContent>
+          </Dialog>
         </form>
       </ThemeScope>
     )
     const draft = page.getByRole('textbox', { name: 'Draft' })
+    const trigger = page.getByRole('button', { name: 'Edit draft' })
+    const dialog = node.querySelector('dialog')!
+    await act(async () => userEvent.click(trigger))
+    expect(dialog.matches(':modal')).toBe(true)
     await act(async () =>
       userEvent.click(page.getByRole('button', { name: 'Action', exact: true }))
     )
     expect(submitted).not.toHaveBeenCalled()
     await act(async () => userEvent.fill(draft, 'Edited'))
+    await act(async () => userEvent.click(page.getByRole('link', { name: 'Draft help' })))
+    await expect.poll(() => location.hash).toBe('#draft-help')
+    expect(dialog.open).toBe(true)
+    await expect
+      .element(page.getByText('Changes are saved with the surrounding form.'))
+      .toHaveFocus()
+    expect(submitted).not.toHaveBeenCalled()
     await act(async () => userEvent.click(page.getByRole('button', { name: 'Save', exact: true })))
     expect(submitted).toHaveBeenCalledExactlyOnceWith('Edited')
+    expect(dialog.open).toBe(true)
     await act(async () => userEvent.click(page.getByRole('button', { name: 'Reset', exact: true })))
     await expect.element(draft).toHaveValue('Original')
+    expect(dialog.open).toBe(true)
+    expect(submitted).toHaveBeenCalledTimes(1)
+    await act(async () => userEvent.click(page.getByRole('button', { name: 'Close draft' })))
+    await expect.poll(() => dialog.open).toBe(false)
+    await expect.element(trigger).toHaveFocus()
+    expect(new FormData(node.querySelector('form')!).get('draft')).toBe('Original')
     expect(submitted).toHaveBeenCalledTimes(1)
   })
 
