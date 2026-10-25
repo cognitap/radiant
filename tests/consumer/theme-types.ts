@@ -6,6 +6,15 @@ import {
   ThemeScope,
   defaultTheme,
   defineTheme,
+  defineThemeDocument,
+  parseThemeDocument,
+  compileThemeDocument,
+  updateThemeDocument,
+  exportThemeSections,
+  themeDocumentFromDefinition,
+  type ThemeDocument,
+  type ThemeSectionExport,
+  type ThemeSections,
   radiant,
   themes,
   type Theme,
@@ -132,3 +141,57 @@ const invalid: ThemeComponentOverrides = {
   card: { panel: '1rem' }
 }
 void invalid
+
+const workshop: ThemeDocument = themeDocumentFromDefinition(definition)
+const authored: ThemeDocument = defineThemeDocument({
+  kind: 'radiant-theme',
+  version: 1,
+  id: 'portable',
+  name: 'Portable',
+  sections: {
+    color: {
+      brand: { value: '#14532d', gamut: 'srgb' },
+      palettes: [{ id: 'brand', name: 'Brand', swatches: [{ stop: 500, value: '#14532d' }] }],
+      anchor: { paletteId: 'brand', stop: 500 },
+      modes: { dark: { accent: '#86efac' } }
+    },
+    typography: {
+      fonts: [{ id: 'local-sans', family: 'Local Sans', source: 'local', weights: [400, 650] }]
+    },
+    components: { values: { button: { pressScale: 0.96 } } }
+  }
+})
+const selection: ThemeSectionExport = exportThemeSections(authored, ['color', 'typography'])
+const imported: unknown = JSON.parse(JSON.stringify(selection))
+const parsed = parseThemeDocument(imported)
+const next =
+  parsed.kind === 'radiant-theme'
+    ? parsed
+    : updateThemeDocument(workshop, parsed.sections, 'replace')
+createElement(ThemeScope, { theme: compileThemeDocument(next), mode: 'system' })
+// @ts-expect-error A selective export cannot replace a full document or compile without identity.
+compileThemeDocument(selection)
+// @ts-expect-error Known portable schema version only.
+defineThemeDocument({ ...workshop, version: 2 })
+// @ts-expect-error Selective exports only name supported sections.
+exportThemeSections(workshop, ['everything'])
+// @ts-expect-error Token groups retain their original types within section updates.
+updateThemeDocument(workshop, { surface: { values: { radius: 4 } } })
+// @ts-expect-error Existing component overrides remain checked.
+updateThemeDocument(workshop, { components: { values: { button: { sparkle: 1 } } } })
+// @ts-expect-error Future structured spring behavior is not an untyped data escape hatch.
+updateThemeDocument(workshop, { motion: { engine: () => {} } })
+// @ts-expect-error Source colors retain explicit gamut metadata.
+updateThemeDocument(workshop, { color: { brand: { value: '#123456', gamut: 'unknown' } } })
+updateThemeDocument(workshop, {
+  // @ts-expect-error Numbered palette stops are a closed set.
+  color: { palettes: [{ id: 'a', name: 'A', swatches: [{ stop: 550, value: 'red' }] }] }
+})
+updateThemeDocument(workshop, {
+  // @ts-expect-error Portable font metadata contains no local file handles or font bytes.
+  typography: { fonts: [{ id: 'a', family: 'A', source: 'local', bytes: new Uint8Array() }] }
+})
+// @ts-expect-error Documents and their source metadata are deeply readonly.
+authored.sections.color!.brand!.value = 'changed'
+const sectionPatch: ThemeSections = { spacing: { values: { fieldGap: '1rem' } } }
+updateThemeDocument(workshop, sectionPatch)

@@ -92,3 +92,25 @@ export { ThemeScope } from './ThemeScope.js'
 export type { ThemeScopeProps } from './ThemeScope.js'
 export type { ButtonProps, ButtonRenderProps, ButtonVariant } from './Button.js'
 export type { ControlSize, Tone } from './presentation.js'
+
+export {
+  defineThemeDocument,
+  parseThemeDocument,
+  compileThemeDocument,
+  updateThemeDocument,
+  exportThemeSections,
+  themeDocumentFromDefinition
+} from './themes/index.js'
+export type {
+  ThemeDocument,
+  ThemeSectionExport,
+  ThemeSections,
+  ThemeSectionName,
+  ThemeSection,
+  ThemeColorSection,
+  ThemeColorStop,
+  ThemeBrandSource,
+  ThemePalette,
+  ThemeTypographySection,
+  ThemeFontMetadata
+} from './themes/index.js'

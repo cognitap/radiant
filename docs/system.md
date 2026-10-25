@@ -50,6 +50,11 @@ fonts in your application; choosing a theme never downloads a font. The
 [theming reference](theming.md#define-and-apply-a-theme) owns the authoring
 example, token defaults, preset IDs, font families/weights and migration steps.
 
+For public workshop editing, use the versioned `ThemeDocument` authoring API.
+Its token sections compile through `defineTheme` into the same `ThemeScope`
+contract. Section imports preserve unrelated settings and deliberate component
+exceptions. See [portable documents and import semantics](theming.md#portable-workshop-documents).
+
 | Token group  | Shared responsibility                                                              |
 | ------------ | ---------------------------------------------------------------------------------- |
 | `color`      | Surface, foreground, borders, focus, invalid/disabled colors and action tone pairs |

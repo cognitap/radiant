@@ -4,6 +4,13 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add versioned theme workshop documents (DEV-152): typed token sections,
+  source/palette and portable font metadata, full/selective JSON exports,
+  explicit merge/replace/reset updates and compilation through the existing
+  `defineTheme`/`ThemeScope` contract. Exact brand anchoring is the default policy;
+  palette generation and semantic role selection follow separately. Existing
+  themes, component exceptions and scope behavior are preserved.
+
 ## 0.0.3
 
 Experimental release of the harmonised ten-family system. **Breaking changes**
