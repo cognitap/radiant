@@ -476,18 +476,40 @@ own overflow. Closed content stays mounted and hidden by the user agent. A
 field inside a closed dialog is still in an ancestor form.
 
 `DialogTrigger` and `DialogClose` compose `Button` by default, accepting its
-current `variant`, `size`, `radius`, `iconOnly`, `fullWidth`, and `pending` props.
+`variant`, `tone`, `controlSize`, `iconOnly`, `fullWidth`, and `pending` props.
 They inherit Button's typography, theme effects, hover, press, focus, and pending
 presentation. `DialogTrigger` adds `aria-haspopup="dialog"`, `aria-expanded`, and
 `aria-controls` pointing at the dialog; `DialogClose` requests close. Native
 disabled and pending guards run before the consumer click handler. A consumer
 can prevent the open/close request with `event.preventDefault()`.
 
-The existing `render` callback explicitly replaces the default Button. It
-receives native button props, ref, children, caller classes/styles, protected
-relationships, and guarded activation. It owns presentation; Button-only props
-are not leaked onto a native replacement. Existing adaptations such as
-`render={props => <Button {...props} variant="outline" />}` remain supported.
+`render(resolvedNativeProps)` returns one button or a component that forwards
+to one button. It receives merged Button classes, caller styles, the real ref,
+resolved children (including pending presentation), protected relationships and
+guarded activation. Forward all props and children without wrapping another
+Button or composing the handler again. Null, text, arrays, fragments and direct
+native hosts other than buttons are rejected; custom components must preserve
+the button host themselves.
+
+```tsx
+<DialogClose
+  variant="outline"
+  tone="neutral"
+  render={props => <button {...props}>{props.children}</button>}
+>
+  Cancel
+</DialogClose>
+```
+
+**Replacement migration:** callbacks previously owned their presentation. Move
+`render={props => <Button {...props} variant="outline" />}` to `variant="outline"`
+on the Dialog action and forward the resolved props to a native/custom button.
+Use caller `className`/`style` on the action for local overrides. Retain resolved
+children so the pending label and decorative indicator remain consistent.
+Button preserves its base identity when composition adds slot tokens; Dialog
+protects the exact `button dialog-trigger` / `button dialog-close` token sets.
+Resolved presentation attributes cannot be replaced with caller data attributes.
+
 Ordinary actions should set presentation props directly on `DialogTrigger` or
 `DialogClose`. A `<form method="dialog">` inside the
 dialog also closes it, and the `close` event updates React. `closeOnBackdrop`

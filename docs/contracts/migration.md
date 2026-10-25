@@ -11,7 +11,12 @@ remaining family and replacement contracts still require their migrations.
 DEV-118 implements Link's resolved native anchor/ref replacement contract.
 Adapters return one compatible element and preserve the forwarded props/ref;
 invalid direct return shapes now fail explicitly. See the README's Link section
-for migration details. Dialog replacement presentation remains with DEV-119.
+for migration details. DEV-119 completes Dialog action replacement presentation:
+set Button presentation props on DialogTrigger/Close, then forward resolved native
+props/ref/children to one button. Replace render→Button adaptations with native
+or custom button adapters; resolved children already contain Button's label and
+pending mark. Direct null/text/array/fragment/non-button outputs are rejected.
+Dialog surface and lifecycle alignment remain with DEV-127.
 
 The baseline is the ten current families in `src/index.ts`: Button, Link, Field,
 Input, Checkbox, RadioGroup (including Radio), Dialog, Collapsible, Accordion,

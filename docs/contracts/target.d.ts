@@ -4,7 +4,13 @@
  * examples. It is not a complete replacement for the package declarations.
  */
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
-import type { ButtonProps, ButtonVariant, ControlSize, ThemeStyle } from '../../src/index.js'
+import type {
+  ButtonProps,
+  ButtonVariant,
+  ControlSize,
+  DialogRenderProps,
+  ThemeStyle
+} from '../../src/index.js'
 
 // DEV-44 now owns the executable theme contract. Keep these sketches tied to it.
 export { defineTheme, ThemeScope } from '../../src/index.js'
@@ -109,7 +115,7 @@ export type DialogProps = OpenOwner & {
 export declare function Dialog(props: DialogProps): ReactElement
 export type DialogActionProps = ButtonProps & {
   /** Resolved native button props; return exactly one compatible element and forward them. */
-  render?: (props: ComponentProps<'button'> & { 'data-slot'?: string }) => ReactElement
+  render?: (props: DialogRenderProps) => ReactElement
 }
 export declare function DialogTrigger(props: DialogActionProps): ReactElement
 export declare function DialogClose(props: DialogActionProps): ReactElement

@@ -26,7 +26,7 @@ for (const key of [
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
-const { act, createElement, createRef, useState } = await import('react')
+const { act, createElement, createRef, Fragment, useState } = await import('react')
 const { createRoot, hydrateRoot } = await import('react-dom/client')
 const { renderToString } = await import('react-dom/server')
 const {
@@ -297,67 +297,130 @@ test('dialog action refs reach the same native hosts and preserve callback clean
   }
 })
 
-test('action replacements receive native props and preserve explicit Button adaptation', () => {
-  let resolved
-  const ref = createRef()
+test('dialog replacements receive canonical Button presentation, children and protected native props', () => {
+  for (const Action of [DialogTrigger, DialogClose]) {
+    for (const variant of ['solid', 'soft', 'outline', 'ghost']) {
+      for (const pending of [false, true]) {
+        let resolved
+        const ref = createRef()
+        const style = { borderRadius: '12px' }
+        const presentation = {
+          variant,
+          tone: 'danger',
+          controlSize: 'large',
+          iconOnly: true,
+          fullWidth: true,
+          pending,
+          className: 'rounded-none',
+          style
+        }
+        const reference = document.createElement('div')
+        reference.innerHTML = renderToString(createElement(Button, presentation, 'Action'))
+        const host = document.createElement('div')
+        host.innerHTML = renderToString(
+          createElement(
+            Dialog,
+            null,
+            createElement(
+              Action,
+              {
+                ...presentation,
+                ref,
+                'aria-busy': false,
+                'data-slot': 'forged',
+                'data-variant': 'forged',
+                'data-tone': 'forged',
+                'data-control-size': 'forged',
+                'aria-haspopup': 'menu',
+                'aria-controls': 'forged',
+                'aria-expanded': true,
+                render: props => {
+                  resolved = props
+                  return createElement('button', props)
+                }
+              },
+              'Action'
+            )
+          )
+        )
+        const action = host.querySelector('button')
+        const canonical = reference.querySelector('button')
+        assert.equal(action.className, canonical.className)
+        assert.equal(
+          action.innerHTML,
+          canonical.innerHTML,
+          'label and pending mark are resolved once'
+        )
+        assert.equal(resolved.ref, ref)
+        assert.equal(resolved.style, style)
+        assert.equal(action.dataset.variant, variant)
+        assert.equal(action.dataset.tone, 'danger')
+        assert.equal(action.dataset.controlSize, 'large')
+        assert.equal(
+          action.dataset.slot,
+          Action === DialogTrigger ? 'button dialog-trigger' : 'button dialog-close'
+        )
+        assert.equal(action.getAttribute('aria-busy'), pending ? 'true' : 'false')
+        assert.equal(action.type, 'button')
+        assert.equal(host.querySelectorAll('button').length, 1)
+        if (Action === DialogTrigger) {
+          assert.equal(resolved['aria-haspopup'], 'dialog')
+          assert.equal(resolved['aria-expanded'], false)
+          assert.notEqual(resolved['aria-controls'], 'forged')
+        }
+        for (const name of ['variant', 'tone', 'controlSize', 'iconOnly', 'fullWidth', 'pending']) {
+          assert.equal(
+            Object.hasOwn(resolved, name),
+            false,
+            `${name} is consumed before replacement`
+          )
+          assert.equal(action.hasAttribute(name.toLowerCase()), false)
+        }
+      }
+    }
+  }
+})
+
+test('Button keeps its base identity and protects effective presentation when composing parts', () => {
   const host = document.createElement('div')
   host.innerHTML = renderToString(
     createElement(
-      Dialog,
-      null,
-      createElement(DialogTrigger, {
-        variant: 'solid',
-        tone: 'danger',
-        controlSize: 'large',
-        iconOnly: true,
-        fullWidth: true,
+      Button,
+      {
         pending: true,
-        className: 'caller-class',
-        ref,
-        render: props => {
-          resolved = props
-          return createElement('button', props, 'Native replacement')
-        }
-      })
+        'aria-busy': false,
+        'data-slot': 'consumer button consumer',
+        'data-variant': 'forged',
+        'data-tone': 'forged',
+        'data-control-size': 'forged'
+      },
+      'Action'
     )
   )
-  assert.equal(resolved.className, 'caller-class')
-  assert.equal(resolved.ref, ref)
-  assert.equal(resolved['aria-busy'], true)
-  assert.equal(resolved['data-slot'], 'button dialog-trigger')
-  assert.equal(resolved.type, 'button')
-  for (const name of ['variant', 'tone', 'controlSize', 'iconOnly', 'fullWidth', 'pending']) {
-    assert.equal(Object.hasOwn(resolved, name), false, `${name} is not a native replacement prop`)
-    assert.equal(host.querySelector('button').hasAttribute(name.toLowerCase()), false)
-  }
+  const button = host.querySelector('button')
+  assert.equal(button.dataset.slot, 'button consumer')
+  assert.equal(button.dataset.variant, 'solid')
+  assert.equal(button.dataset.tone, 'accent')
+  assert.equal(button.dataset.controlSize, 'medium')
+  assert.equal(button.getAttribute('aria-busy'), 'true')
+})
 
-  const adapted = document.createElement('div')
-  adapted.innerHTML = renderToString(
-    createElement(
-      Dialog,
-      null,
-      createElement(
-        DialogClose,
-        {
-          variant: 'solid',
-          tone: 'danger',
-          className: 'rounded-none',
-          render: props => createElement(Button, { ...props, variant: 'outline' })
-        },
-        'Close'
+test('Dialog replacements return one compatible button element', () => {
+  for (const Action of [DialogTrigger, DialogClose]) {
+    for (const render of [
+      () => null,
+      () => 'Action',
+      () => [createElement('button', { key: 'a' })],
+      () => createElement(Fragment, null, createElement('button')),
+      () => createElement('a'),
+      () => createElement('div')
+    ]) {
+      assert.throws(
+        () => renderToString(createElement(Dialog, null, createElement(Action, { render }))),
+        /Dialog.*render.*button/i
       )
-    )
-  )
-  const canonical = document.createElement('div')
-  canonical.innerHTML = renderToString(
-    createElement(Button, { variant: 'outline', className: 'rounded-none' }, 'Close')
-  )
-  assert.equal(
-    adapted.querySelector('button').className,
-    canonical.querySelector('button').className
-  )
-  assert.equal(adapted.querySelectorAll('button').length, 1)
-  assert.equal(adapted.querySelector('button').dataset.slot, 'button dialog-close')
+    }
+  }
 })
 
 test('a closed dialog hydrates without an open attribute', async () => {

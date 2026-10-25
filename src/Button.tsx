@@ -4,6 +4,7 @@ import type { ComponentProps, CSSProperties } from 'react'
 import { actionVariants } from './actionStyles.js'
 import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
 import { composeAction } from './internal/events.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
@@ -27,7 +28,13 @@ export function buttonTheme(theme: ButtonTheme): CSSProperties {
   return flattenComponents({ button: theme }) as CSSProperties
 }
 
-export function Button({
+export function Button(props: ButtonProps) {
+  const resolved = resolveButtonProps(props)
+  return <button {...resolved}>{resolved.children}</button>
+}
+
+// Private family seam: replacements receive the same native presentation as Button.
+export function resolveButtonProps({
   type = 'button',
   variant = 'solid',
   tone = 'accent',
@@ -39,34 +46,35 @@ export function Button({
   onClick,
   children,
   ...props
-}: ButtonProps) {
-  return (
-    <button
-      type={type}
-      aria-busy={pending || undefined}
-      data-slot="button"
-      data-variant={variant}
-      data-tone={tone}
-      data-control-size={controlSize}
-      className={cn(actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }), className)}
-      onClick={composeAction(
-        onClick,
-        undefined,
-        event => pending || event.currentTarget.matches(':disabled')
-      )}
-      {...props}
-    >
-      <span
-        className={cn(
-          'inline-flex items-center gap-[0.5em] [&_svg]:shrink-0',
-          pending && 'opacity-0 motion-reduce:opacity-100'
-        )}
-      >
-        {children}
-      </span>
-      {pending ? <PendingMark /> : null}
-    </button>
-  )
+}: ButtonProps & { 'data-slot'?: string }) {
+  return {
+    ...props,
+    type,
+    'aria-busy': pending || props['aria-busy'],
+    'data-slot': joinIds('button', props['data-slot']) ?? 'button',
+    'data-variant': variant,
+    'data-tone': tone,
+    'data-control-size': controlSize,
+    className: cn(actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }), className),
+    onClick: composeAction(
+      onClick,
+      undefined,
+      event => pending || event.currentTarget.matches(':disabled')
+    ),
+    children: (
+      <>
+        <span
+          className={cn(
+            'inline-flex items-center gap-[0.5em] [&_svg]:shrink-0',
+            pending && 'opacity-0 motion-reduce:opacity-100'
+          )}
+        >
+          {children}
+        </span>
+        {pending ? <PendingMark /> : null}
+      </>
+    )
+  }
 }
 
 function PendingMark() {

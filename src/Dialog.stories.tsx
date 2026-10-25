@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
   DialogTrigger,
+  type DialogRenderProps,
   Field,
   Input
 } from './index.js'
@@ -239,30 +240,76 @@ export const Composition: Story = {
   }
 }
 
+// Consumer-owned adapter; the resolved ref, handler and children reach this one host.
+function ProfileAction({ children, ...props }: DialogRenderProps) {
+  return <button {...props}>{children}</button>
+}
+
+function ReplacementActions() {
+  const [activations, setActivations] = useState(0)
+  return (
+    <Dialog>
+      <DialogTrigger
+        variant="outline"
+        tone="neutral"
+        render={props => <ProfileAction {...props} />}
+        onClick={() => setActivations(count => count + 1)}
+      >
+        Open narrow panel
+      </DialogTrigger>
+      <output>Action activations: {activations}</output>
+      <DialogContent style={{ width: '24rem' }}>
+        <DialogTitle>Narrow panel</DialogTitle>
+        <DialogDescription>
+          Custom button hosts inherit the same action presentation.
+        </DialogDescription>
+        <DialogClose
+          variant="outline"
+          tone="neutral"
+          render={props => <button {...props}>{props.children}</button>}
+          onClick={() => setActivations(count => count + 1)}
+        >
+          Close panel
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export const Customisation: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'Use Button presentation props directly on Dialog actions. The close control demonstrates the existing native render callback with an explicit Button replacement; forward its props to one button.'
+          'Choose Button presentation on the Dialog action, then forward resolved native props, ref and children to one button. The trigger uses a consumer component; the close action uses a native replacement. Both inherit Button styling and activation without a nested Button.'
       }
     }
   },
-  render: () => (
-    <Dialog>
-      <DialogTrigger
-        variant="outline"
-        tone="neutral"
-      >
-        Open narrow panel
-      </DialogTrigger>
-      <DialogContent style={{ width: '24rem' }}>
-        <DialogTitle>Narrow panel</DialogTitle>
-        <DialogDescription>Local geometry and explicit action replacement.</DialogDescription>
-        <DialogClose render={props => <Button {...props}>Close</Button>} />
-      </DialogContent>
-    </Dialog>
-  )
+  render: () => <ReplacementActions />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button', { name: 'Open narrow panel' })
+    const close = canvas.getByRole('button', { name: 'Close panel', hidden: true })
+    await expect(trigger).toHaveAttribute('data-slot', 'button dialog-trigger')
+    await expect(close).toHaveAttribute('data-slot', 'button dialog-close')
+    const view = canvasElement.ownerDocument.defaultView!
+    await expect(Number.parseFloat(view.getComputedStyle(trigger).minHeight)).toBeGreaterThan(0)
+    await expect(view.getComputedStyle(close).borderTopStyle).toBe('solid')
+    await expect(trigger).toHaveAttribute('data-variant', 'outline')
+    await expect(trigger).toHaveAttribute('data-tone', 'neutral')
+    await userEvent.click(trigger)
+    await expect(canvas.getByRole('dialog', { name: 'Narrow panel' })).toBeVisible()
+    await expect(canvas.getByRole('status')).toHaveTextContent('Action activations: 1')
+    await userEvent.click(close)
+    await waitFor(async () => {
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      await expect(trigger).toHaveFocus()
+    })
+    await expect(canvas.getByRole('status')).toHaveTextContent('Action activations: 2')
+    // Leave the dialog visible for the automatic accessibility scan.
+    await userEvent.click(trigger)
+    await expect(canvas.getByRole('dialog', { name: 'Narrow panel' })).toBeVisible()
+  }
 }
 
 export const Nested: Story = {
