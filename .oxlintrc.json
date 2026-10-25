@@ -4,5 +4,11 @@
   "categories": {
     "correctness": "error"
   },
-  "ignorePatterns": ["dist/**", "node_modules/**"]
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "**/.next/**",
+    "**/.source/**",
+    "apps/docs/out/**"
+  ]
 }

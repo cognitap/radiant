@@ -1,4 +1,6 @@
 nodeVersion: 26.11.1
+packages:
+  - apps/*
 engineStrict: true
 strictDepBuilds: true
 

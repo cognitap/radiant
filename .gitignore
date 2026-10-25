@@ -9,3 +9,7 @@ output/
 .env.*
 !.env.example
 .DS_Store
+.next/
+.source/
+apps/docs/out/
+apps/docs/next-env.d.ts

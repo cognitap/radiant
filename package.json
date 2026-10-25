@@ -59,12 +59,17 @@
     "lint": "oxlint --deny-warnings",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:storybook && pnpm test:browser",
+    "check": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:storybook && pnpm test:browser && pnpm test:docs",
     "release:prepare": "node scripts/prepare-release.mjs",
     "theme:generate": "node scripts/generate-theme-css.mjs",
     "theme:check": "node scripts/generate-theme-css.mjs --check",
     "watch:theme": "node scripts/generate-theme-css.mjs --watch",
-    "test:browser": "pnpm theme:generate && vitest run"
+    "test:browser": "pnpm theme:generate && vitest run",
+    "docs:dev": "pnpm build && node scripts/dev-docs.mjs",
+    "build:docs": "pnpm build && pnpm --filter @cognitap/radiant-docs build",
+    "docs:typecheck": "pnpm build && pnpm --filter @cognitap/radiant-docs typecheck",
+    "docs:preview": "node scripts/serve-docs.mjs",
+    "test:docs": "pnpm build:docs && node scripts/verify-docs.mjs"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",

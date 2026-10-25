@@ -1014,3 +1014,10 @@ for other checkouts and type checking.
 - [Changelog](CHANGELOG.md): consumer-facing changes per release
 - [CONTRIBUTING.md](CONTRIBUTING.md): maintainer workflow and bug reports
 - [AGENTS.md](AGENTS.md): component and styling conventions
+
+## Documentation site
+
+Run `pnpm docs:dev` to build and watch the local library alongside the Fumadocs Core
+and MDX app at [localhost:3001](http://127.0.0.1:3001). Use `pnpm build:docs` for a
+static export, `pnpm docs:preview` to serve it, and `pnpm test:docs` to verify it.
+See [the docs app guide](apps/docs/README.md) for setup and verification.
