@@ -8,7 +8,10 @@ const config: StorybookConfig = {
   framework: '@storybook/react-vite',
   features: { backgrounds: false },
   viteFinal(config) {
-    return mergeConfig(config, { plugins: [tailwindcss()] })
+    return mergeConfig(config, {
+      plugins: [tailwindcss()],
+      optimizeDeps: { include: ['@tanstack/react-form'] }
+    })
   },
   core: {
     disableTelemetry: true
