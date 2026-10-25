@@ -63,7 +63,10 @@ type RadioGroupContextValue = {
 
 const RadioGroupContext = createContext<RadioGroupContextValue | null>(null)
 
-export type RadioGroupProps = Omit<FieldProps, 'layout' | 'children' | 'onChange'> & {
+export type RadioGroupProps = Omit<
+  Extract<FieldProps, { layout: 'group' }>,
+  'layout' | 'children' | 'onChange'
+> & {
   name: string
   value?: string
   defaultValue?: string

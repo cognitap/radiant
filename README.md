@@ -189,7 +189,7 @@ the value is invalid and clear it when the value recovers. An empty message
 removes the invalid state.
 
 ```tsx
-import { Field } from '@cognitap/radiant'
+import { Field, Input } from '@cognitap/radiant'
 
 ;<Field
   label="Email"
@@ -197,7 +197,7 @@ import { Field } from '@cognitap/radiant'
   error={error}
   required
 >
-  <input
+  <Input
     name="email"
     type="email"
     autoComplete="email"
@@ -205,11 +205,11 @@ import { Field } from '@cognitap/radiant'
 </Field>
 ```
 
-A single host control (`input`, `textarea`, `select`) receives `id`,
-`required`, `disabled`, `aria-invalid`, `aria-required`, and
-`aria-describedby`. The label uses that `id`. A component child calls
-`useField()` and forwards `controlProps`. `Input` does this already. A render
-function receives the same props, for an adapter that is not a host element:
+Radiant controls read `useField()` and connect themselves. For a native or
+custom control, explicitly forward `children(controlProps)` to its input,
+textarea or select. Field leaves ordinary children untouched. The callback
+supplies the owned `id`, `required`, `disabled`, `aria-invalid`, `aria-required`
+and `aria-describedby` relationships:
 
 ```tsx
 <Field
@@ -235,6 +235,8 @@ label.
 | `description`       | Help text, included in `aria-describedby` while present.                      | —         |
 | `error`             | Error message. Presence marks the field invalid and announces it as an alert. | —         |
 | `layout`            | `control` or `group` (`<fieldset>`).                                          | `control` |
+| `controlId`         | Owned control ID in control layout; omit to generate a stable ID.             | generated |
+| `parts`             | `className`/`style` hooks for `label`, `description`, `error` and `required`. | —         |
 | `required`          | Sets the control's `required` and `aria-required`. The marker is visual.      | `false`   |
 | `disabled`          | Disables the control, or the whole `<fieldset>` for a group.                  | `false`   |
 | `requiredIndicator` | Replaceable visual marker, hidden from assistive tech. `null` hides it.       | `*`       |
@@ -244,10 +246,19 @@ its descendants natively. A radio group uses `RadioGroup`, which is this
 fieldset of native radios, and does not add `role="radiogroup"`. Required and
 invalid on a group are relationships on the fieldset, not on each control.
 
-Ids come from `useId()`, so server markup and hydration agree. A host control's
-own `id` wins, and its `aria-describedby` is kept alongside the description and
-error. There is no built-in English sentence; the label, description, error,
-and required marker are all consumer content.
+Set a custom control ID through `Field controlId`, rather than overriding its
+child's ID. Otherwise IDs come from `useId()`, so server markup and hydration
+agree. Radiant controls append external `aria-describedby` IDs to the owned
+description/error IDs. Native adapters must preserve the callback's relationships
+when adding their own descriptions. The label, description, error and required
+marker are all consumer content.
+
+Control layout accepts native div props and a div ref. Group layout accepts
+native fieldset props, including `form`, `name`, and a fieldset ref; its children
+are ordinary nodes. `className` and `style` target that root. Use
+`parts={{ description: { style: { fontStyle: 'italic' } } }}` to style a text
+part. These hooks accept only styling: Field keeps each part's ID, label
+association, alert role and hidden required marker.
 
 `fieldTheme` maps typed keys to `--rad-field-*` variables: `gap`, `labelColor`,
 `labelSize`, `labelWeight`, `descriptionColor`, `descriptionSize`, `errorColor`,

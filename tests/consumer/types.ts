@@ -169,10 +169,38 @@ const fieldProps: FieldProps = {
   required: true,
   disabled: false,
   requiredIndicator: '(required)',
+  controlId: 'email',
+  ref: createRef<HTMLDivElement>(),
+  parts: {
+    label: { className: 'italic' },
+    description: { style: { '--rad-field-description-color': 'rebeccapurple' } },
+    error: { className: 'font-bold' },
+    required: { style: { marginInlineStart: '0.5em' } }
+  },
   children: control => createElement('input', control)
 }
 createElement(Field, fieldProps)
-createElement(Field, { layout: 'group', label: 'Plan', role: 'radiogroup' })
+createElement(Field, {
+  layout: 'group',
+  label: 'Plan',
+  form: 'profile',
+  name: 'plan',
+  ref: createRef<HTMLFieldSetElement>()
+})
+
+// @ts-expect-error A control Field renders a div, with no native form association.
+const controlForm: FieldProps = { label: 'Email', form: 'profile' }
+// @ts-expect-error A group ref targets its fieldset.
+const groupRef: FieldProps = { layout: 'group', label: 'Plan', ref: createRef<HTMLDivElement>() }
+// @ts-expect-error A control ref targets its div.
+const controlRef: FieldProps = { label: 'Email', ref: createRef<HTMLFieldSetElement>() }
+// @ts-expect-error Groups have multiple controls, with no single controlId.
+const groupControlId: FieldProps = { layout: 'group', label: 'Plan', controlId: 'one' }
+// @ts-expect-error Groups take normal children, not a single-control adapter.
+const groupAdapter: FieldProps = { layout: 'group', label: 'Plan', children: () => null }
+// @ts-expect-error Part hooks style the owned label; they cannot replace its relationship.
+const fieldPartId: FieldProps = { label: 'Email', parts: { label: { htmlFor: 'other' } } }
+void [controlForm, groupRef, controlRef, groupControlId, groupAdapter, fieldPartId]
 
 // @ts-expect-error Field theme keys are a closed set.
 fieldTheme({ gapSize: '1rem' })
