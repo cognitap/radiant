@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { expect, userEvent } from 'storybook/test'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   Accordion,
@@ -143,23 +144,31 @@ const meta = {
     docs: {
       description: {
         component:
-          'Accordion renders a div with single or multiple value/defaultValue and onValueChange. AccordionItem builds on Collapsible; triggers remain summaries, with heading level 3 by default. Root className/style/ref target the accordion div (data-slot="accordion"). Item/trigger/content currently retain the underlying Collapsible slots. disabled suppresses item activation.'
+          'Accordion renders a div with single or multiple value/defaultValue and onValueChange. AccordionItem builds on Collapsible; triggers remain summaries, with heading level 3 by default. Root className/style/ref target the accordion div (data-slot="accordion"). Item/trigger/content expose accordion-item, accordion-trigger and accordion-content alongside the underlying Collapsible identities. Use token selectors ([data-slot~=...]); styles and refs target the actual details/summary/div hosts. disabled suppresses item activation.'
       }
     }
   }
-} satisfies Meta<{
-  type?: 'single'
-  value?: string | null
-  defaultValue?: string | null
-  disabled?: boolean
-  onValueChange?: (value: string | null) => void
-}>
+} satisfies Meta<typeof Accordion>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  render: () => <ShippingSections />
+  render: () => <ShippingSections />,
+  play: async ({ canvasElement }) => {
+    const item = canvasElement.querySelector('[data-slot~="accordion-item"]')!
+    const trigger = item.querySelector('summary')!
+    const content = item.querySelector('[data-slot~="accordion-content"]')!
+    await expect(item).toHaveAttribute('data-slot', 'collapsible accordion-item')
+    await expect(trigger).toHaveAttribute('data-slot', 'collapsible-trigger accordion-trigger')
+    await expect(trigger.querySelector('button')).toBeNull()
+    await expect(content).toHaveAttribute('data-state', 'open')
+    await userEvent.click(trigger)
+    await expect(item).toHaveAttribute('data-state', 'closed')
+    await expect(content).toHaveAttribute('data-state', 'closed')
+    await userEvent.click(trigger)
+    await expect(content).toBeVisible()
+  }
 }
 
 export const States: Story = { render: () => <DisabledSection /> }
@@ -170,9 +179,15 @@ export const Customisation: Story = {
   render: () => {
     const local: ThemeStyle = { '--rad-accordion-gap': '1.5rem' }
     return (
-      <div style={local}>
-        <ShippingSections />
-      </div>
+      <Accordion
+        defaultValue="shipping"
+        style={local}
+      >
+        <AccordionItem value="shipping">
+          <AccordionTrigger>Shipping</AccordionTrigger>
+          <AccordionContent>Local spacing preserves the current theme.</AccordionContent>
+        </AccordionItem>
+      </Accordion>
     )
   }
 }

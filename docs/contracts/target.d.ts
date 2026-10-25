@@ -123,14 +123,14 @@ export declare function DialogContent(
 export declare function DialogTitle(props: Styled<ComponentProps<'h2'>>): ReactElement
 export declare function DialogDescription(props: Styled<ComponentProps<'p'>>): ReactElement
 
-export type CollapsibleProps = Omit<ComponentProps<'details'>, 'open'> &
+export type CollapsibleProps = Omit<Styled<ComponentProps<'details'>>, 'open'> &
   OpenOwner & {
     onOpenChange?: (open: boolean) => void
   }
 export declare function Collapsible(props: CollapsibleProps): ReactElement
-export declare function CollapsibleTrigger(props: ComponentProps<'summary'>): ReactElement
-export declare function CollapsibleContent(props: ComponentProps<'div'>): ReactElement
-type AccordionOwn = Omit<ComponentProps<'div'>, 'defaultValue'> & { disabled?: boolean }
+export declare function CollapsibleTrigger(props: Styled<ComponentProps<'summary'>>): ReactElement
+export declare function CollapsibleContent(props: Styled<ComponentProps<'div'>>): ReactElement
+type AccordionOwn = Omit<Styled<ComponentProps<'div'>>, 'defaultValue'> & { disabled?: boolean }
 export type AccordionProps = AccordionOwn &
   (
     | ({ type?: 'single'; onValueChange?: (value: string | null) => void } & ValueOwner<

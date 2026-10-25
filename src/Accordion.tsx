@@ -3,6 +3,8 @@
 import type { ComponentProps, CSSProperties, ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
 import { composeAction } from './internal/events.js'
 import { isItemOpen, nextSelection, sameSelection, type Selection } from './internal/selection.js'
 import { useControllableState } from './react/useControllableState.js'
@@ -18,7 +20,7 @@ const accordionClass =
   'grid w-full gap-[var(--rad-accordion-gap,var(--rad-spacing-group-gap,0.75rem))]'
 const triggerClass =
   'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1] data-disabled:cursor-not-allowed data-disabled:opacity-[var(--_rad-disabled-opacity,var(--rad-state-disabled-opacity,0.5))] forced-colors:data-disabled:opacity-100'
-const headingClass = 'm-0 min-w-0 [font:inherit]'
+const headingClass = 'm-0 min-w-0 break-words [font:inherit]'
 
 const headingTag = {
   1: 'h1',
@@ -31,23 +33,27 @@ const headingTag = {
 
 export type AccordionHeadingLevel = keyof typeof headingTag
 
-type AccordionBaseProps = Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange'> & {
+type ValueOwner<Value> =
+  | { value: Value; defaultValue?: never }
+  | { value?: undefined; defaultValue?: Value }
+
+type AccordionBaseProps = Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
   disabled?: boolean
 }
 
-type AccordionSingleProps = AccordionBaseProps & {
-  type?: 'single'
-  value?: string | null
-  defaultValue?: string | null
-  onValueChange?: (value: string | null) => void
-}
+type AccordionSingleProps = AccordionBaseProps &
+  ValueOwner<string | null> & {
+    type?: 'single'
+    onValueChange?: (value: string | null) => void
+  }
 
-type AccordionMultipleProps = AccordionBaseProps & {
-  type: 'multiple'
-  value?: string[]
-  defaultValue?: string[]
-  onValueChange?: (value: string[]) => void
-}
+type AccordionMultipleProps = AccordionBaseProps &
+  ValueOwner<string[]> & {
+    type: 'multiple'
+    onValueChange?: (value: string[]) => void
+  }
 
 export type AccordionProps = AccordionSingleProps | AccordionMultipleProps
 
@@ -100,7 +106,7 @@ function useAccordionContext() {
 
 function useAccordionItemContext() {
   const item = useContext(AccordionItemContext)
-  if (!item) throw new Error('Accordion triggers must render inside AccordionItem.')
+  if (!item) throw new Error('Accordion parts must render inside AccordionItem.')
   return item
 }
 
@@ -156,7 +162,7 @@ export function Accordion(allProps: AccordionProps) {
         {...props}
         className={cn(accordionClass, className)}
         data-disabled={disabled ? '' : undefined}
-        data-slot="accordion"
+        data-slot={joinIds('accordion', props['data-slot'])}
         data-type={type}
       >
         {children}
@@ -179,6 +185,8 @@ export function AccordionItem({
       <Collapsible
         {...props}
         className={className}
+        data-slot={joinIds('accordion-item', props['data-slot'])}
+        name={undefined}
         data-disabled={itemDisabled ? '' : undefined}
         data-value={value}
         open={isItemOpen(accordion.value, value)}
@@ -208,6 +216,7 @@ export function AccordionTrigger({
       {...props}
       aria-disabled={item.disabled || undefined}
       className={cn(triggerClass, className)}
+      data-slot={joinIds('accordion-trigger', props['data-slot'])}
       data-disabled={item.disabled ? '' : undefined}
       tabIndex={item.disabled ? -1 : tabIndex}
       onClick={composeAction(onClick, undefined, () => item.disabled)}
@@ -223,6 +232,11 @@ export function AccordionTrigger({
 }
 
 export function AccordionContent(props: AccordionContentProps) {
-  useAccordionContext()
-  return <CollapsibleContent {...props} />
+  useAccordionItemContext()
+  return (
+    <CollapsibleContent
+      {...props}
+      data-slot={joinIds('accordion-content', props['data-slot'])}
+    />
+  )
 }

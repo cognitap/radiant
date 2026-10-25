@@ -371,20 +371,29 @@ for (const mode of ['light', 'dark'] as const) {
   test(`${mode}: native disclosure restoration and prop updates emit one request`, async () => {
     const requests = vi.fn()
     const observations = vi.fn()
+    const detailsRef = createRef<HTMLDetailsElement>()
+    const summaryRef = createRef<HTMLElement>()
+    const contentRef = createRef<HTMLDivElement>()
     const tree = (open: boolean) => (
       <ThemeScope mode={mode}>
         <Collapsible
+          ref={detailsRef}
+          style={{ '--rad-collapsible-padding': '18px' }}
           open={open}
           onOpenChange={requests}
           onToggle={observations}
         >
-          <CollapsibleTrigger>Shipping details</CollapsibleTrigger>
-          <CollapsibleContent>Ships in two days.</CollapsibleContent>
+          <CollapsibleTrigger ref={summaryRef}>Shipping details</CollapsibleTrigger>
+          <CollapsibleContent ref={contentRef}>Ships in two days.</CollapsibleContent>
         </Collapsible>
       </ThemeScope>
     )
     const { node, root } = await mount(tree(false))
     const details = node.querySelector('details')!
+    expect(detailsRef.current).toBe(details)
+    expect(summaryRef.current).toBe(details.querySelector('summary'))
+    expect(contentRef.current).toBe(details.querySelector('[data-slot~=collapsible-content]'))
+    expect(getComputedStyle(summaryRef.current!).padding).toBe('18px')
     await act(async () => userEvent.click(page.getByText('Shipping details', { exact: true })))
     await expect.poll(() => requests.mock.calls.length).toBe(1)
     await expect.poll(() => details.open).toBe(false)

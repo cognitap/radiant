@@ -414,7 +414,8 @@ createElement('div', { style: collapsibleTheme({ radius: '1rem', duration: '0ms'
 
 const collapsibleProps: CollapsibleProps = {
   open: true,
-  defaultOpen: false,
+  style: { '--rad-motion-color-duration': '0ms' },
+  ref: createRef<HTMLDetailsElement>(),
   name: 'faq',
   onOpenChange(open: boolean) {
     void open
@@ -423,8 +424,16 @@ const collapsibleProps: CollapsibleProps = {
 createElement(
   Collapsible,
   collapsibleProps,
-  createElement(CollapsibleTrigger, null, 'Shipping'),
-  createElement(CollapsibleContent, null, 'Ships in two days.')
+  createElement(
+    CollapsibleTrigger,
+    { ref: createRef<HTMLElement>(), style: { '--rad-focus-width': '3px' } },
+    'Shipping'
+  ),
+  createElement(
+    CollapsibleContent,
+    { ref: createRef<HTMLDivElement>(), style: { '--rad-collapsible-content-size': '1rem' } },
+    'Ships in two days.'
+  )
 )
 
 // @ts-expect-error Collapsible theme keys are a closed set.
@@ -435,7 +444,8 @@ createElement('div', { style: accordionTheme({ gap: '0.5rem' }) })
 const accordionProps: AccordionProps = {
   type: 'single',
   value: 'shipping',
-  defaultValue: null,
+  style: { '--rad-accordion-gap': '1rem' },
+  ref: createRef<HTMLDivElement>(),
   disabled: false,
   onValueChange(value: string | null) {
     void value
@@ -539,3 +549,9 @@ void [
   oldButtonRadius,
   oldLinkRadius
 ]
+
+// @ts-expect-error Disclosure open state has one owner.
+const mixedDisclosure: CollapsibleProps = { open: false, defaultOpen: true }
+// @ts-expect-error Accordion selection has one owner, including null.
+const mixedSelection: AccordionProps = { value: null, defaultValue: 'shipping' }
+void [mixedDisclosure, mixedSelection]
