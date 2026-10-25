@@ -35,6 +35,12 @@ import {
   themes,
   ThemeScope,
   defineTheme,
+  defineThemeDocument,
+  compileThemeDocument,
+  parseThemeDocument,
+  updateThemeDocument,
+  exportThemeSections,
+  themeDocumentFromDefinition,
   defaultTheme,
   useField
 } from '@cognitap/radiant'
@@ -999,4 +1005,52 @@ test('the archive includes MIT licensing and public documentation', () => {
   ]) {
     assert.ok(readFileSync(new URL(file, root), 'utf8').trim().length > 0, file)
   }
+})
+
+test('installed workshop data round trips and selectively updates the existing ThemeScope runtime', () => {
+  const original = themeDocumentFromDefinition({
+    id: 'installed-workshop',
+    name: 'Installed workshop',
+    tokens: { typography: { family: 'serif' }, surface: { radius: '2rem' } },
+    components: { button: { pressScale: 0.96 } },
+    modes: { dark: { components: { card: { shadow: 'none' } } } }
+  })
+  const colors = defineThemeDocument({
+    kind: 'radiant-theme',
+    version: 1,
+    id: 'color-source',
+    name: 'Color source',
+    sections: {
+      color: {
+        brand: { value: '#166534', gamut: 'srgb' },
+        palettes: [{ id: 'brand', name: 'Brand', swatches: [{ stop: 500, value: '#166534' }] }],
+        anchor: { paletteId: 'brand', stop: 500 },
+        values: { accent: '#166534' },
+        modes: { dark: { accent: '#86efac' } }
+      }
+    }
+  })
+  const exported = exportThemeSections(colors, ['color'])
+  const imported = parseThemeDocument(JSON.parse(JSON.stringify(exported)))
+  assert.equal(imported.kind, 'radiant-theme-sections')
+  const edited = updateThemeDocument(original, imported.sections, 'replace')
+  assert.deepEqual(edited.sections.components, original.sections.components)
+  assert.equal(edited.id, original.id)
+  const restored = parseThemeDocument(JSON.parse(JSON.stringify(edited)))
+  const theme = compileThemeDocument(restored)
+  assert.equal(theme.modes.dark['--rad-color-accent'], '#86efac')
+  assert.equal(theme.modes.light['--rad-button-press-scale'], 0.96)
+  assert.equal(theme.modes.dark['--rad-card-shadow'], 'none')
+  assert.equal(theme.modes.light['--rad-typography-family'], 'serif')
+  const html = renderToStaticMarkup(
+    createElement(
+      ThemeScope,
+      { theme, mode: 'dark' },
+      createElement(ThemeScope, { theme: defaultTheme }, 'Reset')
+    )
+  )
+  assert.match(html, /data-rad-theme="installed-workshop"/)
+  assert.match(html, /data-rad-theme="default"/)
+  assert.match(html, /--rad-button-press-scale:initial/)
+  assert.throws(() => parseThemeDocument({ ...edited, version: 2 }), /Unsupported document.version/)
 })

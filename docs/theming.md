@@ -70,6 +70,154 @@ values → that theme's mode values**. Missing dark values use the dark baseline
 unless a common value already overrides them. Put a common color in `tokens`
 only when it works in both modes, or supply its dark counterpart explicitly.
 
+## Portable workshop documents
+
+`ThemeDocument` is the versioned authoring format for the public theme workshop.
+It keeps authored values and editor metadata; `Theme` remains the resolved data
+accepted by `ThemeScope`. Radiant owns validation, section updates and compilation.
+The documentation application owns selection, undo history, persistence and UI.
+These APIs are unreleased until the next package publication.
+
+```tsx
+import {
+  ThemeScope,
+  themeDocumentFromDefinition,
+  updateThemeDocument,
+  compileThemeDocument,
+  exportThemeSections,
+  parseThemeDocument
+} from '@cognitap/radiant'
+
+const initial = themeDocumentFromDefinition({
+  id: 'garden',
+  name: 'Garden',
+  tokens: {
+    typography: { family: 'system-ui, sans-serif' },
+    surface: { radius: '1rem' }
+  },
+  components: { button: { radius: '2rem' } }
+})
+
+const document = updateThemeDocument(initial, {
+  color: {
+    brand: { value: '#166534', gamut: 'srgb' },
+    palettes: [
+      {
+        id: 'brand',
+        name: 'Brand',
+        swatches: [{ stop: 500, value: '#166534' }]
+      }
+    ],
+    anchor: { paletteId: 'brand', stop: 500 },
+    values: { accent: '#166534', accentForeground: '#ffffff' },
+    modes: { dark: { accent: '#86efac', accentForeground: '#052e16' } }
+  }
+})
+
+const theme = compileThemeDocument(document)
+const scope = (
+  <ThemeScope
+    theme={theme}
+    mode="system"
+  >
+    Garden
+  </ThemeScope>
+)
+
+// Full authoring configuration, including font descriptors and component exceptions.
+const fullJSON = JSON.stringify(document)
+// Resolved application output, accepted directly by ThemeScope after JSON round trip.
+const runtimeJSON = JSON.stringify(theme)
+// Only these sections; deliberately excludes identity and component exceptions.
+const colorJSON = JSON.stringify(exportThemeSections(document, ['color']))
+
+const imported = parseThemeDocument(JSON.parse(colorJSON))
+const next =
+  imported.kind === 'radiant-theme'
+    ? imported // Explicit full replacement of the editor's document.
+    : updateThemeDocument(initial, imported.sections, 'replace')
+```
+
+`defineThemeDocument` accepts a typed document literal. `parseThemeDocument`
+accepts unknown data, such as `JSON.parse` output, and returns either a full
+`{ kind: 'radiant-theme', version: 1, id, name, sections }` document or a selective
+`{ kind: 'radiant-theme-sections', version: 1, sections }` export. Both are
+validated, detached and deeply frozen. Unsupported versions fail with a migration
+message; unknown fields and invalid values identify their path. No automatic
+version migration or silent dropping of future fields occurs. Parse text with
+`JSON.parse` first so malformed JSON errors remain distinct from schema errors.
+
+The section names follow the existing token groups: `color`, `typography`,
+`control`, `surface`, `focus`, `motion`, `spacing`, `state`, plus `components`.
+Each has optional `values` and `modes.light`/`modes.dark`. Values are exactly the
+corresponding partial token group or component override map, retaining its
+existing types and validation. Typography and motion will extend these sections
+when their richer authoring models are defined; arbitrary runtime or engine
+objects are not configuration fields. Editor layout can combine sections: the
+spacing/surfaces editor can update `control`, `surface`, `spacing`, `focus` and
+`state` together as needed.
+
+Compilation uses the same **mode defaults → common values → mode values**
+resolution as `defineTheme`, including all component resets. Metadata does not
+change rendered values: a palette or brand input alone never overwrites semantic
+roles. The color engine and semantic mapping stages will populate those values.
+The original `defineTheme` API, presets, CSS routes and scope behavior are unchanged.
+`themeDocumentFromDefinition` imports an authored `ThemeDefinition`, retaining
+only explicit overrides rather than baking in library defaults. It does not
+reverse-engineer a resolved `Theme` or recover authoring metadata from a preset.
+
+### Section editing and import semantics
+
+| Operation                                                       | Result                                                                                                     |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `updateThemeDocument(doc, sections)`                            | Merge supplied leaves recursively; preserve omitted leaves and sections. Arrays replace as a whole.        |
+| `updateThemeDocument(doc, sections, 'replace')`                 | Replace each supplied section, including all its mode layers and metadata. Omitted sections remain intact. |
+| `updateThemeDocument(doc, { color: {} }, 'replace')`            | Reset that section to library fallback values by removing its authored values and metadata.                |
+| `updateThemeDocument(doc, { color: {} })`                       | Empty merge is a no-op.                                                                                    |
+| Parse a full document and use it as editor state                | Replace identity and every section; no implicit merge.                                                     |
+| Parse a selective export, then pass its `sections` to an update | Apply an explicit merge or replacement while retaining the destination identity.                           |
+
+Updates preserve deliberate component exceptions unless `components` is explicitly
+included. A typography change therefore retains a Button-only font; a color
+change retains an Input-only focus color. Select `components` separately to copy
+those exceptions. Resetting `color` does not reset an exception in `components`.
+To delete individual leaves, replace their section with the desired retained
+values. `null` is invalid, and optional object properties set to `undefined` are
+omitted, not deletion markers. Array holes and undefined array elements are invalid.
+
+### Color identity and font boundaries
+
+`color.brand` retains the original `value`, declared `gamut` (`srgb` or
+`display-p3`) and optional explicitly labeled `srgbFallback`. Adding a brand
+materialises `fidelity: 'anchored'` unless `unanchored` was explicitly selected.
+`palettes` holds named ramps with unique stops from 50, 100, 200, …, 900, 950.
+Partial ramps can be saved while authoring. An optional `anchor` references a
+palette/stop whose value must exactly equal `brand.value`; a stale anchor fails
+validation with a regeneration/replacement instruction. An unanchored ramp omits
+`anchor`. A fallback cannot stand in for the unchanged original.
+
+This schema preserves the exact-anchoring decision; it does not generate ramps,
+parse color syntax, check gamut claims, measure contrast or prove balanced swatches.
+Those belong to the subsequent color engine and semantic role mapping. A P3 source
+and labeled fallback can be retained as data without claiming P3 generation support.
+Changing source/fidelity alongside an existing anchor requires a coherent replacement
+or regenerated palette; the compiler never silently adjusts the source.
+
+`typography.fonts` contains portable descriptors: unique `id`, `family`, `source`
+(`system`, `catalog` or `local`), optional numeric `weights` (1–1000) and `styles`
+(`normal`/`italic`). These describe requirements; the consuming application loads
+fonts and determines availability. Local font bytes, file paths/handles, URLs,
+DOM objects and runtime functions have no fields in the schema. A local family
+name can travel with the configuration, but the local font itself does not.
+Font metadata does not set `typography.values.family` automatically.
+
+Full and selective authoring JSON preserve those descriptors; only selecting
+`typography` exports them. Compiled `Theme` output contains resolved CSS values
+and no palette/source/font metadata. Both formats are data: plain objects,
+arrays, strings, booleans, null and finite numbers, restricted further by their
+field schema. Functions, class/binary instances, cycles, accessors and unsupported
+keys fail before import can silently discard data.
+
 ## Scopes, mode, and overrides
 
 `ThemeScope` renders a normal `div` and accepts its native props and ref. It
