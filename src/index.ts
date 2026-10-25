@@ -114,3 +114,6 @@ export type {
   ThemeTypographySection,
   ThemeFontMetadata
 } from './themes/index.js'
+
+export { generateColorWall } from './color/index.js'
+export type { ColorWall, ColorWallInput } from './color/index.js'

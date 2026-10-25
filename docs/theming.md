@@ -218,6 +218,80 @@ arrays, strings, booleans, null and finite numbers, restricted further by their
 field schema. Functions, class/binary instances, cycles, accessors and unsupported
 keys fail before import can silently discard data.
 
+## Generate a color wall
+
+```ts
+import { generateColorWall } from '@cognitap/radiant/color'
+import { updateThemeDocument } from '@cognitap/radiant'
+
+const wall = generateColorWall({ brand: '#7C3AED' })
+// Optional dials are materialised, so this reproduces every output swatch.
+const replay = generateColorWall(JSON.parse(JSON.stringify(wall.input)))
+
+// Retain independently authored semantic values/modes; replace generated metadata
+// so switching to unanchored fidelity also removes the previous anchor.
+const previous = document.sections.color
+const next = updateThemeDocument(
+  document,
+  {
+    color: { values: previous?.values, modes: previous?.modes, ...wall.color }
+  },
+  'replace'
+)
+```
+
+The generator is available from the package root and from the React-free
+`@cognitap/radiant/color` entry. It reads no browser globals, loads no fonts and
+uses no randomness or AI. The result is detached, deeply frozen, JSON-safe data.
+This is an unreleased API until the next package publication.
+
+`wall.color` fits the existing `ThemeColorSection`: original `brand`, selected
+`fidelity`, 18 `palettes` and an `anchor` only for anchored fidelity. Palette order
+is Brand, Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue,
+Indigo, Violet, Purple, Pink, Rose, Neutral. Each has a stable lowercase ID and
+11 swatches at 50, 100, 200, …, 900, 950. Generated values are opaque six-digit
+sRGB hex; the exact original preserves its supplied spelling/case.
+`wall.neutralInput` reports the low-chroma path. `wall.input` contains all
+materialised controls and algorithm `version: 1` for replay. Persist that input
+as a generator recipe separately; the current version-1 theme document stores
+its color output, not a new untyped generation-settings field.
+
+| Input          | Default                                                              | Supported range / meaning                                                                                                                                                |
+| -------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `brand`        | Required                                                             | Opaque six-digit sRGB hex. Alpha, CSS functions, named colors and P3 sources are rejected explicitly.                                                                    |
+| `version`      | `1`                                                                  | Only the calibrated algorithm version 1 is supported.                                                                                                                    |
+| `gamut`        | `srgb`                                                               | Only sRGB output is currently supported. No automatic P3 fallback or source replacement.                                                                                 |
+| `fidelity`     | `anchored`                                                           | `anchored` preserves the original at its nearest-lightness numbered stop; `unanchored` keeps the regular ramp and separate original.                                     |
+| `vividness`    | Source C / available C, clamped to .10–.92; .35 for low-chroma input | 0–1. Controls generated chroma; it never changes the exact source anchor.                                                                                                |
+| `lightness`    | `hue-aware`                                                          | `hue-aware` adapts the middle toward each hue's gamut cusp; `shared` uses the common reference curve.                                                                    |
+| `distribution` | `1`                                                                  | .75–1.35. Redistributes intermediate shades while retaining endpoints/middle in regular chromatic ramps.                                                                 |
+| `neutralTint`  | `.012`                                                               | 0–.035 peak chroma in the Neutral ramp; zero produces untinted grays.                                                                                                    |
+| `hueAlignment` | `.6`                                                                 | 0–1. Rotate the wall so its nearest named family moves toward the brand hue; family order/spacing stays intact.                                                          |
+| `neutralHue`   | `255`                                                                | Any finite degrees, wrapped into [0, 360). Explicit direction when source C < .02; the near-neutral Brand ramp remains neutral apart from its exact source neighborhood. |
+
+The calibration follows the [accepted DEV-151 decision](https://github.com/cognitap/radiant/blob/50044fc0d6d66c94b2e3dfb02fc17c0d2828aff6/docs/research/dev-151-calibration-proposal.md).
+It uses the reference lightness curve .985, .965, .93, .87, .79, .70, .61, .52,
+.43, .34, .24, hue-relative gamut fractions and a smooth chroma envelope. Anchored
+fidelity reshapes neighboring lightness and chroma around the unchanged source.
+Nearest-lightness ties prefer the earlier/lighter stop. Black and white can
+occupy the endpoint stops. Metrics and anchor selection use actual quantized
+colors, rather than assuming requested OKLCH values survived mapping unchanged.
+
+The mapper reduces chroma at constant lightness/hue until the result fits sRGB,
+then emits 8-bit output. Conversion uses [Ottosson's Oklab matrices](https://bottosson.github.io/posts/oklab/)
+and the [CSS Color 4 transfer functions](https://www.w3.org/TR/css-color-4/#color-conversion-code).
+This deliberate mapper does not claim to duplicate a browser's gamut-mapping
+algorithm. The per-call caches are discarded after generation; past calls cannot
+change subsequent results or retain an unbounded history of user colors.
+
+A color wall is palette data. It does not select semantic text/action/state
+roles, guarantee contrast on arbitrary surfaces or certify chart distinctions.
+Those decisions follow in DEV-154. `compileThemeDocument` continues to use only
+semantic `values`/`modes`; adding this metadata alone does not change a rendered
+theme. In Storybook, **System → Color Wall → Reference** exposes the accepted
+12 inputs and controls for visual inspection; the public workshop UI remains
+separate documentation-application work.
+
 ## Scopes, mode, and overrides
 
 `ThemeScope` renders a normal `div` and accepts its native props and ref. It

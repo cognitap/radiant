@@ -37,7 +37,11 @@
     },
     "./styles.css": "./dist/library/styles.css",
     "./reset.css": "./dist/library/reset.css",
-    "./tailwind.css": "./src/styles.css"
+    "./tailwind.css": "./src/styles.css",
+    "./color": {
+      "types": "./dist/library/color/index.d.ts",
+      "default": "./dist/library/color/index.js"
+    }
   },
   "publishConfig": {
     "access": "public",

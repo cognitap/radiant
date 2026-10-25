@@ -4,6 +4,13 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add the deterministic OKLCH color-wall generator (DEV-153), available through
+  the package root and a React-free `@cognitap/radiant/color` entry. It emits 16
+  hue families plus Brand and Neutral ramps, defaults to exact source anchoring
+  with reshaped neighbors, exposes bounded calibration controls and returns
+  immutable replayable inputs and theme-document-compatible color data. Add
+  reference/extreme-case coverage and a Storybook wall inspection story.
+
 - Add versioned theme workshop documents (DEV-152): typed token sections,
   source/palette and portable font metadata, full/selective JSON exports,
   explicit merge/replace/reset updates and compilation through the existing
