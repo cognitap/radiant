@@ -1,4 +1,6 @@
 import { useId, useState } from 'react'
+import { expect, userEvent, within } from 'storybook/test'
+import { ProfileExample } from '../.storybook/examples/ProfileForm.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   Button,
@@ -18,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A passive div surface with CardHeader, CardTitle, CardDescription, CardContent and CardFooter parts. Each part accepts native props, className/style and ref on its host; data-slot values are card, card-header, card-title, card-description, card-content and card-footer. Title defaults to h2 and accepts level. Put Button/Link actions inside; Card has no disabled, pending or open state.'
+          'A passive div surface with CardHeader, CardTitle, CardDescription, CardContent and CardFooter parts. Each part accepts native props, className, typed local theme styles and ref on its host; caller data-slot tokens add to the owned identity. Shared color motion respects reduced motion; data-slot values are card, card-header, card-title, card-description, card-content and card-footer. Title defaults to h2 and accepts level. Put Button/Link actions inside; Card has no disabled, pending or open state.'
       }
     }
   }
@@ -64,26 +66,42 @@ function ShippingCard() {
 }
 
 export const Default: Story = {
-  render: () => <ShippingCard />
+  render: () => <ShippingCard />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const card = canvasElement.querySelector('[data-slot~="card"]')!
+    await expect(card.tagName).toBe('DIV')
+    await expect(card).not.toHaveAttribute('role')
+    await expect(card).not.toHaveAttribute('tabindex')
+    await userEvent.click(canvas.getByRole('button', { name: 'Track' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Tracking update:')
+    await expect(canvas.getByRole('link', { name: 'Details' })).toHaveAttribute('data-slot', 'link')
+  }
 }
 
 export const Composition: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The canonical native profile form, reused inside Card. Fields and Button actions follow the global theme; the same form can also be placed inside Dialog under Recipes → Forms.'
+      }
+    }
+  },
   render: () => (
-    <section aria-labelledby="pack-title">
-      <Card style={{ maxWidth: '24rem' }}>
-        <CardHeader>
-          <CardTitle id="pack-title">Pack</CardTitle>
-          <CardDescription>The consumer named this section.</CardDescription>
-        </CardHeader>
-        <CardContent>Three pieces, one box.</CardContent>
-      </Card>
-    </section>
+    <ProfileExample
+      owner="native"
+      placement="card"
+    />
   )
 }
 
 export const Customisation: Story = {
   render: () => (
-    <Card style={{ maxWidth: '24rem' }}>
+    <Card
+      data-slot="product"
+      style={{ maxWidth: '24rem', '--rad-card-padding': '1.25rem' }}
+    >
       <div
         style={{
           height: '4.5rem',
@@ -92,9 +110,22 @@ export const Customisation: Story = {
         }}
       />
       <CardContent>The content can sit before the title.</CardContent>
-      <CardTitle level={3}>Soft set</CardTitle>
+      <CardTitle
+        level={3}
+        style={{ '--rad-card-title-size': '1.25rem' }}
+      >
+        Soft set
+      </CardTitle>
     </Card>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    const card = canvasElement.querySelector('[data-slot~="card"]')!
+    await expect(card).toHaveAttribute('data-slot', 'card product')
+    await expect(card).toHaveStyle({ padding: '20px' })
+    await expect(within(canvasElement).getByRole('heading', { level: 3 })).toHaveStyle({
+      fontSize: '20px'
+    })
+  }
 }
 
 export const Quiet: Story = {

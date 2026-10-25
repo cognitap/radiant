@@ -486,15 +486,42 @@ accordionTheme({ radius: '1rem' })
 
 createElement('div', { style: cardTheme({ radius: '1rem', padding: '0', titleWeight: 550 }) })
 
-const cardProps: CardProps = { role: 'region', 'aria-labelledby': 'ship' }
-const cardTitleProps: CardTitleProps = { id: 'ship', level: 3 }
+const cardProps: CardProps = {
+  role: 'region',
+  'aria-labelledby': 'ship',
+  ref: createRef<HTMLDivElement>(),
+  style: { '--rad-card-padding': '1rem' },
+  'data-slot': 'product'
+}
+const cardTitleProps: CardTitleProps = {
+  id: 'ship',
+  level: 3,
+  ref: createRef<HTMLHeadingElement>(),
+  style: { '--rad-card-title-size': '1.25rem' }
+}
 createElement(
   Card,
   cardProps,
-  createElement(CardHeader, null, createElement(CardTitle, cardTitleProps, 'Shipping')),
-  createElement(CardDescription, null, 'Leaves the studio tomorrow.'),
-  createElement(CardContent, null, 'Ships in two days.'),
-  createElement(CardFooter, null, 'Track')
+  createElement(
+    CardHeader,
+    { ref: createRef<HTMLDivElement>(), style: { '--rad-surface-gap': '1rem' } },
+    createElement(CardTitle, cardTitleProps, 'Shipping')
+  ),
+  createElement(
+    CardDescription,
+    { ref: createRef<HTMLParagraphElement>(), style: { '--rad-surface-gap': '1rem' } },
+    'Leaves the studio tomorrow.'
+  ),
+  createElement(
+    CardContent,
+    { ref: createRef<HTMLDivElement>(), style: { '--rad-surface-gap': '1rem' } },
+    'Ships in two days.'
+  ),
+  createElement(
+    CardFooter,
+    { ref: createRef<HTMLDivElement>(), style: { '--rad-surface-gap': '1rem' } },
+    'Track'
+  )
 )
 
 // @ts-expect-error Card theme keys are a closed set.
@@ -555,3 +582,9 @@ const mixedDisclosure: CollapsibleProps = { open: false, defaultOpen: true }
 // @ts-expect-error Accordion selection has one owner, including null.
 const mixedSelection: AccordionProps = { value: null, defaultValue: 'shipping' }
 void [mixedDisclosure, mixedSelection]
+
+// @ts-expect-error A passive Card has no disabled control state.
+const disabledCard: CardProps = { disabled: true }
+// @ts-expect-error CardTitle uses a native heading level.
+const invalidCardHeading: CardTitleProps = { level: 7 }
+void [disabledCard, invalidCardHeading]

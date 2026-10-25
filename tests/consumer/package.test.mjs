@@ -880,31 +880,53 @@ test('a card groups content without becoming a control', () => {
   const html = renderToStaticMarkup(
     createElement(
       Card,
-      { className: 'bg-transparent' },
+      {
+        className: 'bg-transparent p-0',
+        'data-slot': 'product product',
+        style: { '--rad-card-padding': '18px' },
+        id: 'shipping-card'
+      },
       createElement(
         CardHeader,
-        null,
-        createElement(CardTitle, null, 'Shipping'),
-        createElement(CardDescription, null, 'Leaves the studio tomorrow.')
+        { 'data-slot': 'product' },
+        createElement(
+          CardTitle,
+          { level: 3, 'data-slot': 'product', style: { '--rad-card-title-size': '20px' } },
+          'Shipping'
+        ),
+        createElement(CardDescription, { 'data-slot': 'product' }, 'Leaves the studio tomorrow.')
       ),
-      createElement(CardContent, null, 'Ships in two days.'),
-      createElement(CardFooter, null, createElement('a', { href: '/orders/1' }, 'Details'))
+      createElement(CardContent, { 'data-slot': 'product' }, 'Ships in two days.'),
+      createElement(
+        CardFooter,
+        { 'data-slot': 'product' },
+        createElement(Link, { href: '/orders/1' }, 'Details'),
+        createElement(Button, null, 'Track')
+      )
     )
   )
-  const opening = /<div\b[^>]*data-slot="card"[^>]*>/.exec(html)?.[0] ?? ''
-  assert.match(opening, /data-slot="card"/)
+  const opening = /<div\b[^>]*data-slot="card product"[^>]*>/.exec(html)?.[0] ?? ''
+  assert.match(opening, /data-slot="card product"/)
   assert.doesNotMatch(opening, /\srole=/)
   assert.doesNotMatch(opening, /tabindex/i)
-  assert.match(html, /<h2\b[^>]*>Shipping<\/h2>/)
-  assert.match(html, /data-slot="card-description"/)
-  assert.match(html, /data-slot="card-footer"/)
+  assert.match(html, /<h3\b[^>]*>Shipping<\/h3>/)
+  assert.match(html, /data-slot="card-description product"/)
+  assert.match(html, /data-slot="card-footer product"/)
   assert.match(html, /<a\b[^>]*href="\/orders\/1"/)
   const classAttribute =
-    /<div\b[^>]*data-slot="card"[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ??
-    /<div\b[^>]*\sclass="([^"]*)"[^>]*data-slot="card"/.exec(html)?.[1] ??
+    /<div\b[^>]*data-slot="card product"[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ??
+    /<div\b[^>]*\sclass="([^"]*)"[^>]*data-slot="card product"/.exec(html)?.[1] ??
     ''
   assert.match(classAttribute, /\bbg-transparent\b/)
-  assert.doesNotMatch(classAttribute, /card-background/)
+  assert.doesNotMatch(classAttribute, /card-background|(?:^|\s)p-\[/)
+  assert.match(classAttribute, /\bp-0\b/)
+  assert.match(opening, /id="shipping-card"/)
+  assert.match(opening, /style="--rad-card-padding:18px"/)
+  for (const part of ['header', 'title', 'description', 'content', 'footer']) {
+    assert.match(html, new RegExp(`data-slot="card-${part} product"`))
+  }
+  assert.match(html, /data-slot="button"/)
+  assert.match(html, /data-slot="link"/)
 })
 
 test('cardTheme maps typed settings to Card variables', () => {

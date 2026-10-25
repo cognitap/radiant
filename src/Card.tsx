@@ -1,9 +1,15 @@
 import type { ComponentProps, CSSProperties } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
+const colorMotionClass =
+  'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
+
 const cardVariants = cva([
+  colorMotionClass,
   '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
   'box-border grid w-full gap-[var(--rad-card-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
   'rounded-[var(--rad-card-radius,var(--rad-surface-radius,0.75rem))]',
@@ -23,6 +29,7 @@ const cardHeaderVariants = cva([
 ])
 
 const cardTitleVariants = cva([
+  colorMotionClass,
   'm-0 min-w-0 break-words leading-snug',
   '[font-size:var(--rad-card-title-size,var(--rad-typography-heading-size,1.125rem))]',
   '[font-weight:var(--rad-card-title-weight,var(--rad-typography-heading-weight,600))]',
@@ -30,6 +37,7 @@ const cardTitleVariants = cva([
 ])
 
 const cardDescriptionVariants = cva([
+  colorMotionClass,
   'm-0 min-w-0 break-words leading-snug',
   '[color:var(--rad-card-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
   '[font-size:var(--rad-card-description-size,var(--rad-typography-small-size,0.8125rem))]',
@@ -53,19 +61,24 @@ const headingTag = {
 
 export type CardHeadingLevel = keyof typeof headingTag
 
-export type CardProps = ComponentProps<'div'>
+type CardPartProps<Host extends 'div' | 'h2' | 'p'> = Omit<ComponentProps<Host>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 
-export type CardHeaderProps = ComponentProps<'div'>
+export type CardProps = CardPartProps<'div'>
 
-export type CardTitleProps = ComponentProps<'h2'> & {
+export type CardHeaderProps = CardPartProps<'div'>
+
+export type CardTitleProps = CardPartProps<'h2'> & {
   level?: CardHeadingLevel
 }
 
-export type CardDescriptionProps = ComponentProps<'p'>
+export type CardDescriptionProps = CardPartProps<'p'>
 
-export type CardContentProps = ComponentProps<'div'>
+export type CardContentProps = CardPartProps<'div'>
 
-export type CardFooterProps = ComponentProps<'div'>
+export type CardFooterProps = CardPartProps<'div'>
 
 export type CardTheme = NonNullable<ThemeComponentOverrides['card']>
 
@@ -78,7 +91,7 @@ export function Card({ className, ...props }: CardProps) {
     <div
       {...props}
       className={cn(cardVariants(), className)}
-      data-slot="card"
+      data-slot={joinIds('card', props['data-slot'])}
     />
   )
 }
@@ -88,7 +101,7 @@ export function CardHeader({ className, ...props }: CardHeaderProps) {
     <div
       {...props}
       className={cn(cardHeaderVariants(), className)}
-      data-slot="card-header"
+      data-slot={joinIds('card-header', props['data-slot'])}
     />
   )
 }
@@ -99,7 +112,7 @@ export function CardTitle({ level = 2, className, children, ...props }: CardTitl
     <Tag
       {...props}
       className={cn(cardTitleVariants(), className)}
-      data-slot="card-title"
+      data-slot={joinIds('card-title', props['data-slot'])}
     >
       {children}
     </Tag>
@@ -111,7 +124,7 @@ export function CardDescription({ className, ...props }: CardDescriptionProps) {
     <p
       {...props}
       className={cn(cardDescriptionVariants(), className)}
-      data-slot="card-description"
+      data-slot={joinIds('card-description', props['data-slot'])}
     />
   )
 }
@@ -121,7 +134,7 @@ export function CardContent({ className, ...props }: CardContentProps) {
     <div
       {...props}
       className={cn(cardContentVariants(), className)}
-      data-slot="card-content"
+      data-slot={joinIds('card-content', props['data-slot'])}
     />
   )
 }
@@ -131,7 +144,7 @@ export function CardFooter({ className, ...props }: CardFooterProps) {
     <div
       {...props}
       className={cn(cardFooterVariants(), className)}
-      data-slot="card-footer"
+      data-slot={joinIds('card-footer', props['data-slot'])}
     />
   )
 }
