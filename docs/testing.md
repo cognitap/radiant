@@ -9,6 +9,9 @@ The [browser/AT matrix and evidence process](accessibility.md) defines support
 targets, manual scenarios, WCAG mapping and how to report unverified combinations.
 Automated Chromium results are one evidence category within that matrix.
 
+The [ten-family coverage audit](verification/2026-10-25-harmonisation.md) maps the
+harmonised contract to executable checks and records the remaining readiness gaps.
+
 ## Running browser checks
 
 After installing dependencies, install the matching browser once:
@@ -41,6 +44,11 @@ dismissal, event cancellation, action refs, StrictMode cleanup/remount, and
 server hydration in light and dark. It uses Vitest's Playwright-backed input,
 because synthetic keyboard events in a story cannot prove native Escape, Tab,
 summary activation, or `method="dialog"` behavior.
+
+Its Appearance cases also check rendered nested/default scope isolation and
+live system-mode changes, plus reduced-motion/forced-colors emulation across all
+presets in both modes using the canonical workspace. Emulation is separate from
+actual OS settings and manual screen-reader verification.
 
 Link scenarios also observe actual new-tab and download events. The platform
 project's narrow server commands perform trusted clicks, return the observed
