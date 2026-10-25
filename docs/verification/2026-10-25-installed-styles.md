@@ -1,16 +1,17 @@
 # E135 — Installed styling artifact verification
 
 Date: 25 October 2026. Source baseline:
-`77d83681870474babae06fb7aaf12accf4c6f72c` (merged DEV-134), plus explicitly dirty
-DEV-135 changes. Method: one locally packed archive, isolated installed React
+`6ec835ea77d44deabebfae87cd69d528cb252311` (DEV-135), plus explicitly dirty final
+layer-order/evidence refinements, based on merged DEV-134
+`77d83681870474babae06fb7aaf12accf4c6f72c`. Method: one locally packed archive, isolated installed React
 consumer, Vite production builds and automated Playwright Chromium input.
 This is an artifact checkpoint, not registry/Cognitap consumption or a complete
 visual, browser/AT or WCAG audit. See the [evidence matrix](../accessibility.md).
 
 ## Package and environment
 
-Installed-run receipt: `2026-10-25T15:29:45.675Z`; completed:
-`2026-10-25T15:30:44.410Z`. Revision is the baseline above with `dirty: true`
+Installed-run receipt: `2026-10-25T15:40:46.191Z`; completed:
+`2026-10-25T15:41:46.869Z`. Revision is the baseline above with `dirty: true`
 for DEV-135 changes, not a falsely attributed final commit.
 
 | Field       | Observed value                                                            |
@@ -26,7 +27,7 @@ for DEV-135 changes, not a falsely attributed final commit.
 Exact archive integrity:
 
 ```text
-sha512-8LZUGM0YiF9C82WAku0zPBPAq/mT6Wf/vQgZbSsunryZWO5zn8utXtB9PKflc7XPdfmPEM8ptPu1iBthvhyGEQ==
+sha512-9qWdqW+ecKSgICsu68tJKGOnkNbo8Z89jpqjkEXMnVaP3c4uJqaOqHrie1D4MhXBvBWM6IF5PriRGm20CwUhbw==
 ```
 
 All four builds use the same installed `@cognitap/radiant` archive. The compiled
@@ -81,6 +82,8 @@ a separate framework/RSC deployment proof.
    Supplying the complete layer order restored the intended color. The CSS build
    now preserves that statement at the front of both compiled exports. Consumers
    continue using the documented imports, without a compensating application rule.
+   The compiler's `properties` fallback layer is ordered first, retaining its
+   lower priority than utility declarations.
 3. **Caller hover utility loses to internal specificity.** A generated
    `hover:bg-[#123456]` failed to replace the guarded internal hover background.
    Color utilities now use the same `hover:`/`active:` prefixes as caller classes;
@@ -102,8 +105,8 @@ runs, zero JUnit failures/errors). Formatting, lint, source/contract types,
 generated styles and Storybook build also pass. A separate check resolves all
 115 repository links/anchors across 14 documents.
 
-The subsequent source-browser receipt is `2026-10-25T15:30:47.793Z`; last JUnit
-suite timestamp is `2026-10-25T15:32:26.722Z`. Its environment matches the host
+The subsequent source-browser receipt is `2026-10-25T15:41:50.050Z`; last JUnit
+suite timestamp is `2026-10-25T15:43:25.672Z`. Its environment matches the host
 and browser above; the installed report retains its own earlier timestamps and
 archive identity. These results are separate evidence categories.
 
