@@ -5,9 +5,10 @@ import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Checkbox, Field, type ThemeStyle } from './index.js'
 
 function NativeForm() {
-  const [summary, setSummary] = useState('None selected')
+  const [summary, setSummary] = useState('No changes saved.')
   return (
     <form
+      onReset={() => setSummary('No changes saved.')}
       onSubmit={event => {
         event.preventDefault()
         const selected = new FormData(event.currentTarget).getAll('channels')
@@ -36,7 +37,7 @@ function NativeForm() {
           Reset
         </Button>
       </div>
-      <p style={{ margin: 0 }}>{summary}</p>
+      <output>{summary}</output>
     </form>
   )
 }
@@ -125,10 +126,11 @@ export const Composition: Story = {
     await userEvent.keyboard(' ')
     await expect(sms).toBeChecked()
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
-    await expect(canvas.getByText('sms', { exact: true })).toBeVisible()
+    await expect(canvas.getByRole('status')).toHaveTextContent('sms')
     await userEvent.click(canvas.getByRole('button', { name: 'Reset' }))
     await expect(email).toBeChecked()
     await expect(sms).not.toBeChecked()
+    await expect(canvas.getByRole('status')).toHaveTextContent('No changes saved.')
   }
 }
 

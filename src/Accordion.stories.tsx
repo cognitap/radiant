@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { expect, userEvent } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
+import { ShipmentTracking } from '../.storybook/examples/ShipmentTracking.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   Accordion,
@@ -21,13 +22,7 @@ function ShippingSections({ multiple = false }: { multiple?: boolean }) {
       <AccordionItem value="shipping">
         <AccordionTrigger>Shipping</AccordionTrigger>
         <AccordionContent>
-          <p style={{ margin: 0 }}>Ships in two days.</p>
-          <Button
-            style={{ marginTop: '0.75rem' }}
-            type="button"
-          >
-            Track
-          </Button>
+          <ShipmentTracking />
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="returns">
@@ -156,12 +151,14 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => <ShippingSections />,
   play: async ({ canvasElement }) => {
-    const item = canvasElement.querySelector('[data-slot~="accordion-item"]')!
+    const item = canvasElement.querySelector<HTMLElement>('[data-slot~="accordion-item"]')!
     const trigger = item.querySelector('summary')!
     const content = item.querySelector('[data-slot~="accordion-content"]')!
     await expect(item).toHaveAttribute('data-slot', 'collapsible accordion-item')
     await expect(trigger).toHaveAttribute('data-slot', 'collapsible-trigger accordion-trigger')
     await expect(trigger.querySelector('button')).toBeNull()
+    await userEvent.click(within(item).getByRole('button', { name: 'Track' }))
+    await expect(within(item).getByRole('status')).toHaveTextContent('Tracking update:')
     await expect(content).toHaveAttribute('data-state', 'open')
     await userEvent.click(trigger)
     await expect(item).toHaveAttribute('data-state', 'closed')

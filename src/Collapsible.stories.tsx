@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
+import { ShipmentTracking } from '../.storybook/examples/ShipmentTracking.js'
+import { expect, userEvent, within } from 'storybook/test'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   Button,
@@ -11,6 +13,7 @@ import {
 } from './index.js'
 
 function ExclusiveGroup() {
+  const name = useId()
   return (
     <div
       style={{
@@ -22,12 +25,12 @@ function ExclusiveGroup() {
     >
       <Collapsible
         defaultOpen
-        name="faq"
+        name={name}
       >
         <CollapsibleTrigger>Shipping</CollapsibleTrigger>
         <CollapsibleContent>Ships in two days.</CollapsibleContent>
       </Collapsible>
-      <Collapsible name="faq">
+      <Collapsible name={name}>
         <CollapsibleTrigger>Returns</CollapsibleTrigger>
         <CollapsibleContent>Returns are free for 30 days.</CollapsibleContent>
       </Collapsible>
@@ -113,17 +116,17 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByText('Shipping', { exact: true }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Track' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Tracking update:')
+  },
   render: () => (
     <Collapsible>
       <CollapsibleTrigger>Shipping</CollapsibleTrigger>
       <CollapsibleContent>
-        <p style={{ margin: 0 }}>Ships in two days.</p>
-        <Button
-          style={{ marginTop: '0.75rem' }}
-          type="button"
-        >
-          Track
-        </Button>
+        <ShipmentTracking />
       </CollapsibleContent>
     </Collapsible>
   )

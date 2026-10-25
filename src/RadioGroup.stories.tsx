@@ -5,9 +5,10 @@ import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Radio, RadioGroup, type ThemeStyle } from './index.js'
 
 function NativeForm() {
-  const [summary, setSummary] = useState('pro')
+  const [summary, setSummary] = useState('No changes saved.')
   return (
     <form
+      onReset={() => setSummary('No changes saved.')}
       onSubmit={event => {
         event.preventDefault()
         const selected = new FormData(event.currentTarget).get('plan')
@@ -49,7 +50,7 @@ function NativeForm() {
           Reset
         </Button>
       </div>
-      <p style={{ margin: 0 }}>{summary}</p>
+      <output>{summary}</output>
     </form>
   )
 }
@@ -169,10 +170,11 @@ export const Composition: Story = {
     await expect(team).toBeChecked()
     await expect(team).toHaveFocus()
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
-    await expect(canvas.getByText('team', { exact: true })).toBeVisible()
+    await expect(canvas.getByRole('status')).toHaveTextContent('team')
     await userEvent.click(canvas.getByRole('button', { name: 'Reset' }))
     await expect(pro).toBeChecked()
     await expect(team).not.toBeChecked()
+    await expect(canvas.getByRole('status')).toHaveTextContent('No changes saved.')
   }
 }
 
