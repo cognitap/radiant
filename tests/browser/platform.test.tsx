@@ -25,6 +25,7 @@ import {
   ThemeScope
 } from '../../src/index.js'
 import '../../.storybook/styles.css'
+import { ProfileExample } from '../../.storybook/examples/ProfileForm.js'
 
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
 const roots: Root[] = []
@@ -233,6 +234,45 @@ for (const mode of ['light', 'dark'] as const) {
     expect(node.querySelectorAll('input:checked')).toHaveLength(0)
     expect(requests).toHaveBeenCalledTimes(2)
     expect(observations).toHaveBeenCalledTimes(2)
+  })
+
+  test(`${mode}: native and TanStack recipes reuse their form inside Card and Dialog`, async () => {
+    for (const owner of ['native', 'tanstack'] as const) {
+      for (const placement of ['card', 'dialog'] as const) {
+        const { node, root } = await mount(
+          <ThemeScope mode={mode}>
+            <ProfileExample
+              owner={owner}
+              placement={placement}
+            />
+          </ThemeScope>
+        )
+        const trigger = page.getByRole('button', { name: 'Edit profile' })
+        if (placement === 'dialog') await act(async () => userEvent.click(trigger))
+        expect(node.querySelectorAll('form')).toHaveLength(1)
+        expect(node.querySelector('form form')).toBe(null)
+        const email = page.getByRole('textbox', { name: 'Email' })
+        await act(async () => userEvent.type(email, 'grace@example.com'))
+        await act(async () => userEvent.click(page.getByRole('radio', { name: 'Pro' })))
+        await act(async () => userEvent.click(page.getByRole('button', { name: 'Reset' })))
+        await expect.element(email).toHaveValue('')
+        await expect.element(page.getByRole('radio', { name: 'Free' })).toBeChecked()
+        await act(async () => userEvent.type(email, 'ada@example.com'))
+        await act(async () => userEvent.click(page.getByRole('radio', { name: 'Pro' })))
+        await act(async () =>
+          userEvent.click(page.getByRole('checkbox', { name: 'Send product updates' }))
+        )
+        await act(async () => userEvent.click(page.getByRole('button', { name: 'Save profile' })))
+        await expect
+          .element(page.getByRole('status'))
+          .toHaveTextContent('Saved ada@example.com · pro · Updates off')
+        if (placement === 'dialog') {
+          await expect.element(page.getByRole('dialog')).not.toBeInTheDocument()
+          await expect.element(trigger).toHaveFocus()
+        } else expect(node.querySelector('[data-slot~="card-content"] form')).not.toBe(null)
+        await act(async () => root.render(null))
+      }
+    }
   })
 
   test(`${mode}: changing modal and dismissal props reconciles the same native dialog`, async () => {

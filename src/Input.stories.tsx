@@ -1,45 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button, Field, Input, type ThemeStyle } from './index.js'
-
-function NativeForm() {
-  const [error, setError] = useState<string | undefined>()
-  return (
-    <form
-      onReset={() => setError(undefined)}
-      onSubmit={event => {
-        event.preventDefault()
-        const email = new FormData(event.currentTarget).get('email')
-        setError(typeof email === 'string' && email.trim() ? undefined : 'Enter an email.')
-      }}
-      style={{ display: 'grid', gap: '0.75rem', maxWidth: '20rem' }}
-    >
-      <Field
-        description="Work address"
-        error={error}
-        label="Email"
-        required
-      >
-        <Input
-          autoComplete="email"
-          defaultValue="ada@example.com"
-          name="email"
-          type="email"
-        />
-      </Field>
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
-        <Button type="submit">Save</Button>
-        <Button
-          type="reset"
-          variant="outline"
-          tone="neutral"
-        >
-          Reset
-        </Button>
-      </div>
-    </form>
-  )
-}
+import { Field, Input, type ThemeStyle } from './index.js'
 
 function Controlled() {
   const [value, setValue] = useState('Hello')
@@ -117,8 +78,6 @@ export const States: Story = {
     )
   }
 }
-
-export const Composition: Story = { render: () => <NativeForm /> }
 
 export const Customisation: Story = {
   parameters: {

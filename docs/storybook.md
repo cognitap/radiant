@@ -47,8 +47,10 @@ theme, rather than another hardcoded theme gallery.
 
 Meta descriptions identify the native host, relevant props, and named parts.
 Preserve native form, controlled-state, focus, nesting, and adapter examples
-when removing presentation duplication. Canonical application and TanStack
-integration examples remain owned by their component migration issues.
+when removing presentation duplication. **Recipes → Forms** contains the canonical
+native and TanStack profile forms. Its placement control reuses either recipe
+standalone, in Card, or in Dialog. It replaces the small Field/Input form stories;
+the source is `.storybook/examples/ProfileForm.tsx`, outside the shipped library.
 
 Docs can render a story more than once. Give independent native radio examples
 their own form owners or unique group names, so selecting an option in one

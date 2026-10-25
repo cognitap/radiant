@@ -41,6 +41,7 @@ export default defineConfig({
       ),
       {
         plugins: [tailwindcss()],
+        optimizeDeps: { include: ['@tanstack/react-form'] },
         oxc: { jsx: { runtime: 'automatic' } },
         test: {
           name: 'browser-platform',

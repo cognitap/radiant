@@ -301,6 +301,33 @@ control's state still determines which is visible. Local styles on a control or
 part affect that subtree. The Customisation stories show neighbouring controls
 without those overrides.
 
+### Form recipes
+
+Storybook's **Recipes → Forms → Native / TanStack** shows the same profile
+form with two value owners. The **placement** control reuses either form
+standalone, inside Card, or inside Dialog. Both inherit the toolbar's theme and
+mode. The [live source](.storybook/examples/ProfileForm.tsx) shares field anatomy,
+validation rules and Button actions; each adapter makes ownership explicit.
+
+| Responsibility | Native recipe                                                         | TanStack recipe                                                                        |
+| -------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Values         | `defaultValue` / `defaultChecked`; read `FormData` on submit          | Controlled `value` / `checked`; forward native changes to `handleChange`               |
+| Blur           | The recipe marks email touched and validates                          | `handleBlur`; group blur ignores focus moves between its options                       |
+| Validation     | The recipe validates on blur, change once touched, and submit         | Validators run on change/blur/submit; format errors and reveal them once touched       |
+| Reset          | Browser restores defaults; the recipe clears its error/touched state  | Prevent the native reset and call `form.reset()` to reset values and metadata together |
+| Submission     | Read named native inputs; unchecked and disabled controls are omitted | `handleSubmit()` delivers the library's values after validation                        |
+
+Both use `noValidate` so the recipe can show the agreed errors through Field,
+while inputs retain their native types, required/disabled state and form data.
+Checkbox maps its boolean through `checked`; its `value="yes"` remains submitted
+data. RadioGroup writes through one selection callback. Card and Dialog reuse
+the form without nested forms or per-surface styling overrides. Saving a valid
+Dialog form closes it and restores trigger focus; reset leaves the Dialog open.
+
+TanStack is an optional development/example dependency. Neither the recipes nor
+the integration are exported by the library. The ownership decisions are in
+[the shared form contract](docs/contracts/README.md#4-state-and-forms) (DEV-43).
+
 ### Input
 
 `Input` is a native `<input>` with the text-field metrics. It keeps every
@@ -355,29 +382,8 @@ for arbitrary native content.
 `focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. An invalid field
 uses the destructive border. The element sets `data-slot="input"`.
 
-TanStack Form is a reference integration, not a dependency. Drive Input in
-controlled mode and pass the library's message to Field:
-
-```tsx
-<form.Field
-  name="email"
-  validators={{ onBlur: ({ value }) => (value.trim() ? undefined : 'Enter an email.') }}
->
-  {field => (
-    <Field
-      label="Email"
-      error={field.state.meta.errors[0]}
-    >
-      <Input
-        name={field.name}
-        value={field.state.value}
-        onBlur={field.handleBlur}
-        onChange={event => field.handleChange(event.target.value)}
-      />
-    </Field>
-  )}
-</form.Field>
-```
+The [form recipes](#form-recipes) show controlled Input, Checkbox and RadioGroup
+with optional TanStack state, validation and reset ownership.
 
 Checkbox, radio, and file inputs are separate families. `type` still accepts
 any native value. Use `RadioGroup` for a mutually exclusive choice.
