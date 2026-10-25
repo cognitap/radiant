@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Radiant · Color calibration / DEV-151</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f5f4ef;
+        color: #24242b;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1620px;
+        margin: auto;
+        padding: 36px 28px 72px;
+      }
+      h1 {
+        font-size: clamp(27px, 4vw, 44px);
+        line-height: 1.1;
+        letter-spacing: -0.045em;
+        margin: 10px 0 16px;
+      }
+      h2 {
+        font-size: 20px;
+        letter-spacing: -0.025em;
+        margin: 0 0 12px;
+      }
+      h3 {
+        font-size: 15px;
+        margin: 0 0 8px;
+      }
+      p {
+        max-width: 90ch;
+        margin: 8px 0;
+      }
+      small,
+      .muted {
+        color: #62616b;
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #deddd6;
+        border-radius: 14px;
+        padding: 20px;
+      }
+      .section {
+        margin-top: 24px;
+      }
+      .grid {
+        display: grid;
+        gap: 18px;
+      }
+      .two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 650;
+      }
+      input,
+      select,
+      button {
+        font: inherit;
+      }
+      input[type='text'],
+      input[type='number'],
+      select {
+        width: 100%;
+        margin-top: 6px;
+        border: 1px solid #bbb9b1;
+        border-radius: 6px;
+        padding: 8px;
+        background: #fff;
+        color: #24242b;
+      }
+      input[type='range'] {
+        width: 100%;
+        accent-color: #6154c6;
+      }
+      input[type='color'] {
+        width: 40px;
+        height: 38px;
+        padding: 2px;
+        flex-shrink: 0;
+        border: 1px solid #bbb9b1;
+        border-radius: 6px;
+        background: #fff;
+      }
+      .inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .inline input[type='text'] {
+        margin: 0;
+      }
+      button {
+        padding: 7px 12px;
+        border: 1px solid #cfcdc5;
+        background: #fff;
+        border-radius: 7px;
+        cursor: pointer;
+        color: inherit;
+      }
+      button:hover {
+        background: #f0efe9;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid #7964df;
+        outline-offset: 3px;
+      }
+      button[aria-pressed='true'],
+      button[aria-selected='true'] {
+        background: #ebe7ff;
+        border-color: #7964df;
+      }
+      .cases {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        display: inline-block;
+        vertical-align: -1px;
+        border: 1px solid #0002;
+        margin-right: 5px;
+      }
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px 28px;
+        margin: 18px 0 0;
+        font-size: 12px;
+      }
+      .facts b {
+        display: block;
+        font-size: 15px;
+        margin-top: 2px;
+      }
+      .notice {
+        background: #f4f1ff;
+        border-left: 3px solid #7964df;
+        padding: 10px 14px;
+        margin-top: 14px;
+      }
+      .comparison {
+        align-items: start;
+      }
+      .panel {
+        min-width: 0;
+      }
+      .panel p {
+        font-size: 12px;
+        min-height: 36px;
+      }
+      .identity {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 0;
+      }
+      .identity .sample {
+        width: 50px;
+        height: 50px;
+        border-radius: 9px;
+        border: 1px solid #0002;
+        flex-shrink: 0;
+      }
+      .identity code {
+        display: block;
+        font-size: 16px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        background: #f7f6f2;
+        border-radius: 8px;
+        padding: 12px;
+        gap: 8px;
+        font-size: 11px;
+        margin-bottom: 16px;
+      }
+      .metrics b {
+        display: block;
+        font-size: 15px;
+        font-variant-numeric: tabular-nums;
+      }
+      .wall {
+        min-width: 480px;
+      }
+      .wall-scroll {
+        overflow: auto;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 68px repeat(11, minmax(0, 1fr));
+        align-items: center;
+        gap: 3px;
+        margin: 3px 0;
+      }
+      .row.header {
+        font-size: 9px;
+        text-align: center;
+        color: #62616b;
+        margin-bottom: 7px;
+      }
+      .row .name {
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .swatch {
+        height: 29px;
+        border-radius: 3px;
+        border: 1px solid #00000009;
+      }
+      .row.brand {
+        margin-bottom: 10px;
+      }
+      .row.brand .swatch {
+        height: 42px;
+      }
+      .swatch.anchor {
+        outline: 2px solid #24242b;
+        outline-offset: 1px;
+        position: relative;
+        z-index: 1;
+      }
+      .limited {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 16px;
+      }
+      .limited .chip {
+        height: 33px;
+        border-radius: 5px;
+        border: 1px solid #0001;
+      }
+      .limited span {
+        display: block;
+        font-size: 9px;
+        margin-top: 3px;
+      }
+      .specimens {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 18px;
+        gap: 8px;
+      }
+      .specimen {
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid #0001;
+        font-size: 11px;
+      }
+      .specimen small {
+        color: inherit;
+        font-size: 10px;
+      }
+      .specimen .panel-surface {
+        padding: 12px;
+        border-radius: 7px;
+        margin-top: 12px;
+      }
+      .specimen .field {
+        border: 1px solid;
+        border-radius: 5px;
+        padding: 7px;
+        margin: 7px 0 10px;
+      }
+      .specimen .action {
+        border-radius: 5px;
+        padding: 7px 10px;
+        display: inline-block;
+        font-weight: 650;
+      }
+      .specimen a {
+        text-decoration: underline;
+        font-weight: 600;
+      }
+      .ratio {
+        font-variant-numeric: tabular-nums;
+        margin-top: 10px;
+        font-size: 10px;
+      }
+      .small-table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 11px;
+        margin-top: 10px;
+        font-variant-numeric: tabular-nums;
+      }
+      .small-table th,
+      .small-table td {
+        text-align: left;
+        padding: 5px 8px;
+        border-bottom: 1px solid #e5e4de;
+      }
+      .small-table th {
+        font-weight: 600;
+      }
+      .small-table .mini {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        vertical-align: -3px;
+        margin-right: 5px;
+        border: 1px solid #0001;
+        border-radius: 3px;
+      }
+      details {
+        margin-top: 15px;
+      }
+      summary {
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 650;
+      }
+      .tabbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+      .steps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .recommendation {
+        background: #262435;
+        color: #f8f6ff;
+        border: 0;
+      }
+      .recommendation small {
+        color: #d0cadd;
+      }
+      .footnote {
+        font-size: 11px;
+        color: #62616b;
+      }
+      .report {
+        overflow: auto;
+        max-height: 360px;
+      }
+      @media (max-width: 1000px) {
+        .two {
+          grid-template-columns: 1fr;
+        }
+        .controls {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 540px) {
+        main {
+          padding: 22px 14px 40px;
+        }
+        .controls {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          padding: 15px;
+        }
+        .specimens {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="eyebrow">Radiant / DEV-151 / disposable experiment</div>
+        <h1>A brand color. A whole color wall.</h1>
+        <p>
+          Should an exact brand color occupy a numbered shade, or stay intact beside a balanced
+          scale? Compare the same input under both policies, then inspect a limited palette and
+          light/dark interface. This experiment calibrates color behavior; it is not the production
+          workshop.
+        </p>
+      </header>
+      <section
+        class="card section"
+        aria-label="Palette controls"
+      >
+        <div class="controls">
+          <div>
+            <label for="brand">Original brand · sRGB hex</label>
+            <div
+              class="inline"
+              style="margin-top: 6px"
+            >
+              <input
+                type="color"
+                id="picker"
+                aria-label="Pick original brand color"
+                value="#7c3aed"
+              /><input
+                id="brand"
+                type="text"
+                value="#7C3AED"
+                maxlength="7"
+                spellcheck="false"
+              />
+            </div>
+          </div>
+          <div>
+            <label for="vividness">Vividness <output id="vividness-value"></output></label
+            ><input
+              type="range"
+              id="vividness"
+              min="0.1"
+              max="1"
+              step="0.01"
+            /><button id="derive">Use the brand’s restraint</button>
+          </div>
+          <div>
+            <label for="curves">Shade lightness</label
+            ><select id="curves">
+              <option value="hue-aware">Hue-aware curves</option>
+              <option value="shared">Shared curve for every hue</option></select
+            ><small>Hue-aware gives yellow and blue different middle tones.</small>
+          </div>
+          <div>
+            <label for="distribution"
+              >Tone distribution <output id="distribution-value"></output></label
+            ><input
+              type="range"
+              id="distribution"
+              min="0.75"
+              max="1.35"
+              step="0.05"
+              value="1"
+            /><small>Moves intermediate shades while keeping endpoints and middle tone.</small>
+          </div>
+          <div>
+            <label for="tint">Neutral tint <output id="tint-value"></output></label
+            ><input
+              type="range"
+              id="tint"
+              min="0"
+              max="0.035"
+              step="0.001"
+              value="0.012"
+            />
+          </div>
+          <div>
+            <label for="spread">Family hue alignment <output id="spread-value"></output></label
+            ><input
+              type="range"
+              id="spread"
+              min="0"
+              max="1"
+              step="0.05"
+              value="0.6"
+            /><small>Gently relates the named hue families to the brand.</small>
+          </div>
+          <div>
+            <label for="fallback">Hue for near-neutral inputs</label
+            ><input
+              type="number"
+              id="fallback"
+              min="0"
+              max="359"
+              value="255"
+            /><small>Explicit fallback when the input has no dependable hue.</small>
+          </div>
+          <div>
+            <label for="right-policy">Compare exact-in-wall with</label
+            ><select id="right-policy">
+              <option value="reference">Exact source + balanced wall</option>
+              <option value="adjusted">Adjust source to regular shade</option></select
+            ><button
+              id="reset"
+              style="margin-top: 8px"
+            >
+              Reset controls
+            </button>
+          </div>
+          <div>
+            <label for="exact-policy">Exact-in-wall method</label
+            ><select id="exact-policy">
+              <option value="anchored">Reshape neighbors around the exact color</option>
+              <option value="pinned">Replace one stop only</option></select
+            ><small>Both choose the insertion position by lightness.</small>
+          </div>
+        </div>
+        <div
+          class="section cases"
+          id="cases"
+          aria-label="Reference inputs"
+        ></div>
+        <div
+          class="facts"
+          id="facts"
+          aria-live="polite"
+        ></div>
+        <div id="neutral-notice"></div>
+      </section>
+      <section
+        class="card section"
+        aria-label="Guided comparisons"
+      >
+        <h2>Walk through the awkward cases</h2>
+        <div
+          class="tabbar"
+          role="tablist"
+          aria-label="Comparison scenario"
+          id="tours"
+        ></div>
+        <div
+          id="walkthrough"
+          role="tabpanel"
+        ></div>
+      </section>
+      <p class="section footnote">
+        The UI illustrations use a simple semantic policy: action fills contrast with their panel as
+        well as their label. An exact bright brand can alternatively work with a contrasting
+        outline; a darker related fill is not the only accessible option. Production role mapping
+        belongs to DEV-154.
+      </p>
+      <section
+        class="grid two section comparison"
+        id="comparison"
+        aria-label="Brand-fidelity comparison"
+      ></section>
+      <section class="card section recommendation">
+        <h2>Candidate default: preserve the source, calibrate the scale.</h2>
+        <p>
+          Keep the original brand color as an exact reference. Use a regular, brand-related ramp for
+          the wall, and select semantic colors for their actual use. Label the closest shade as an
+          approximation. Offer an explicit “pin exact color into the wall” option.
+        </p>
+        <small
+          >This is a recommendation for visual review, not an approved production contract. sRGB is
+          the calibration target. Display P3 enhancement and its separately checked fallback belong
+          to the next implementation study; this page does not simulate a P3 display.</small
+        >
+      </section>
+      <section class="card section">
+        <h2>Across the reference set</h2>
+        <p class="footnote">
+          Each case uses its derived vividness and the current curve/tint/distribution settings. ΔE
+          OK is Euclidean distance in Oklab (0–1 coordinates), not an established
+          brand-acceptability threshold. Contrast is calculated after sRGB hex rounding, without
+          rounding a failure upward.
+        </p>
+        <div class="report">
+          <table class="small-table">
+            <thead>
+              <tr>
+                <th>Input</th>
+                <th>Exact / nearest step</th>
+                <th>Approximation ΔE</th>
+                <th>Selected exact method: max adjacent ΔE</th>
+                <th>Balanced max adjacent ΔE</th>
+                <th>Light/dark action contrast</th>
+              </tr>
+            </thead>
+            <tbody id="matrix"></tbody>
+          </table>
+        </div>
+      </section>
+      <footer class="section footnote">
+        <p>
+          50–950 are ordering labels, not contrast promises. Neutral inputs use an explicitly chosen
+          hue. Swatch text alternatives expose actual hex, lightness and contrast. Specimens are
+          disposable HTML illustrations, not production Radiant component or accessibility
+          certification.
+        </p>
+        <p>
+          Math references:
+          <a href="https://bottosson.github.io/posts/oklab/">Oklab conversions</a> ·
+          <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html"
+            >WCAG contrast</a
+          >
+          · <a href="https://www.w3.org/TR/css-color-4/#gamut-mapping">CSS gamut mapping</a>.
+          Mapping here uses strict constant-L/h chroma reduction, not a claim to reproduce browser
+          CSS gamut mapping.
+        </p>
+      </footer>
+    </main>
+    <script id="calibration-math">
+      // Pure, disposable comparison math. No DOM, packages, network or persistence.
+      const Calibration = (() => {
+        const stops = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+        const lightness = [0.985, 0.965, 0.93, 0.87, 0.79, 0.7, 0.61, 0.52, 0.43, 0.34, 0.24]
+        const families = [
+          ['Red', 25],
+          ['Orange', 55],
+          ['Amber', 80],
+          ['Yellow', 100],
+          ['Lime', 125],
+          ['Green', 145],
+          ['Emerald', 165],
+          ['Teal', 185],
+          ['Cyan', 205],
+          ['Sky', 230],
+          ['Blue', 255],
+          ['Indigo', 275],
+          ['Violet', 295],
+          ['Purple', 315],
+          ['Pink', 340],
+          ['Rose', 10]
+        ]
+        const fixtures = [
+          ['Violet', '#7C3AED'],
+          ['Vivid red', '#FF0000'],
+          ['Deep blue', '#0000FF'],
+          ['Yellow', '#FFFF00'],
+          ['Green', '#00FF00'],
+          ['Cyan', '#00FFFF'],
+          ['Muted plum', '#7F6A75'],
+          ['Pale lavender', '#F5E6FF'],
+          ['Dark ink', '#17111F'],
+          ['Gray', '#808080'],
+          ['Black', '#000000'],
+          ['White', '#FFFFFF']
+        ]
+        const clamp = (n, a = 0, b = 1) => Math.max(a, Math.min(b, n))
+        const wrap = h => ((h % 360) + 360) % 360
+        const hueDiff = (a, b) => ((a - b + 540) % 360) - 180
+        const linear = n => (n <= 0.04045 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4)
+        const encoded = n =>
+          n <= 0.0031308 ? 12.92 * n : 1.055 * Math.max(0, n) ** (1 / 2.4) - 0.055
+        function hexRgb(hex) {
+          return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+        }
+        function rgbHex(rgb) {
+          return (
+            '#' +
+            rgb
+              .map(n =>
+                Math.round(clamp(n) * 255)
+                  .toString(16)
+                  .padStart(2, '0')
+              )
+              .join('')
+              .toUpperCase()
+          )
+        }
+        function rgbLab(rgb) {
+          const [r, g, b] = rgb.map(linear)
+          const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+          const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+          const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+          return [
+            0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+            1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+            0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
+          ]
+        }
+        function labLinear([L, a, b]) {
+          const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
+          const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
+          const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
+          return [
+            4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+            -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+            -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s
+          ]
+        }
+        function lchLab(L, C, h) {
+          const a = (h * Math.PI) / 180
+          return [L, C * Math.cos(a), C * Math.sin(a)]
+        }
+        function color(hex) {
+          const rgb = hexRgb(hex),
+            lab = rgbLab(rgb),
+            [L, a, b] = lab,
+            C = Math.hypot(a, b)
+          return {
+            hex: hex.toUpperCase(),
+            rgb,
+            lab,
+            L,
+            C,
+            h: C < 1e-6 ? 0 : wrap((Math.atan2(b, a) * 180) / Math.PI)
+          }
+        }
+        const inGamut = rgb => rgb.every(n => n >= -1e-8 && n <= 1 + 1e-8)
+        const gamutCache = new Map(),
+          cuspCache = new Map()
+        function maxChroma(L, h) {
+          if (L <= 0 || L >= 1) return 0
+          const key = L.toFixed(7) + ',' + h.toFixed(4)
+          if (gamutCache.has(key)) return gamutCache.get(key)
+          let lo = 0,
+            hi = 0.5
+          for (let i = 0; i < 25; i++) {
+            const mid = (lo + hi) / 2
+            if (inGamut(labLinear(lchLab(L, mid, h)))) lo = mid
+            else hi = mid
+          }
+          gamutCache.set(key, lo)
+          return lo
+        }
+        function cuspLightness(h) {
+          const key = h.toFixed(4)
+          if (cuspCache.has(key)) return cuspCache.get(key)
+          let bestL = 0.7,
+            bestC = 0
+          for (let L = 0.2; L < 0.981; L += 0.01) {
+            const C = maxChroma(L, h)
+            if (C > bestC) {
+              bestC = C
+              bestL = L
+            }
+          }
+          cuspCache.set(key, bestL)
+          return bestL
+        }
+        function mapped(L, C, h) {
+          const lab = lchLab(clamp(L), Math.min(C, maxChroma(L, h)), h)
+          return color(rgbHex(labLinear(lab).map(encoded)))
+        }
+        const delta = (a, b) => Math.hypot(...a.lab.map((n, i) => n - b.lab[i]))
+        const luminance = c => {
+          const [r, g, b] = c.rgb.map(linear)
+          return 0.2126 * r + 0.7152 * g + 0.0722 * b
+        }
+        const contrast = (a, b) => {
+          const x = luminance(a),
+            y = luminance(b)
+          return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
+        }
+        const white = color('#FFFFFF'),
+          black = color('#000000')
+        const ink = c => (contrast(c, white) >= contrast(c, black) ? white : black)
+        function restraint(seed) {
+          return seed.C < 0.02
+            ? 0.35
+            : clamp(seed.C / Math.max(0.001, maxChroma(seed.L, seed.h)), 0.1, 0.92)
+        }
+        function tone(L, h, state) {
+          const mid =
+            state.curves === 'shared' ? 0.7 : clamp(0.7 + 0.7 * (cuspLightness(h) - 0.7), 0.6, 0.86)
+          if (L >= 0.7)
+            return mid + (0.985 - mid) * ((L - 0.7) / (0.985 - 0.7)) ** state.distribution
+          return mid - (mid - 0.24) * ((0.7 - L) / (0.7 - 0.24)) ** state.distribution
+        }
+        function ramp(h, state, neutral = false, achromaticBrand = false) {
+          return lightness.map((base, i) => {
+            const L = neutral || achromaticBrand ? base : tone(base, h, state)
+            const envelope = Math.sin(Math.PI * (1 - L)) ** 0.8
+            const C = neutral
+              ? state.tint * envelope
+              : achromaticBrand
+                ? 0
+                : Math.min(maxChroma(L, h) * state.vividness, 0.255 * envelope)
+            return { ...mapped(L, C, h), step: stops[i] }
+          })
+        }
+        function nearest(list, target) {
+          return list.reduce((a, b) => (delta(a, target) <= delta(b, target) ? a : b))
+        }
+        function roles(brand, neutral, source, mode) {
+          const get = s => neutral[stops.indexOf(s)]
+          const surface = get(mode === 'light' ? 50 : 950),
+            panel = get(mode === 'light' ? 100 : 900),
+            text = get(mode === 'light' ? 950 : 50),
+            muted = get(mode === 'light' ? 700 : 300)
+          const actionOptions = brand.filter(
+            c => contrast(c, panel) >= 3 && contrast(c, ink(c)) >= 4.5
+          )
+          const action = nearest(actionOptions.length ? actionOptions : [black, white], source)
+          const linkOptions = brand.filter(c => contrast(c, panel) >= 4.5)
+          const link = nearest(linkOptions.length ? linkOptions : [ink(panel)], source)
+          const borderOptions = neutral.filter(c => contrast(c, panel) >= 3)
+          const border = nearest(borderOptions, panel)
+          return {
+            surface,
+            panel,
+            text,
+            muted,
+            action,
+            actionText: ink(action),
+            link,
+            border,
+            ratios: {
+              action: contrast(action, ink(action)),
+              boundary: contrast(action, panel),
+              body: contrast(text, panel),
+              muted: contrast(muted, panel),
+              link: contrast(link, panel),
+              field: contrast(border, panel)
+            }
+          }
+        }
+        function generate(state, policy = 'reference') {
+          const source = color(state.hex),
+            neutralInput = source.C < 0.02,
+            h = neutralInput ? state.fallback : source.h
+          const nearestFamily = families.reduce((a, b) =>
+            Math.abs(hueDiff(h, a[1])) < Math.abs(hueDiff(h, b[1])) ? a : b
+          )
+          const rotation = hueDiff(h, nearestFamily[1]) * state.spread
+          const regular = ramp(h, state, false, neutralInput),
+            closest = nearest(regular, source)
+          const byLightness = regular.reduce((a, b) =>
+            Math.abs(a.L - source.L) <= Math.abs(b.L - source.L) ? a : b
+          )
+          const exact = policy === 'pinned' || policy === 'anchored',
+            anchor = regular.indexOf(exact ? byLightness : closest)
+          const anchorColor = regular[anchor]
+          const brand = regular.map((c, i) => {
+            if (!exact) return c
+            if (i === anchor) return { ...source, step: stops[i] }
+            if (policy === 'pinned') return c
+            const top = Math.max(regular[0].L, source.L),
+              bottom = Math.min(regular.at(-1).L, source.L)
+            const L =
+              i < anchor
+                ? source.L +
+                  ((top - source.L) * (c.L - anchorColor.L)) / (regular[0].L - anchorColor.L)
+                : source.L -
+                  ((source.L - bottom) * (anchorColor.L - c.L)) / (anchorColor.L - regular.at(-1).L)
+            const C = Math.max(
+              0,
+              c.C + (source.C - anchorColor.C) * Math.exp(-(((i - anchor) / 2.2) ** 2))
+            )
+            return { ...mapped(L, C, h), step: c.step }
+          })
+          const identity = policy === 'adjusted' ? closest : source
+          const rows = [
+            { name: 'Brand', h, colors: brand },
+            ...families.map(([name, hue]) => ({
+              name,
+              h: wrap(hue + rotation),
+              colors: ramp(wrap(hue + rotation), state)
+            })),
+            { name: 'Neutral', h, colors: ramp(h, state, true) }
+          ]
+          const neutral = rows.at(-1).colors,
+            light = roles(brand, neutral, identity, 'light'),
+            dark = roles(brand, neutral, identity, 'dark')
+          const adjacent = brand.slice(1).map((c, i) => delta(c, brand[i]))
+          const supporting = rows
+            .slice(1, -1)
+            .reduce((a, b) =>
+              Math.abs(hueDiff(a.h, h + 120)) < Math.abs(hueDiff(b.h, h + 120)) ? a : b
+            ).colors[5]
+          const pick = name => rows.find(r => r.name === name).colors[5]
+          return {
+            source,
+            identity,
+            closest,
+            anchor,
+            brand,
+            rows,
+            light,
+            dark,
+            policy,
+            neutralInput,
+            rotation,
+            limited: [
+              ['Primary', light.action],
+              ['Support', supporting],
+              ['Neutral', neutral[7]],
+              ['Success', pick('Emerald')],
+              ['Warning', pick('Amber')],
+              ['Danger', pick('Red')]
+            ],
+            metrics: {
+              identityDelta: delta(source, identity),
+              shadeDelta: delta(source, closest),
+              maxAdjacent: Math.max(...adjacent),
+              adjacent,
+              monotonic: rows.every(r => r.colors.every((c, i) => !i || c.L < r.colors[i - 1].L)),
+              duplicates: rows.reduce(
+                (n, r) => n + r.colors.slice(1).filter((c, i) => c.hex === r.colors[i].hex).length,
+                0
+              )
+            }
+          }
+        }
+        function initial(hex = '#7C3AED') {
+          return {
+            hex,
+            vividness: restraint(color(hex)),
+            curves: 'hue-aware',
+            distribution: 1,
+            tint: 0.012,
+            spread: 0.6,
+            fallback: 255,
+            right: 'reference',
+            left: 'anchored'
+          }
+        }
+        function matrix(state) {
+          return fixtures.map(([name, hex]) => {
+            const options = { ...state, hex, vividness: restraint(color(hex)) },
+              exact = generate(options, state.left),
+              balanced = generate(options, 'reference')
+            return {
+              name,
+              hex,
+              vividness: options.vividness,
+              step: stops[balanced.anchor],
+              exactStep: stops[exact.anchor],
+              shadeDelta: balanced.metrics.shadeDelta,
+              exactMaxAdjacent: exact.metrics.maxAdjacent,
+              balancedMaxAdjacent: balanced.metrics.maxAdjacent,
+              exactMonotonic: exact.metrics.monotonic,
+              balancedMonotonic: balanced.metrics.monotonic,
+              duplicates: balanced.metrics.duplicates,
+              lightRatios: balanced.light.ratios,
+              darkRatios: balanced.dark.ratios,
+              exactIdentity: exact.identity.hex,
+              referenceIdentity: balanced.identity.hex,
+              adjustedIdentity: balanced.closest.hex
+            }
+          })
+        }
+        return {
+          stops,
+          fixtures,
+          color,
+          contrast,
+          delta,
+          ink,
+          maxChroma,
+          generate,
+          initial,
+          matrix,
+          restraint,
+          hueDiff
+        }
+      })()
+    </script>
+    <script>
+      let state = Calibration.initial(),
+        tourIndex = 0,
+        tourStep = -1
+      const $ = id => document.getElementById(id)
+      const f = (n, d = 3) => n.toFixed(d)
+      const tours = [
+        {
+          name: 'Vivid',
+          text: 'An exact vivid color can create a chroma spike. Compare replacing a single stop with reshaping its neighbors, then inspect the action foreground.',
+          steps: [
+            ['Load vivid red', () => setBrand('#FF0000')],
+            ['Replace one stop only', () => (state.left = 'pinned')],
+            ['Reshape the neighboring shades', () => (state.left = 'anchored')]
+          ]
+        },
+        {
+          name: 'Muted',
+          text: 'A restrained brand should not automatically produce a loud wall. Try the input-derived restraint, then deliberately increase vividness.',
+          steps: [
+            ['Load muted plum', () => setBrand('#7F6A75')],
+            ['Turn up vividness', () => (state.vividness = 0.85)],
+            [
+              'Restore brand restraint',
+              () => (state.vividness = Calibration.restraint(Calibration.color(state.hex)))
+            ]
+          ]
+        },
+        {
+          name: 'Very light',
+          text: 'A pale source is valid brand artwork but often unsuitable as an action background on a pale surface. Watch the separately selected semantic shade.',
+          steps: [
+            ['Load pale lavender', () => setBrand('#F5E6FF')],
+            ['Adjust the source to the grid', () => (state.right = 'adjusted')],
+            ['Keep the source exact instead', () => (state.right = 'reference')]
+          ]
+        },
+        {
+          name: 'Very dark / neutral',
+          text: 'Dark or achromatic input needs explicit handling. A neutral source has no dependable hue to rotate a color wall around.',
+          steps: [
+            ['Load dark ink', () => setBrand('#17111F')],
+            ['Try an achromatic source', () => setBrand('#808080')],
+            ['Choose a warm fallback hue', () => (state.fallback = 60)]
+          ]
+        }
+      ]
+      function setBrand(hex) {
+        state.hex = hex.toUpperCase()
+        state.vividness = Calibration.restraint(Calibration.color(state.hex))
+      }
+      function sync() {
+        for (const [id, key] of [
+          ['brand', 'hex'],
+          ['picker', 'hex'],
+          ['vividness', 'vividness'],
+          ['curves', 'curves'],
+          ['distribution', 'distribution'],
+          ['tint', 'tint'],
+          ['spread', 'spread'],
+          ['fallback', 'fallback'],
+          ['right-policy', 'right'],
+          ['exact-policy', 'left']
+        ])
+          $(id).value = state[key]
+        $('vividness-value').textContent = f(state.vividness, 2)
+        $('distribution-value').textContent = f(state.distribution, 2)
+        $('tint-value').textContent = f(state.tint, 3)
+        $('spread-value').textContent = f(state.spread, 2)
+      }
+      function swatch(c, anchor = false) {
+        const title = `${c.step}: ${c.hex}; OKLCH L ${f(c.L)} C ${f(c.C)} h ${f(c.h, 1)}; white ${f(Calibration.contrast(c, Calibration.color('#FFFFFF')), 2)}:1; black ${f(Calibration.contrast(c, Calibration.color('#000000')), 2)}:1`
+        return `<div class="swatch ${anchor ? 'anchor' : ''}" style="background:${c.hex}" role="img" aria-label="${title}" title="${title}"></div>`
+      }
+      function specimen(r, mode) {
+        return `<div class="specimen" style="background:${r.surface.hex};color:${r.text.hex}"><div class="eyebrow">${mode} specimen</div><h3 style="margin-top:8px">Your next chapter</h3><div style="color:${r.muted.hex}">A quiet workspace, made your own.</div><div class="panel-surface" style="background:${r.panel.hex}"><b>Workspace name</b><div class="field" style="border-color:${r.border.hex}">Sunday Studio</div><span class="action" style="background:${r.action.hex};color:${r.actionText.hex}">Save changes</span><div style="margin-top:10px"><a href="#" onclick="return false" style="color:${r.link.hex}">View workspace</a></div></div><div class="ratio">Action text ${f(r.ratios.action, 2)}:1 · link ${f(r.ratios.link, 2)}:1<br>Body ${f(r.ratios.body, 2)}:1 · field ${f(r.ratios.field, 2)}:1<br>Action ${r.action.hex}${r.action.step ? ' / ' + r.action.step : ''}</div></div>`
+      }
+      function panel(result) {
+        const pinned = result.policy === 'pinned',
+          anchored = result.policy === 'anchored',
+          adjusted = result.policy === 'adjusted'
+        const title = pinned
+          ? '01 / Replace one stop with the exact brand'
+          : anchored
+            ? '01 / Anchor exact, reshape the brand ramp'
+            : adjusted
+              ? '02 / Adjust the original to the grid'
+              : '02 / Exact source + balanced wall'
+        const description = pinned
+          ? 'The nearest-lightness stop is replaced with the exact source. The other shades keep their positions.'
+          : anchored
+            ? 'The nearest-lightness stop is exact. Its neighbors adapt in lightness and chroma; supporting families keep their calibrated curves.'
+            : 'The wall keeps calibrated stops. ' +
+              (adjusted
+                ? 'The nearest shade becomes the brand identity; this changes the original.'
+                : 'The original remains an exact brand reference; the nearest shade is explicitly approximate.')
+        return `<article class="card panel"><h2>${title}</h2><p class="muted">${description}</p><div class="identity"><div class="sample" style="background:${result.identity.hex}"></div><div><small>${adjusted ? 'Adjusted identity' : 'Exact brand reference'}</small><code>${result.identity.hex}</code><small>${pinned || anchored ? `Exact anchor: ${result.brand[result.anchor].step} · ` : ''}Nearest regular shade: ${result.closest.step} / ${result.closest.hex}</small></div></div><div class="metrics"><div>Identity ΔE<b>${f(result.metrics.identityDelta, 4)}</b></div><div>Nearest shade ΔE<b>${f(result.metrics.shadeDelta, 4)}</b></div><div>Largest adjacent ΔE<b>${f(result.metrics.maxAdjacent, 4)}</b></div></div><div class="wall-scroll"><div class="wall"><div class="row header"><span></span>${Calibration.stops.map(s => `<span>${s}</span>`).join('')}</div>${result.rows.map((r, ri) => `<div class="row ${ri === 0 ? 'brand' : ''}"><span class="name">${r.name}</span>${r.colors.map((c, i) => swatch(c, ri === 0 && i === result.anchor)).join('')}</div>`).join('')}</div></div><div class="limited">${result.limited.map(([name, c]) => `<div><div class="chip" style="background:${c.hex}" role="img" aria-label="${name} ${c.hex}" title="${c.hex}"></div><span>${name}</span></div>`).join('')}</div><div class="specimens">${specimen(result.light, 'Light')}${specimen(result.dark, 'Dark')}</div><details><summary>Inspect the brand ramp and exact values</summary><table class="small-table"><thead><tr><th>Step</th><th>Rendered sRGB</th><th>L</th><th>C</th><th>h</th><th>Adjacent ΔE</th></tr></thead><tbody>${result.brand.map((c, i) => `<tr><td>${c.step}</td><td><span class="mini" style="background:${c.hex}"></span>${c.hex}</td><td>${f(c.L)}</td><td>${f(c.C)}</td><td>${f(c.h, 1)}</td><td>${i ? f(result.metrics.adjacent[i - 1], 4) : '—'}</td></tr>`).join('')}</tbody></table></details><p class="footnote">Strict descending L: ${result.metrics.monotonic ? 'yes' : 'inspect'} · duplicate adjacent swatches: ${result.metrics.duplicates}. Highlighted stop is the nearest brand position; step numbers do not promise contrast.</p></article>`
+      }
+      function renderTour() {
+        $('tours').innerHTML = tours
+          .map(
+            (t, i) =>
+              `<button role="tab" id="tour-${i}" aria-controls="walkthrough" aria-selected="${i === tourIndex}" tabindex="${i === tourIndex ? 0 : -1}" data-tour="${i}">${t.name}</button>`
+          )
+          .join('')
+        $('walkthrough').setAttribute('aria-labelledby', 'tour-' + tourIndex)
+        $('walkthrough').innerHTML =
+          `<p>${tours[tourIndex].text}</p><div class="steps">${tours[tourIndex].steps.map(([label], i) => `<button data-step="${i}" aria-pressed="${tourStep === i}">${i + 1}. ${label}</button>`).join('')}</div>`
+      }
+      function render() {
+        sync()
+        const exact = Calibration.generate(state, state.left),
+          right = Calibration.generate(state, state.right),
+          source = right.source
+        $('facts').innerHTML =
+          `<div>Input OKLCH<b>L ${f(source.L)} · C ${f(source.C)} · h ${f(source.h, 1)}°</b></div><div>Original with white text<b>${f(Calibration.contrast(source, Calibration.color('#FFFFFF')), 2)}:1</b></div><div>Original with black text<b>${f(Calibration.contrast(source, Calibration.color('#000000')), 2)}:1</b></div><div>Wall family rotation<b>${f(right.rotation, 1)}°</b></div><div>Calibration target<b>sRGB · 11 shades · 16 hue families</b></div>`
+        $('neutral-notice').innerHTML = right.neutralInput
+          ? `<div class="notice">This input has C &lt; 0.02, so its hue is not a dependable brand direction. The brand ramp is neutral; the supporting wall and tinted neutrals use the explicit ${state.fallback}° fallback.</div>`
+          : ''
+        $('comparison').innerHTML = panel(exact) + panel(right)
+        $('cases').innerHTML = Calibration.fixtures
+          .map(
+            ([name, hex], i) =>
+              `<button data-case="${i}" aria-pressed="${state.hex === hex}"><span class="dot" style="background:${hex}"></span>${name}</button>`
+          )
+          .join('')
+        $('matrix').innerHTML = Calibration.matrix(state)
+          .map(
+            r =>
+              `<tr><td><span class="mini" style="background:${r.hex}"></span>${r.name} ${r.hex}</td><td>${r.exactStep} / ${r.step}</td><td>${f(r.shadeDelta, 4)}</td><td>${f(r.exactMaxAdjacent, 4)}</td><td>${f(r.balancedMaxAdjacent, 4)}</td><td>${f(r.lightRatios.action, 2)} / ${f(r.darkRatios.action, 2)}</td></tr>`
+          )
+          .join('')
+        renderTour()
+      }
+      $('brand').addEventListener('change', e => {
+        if (/^#[0-9a-f]{6}$/i.test(e.target.value)) {
+          setBrand(e.target.value)
+          render()
+        } else {
+          e.target.setCustomValidity('Use a six-digit sRGB hex color, such as #7C3AED.')
+          e.target.reportValidity()
+        }
+      })
+      $('brand').addEventListener('input', e => e.target.setCustomValidity(''))
+      $('picker').addEventListener('input', e => {
+        setBrand(e.target.value)
+        render()
+      })
+      for (const [id, key] of [
+        ['vividness', 'vividness'],
+        ['distribution', 'distribution'],
+        ['tint', 'tint'],
+        ['spread', 'spread'],
+        ['fallback', 'fallback']
+      ])
+        $(id).addEventListener('input', e => {
+          state[key] = Number(e.target.value)
+          render()
+        })
+      $('curves').addEventListener('change', e => {
+        state.curves = e.target.value
+        render()
+      })
+      $('right-policy').addEventListener('change', e => {
+        state.right = e.target.value
+        render()
+      })
+      $('exact-policy').addEventListener('change', e => {
+        state.left = e.target.value
+        render()
+      })
+      $('derive').addEventListener('click', () => {
+        state.vividness = Calibration.restraint(Calibration.color(state.hex))
+        render()
+      })
+      $('reset').addEventListener('click', () => {
+        state = Calibration.initial(state.hex)
+        tourStep = -1
+        render()
+      })
+      $('cases').addEventListener('click', e => {
+        const button = e.target.closest('[data-case]')
+        if (button) {
+          const index = Number(button.dataset.case)
+          setBrand(Calibration.fixtures[index][1])
+          tourStep = -1
+          render()
+          document.querySelector(`[data-case="${index}"]`).focus()
+        }
+      })
+      $('tours').addEventListener('click', e => {
+        const button = e.target.closest('[data-tour]')
+        if (button) {
+          tourIndex = Number(button.dataset.tour)
+          tourStep = -1
+          state = Calibration.initial()
+          render()
+          $('tour-' + tourIndex).focus()
+        }
+      })
+      $('tours').addEventListener('keydown', e => {
+        if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+          e.preventDefault()
+          const focused = Number(e.target.closest('[data-tour]')?.dataset.tour ?? tourIndex)
+          tourIndex =
+            e.key === 'Home'
+              ? 0
+              : e.key === 'End'
+                ? tours.length - 1
+                : (focused + (e.key === 'ArrowRight' ? 1 : -1) + tours.length) % tours.length
+          tourStep = -1
+          state = Calibration.initial()
+          render()
+          $('tour-' + tourIndex).focus()
+        }
+      })
+      $('walkthrough').addEventListener('click', e => {
+        const button = e.target.closest('[data-step]')
+        if (button) {
+          const index = Number(button.dataset.step)
+          state = Calibration.initial()
+          for (let i = 0; i <= index; i++) tours[tourIndex].steps[i][1]()
+          tourStep = index
+          render()
+          document.querySelector(`[data-step="${index}"]`).focus()
+        }
+      })
+      render()
+    </script>
+  </body>
+</html>
