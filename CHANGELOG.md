@@ -4,6 +4,10 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Audit the ten-family harmonisation coverage (DEV-134), adding focused rendered
+  scope and reduced-motion/forced-colors browser checks. Record the required gate
+  and explicit manual/browser/artifact gaps without expanding support claims.
+
 - Publish the browser/assistive-technology target matrix and evidence process
   (DEV-47), including manual scenarios, WCAG 2.2 A/AA mapping and explicit gaps.
   Browser runs now capture exact environment versions with their existing
