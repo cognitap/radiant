@@ -858,7 +858,27 @@ shared surface radius and corner shape. `cardTheme` maps `radius`, `cornerShape`
 `titleWeight`, `descriptionColor`, and `descriptionSize`. The card sets
 `data-slot="card"`. The header, title, description, content, and footer set
 `card-header`, `card-title`, `card-description`, `card-content`, and
-`card-footer`.
+`card-footer`. Each part accepts typed local theme variables and native props/refs
+on its own host. Caller `data-slot` tokens are additive and deduplicated; owned
+identities remain present. Use token selectors such as `[data-slot~="card-title"]`.
+
+| Part                                      | Native host / ref target                      |
+| ----------------------------------------- | --------------------------------------------- |
+| Card, CardHeader, CardContent, CardFooter | `div` / `HTMLDivElement`                      |
+| CardTitle                                 | `h1`–`h6` from `level` / `HTMLHeadingElement` |
+| CardDescription                           | `p` / `HTMLParagraphElement`                  |
+
+Root/title/description color transitions follow shared color motion and stop
+under reduced motion. Local overrides retain the shared fallbacks on other
+parts: for example, `style={{ '--rad-card-padding': '1.25rem' }}` changes root
+padding and `style={{ '--rad-card-title-size': '1.25rem' }}` targets a title.
+Caller classes merge after defaults. Preserve the grid layout, content wrapping
+and footer wrapping when changing functional CSS; keep actions as Button/Link
+children rather than making the surface itself interactive.
+
+Card → Composition reuses the canonical native profile form under the global
+Storybook theme. Recipes → Forms also offers the TanStack owner and Dialog
+placement; these share the same fields and actions rather than separate demos.
 
 ### Theming
 

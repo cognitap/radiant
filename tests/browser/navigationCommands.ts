@@ -14,6 +14,8 @@ export async function observeLinkPopup(
       : frame.locator(selector).click({ button: activation === 'middle' ? 'middle' : 'left' })
   const [popup] = await Promise.all([opened, click])
   try {
+    // The initial about:blank document may already be DOMContentLoaded.
+    await popup.waitForURL(url => url.href !== 'about:blank')
     await popup.waitForLoadState('domcontentloaded')
     return popup.url()
   } finally {

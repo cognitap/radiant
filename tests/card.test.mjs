@@ -25,24 +25,38 @@ for (const key of [
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
-const { act, createElement } = await import('react')
+const { act, createElement, createRef } = await import('react')
 const { hydrateRoot } = await import('react-dom/client')
 const { renderToString } = await import('react-dom/server')
 const { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } =
   await import('../dist/library/index.js')
 
+const refs = Object.fromEntries(
+  ['card', 'card-header', 'card-title', 'card-description', 'card-content', 'card-footer'].map(
+    part => [part, createRef()]
+  )
+)
+
 function card(props = {}) {
   return createElement(
     Card,
-    props,
+    { ref: refs.card, ...props },
     createElement(
       CardHeader,
-      null,
-      createElement(CardTitle, { id: 'ship' }, 'Shipping'),
-      createElement(CardDescription, null, 'Leaves the studio tomorrow.')
+      { ref: refs['card-header'] },
+      createElement(CardTitle, { id: 'ship', ref: refs['card-title'] }, 'Shipping'),
+      createElement(
+        CardDescription,
+        { ref: refs['card-description'] },
+        'Leaves the studio tomorrow.'
+      )
     ),
-    createElement(CardContent, null, 'Ships in two days.'),
-    createElement(CardFooter, null, createElement('a', { href: '/orders/1' }, 'Details'))
+    createElement(CardContent, { ref: refs['card-content'] }, 'Ships in two days.'),
+    createElement(
+      CardFooter,
+      { ref: refs['card-footer'] },
+      createElement('a', { href: '/orders/1' }, 'Details')
+    )
   )
 }
 
@@ -75,7 +89,11 @@ test('a card hydrates as a grouped surface and not a control', async () => {
   assert.equal(surface.tagName, 'DIV')
   assert.equal(surface.getAttribute('tabindex'), null)
   assert.equal(host.querySelector('[data-slot="card-title"]').tagName, 'H2')
+  for (const [part, ref] of Object.entries(refs)) {
+    assert.equal(ref.current, host.querySelector(`[data-slot~="${part}"]`))
+  }
   await act(async () => hydrated.unmount())
+  for (const ref of Object.values(refs)) assert.equal(ref.current, null)
 })
 
 test('the title level and a consumer region stay explicit', () => {
