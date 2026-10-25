@@ -1,8 +1,9 @@
 # E57 — Installed architecture-batch compositions
 
 **Date:** 2026-10-25. **Status:** automated archive/Cognitap checkpoints pass;
-the full DEV-57 acceptance remains open for actual screen-reader evidence and
-the ten-family registry checkpoint. No package was published and Cognitap's
+the full DEV-57 acceptance remains open for actual screen-reader evidence.
+The explicit archive checkpoint covers the unreleased API under DEV-57's allowed
+local build/install provision; modern registry consumption remains unverified. No package was published and Cognitap's
 checked-in pins were not changed.
 
 This follows the [E135 styling proof](2026-10-25-installed-styles.md), reusing its
@@ -81,6 +82,8 @@ CI records its own Linux environment and archive integrity.
    changes. Once a reviewed release is published and Cognitap deliberately pins
    it, rerun the same checkpoint: it exercises the registry compositions when
    the needed exports are present. Archive success never changes registry status.
+   DEV-57 explicitly permits this local build/install checkpoint for unreleased
+   changes; it does not require publication as an additional prerequisite.
 2. **A public package import is separate from local recipe resolution.** Next's
    current Turbopack cannot resolve the copied `.js` local recipe specifiers to
    TSX files. The Cognitap snapshot uses extensionless local imports; the isolated
@@ -122,9 +125,10 @@ To finish DEV-57, a functioning browser/AT session must execute
 including native/TanStack errors/reset/status announcements, modal reading/focus
 containment/restoration, Accordion/nested disclosure state and Link navigation.
 Record actual utterances, reading-cursor observations, precise settings and sampled
-themes/modes separately from the automated counts. Complete the ten-family
-registry run after a release/pin supplies that API. DEV-57/DEV-31 and broader
-catalog dependencies remain open until the checkpoint is accepted; DEV-83 retains
+themes/modes separately from the automated counts. Repeat registry consumption
+after a release/pin supplies the modern API; this run uses the explicitly allowed
+unreleased archive checkpoint. DEV-57/DEV-31 and broader catalog dependencies
+remain open for actual AT evidence and checkpoint review; DEV-83 retains
 the later complete-catalog compatibility/AT audit.
 
 ## Reproduction and retained evidence
