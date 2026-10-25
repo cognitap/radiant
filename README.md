@@ -266,11 +266,40 @@ association, alert role and hidden required marker.
 `data-slot="field"`, `data-layout`, `data-invalid`, `data-disabled`, and
 `data-required`. Parts set `data-slot` to `field-label`, `field-description`,
 `field-error`, and `field-required`. Style a control from the field, for
-example `[data-slot="field"][data-invalid] input`.
+example `[data-slot~="field"][data-invalid] input`.
 
 A native `<form>` leaves the control uncontrolled: give it a `name`, and on
 submit pass the message back through `error`. Text controls follow the value
 contract documented on Input.
+
+### Form styling targets
+
+`className`, `style`, native props and `ref` reach the same host. Convenience
+labels do not redirect input props to a wrapper. Use `parts` for the named
+internal elements; each hook accepts only `className` and `style`.
+
+| Component / part                 | Host / identity tokens                                                                      | Styling hook                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Field control / group root       | `div` / `fieldset`: `field`                                                                 | Root `className` / `style`                             |
+| RadioGroup root                  | Field's `fieldset`: `field radio-group`                                                     | Root `className` / `style`                             |
+| Field / RadioGroup label         | `label` / `legend`: `field-label`                                                           | `parts.label`                                          |
+| Help / error / required marker   | `field-description` / `field-error` / `field-required`                                      | `parts.description` / `parts.error` / `parts.required` |
+| RadioGroup options               | `div`: `radio-group-options`                                                                | `parts.options`                                        |
+| Input / Checkbox / Radio control | Native `input`: `input` / `checkbox` / `radio`                                              | Root `className` / `style`                             |
+| Checkbox / Radio wrapper         | Outer `label` when labelled, otherwise control `span`: `checkbox-wrapper` / `radio-wrapper` | `parts.wrapper`                                        |
+| Checkbox / Radio label text      | `span`: `checkbox-label` / `radio-label` (only when labelled)                               | `parts.label`                                          |
+| Checkbox / Radio indicator       | Check/mixed SVGs: `checkbox-indicator`; dot `span`: `radio-indicator`                       | `parts.indicator`                                      |
+
+Identities are whitespace-separated tokens. Select parts with
+`[data-slot~="radio-group"]` and `[data-slot~="radio-group-options"]`. This
+replaces the old `[data-slot="radio-group"]` options selector. Composed roots
+retain their base identity, including when extra tokens are supplied.
+
+Part hooks leave owned IDs, label associations, ARIA, events and refs intact.
+Checkbox's indicator hook styles both its check and mixed-state glyphs; the
+control's state still determines which is visible. Local styles on a control or
+part affect that subtree. The Customisation stories show neighbouring controls
+without those overrides.
 
 ### Input
 
@@ -498,9 +527,8 @@ control shapes do not pinch it. Checked fill follows `--rad-color-accent`.
 `borderStyle`, `borderColor`, `background`, `checkedBackground`,
 `checkedBorder`, `mark`, `invalidBorder`, `labelGap`, `labelColor`,
 `labelSize`, `disabledBorder`, `disabledBackground`, `focusColor`,
-`focusWidth`, `focusOffset`, and `focusStyle`. The fieldset keeps
-`data-slot="field"`. The options set `data-slot="radio-group"`, and each input
-sets `data-slot="radio"`.
+`focusWidth`, `focusOffset`, and `focusStyle`. Root and part identities and
+styling hooks are listed in [Form styling targets](#form-styling-targets).
 
 ### Dialog
 

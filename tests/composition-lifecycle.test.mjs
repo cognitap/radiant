@@ -65,7 +65,7 @@ afterEach(async () => {
 })
 
 test('composed native refs retain cleanup and do not detach on unrelated renders', async () => {
-  for (const Control of [Checkbox, Radio, DialogContent]) {
+  for (const Control of [Input, Checkbox, Radio, DialogContent]) {
     const attached = []
     const cleaned = []
     const ref = node => {
@@ -89,6 +89,7 @@ test('composed native refs retain cleanup and do not detach on unrelated renders
             title,
             'aria-label': 'Option',
             value: 'yes',
+            readOnly: true,
             indeterminate: Control === Checkbox ? true : undefined
           })
     const { host, root } = await mount(element('First'))

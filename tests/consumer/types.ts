@@ -236,6 +236,11 @@ const checkboxProps: CheckboxProps = {
   indeterminate: true,
   controlSize: 'small',
   label: 'Email',
+  parts: {
+    wrapper: { className: 'gap-4' },
+    label: { style: { fontStyle: 'italic' } },
+    indicator: { className: 'scale-75' }
+  },
   disabled: false,
   ref: createRef<HTMLInputElement>()
 }
@@ -256,6 +261,15 @@ const radioGroupProps: RadioGroupProps = {
   value: null,
   controlSize: 'large',
   required: true,
+  form: 'profile',
+  className: 'p-4',
+  style: { margin: 0 },
+  'data-slot': 'plan',
+  ref: createRef<HTMLFieldSetElement>(),
+  parts: {
+    label: { className: 'italic' },
+    options: { className: 'flex', style: { gap: '1rem' } }
+  },
   onValueChange(value: string) {
     void value
   }
@@ -268,9 +282,26 @@ const radioProps: RadioProps = {
   defaultChecked: true,
   controlSize: 'medium',
   label: 'Pro',
+  parts: {
+    wrapper: { className: 'gap-4' },
+    label: { className: 'italic' },
+    indicator: { style: { inset: '25%' } }
+  },
   ref: createRef<HTMLInputElement>()
 }
 createElement(Radio, radioProps)
+
+// @ts-expect-error Styling hooks cannot redirect label relationships.
+const checkboxPartId: CheckboxProps = { parts: { label: { id: 'other' } } }
+// @ts-expect-error Styling hooks cannot attach event handlers.
+const radioPartEvent: RadioProps = { value: 'pro', parts: { wrapper: { onClick() {} } } }
+const groupPartRef: RadioGroupProps = {
+  name: 'plan',
+  label: 'Plan',
+  // @ts-expect-error Group parts cannot redirect refs away from the fieldset.
+  parts: { options: { ref: createRef<HTMLDivElement>() } }
+}
+void [checkboxPartId, radioPartEvent, groupPartRef]
 
 // @ts-expect-error Native Input size remains numeric character width.
 const visualNativeSize: InputProps = { size: 'large' }

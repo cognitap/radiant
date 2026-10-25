@@ -67,7 +67,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A Field fieldset of native radios. The group owns name and selection: choose an initial defaultValue or controlled value, with null for no selection and an empty string for a real empty-valued option. Conflicting option ownership is rejected. controlSize supplies shared option metrics. Group className/style/ref reach the Field; data-slot="radio-group" still identifies the inner options container. Radio className/style/ref target its input (data-slot="radio"); radio-label identifies its text.'
+          'A Field fieldset of native radios. The group owns name and selection: choose an initial defaultValue or controlled value, with null for no selection and an empty string for a real empty-valued option. Conflicting option ownership is rejected. controlSize supplies shared option metrics. Group className/style/native props/ref reach the fieldset (data-slot="field radio-group"); parts.options styles radio-group-options. Radio props/ref reach its input; parts.wrapper, parts.label and parts.indicator style its surrounding label or control span, label text and decorative dot.'
       }
     }
   }
@@ -181,19 +181,50 @@ export const Customisation: Story = {
   render: args => {
     const local: ThemeStyle = { '--rad-radio-group-gap': '1rem', '--rad-radio-size': '1.5rem' }
     return (
-      <RadioGroup
-        {...args}
-        style={local}
-      >
+      <div style={{ display: 'grid', justifyItems: 'start', gap: '1rem' }}>
+        <RadioGroup
+          {...args}
+          style={local}
+          parts={{
+            label: { style: { fontStyle: 'italic' } },
+            options: { className: 'flex gap-4' }
+          }}
+        >
+          <Radio
+            label="Free"
+            value="free"
+          />
+          <Radio
+            label="Pro"
+            value="pro"
+            parts={{
+              label: { style: { fontWeight: 700 } },
+              indicator: { style: { inset: '25%' } }
+            }}
+          />
+        </RadioGroup>
         <Radio
-          label="Free"
-          value="free"
+          label="Unchanged neighbour"
+          name="neighbour"
+          value="unchanged"
         />
-        <Radio
-          label="Pro"
-          value="pro"
-        />
-      </RadioGroup>
+      </div>
     )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const group = canvas.getByRole('group', { name: 'Plan' })
+    await expect(group).toHaveAttribute('data-slot', 'field radio-group')
+    await expect(group.querySelector('[data-slot~="radio-group-options"]')).toHaveStyle({
+      display: 'flex',
+      gap: '16px'
+    })
+    await expect(group.querySelector('legend')).toHaveStyle({ fontStyle: 'italic' })
+    await expect(canvas.getByText('Pro')).toHaveStyle({ fontWeight: '700' })
+    const indicator = group.querySelector<HTMLElement>(
+      'input:checked + [data-slot~="radio-indicator"]'
+    )!
+    await expect(indicator.getBoundingClientRect().width).toBeGreaterThan(0)
+    await expect(canvas.getByText('Unchanged neighbour')).toHaveStyle({ fontStyle: 'normal' })
   }
 }

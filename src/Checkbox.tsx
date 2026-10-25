@@ -15,7 +15,7 @@ import { useNativeOwner, type CheckedOwner } from './react/useNativeOwner.js'
 import { controlBorderClass, controlMetrics } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
-import type { ControlSize } from './presentation.js'
+import type { ControlSize, ControlParts } from './presentation.js'
 import { useFieldControl } from './Field.js'
 
 const checkboxVariants = cva([
@@ -65,6 +65,7 @@ export type CheckboxProps = Omit<
     indeterminate?: boolean
     controlSize?: ControlSize
     style?: ThemeStyle
+    parts?: ControlParts
   }
 
 export type CheckboxTheme = NonNullable<ThemeComponentOverrides['checkbox']>
@@ -80,6 +81,7 @@ export function checkboxTheme(theme: CheckboxTheme): CSSProperties {
 export function Checkbox({
   className,
   controlSize = 'medium',
+  parts,
   label,
   indeterminate = false,
   id,
@@ -94,6 +96,7 @@ export function Checkbox({
   ...props
 }: CheckboxProps) {
   const controlled = useNativeOwner('Checkbox', checked, defaultChecked)
+  const labelled = hasContent(label)
   const control = useFieldControl({
     id,
     disabled,
@@ -121,7 +124,11 @@ export function Checkbox({
     }
   })
   const controlNode = (
-    <span className="relative inline-grid w-fit shrink-0">
+    <span
+      className={cn('relative inline-grid w-fit shrink-0', !labelled && parts?.wrapper?.className)}
+      style={!labelled ? parts?.wrapper?.style : undefined}
+      data-slot={!labelled ? 'checkbox-wrapper' : undefined}
+    >
       <input
         {...props}
         {...control}
@@ -135,7 +142,13 @@ export function Checkbox({
       />
       <svg
         aria-hidden="true"
-        className={cn(markClass, 'opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-0')}
+        className={cn(
+          markClass,
+          'opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-0',
+          parts?.indicator?.className
+        )}
+        style={parts?.indicator?.style}
+        data-slot="checkbox-indicator"
         fill="none"
         viewBox="0 0 16 16"
       >
@@ -149,7 +162,13 @@ export function Checkbox({
       </svg>
       <svg
         aria-hidden="true"
-        className={cn(markClass, 'opacity-0 peer-indeterminate:opacity-100')}
+        className={cn(
+          markClass,
+          'opacity-0 peer-indeterminate:opacity-100',
+          parts?.indicator?.className
+        )}
+        style={parts?.indicator?.style}
+        data-slot="checkbox-indicator"
         fill="none"
         viewBox="0 0 16 16"
       >
@@ -163,13 +182,18 @@ export function Checkbox({
     </span>
   )
 
-  if (!hasContent(label)) return controlNode
+  if (!labelled) return controlNode
 
   return (
-    <label className={rowClass}>
+    <label
+      className={cn(rowClass, parts?.wrapper?.className)}
+      style={parts?.wrapper?.style}
+      data-slot="checkbox-wrapper"
+    >
       {controlNode}
       <span
-        className={cn(labelClass, controlMetrics({ controlSize }))}
+        className={cn(labelClass, controlMetrics({ controlSize }), parts?.label?.className)}
+        style={parts?.label?.style}
         data-slot="checkbox-label"
       >
         {label}
