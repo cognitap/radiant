@@ -68,6 +68,7 @@ export type {
 } from './Card.js'
 export {
   defineTheme,
+  updateThemeAppearance,
   themes,
   radiant,
   defaultTheme,
@@ -80,6 +81,8 @@ export {
 } from './themes/index.js'
 export type {
   SharedTokens,
+  ThemeAppearanceSettings,
+  ThemeGeometrySettings,
   Theme,
   ThemeComponentOverrides,
   ThemeDefinition,

@@ -27,6 +27,11 @@ import {
   ThemeScope,
   defaultTheme,
   defineTheme,
+  compileThemeDocument,
+  generateColorWall,
+  recommendColorPalette,
+  themeDocumentFromDefinition,
+  updateThemeAppearance,
   themes,
   type ThemeMode
 } from '@cognitap/radiant'
@@ -41,10 +46,36 @@ const brand = defineTheme({
   components: { button: { radius: '21px' }, input: { radius: '19px' } }
 })
 
+const inspectionThemes = [
+  ...themes,
+  compileThemeDocument(
+    updateThemeAppearance(
+      themeDocumentFromDefinition({ id: 'generated-workshop', name: 'Generated workshop' }),
+      {
+        palette: recommendColorPalette(generateColorWall({ brand: '#FFFF00' })),
+        geometry: {
+          values: {
+            spacing: 1.5,
+            density: 1.25,
+            controlRadius: 8,
+            surfaceRadius: 24,
+            controlBorderWidth: 2,
+            surfaceBorderWidth: 3,
+            borderStyle: 'dashed',
+            elevation: 2,
+            backdropOpacity: 0.55
+          },
+          modes: { dark: { density: 0.75, surfaceRadius: 12, backdropOpacity: 0.75 } }
+        }
+      }
+    )
+  )
+]
+
 function Appearance() {
   const [themeId, setTheme] = useState(themes[0].id)
   const [mode, setMode] = useState<ThemeMode>('light')
-  const theme = themes.find(item => item.id === themeId)!
+  const theme = inspectionThemes.find(item => item.id === themeId)!
   const callerClass = document.body.dataset.route?.startsWith('tailwind')
     ? 'rounded-[31px] px-[23px] hover:bg-[#123456] disabled:opacity-100'
     : 'app-override'
@@ -58,7 +89,7 @@ function Appearance() {
           value={themeId}
           onChange={event => setTheme(event.target.value)}
         >
-          {themes.map(item => (
+          {inspectionThemes.map(item => (
             <option
               key={item.id}
               value={item.id}
