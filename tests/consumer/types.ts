@@ -25,6 +25,8 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogTitle,
   DialogTrigger,
   dialogTheme,
   Radio,
@@ -343,7 +345,6 @@ createElement('div', { style: dialogTheme({ width: '24rem', backdrop: 'transpare
 
 const dialogProps: DialogProps = {
   open: true,
-  defaultOpen: false,
   modal: true,
   closeOnBackdrop: true,
   closeOnEscape: false,
@@ -355,8 +356,33 @@ createElement(
   Dialog,
   dialogProps,
   createElement(DialogTrigger, null, 'Edit'),
-  createElement(DialogContent, { ref: createRef<HTMLDialogElement>() })
+  createElement(
+    DialogContent,
+    {
+      ref: createRef<HTMLDialogElement>(),
+      className: 'open:p-0',
+      style: { '--rad-dialog-width': '24rem', '--rad-motion-color-duration': '0ms' }
+    },
+    createElement(
+      DialogTitle,
+      { ref: createRef<HTMLHeadingElement>(), style: { '--rad-dialog-title-size': '1.25rem' } },
+      'Profile'
+    ),
+    createElement(
+      DialogDescription,
+      { ref: createRef<HTMLParagraphElement>(), style: { fontStyle: 'italic' } },
+      'Your details'
+    )
+  )
 )
+
+// @ts-expect-error Dialog has one open-state owner, including false.
+const mixedDialog: DialogProps = { open: false, defaultOpen: true }
+// @ts-expect-error Dialog is a non-DOM owner; styles and refs belong to its parts.
+const styledDialog: DialogProps = { className: 'p-4' }
+// @ts-expect-error DialogContent refs target the native dialog, not a div wrapper.
+const wrongDialogRef: DialogContentProps = { ref: createRef<HTMLDivElement>() }
+void [mixedDialog, styledDialog, wrongDialogRef]
 
 const dialogTriggerProps: DialogTriggerProps = {
   variant: 'outline',

@@ -538,7 +538,8 @@ styling hooks are listed in [Form styling targets](#form-styling-targets).
 
 ### Dialog
 
-`Dialog` is a native `<dialog>`. It stays in the document that rendered it, so
+`Dialog` is the open-state owner and renders no DOM wrapper. `DialogContent`
+renders the native `<dialog>`. It stays in the document that rendered it, so
 an ancestor form still owns the fields inside. There is no portal. A modal
 dialog calls `showModal()`, which gives it the browser's top layer, inert
 background, focus containment, and focus restoration. `modal={false}` calls
@@ -637,6 +638,35 @@ then left to the consumer.
 External `aria-describedby` IDs are deduplicated and appended to the owned
 DialogDescription ID. Changing `modal` on an open Dialog switches the same
 native host between `showModal()` and `show()` without requesting a state change.
+
+| Part                        | DOM, styling and ref target                   | Identity                                        |
+| --------------------------- | --------------------------------------------- | ----------------------------------------------- |
+| Dialog                      | State owner; DOM props belong to its parts    | No host                                         |
+| DialogContent               | Native `dialog` panel, including `::backdrop` | `dialog`                                        |
+| DialogTitle                 | `h2`, with its owned label ID                 | `dialog-title`                                  |
+| DialogDescription           | `p`, with its owned description ID            | `dialog-description`                            |
+| DialogTrigger / DialogClose | Button's native `button` host                 | `button dialog-trigger` / `button dialog-close` |
+
+Each DOM part accepts `className`, `style`, native props and the ref for that
+same host. Content, title and description styles accept local theme variables.
+Computed identities and IDs stay owned. Content's `data-state="open" | "closed"`
+reflects the React state owner, just like Trigger's `aria-expanded`; native
+`open`/`:modal` remain authoritative for the browser layer. Even untyped caller
+props cannot supply Content's `open` attribute. Server markup stays closed and
+hydration opens it after mount.
+
+The open panel keeps a viewport margin of 1rem, a maximum height of
+`min(40rem, 100dvh - 2rem)`, and its own scrolling/overscroll containment.
+Set `style={{ '--rad-dialog-width': '24rem' }}` to choose a local width while
+retaining the viewport bound. Caller classes merge after defaults; match the
+`open:` prefix for open-only layout, such as `open:p-0`. Preserve visibility,
+viewport bounds and scrolling when replacing functional styles.
+
+Surface, typography, border and focus settings fall back to shared theme roles.
+Panel/title/description color transitions use `motion.colorDuration` and turn
+off under reduced motion. Native opening, dismissal and cleanup keep their
+existing timing. Backdrop background and the panel's `backdropFilter` remain
+independent settings, including Glass's blur correction.
 
 Focus is the platform's. An `autoFocus` control inside the dialog takes initial
 focus. Otherwise the browser focuses the first focusable control inside.

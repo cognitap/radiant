@@ -132,7 +132,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native `<dialog>`: Dialog owns open/defaultOpen and onOpenChange; DialogTrigger and DialogClose compose Button by default and accept its presentation and pending props. DialogContent owns the dialog host/ref. DialogTitle and DialogDescription provide accessible relationships. Action slots include button plus dialog-trigger or dialog-close; other parts expose dialog, dialog-title and dialog-description. Native showModal supplies the modal layer; no portal or body scroll lock is added.'
+          'Dialog is a non-DOM state owner: choose open or defaultOpen. DialogContent is the native dialog and owns its className/style/native props/ref, dialog identity and open/closed data-state. Title (h2) and Description (p) own their own styling/ref targets and protected IDs. DialogTrigger/Close compose Button. The panel uses shared surface/typography/border/focus roles and reduced-motion-aware color transitions. Native showModal supplies the modal layer; the bounded panel scrolls its content.'
       }
     }
   }
@@ -250,7 +250,7 @@ export const Customisation: Story = {
     docs: {
       description: {
         story:
-          'Choose Button presentation on the Dialog action, then forward resolved native props, ref and children to one button. The trigger uses a consumer component; the close action uses a native replacement. Both inherit Button styling and activation without a nested Button.'
+          'A local Dialog width variable preserves the viewport bound; title and description overrides target their own hosts. Color transitions follow shared motion settings and reduced-motion preference. Choose Button presentation on actions and forward resolved props/ref/children to one compatible button host.'
       }
     }
   },
@@ -263,9 +263,11 @@ export const Customisation: Story = {
       >
         Open narrow panel
       </DialogTrigger>
-      <DialogContent style={{ width: '24rem' }}>
-        <DialogTitle>Narrow panel</DialogTitle>
-        <DialogDescription>Custom hosts inherit Button presentation.</DialogDescription>
+      <DialogContent style={{ '--rad-dialog-width': '24rem' }}>
+        <DialogTitle style={{ '--rad-dialog-title-size': '1.25rem' }}>Narrow panel</DialogTitle>
+        <DialogDescription style={{ fontStyle: 'italic' }}>
+          Custom hosts inherit Button presentation.
+        </DialogDescription>
         <DialogClose
           variant="outline"
           tone="neutral"
@@ -279,7 +281,19 @@ export const Customisation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'Open narrow panel' }))
-    await expect(canvas.getByRole('dialog', { name: 'Narrow panel' })).toBeVisible()
+    const panel = canvas.getByRole('dialog', { name: 'Narrow panel' })
+    await expect(panel).toBeVisible()
+    await expect(panel).toHaveAttribute('data-slot', 'dialog')
+    await expect(panel).toHaveAttribute('data-state', 'open')
+    await expect(within(panel).getByRole('heading', { name: 'Narrow panel' })).toHaveStyle({
+      fontSize: '20px'
+    })
+    await expect(within(panel).getByText('Custom hosts inherit Button presentation.')).toHaveStyle({
+      fontStyle: 'italic'
+    })
+    await expect(panel.getBoundingClientRect().width).toBeLessThanOrEqual(
+      Math.min(384, canvasElement.ownerDocument.defaultView!.innerWidth - 32)
+    )
   }
 }
 

@@ -120,8 +120,8 @@ export declare function DialogClose(props: DialogActionProps): ReactElement
 export declare function DialogContent(
   props: Omit<Styled<ComponentProps<'dialog'>>, 'open'>
 ): ReactElement
-export declare function DialogTitle(props: ComponentProps<'h2'>): ReactElement
-export declare function DialogDescription(props: ComponentProps<'p'>): ReactElement
+export declare function DialogTitle(props: Styled<ComponentProps<'h2'>>): ReactElement
+export declare function DialogDescription(props: Styled<ComponentProps<'p'>>): ReactElement
 
 export type CollapsibleProps = Omit<ComponentProps<'details'>, 'open'> &
   OpenOwner & {

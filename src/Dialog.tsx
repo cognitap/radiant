@@ -10,8 +10,13 @@ import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
+
+const colorMotionClass =
+  'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
 
 const dialogVariants = cva([
+  colorMotionClass,
   '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
   'box-border text-start antialiased',
   '[&:not([open])]:hidden',
@@ -40,6 +45,7 @@ const dialogVariants = cva([
 ])
 
 const dialogTitleVariants = cva([
+  colorMotionClass,
   'm-0 min-w-0 break-words leading-snug',
   '[font-size:var(--rad-dialog-title-size,var(--rad-typography-heading-size,1.125rem))]',
   '[font-weight:var(--rad-dialog-title-weight,var(--rad-typography-heading-weight,600))]',
@@ -47,15 +53,17 @@ const dialogTitleVariants = cva([
 ])
 
 const dialogDescriptionVariants = cva([
+  colorMotionClass,
   'm-0 min-w-0 break-words leading-snug',
   '[color:var(--rad-dialog-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
   '[font-size:var(--rad-dialog-description-size,var(--rad-typography-small-size,0.8125rem))]',
   'forced-colors:text-[CanvasText]'
 ])
 
-export type DialogProps = {
-  open?: boolean
-  defaultOpen?: boolean
+export type DialogProps = (
+  | { open: boolean; defaultOpen?: never }
+  | { open?: undefined; defaultOpen?: boolean }
+) & {
   onOpenChange?: (open: boolean) => void
   /** `true` calls `showModal()`. `false` calls `show()` and leaves the rest of the page active. */
   modal?: boolean
@@ -82,11 +90,13 @@ export type DialogRenderProps = ButtonRenderProps
 
 export type DialogTriggerProps = ButtonProps
 
-export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open'>
+export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open' | 'style'> & {
+  style?: ThemeStyle
+}
 
-export type DialogTitleProps = ComponentProps<'h2'>
+export type DialogTitleProps = Omit<ComponentProps<'h2'>, 'style'> & { style?: ThemeStyle }
 
-export type DialogDescriptionProps = ComponentProps<'p'>
+export type DialogDescriptionProps = Omit<ComponentProps<'p'>, 'style'> & { style?: ThemeStyle }
 
 export type DialogCloseProps = DialogTriggerProps
 
@@ -223,11 +233,13 @@ export function DialogContent({
     // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       {...props}
+      open={undefined}
       ref={hostRef}
       aria-describedby={joinIds(dialog.descriptionId, props['aria-describedby'])}
       aria-labelledby={props['aria-label'] ? props['aria-labelledby'] : dialog.titleId}
       className={cn(dialogVariants(), className)}
       data-slot="dialog"
+      data-state={dialog.open ? 'open' : 'closed'}
       id={dialog.contentId}
       onCancel={event => {
         // cancel and close bubble, so a nested dialog must not dismiss its parent.
