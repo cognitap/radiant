@@ -55,7 +55,7 @@ test('package import and server rendering do not read browser globals or attach 
       h(DialogContent, { ref }, h(DialogTitle, null, 'Panel'), h(DialogDescription, null, 'Details'),
         h(Checkbox, { ref, label: 'Mixed', indeterminate: true }), h(Radio, { ref, label: 'Choice', value: 'yes' }))));
     assert.doesNotMatch(html.match(/<dialog\\b[^>]*>/)?.[0] ?? '', /\\sopen(?:=|\\s|>)/);
-    for (const name of ['joinIds', 'composeAction', 'resolveButtonProps', 'useComposedRefs', 'useControllableState']) {
+    for (const name of ['joinIds', 'composeAction', 'useComposedRefs', 'useControllableState']) {
       assert.equal(name in await import('./dist/library/index.js'), false);
     }
   `

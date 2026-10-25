@@ -10,8 +10,9 @@ contracts below remain targets for their owning stages. DEV-48 now implements
 the [shared React runtime seams](../react-bindings.md); family-specific public
 anatomy and replacement migrations remain with their named owners. DEV-117 now
 implements the Button/Link action vocabulary and default Dialog action props.
-DEV-118 now implements Link's native anchor/ref replacement contract; Dialog's
-fully resolved replacement presentation remains with DEV-119.
+DEV-118 implements Link's native anchor/ref replacement contract. DEV-119 makes
+Button own button-host replacement and Dialog actions compose Button in both
+default and replacement paths.
 
 Read [the glossary](../../GLOSSARY.md) for terminology,
 [the migration inventory](./migration.md) for current-to-target mappings, and
@@ -329,7 +330,7 @@ and group size. ARIA and native state remain authoritative for accessibility.
 
 ### Replacement and event rules
 
-Where replacement is needed (Link router integration and Dialog actions),
+Where replacement is needed (Button custom hosts and Link router integration),
 `render(resolvedNativeProps)` returns one compatible element. The resolved props
 include native attributes/ref, merged presentation, children and protected
 relationships. Forward them to the actual anchor/button host. Returning a
@@ -338,10 +339,14 @@ is unsupported. No `as`, `asChild` or unrelated second replacement convention
 is added. Field's control-prop callback is explicit accessibility adaptation,
 not replacement of Field's host.
 
-Default Dialog actions render Button. Their presentation options have the same
-meanings as Button; no separate Dialog action style recipe exists. A replacement
-does not create a nested Button inside a button. Link shares presentation policy
-with Button but keeps its anchor implementation.
+Button owns the button `render` callback, resolved native props/children and
+compatible-host validation. Dialog actions inherit ButtonProps and always
+compose Button, forwarding `render` along with their protected relationships
+and guarded open/close request. DialogRenderProps aliases ButtonRenderProps.
+Their presentation options have the same meanings as Button; no separate Dialog
+action recipe or replacement resolver exists. Forward resolved props to one
+button host. Link shares presentation policy with Button and keeps its anchor
+implementation.
 
 For a cancellable action, guards for native disabled/pending state run first,
 then the consumer handler, then the library state request if

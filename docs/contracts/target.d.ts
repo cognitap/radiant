@@ -4,13 +4,7 @@
  * examples. It is not a complete replacement for the package declarations.
  */
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
-import type {
-  ButtonProps,
-  ButtonVariant,
-  ControlSize,
-  DialogRenderProps,
-  ThemeStyle
-} from '../../src/index.js'
+import type { ButtonProps, ButtonVariant, ControlSize, ThemeStyle } from '../../src/index.js'
 
 // DEV-44 now owns the executable theme contract. Keep these sketches tied to it.
 export { defineTheme, ThemeScope } from '../../src/index.js'
@@ -26,7 +20,13 @@ export type {
 
 // DEV-117 now owns the executable action vocabulary; examples check real exports.
 export { Button, Link } from '../../src/index.js'
-export type { ButtonProps, LinkProps, ControlSize, Tone } from '../../src/index.js'
+export type {
+  ButtonProps,
+  ButtonRenderProps,
+  LinkProps,
+  ControlSize,
+  Tone
+} from '../../src/index.js'
 export type Variant = ButtonVariant
 type Styled<P> = Omit<P, 'style'> & { style?: ThemeStyle }
 
@@ -113,10 +113,8 @@ export type DialogProps = OpenOwner & {
   children?: ReactNode
 }
 export declare function Dialog(props: DialogProps): ReactElement
-export type DialogActionProps = ButtonProps & {
-  /** Resolved native button props; return exactly one compatible element and forward them. */
-  render?: (props: DialogRenderProps) => ReactElement
-}
+// Button owns replacement; Dialog adds its protected open/close semantics.
+export type DialogActionProps = ButtonProps
 export declare function DialogTrigger(props: DialogActionProps): ReactElement
 export declare function DialogClose(props: DialogActionProps): ReactElement
 export declare function DialogContent(

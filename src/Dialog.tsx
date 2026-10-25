@@ -1,19 +1,9 @@
 'use client'
 
-import type { ComponentProps, CSSProperties, MouseEvent, ReactElement, ReactNode } from 'react'
-import {
-  Fragment,
-  isValidElement,
-  createContext,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState
-} from 'react'
+import type { ComponentProps, CSSProperties, MouseEvent, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { cva } from 'class-variance-authority'
-import { Button, resolveButtonProps, type ButtonProps } from './Button.js'
-import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
+import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
@@ -88,17 +78,9 @@ export type DialogState = {
   controlled: boolean
 }
 
-export type DialogRenderProps = ComponentProps<'button'> & {
-  'data-slot': 'button dialog-trigger' | 'button dialog-close'
-  'data-variant': ButtonVariant
-  'data-tone': Tone
-  'data-control-size': ControlSize
-}
+export type DialogRenderProps = ButtonRenderProps
 
-export type DialogTriggerProps = ButtonProps & {
-  /** Forward resolved presentation, children, native attributes and ref to one button host. */
-  render?: (props: DialogRenderProps) => ReactElement
-}
+export type DialogTriggerProps = ButtonProps
 
 export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open'>
 
@@ -169,16 +151,11 @@ export function Dialog({
   )
 }
 
-function DialogAction({
-  action,
-  render,
-  ...props
-}: DialogTriggerProps & { action: 'open' | 'close' }) {
+function DialogAction({ action, ...props }: DialogTriggerProps & { action: 'open' | 'close' }) {
   const dialog = useDialogContext()
   const slot = action === 'open' ? 'button dialog-trigger' : 'button dialog-close'
-  const buttonProps: ButtonProps & { 'data-slot': DialogRenderProps['data-slot'] } = {
+  const buttonProps: ButtonProps = {
     ...props,
-    type: props.type ?? 'button',
     ...(action === 'open'
       ? {
           'aria-haspopup': 'dialog',
@@ -188,23 +165,6 @@ function DialogAction({
       : {}),
     'data-slot': slot,
     onClick: composeAction(props.onClick, () => dialog.setOpen(action === 'open'))
-  }
-  if (render) {
-    const resolved: DialogRenderProps = {
-      ...resolveButtonProps(buttonProps),
-      'data-slot': slot
-    }
-    const element = render(resolved)
-    if (
-      !isValidElement(element) ||
-      element.type === Fragment ||
-      (typeof element.type === 'string' && element.type !== 'button')
-    ) {
-      throw new Error(
-        'Dialog action render must return one button or a component that forwards props to a button.'
-      )
-    }
-    return element
   }
   return <Button {...buttonProps} />
 }

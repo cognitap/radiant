@@ -1,6 +1,7 @@
 'use client'
 
-import type { ComponentProps, CSSProperties } from 'react'
+import type { ComponentProps, CSSProperties, ReactElement } from 'react'
+import { Fragment, isValidElement } from 'react'
 import { actionVariants } from './actionStyles.js'
 import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
 import { cn } from './cn.js'
@@ -10,7 +11,18 @@ import { flattenComponents, type ThemeComponentOverrides } from './themes/compon
 
 export type { ButtonVariant } from './presentation.js'
 
+export type ButtonRenderProps = ComponentProps<'button'> & {
+  'data-slot': string
+  'data-variant': ButtonVariant
+  'data-tone': Tone
+  'data-control-size': ControlSize
+}
+
 export type ButtonProps = ComponentProps<'button'> & {
+  /** Additional composed identities; the button token is always retained. */
+  'data-slot'?: string
+  /** Forward resolved presentation, children, native attributes and ref to one button host. */
+  render?: (props: ButtonRenderProps) => ReactElement
   variant?: ButtonVariant
   tone?: Tone
   controlSize?: ControlSize
@@ -28,13 +40,8 @@ export function buttonTheme(theme: ButtonTheme): CSSProperties {
   return flattenComponents({ button: theme }) as CSSProperties
 }
 
-export function Button(props: ButtonProps) {
-  const resolved = resolveButtonProps(props)
-  return <button {...resolved}>{resolved.children}</button>
-}
-
-// Private family seam: replacements receive the same native presentation as Button.
-export function resolveButtonProps({
+export function Button({
+  render,
   type = 'button',
   variant = 'solid',
   tone = 'accent',
@@ -46,8 +53,8 @@ export function resolveButtonProps({
   onClick,
   children,
   ...props
-}: ButtonProps & { 'data-slot'?: string }) {
-  return {
+}: ButtonProps) {
+  const buttonProps: ButtonRenderProps = {
     ...props,
     type,
     'aria-busy': pending || props['aria-busy'],
@@ -75,6 +82,18 @@ export function resolveButtonProps({
       </>
     )
   }
+  if (!render) return <button {...buttonProps}>{buttonProps.children}</button>
+  const element = render(buttonProps)
+  if (
+    !isValidElement(element) ||
+    element.type === Fragment ||
+    (typeof element.type === 'string' && element.type !== 'button')
+  ) {
+    throw new Error(
+      'Button render must return one button or a component that forwards props to a button.'
+    )
+  }
+  return element
 }
 
 function PendingMark() {

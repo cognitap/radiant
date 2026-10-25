@@ -49,12 +49,35 @@ button. Use a link for navigation.
 | `iconOnly`    | Squares the button at its size. Pass `aria-label`.     | `false`  |
 | `fullWidth`   | Fills the container width.                             | `false`  |
 | `pending`     | Shows a spinner over the label and ignores activation. | `false`  |
+| `render`      | Forward resolved props to one custom button host.      | —        |
 
 The style prop is `variant`, because `type` stays the native attribute. An omitted
 `type` is `button` even when `formAction` is set. Pass `type="submit"` to submit.
 While `pending` is set, the label stays in place, a spinner covers it, and
 activation does not run. It does not set `disabled`, so focus stays. Reduced
 motion keeps the label and hides the spinner. Child SVGs are sized to the button.
+
+Button owns host replacement through `render(resolvedNativeProps)`. The public
+`ButtonRenderProps` type includes merged classes, caller styles, the real button
+ref, guarded activation, computed presentation attributes and resolved children
+(label and pending indicator). Forward these to one native/custom button:
+
+```tsx
+<Button
+  variant="outline"
+  render={props => <button {...props}>{props.children}</button>}
+>
+  Save draft
+</Button>
+```
+
+Return one compatible element. Null, text, arrays, fragments and direct native
+hosts other than buttons fail clearly. Custom components must forward every
+resolved prop/ref/child to their button. Preserve resolved children and handlers
+so pending presentation and activation guards survive. Set presentation on the
+owning Button; resolved props already contain its styling and children.
+Dialog actions inherit this same Button interface and compose Button in both
+the default and replacement paths.
 
 ### Link
 
@@ -153,9 +176,9 @@ The exported `ButtonVariant` and `LinkVariant` types use the new treatments;
 `Tone` and `ControlSize` are shared public types. The old props/values/types are
 removed during the experimental 0.x series. Native Input's numeric `size`,
 Button form attributes, accessible names and pending behaviour remain available.
-Link remains an anchor with native navigation. Existing native Dialog `render`
-callbacks still own their replacement's presentation; the fully resolved
-replacement contract is a separate migration.
+Link remains an anchor with native navigation. Button owns `render` for custom
+button hosts; Dialog actions inherit it and receive fully resolved Button
+presentation, including pending markup.
 
 ### Field
 
@@ -483,7 +506,9 @@ presentation. `DialogTrigger` adds `aria-haspopup="dialog"`, `aria-expanded`, an
 disabled and pending guards run before the consumer click handler. A consumer
 can prevent the open/close request with `event.preventDefault()`.
 
-`render(resolvedNativeProps)` returns one button or a component that forwards
+Dialog actions inherit Button's `render(resolvedNativeProps)` interface. Both
+default and custom paths compose Button; Button resolves and validates the host.
+The callback returns one button or a component that forwards
 to one button. It receives merged Button classes, caller styles, the real ref,
 resolved children (including pending presentation), protected relationships and
 guarded activation. Forward all props and children without wrapping another

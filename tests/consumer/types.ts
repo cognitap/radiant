@@ -38,6 +38,7 @@ import {
   themes,
   useField,
   type ButtonProps,
+  type ButtonRenderProps,
   type ButtonVariant,
   type LinkVariant,
   type Tone,
@@ -83,6 +84,28 @@ const props: ButtonProps = {
   ref: createRef<HTMLButtonElement>()
 }
 createElement(Button, props)
+
+const renderButton = (resolved: ButtonRenderProps) => {
+  const ref: Ref<HTMLButtonElement> | undefined = resolved.ref
+  const variant: ButtonVariant = resolved['data-variant']
+  const tone: Tone = resolved['data-tone']
+  const size: ControlSize = resolved['data-control-size']
+  void [ref, variant, tone, size]
+  // @ts-expect-error Button consumes presentation props before host replacement.
+  void resolved.pending
+  // @ts-expect-error Button owns the render callback; it never reaches the host.
+  void resolved.render
+  return createElement('button', resolved)
+}
+createElement(Button, { render: renderButton })
+createElement(DialogTrigger, { render: renderButton })
+createElement(DialogClose, { render: renderButton })
+// @ts-expect-error Button replacement returns one compatible element.
+createElement(Button, { render: () => 'text' })
+// @ts-expect-error A replacement must retain a host.
+createElement(Button, { render: () => null })
+// @ts-expect-error A replacement cannot return an array of hosts.
+createElement(Button, { render: () => [createElement('button')] })
 
 // @ts-expect-error Variants are a closed set.
 const invalidVariant: ButtonProps = { variant: 'link' }

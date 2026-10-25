@@ -417,7 +417,7 @@ test('Dialog replacements return one compatible button element', () => {
     ]) {
       assert.throws(
         () => renderToString(createElement(Dialog, null, createElement(Action, { render }))),
-        /Dialog.*render.*button/i
+        /Button.*render.*button/i
       )
     }
   }
