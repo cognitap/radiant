@@ -1,10 +1,18 @@
 # Verification for component migrations
 
-`pnpm check` is the required local and CI gate. It runs formatting, lint, source
+`pnpm check` is the complete local gate. It runs formatting, lint, source
 and contract types, runtime tests, the installed consumer suite, a Storybook
 build, and real Chromium tests. The installed check also builds and renders
-production consumers of both styling routes and the canonical compositions. CI's **Library checks** job fails if any stage
-fails. Keep that status required when configuring repository merge rules.
+production consumers of both styling routes and the canonical compositions.
+CI runs the same stages in parallel: source/runtime checks and the Storybook
+build, installed package/style/composition checks, and four shards of the full
+Storybook/platform browser matrix. CI's **Library checks** job requires every
+job and shard to succeed, including when another job fails or is skipped. Keep
+that status required when configuring repository merge rules.
+
+Pull requests run CI on their merge revision; pushes to `main` verify the merged
+result. Feature branch pushes use the pull request run, avoiding duplicate
+push/PR suites. Within a pull request, newer commits cancel older runs.
 
 The [browser/AT matrix and evidence process](accessibility.md) defines support
 targets, manual scenarios, WCAG mapping and how to report unverified combinations.
@@ -66,8 +74,17 @@ recorder or the current Chromium suite.
 
 JUnit results identify the preset/mode project and story in
 `output/browser/junit.xml`. Failure screenshots are saved under
-`output/browser/attachments/`. CI uploads both as **browser-results**, even
-when a test fails. Artifacts expire after 14 days; preserve the environment and
+`output/browser/attachments/`. Each CI shard uploads its own receipt, JUnit and
+screenshots as **browser-results-1** through **browser-results-4**, even when a
+test fails. Download each artifact into its own directory to retain all four
+receipts and reports. Shards keep running when another fails, preserving the
+complete diagnostic results. To reproduce a shard locally:
+
+```sh
+pnpm test:browser --shard=1/4
+```
+
+Artifacts expire after 14 days; preserve the environment and
 result summary/captures in a reviewed evidence record before expiry. Story failures also link to the corresponding local Canvas.
 Use the Storybook testing widget to run and debug plays interactively; use the
 command above for the complete required matrix.
@@ -113,8 +130,8 @@ The same checks run inside `pnpm check` through `pnpm test --styles --compositio
 
 `output/browser/installed-styles/results.json` records its own environment,
 archive integrity, build tools, observed styles and pass/fail cases. Production
-bundles and representative Glass/Sharp 3D captures are beside it; CI's existing
-browser artifact includes them. This receipt belongs to the installed run,
+bundles and representative Glass/Sharp 3D captures are beside it; CI's
+**installed-consumer-results** artifact includes them. This receipt belongs to the installed run,
 separately from the subsequent Storybook/platform JUnit report. Review/preserve
 the [artifact evidence record](verification/2026-10-25-installed-styles.md)
 before the same 14-day expiry. Ordinary `pnpm test`/`test:package` and release
@@ -137,8 +154,8 @@ disclosures, Link navigation and open-modal unmount/remount. All presets run in
 both modes, including an inherited input override and an independent default scope.
 
 Results, environment/package integrity, the production page and representative
-captures are in `output/browser/installed-compositions/`, included in the existing
-CI browser artifact. The required gate includes this check. Serve the retained
+captures are in `output/browser/installed-compositions/`, included in CI's
+**installed-consumer-results** artifact. The required gate includes this check. Serve the retained
 page for manual browser/AT testing:
 
 ```sh
