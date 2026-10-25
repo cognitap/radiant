@@ -55,7 +55,9 @@ Its token sections compile through `defineTheme` into the same `ThemeScope`
 contract. Section imports preserve unrelated settings and deliberate component
 exceptions. See [portable documents and import semantics](theming.md#portable-workshop-documents). The pure
 `generateColorWall` interface supplies calibrated sRGB palette metadata through
-`@cognitap/radiant/color`; see [color-wall inputs and output](theming.md#generate-a-color-wall).
+`@cognitap/radiant/color`; see [color-wall inputs and output](theming.md#generate-a-color-wall). Use
+`recommendColorPalette` to select a limited working set, map light/dark color and
+canvas layers, and inspect named contrast pairs before compiling a theme.
 
 | Token group  | Shared responsibility                                                              |
 | ------------ | ---------------------------------------------------------------------------------- |

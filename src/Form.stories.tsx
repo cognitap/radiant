@@ -61,7 +61,7 @@ const exercise: NonNullable<Story['play']> = async ({ canvasElement, args }) => 
   await userEvent.keyboard('{ArrowDown}')
   await expect(free).toBeChecked()
   await userEvent.click(pro)
-  const form = canvas.getByRole('form', { name: 'Profile' }) as HTMLFormElement
+  const form = canvas.getByRole('form', { name: args.label ?? 'Profile' }) as HTMLFormElement
   const data = new FormData(form)
   await expect(data.get('email')).toBe('ada@example.com')
   await expect(data.get('plan')).toBe('pro')

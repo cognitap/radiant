@@ -117,3 +117,12 @@ export type {
 
 export { generateColorWall } from './color/index.js'
 export type { ColorWall, ColorWallInput } from './color/index.js'
+export { recommendColorPalette } from './color/index.js'
+export type {
+  ColorPalette,
+  ColorPaletteOptions,
+  PaletteModeColors,
+  PaletteColorPair,
+  PaletteContrastCheck,
+  WorkingPaletteRole
+} from './color/index.js'

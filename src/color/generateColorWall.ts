@@ -1,3 +1,4 @@
+import { colorFamilies as families } from './colorFamilies.js'
 import type {
   ThemeBrandSource,
   ThemeColorSection,
@@ -39,24 +40,6 @@ export interface ColorWall {
 
 const stops = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
 const lightness = [0.985, 0.965, 0.93, 0.87, 0.79, 0.7, 0.61, 0.52, 0.43, 0.34, 0.24]
-const families = [
-  ['Red', 25],
-  ['Orange', 55],
-  ['Amber', 80],
-  ['Yellow', 100],
-  ['Lime', 125],
-  ['Green', 145],
-  ['Emerald', 165],
-  ['Teal', 185],
-  ['Cyan', 205],
-  ['Sky', 230],
-  ['Blue', 255],
-  ['Indigo', 275],
-  ['Violet', 295],
-  ['Purple', 315],
-  ['Pink', 340],
-  ['Rose', 10]
-] as const
 
 function option<T>(value: unknown, fallback: T, allowed: readonly T[], key: string): T {
   if (value === undefined) return fallback

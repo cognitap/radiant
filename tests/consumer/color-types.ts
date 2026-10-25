@@ -18,3 +18,26 @@ generateColorWall({ brand: '#7C3AED', vividness: () => 0.5 })
 generateColorWall({ brand: '#7C3AED', version: 2 })
 // @ts-expect-error Generated color data is deeply readonly.
 wall.color.palettes[0].swatches.push({ stop: 500, value: '#ffffff' })
+
+import {
+  recommendColorPalette,
+  type ColorPalette,
+  type ColorPaletteOptions
+} from '@cognitap/radiant/color'
+const options: ColorPaletteOptions = {
+  working: { support: 'teal' },
+  modes: { dark: { focus: '#ABCDEF' } }
+}
+const palette: ColorPalette = recommendColorPalette(wall, options)
+updateThemeDocument(themeDocumentFromDefinition({ id: 'palette', name: 'Palette' }), {
+  color: palette.color,
+  surface: palette.surface
+})
+// @ts-expect-error Working roles are explicit; family IDs are validated against the wall at runtime.
+recommendColorPalette(wall, { working: { extra: 'blue' } })
+// @ts-expect-error Only light and dark are authored modes.
+recommendColorPalette(wall, { modes: { system: {} } })
+// @ts-expect-error Unknown semantic roles fail type checking.
+recommendColorPalette(wall, { modes: { light: { activePink: '#ffffff' } } })
+// @ts-expect-error Recommendations are deeply readonly.
+palette.color.modes.light.accent = '#ffffff'
