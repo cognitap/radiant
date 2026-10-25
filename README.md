@@ -928,6 +928,16 @@ not both, or the utilities are duplicated:
 
 To skip Preflight, replace `@import 'tailwindcss'` with
 [Tailwind's separate imports](https://tailwindcss.com/docs/preflight#disabling-preflight).
+
+```css
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import '@cognitap/radiant/tailwind.css';
+```
+
+Keep application source discovery enabled so caller utilities are generated;
+using `source(none)` requires explicitly registering your application's sources.
 Utilities passed in `className` replace matching defaults, including `hover:` and
 `disabled:` variants: `<Button className="rounded-full hover:bg-red-500">`.
 

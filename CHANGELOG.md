@@ -4,6 +4,15 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Verify installed styling artifacts through production builds (DEV-135):
+  compiled CSS and Tailwind, with both reset choices, across all eight presets
+  in light/dark. The required gate now retains versioned results and captures.
+- Preserve complete CSS layer order in both compiled exports so consumer
+  bundling cannot put Preflight above component utilities. Action-shaped Links
+  explicitly remove native underlining without depending on a global reset.
+- Let caller `hover:`/`active:` color utilities replace the shared action defaults,
+  while explicit disabled/busy backgrounds preserve paint guards.
+
 - Audit the ten-family harmonisation coverage (DEV-134), adding focused rendered
   scope and reduced-motion/forced-colors browser checks. Record the required gate
   and explicit manual/browser/artifact gaps without expanding support claims.

@@ -7,31 +7,26 @@ import { chromium } from 'playwright'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(import.meta.url)
-const output = new URL('../output/browser/', import.meta.url)
-mkdirSync(output, { recursive: true })
-// A failed preflight or interrupted suite must not leave an older passing report.
-for (const name of ['environment.json', 'junit.xml']) rmSync(new URL(name, output), { force: true })
 const run = (command, args) => execFileSync(command, args, { cwd: root, encoding: 'utf8' }).trim()
-const platform = {
-  name: os.platform(),
-  version: os.version(),
-  kernel: os.release(),
-  arch: os.arch()
-}
-if (os.platform() === 'darwin') {
-  platform.productVersion = run('sw_vers', ['-productVersion'])
-  platform.build = run('sw_vers', ['-buildVersion'])
-} else if (os.platform() === 'linux' && existsSync('/etc/os-release')) {
-  platform.distribution = readFileSync('/etc/os-release', 'utf8')
-    .split('\n')
-    .find(line => line.startsWith('PRETTY_NAME='))
-    ?.slice('PRETTY_NAME='.length)
-    .replace(/^"|"$/g, '')
-}
 
-const browser = await chromium.launch({ headless: true })
-try {
-  const receipt = {
+export function browserEnvironment(browser) {
+  const platform = {
+    name: os.platform(),
+    version: os.version(),
+    kernel: os.release(),
+    arch: os.arch()
+  }
+  if (os.platform() === 'darwin') {
+    platform.productVersion = run('sw_vers', ['-productVersion'])
+    platform.build = run('sw_vers', ['-buildVersion'])
+  } else if (os.platform() === 'linux' && existsSync('/etc/os-release')) {
+    platform.distribution = readFileSync('/etc/os-release', 'utf8')
+      .split('\n')
+      .find(line => line.startsWith('PRETTY_NAME='))
+      ?.slice('PRETTY_NAME='.length)
+      .replace(/^"|"$/g, '')
+  }
+  return {
     recordedAt: new Date().toISOString(),
     revision: run('git', ['rev-parse', 'HEAD']),
     dirty: Boolean(run('git', ['status', '--porcelain'])),
@@ -49,10 +44,22 @@ try {
         : null,
     result: 'Environment only; pair with the completed JUnit report and manual evidence.'
   }
-  writeFileSync(new URL('environment.json', output), `${JSON.stringify(receipt, null, 2)}\n`)
-  console.log(
-    `Recorded ${receipt.browser.engine} ${receipt.browser.version} environment in output/browser/environment.json`
-  )
-} finally {
-  await browser.close()
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const output = new URL('../output/browser/', import.meta.url)
+  mkdirSync(output, { recursive: true })
+  // Clear earlier reports before a run can produce new environment metadata.
+  for (const name of ['environment.json', 'junit.xml'])
+    rmSync(new URL(name, output), { force: true })
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const receipt = browserEnvironment(browser)
+    writeFileSync(new URL('environment.json', output), `${JSON.stringify(receipt, null, 2)}\n`)
+    console.log(
+      `Recorded ${receipt.browser.engine} ${receipt.browser.version} environment in output/browser/environment.json`
+    )
+  } finally {
+    await browser.close()
+  }
 }
