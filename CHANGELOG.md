@@ -4,6 +4,11 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Publish the browser/assistive-technology target matrix and evidence process
+  (DEV-47), including manual scenarios, WCAG 2.2 A/AA mapping and explicit gaps.
+  Browser runs now capture exact environment versions with their existing
+  result artifacts. This does not declare untested browser/screen-reader support.
+
 - Add the concise Radiant system guide (DEV-133), shipped with the package and
   linked from introductory, theming, Storybook and agent documentation. It covers
   the current ten-family contract and points to canonical live recipes; the

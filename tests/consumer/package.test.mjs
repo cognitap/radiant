@@ -968,6 +968,7 @@ test('the archive includes MIT licensing and public documentation', () => {
     'CHANGELOG.md',
     'RELEASE_POLICY.md',
     'docs/system.md',
+    'docs/accessibility.md',
     'docs/theming.md'
   ]) {
     assert.ok(readFileSync(new URL(file, root), 'utf8').trim().length > 0, file)

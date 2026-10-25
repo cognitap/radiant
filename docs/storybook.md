@@ -95,7 +95,8 @@ runs native keyboard, modal, cancellation/ref, lifecycle and hydration scenarios
 `pnpm check` and CI require this browser matrix alongside runtime/package checks
 and the Storybook build. See [verification conventions](testing.md) for setup,
 focused runs, failure artifacts and migration evidence. Automated accessibility
-checks cover only part of WCAG.
+checks cover only part of WCAG. Use the [browser/AT matrix](accessibility.md)
+for versioned evidence, manual scenarios and the unverified combinations.
 
 Dialog Default compares its unadapted Trigger and Close with a canonical Button
 in the same scope. This guards the actual default call site; a comparison that

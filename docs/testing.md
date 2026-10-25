@@ -5,6 +5,10 @@ and contract types, runtime tests, the installed consumer suite, a Storybook
 build, and real Chromium tests. CI's **Library checks** job fails if any stage
 fails. Keep that status required when configuring repository merge rules.
 
+The [browser/AT matrix and evidence process](accessibility.md) defines support
+targets, manual scenarios, WCAG mapping and how to report unverified combinations.
+Automated Chromium results are one evidence category within that matrix.
+
 ## Running browser checks
 
 After installing dependencies, install the matching browser once:
@@ -44,10 +48,18 @@ URL/filename, and close the new page/delete the download. Destinations are local
 fixtures; no router dependency or external site is required. These checks prove
 browser navigation rather than inferring it from event flags or DOM attributes.
 
+Before each browser suite, `scripts/record-browser-environment.mjs` records
+`output/browser/environment.json` with the exact installed browser/tool versions,
+host OS/build, revision and dirty flag. Preflight clears the previous environment
+and JUnit files before recording a run. This receipt is metadata, not a pass;
+pair it with that run's JUnit report and case selection. No AT is run by the
+recorder or the current Chromium suite.
+
 JUnit results identify the preset/mode project and story in
 `output/browser/junit.xml`. Failure screenshots are saved under
 `output/browser/attachments/`. CI uploads both as **browser-results**, even
-when a test fails. Story failures also link to the corresponding local Canvas.
+when a test fails. Artifacts expire after 14 days; preserve the environment and
+result summary/captures in a reviewed evidence record before expiry. Story failures also link to the corresponding local Canvas.
 Use the Storybook testing widget to run and debug plays interactively; use the
 command above for the complete required matrix.
 

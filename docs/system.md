@@ -201,6 +201,8 @@ come from `@cognitap/radiant`; implementation deep imports are unsupported.
 
 For a change to this contract, update its guide/reference and canonical example
 together, then run the [verification gate](https://github.com/cognitap/radiant/blob/main/docs/testing.md).
+Use the [browser/AT matrix](accessibility.md) for target combinations, manual
+scenarios, exact-version evidence and unverified gaps.
 Check relevant keyboard/form/ref behavior and actual appearance in both modes;
 automated accessibility results do not establish complete visual or assistive
 technology readiness. Historical design decisions and acceptance sketches remain
