@@ -48,19 +48,21 @@ const meta = {
     label: 'Email me product updates',
     name: 'email',
     disabled: false,
+    controlSize: 'medium',
     indeterminate: false
   },
   argTypes: {
     label: { control: 'text' },
     name: { control: 'text' },
     disabled: { control: 'boolean' },
-    indeterminate: { control: 'boolean' }
+    indeterminate: { control: 'boolean' },
+    controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] }
   },
   parameters: {
     docs: {
       description: {
         component:
-          'A native checkbox: defaultChecked initializes uncontrolled state; checked/onChange controls it. indeterminate sets a visual mixed DOM state, not a third submitted value. className/style/ref target the input (data-slot="checkbox"); label wraps the control and checkbox-label identifies its text. Field can supply the accessible name instead.'
+          'A native checkbox: choose defaultChecked or checked/onChange and keep one owner per mount. indeterminate is a visual DOM state, not a third submitted value. controlSize selects shared indicator/label metrics. className/style/ref target the input (data-slot="checkbox"); label wraps it and checkbox-label identifies its text. Field may supply the name and protected required/error relationships instead.'
       }
     }
   }

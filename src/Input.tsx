@@ -3,18 +3,20 @@
 import type { ComponentProps, CSSProperties } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
-import { joinIds } from './internal/ids.js'
-import { controlBorderClass } from './controlStyles.js'
+import { controlBorderClass, controlMetrics } from './controlStyles.js'
+import { useNativeOwner, type ValueOwner } from './react/useNativeOwner.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
-import { useField } from './Field.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
+import type { ControlSize } from './presentation.js'
+import { useFieldControl } from './Field.js'
 
 const inputVariants = cva([
   controlBorderClass,
   'box-border w-full min-w-0',
-  'h-[var(--rad-input-height,var(--rad-control-medium-height,2.5rem))]',
-  'px-[var(--rad-input-padding,var(--rad-control-medium-padding-inline,1rem))]',
+  'h-[var(--rad-input-height,var(--_rad-control-height))]',
+  'px-[var(--rad-input-padding,var(--_rad-control-padding))]',
   '[font-family:var(--rad-input-font-family,var(--rad-typography-family,system-ui,sans-serif))] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)]',
-  '[font-size:var(--rad-input-font-size,var(--rad-control-medium-font-size,0.875rem))]',
+  '[font-size:var(--rad-input-font-size,var(--_rad-control-font-size))]',
   '[font-weight:var(--rad-input-font-weight,var(--rad-typography-body-weight,400))]',
   '[color:var(--rad-input-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
   'bg-[var(--rad-input-background,var(--rad-color-surface,oklch(1_0_0)))]',
@@ -30,14 +32,18 @@ const inputVariants = cva([
   'focus-visible:[outline-width:var(--rad-input-focus-width,var(--rad-focus-width,2px))]',
   'focus-visible:[outline-offset:var(--rad-input-focus-offset,var(--rad-focus-offset,2px))]',
   'focus-visible:[outline-style:var(--rad-input-focus-style,var(--rad-focus-style,solid))]',
-  'aria-invalid:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'data-invalid:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'disabled:cursor-not-allowed',
   'disabled:[background:var(--rad-input-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText] forced-colors:text-[CanvasText]',
   'forced-colors:disabled:bg-[Canvas] forced-colors:disabled:text-[GrayText]'
 ])
 
-export type InputProps = ComponentProps<'input'>
+export type InputProps = Omit<ComponentProps<'input'>, 'value' | 'defaultValue' | 'style'> &
+  ValueOwner<Exclude<ComponentProps<'input'>['value'], undefined>> & {
+    controlSize?: ControlSize
+    style?: ThemeStyle
+  }
 
 export type InputTheme = NonNullable<ThemeComponentOverrides['input']>
 
@@ -47,6 +53,7 @@ export function inputTheme(theme: InputTheme): CSSProperties {
 
 export function Input({
   className,
+  controlSize = 'medium',
   type = 'text',
   id,
   disabled,
@@ -56,23 +63,26 @@ export function Input({
   'aria-required': ariaRequired,
   ...props
 }: InputProps) {
-  const field = useField()
-  const control = field?.layout === 'control' ? field.controlProps : null
-  const invalid = ariaInvalid ?? control?.['aria-invalid']
+  const ownsValue = !['checkbox', 'radio', 'file'].includes(type)
+  useNativeOwner('Input', props.value, props.defaultValue, ownsValue)
+  if (ownsValue && props.value === null)
+    throw new TypeError('Input value cannot be null. Use an empty string.')
+  const control = useFieldControl({
+    id,
+    disabled,
+    required,
+    'aria-invalid': ariaInvalid,
+    'aria-required': ariaRequired,
+    'aria-describedby': ariaDescribedBy
+  })
 
   return (
     <input
-      {...control}
       {...props}
-      aria-describedby={joinIds(control?.['aria-describedby'], ariaDescribedBy)}
-      aria-invalid={invalid}
-      aria-required={ariaRequired ?? control?.['aria-required']}
-      className={cn(inputVariants(), className)}
-      data-invalid={invalid === true || invalid === 'true' ? '' : undefined}
+      {...control}
+      className={cn(inputVariants(), controlMetrics({ controlSize }), className)}
+      data-control-size={controlSize}
       data-slot="input"
-      disabled={disabled ?? control?.disabled}
-      id={control?.id ?? id}
-      required={required ?? control?.required}
       type={type}
     />
   )

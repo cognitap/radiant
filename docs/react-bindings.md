@@ -11,6 +11,7 @@ package and are not public exports or supported import subpaths.
 | `src/internal/selection.ts`         | Accordion membership, equality and single/multiple transitions              | Accordion                                          |
 | `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup | Checkbox, Radio, DialogContent                     |
 | `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression | Dialog, Collapsible, Accordion                     |
+| `src/react/useNativeOwner.ts`       | Diagnose mixed owners and mode changes without storing native values        | Input, Checkbox, standalone Radio, RadioGroup      |
 
 The import check in `tests/architecture.test.mjs` keeps `internal` independent
 of React and families. Shared bindings may import React, other bindings and
@@ -42,8 +43,19 @@ their parent owner.
 
 Text and selection inputs retain React/browser state, change, blur and reset
 behavior. The shared state hook is not a replacement reset engine. The remaining
-RadioGroup ownership/empty-value rules and monotonic Field metadata migrate in
-the form-control stage.
+RadioGroup chooses one name/selection owner; null clears a controlled group,
+while an empty string remains a real option value. Its uncontrolled default is
+an initial snapshot, with native radio selection and reset. Group options may
+not supply a competing name or checked/defaultChecked owner. Group change
+observations and convenience selection callbacks remain native-event driven;
+prop synchronisation and reset do not manufacture requests.
+
+Field's private useFieldControl adapter resolves owned IDs, required/error
+relationships, deduplicated descriptions and disabled inheritance for all three
+native control families. Group descriptions stay on their fieldset; a plain
+Field group does not make every checkbox required. RadioGroup applies its
+required state to native radios, which validate one selection together. Native
+content retains its platform fieldset behavior, including the first legend.
 
 ## Activation and refs
 

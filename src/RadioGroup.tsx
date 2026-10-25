@@ -1,20 +1,22 @@
 'use client'
 
-import { createContext, useCallback, useContext, useLayoutEffect, useRef } from 'react'
+import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ComponentProps, CSSProperties, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
-import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
-import { controlBorderClass } from './controlStyles.js'
+import { useNativeOwner, type ValueOwner, type CheckedOwner } from './react/useNativeOwner.js'
+import { controlBorderClass, controlMetrics } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
-import { Field, useField } from './Field.js'
+import { Field, useFieldControl } from './Field.js'
 import type { FieldProps } from './Field.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
+import type { ControlSize } from './presentation.js'
 
 const radioVariants = cva([
   controlBorderClass,
   'peer col-start-1 row-start-1 m-0 box-border appearance-none',
-  'size-[var(--rad-radio-size,var(--rad-control-medium-indicator-size,1.125rem))]',
+  'size-[var(--rad-radio-size,var(--_rad-control-indicator-size))]',
   'rounded-[var(--rad-radio-radius,999px)]',
   '[corner-shape:var(--rad-radio-corner-shape,unset)]',
   '[border-width:var(--rad-radio-border-width,var(--rad-control-border-width,1px))]',
@@ -39,13 +41,13 @@ const radioVariants = cva([
 ])
 
 const dotClass =
-  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--rad-radio-size,var(--rad-control-medium-indicator-size,1.125rem))*0.4)] self-center justify-self-center rounded-[var(--rad-radio-radius,999px)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText] forced-colors:peer-disabled:bg-[GrayText]'
+  'pointer-events-none absolute inset-[30%] rounded-[var(--rad-radio-radius,999px)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText] forced-colors:peer-disabled:bg-[GrayText]'
 
 const rowClass =
   '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-weight:var(--rad-typography-body-weight,400)] inline-flex min-h-6 cursor-pointer items-center gap-[var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 
 const labelClass =
-  'leading-snug [color:var(--rad-radio-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-radio-label-size,var(--rad-typography-body-size,0.875rem))]'
+  'leading-snug [color:var(--rad-radio-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-radio-label-size,var(--_rad-control-font-size))]'
 
 const optionsClass =
   'grid justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
@@ -54,9 +56,11 @@ export type RadioTheme = NonNullable<ThemeComponentOverrides['radio']> & { gap?:
 
 type RadioGroupContextValue = {
   name: string
-  value?: string
-  defaultValue?: string
+  value?: string | null
+  defaultValue?: string | null
+  controlled: boolean
   required?: boolean
+  controlSize: ControlSize
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void
   onValueChange?: (value: string) => void
 }
@@ -65,20 +69,26 @@ const RadioGroupContext = createContext<RadioGroupContextValue | null>(null)
 
 export type RadioGroupProps = Omit<
   Extract<FieldProps, { layout: 'group' }>,
-  'layout' | 'children' | 'onChange'
-> & {
-  name: string
-  value?: string
-  defaultValue?: string
-  onChange?: (event: ChangeEvent<HTMLInputElement>) => void
-  onValueChange?: (value: string) => void
-  children?: ReactNode
-}
+  'layout' | 'children' | 'onChange' | 'defaultValue'
+> &
+  ValueOwner<string | null> & {
+    name: string
+    controlSize?: ControlSize
+    onChange?: (event: ChangeEvent<HTMLInputElement>) => void
+    onValueChange?: (value: string) => void
+    children?: ReactNode
+  }
 
-export type RadioProps = Omit<ComponentProps<'input'>, 'type' | 'value'> & {
-  label?: ReactNode
-  value: string
-}
+export type RadioProps = Omit<
+  ComponentProps<'input'>,
+  'type' | 'value' | 'checked' | 'defaultChecked' | 'style'
+> &
+  CheckedOwner & {
+    label?: ReactNode
+    value: string
+    controlSize?: ControlSize
+    style?: ThemeStyle
+  }
 
 function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
@@ -97,16 +107,29 @@ export function RadioGroup({
   onChange,
   children,
   required,
+  controlSize = 'medium',
   ...fieldProps
 }: RadioGroupProps) {
+  const controlled = useNativeOwner('RadioGroup', value, defaultValue)
+  const [initialDefault] = useState(defaultValue)
   return (
     <Field
       {...fieldProps}
+      data-control-size={controlSize}
       layout="group"
       required={required}
     >
       <RadioGroupContext.Provider
-        value={{ name, value, defaultValue, required, onChange, onValueChange }}
+        value={{
+          name,
+          value,
+          defaultValue: initialDefault,
+          controlled,
+          required,
+          controlSize,
+          onChange,
+          onValueChange
+        }}
       >
         <div
           className={optionsClass}
@@ -121,6 +144,7 @@ export function RadioGroup({
 
 export function Radio({
   className,
+  controlSize: controlSizeProp,
   label,
   value,
   name,
@@ -137,19 +161,35 @@ export function Radio({
   ...props
 }: RadioProps) {
   const group = useContext(RadioGroupContext)
-  const field = useField()
-  const control = field?.layout === 'control' ? field.controlProps : null
-  const controlled = group?.value !== undefined || checked !== undefined
-  const selected = group?.value !== undefined ? group.value === value : checked
-  const invalid = ariaInvalid ?? control?.['aria-invalid']
-  const requiredFromAria = ariaRequired === true || ariaRequired === 'true' ? true : undefined
+  const standaloneControlled = useNativeOwner('Radio', checked, defaultChecked, !group)
+  if (
+    group &&
+    ((name !== undefined && name !== group.name) ||
+      checked !== undefined ||
+      defaultChecked !== undefined)
+  ) {
+    throw new TypeError(
+      'RadioGroup owns name and selection. Remove conflicting name, checked and defaultChecked from Radio.'
+    )
+  }
+  const controlSize = controlSizeProp ?? group?.controlSize ?? 'medium'
+  const { 'aria-required': _ariaRequired, ...control } = useFieldControl({
+    id,
+    disabled,
+    required,
+    'aria-invalid': ariaInvalid,
+    'aria-required': ariaRequired,
+    'aria-describedby': ariaDescribedBy
+  })
+  const controlled = group ? group.controlled : standaloneControlled
+  const selected = group ? group.value === value : checked
   const nodeRef = useRef<HTMLInputElement>(null)
   const initialise = useCallback(
     (node: HTMLInputElement | null) => {
       nodeRef.current = node
-      if (node && controlled) node.defaultChecked = !!selected
+      if (node && controlled) node.defaultChecked = node.checked
     },
-    [controlled, selected]
+    [controlled]
   )
   const hostRef = useComposedRefs(initialise, ref)
   useLayoutEffect(() => {
@@ -157,27 +197,25 @@ export function Radio({
     if (nodeRef.current && controlled) nodeRef.current.defaultChecked = !!selected
   }, [controlled, selected])
   const controlNode = (
-    <span className="inline-grid shrink-0">
+    <span className="relative inline-grid shrink-0">
       <input
         {...props}
-        aria-describedby={joinIds(control?.['aria-describedby'], ariaDescribedBy)}
+        {...control}
         onChange={event => {
           onChange?.(event)
           group?.onChange?.(event)
-          group?.onValueChange?.(event.target.value)
+          if (event.currentTarget.checked) group?.onValueChange?.(event.currentTarget.value)
         }}
         ref={hostRef}
         checked={controlled ? selected : undefined}
-        className={cn(radioVariants(), className)}
-        data-invalid={invalid === true || invalid === 'true' ? '' : undefined}
+        className={cn(radioVariants(), controlMetrics({ controlSize }), className)}
+        data-control-size={controlSize}
         data-slot="radio"
         defaultChecked={
           controlled ? undefined : group ? group.defaultValue === value : defaultChecked
         }
-        disabled={disabled ?? control?.disabled}
-        id={control?.id ?? id}
         name={group?.name ?? name}
-        required={required ?? requiredFromAria ?? group?.required ?? control?.required}
+        required={group?.required || control.required}
         type="radio"
         value={value}
       />
@@ -194,7 +232,7 @@ export function Radio({
     <label className={rowClass}>
       {controlNode}
       <span
-        className={labelClass}
+        className={cn(labelClass, controlMetrics({ controlSize }))}
         data-slot="radio-label"
       >
         {label}

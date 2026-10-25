@@ -109,6 +109,33 @@ export function useField(): FieldState | null {
   return useContext(FieldContext)
 }
 
+/** Private native-control adapter; Field keeps its owned relationships. */
+export function useFieldControl({
+  id,
+  disabled,
+  required,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
+  'aria-describedby': ariaDescribedBy
+}: Pick<
+  ComponentProps<'input'>,
+  'id' | 'disabled' | 'required' | 'aria-invalid' | 'aria-required' | 'aria-describedby'
+>) {
+  const field = useField()
+  const control = field?.controlProps
+  const isRequired = control?.required || required
+  const invalid = control?.['aria-invalid'] || ariaInvalid
+  return {
+    id: control?.id ?? id,
+    disabled: field?.disabled || disabled,
+    required: isRequired,
+    'aria-invalid': invalid,
+    'data-invalid': invalid && invalid !== 'false' ? '' : undefined,
+    'aria-required': isRequired ? true : ariaRequired,
+    'aria-describedby': joinIds(control?.['aria-describedby'], ariaDescribedBy)
+  }
+}
+
 export function fieldTheme(theme: FieldTheme): CSSProperties {
   return flattenComponents({ field: theme }) as CSSProperties
 }
@@ -129,7 +156,7 @@ export function Field(props: FieldProps) {
     description,
     error,
     required = false,
-    disabled = false,
+    disabled: disabledProp = false,
     requiredIndicator = '*',
     children,
     className,
@@ -138,6 +165,8 @@ export function Field(props: FieldProps) {
     'aria-invalid': ariaInvalid,
     ...rest
   } = props
+  const parent = useField()
+  const disabled = parent?.disabled || disabledProp
   const layout = rest.layout ?? 'control'
   const generatedId = useId()
   const controlId = rest.controlId ?? generatedId

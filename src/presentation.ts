@@ -5,4 +5,4 @@ type ActionPresentation = VariantProps<typeof actionVariants>
 
 export type ButtonVariant = NonNullable<ActionPresentation['variant']>
 export type Tone = NonNullable<ActionPresentation['tone']>
-export type ControlSize = NonNullable<ActionPresentation['controlSize']>
+export type ControlSize = 'small' | 'medium' | 'large'
