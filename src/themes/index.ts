@@ -19,6 +19,8 @@ export type {
   ThemeTokens
 } from './types.js'
 export { defineTheme } from './defineTheme.js'
+export { updateThemeAppearance } from './updateThemeAppearance.js'
+export type { ThemeAppearanceSettings, ThemeGeometrySettings } from './updateThemeAppearance.js'
 export { radiant, defaultTheme, soft, expressive, glass, sharp, jelly, ticket }
 
 export const themes: readonly Theme[] = Object.freeze([

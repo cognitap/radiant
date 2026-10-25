@@ -195,3 +195,30 @@ updateThemeDocument(workshop, {
 authored.sections.color!.brand!.value = 'changed'
 const sectionPatch: ThemeSections = { spacing: { values: { fieldGap: '1rem' } } }
 updateThemeDocument(workshop, sectionPatch)
+
+import {
+  updateThemeAppearance,
+  recommendColorPalette,
+  generateColorWall,
+  type ThemeAppearanceSettings
+} from '@cognitap/radiant'
+const appearance: ThemeAppearanceSettings = {
+  palette: recommendColorPalette(generateColorWall({ brand: '#7C3AED' })),
+  geometry: {
+    values: { spacing: 1.25, density: 0.9, controlRadius: 8, elevation: 2 },
+    modes: { dark: { backdropOpacity: 0.7 } }
+  }
+}
+createElement(ThemeScope, {
+  theme: compileThemeDocument(updateThemeAppearance(workshop, appearance))
+})
+// @ts-expect-error Geometry controls are bounded numbers, not arbitrary CSS strings.
+updateThemeAppearance(workshop, { geometry: { values: { controlRadius: '1rem' } } })
+// @ts-expect-error Elevation has four supported levels.
+updateThemeAppearance(workshop, { geometry: { values: { elevation: 4 } } })
+// @ts-expect-error Structured spring settings remain a separate concern.
+updateThemeAppearance(workshop, { geometry: { values: { spring: {} } } })
+// @ts-expect-error Independent authoring modes are light and dark.
+updateThemeAppearance(workshop, { geometry: { modes: { system: {} } } })
+// @ts-expect-error A raw wall has no semantic roles or canvas layer; map it first.
+updateThemeAppearance(workshop, { palette: generateColorWall({ brand: '#7C3AED' }) })

@@ -373,7 +373,89 @@ effect can change the effective pair. Recheck those contexts in the browser; thi
 base-pair report does not silently certify them. **System → Color Palette →
 Reference** reuses the canonical profile form and inspects invalid, disabled,
 checked, pending and keyboard-focus states in both modes. DEV-155 owns the wider
-theme-editor integration; the public editor itself remains in radiant-docs.
+theme-editor integration is described below; the public editor itself remains in radiant-docs.
+
+## Apply palette, spacing and surfaces together
+
+Use `updateThemeAppearance` when the workshop applies generated colors and bounded
+geometry together. It produces an ordinary version-1 `ThemeDocument`; compile it
+through the existing runtime and use either installed CSS route.
+
+```ts
+import {
+  themeDocumentFromDefinition,
+  updateThemeAppearance,
+  compileThemeDocument,
+  generateColorWall,
+  recommendColorPalette
+} from '@cognitap/radiant'
+
+const initial = themeDocumentFromDefinition({
+  id: 'brand-workshop',
+  name: 'Brand workshop',
+  components: { button: { radius: '12px' } } // A deliberate exception survives edits.
+})
+const palette = recommendColorPalette(generateColorWall({ brand: '#7C3AED' }))
+const document = updateThemeAppearance(initial, {
+  palette,
+  geometry: {
+    values: { spacing: 1.25, density: 1.1, controlRadius: 8, surfaceRadius: 16, elevation: 2 },
+    modes: { dark: { backdropOpacity: 0.75 } }
+  }
+})
+const theme = compileThemeDocument(document)
+// <ThemeScope theme={theme} mode="system">...</ThemeScope>
+```
+
+The optional `palette` is the mapped result of `recommendColorPalette`, not raw
+wall metadata. Its complete color section replaces previous common/mode colors;
+its light/dark canvas leaves merge into surface settings in the same immutable
+operation. Applying a palette never erases radii, padding, elevation or component
+exceptions. A failing deliberate palette choice is retained; inspect its contrast
+report before applying it.
+
+`geometry.values` controls both modes; `geometry.modes.light`/`dark` override
+individual controls. Omitted controls retain authored settings. Each provided
+control maps to the existing semantic token leaves in both modes, overriding
+older common or mode values for those leaves. No recipe metadata or new runtime
+token group is added. An empty update changes no values.
+
+| Geometry control                           | Accepted values             | Existing responsibilities                                                                                               |
+| ------------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `spacing`                                  | 0.5–2                       | Multiplies all five `spacing` gaps plus `surface.padding` and `surface.gap`.                                            |
+| `density`                                  | 0.75–1.5                    | Multiplies small/medium/large control height, inline padding and indicator size; retains font sizes.                    |
+| `controlRadius`                            | 0–32 px                     | Shared action/input radius; Checkbox caps the inherited radius; Radio remains circular.                                 |
+| `surfaceRadius`                            | 0–48 px                     | Card, Dialog and Collapsible shape, including Accordion items.                                                          |
+| `controlBorderWidth`, `surfaceBorderWidth` | 0–4 px                      | Respective shared border widths.                                                                                        |
+| `borderStyle`                              | `solid`, `dashed`, `dotted` | Both control and surface borders.                                                                                       |
+| `elevation`                                | Integer 0–3                 | 0 removes passive/overlay shadows; 1 uses mode defaults; 2/3 select raised/floating shadows with mode-specific opacity. |
+| `backdropOpacity`                          | 0–0.9                       | Black modal backdrop opacity; panel backdrop filtering stays a Dialog component exception.                              |
+
+Scale controls derive absolute values from the neutral baseline, retaining rem
+units. Reapplying `spacing: 1.25` is idempotent; it never multiplies already-edited
+values. `density: 1` restores baseline metric leaves, while fonts and unrelated
+settings remain authored. Action-local effects/shadows remain component decisions;
+inline Link retains text metrics, and action-shaped Link follows control metrics.
+Values outside the bounds, unknown keys/modes and unsupported `version` (default 1)
+fail with a path instead of being silently clamped. These bounds support workshop
+exploration; border removal, small targets or overrides still need contextual
+accessibility review. Focus behavior, state ownership and forced-colors behavior
+remain the existing families' responsibility.
+
+Precedence stays **component exception → shared role → baseline**, followed by
+caller utility/style overrides on the host. Nested mode scopes resolve the same
+compiled theme and retain explicit scope style exceptions; named themes reset
+them. **System → Theme Appearance → Workspace** reuses the canonical ten-family
+workspace, inspects all three control sizes and demonstrates these precedence
+rules. Installed-package checks include the generated theme through compiled CSS
+and Tailwind, with and without a reset.
+
+Existing theme definitions, presets, token names, generated baseline CSS and CSS
+imports need no migration. Existing documents can be passed directly; authored
+`ThemeDefinition` inputs use `themeDocumentFromDefinition`. Resolved presets remain
+runtime data and cannot recover their original authoring intent. Advanced CSS
+geometry stays available through typed `updateThemeDocument` token sections and
+component overrides. Public editing and handoff UI follow in DEV-158/DEV-159.
 
 ## Scopes, mode, and overrides
 

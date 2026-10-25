@@ -4,6 +4,12 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add `updateThemeAppearance` for generated palette/canvas integration and bounded
+  spacing, density, radius, border, elevation and backdrop controls (DEV-155).
+  Preserve independent modes, unrelated settings and component exceptions;
+  compile ordinary theme documents through the existing runtime and CSS routes.
+  Add canonical workspace and installed-package appearance verification.
+
 - Add working-palette recommendations and semantic light/dark mapping (DEV-154).
   `recommendColorPalette` preserves the exact source and full wall, supports
   deliberate family/role overrides and reports unrounded contrast for named

@@ -134,7 +134,7 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
         .getByLabel('Theme', { exact: true })
         .locator('option')
         .evaluateAll(options => options.map(option => option.value))
-      assert.equal(choices.length, 8)
+      assert.equal(choices.length, 9)
       for (const theme of choices)
         for (const mode of ['light', 'dark']) {
           current = `${route.name}-${theme}-${mode}`
@@ -169,6 +169,7 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
                   'border-radius',
                   'border-color',
                   'border-style',
+                  'border-width',
                   'font-family',
                   'font-size',
                   'font-weight',
@@ -176,6 +177,7 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
                   'padding',
                   'gap',
                   'min-height',
+                  'height',
                   'text-decoration-line'
                 ].map(property => [property, getComputedStyle(element).getPropertyValue(property)])
               )
@@ -211,7 +213,11 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
                 getComputedStyle(document.getElementById('reset-probe')).marginTop
               ),
               labelStyle: getComputedStyle(selected.querySelector('[data-slot=field-label]'))
-                .fontStyle
+                .fontStyle,
+              indicatorLabel: styles(selected.querySelector('[data-slot=checkbox-label]')),
+              fieldGap: getComputedStyle(selected.querySelector('[data-slot=field]')).gap,
+              groupGap: getComputedStyle(selected.querySelector('[data-slot=radio-group-options]'))
+                .gap
             }
           })
           assert.equal(measured.snapshot['input[type=text]']['border-radius'], '29px')
@@ -226,6 +232,34 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
           assert.equal(measured.resetMargin === 0, route.reset)
           assert.equal(measured.labelStyle, 'italic')
           assert.equal(measured.snapshot.a['text-decoration-line'], 'none')
+          if (theme === 'generated-workshop') {
+            const dark = mode === 'dark'
+            assert.equal(measured.snapshot.button['min-height'], dark ? '30px' : '50px')
+            assert.equal(measured.snapshot['input[type=text]'].height, dark ? '30px' : '50px')
+            assert.equal(measured.snapshot.a['min-height'], dark ? '30px' : '50px')
+            for (const selector of [
+              'button',
+              'a',
+              'input[type=text]',
+              'input[type=checkbox]',
+              'input[type=radio]'
+            ])
+              assert.equal(measured.snapshot[selector]['border-width'], '2px')
+            for (const selector of ['[data-slot=card]', 'details', 'dialog']) {
+              assert.equal(measured.snapshot[selector]['border-radius'], dark ? '12px' : '24px')
+              assert.equal(measured.snapshot[selector]['border-width'], '3px')
+              assert.equal(measured.snapshot[selector]['border-style'], 'dashed')
+            }
+            assert.equal(measured.snapshot['[data-slot=card]'].padding, '36px')
+            assert.equal(measured.snapshot.details.padding, '0px')
+            assert.equal(measured.snapshot['[data-slot=accordion]'].gap, '18px')
+            assert.equal(measured.fieldGap, '9px')
+            assert.equal(measured.groupGap, '18px')
+            assert.equal(measured.indicatorLabel['font-size'], '14px')
+            for (const selector of ['input[type=checkbox]', 'input[type=radio]'])
+              assert.equal(measured.snapshot[selector].height, dark ? '13.5px' : '22.5px')
+            assert.match(measured.snapshot['[data-slot=card]']['box-shadow'], /4px 12px -2px/)
+          }
           const key = `${route.reset}-${theme}-${mode}`
           if (route.name.startsWith('compiled')) parity.set(key, measured.snapshot)
           else
@@ -267,6 +301,21 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
           assert.equal(await panel.isVisible(), false)
           await page.getByRole('button', { name: 'Open artifact dialog' }).press('Space')
           assert.equal(await panel.isVisible(), true)
+          if (theme === 'generated-workshop') {
+            const observed = await panel.evaluate(node => ({
+              padding: getComputedStyle(node).padding,
+              gap: getComputedStyle(node).gap,
+              shadow: getComputedStyle(node).boxShadow,
+              backdrop: getComputedStyle(node, '::backdrop').backgroundColor
+            }))
+            assert.equal(observed.padding, '36px')
+            assert.equal(observed.gap, '24px')
+            assert.match(observed.shadow, /24px 64px -16px/)
+            assert.equal(
+              observed.backdrop,
+              mode === 'dark' ? 'rgba(0, 0, 0, 0.75)' : 'rgba(0, 0, 0, 0.55)'
+            )
+          }
           await page.getByRole('button', { name: 'Close artifact dialog' }).click()
           assert.equal(await panel.isVisible(), false)
           await page.getByText('Shipping', { exact: true }).click()
