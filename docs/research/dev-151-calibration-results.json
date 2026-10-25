@@ -1,8 +1,8 @@
 {
   "date": "2026-10-25",
-  "status": "candidate defaults; owner visual review pending",
+  "status": "owner-selected exact anchoring with neighboring-shade reshaping; production implementation remains separate",
   "prototype": "src/themes/dev-151-color-calibration.prototype.html",
-  "sha256": "aa683c1c4102037667d04b0e8740a7b6e06825ef82f15ef5483c9fbafece37f6",
+  "sha256": "c86623ee88931c0fb1242d9806ba3b37fa392e0369579c1e7664c27826ab2e85",
   "runtime": "v26.11.1",
   "target": "opaque sRGB hex after 8-bit quantization",
   "defaults": {
@@ -12917,5 +12917,11 @@
         "C": 0.29627961
       }
     ]
+  },
+  "ownerDecision": {
+    "date": "2026-10-25",
+    "policy": "anchored",
+    "sourcePreserved": true,
+    "regularRamp": "explicit alternative"
   }
 }

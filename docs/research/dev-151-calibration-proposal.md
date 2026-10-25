@@ -1,25 +1,29 @@
-# DEV-151: Color calibration proposal
+# DEV-151: Accepted color calibration decision
 
-Date: 2026-10-25. Status: ready for owner visual review. These are selected
-candidate defaults for the production generator, not an approved public API.
+Date: 2026-10-25. Status: owner selected the exact-anchored, reshaped ramp.
+This records the accepted fidelity policy and calibration baseline for DEV-153;
+the prototype is not a production API.
 
-## Recommended brand-fidelity default
+## Accepted brand-fidelity default
 
-**Preserve the original source exactly, alongside a calibrated shade ramp.**
-Keep the source identity separate from a numbered shade and from semantic action
-or text colors. Label the closest regular shade as an approximation. Never
-silently replace the supplied brand with that approximation.
+**Keep the original brand exact at a numbered stop and reshape its neighbors.**
+The owner preferred the left-hand comparison: exact anchoring with neighboring
+lightness/chroma adjusted smoothly around the source. This supersedes the
+initial recommendation to keep the regular ramp as the default.
 
-Offer **anchor exact color in the ramp** as an explicit option. Choose its stop
-by nearest lightness, reshape neighboring lightness/chroma smoothly, and retain
-the exact input at the anchor. This is viable; the data does not establish that
-it is universally less balanced. The default preference for stable calibrated
-curves is a product judgment, not a theorem about adjacent color distances.
+Choose the anchor by nearest lightness, preserve the exact input at that stop,
+and reshape the surrounding brand ramp while retaining monotonic lightness and
+explicit gamut handling. Keep the unmodified source as reference metadata too.
+The calibrated hue families remain coordinated with the brand; they do not all
+need to contain an exact brand stop.
 
-Reject silent snapping of the source to a regular stop. For example, the
-prototype's nearest generated shade is about 0.1302 ΔE OK from pure yellow and
-0.2393 from black. These are observed differences, not universal acceptability
-thresholds. They should not be described as harmless small adjustments.
+A regular, unanchored ramp can remain an explicit alternative. Never silently
+snap or modify the source. Semantic text, action and state colors remain
+independent role decisions and may use related shades with measured contrast.
+
+The initial 96-profile evidence supports the selected method's viability. The
+owner's visual preference decides the default; adjacent color distances do not
+establish a universally superior aesthetic.
 
 ## Comparison artifact
 
@@ -86,7 +90,7 @@ contrasting outline can also be appropriate. Therefore a darker example action
 is not evidence that the brand itself must change. Full role/state mapping and
 working-palette recommendations remain DEV-154 work.
 
-## Verification and remaining review
+## Verification and owner decision
 
 - Primary-source research and conversion/contrast baselines are in
   [the research note](dev-151-color-calibration.md). The experiment reproduces
@@ -100,7 +104,8 @@ working-palette recommendations remain DEV-154 work.
 - No tests or dependencies were added to the production library, and no public
   theme API was changed. Preserve the prototype on its throwaway branch.
 
-Before the production generator commits to these defaults, the owner should
-review **the regular-ramp versus exact-anchored preference** and the overall
-hue-aware wall's visual character. The source-preservation contract is the
-recommended invariant in either case.
+The owner reviewed the comparison and selected the exact-anchored reshaping
+method on 25 October 2026. DEV-151's fidelity decision is resolved. DEV-153 must
+implement this policy against DEV-152's theme document, using the recorded
+reference set and calibration limits. Further production tuning must preserve
+the exact source and monotonic ramp contract.

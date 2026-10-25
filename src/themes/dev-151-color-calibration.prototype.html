@@ -553,16 +553,17 @@
         aria-label="Brand-fidelity comparison"
       ></section>
       <section class="card section recommendation">
-        <h2>Candidate default: preserve the source, calibrate the scale.</h2>
+        <h2>Selected default: exact brand, reshaped ramp.</h2>
         <p>
-          Keep the original brand color as an exact reference. Use a regular, brand-related ramp for
-          the wall, and select semantic colors for their actual use. Label the closest shade as an
-          approximation. Offer an explicit “pin exact color into the wall” option.
+          Keep the original brand color exact at the nearest-lightness stop. Smoothly reshape
+          neighboring lightness and chroma around it, retaining monotonic lightness. Keep a regular,
+          unanchored ramp as an explicit alternative. Semantic colors are selected for their actual
+          use; the original brand is never silently changed.
         </p>
         <small
-          >This is a recommendation for visual review, not an approved production contract. sRGB is
-          the calibration target. Display P3 enhancement and its separately checked fallback belong
-          to the next implementation study; this page does not simulate a P3 display.</small
+          >The owner selected the left-hand reshaping method on 25 October 2026. This is the
+          fidelity handoff for DEV-153, not a production API. sRGB is the calibration target;
+          Display P3 enhancement needs its own checked fallback.</small
         >
       </section>
       <section class="card section">
@@ -815,7 +816,7 @@
             }
           }
         }
-        function generate(state, policy = 'reference') {
+        function generate(state, policy = 'anchored') {
           const source = color(state.hex),
             neutralInput = source.C < 0.02,
             h = neutralInput ? state.fallback : source.h

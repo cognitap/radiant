@@ -1,8 +1,10 @@
 # DEV-151: Color-wall calibration research
 
 Date: 2026-10-25. Status: research and candidate defaults for visual comparison;
-owner aesthetic approval and the production interface remain open. No runtime
-contract changes are implied.
+the research preceded owner review. The owner has since selected exact anchoring
+with neighboring-shade reshaping; see the accepted calibration decision in
+`dev-151-calibration-proposal.md`. Candidate comparisons below are research
+history, not an override of that decision. No runtime contract changes are implied.
 
 ## Reference and model
 
