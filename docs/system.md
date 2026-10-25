@@ -53,7 +53,9 @@ example, token defaults, preset IDs, font families/weights and migration steps.
 For public workshop editing, use the versioned `ThemeDocument` authoring API.
 Its token sections compile through `defineTheme` into the same `ThemeScope`
 contract. Section imports preserve unrelated settings and deliberate component
-exceptions. See [portable documents and import semantics](theming.md#portable-workshop-documents).
+exceptions. See [portable documents and import semantics](theming.md#portable-workshop-documents). The pure
+`generateColorWall` interface supplies calibrated sRGB palette metadata through
+`@cognitap/radiant/color`; see [color-wall inputs and output](theming.md#generate-a-color-wall).
 
 | Token group  | Shared responsibility                                                              |
 | ------------ | ---------------------------------------------------------------------------------- |

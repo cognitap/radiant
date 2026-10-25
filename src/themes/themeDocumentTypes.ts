@@ -1,4 +1,5 @@
-import type { ThemeComponentOverrides, ThemeTokens } from './defineTheme.js'
+import type { ThemeComponentOverrides } from './components.js'
+import type { ThemeTokens } from './tokens.js'
 
 /** One existing token group, with independently authored mode layers. */
 export interface ThemeSection<T> {
