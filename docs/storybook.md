@@ -92,8 +92,12 @@ Use the **Accessibility** panel and testing widget alongside keyboard, focus,
 and contrast checks. `pnpm test:browser` renders every story, runs its play and
 fails on axe violations in all eight themes and both explicit modes. It also
 runs native keyboard, modal, cancellation/ref, lifecycle and hydration scenarios.
-`pnpm check` and CI require this browser matrix alongside runtime/package checks
-and the Storybook build. See [verification conventions](testing.md) for setup,
+Routine CI uses `pnpm check:ci`: every story in Radiant Light/Dark and all native
+browser scenarios, alongside runtime/package checks and the Storybook build.
+The full `pnpm check` audit retains every theme/mode and installed production
+styling/composition checks; run it locally or through the manual workflow's
+**full** input for theme/styling changes and release verification.
+See [verification conventions](testing.md) for setup,
 focused runs, failure artifacts and migration evidence. Automated accessibility
 checks cover only part of WCAG. Use the [browser/AT matrix](accessibility.md)
 for versioned evidence, manual scenarios and the unverified combinations.

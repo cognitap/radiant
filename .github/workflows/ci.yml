@@ -2,7 +2,14 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the exhaustive theme and installed-consumer audit
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -40,7 +47,12 @@ jobs:
       - name: Install Chromium and system dependencies
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Check library, package, Storybook interactions and accessibility
+      - name: Check library, package, Storybook and representative browser coverage
+        if: ${{ !inputs.full }}
+        run: pnpm check:ci
+
+      - name: Audit all themes, installed styles and compositions
+        if: ${{ inputs.full }}
         run: pnpm check
 
       - name: Save browser results and failure screenshots
