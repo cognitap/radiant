@@ -275,8 +275,13 @@ for (const mode of ['light', 'dark'] as const) {
     }
   })
 
-  test(`${mode}: changing modal and dismissal props reconciles the same native dialog`, async () => {
+  test(`${mode}: styled Dialog parts preserve bounded scrolling, refs and native reconciliation`, async () => {
+    const viewport = [innerWidth, innerHeight]
+    await page.viewport(320, 480)
     const requests = vi.fn()
+    const panelRef = createRef<HTMLDialogElement>()
+    const titleRef = createRef<HTMLHeadingElement>()
+    const descriptionRef = createRef<HTMLParagraphElement>()
     const tree = (modal: boolean, closeOnEscape: boolean, open = true) => (
       <ThemeScope mode={mode}>
         <Dialog
@@ -285,34 +290,82 @@ for (const mode of ['light', 'dark'] as const) {
           closeOnEscape={closeOnEscape}
           onOpenChange={requests}
         >
-          <DialogContent>
-            <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>Changing the modal policy preserves this session.</DialogDescription>
+          <DialogContent
+            ref={panelRef}
+            title="Panel host"
+            data-state="wrong"
+            style={{
+              '--rad-dialog-width': '24rem',
+              '--rad-surface-padding': '18px',
+              '--rad-motion-color-duration': '40ms'
+            }}
+          >
+            <DialogTitle
+              ref={titleRef}
+              style={{ '--rad-dialog-title-size': '20px' }}
+            >
+              Settings
+            </DialogTitle>
+            <DialogDescription
+              ref={descriptionRef}
+              style={{ fontStyle: 'italic' }}
+            >
+              Changing the modal policy preserves this session.
+            </DialogDescription>
+            <Input aria-label="First setting" />
+            <p style={{ minHeight: '100vh' }}>Long settings remain inside the scrolling panel.</p>
             <DialogClose>Close settings</DialogClose>
           </DialogContent>
         </Dialog>
       </ThemeScope>
     )
-    const { node, root } = await mount(tree(true, false))
-    const dialog = node.querySelector('dialog')!
-    expect(dialog.matches(':modal')).toBe(true)
-    await act(async () => root.render(tree(false, false)))
-    expect(dialog.open).toBe(true)
-    expect(dialog.matches(':modal')).toBe(false)
-    await act(async () => root.render(tree(true, false)))
-    expect(dialog.matches(':modal')).toBe(true)
-    await act(async () => userEvent.keyboard('{Escape}'))
-    expect(dialog.open).toBe(true)
-    expect(requests).not.toHaveBeenCalled()
-    await act(async () => root.render(tree(true, true)))
-    await act(async () => userEvent.keyboard('{Escape}'))
-    await expect.poll(() => requests.mock.calls.length).toBe(1)
-    expect(requests).toHaveBeenCalledWith(false)
-    await expect.poll(() => dialog.matches(':modal')).toBe(true)
-    await act(async () => root.render(tree(true, true, false)))
-    await act(async () => new Promise(requestAnimationFrame))
-    expect(dialog.open).toBe(false)
-    expect(requests).toHaveBeenCalledTimes(1)
+    try {
+      const { node, root } = await mount(tree(true, false))
+      const dialog = node.querySelector('dialog')!
+      expect(panelRef.current).toBe(dialog)
+      expect(titleRef.current).toBe(dialog.querySelector('h2'))
+      expect(descriptionRef.current).toBe(dialog.querySelector('p'))
+      expect(dialog.title).toBe('Panel host')
+      expect(dialog.dataset.state).toBe('open')
+      const styles = getComputedStyle(dialog)
+      expect(styles.padding).toBe('18px')
+      expect(styles.transitionDuration).toBe('0.04s')
+      expect(getComputedStyle(titleRef.current!).fontSize).toBe('20px')
+      expect(getComputedStyle(descriptionRef.current!).fontStyle).toBe('italic')
+      const bounds = dialog.getBoundingClientRect()
+      expect(bounds.width).toBeLessThanOrEqual(innerWidth - 32)
+      expect(bounds.height).toBeLessThanOrEqual(innerHeight - 32)
+      expect(bounds.left).toBeGreaterThanOrEqual(0)
+      expect(bounds.top).toBeGreaterThanOrEqual(0)
+      expect(dialog.scrollHeight).toBeGreaterThan(dialog.clientHeight)
+      expect(styles.overflowY).toBe('auto')
+      await expect.element(page.getByRole('textbox', { name: 'First setting' })).toHaveFocus()
+      await act(async () => userEvent.tab())
+      await expect.element(page.getByRole('button', { name: 'Close settings' })).toHaveFocus()
+      expect(dialog.scrollTop).toBeGreaterThan(0)
+      expect(dialog.matches(':modal')).toBe(true)
+      await act(async () => root.render(tree(false, false)))
+      expect(dialog.open).toBe(true)
+      expect(dialog.matches(':modal')).toBe(false)
+      await act(async () => root.render(tree(true, false)))
+      expect(dialog.matches(':modal')).toBe(true)
+      await act(async () => userEvent.keyboard('{Escape}'))
+      expect(dialog.open).toBe(true)
+      expect(requests).not.toHaveBeenCalled()
+      await act(async () => root.render(tree(true, true)))
+      await act(async () => userEvent.keyboard('{Escape}'))
+      await expect.poll(() => requests.mock.calls.length).toBe(1)
+      expect(requests).toHaveBeenCalledWith(false)
+      await expect.poll(() => dialog.matches(':modal')).toBe(true)
+      await act(async () => root.render(tree(true, true, false)))
+      await act(async () => new Promise(requestAnimationFrame))
+      expect(dialog.open).toBe(false)
+      expect(dialog.dataset.state).toBe('closed')
+      expect(panelRef.current).toBe(dialog)
+      expect(requests).toHaveBeenCalledTimes(1)
+    } finally {
+      await page.viewport(viewport[0], viewport[1])
+    }
   })
 
   test(`${mode}: native disclosure restoration and prop updates emit one request`, async () => {

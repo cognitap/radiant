@@ -739,10 +739,30 @@ test('a dialog stays closed in server markup and names itself from its title', (
       createElement(DialogTrigger, null, 'Edit'),
       createElement(
         DialogContent,
-        { className: 'bg-transparent' },
+        {
+          className: 'bg-transparent open:p-0',
+          style: { '--rad-dialog-width': '24rem' },
+          open: true,
+          id: 'wrong-panel',
+          'data-slot': 'wrong-panel',
+          'data-state': 'wrong-state',
+          'aria-describedby': 'external external'
+        },
         createElement(DialogClose, null, 'Close'),
-        createElement(DialogDescription, null, 'Visible to your team.'),
-        createElement(DialogTitle, null, 'Edit profile')
+        createElement(
+          DialogDescription,
+          { id: 'wrong-description', className: 'italic', style: { fontStyle: 'italic' } },
+          'Visible to your team.'
+        ),
+        createElement(
+          DialogTitle,
+          {
+            id: 'wrong-title',
+            className: 'font-normal',
+            style: { '--rad-dialog-title-size': '1.25rem' }
+          },
+          'Edit profile'
+        )
       )
     )
   )
@@ -750,11 +770,16 @@ test('a dialog stays closed in server markup and names itself from its title', (
   assert.doesNotMatch(dialogTag, /\sopen(?:=|\s|>)/)
   assert.doesNotMatch(html, /closeOnBackdrop|closeOnEscape|onOpenChange/)
   assert.match(dialogTag, /data-slot="dialog"/)
+  assert.match(dialogTag, /data-state="open"/)
+  assert.match(dialogTag, /style="--rad-dialog-width:24rem"/)
+  assert.doesNotMatch(html, /wrong-panel|wrong-state|wrong-title|wrong-description/)
   assert.match(html, /aria-haspopup="dialog"/)
   assert.match(html, /aria-expanded="true"/)
   const controls = /aria-controls="([^"]+)"/.exec(html)?.[1]
   const labelledBy = /aria-labelledby="([^"]+)"/.exec(dialogTag)?.[1]
-  const describedBy = /aria-describedby="([^"]+)"/.exec(dialogTag)?.[1]
+  const descriptions = /aria-describedby="([^"]+)"/.exec(dialogTag)?.[1].split(' ')
+  const describedBy = descriptions?.[0]
+  assert.deepEqual(descriptions?.slice(1), ['external'])
   assert.ok(controls)
   assert.match(dialogTag, new RegExp(`\\sid="${controls}"`))
   assert.match(html, new RegExp(`<h2\\b[^>]*\\sid="${labelledBy}"`))
@@ -763,6 +788,14 @@ test('a dialog stays closed in server markup and names itself from its title', (
   const classAttribute = /<dialog\b[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ?? ''
   assert.match(classAttribute, /\bbg-transparent\b/)
   assert.doesNotMatch(classAttribute, /dialog-background/)
+  assert.match(classAttribute, /open:p-0/)
+  assert.doesNotMatch(classAttribute, /open:p-\[/)
+  const titleTag = /<h2\b[^>]*>/.exec(html)?.[0] ?? ''
+  const descriptionTag = /<p\b[^>]*>/.exec(html)?.[0] ?? ''
+  assert.match(titleTag, /font-normal/)
+  assert.match(titleTag, /style="--rad-dialog-title-size:1.25rem"/)
+  assert.match(descriptionTag, /italic/)
+  assert.match(descriptionTag, /style="font-style:italic"/)
 })
 
 test('a disclosure renders a summary and keeps closed content in the document', () => {

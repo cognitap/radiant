@@ -417,14 +417,17 @@ test('opening, closing, and a prevented trigger stay in React state', async () =
   const dialog = host.querySelector('dialog')
   assert.equal(dialog.hasAttribute('open'), false)
   assert.equal(trigger.getAttribute('aria-expanded'), 'false')
+  assert.equal(dialog.dataset.state, 'closed')
   assert.equal(trigger.getAttribute('aria-controls'), dialog.id)
 
   await act(async () => trigger.click())
   assert.equal(dialog.hasAttribute('open'), true)
   assert.equal(trigger.getAttribute('aria-expanded'), 'true')
+  assert.equal(dialog.dataset.state, 'open')
 
   await act(async () => host.querySelector('[data-slot~="dialog-close"]').click())
   assert.equal(dialog.hasAttribute('open'), false)
+  assert.equal(dialog.dataset.state, 'closed')
 
   trigger.addEventListener('click', event => event.preventDefault(), { capture: true })
   await act(async () => trigger.click())
