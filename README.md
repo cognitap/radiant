@@ -734,7 +734,14 @@ shared surface radius and corner shape. `collapsibleTheme` maps `radius`,
 `borderColor`, `padding`, `gap`, `contentColor`, `contentSize`, `duration`,
 `focusColor`, `focusWidth`, `focusOffset`, and `focusStyle`. The disclosure
 sets `data-slot="collapsible"`. The summary and content set
-`collapsible-trigger` and `collapsible-content`.
+`collapsible-trigger` and `collapsible-content`. Root, summary and content accept
+native props/refs and typed local theme styles on those exact hosts. Their
+owned `data-state` follows the open-state owner; a caller `data-slot` adds tokens
+without replacing the owned identity. Use token selectors (`[data-slot~="collapsible"]`)
+when targeting composed disclosures. Color transitions use shared color motion
+and also stop under reduced motion. Keep the native closed-content visibility,
+direct-child summary and details-content overflow/height rules when overriding
+functional CSS. Closed fields stay mounted and remain successful form controls.
 
 ### Accordion
 
@@ -785,10 +792,25 @@ disclosure does not change the accordion selection.
 
 `className` merges onto the part it is passed to. Section surface, radius,
 and motion come from `Collapsible`; set `collapsibleTheme` on the accordion
-and the variables inherit. `accordionTheme` maps `gap` to `--accordion-gap`,
+and the variables inherit. `accordionTheme` maps `gap` to `--rad-accordion-gap`,
 the space between sections. The group sets `data-slot="accordion"` and
-`data-type="single"` or `"multiple"`. Each section keeps the Collapsible
-slots.
+`data-type="single"` or `"multiple"`. Part props, styles and refs target the same native hosts as Collapsible:
+
+| Part             | Host      | Owned identity tokens                   |
+| ---------------- | --------- | --------------------------------------- |
+| Accordion        | `div`     | `accordion`                             |
+| AccordionItem    | `details` | `collapsible accordion-item`            |
+| AccordionTrigger | `summary` | `collapsible-trigger accordion-trigger` |
+| AccordionContent | `div`     | `collapsible-content accordion-content` |
+
+Use `[data-slot~="accordion-trigger"]` (and token selectors for the underlying
+Collapsible identities). Caller tokens are additive and deduplicated. Item,
+trigger and content expose the item's owned `data-state`; content IDs remain
+owned. Content must belong to an AccordionItem. The item ignores native `name`
+even for JavaScript callers, so browser exclusive grouping cannot compete with
+Accordion's selection owner. Local theme variables can be passed directly to
+any part's `style`. Choose `value` or `defaultValue`, and `open` or `defaultOpen`
+for standalone Collapsible; mixed owners are rejected by types and runtime.
 
 ### Card
 

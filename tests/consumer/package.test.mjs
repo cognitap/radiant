@@ -829,8 +829,17 @@ test('an accordion opens its default section and keeps the rest closed', () => {
       { className: 'bg-transparent', defaultValue: 'shipping', onValueChange() {} },
       createElement(
         AccordionItem,
-        { value: 'shipping' },
-        createElement(AccordionTrigger, null, 'Shipping'),
+        {
+          value: 'shipping',
+          name: 'ignored',
+          'data-slot': 'custom custom',
+          style: { '--rad-collapsible-padding': '18px' }
+        },
+        createElement(
+          AccordionTrigger,
+          { 'data-slot': 'custom', 'data-state': 'wrong' },
+          'Shipping'
+        ),
         createElement(AccordionContent, null, 'Ships in two days.')
       ),
       createElement(
@@ -852,7 +861,15 @@ test('an accordion opens its default section and keeps the rest closed', () => {
   assert.match(details[1], /data-disabled/)
   assert.match(html, /<summary\b[^>]*aria-disabled="true"[^>]*tabindex="-1"/)
   assert.match(html, /<h3\b[^>]*>Shipping<\/h3>/)
-  assert.match(html, /data-slot="collapsible-content"/)
+  assert.match(details[0], /data-slot="collapsible accordion-item custom"/)
+  assert.doesNotMatch(details[0], /\sname=/)
+  assert.match(details[0], /style="--rad-collapsible-padding:18px"/)
+  assert.match(
+    html,
+    /<summary\b[^>]*data-slot="collapsible-trigger accordion-trigger custom"[^>]*data-state="open"/
+  )
+  assert.match(html, /data-slot="collapsible-content accordion-content"/)
+  assert.doesNotMatch(html, /data-state="wrong"/)
 })
 
 test('accordionTheme maps the stack gap to an Accordion variable', () => {

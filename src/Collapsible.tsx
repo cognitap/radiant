@@ -4,10 +4,16 @@ import type { ComponentProps, CSSProperties, ToggleEvent } from 'react'
 import { createContext, useContext, useId } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
 import { useControllableState } from './react/useControllableState.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 
+const colorMotionClass =
+  'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
+
 const collapsibleVariants = cva([
+  colorMotionClass,
   '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
   'group box-border grid w-full gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
   'rounded-[var(--rad-collapsible-radius,var(--rad-surface-radius,0.75rem))]',
@@ -29,6 +35,7 @@ const collapsibleVariants = cva([
 ])
 
 const collapsibleTriggerVariants = cva([
+  colorMotionClass,
   'flex w-full cursor-pointer items-center gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))]',
   'list-none p-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))]',
   '[&::-webkit-details-marker]:hidden [&::marker]:content-none',
@@ -50,18 +57,20 @@ const collapsibleMarkerVariants = cva([
 ])
 
 const collapsibleContentVariants = cva([
+  colorMotionClass,
   'min-w-0 px-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))] pb-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))]',
   '[color:var(--rad-collapsible-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
   '[font-size:var(--rad-collapsible-content-size,var(--rad-typography-body-size,0.875rem))]',
   'forced-colors:text-[CanvasText]'
 ])
 
-export type CollapsibleProps = Omit<ComponentProps<'details'>, 'open' | 'onToggle'> & {
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  onToggle?: (event: ToggleEvent<HTMLDetailsElement>) => void
-}
+export type CollapsibleProps = Omit<ComponentProps<'details'>, 'open' | 'onToggle' | 'style'> &
+  ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
+    style?: ThemeStyle
+    'data-slot'?: string
+    onOpenChange?: (open: boolean) => void
+    onToggle?: (event: ToggleEvent<HTMLDetailsElement>) => void
+  }
 
 export type CollapsibleState = {
   open: boolean
@@ -69,9 +78,15 @@ export type CollapsibleState = {
   setOpen: (open: boolean) => void
 }
 
-export type CollapsibleTriggerProps = ComponentProps<'summary'>
+export type CollapsibleTriggerProps = Omit<ComponentProps<'summary'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 
-export type CollapsibleContentProps = ComponentProps<'div'>
+export type CollapsibleContentProps = Omit<ComponentProps<'div'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 
 export type CollapsibleTheme = NonNullable<ThemeComponentOverrides['collapsible']>
 
@@ -118,7 +133,7 @@ export function Collapsible({
       <details
         {...props}
         className={cn(collapsibleVariants(), className)}
-        data-slot="collapsible"
+        data-slot={joinIds('collapsible', props['data-slot'])}
         data-state={isOpen ? 'open' : 'closed'}
         open={isOpen}
         onToggle={event => {
@@ -138,12 +153,13 @@ export function Collapsible({
 }
 
 export function CollapsibleTrigger({ className, children, ...props }: CollapsibleTriggerProps) {
-  useCollapsibleContext()
+  const collapsible = useCollapsibleContext()
   return (
     <summary
       {...props}
       className={cn(collapsibleTriggerVariants(), className)}
-      data-slot="collapsible-trigger"
+      data-slot={joinIds('collapsible-trigger', props['data-slot'])}
+      data-state={collapsible.open ? 'open' : 'closed'}
     >
       <Marker />
       {children}
@@ -157,7 +173,8 @@ export function CollapsibleContent({ className, ...props }: CollapsibleContentPr
     <div
       {...props}
       className={cn(collapsibleContentVariants(), className)}
-      data-slot="collapsible-content"
+      data-slot={joinIds('collapsible-content', props['data-slot'])}
+      data-state={collapsible.open ? 'open' : 'closed'}
       id={collapsible.contentId}
     />
   )
