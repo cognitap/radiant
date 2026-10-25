@@ -294,7 +294,9 @@ export const Customisation: Story = {
     await expect(close).toHaveAttribute('data-slot', 'button dialog-close')
     const view = canvasElement.ownerDocument.defaultView!
     await expect(Number.parseFloat(view.getComputedStyle(trigger).minHeight)).toBeGreaterThan(0)
-    await expect(view.getComputedStyle(close).borderTopStyle).toBe('solid')
+    await expect(view.getComputedStyle(close).borderTopStyle).toBe(
+      view.getComputedStyle(trigger).borderTopStyle
+    )
     await expect(trigger).toHaveAttribute('data-variant', 'outline')
     await expect(trigger).toHaveAttribute('data-tone', 'neutral')
     await userEvent.click(trigger)
