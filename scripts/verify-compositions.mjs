@@ -38,6 +38,24 @@ async function focused(locator) {
   assert.equal(await locator.evaluate(node => node === document.activeElement), true)
 }
 
+async function disclose(summary, key, open) {
+  const host = await summary.elementHandle()
+  try {
+    await summary.press(key)
+    // Native details paint precedes its queued toggle observation and React's
+    // controlled-state reconciliation. Wait for the public state to agree too.
+    await summary.page().waitForFunction(
+      ({ host, open }) => {
+        const details = host.closest('details')
+        return details.open === open && details.dataset.state === (open ? 'open' : 'closed')
+      },
+      { host, open }
+    )
+  } finally {
+    await host.dispose()
+  }
+}
+
 /** The same installed flow runs against Vite, Astro islands and Next client boundaries. */
 export async function exerciseCompositions(
   page,
@@ -190,16 +208,19 @@ export async function exerciseCompositions(
             assert.equal(await recipe.getByRole('dialog').count(), 0)
           }
           if (placement === 'workspace') {
-            await recipe.locator('summary').filter({ hasText: 'Privacy' }).press('Enter')
+            await disclose(recipe.locator('summary').filter({ hasText: 'Privacy' }), 'Enter', true)
+            await recipe
+              .locator('details[data-value=profile][data-state=closed]:not([open])')
+              .waitFor()
             const retention = recipe.locator('summary').filter({ hasText: 'Data retention' })
-            await retention.press('Space')
+            await disclose(retention, 'Space', true)
             assert.equal(
               await recipe
                 .getByText('Profile preferences stay until you change or reset them.')
                 .isVisible(),
               true
             )
-            await retention.press('Enter')
+            await disclose(retention, 'Enter', false)
             assert.equal(
               await recipe
                 .getByText('Profile preferences stay until you change or reset them.')
@@ -227,7 +248,7 @@ export async function exerciseCompositions(
             ['glass', 'sharp-3d'].includes(theme)
           ) {
             // Capture the assembled modal with its current theme, including validation and focus.
-            await recipe.locator('summary').filter({ hasText: 'Profile' }).press('Enter')
+            await disclose(recipe.locator('summary').filter({ hasText: 'Profile' }), 'Enter', true)
             await trigger.press('Enter')
             await reset.press('Enter')
             await save.press('Enter')

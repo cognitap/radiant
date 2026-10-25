@@ -1,10 +1,11 @@
 # E57 — Installed architecture-batch compositions
 
 **Date:** 2026-10-25. **Status:** automated archive/Cognitap checkpoints pass;
-the full DEV-57 acceptance remains open for actual screen-reader evidence.
-The explicit archive checkpoint covers the unreleased API under DEV-57's allowed
-local build/install provision; modern registry consumption remains unverified. No package was published and Cognitap's
-checked-in pins were not changed.
+actual VoiceOver work was explicitly deferred by the user on 2026-10-25 and is
+outside this delivery's acceptance. It remains unverified. The explicit archive
+checkpoint covers the unreleased API under DEV-57's allowed local build/install
+provision; modern registry consumption remains unverified. No package was
+published and Cognitap's checked-in pins were not changed.
 
 This follows the [E135 styling proof](2026-10-25-installed-styles.md), reusing its
 archive verifier and the [canonical recipes](../system.md#reuse-the-canonical-examples).
@@ -93,7 +94,11 @@ CI records its own Linux environment and archive integrity.
 3. **Native browser behavior must be observed.** Summary keyboard input targets
    the actual `summary`, including Accordion's heading wrapper. Native Dialog
    close state settles before reopening; tests allow browser-chrome and native
-   scroll-container focus without allowing background controls.
+   scroll-container focus without allowing background controls. One Linux CI run
+   exposed screenshot setup acting before a queued native `toggle` observation
+   reconciled with React. The harness now waits for both `open` and public
+   `data-state` agreement after each disclosure action and asserts the previous
+   Accordion section closes. It uses no sleeps, retries or component workaround.
 4. **A preview process must remain owned by the runner.** Astro 7.3.8 infers
    agent backgrounding. The checkpoint uses its documented `--ignore-lock`
    foreground mode, closes owned process groups and removes its temporary snapshot.
@@ -102,7 +107,7 @@ CI records its own Linux environment and archive integrity.
    retaining the warning in `next-security-reminder.log`. This checkpoint does
    not upgrade Cognitap or claim that warning is resolved.
 
-## Safari/VoiceOver attempt and remaining acceptance
+## Safari/VoiceOver attempt and explicit deferral
 
 The user authorised briefly enabling VoiceOver and restoring settings. Safari
 `27.0.1` (`22625.1.29.11.28`) opened the installed production page. Its native
@@ -120,7 +125,9 @@ The VoiceOver switch was restored and verified **off**. VoiceOver verbosity,
 modifier, Quick Nav, actual Safari keyboard settings/zoom, speech language and
 AT navigation settings were not verified and cannot be reported as a tested setup.
 
-To finish DEV-57, a functioning browser/AT session must execute
+The user explicitly deferred VoiceOver work from DEV-57 on 2026-10-25: "we'll do
+voiceover stuff later. not in scope right now." This closes no AT evidence row.
+In the later manual audit, a functioning browser/AT session must execute
 [K1–K5](../accessibility.md#manual-scenarios) on the retained installed page,
 including native/TanStack errors/reset/status announcements, modal reading/focus
 containment/restoration, Accordion/nested disclosure state and Link navigation.
@@ -128,8 +135,9 @@ Record actual utterances, reading-cursor observations, precise settings and samp
 themes/modes separately from the automated counts. Repeat registry consumption
 after a release/pin supplies the modern API; this run uses the explicitly allowed
 unreleased archive checkpoint. DEV-57/DEV-31 and broader catalog dependencies
-remain open for actual AT evidence and checkpoint review; DEV-83 retains
-the later complete-catalog compatibility/AT audit.
+remain subject to this delivery's review/merge; DEV-83 retains the later manual
+compatibility/AT audit. Actual AT is not a prerequisite for this delivery after
+the user's explicit deferral.
 
 ## Reproduction and retained evidence
 
@@ -157,3 +165,9 @@ Preserve its receipt summary here and in the PR before replacing local output.
 - Isolated archive execution: `2026-10-25T16:33:47.337Z`–`2026-10-25T16:34:07.753Z`, 128 cases passed, hydration/cleanup passed.
 - Cognitap execution: `2026-10-25T16:35:18.501Z`–`2026-10-25T16:36:06.876Z`. Helicon and Terminus each resolved installed version `0.0.2` and passed 24 cases. Both used the same archive integrity above; the source checkout remained unchanged. Registry compositions remain unavailable.
 - The complete gate's separate Chromium receipt was recorded at `2026-10-25T16:29:04.199Z`; its completed JUnit report contains 1,037 passing cases. The final archive check reran all 41 installed/package types, 64 styling and 128 composition cases after the packaged guide/changelog edits.
+
+The disclosure-state synchronization rerun passed all 128 installed cases at
+`2026-10-25T16:52:52.278Z`–`2026-10-25T16:53:14.101Z`, then both Cognitap production apps
+passed their 24 cases at `2026-10-25T16:52:49.599Z`–`2026-10-25T16:53:36.287Z`.
+Both used the same explicit archive SHA-512 above. The final PR-head CI reruns
+the full required gate after this harness change.
