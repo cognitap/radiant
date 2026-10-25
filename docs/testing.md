@@ -2,7 +2,8 @@
 
 `pnpm check` is the required local and CI gate. It runs formatting, lint, source
 and contract types, runtime tests, the installed consumer suite, a Storybook
-build, and real Chromium tests. CI's **Library checks** job fails if any stage
+build, and real Chromium tests. The installed check also builds and renders
+production consumers of both styling routes. CI's **Library checks** job fails if any stage
 fails. Keep that status required when configuring repository merge rules.
 
 The [browser/AT matrix and evidence process](accessibility.md) defines support
@@ -94,6 +95,30 @@ Reuse those seams for nonvisual contracts rather than moving every check into a
 browser. A styling change also needs browser evidence against the generated CSS.
 
 ## Evidence and readiness
+
+For the focused installed styling check:
+
+```sh
+pnpm test:package --styles
+```
+
+The existing archive verifier first runs its isolated no-Tailwind package/type
+checks, then builds compiled CSS consumers with and without the optional reset.
+Only then does it install the pinned Tailwind CLI in that temporary fixture and
+build both documented Tailwind entries. Vite production bundles import the
+installed public package; no repository source or Storybook stylesheet is used.
+Each route exercises all presets in light/dark, provider-free/default/nested
+scopes, component/local/caller overrides, and native Dialog/disclosure visibility.
+The same checks run inside `pnpm check` through `pnpm test --styles`.
+
+`output/browser/installed-styles/results.json` records its own environment,
+archive integrity, build tools, observed styles and pass/fail cases. Production
+bundles and representative Glass/Sharp 3D captures are beside it; CI's existing
+browser artifact includes them. This receipt belongs to the installed run,
+separately from the subsequent Storybook/platform JUnit report. Review/preserve
+the [artifact evidence record](verification/2026-10-25-installed-styles.md)
+before the same 14-day expiry. Ordinary `pnpm test`/`test:package` and release
+preparation retain the package/type check without requiring a browser.
 
 Each migration issue and PR should record:
 

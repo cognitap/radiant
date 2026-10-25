@@ -163,7 +163,7 @@ test('links render as native anchors with native attributes intact', () => {
   assert.match(html, /\sdata-variant="inline"/)
   assert.match(html, /Read the guide/)
   const classAttribute = / class="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\bunderline\b/)
+  assert.match(classAttribute, /(?:^|\s)underline(?:\s|$)/)
   assert.doesNotMatch(html, /\s(variant|tone|controlSize|external|render)=/)
 })
 
@@ -200,7 +200,7 @@ test('button-styled links reuse the Button variant classes', () => {
     classAttribute,
     /\[--_btn-h:var\(--rad-button-height-small,var\(--rad-control-small-height,2rem\)\)\]/
   )
-  assert.doesNotMatch(classAttribute, /\bunderline\b/)
+  assert.doesNotMatch(classAttribute, /(?:^|\s)underline(?:\s|$)/)
   assert.doesNotMatch(html, /\s(tone|controlSize)=/)
 })
 
@@ -914,6 +914,32 @@ test('public JavaScript and declaration maps point to shipped sources', () => {
       )
     }
   }
+})
+
+test('installed modules retain their declared client boundaries and CSS side effects', () => {
+  for (const file of [
+    'Button',
+    'Field',
+    'Input',
+    'Checkbox',
+    'RadioGroup',
+    'Dialog',
+    'Collapsible',
+    'Accordion',
+    'ThemeScope'
+  ]) {
+    assert.match(
+      readFileSync(new URL(`dist/library/${file}.js`, root), 'utf8'),
+      /^['"]use client['"]/
+    )
+  }
+  for (const file of ['index', 'Card', 'Link']) {
+    assert.doesNotMatch(
+      readFileSync(new URL(`dist/library/${file}.js`, root), 'utf8'),
+      /^['"]use client['"]/
+    )
+  }
+  assert.deepEqual(manifest.sideEffects, ['**/*.css'])
 })
 
 test('exports reject implementation deep imports', async () => {
