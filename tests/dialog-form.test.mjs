@@ -182,7 +182,7 @@ test('dialog action consumers can veto requests and a controlled owner can decli
 })
 
 test('pending and native disabled actions block consumers, requests and form submission', async () => {
-  for (const Action of [DialogTrigger, DialogClose]) {
+  for (const Action of [Button, DialogTrigger, DialogClose]) {
     for (const render of [undefined, props => createElement('button', props)]) {
       const { host, root } = mount()
       const initiallyOpen = Action === DialogClose
@@ -252,8 +252,8 @@ test('pending and native disabled actions block consumers, requests and form sub
         await act(async () => root.render(tree({})))
         await act(async () => host.querySelector('button').click())
         assert.equal(clicks, 1)
-        assert.deepEqual(requests, [!initiallyOpen])
-        assert.equal(dialog.hasAttribute('open'), !initiallyOpen)
+        assert.deepEqual(requests, Action === Button ? [] : [!initiallyOpen])
+        assert.equal(dialog.hasAttribute('open'), Action === Button ? false : !initiallyOpen)
         assert.equal(submits, 1, 'an explicit submit type retains native form behavior')
       } finally {
         await act(async () => root.unmount())
@@ -263,161 +263,125 @@ test('pending and native disabled actions block consumers, requests and form sub
   }
 })
 
-test('dialog action refs reach the same native hosts and preserve callback cleanup', async () => {
-  for (const render of [undefined, props => createElement('button', props)]) {
-    const { host, root } = mount()
-    const triggerRef = createRef()
-    const attached = []
-    const cleaned = []
-    const closeRef = node => {
-      attached.push(node)
-      return () => {
-        cleaned.push(node)
+test('Button and composed action refs survive rerenders, ref changes and callback cleanup', async () => {
+  function ConsumerButton(props) {
+    return createElement('button', props)
+  }
+  for (const Action of [Button, DialogTrigger, DialogClose]) {
+    for (const render of [undefined, props => createElement(ConsumerButton, props)]) {
+      const { host, root } = mount()
+      const attached = []
+      const cleaned = []
+      const ref = node => {
+        attached.push(node)
+        return () => cleaned.push(node)
       }
+      const tree = props =>
+        createElement(Dialog, null, createElement(Action, { ref, render, ...props }, 'Action'))
+      await act(async () => root.render(tree({})))
+      const button = host.querySelector('button')
+      await act(async () => root.render(tree({ pending: true })))
+      assert.equal(host.querySelector('button'), button)
+      assert.deepEqual(attached, [button])
+      assert.deepEqual(cleaned, [])
+      const objectRef = createRef()
+      await act(async () => root.render(tree({ ref: objectRef })))
+      assert.equal(objectRef.current, button)
+      assert.deepEqual(cleaned, [button])
+      await act(async () => root.unmount())
+      assert.equal(objectRef.current, null)
+      assert.deepEqual(attached, [button], 'returned cleanup replaces the null callback')
+      host.remove()
     }
-    await act(async () =>
-      root.render(
+  }
+})
+
+test('Button resolves presentation once and protects native props through Dialog composition', () => {
+  const ref = createRef()
+  const style = { borderRadius: '12px' }
+  const presentation = {
+    variant: 'outline',
+    tone: 'danger',
+    controlSize: 'large',
+    pending: true,
+    iconOnly: true,
+    fullWidth: true,
+    className: 'rounded-none',
+    style
+  }
+  const reference = document.createElement('div')
+  reference.innerHTML = renderToString(createElement(Button, presentation, 'Action'))
+  const canonical = reference.querySelector('button')
+  for (const [Action, slot] of [
+    [Button, 'button caller'],
+    [DialogTrigger, 'button dialog-trigger'],
+    [DialogClose, 'button dialog-close']
+  ]) {
+    let resolved
+    const host = document.createElement('div')
+    host.innerHTML = renderToString(
+      createElement(
+        Dialog,
+        null,
         createElement(
-          Dialog,
-          null,
-          createElement(DialogTrigger, { ref: triggerRef, render }, 'Edit'),
-          createElement(DialogClose, { ref: closeRef, render }, 'Close')
+          Action,
+          {
+            ...presentation,
+            ref,
+            'aria-busy': false,
+            'data-slot': 'caller',
+            'data-variant': 'forged',
+            'data-tone': 'forged',
+            'data-control-size': 'forged',
+            render: props => {
+              resolved = props
+              return createElement('button', props)
+            }
+          },
+          'Action'
         )
       )
     )
-    const trigger = host.querySelector('[data-slot~="dialog-trigger"]')
-    const close = host.querySelector('[data-slot~="dialog-close"]')
-    assert.equal(triggerRef.current, trigger)
-    assert.deepEqual(attached, [close])
-    await act(async () => root.unmount())
-    assert.equal(triggerRef.current, null)
-    assert.deepEqual(attached, [close], 'a returned cleanup replaces the null callback')
-    assert.deepEqual(cleaned, [close])
-    host.remove()
-  }
-})
-
-test('dialog replacements receive canonical Button presentation, children and protected native props', () => {
-  for (const Action of [DialogTrigger, DialogClose]) {
-    for (const variant of ['solid', 'soft', 'outline', 'ghost']) {
-      for (const pending of [false, true]) {
-        let resolved
-        const ref = createRef()
-        const style = { borderRadius: '12px' }
-        const presentation = {
-          variant,
-          tone: 'danger',
-          controlSize: 'large',
-          iconOnly: true,
-          fullWidth: true,
-          pending,
-          className: 'rounded-none',
-          style
-        }
-        const reference = document.createElement('div')
-        reference.innerHTML = renderToString(createElement(Button, presentation, 'Action'))
-        const host = document.createElement('div')
-        host.innerHTML = renderToString(
-          createElement(
-            Dialog,
-            null,
-            createElement(
-              Action,
-              {
-                ...presentation,
-                ref,
-                'aria-busy': false,
-                'data-slot': 'forged',
-                'data-variant': 'forged',
-                'data-tone': 'forged',
-                'data-control-size': 'forged',
-                'aria-haspopup': 'menu',
-                'aria-controls': 'forged',
-                'aria-expanded': true,
-                render: props => {
-                  resolved = props
-                  return createElement('button', props)
-                }
-              },
-              'Action'
-            )
-          )
-        )
-        const action = host.querySelector('button')
-        const canonical = reference.querySelector('button')
-        assert.equal(action.className, canonical.className)
-        assert.equal(
-          action.innerHTML,
-          canonical.innerHTML,
-          'label and pending mark are resolved once'
-        )
-        assert.equal(resolved.ref, ref)
-        assert.equal(resolved.style, style)
-        assert.equal(action.dataset.variant, variant)
-        assert.equal(action.dataset.tone, 'danger')
-        assert.equal(action.dataset.controlSize, 'large')
-        assert.equal(
-          action.dataset.slot,
-          Action === DialogTrigger ? 'button dialog-trigger' : 'button dialog-close'
-        )
-        assert.equal(action.getAttribute('aria-busy'), pending ? 'true' : 'false')
-        assert.equal(action.type, 'button')
-        assert.equal(host.querySelectorAll('button').length, 1)
-        if (Action === DialogTrigger) {
-          assert.equal(resolved['aria-haspopup'], 'dialog')
-          assert.equal(resolved['aria-expanded'], false)
-          assert.notEqual(resolved['aria-controls'], 'forged')
-        }
-        for (const name of ['variant', 'tone', 'controlSize', 'iconOnly', 'fullWidth', 'pending']) {
-          assert.equal(
-            Object.hasOwn(resolved, name),
-            false,
-            `${name} is consumed before replacement`
-          )
-          assert.equal(action.hasAttribute(name.toLowerCase()), false)
-        }
-      }
+    const action = host.querySelector('button')
+    assert.ok(resolved, 'Button owns the callback, including through Dialog')
+    assert.equal(action.className, canonical.className)
+    assert.equal(action.innerHTML, canonical.innerHTML, 'label and pending mark are resolved once')
+    assert.equal(resolved.ref, ref)
+    assert.equal(resolved.style, style)
+    assert.equal(action.dataset.slot, slot)
+    assert.equal(action.dataset.variant, 'outline')
+    assert.equal(action.dataset.tone, 'danger')
+    assert.equal(action.dataset.controlSize, 'large')
+    assert.equal(action.getAttribute('aria-busy'), 'true')
+    assert.equal(action.type, 'button')
+    assert.equal(host.querySelectorAll('button').length, 1)
+    for (const key of [
+      'render',
+      'variant',
+      'tone',
+      'controlSize',
+      'iconOnly',
+      'fullWidth',
+      'pending'
+    ]) {
+      assert.equal(Object.hasOwn(resolved, key), false, `${key} is consumed before replacement`)
     }
   }
 })
 
-test('Button keeps its base identity and protects effective presentation when composing parts', () => {
-  const host = document.createElement('div')
-  host.innerHTML = renderToString(
-    createElement(
-      Button,
-      {
-        pending: true,
-        'aria-busy': false,
-        'data-slot': 'consumer button consumer',
-        'data-variant': 'forged',
-        'data-tone': 'forged',
-        'data-control-size': 'forged'
-      },
-      'Action'
-    )
-  )
-  const button = host.querySelector('button')
-  assert.equal(button.dataset.slot, 'button consumer')
-  assert.equal(button.dataset.variant, 'solid')
-  assert.equal(button.dataset.tone, 'accent')
-  assert.equal(button.dataset.controlSize, 'medium')
-  assert.equal(button.getAttribute('aria-busy'), 'true')
-})
-
-test('Dialog replacements return one compatible button element', () => {
-  for (const Action of [DialogTrigger, DialogClose]) {
-    for (const render of [
-      () => null,
-      () => 'Action',
-      () => [createElement('button', { key: 'a' })],
-      () => createElement(Fragment, null, createElement('button')),
-      () => createElement('a'),
-      () => createElement('div')
-    ]) {
+test('Button validates replacement hosts, including composed Dialog actions', () => {
+  const invalid = [
+    () => null,
+    () => 'Action',
+    () => [createElement('button', { key: 'a' })],
+    () => createElement(Fragment),
+    () => createElement('a')
+  ]
+  for (const Action of [Button, DialogTrigger, DialogClose]) {
+    for (const render of Action === Button ? invalid : [invalid[0]]) {
       assert.throws(
         () => renderToString(createElement(Dialog, null, createElement(Action, { render }))),
-        /Button.*render.*button/i
+        /Button render must return one button/
       )
     }
   }

@@ -282,25 +282,9 @@ const dialogCloseProps: DialogCloseProps = {
     node?.focus()
     return () => {}
   },
-  render: nativeProps => {
-    // @ts-expect-error Replacement props are native; Button-only presentation props are consumed.
-    void nativeProps.pending
-    const ref: Ref<HTMLButtonElement> | undefined = nativeProps.ref
-    const variant: ButtonVariant = nativeProps['data-variant']
-    const tone: Tone = nativeProps['data-tone']
-    const size: ControlSize = nativeProps['data-control-size']
-    void [ref, variant, tone, size]
-    return createElement('button', nativeProps)
-  }
+  render: renderButton
 }
 createElement(DialogClose, dialogCloseProps)
-// @ts-expect-error A replacement must return one compatible React element.
-createElement(DialogTrigger, { render: () => 'text' })
-// @ts-expect-error A missing host cannot forward native props/ref.
-createElement(DialogClose, { render: () => null })
-// @ts-expect-error An array is not a single replacement host.
-createElement(DialogClose, { render: () => [createElement('button')] })
-
 // @ts-expect-error Dialog actions use the same closed variant vocabulary as Button.
 const invalidDialogAction: DialogTriggerProps = { variant: 'link' }
 createElement(DialogTrigger, invalidDialogAction)

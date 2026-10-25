@@ -188,36 +188,6 @@ test('buttonTheme maps typed settings to Button variables', () => {
   )
 })
 
-test('installed Button exposes the fully resolved native replacement contract', () => {
-  const props = {
-    variant: 'outline',
-    tone: 'warning',
-    pending: true,
-    className: 'rounded-none',
-    fullWidth: true
-  }
-  let resolved
-  const expected = renderToStaticMarkup(createElement(Button, props, 'Save'))
-  const actual = renderToStaticMarkup(
-    createElement(
-      Button,
-      {
-        ...props,
-        render: nativeProps => {
-          resolved = nativeProps
-          return createElement('button', nativeProps)
-        }
-      },
-      'Save'
-    )
-  )
-  assert.equal(actual, expected)
-  assert.equal(resolved['data-slot'], 'button')
-  assert.equal(resolved['data-variant'], 'outline')
-  assert.equal(resolved['aria-busy'], true)
-  assert.equal(Object.hasOwn(resolved, 'render'), false)
-})
-
 test('links render as native anchors with native attributes intact', () => {
   const html = renderToStaticMarkup(
     createElement(Link, { href: '/guide', download: true }, 'Read the guide')

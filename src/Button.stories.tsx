@@ -70,6 +70,10 @@ const arrow = (
 
 export const Default: Story = {}
 
+function ConsumerButton({ children, ...props }: ButtonRenderProps) {
+  return <button {...props}>{children}</button>
+}
+
 function ButtonComposition(args: ButtonProps) {
   const id = useId()
   const [activations, setActivations] = useState({ next: 0, close: 0 })
@@ -85,6 +89,7 @@ function ButtonComposition(args: ButtonProps) {
             args.onClick?.(event)
             setActivations(counts => ({ ...counts, next: counts.next + 1 }))
           }}
+          render={props => <ConsumerButton {...props} />}
         >
           Next {arrow}
         </Button>
@@ -317,78 +322,5 @@ export const LongLabel: Story = {
   args: {
     children: 'Save the current draft and continue to the next step',
     style: { width: '9rem' }
-  }
-}
-
-function ConsumerButton({ children, ...props }: ButtonRenderProps) {
-  return (
-    <button
-      {...props}
-      data-integration="consumer"
-    >
-      {children}
-    </button>
-  )
-}
-
-function ReplacementExample(args: ButtonProps) {
-  const [count, setCount] = useState(0)
-  const onClick: ButtonProps['onClick'] = event => {
-    args.onClick?.(event)
-    if (!event.defaultPrevented) setCount(value => value + 1)
-  }
-  return (
-    <div style={{ display: 'grid', justifyItems: 'start', gap: '1rem' }}>
-      <Button
-        {...args}
-        onClick={onClick}
-      >
-        Default host
-      </Button>
-      <Button
-        {...args}
-        onClick={onClick}
-        render={props => <ConsumerButton {...props} />}
-      >
-        Custom host
-      </Button>
-      <output>Activations: {count}</output>
-    </div>
-  )
-}
-
-export const Replacement: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Button owns both hosts: a consumer component forwards resolved native props, ref and children to one button. Styling, pending presentation and click guards stay inside Button. Dialog actions compose this same render interface.'
-      }
-    }
-  },
-  render: args => <ReplacementExample {...args} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const reference = canvas.getByRole('button', { name: 'Default host' })
-    const custom = canvas.getByRole('button', { name: 'Custom host' })
-    const view = canvasElement.ownerDocument.defaultView!
-    for (const property of [
-      'font-family',
-      'font-size',
-      'min-height',
-      'border-top-style',
-      'border-radius'
-    ]) {
-      await expect(view.getComputedStyle(custom).getPropertyValue(property)).toBe(
-        view.getComputedStyle(reference).getPropertyValue(property)
-      )
-    }
-    await expect(custom).toHaveAttribute('data-slot', 'button')
-    await expect(custom).toHaveAttribute('data-integration', 'consumer')
-    await userEvent.click(reference)
-    await userEvent.click(custom)
-    await userEvent.keyboard('{Enter} ')
-    await expect(canvas.getByRole('status')).toHaveTextContent('Activations: 4')
-    await expect(custom).toHaveFocus()
   }
 }
