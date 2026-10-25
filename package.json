@@ -15,6 +15,7 @@
     "LICENSE",
     "CHANGELOG.md",
     "RELEASE_POLICY.md",
+    "docs/system.md",
     "docs/theming.md",
     "dist/library",
     "src/**/*.ts",

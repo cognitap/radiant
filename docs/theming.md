@@ -1,5 +1,8 @@
 # Theming Radiant
 
+This is the theme authoring, token and migration reference. Start with the
+[system guide](system.md) for shared composition, ownership and styling rules.
+
 Radiant has one shared theme model: semantic tokens define the design system,
 and component overrides describe deliberate exceptions. `Button` does not own
 other components' typography, dimensions, shape, focus, or motion.
@@ -170,8 +173,8 @@ Appearance overrides must preserve closed Dialog/details visibility, dialog
 geometry and scrolling, real control hit targets, and accessible names. Keep
 focus, invalid, disabled, and pending cues visible. The library retains
 forced-colors system colors and reduced-motion alternatives; a theme must not
-erase them with replacement CSS. See the [functional CSS contract](https://github.com/cognitap/radiant/blob/main/docs/contracts/README.md#functional-css-obligations)
-for the full obligations. Importing the optional reset is not required for
+erase them with replacement CSS. See the [system guide's functional CSS obligations](system.md#preserve-behavior-when-customising)
+for host replacement and the behavior that overrides must preserve. Importing the optional reset is not required for
 these behaviors.
 
 ## Presets and fonts

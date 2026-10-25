@@ -1,24 +1,19 @@
-# Radiant shared contract
+# Radiant harmonisation design record
 
-Decision baseline for [DEV-104](https://linear.app/cognitap/issue/DEV-104),
-24 October 2026. This is the canonical target for the harmonisation sequence,
-not a claim that these interfaces already ship. The current source and package
-retain their existing behavior until their owning migration issues land. DEV-44
-now implements the theme model; [the theming guide](../theming.md) describes its
-shipped API and concrete defaults. Remaining component presentation and composition
-contracts below remain targets for their owning stages. DEV-48 now implements
-the [shared React runtime seams](../react-bindings.md); family-specific public
-anatomy and replacement migrations remain with their named owners. DEV-117 now
-implements the Button/Link action vocabulary and default Dialog action props.
-DEV-118 implements Link's native anchor/ref replacement contract. DEV-119 makes
-Button own button-host replacement and Dialog actions compose Button in both
-default and replacement paths.
+Design record for [DEV-104](https://linear.app/cognitap/issue/DEV-104),
+24 October 2026, with later delivery annotations. It preserves the decisions and
+acceptance targets that guided harmonisation; future-tense text and projected
+state attributes below describe that baseline.
 
-Read [the glossary](../../GLOSSARY.md) for terminology,
-[the migration inventory](./migration.md) for current-to-target mappings, and
-[the acceptance sketches](./examples.tsx) for concrete usage. The sketches use
-[declarations](./target.d.ts) for future component APIs and the real package
-types for the implemented theme and action APIs.
+The [system guide](../system.md) is the current ten-family consumer contract,
+with links to detailed props, themes and canonical live examples. The
+[migration inventory](./migration.md) maps the original interface to its
+replacement; the [glossary](../../GLOSSARY.md) defines the shared terms.
+
+The [acceptance sketches](./examples.tsx) and [declaration projection](./target.d.ts)
+remain compile-only design evidence, not shipped exports or canonical runtime
+recipes. They do not establish implementation, visual or accessibility readiness.
+Use the linked live sources in the system guide when composing current code.
 
 ## Decisions at a glance
 

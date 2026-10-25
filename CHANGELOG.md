@@ -4,6 +4,11 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add the concise Radiant system guide (DEV-133), shipped with the package and
+  linked from introductory, theming, Storybook and agent documentation. It covers
+  the current ten-family contract and points to canonical live recipes; the
+  original harmonisation sketches remain labelled as historical design evidence.
+
 - **Breaking: remove superseded theme paths (DEV-132).** Remove all ten family
   `*Theme()` helpers and their corresponding type aliases, `radiantTheme`, and
   the resolved `Theme.style`/`Theme.surface` compatibility fields. Author shared
