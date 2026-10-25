@@ -197,15 +197,26 @@ test('a disabled group does not change the selection', async () => {
   root.unmount()
 })
 
-test('a ref points at the radio input', async () => {
+test('group and option refs point at the fieldset and native radio input', async () => {
   const ref = createRef()
+  const groupRef = createRef()
   const { host, root } = mount()
   await act(async () => {
-    root.render(createElement(Radio, { label: 'Pro', name: 'plan', value: 'pro', ref }))
+    root.render(
+      createElement(
+        RadioGroup,
+        { label: 'Plan', name: 'plan', ref: groupRef },
+        createElement(Radio, { label: 'Pro', value: 'pro', ref })
+      )
+    )
   })
+  assert.equal(groupRef.current, host.querySelector('fieldset'))
+  assert.equal(groupRef.current.dataset.slot, 'field radio-group')
   assert.equal(ref.current, host.querySelector('input'))
   assert.equal(ref.current.type, 'radio')
   root.unmount()
+  assert.equal(ref.current, null)
+  assert.equal(groupRef.current, null)
 })
 
 test('RadioGroup diagnoses conflicting child ownership', () => {

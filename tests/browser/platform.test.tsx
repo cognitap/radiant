@@ -1,4 +1,4 @@
-import { act, StrictMode, type ReactNode } from 'react'
+import { act, createRef, StrictMode, type ReactNode } from 'react'
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
@@ -160,12 +160,19 @@ for (const mode of ['light', 'dark'] as const) {
   test(`${mode}: controlled RadioGroup keeps null, empty values, native callbacks and reset distinct`, async () => {
     const requests = vi.fn()
     const observations = vi.fn()
+    const groupRef = createRef<HTMLFieldSetElement>()
     const tree = (value: string | null) => (
       <ThemeScope mode={mode}>
         <form>
           <RadioGroup
             label="Plan"
             name="plan"
+            ref={groupRef}
+            title="Available plans"
+            className="p-4"
+            style={{ margin: 0 }}
+            data-slot="custom radio-group"
+            parts={{ options: { className: 'flex', style: { gap: '1rem' } } }}
             value={value}
             onValueChange={requests}
             onChange={event => observations(event.currentTarget.name, event.currentTarget.value)}
@@ -190,6 +197,16 @@ for (const mode of ['light', 'dark'] as const) {
     )
     const { node, root } = await mount(tree(null))
     const form = node.querySelector('form')!
+    const group = node.querySelector('fieldset')!
+    const options = group.querySelector<HTMLElement>('[data-slot~="radio-group-options"]')!
+    expect(groupRef.current).toBe(group)
+    expect(group.dataset.slot).toBe('field radio-group custom')
+    expect(group.title).toBe('Available plans')
+    expect(getComputedStyle(group).padding).toBe('16px')
+    expect(group.style.margin).toBe('0px')
+    expect(getComputedStyle(options).display).toBe('flex')
+    expect(getComputedStyle(options).gap).toBe('16px')
+    expect(options.classList.contains('p-4')).toBe(false)
     const pro = page.getByRole('radio', { name: 'Pro' })
     const free = page.getByRole('radio', { name: 'Free' })
     expect(new FormData(form).get('plan')).toBe(null)

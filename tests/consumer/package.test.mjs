@@ -396,6 +396,7 @@ test('part styling preserves the adapter and owned accessibility relationships',
         description: 'Work address',
         error: 'Missing',
         required: true,
+        'data-slot': 'custom field custom',
         parts: {
           label: { className: 'italic', style: { fontWeight: 700 }, id: 'wrong', htmlFor: 'wrong' },
           description: { className: 'help', style: { fontStyle: 'italic' } },
@@ -412,6 +413,7 @@ test('part styling preserves the adapter and owned accessibility relationships',
   )
   const id = /<input\b[^>]*\sid="([^"]+)"/.exec(html)?.[1]
   assert.ok(id)
+  assert.match(html, /data-slot="field custom"/)
   assert.match(html, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
   assert.match(html, /aria-invalid="true"/)
   assert.match(html, /name="email"/)
@@ -622,15 +624,56 @@ test('checkboxes keep their own identity in a Field group', () => {
   assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
 })
 
-test('replacing appearance leaves the checkbox class and element', () => {
-  const html = renderToStaticMarkup(
-    createElement(Checkbox, { label: 'Email', className: 'appearance-auto' })
-  )
-  const classAttribute = /<input\b[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\bappearance-auto\b/)
-  assert.doesNotMatch(classAttribute, /\bappearance-none\b/)
-  assert.match(html, /type="checkbox"/)
-})
+for (const [Control, slot] of [
+  [Checkbox, 'checkbox'],
+  [Radio, 'radio']
+]) {
+  test(`${slot} styling keeps native props on the input and part hooks on their own hosts`, () => {
+    for (const label of ['Option', undefined]) {
+      const html = renderToStaticMarkup(
+        createElement(Control, {
+          label,
+          name: 'choice',
+          value: 'yes',
+          className: 'appearance-auto',
+          style: { margin: 0 },
+          parts: {
+            wrapper: { className: 'custom-wrapper', style: { gap: '1rem' }, id: 'wrong' },
+            label: { className: 'custom-label', style: { fontStyle: 'italic' }, htmlFor: 'wrong' },
+            indicator: {
+              className: 'custom-indicator',
+              style: { opacity: 0.5 },
+              'aria-hidden': false,
+              'data-slot': 'wrong'
+            }
+          }
+        })
+      )
+      const input = /<input\b[^>]*>/.exec(html)?.[0] ?? ''
+      assert.match(input, /class="[^"]*appearance-auto[^"]*"/)
+      assert.match(input, /style="margin:0"/)
+      assert.match(input, /name="choice"/)
+      assert.match(input, new RegExp(`data-slot="${slot}"`))
+      assert.match(input, new RegExp(`type="${slot}"`))
+      assert.doesNotMatch(input, /appearance-none|custom-wrapper|custom-label|custom-indicator/)
+      assert.match(
+        html,
+        new RegExp(
+          `^<${label ? 'label' : 'span'}[^>]*custom-wrapper[^>]*style="gap:1rem"[^>]*data-slot="${slot}-wrapper"`
+        )
+      )
+      assert.equal(html.includes(`data-slot="${slot}-label"`), !!label)
+      if (label) assert.match(html, /custom-label[^>]*style="font-style:italic"/)
+      assert.match(
+        html,
+        new RegExp(
+          `aria-hidden="true"[^>]*custom-indicator[^>]*style="opacity:0.5"[^>]*data-slot="${slot}-indicator"`
+        )
+      )
+      assert.doesNotMatch(html, /wrong|aria-hidden="false"|parts=/)
+    }
+  })
+}
 
 test('checkboxTheme maps typed settings to Checkbox variables', () => {
   assert.deepEqual(
@@ -659,7 +702,8 @@ test('a radio group shares one name and checks the default value', () => {
   assert.equal(html.match(/name="plan"/g)?.length, 2)
   assert.equal(html.match(/\schecked=""/g)?.length, 1)
   assert.match(html, /value="pro"[^>]*\schecked=""|checked=""[^>]*value="pro"/)
-  assert.match(html, /data-slot="radio-group"/)
+  assert.match(html, /^<fieldset\b[^>]*data-slot="field radio-group"/)
+  assert.match(html, /<div\b[^>]*data-slot="radio-group-options"/)
   assert.match(html, /data-slot="radio"/)
   const fieldset = /^<fieldset\b[^>]*>/.exec(html)?.[0] ?? ''
   assert.doesNotMatch(fieldset, /\sname=/)
@@ -677,16 +721,6 @@ test('a required RadioGroup keeps native option labels and validity', () => {
   assert.match(group, /data-slot="radio-label"/)
   assert.match(group, /<input\b[^>]*\srequired=""/)
   assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
-})
-
-test('replacing appearance leaves the radio class and element', () => {
-  const html = renderToStaticMarkup(
-    createElement(Radio, { label: 'Pro', name: 'plan', value: 'pro', className: 'appearance-auto' })
-  )
-  const classAttribute = /<input\b[^>]*\sclass="([^"]*)"/.exec(html)?.[1] ?? ''
-  assert.match(classAttribute, /\bappearance-auto\b/)
-  assert.doesNotMatch(classAttribute, /\bappearance-none\b/)
-  assert.match(html, /type="radio"/)
 })
 
 test('radioTheme maps typed settings to Radio variables', () => {

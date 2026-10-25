@@ -7,6 +7,7 @@ import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
+import type { PartStyle } from './presentation.js'
 
 const fieldVariants = cva(
   [
@@ -67,9 +68,9 @@ export type FieldState = {
 
 export type FieldTheme = NonNullable<ThemeComponentOverrides['field']>
 
-type PartStyle = { className?: string; style?: ThemeStyle }
-
 type FieldOwn = {
+  /** Additional identities; Field always retains its base identity. */
+  'data-slot'?: string
   label: ReactNode
   description?: ReactNode
   error?: ReactNode
@@ -163,6 +164,7 @@ export function Field(props: FieldProps) {
     parts,
     'aria-describedby': ariaDescribedBy,
     'aria-invalid': ariaInvalid,
+    'data-slot': dataSlot,
     ...rest
   } = props
   const parent = useField()
@@ -220,7 +222,7 @@ export function Field(props: FieldProps) {
     'data-invalid': invalid ? '' : undefined,
     'data-layout': layout,
     'data-required': required ? '' : undefined,
-    'data-slot': 'field'
+    'data-slot': joinIds('field', dataSlot)
   }
   const body = (
     <>

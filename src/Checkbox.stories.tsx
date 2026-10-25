@@ -62,7 +62,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native checkbox: choose defaultChecked or checked/onChange and keep one owner per mount. indeterminate is a visual DOM state, not a third submitted value. controlSize selects shared indicator/label metrics. className/style/ref target the input (data-slot="checkbox"); label wraps it and checkbox-label identifies its text. Field may supply the name and protected required/error relationships instead.'
+          'A native checkbox: choose defaultChecked or checked/onChange and keep one owner per mount. indeterminate is a visual DOM state, not a third submitted value. controlSize selects shared indicator/label metrics. className/style/native props/ref target the input (data-slot="checkbox"). parts.wrapper, parts.label and parts.indicator style the surrounding label or control span, label text and decorative marks. Field may supply the name and protected required/error relationships instead.'
       }
     }
   }
@@ -133,16 +133,35 @@ export const Composition: Story = {
 }
 
 export const Customisation: Story = {
+  args: { defaultChecked: true },
   render: args => {
     const local: ThemeStyle = {
       '--rad-checkbox-size': '1.5rem',
       '--rad-checkbox-radius': '0.25rem'
     }
     return (
-      <div style={local}>
-        <Checkbox {...args} />
+      <div style={{ display: 'grid', justifyItems: 'start', gap: '1rem' }}>
+        <Checkbox
+          {...args}
+          style={local}
+          parts={{
+            wrapper: { className: 'gap-4' },
+            label: { style: { fontStyle: 'italic' } },
+            indicator: { className: 'scale-75' }
+          }}
+        />
+        <Checkbox label="Unchanged neighbour" />
       </div>
     )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const customised = canvas.getByRole('checkbox', { name: 'Email me product updates' })
+    const neighbour = canvas.getByRole('checkbox', { name: 'Unchanged neighbour' })
+    await expect(customised.closest('label')).toHaveStyle({ gap: '16px' })
+    await expect(canvas.getByText('Email me product updates')).toHaveStyle({ fontStyle: 'italic' })
+    await expect(canvas.getByText('Unchanged neighbour')).toHaveStyle({ fontStyle: 'normal' })
+    await expect(neighbour.style.getPropertyValue('--rad-checkbox-size')).toBe('')
   }
 }
 

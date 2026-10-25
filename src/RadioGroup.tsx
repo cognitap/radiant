@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useLayoutEffect, useRef, useSta
 import type { ChangeEvent, ComponentProps, CSSProperties, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from './react/useNativeOwner.js'
 import { controlBorderClass, controlMetrics } from './controlStyles.js'
@@ -11,7 +12,7 @@ import { flattenComponents, type ThemeComponentOverrides } from './themes/compon
 import { Field, useFieldControl } from './Field.js'
 import type { FieldProps } from './Field.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
-import type { ControlSize } from './presentation.js'
+import type { ControlSize, ControlParts, PartStyle } from './presentation.js'
 
 const radioVariants = cva([
   controlBorderClass,
@@ -69,11 +70,12 @@ const RadioGroupContext = createContext<RadioGroupContextValue | null>(null)
 
 export type RadioGroupProps = Omit<
   Extract<FieldProps, { layout: 'group' }>,
-  'layout' | 'children' | 'onChange' | 'defaultValue'
+  'layout' | 'children' | 'onChange' | 'defaultValue' | 'parts'
 > &
   ValueOwner<string | null> & {
     name: string
     controlSize?: ControlSize
+    parts?: NonNullable<FieldProps['parts']> & { options?: PartStyle }
     onChange?: (event: ChangeEvent<HTMLInputElement>) => void
     onValueChange?: (value: string) => void
     children?: ReactNode
@@ -88,6 +90,7 @@ export type RadioProps = Omit<
     value: string
     controlSize?: ControlSize
     style?: ThemeStyle
+    parts?: ControlParts
   }
 
 function hasContent(value: ReactNode) {
@@ -108,13 +111,17 @@ export function RadioGroup({
   children,
   required,
   controlSize = 'medium',
+  parts,
   ...fieldProps
 }: RadioGroupProps) {
   const controlled = useNativeOwner('RadioGroup', value, defaultValue)
   const [initialDefault] = useState(defaultValue)
+  const { options: optionsPart, ...fieldParts } = parts ?? {}
   return (
     <Field
       {...fieldProps}
+      data-slot={joinIds('radio-group', fieldProps['data-slot'])}
+      parts={fieldParts}
       data-control-size={controlSize}
       layout="group"
       required={required}
@@ -132,8 +139,9 @@ export function RadioGroup({
         }}
       >
         <div
-          className={optionsClass}
-          data-slot="radio-group"
+          className={cn(optionsClass, optionsPart?.className)}
+          style={optionsPart?.style}
+          data-slot="radio-group-options"
         >
           {children}
         </div>
@@ -145,6 +153,7 @@ export function RadioGroup({
 export function Radio({
   className,
   controlSize: controlSizeProp,
+  parts,
   label,
   value,
   name,
@@ -161,6 +170,7 @@ export function Radio({
   ...props
 }: RadioProps) {
   const group = useContext(RadioGroupContext)
+  const labelled = hasContent(label)
   const standaloneControlled = useNativeOwner('Radio', checked, defaultChecked, !group)
   if (
     group &&
@@ -197,7 +207,11 @@ export function Radio({
     if (nodeRef.current && controlled) nodeRef.current.defaultChecked = !!selected
   }, [controlled, selected])
   const controlNode = (
-    <span className="relative inline-grid shrink-0">
+    <span
+      className={cn('relative inline-grid shrink-0', !labelled && parts?.wrapper?.className)}
+      style={!labelled ? parts?.wrapper?.style : undefined}
+      data-slot={!labelled ? 'radio-wrapper' : undefined}
+    >
       <input
         {...props}
         {...control}
@@ -221,18 +235,25 @@ export function Radio({
       />
       <span
         aria-hidden="true"
-        className={dotClass}
+        className={cn(dotClass, parts?.indicator?.className)}
+        style={parts?.indicator?.style}
+        data-slot="radio-indicator"
       />
     </span>
   )
 
-  if (!hasContent(label)) return controlNode
+  if (!labelled) return controlNode
 
   return (
-    <label className={rowClass}>
+    <label
+      className={cn(rowClass, parts?.wrapper?.className)}
+      style={parts?.wrapper?.style}
+      data-slot="radio-wrapper"
+    >
       {controlNode}
       <span
-        className={cn(labelClass, controlMetrics({ controlSize }))}
+        className={cn(labelClass, controlMetrics({ controlSize }), parts?.label?.className)}
+        style={parts?.label?.style}
         data-slot="radio-label"
       >
         {label}
