@@ -265,12 +265,10 @@ function ReadingControl() {
   })
 }
 
-test('a field labels a host control and keeps native attributes', () => {
+test('a field labels an explicit native adapter and keeps native attributes', () => {
   const html = renderToStaticMarkup(
-    createElement(
-      Field,
-      { label: 'Email', description: 'Work address', required: true },
-      createElement('input', { name: 'email', type: 'email', autoComplete: 'email' })
+    createElement(Field, { label: 'Email', description: 'Work address', required: true }, control =>
+      createElement('input', { ...control, name: 'email', type: 'email', autoComplete: 'email' })
     )
   )
   const inputId = /<input\b[^>]*\sid="([^"]+)"/.exec(html)?.[1]
@@ -295,7 +293,7 @@ test('a field labels a host control and keeps native attributes', () => {
 
 test('an error marks the control invalid without changing its id', () => {
   const props = { label: 'Email', description: 'Work address' }
-  const input = createElement('input', { name: 'email' })
+  const input = control => createElement('input', { ...control, name: 'email' })
   const calm = renderToStaticMarkup(createElement(Field, props, input))
   const invalid = renderToStaticMarkup(
     createElement(Field, { ...props, error: 'Enter an email.' }, input)
@@ -318,21 +316,38 @@ test('an empty error clears the invalid state', () => {
   )
   assert.doesNotMatch(html, /aria-invalid/)
   assert.doesNotMatch(html, /\srole="alert"/)
+  const external = renderToStaticMarkup(
+    createElement(Field, { layout: 'group', label: 'Plan', error: '', 'aria-invalid': 'grammar' })
+  )
+  assert.match(external, /aria-invalid="grammar"/)
+  assert.doesNotMatch(external, /\sdata-invalid=/)
 })
 
-test('a host id and describedby are kept', () => {
+test('native children are left untouched; controlId and adapters own their relationships', () => {
+  const child = createElement('input', { id: 'native', 'aria-describedby': 'hint' })
+  const untouched = renderToStaticMarkup(
+    createElement(Field, { label: 'Email', required: true, error: 'Missing' }, child)
+  )
+  assert.match(untouched, /<input id="native" aria-describedby="hint"\/>/)
+  assert.doesNotMatch(untouched, /<label\b[^>]*\sfor="native"/)
+
   const html = renderToStaticMarkup(
     createElement(
       Field,
-      { label: 'Email', description: 'Work address' },
-      createElement('input', { id: 'email', 'aria-describedby': 'hint' })
+      { label: 'Email', description: 'Work address', controlId: 'email' },
+      control =>
+        createElement('input', {
+          ...control,
+          'aria-describedby': `${control['aria-describedby']} hint`
+        })
     )
   )
   assert.match(html, /<label\b[^>]*\sfor="email"/)
   assert.match(html, /<input\b[^>]*\sid="email"/)
   const describedBy = /<input\b[^>]*\saria-describedby="([^"]+)"/.exec(html)?.[1] ?? ''
   assert.ok(describedBy.split(' ').includes('hint'))
-  assert.ok(describedBy.split(' ').length >= 2)
+  assert.equal(describedBy.split(' ').length, 2)
+  assert.doesNotMatch(html, /\scontrolId=/)
 })
 
 test('a group uses a fieldset and does not label each control', () => {
@@ -342,6 +357,10 @@ test('a group uses a fieldset and does not label each control', () => {
       {
         layout: 'group',
         label: 'Notifications',
+        form: 'profile',
+        name: 'channels',
+        'aria-invalid': false,
+        'aria-describedby': 'hint hint',
         description: 'Choose any',
         error: 'Pick at least one.',
         required: true,
@@ -351,6 +370,11 @@ test('a group uses a fieldset and does not label each control', () => {
     )
   )
   assert.match(html, /^<fieldset\b/)
+  assert.match(html, /<fieldset\b[^>]*\sform="profile"/)
+  assert.match(html, /<fieldset\b[^>]*\sname="channels"/)
+  const ids = /aria-describedby="([^"]+)"/.exec(html)[1].split(' ')
+  assert.equal(ids.length, 3)
+  assert.equal(ids.at(-1), 'hint')
   assert.match(html, /<legend\b/)
   assert.match(html, /\sdisabled=""/)
   assert.match(html, /aria-invalid="true"/)
@@ -363,10 +387,27 @@ test('a group uses a fieldset and does not label each control', () => {
   assert.doesNotMatch(html, /\srequired=""/)
 })
 
-test('a render function receives the control props', () => {
+test('part styling preserves the adapter and owned accessibility relationships', () => {
   const html = renderToStaticMarkup(
-    createElement(Field, { label: 'Email', error: 'Missing' }, control =>
-      createElement('input', { ...control, name: 'email' })
+    createElement(
+      Field,
+      {
+        label: 'Email',
+        description: 'Work address',
+        error: 'Missing',
+        required: true,
+        parts: {
+          label: { className: 'italic', style: { fontWeight: 700 }, id: 'wrong', htmlFor: 'wrong' },
+          description: { className: 'help', style: { fontStyle: 'italic' } },
+          error: { className: 'error', style: { fontWeight: 700 }, role: 'none' },
+          required: {
+            className: 'marker',
+            style: { marginInlineStart: '0.5em' },
+            'aria-hidden': false
+          }
+        }
+      },
+      control => createElement('input', { ...control, name: 'email' })
     )
   )
   const id = /<input\b[^>]*\sid="([^"]+)"/.exec(html)?.[1]
@@ -374,6 +415,15 @@ test('a render function receives the control props', () => {
   assert.match(html, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
   assert.match(html, /aria-invalid="true"/)
   assert.match(html, /name="email"/)
+  assert.match(html, /class="[^"]*italic[^"]*" style="font-weight:700"/)
+  assert.match(html, /class="[^"]*help[^"]*" style="font-style:italic"/)
+  assert.match(html, /class="[^"]*error[^"]*" style="font-weight:700"/)
+  assert.match(
+    html,
+    /aria-hidden="true"[^>]*class="[^"]*marker[^"]*" style="margin-inline-start:0.5em"/
+  )
+  assert.match(html, /role="alert"/)
+  assert.doesNotMatch(html, /wrong|role="none"|aria-hidden="false"|parts=/)
 })
 
 test('useField wires a component child and is null outside a field', () => {
@@ -405,10 +455,8 @@ test('the required marker is replaceable and stays out of the accessible name', 
   assert.match(custom, /\(required\)/)
   assert.match(custom, /aria-hidden="true"/)
   const hidden = renderToStaticMarkup(
-    createElement(
-      Field,
-      { label: 'Email', required: true, requiredIndicator: null },
-      createElement('input', { name: 'email' })
+    createElement(Field, { label: 'Email', required: true, requiredIndicator: null }, control =>
+      createElement('input', { ...control, name: 'email' })
     )
   )
   assert.doesNotMatch(hidden, /data-slot="field-required"/)

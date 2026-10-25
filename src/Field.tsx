@@ -1,11 +1,12 @@
 'use client'
 
-import { cloneElement, createContext, isValidElement, useContext, useId } from 'react'
-import type { ComponentProps, CSSProperties, ReactElement, ReactNode } from 'react'
+import { createContext, useContext, useId } from 'react'
+import type { ComponentProps, CSSProperties, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
 
 const fieldVariants = cva(
   [
@@ -66,6 +67,8 @@ export type FieldState = {
 
 export type FieldTheme = NonNullable<ThemeComponentOverrides['field']>
 
+type PartStyle = { className?: string; style?: ThemeStyle }
+
 type FieldOwn = {
   label: ReactNode
   description?: ReactNode
@@ -73,22 +76,32 @@ type FieldOwn = {
   required?: boolean
   disabled?: boolean
   requiredIndicator?: ReactNode
+  style?: ThemeStyle
+  parts?: {
+    label?: PartStyle
+    description?: PartStyle
+    error?: PartStyle
+    required?: PartStyle
+  }
 }
 
-export type FieldProps = FieldOwn &
-  Omit<ComponentProps<'div'>, 'children'> & {
-    layout?: FieldLayout
+type FieldControl = FieldOwn &
+  Omit<ComponentProps<'div'>, 'children' | 'style'> & {
+    layout?: 'control'
+    form?: never
+    name?: never
+    controlId?: string
     children?: ReactNode | ((control: FieldControlProps) => ReactNode)
   }
 
-type HostProps = {
-  id?: string
-  required?: boolean
-  disabled?: boolean
-  'aria-invalid'?: boolean | 'false' | 'true' | 'grammar' | 'spelling'
-  'aria-required'?: boolean | 'false' | 'true'
-  'aria-describedby'?: string
-}
+type FieldGroup = FieldOwn &
+  Omit<ComponentProps<'fieldset'>, 'children' | 'style'> & {
+    layout: 'group'
+    controlId?: never
+    children?: ReactNode
+  }
+
+export type FieldProps = FieldControl | FieldGroup
 
 const FieldContext = createContext<FieldState | null>(null)
 
@@ -104,12 +117,6 @@ function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
 }
 
-function isHostElement(
-  node: ReactNode | ((control: FieldControlProps) => ReactNode)
-): node is ReactElement<HostProps> {
-  return isValidElement<HostProps>(node) && typeof node.type === 'string'
-}
-
 function definedProps(props: FieldControlProps): FieldControlProps {
   return Object.fromEntries(
     Object.entries(props).filter(([, value]) => value !== undefined)
@@ -123,29 +130,30 @@ export function Field(props: FieldProps) {
     error,
     required = false,
     disabled = false,
-    layout = 'control',
     requiredIndicator = '*',
     children,
     className,
+    parts,
     'aria-describedby': ariaDescribedBy,
+    'aria-invalid': ariaInvalid,
     ...rest
   } = props
+  const layout = rest.layout ?? 'control'
   const generatedId = useId()
-  const hostChild = layout === 'control' && isHostElement(children) ? children : null
-  const controlId = hostChild?.props.id || generatedId
+  const controlId = rest.controlId ?? generatedId
   const labelId = `${generatedId}-label`
   const invalid = hasContent(error)
   const descriptionId = hasContent(description) ? `${generatedId}-description` : undefined
   const errorId = invalid ? `${generatedId}-error` : undefined
   const describedBy = joinIds(descriptionId, errorId)
-  const controlProps: FieldControlProps = {
+  const controlProps = definedProps({
     id: controlId,
     required: required || undefined,
     disabled: disabled || undefined,
     'aria-invalid': invalid || undefined,
     'aria-required': required || undefined,
     'aria-describedby': describedBy
-  }
+  })
   const state: FieldState = {
     layout,
     controlId,
@@ -156,33 +164,19 @@ export function Field(props: FieldProps) {
     required,
     disabled,
     describedBy,
-    controlProps: layout === 'control' ? definedProps(controlProps) : null
+    controlProps: layout === 'control' ? controlProps : null
   }
   const control: ReactNode =
     typeof children === 'function'
       ? layout === 'control'
-        ? children(definedProps(controlProps))
+        ? children(controlProps)
         : null
-      : hostChild
-        ? cloneElement(hostChild, {
-            ...definedProps(controlProps),
-            id: controlId,
-            required: hostChild.props.required ?? controlProps.required,
-            disabled: hostChild.props.disabled ?? controlProps.disabled,
-            'aria-invalid': hostChild.props['aria-invalid'] ?? controlProps['aria-invalid'],
-            'aria-required': hostChild.props['aria-required'] ?? controlProps['aria-required'],
-            'aria-describedby': joinIds(
-              describedBy,
-              typeof hostChild.props['aria-describedby'] === 'string'
-                ? hostChild.props['aria-describedby']
-                : undefined
-            )
-          })
-        : children
+      : children
   const indicator = required && hasContent(requiredIndicator) && (
     <span
       aria-hidden="true"
-      className={requiredClass}
+      className={cn(requiredClass, parts?.required?.className)}
+      style={parts?.required?.style}
       data-slot="field-required"
     >
       {requiredIndicator}
@@ -191,7 +185,7 @@ export function Field(props: FieldProps) {
   const rootProps = {
     'aria-describedby':
       layout === 'group' ? joinIds(describedBy, ariaDescribedBy) : ariaDescribedBy,
-    'aria-invalid': layout === 'group' && invalid ? true : undefined,
+    'aria-invalid': layout === 'group' && invalid ? true : ariaInvalid,
     className: cn(fieldVariants({ layout }), className),
     'data-disabled': disabled ? '' : undefined,
     'data-invalid': invalid ? '' : undefined,
@@ -203,7 +197,8 @@ export function Field(props: FieldProps) {
     <>
       {layout === 'group' ? (
         <legend
-          className={labelClass}
+          className={cn(labelClass, parts?.label?.className)}
+          style={parts?.label?.style}
           data-slot="field-label"
           id={labelId}
         >
@@ -212,7 +207,8 @@ export function Field(props: FieldProps) {
         </legend>
       ) : (
         <label
-          className={labelClass}
+          className={cn(labelClass, parts?.label?.className)}
+          style={parts?.label?.style}
           data-slot="field-label"
           htmlFor={controlId}
           id={labelId}
@@ -224,7 +220,8 @@ export function Field(props: FieldProps) {
       {control}
       {descriptionId ? (
         <div
-          className={descriptionClass}
+          className={cn(descriptionClass, parts?.description?.className)}
+          style={parts?.description?.style}
           data-slot="field-description"
           id={descriptionId}
         >
@@ -233,7 +230,8 @@ export function Field(props: FieldProps) {
       ) : null}
       {errorId ? (
         <div
-          className={errorClass}
+          className={cn(errorClass, parts?.error?.className)}
+          style={parts?.error?.style}
           data-slot="field-error"
           id={errorId}
           role="alert"
@@ -244,24 +242,28 @@ export function Field(props: FieldProps) {
     </>
   )
 
-  return (
-    <FieldContext.Provider value={state}>
-      {layout === 'group' ? (
-        <fieldset
-          {...(rest as ComponentProps<'fieldset'>)}
-          {...rootProps}
-          disabled={disabled || undefined}
-        >
-          {body}
-        </fieldset>
-      ) : (
-        <div
-          {...rest}
-          {...rootProps}
-        >
-          {body}
-        </div>
-      )}
-    </FieldContext.Provider>
-  )
+  let root: ReactNode
+  if (rest.layout === 'group') {
+    const { layout: _layout, controlId: _controlId, ...nativeProps } = rest
+    root = (
+      <fieldset
+        {...nativeProps}
+        {...rootProps}
+        disabled={disabled || undefined}
+      >
+        {body}
+      </fieldset>
+    )
+  } else {
+    const { layout: _layout, controlId: _controlId, ...nativeProps } = rest
+    root = (
+      <div
+        {...nativeProps}
+        {...rootProps}
+      >
+        {body}
+      </div>
+    )
+  }
+  return <FieldContext.Provider value={state}>{root}</FieldContext.Provider>
 }

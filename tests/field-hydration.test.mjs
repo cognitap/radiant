@@ -25,7 +25,7 @@ for (const key of [
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
-const { act, createElement, useState } = await import('react')
+const { act, createElement, createRef, useState } = await import('react')
 const { hydrateRoot, createRoot } = await import('react-dom/client')
 const { renderToString } = await import('react-dom/server')
 const { Field } = await import('../dist/library/index.js')
@@ -34,7 +34,7 @@ function fieldElement(error) {
   return createElement(
     Field,
     { label: 'Email', description: 'Work address', error, required: true },
-    createElement('input', { name: 'email', type: 'email' })
+    control => createElement('input', { ...control, name: 'email', type: 'email' })
   )
 }
 
@@ -61,8 +61,9 @@ test('server markup hydrates and a later error keeps the control id', async () =
   const root = document.getElementById('root')
   root.innerHTML = html
   const recoverable = []
+  let hydrated
   await act(async () => {
-    hydrateRoot(root, createElement(DynamicField), {
+    hydrated = hydrateRoot(root, createElement(DynamicField), {
       onRecoverableError(error) {
         recoverable.push(String(error))
       }
@@ -79,14 +80,19 @@ test('server markup hydrates and a later error keeps the control id', async () =
   assert.equal(input.getAttribute('aria-invalid'), 'true')
   assert.equal(input.getAttribute('aria-describedby').split(' ').length, 2)
   assert.equal(root.querySelector('[data-slot="field-error"]').textContent, 'Enter an email.')
+  await act(async () => hydrated.unmount())
 })
 
-test('a native form submit owns the error and leaves the control id stable', async () => {
+test('native form validation preserves explicit control IDs and both Field host refs', async () => {
+  const controlRef = createRef()
+  const groupRef = createRef()
+  const inputRef = createRef()
   function Harness() {
     const [error, setError] = useState(undefined)
     return createElement(
       'form',
       {
+        id: 'profile',
         onSubmit(event) {
           event.preventDefault()
           const email = new dom.window.FormData(event.currentTarget).get('email')
@@ -95,8 +101,19 @@ test('a native form submit owns the error and leaves the control id stable', asy
       },
       createElement(
         Field,
-        { label: 'Email', error, required: true },
-        createElement('input', { name: 'email', type: 'email' })
+        {
+          layout: 'group',
+          label: 'Profile',
+          ref: groupRef,
+          form: 'profile',
+          name: 'profile-fields'
+        },
+        createElement(
+          Field,
+          { label: 'Email', error, required: true, controlId: 'email', ref: controlRef },
+          control =>
+            createElement('input', { ...control, ref: inputRef, name: 'email', type: 'email' })
+        )
       ),
       createElement('button', { type: 'submit' }, 'Save')
     )
@@ -108,7 +125,13 @@ test('a native form submit owns the error and leaves the control id stable', asy
   await act(async () => {
     root.render(createElement(Harness))
   })
+  assert.equal(controlRef.current.tagName, 'DIV')
+  assert.equal(groupRef.current.tagName, 'FIELDSET')
+  assert.equal(groupRef.current.form, host.querySelector('form'))
+  assert.equal(groupRef.current.name, 'profile-fields')
+  assert.equal(inputRef.current, host.querySelector('input'))
   const id = host.querySelector('input').id
+  assert.equal(id, 'email')
   host.querySelector('input').value = ''
   const submit = () =>
     host
@@ -130,5 +153,9 @@ test('a native form submit owns the error and leaves the control id stable', asy
   assert.equal(recovered.id, id)
   assert.equal(recovered.getAttribute('aria-invalid'), null)
   assert.equal(host.querySelector('[data-slot="field-error"]'), null)
-  root.unmount()
+  await act(async () => root.unmount())
+  assert.equal(controlRef.current, null)
+  assert.equal(groupRef.current, null)
+  assert.equal(inputRef.current, null)
+  host.remove()
 })
