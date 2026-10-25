@@ -19,6 +19,9 @@ import {
   Field,
   Input,
   Link,
+  Radio,
+  RadioGroup,
+  defaultTheme,
   ThemeScope
 } from '../../src/index.js'
 import '../../.storybook/styles.css'
@@ -55,6 +58,166 @@ function ConsumerButton({ children, ...props }: ButtonRenderProps) {
 const renderButton = (props: ButtonRenderProps) => <ConsumerButton {...props} />
 
 for (const mode of ['light', 'dark'] as const) {
+  test(`${mode}: native control sizes and disabled Field inheritance`, async () => {
+    const { node } = await mount(
+      <ThemeScope
+        theme={defaultTheme}
+        mode={mode}
+      >
+        {(['small', 'medium', 'large'] as const).map(controlSize => (
+          <div
+            key={controlSize}
+            data-size-row={controlSize}
+          >
+            <Input
+              aria-label={`${controlSize} text`}
+              size={24}
+              controlSize={controlSize}
+            />
+            <Checkbox
+              label={`${controlSize} check`}
+              defaultChecked
+              controlSize={controlSize}
+            />
+            <Radio
+              name={controlSize}
+              value="yes"
+              label={`${controlSize} radio`}
+              defaultChecked
+              controlSize={controlSize}
+            />
+          </div>
+        ))}
+        <Field
+          layout="group"
+          label={
+            <>
+              Locked settings{' '}
+              <input
+                type="checkbox"
+                aria-label="Legend choice"
+              />
+            </>
+          }
+          disabled
+        >
+          <Field
+            label="Nested text"
+            disabled={false}
+          >
+            <Input disabled={false} />
+          </Field>
+          <Checkbox
+            label="Locked check"
+            disabled={false}
+          />
+          <RadioGroup
+            label="Locked plan"
+            name="locked-plan"
+            disabled={false}
+            defaultValue="pro"
+          >
+            <Radio
+              label="Locked pro"
+              value="pro"
+              disabled={false}
+            />
+          </RadioGroup>
+        </Field>
+      </ThemeScope>
+    )
+    const sizes = [...node.querySelectorAll('[data-size-row]')].map(row => {
+      const [text, check, radio] = row.querySelectorAll('input')
+      expect(text.size).toBe(24)
+      for (const input of [text, check, radio])
+        expect(input.dataset.controlSize).toBe(row.getAttribute('data-size-row'))
+      for (const [input, ratio] of [
+        [check, 0.65],
+        [radio, 0.4]
+      ] as const) {
+        const mark = input.parentElement!.querySelector('[aria-hidden]')!
+        expect(
+          mark.getBoundingClientRect().width / input.getBoundingClientRect().width
+        ).toBeCloseTo(ratio, 1)
+      }
+      return [
+        text.getBoundingClientRect().height,
+        check.getBoundingClientRect().width,
+        radio.getBoundingClientRect().width
+      ]
+    })
+    for (let index = 1; index < sizes.length; index++) {
+      sizes[index].forEach((value, dimension) =>
+        expect(value).toBeGreaterThan(sizes[index - 1][dimension])
+      )
+    }
+    await expect.element(page.getByRole('textbox', { name: 'Nested text' })).toBeDisabled()
+    await expect.element(page.getByRole('checkbox', { name: 'Locked check' })).toBeDisabled()
+    await expect.element(page.getByRole('radio', { name: 'Locked pro' })).toBeDisabled()
+    await expect.element(page.getByRole('checkbox', { name: 'Legend choice' })).toBeEnabled()
+  })
+
+  test(`${mode}: controlled RadioGroup keeps null, empty values, native callbacks and reset distinct`, async () => {
+    const requests = vi.fn()
+    const observations = vi.fn()
+    const tree = (value: string | null) => (
+      <ThemeScope mode={mode}>
+        <form>
+          <RadioGroup
+            label="Plan"
+            name="plan"
+            value={value}
+            onValueChange={requests}
+            onChange={event => observations(event.currentTarget.name, event.currentTarget.value)}
+          >
+            <Radio
+              label="Pro"
+              value="pro"
+            />
+            <Radio
+              label="Free"
+              value=""
+            />
+            <Radio
+              label="Retired"
+              value="retired"
+              disabled
+            />
+          </RadioGroup>
+          <Button type="reset">Reset plan</Button>
+        </form>
+      </ThemeScope>
+    )
+    const { node, root } = await mount(tree(null))
+    const form = node.querySelector('form')!
+    const pro = page.getByRole('radio', { name: 'Pro' })
+    const free = page.getByRole('radio', { name: 'Free' })
+    expect(new FormData(form).get('plan')).toBe(null)
+    await act(async () => userEvent.click(pro))
+    expect(requests).toHaveBeenCalledExactlyOnceWith('pro')
+    expect(observations).toHaveBeenCalledExactlyOnceWith('plan', 'pro')
+    await expect.element(pro).not.toBeChecked()
+    await act(async () => root.render(tree('pro')))
+    await act(async () => userEvent.click(pro))
+    expect(requests).toHaveBeenCalledTimes(1)
+    await act(async () => userEvent.keyboard('{ArrowDown}'))
+    expect(requests).toHaveBeenLastCalledWith('')
+    expect(observations).toHaveBeenLastCalledWith('plan', '')
+    expect(requests).toHaveBeenCalledTimes(2)
+    await expect.element(pro).toBeChecked()
+    await expect.element(free).not.toBeChecked()
+    await act(async () => root.render(tree('')))
+    await expect.element(free).toBeChecked()
+    expect(new FormData(form).get('plan')).toBe('')
+    await act(async () => userEvent.click(page.getByRole('button', { name: 'Reset plan' })))
+    await expect.element(free).toBeChecked()
+    await act(async () => root.render(tree(null)))
+    expect(new FormData(form).get('plan')).toBe(null)
+    expect(node.querySelectorAll('input:checked')).toHaveLength(0)
+    expect(requests).toHaveBeenCalledTimes(2)
+    expect(observations).toHaveBeenCalledTimes(2)
+  })
+
   test(`${mode}: changing modal and dismissal props reconciles the same native dialog`, async () => {
     const requests = vi.fn()
     const tree = (modal: boolean, closeOnEscape: boolean, open = true) => (

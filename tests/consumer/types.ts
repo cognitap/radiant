@@ -217,6 +217,8 @@ const inputProps: InputProps = {
   autoComplete: 'email',
   defaultValue: 'ada@example.com',
   size: 24,
+  controlSize: 'large',
+  style: { '--rad-input-radius': '1rem' },
   required: true,
   ref: createRef<HTMLInputElement>()
 }
@@ -232,6 +234,7 @@ const checkboxProps: CheckboxProps = {
   value: 'email',
   defaultChecked: true,
   indeterminate: true,
+  controlSize: 'small',
   label: 'Email',
   disabled: false,
   ref: createRef<HTMLInputElement>()
@@ -250,8 +253,8 @@ createElement('div', { style: radioTheme({ size: '1.25rem', radius: '999px' }) }
 const radioGroupProps: RadioGroupProps = {
   label: 'Plan',
   name: 'plan',
-  defaultValue: 'pro',
-  value: 'pro',
+  value: null,
+  controlSize: 'large',
   required: true,
   onValueChange(value: string) {
     void value
@@ -263,10 +266,40 @@ const radioProps: RadioProps = {
   name: 'plan',
   value: 'pro',
   defaultChecked: true,
+  controlSize: 'medium',
   label: 'Pro',
   ref: createRef<HTMLInputElement>()
 }
 createElement(Radio, radioProps)
+
+// @ts-expect-error Native Input size remains numeric character width.
+const visualNativeSize: InputProps = { size: 'large' }
+// @ts-expect-error Visual control sizes use the shared closed vocabulary.
+const unknownControlSize: CheckboxProps = { controlSize: 'default' }
+// @ts-expect-error Native values have one owner.
+const mixedInput: InputProps = { value: '', defaultValue: '' }
+// @ts-expect-error Checked state has one owner, including false.
+const mixedCheckbox: CheckboxProps = { checked: false, defaultChecked: true }
+// @ts-expect-error Standalone Radio checked state has one owner.
+const mixedRadio: RadioProps = { value: 'yes', checked: false, defaultChecked: true }
+// @ts-expect-error RadioGroup has one owner; null is a supplied controlled value.
+const mixedGroup: RadioGroupProps = {
+  label: 'Plan',
+  name: 'plan',
+  value: null,
+  defaultValue: 'pro'
+}
+// @ts-expect-error Controlled text values use an empty string rather than null.
+const nullInput: InputProps = { value: null }
+void [
+  visualNativeSize,
+  unknownControlSize,
+  mixedInput,
+  mixedCheckbox,
+  mixedRadio,
+  mixedGroup,
+  nullInput
+]
 
 // @ts-expect-error Radio theme keys are a closed set.
 radioTheme({ diskSize: '1rem' })

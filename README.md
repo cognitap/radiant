@@ -306,8 +306,19 @@ import { Field, Input } from '@cognitap/radiant'
 
 `onChange` and `onBlur` are the native events. Radiant does not store the value
 and does not validate on blur. The native `size` attribute stays the character
-width. Visual size is `--rad-input-height`, padding, and font tokens, which fall
-back to shared control metrics.
+width. `controlSize="small" | "medium" | "large"` selects shared height,
+padding and font metrics, independently of native `size`. The default is
+`medium`; explicit `--rad-input-height`, padding and font overrides still win.
+Choose `value` or `defaultValue` for text inputs, and keep that owner for the
+mounted lifetime. Mixed owners or changing modes throw; use a new key to
+remount. Controlled text uses `''` for empty, never `null`. File, checkbox and
+radio Input types retain their native type-specific value behavior.
+
+Field's owned control ID, required state and active error cannot be erased by
+conflicting child props. Descriptions append external IDs once. Disabled Field
+owners propagate through nested Fields; a child `disabled={false}` cannot
+re-enable them. Native fieldsets retain the platform's first-legend exception
+for arbitrary native content.
 
 `inputTheme` maps `height`, `padding`, `fontFamily`, `fontSize`, `fontWeight`,
 `color`, `background`, `borderWidth`, `borderStyle`, `borderColor`, `radius`,
@@ -370,10 +381,26 @@ value and not an HTML attribute. The form submits `checked`. A checked box
 submits its `value`, or `on` when `value` is omitted. An unchecked box submits
 nothing.
 
+Checkbox and standalone Radio choose `checked` or `defaultChecked`, with one
+owner per mount. Mixed owners or switching modes throw. Native default/reset
+behavior stays with React and the browser. A controlled checkbox or radio
+preserves its current check during browser reset, including after a change.
+The consumer recomputes `indeterminate` after reset when it derives from other
+selections.
+
+`controlSize` uses the same small/medium/large vocabulary and defaults to
+medium. It selects the shared indicator and label font metrics. Explicit
+Checkbox/Radio size and label overrides still win; decorative marks follow
+the actual input dimensions.
+
 `label` wraps the input, so the text toggles it. Inside a single-control Field
 the field id wins, and that label is the accessible name. Inside a group, each
 checkbox keeps the `label` beside it and the fieldset keeps the caption. Pass
 one name for the option, not both.
+An ordinary Field group leaves each checkbox's native requirement independent:
+a group marker does not require every box. The consumer validates rules such
+as “choose at least one”. RadioGroup uses native radio validity for its one
+required choice.
 
 `className` merges onto the input. Replacing `appearance-none` puts the native
 glyph back; the input stays in the tab order and in the form. The check and
@@ -429,18 +456,31 @@ import { Radio, RadioGroup } from '@cognitap/radiant'
 </RadioGroup>
 ```
 
-| Mode         | How the selection moves                                        | Reset                                        |
-| ------------ | -------------------------------------------------------------- | -------------------------------------------- |
-| Uncontrolled | Omit `value`. `defaultValue` checks the matching radio.        | `form.reset()` restores `defaultValue`.      |
-| Controlled   | Pass `value` and update it from `onValueChange` or `onChange`. | A browser reset does not change React state. |
+| Mode         | How the selection moves                                             | Reset                                           |
+| ------------ | ------------------------------------------------------------------- | ----------------------------------------------- |
+| Uncontrolled | Omit `value`. The initial `defaultValue` checks its matching radio. | `form.reset()` restores that initial selection. |
+| Controlled   | Pass `value` and update it from `onValueChange` or `onChange`.      | A browser reset does not change React state.    |
 
 The checked radio submits `name=value`. When none is checked, the group submits
 nothing. `onChange` is the selected radio's change event, and `onValueChange`
 receives its value. React does not deliver a radio change through the
 fieldset, so the group listens on each radio. Inside the group, the group name
 and selection win, so a `checked` or `name` on `Radio` does not split the
-group. Outside a group, `Radio` is an ordinary radio: pass `name` and
+group. Conflicting option names or supplied `checked`/`defaultChecked` throw;
+put selection ownership on RadioGroup. Outside a group, `Radio` is an ordinary radio: pass `name` and
 `defaultChecked` or `checked`.
+
+Use `value={null}` to clear a controlled group. `value=""` selects a real
+option whose value is the empty string. Never pass both `value` and
+`defaultValue`, or switch modes during a mount. Group defaults are initial
+snapshots; changing them does not replace a user's selection or reset baseline.
+User selection notifies once; prop updates, reset and clearing do not emit a
+selection callback. A controlled owner may decline a selection, and native
+checked state reconciles to its unchanged prop.
+
+Group `controlSize` supplies the default size for its Radio options. An option
+may select its own `controlSize`. Group required state cannot be removed by an
+option's `required={false}`.
 
 `label` wraps the input. Pass one name for the option, not a Field label as
 well. A disabled group disables every choice through the fieldset. A disabled

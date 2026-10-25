@@ -10,17 +10,19 @@ import {
 } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
-import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
-import { controlBorderClass } from './controlStyles.js'
+import { useNativeOwner, type CheckedOwner } from './react/useNativeOwner.js'
+import { controlBorderClass, controlMetrics } from './controlStyles.js'
 import { flattenComponents, type ThemeComponentOverrides } from './themes/components.js'
-import { useField } from './Field.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
+import type { ControlSize } from './presentation.js'
+import { useFieldControl } from './Field.js'
 
 const checkboxVariants = cva([
   controlBorderClass,
   'peer col-start-1 row-start-1 m-0 box-border appearance-none',
-  'size-[var(--rad-checkbox-size,var(--rad-control-medium-indicator-size,1.125rem))]',
-  'rounded-[var(--rad-checkbox-radius,min(var(--rad-control-radius,0.5rem),calc(var(--rad-checkbox-size,var(--rad-control-medium-indicator-size,1.125rem))*0.25)))]',
+  'size-[var(--rad-checkbox-size,var(--_rad-control-indicator-size))]',
+  'rounded-[var(--rad-checkbox-radius,min(var(--rad-control-radius,0.5rem),calc(var(--rad-checkbox-size,var(--_rad-control-indicator-size))*0.25)))]',
   '[corner-shape:var(--rad-checkbox-corner-shape,var(--rad-control-corner-shape,round))]',
   '[border-width:var(--rad-checkbox-border-width,var(--rad-control-border-width,1px))]',
   '[border-style:var(--rad-checkbox-border-style,var(--rad-control-border-style,solid))]',
@@ -30,7 +32,7 @@ const checkboxVariants = cva([
   'checked:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
   'indeterminate:bg-[var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
   'indeterminate:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
-  'aria-invalid:[border-color:var(--rad-checkbox-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'data-invalid:[border-color:var(--rad-checkbox-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-checkbox-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
   'focus-visible:[outline-width:var(--rad-checkbox-focus-width,var(--rad-focus-width,2px))]',
@@ -46,18 +48,24 @@ const checkboxVariants = cva([
 ])
 
 const markClass =
-  'pointer-events-none col-start-1 row-start-1 size-[calc(var(--rad-checkbox-size,var(--rad-control-medium-indicator-size,1.125rem))*0.65)] self-center justify-self-center [color:var(--rad-checkbox-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-checkbox-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
+  'pointer-events-none absolute inset-0 size-full scale-65 [color:var(--rad-checkbox-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-checkbox-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
 
 const rowClass =
   '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-weight:var(--rad-typography-body-weight,400)] inline-flex min-h-6 cursor-pointer items-center gap-[var(--rad-checkbox-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 
 const labelClass =
-  'leading-snug [color:var(--rad-checkbox-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-checkbox-label-size,var(--rad-typography-body-size,0.875rem))]'
+  'leading-snug [color:var(--rad-checkbox-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-checkbox-label-size,var(--_rad-control-font-size))]'
 
-export type CheckboxProps = Omit<ComponentProps<'input'>, 'type'> & {
-  label?: ReactNode
-  indeterminate?: boolean
-}
+export type CheckboxProps = Omit<
+  ComponentProps<'input'>,
+  'type' | 'checked' | 'defaultChecked' | 'style'
+> &
+  CheckedOwner & {
+    label?: ReactNode
+    indeterminate?: boolean
+    controlSize?: ControlSize
+    style?: ThemeStyle
+  }
 
 export type CheckboxTheme = NonNullable<ThemeComponentOverrides['checkbox']>
 
@@ -71,47 +79,58 @@ export function checkboxTheme(theme: CheckboxTheme): CSSProperties {
 
 export function Checkbox({
   className,
+  controlSize = 'medium',
   label,
   indeterminate = false,
   id,
   disabled,
   required,
+  checked,
+  defaultChecked,
   ref,
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
   ...props
 }: CheckboxProps) {
-  const field = useField()
-  const control = field?.layout === 'control' ? field.controlProps : null
-  const invalid = ariaInvalid ?? control?.['aria-invalid']
+  const controlled = useNativeOwner('Checkbox', checked, defaultChecked)
+  const control = useFieldControl({
+    id,
+    disabled,
+    required,
+    'aria-invalid': ariaInvalid,
+    'aria-required': ariaRequired,
+    'aria-describedby': ariaDescribedBy
+  })
   const nodeRef = useRef<HTMLInputElement>(null)
   const initialise = useCallback(
     (node: HTMLInputElement | null) => {
       nodeRef.current = node
-      if (node) node.indeterminate = indeterminate
+      if (node) {
+        node.indeterminate = indeterminate
+        if (controlled) node.defaultChecked = node.checked
+      }
     },
-    [indeterminate]
+    [indeterminate, controlled]
   )
   const hostRef = useComposedRefs(initialise, ref)
   useLayoutEffect(() => {
-    if (nodeRef.current) nodeRef.current.indeterminate = indeterminate
+    if (nodeRef.current) {
+      nodeRef.current.indeterminate = indeterminate
+      if (controlled) nodeRef.current.defaultChecked = !!checked
+    }
   })
   const controlNode = (
-    <span className="inline-grid w-fit shrink-0">
+    <span className="relative inline-grid w-fit shrink-0">
       <input
-        {...control}
         {...props}
+        {...control}
+        checked={checked}
+        defaultChecked={defaultChecked}
         ref={hostRef}
-        aria-describedby={joinIds(control?.['aria-describedby'], ariaDescribedBy)}
-        aria-invalid={invalid}
-        aria-required={ariaRequired ?? control?.['aria-required']}
-        className={cn(checkboxVariants(), className)}
-        data-invalid={invalid === true || invalid === 'true' ? '' : undefined}
+        className={cn(checkboxVariants(), controlMetrics({ controlSize }), className)}
+        data-control-size={controlSize}
         data-slot="checkbox"
-        disabled={disabled ?? control?.disabled}
-        id={control?.id ?? id}
-        required={required ?? control?.required}
         type="checkbox"
       />
       <svg
@@ -150,7 +169,7 @@ export function Checkbox({
     <label className={rowClass}>
       {controlNode}
       <span
-        className={labelClass}
+        className={cn(labelClass, controlMetrics({ controlSize }))}
         data-slot="checkbox-label"
       >
         {label}

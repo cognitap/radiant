@@ -489,6 +489,7 @@ test('inputs preserve native attributes and the character-width size', () => {
       defaultValue: 'ada@example.com',
       placeholder: 'you@example.com',
       size: 24,
+      controlSize: 'large',
       required: true,
       id: 'email'
     })
@@ -500,6 +501,8 @@ test('inputs preserve native attributes and the character-width size', () => {
   assert.match(html, /\svalue="ada@example.com"/)
   assert.match(html, /\splaceholder="you@example.com"/)
   assert.match(html, /\ssize="24"/)
+  assert.match(html, /data-control-size="large"/)
+  assert.doesNotMatch(html, /\scontrolSize=/)
   assert.match(html, /\srequired=""/)
   assert.match(html, /\sid="email"/)
   assert.match(html, /\sdata-slot="input"/)
@@ -508,29 +511,52 @@ test('inputs preserve native attributes and the character-width size', () => {
   assert.doesNotMatch(html, /\s(inputTheme)=/)
 })
 
-test('an input takes its accessible relationships from Field', () => {
-  const html = renderToStaticMarkup(
-    createElement(
-      Field,
-      { label: 'Email', description: 'Work address', error: 'Enter an email.', required: true },
-      createElement(Input, {
-        name: 'email',
-        type: 'email',
-        id: 'custom',
-        'aria-describedby': 'hint'
+test('Field protects owned relationships across the native control families', () => {
+  for (const Control of [Input, Checkbox, Radio]) {
+    const html = renderToStaticMarkup(
+      createElement(
+        Field,
+        {
+          label: 'Required value',
+          controlId: 'owned',
+          description: 'Help',
+          error: 'Required',
+          required: true,
+          disabled: true
+        },
+        createElement(Control, {
+          name: 'answer',
+          id: 'other',
+          value: Control === Radio ? 'yes' : undefined,
+          required: false,
+          disabled: false,
+          'aria-invalid': false,
+          'aria-required': false,
+          'aria-describedby': 'hint hint'
+        })
+      )
+    )
+    const input = /<input\b[^>]*>/.exec(html)[0]
+    assert.match(html, /<label\b[^>]*\sfor="owned"/)
+    assert.match(input, /\sid="owned"/)
+    assert.match(input, /\srequired=""/)
+    assert.match(input, /\sdisabled=""/)
+    assert.match(input, /aria-invalid="true"/)
+    if (Control === Radio) assert.doesNotMatch(input, /aria-required=/)
+    else assert.match(input, /aria-required="true"/)
+    assert.match(input, /data-invalid=""/)
+    const ids = /aria-describedby="([^"]+)"/.exec(input)[1].split(' ')
+    assert.equal(ids.length, 3)
+    assert.equal(ids.at(-1), 'hint')
+    const external = renderToStaticMarkup(
+      createElement(Control, {
+        value: Control === Radio ? 'yes' : undefined,
+        'aria-invalid': 'grammar'
       })
     )
-  )
-  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(html)?.[1]
-  assert.ok(id)
-  assert.notEqual(id, 'custom')
-  assert.match(html, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
-  assert.match(html, /aria-invalid="true"/)
-  assert.match(html, /\sdata-invalid=""/)
-  assert.match(html, /\sname="email"/)
-  const describedBy = /<input\b[^>]*\saria-describedby="([^"]+)"/.exec(html)?.[1] ?? ''
-  assert.equal(describedBy.split(' ').length, 3)
-  assert.ok(describedBy.split(' ').includes('hint'))
+    assert.match(external, /aria-invalid="grammar"/)
+    assert.match(external, /data-invalid=""/)
+  }
 })
 
 test('an input inside a group keeps its own description', () => {
@@ -583,21 +609,7 @@ test('checkboxes preserve name, value, and checked state', () => {
   assert.doesNotMatch(html, /\stype="(?!checkbox")/)
 })
 
-test('a checkbox takes a single-control Field name and keeps group identity', () => {
-  const single = renderToStaticMarkup(
-    createElement(
-      Field,
-      { label: 'Accept terms', required: true, error: 'Required' },
-      createElement(Checkbox, { name: 'accept', id: 'custom' })
-    )
-  )
-  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(single)?.[1]
-  assert.ok(id)
-  assert.notEqual(id, 'custom')
-  assert.match(single, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
-  assert.match(single, /aria-invalid="true"/)
-  assert.match(single, /\srequired=""/)
-
+test('checkboxes keep their own identity in a Field group', () => {
   const group = renderToStaticMarkup(
     createElement(
       Field,
@@ -653,25 +665,12 @@ test('a radio group shares one name and checks the default value', () => {
   assert.doesNotMatch(fieldset, /\sname=/)
 })
 
-test('a radio takes a single-control Field name and a group keeps option labels', () => {
-  const single = renderToStaticMarkup(
-    createElement(
-      Field,
-      { label: 'Agree', required: true },
-      createElement(Radio, { value: 'yes', id: 'custom' })
-    )
-  )
-  const id = /<input\b[^>]*\sid="([^"]+)"/.exec(single)?.[1]
-  assert.ok(id)
-  assert.notEqual(id, 'custom')
-  assert.match(single, new RegExp(`<label\\b[^>]*\\sfor="${id}"`))
-  assert.match(single, /\srequired=""/)
-
+test('a required RadioGroup keeps native option labels and validity', () => {
   const group = renderToStaticMarkup(
     createElement(
       RadioGroup,
       { label: 'Plan', name: 'plan', description: 'Choose one', required: true },
-      createElement(Radio, { label: 'Pro', value: 'pro' })
+      createElement(Radio, { label: 'Pro', value: 'pro', required: false, 'aria-required': false })
     )
   )
   assert.doesNotMatch(group, /<fieldset\b[^>]*\saria-required=/)

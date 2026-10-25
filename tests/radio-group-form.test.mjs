@@ -76,7 +76,7 @@ test('a default radio hydrates without putting the group name on the fieldset', 
 
 test('choosing a radio submits that value, skips a disabled choice, and reset restores the default', async () => {
   const seen = { value: '', submitted: '' }
-  function Form() {
+  function Form({ defaultValue = 'pro' }) {
     return createElement(
       'form',
       {
@@ -90,7 +90,7 @@ test('choosing a radio submits that value, skips a disabled choice, and reset re
         {
           label: 'Plan',
           name: 'plan',
-          defaultValue: 'pro',
+          defaultValue,
           onValueChange(value) {
             seen.value = value
           }
@@ -112,6 +112,8 @@ test('choosing a radio submits that value, skips a disabled choice, and reset re
   assert.equal(team.checked, true)
   assert.equal(radios.find(input => input.value === 'pro').checked, false)
   assert.equal(seen.value, 'team')
+  await act(async () => root.render(createElement(Form, { defaultValue: 'free' })))
+  assert.equal(team.checked, true, 'changing a group default does not synchronise native selection')
   await act(async () => {
     host
       .querySelector('form')
@@ -204,4 +206,20 @@ test('a ref points at the radio input', async () => {
   assert.equal(ref.current, host.querySelector('input'))
   assert.equal(ref.current.type, 'radio')
   root.unmount()
+})
+
+test('RadioGroup diagnoses conflicting child ownership', () => {
+  for (const props of [{ name: 'other' }, { checked: false }, { defaultChecked: false }]) {
+    assert.throws(
+      () =>
+        renderToString(
+          createElement(
+            RadioGroup,
+            { label: 'Plan', name: 'plan' },
+            createElement(Radio, { value: 'pro', ...props })
+          )
+        ),
+      /RadioGroup owns name and selection/
+    )
+  }
 })

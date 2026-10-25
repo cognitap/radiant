@@ -59,13 +59,15 @@ const meta = {
   component: RadioGroup,
   args: {
     label: 'Plan',
-    name: 'plan'
+    name: 'plan',
+    controlSize: 'medium'
   },
+  argTypes: { controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] } },
   parameters: {
     docs: {
       description: {
         component:
-          'A Field fieldset of native radios: the group owns name and selection, and Radio supplies value and label. The disk stays circular. Group className/style reach the outer Field; data-slot="radio-group" identifies the inner options container. Radio className/style/ref target its input (data-slot="radio"); radio-label identifies its text.'
+          'A Field fieldset of native radios. The group owns name and selection: choose an initial defaultValue or controlled value, with null for no selection and an empty string for a real empty-valued option. Conflicting option ownership is rejected. controlSize supplies shared option metrics. Group className/style/ref reach the Field; data-slot="radio-group" still identifies the inner options container. Radio className/style/ref target its input (data-slot="radio"); radio-label identifies its text.'
       }
     }
   }
@@ -175,14 +177,13 @@ export const Composition: Story = {
 }
 
 export const Customisation: Story = {
-  args: { name: 'custom-plan' },
+  args: { name: 'custom-plan', defaultValue: 'pro' },
   render: args => {
     const local: ThemeStyle = { '--rad-radio-group-gap': '1rem', '--rad-radio-size': '1.5rem' }
     return (
       <RadioGroup
         {...args}
         style={local}
-        defaultValue="pro"
       >
         <Radio
           label="Free"

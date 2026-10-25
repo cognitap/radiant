@@ -39,7 +39,9 @@ const {
   DialogDescription,
   DialogTitle,
   DialogTrigger,
+  Input,
   Radio,
+  RadioGroup,
   useAccordion,
   useCollapsible,
   useDialog
@@ -279,19 +281,30 @@ test('multiple Accordion requests in one event preserve previous accepted reques
   assert.equal(changes.length, 2, 'changing a composite default does not reset live selection')
 })
 
-test('composite owners diagnose ownership and type changes instead of silently changing policy', async () => {
-  for (const Owner of [Dialog, Collapsible, Accordion]) {
-    const property = Owner === Accordion ? 'value' : 'open'
-    const defaultProperty = Owner === Accordion ? 'defaultValue' : 'defaultOpen'
-    const value = Owner === Accordion ? null : false
-    const { root } = await mount(h(Owner, { [property]: value }))
+test('state owners diagnose mixed ownership and mode changes instead of silently changing policy', async () => {
+  for (const [Owner, property, defaultProperty, value, props] of [
+    [Dialog, 'open', 'defaultOpen', false, {}],
+    [Collapsible, 'open', 'defaultOpen', false, {}],
+    [Accordion, 'value', 'defaultValue', null, {}],
+    [RadioGroup, 'value', 'defaultValue', null, { label: 'Plan', name: 'plan' }],
+    [Input, 'value', 'defaultValue', '', { readOnly: true }],
+    [Checkbox, 'checked', 'defaultChecked', false, { readOnly: true }],
+    [Radio, 'checked', 'defaultChecked', false, { value: 'yes', readOnly: true }]
+  ]) {
+    const { root } = await mount(h(Owner, { ...props, [property]: value }))
     await assert.rejects(async () => {
-      await act(async () => root.render(h(Owner)))
+      await act(async () => root.render(h(Owner, props)))
     }, /cannot switch between controlled and uncontrolled/)
-    const another = await mount(h(Owner, { [defaultProperty]: value }))
+    const another = await mount(h(Owner, { ...props, [defaultProperty]: value }))
     await assert.rejects(async () => {
-      await act(async () => another.root.render(h(Owner, { [property]: value })))
+      await act(async () => another.root.render(h(Owner, { ...props, [property]: value })))
     }, /cannot switch between controlled and uncontrolled/)
+    const mixed = await mount(null)
+    await assert.rejects(async () => {
+      await act(async () =>
+        mixed.root.render(h(Owner, { ...props, [property]: value, [defaultProperty]: value }))
+      )
+    }, /controlled value or a default, not both/)
   }
   const { root } = await mount(h(Accordion, { type: 'single' }))
   await assert.rejects(async () => {
