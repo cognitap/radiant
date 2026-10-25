@@ -998,6 +998,7 @@ for other checkouts and type checking.
 
 ## Further reading
 
+- [Browser/accessibility matrix](docs/accessibility.md): support targets, manual checks, WCAG evidence and unverified combinations
 - [System guide](docs/system.md): the current ten-family theming, composition and customisation contract
 - [Theming reference](docs/theming.md): token defaults, presets, fonts and migration steps
 - [Storybook inspection](docs/storybook.md): global Theme/Mode controls and canonical live recipes
