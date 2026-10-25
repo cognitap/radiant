@@ -188,7 +188,6 @@ export const Default: Story = {
         <DialogClose style={{ justifySelf: 'end' }}>Close</DialogClose>
         <DialogTitle>Edit profile</DialogTitle>
         <DialogDescription>This name is visible to your team.</DialogDescription>
-        <Button type="button">Continue</Button>
         <form method="dialog">
           <Button type="submit">Done</Button>
         </form>
@@ -224,6 +223,15 @@ export const States: Story = {
 }
 
 export const Composition: Story = {
+  name: 'Ancestor form interoperability',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A focused native interoperability example: the dialog remains inside its ancestor form, and its submit button submits that form. Recipes → Workspace and Recipes → Forms show the canonical product composition.'
+      }
+    }
+  },
   render: () => <ProfileForm />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

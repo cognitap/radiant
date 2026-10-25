@@ -121,3 +121,47 @@ sequence. Browser CI infrastructure remains separate work.
 
 This pass covers Chrome rendering and interaction. Cross-browser and screen
 reader verification were not part of this audit.
+
+## 2026-10-25 — canonical example reconciliation (DEV-130)
+
+This pass reviews the assembled examples after the family migrations. It extends
+the earlier visual audit; it does not claim another screenshot pass over every
+historical story and Docs page. Runtime contracts are unchanged.
+
+| Family      | Reconciliation                                                                                                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Button      | Ordinary Composition uses the default host; the consumer-owned native adapter lives in Customisation. Keyboard actions keep visible counters.                                                                            |
+| Link        | Existing public Link actions/router adapter retained; destinations remain real fragments or deliberate external links. Workspace adds a unique native privacy destination.                                               |
+| Field       | Ordinary examples use Input/Checkbox. The explicit native adapter is named in the sidebar.                                                                                                                               |
+| Input       | Existing labelled/controlled examples retained; Workspace reuses canonical Field ownership and validation.                                                                                                               |
+| Checkbox    | Public native checkbox form retained; Reset now clears stale submission feedback, with a live status output.                                                                                                             |
+| RadioGroup  | Field-composed native radio form retained; Reset clears submission feedback. Independent form owners remain intact.                                                                                                      |
+| Dialog      | Default keeps unadapted Trigger/Close and native method=dialog submission; removed the inert Continue action. Ancestor-form composition is explicitly named interoperability. Workspace uses the canonical product form. |
+| Collapsible | Summary remains native. Track now has visible feedback through shared ShipmentTracking; native exclusive group names are unique per example instance.                                                                    |
+| Accordion   | Collapsible composition retained; the same ShipmentTracking replaces its inert action. No Button is inserted in summary.                                                                                                 |
+| Card        | Existing canonical form and Button/Link examples retained. Workspace supplies the cross-family assembly without a new Card interaction model.                                                                            |
+
+Recipes → Workspace → Settings is one interface across all ten families. It
+reuses ProfileExample with native ownership and Dialog placement, with no new
+profile form or per-family visual overrides. Shared preview selection supplies
+theme and mode. Its play covers invalid submission, valid save, focus restoration,
+nested disclosure use and destination identity. Existing disclosure/form plays
+cover tracking feedback and native reset feedback.
+
+A source scan leaves raw action/control hosts only in the documented Button,
+Dialog, Link and Field adapters/interoperability examples. The named-theme gallery
+is the sole story-level ThemeScope; the fixed Card illustration is confined to
+Customisation. Ordinary styles supply layout or shared semantic spacing.
+
+The assembled interface was exercised at 390px in all eight themes and both
+explicit modes. Checks covered invalid/valid submit, reset defaults, keyboard
+access to Cancel in the bounded scrolling modal, trigger focus restoration,
+nested disclosures, real fragment navigation and viewport fit. The 32 modal and
+workspace screenshots were visually reviewed. Docs was checked in Glass/Dark and
+with actual toolbar switching to Default/Light on a fresh server. The older hot
+reload session showed stale Docs; the fresh server applied both scopes correctly.
+Manual checks disabled autoplay with embed=true; normal matrix plays stayed on.
+
+Final verification results and the exact revision are recorded on the DEV-130 PR.
+DEV-57 retains final installed-consumer architecture evidence; this pass owns
+example coherence and its actual Storybook behavior.

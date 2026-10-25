@@ -89,7 +89,6 @@ function ButtonComposition(args: ButtonProps) {
             args.onClick?.(event)
             setActivations(counts => ({ ...counts, next: counts.next + 1 }))
           }}
-          render={props => <ConsumerButton {...props} />}
         >
           Next {arrow}
         </Button>
@@ -174,7 +173,7 @@ export const Customisation: Story = {
     docs: {
       description: {
         story:
-          'Local Button variables change this action without replacing the selected global theme. Caller utilities can replace matching default classes on the Tailwind route.'
+          'An explicit native button adapter forwards resolved props/ref/children; local Button variables change this action without replacing the selected global theme. Caller utilities can replace matching default classes on the Tailwind route.'
       }
     }
   },
@@ -184,6 +183,7 @@ export const Customisation: Story = {
       <Button
         {...args}
         style={local}
+        render={props => <ConsumerButton {...props} />}
       />
     )
   }

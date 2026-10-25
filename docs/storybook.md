@@ -47,7 +47,14 @@ theme, rather than another hardcoded theme gallery.
 
 Meta descriptions identify the native host, relevant props, and named parts.
 Preserve native form, controlled-state, focus, nesting, and adapter examples
-when removing presentation duplication. **Recipes → Forms** contains the canonical
+when removing presentation duplication. **Recipes → Workspace → Settings** is the
+canonical assembled product interface across all ten families. It combines Card,
+Accordion, Collapsible and Link with the existing profile form in Dialog; that
+form composes Field, Input, Checkbox, RadioGroup/Radio and Button. Its play saves
+preferences, restores focus, opens nested help and verifies the Link destination.
+The example inherits the toolbar's theme and mode without its own ThemeScope.
+
+**Recipes → Forms** contains the canonical
 native and TanStack profile forms. Its placement control reuses either recipe
 standalone, in Card, or in Dialog. It replaces the small Field/Input form stories;
 the source is `.storybook/examples/ProfileForm.tsx`, outside the shipped library.
@@ -55,6 +62,14 @@ the source is `.storybook/examples/ProfileForm.tsx`, outside the shipped library
 Docs can render a story more than once. Give independent native radio examples
 their own form owners or unique group names, so selecting an option in one
 preview cannot silently clear another preview's selection.
+
+Raw hosts belong to explicitly identified interoperability or Customisation
+examples: Button's native adapter, Link's router adapter, Field's native control
+adapter, Dialog's ancestor form and outside-trigger cases. Ordinary product
+examples use the public Radiant parts and default Button composition. Native
+forms, details/summary, headings and fragment destinations retain their semantics.
+The comparison gallery and decorative art in Card Customisation remain deliberate
+inspection/customisation examples rather than ordinary product styling.
 
 Keep example navigation inside the preview with unique native fragment targets,
 or use a deliberate external destination. Actions should expose a visible result.
@@ -109,6 +124,13 @@ visual legibility. A known default-action violation must be fixed or explicitly
 reported as unresolved; a future migration issue is not a reason to call the
 audit complete. Keep ordinary comparisons on default composition so explicit
 replacement callbacks cannot mask missing component reuse.
+For manual interaction checks, add `embed=true` to the iframe URL so Storybook's
+play does not compete with your inputs. The normal browser matrix still executes
+plays. Wait for the story scope as well as the Docs scope to apply the selected
+theme/mode before capturing a toolbar change. If a long-running development
+session retains stale Docs after story edits, repeat on a fresh Storybook server
+before treating that state as a runtime regression.
+
 Recheck corrected combinations after the source change. The
 [October 2026 audit](storybook-audit-2026-10.md) records the first complete pass.
 

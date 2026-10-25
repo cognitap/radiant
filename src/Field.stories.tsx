@@ -98,6 +98,7 @@ export const States: Story = {
 }
 
 export const Customisation: Story = {
+  name: 'Native control adapter',
   argTypes: { layout: { control: false } },
   play: async ({ canvasElement, args }) => {
     const input = within(canvasElement).getByRole('textbox')
