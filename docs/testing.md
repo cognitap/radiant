@@ -3,7 +3,7 @@
 `pnpm check` is the required local and CI gate. It runs formatting, lint, source
 and contract types, runtime tests, the installed consumer suite, a Storybook
 build, and real Chromium tests. The installed check also builds and renders
-production consumers of both styling routes. CI's **Library checks** job fails if any stage
+production consumers of both styling routes and the canonical compositions. CI's **Library checks** job fails if any stage
 fails. Keep that status required when configuring repository merge rules.
 
 The [browser/AT matrix and evidence process](accessibility.md) defines support
@@ -109,7 +109,7 @@ build both documented Tailwind entries. Vite production bundles import the
 installed public package; no repository source or Storybook stylesheet is used.
 Each route exercises all presets in light/dark, provider-free/default/nested
 scopes, component/local/caller overrides, and native Dialog/disclosure visibility.
-The same checks run inside `pnpm check` through `pnpm test --styles`.
+The same checks run inside `pnpm check` through `pnpm test --styles --compositions`.
 
 `output/browser/installed-styles/results.json` records its own environment,
 archive integrity, build tools, observed styles and pass/fail cases. Production
@@ -119,6 +119,52 @@ separately from the subsequent Storybook/platform JUnit report. Review/preserve
 the [artifact evidence record](verification/2026-10-25-installed-styles.md)
 before the same 14-day expiry. Ordinary `pnpm test`/`test:package` and release
 preparation retain the package/type check without requiring a browser.
+
+For the realistic installed composition checkpoint:
+
+```sh
+pnpm test:compositions
+```
+
+This reuses the archive verifier and copies the canonical Profile/Workspace
+recipes into its isolated consumer, changing only their import target to the
+installed public package. Their source hashes are retained. One private harness
+selects native/TanStack ownership and standalone/Card/Dialog/Workspace placement;
+it does not implement another form. Production server markup hydrates in
+Chromium with stable IDs/control identity. Native keyboard input checks errors,
+submitted data, reset, radio arrows, modal containment/Escape/restoration,
+disclosures, Link navigation and open-modal unmount/remount. All presets run in
+both modes, including an inherited input override and an independent default scope.
+
+Results, environment/package integrity, the production page and representative
+captures are in `output/browser/installed-compositions/`, included in the existing
+CI browser artifact. The required gate includes this check. Serve the retained
+page for manual browser/AT testing:
+
+```sh
+pnpm exec vite preview --host 127.0.0.1 --port 4175 --strictPort --outDir output/browser/installed-compositions/client
+```
+
+The opt-in Cognitap checkpoint requires a clean, fixed checkout and a matching
+locally built archive. It snapshots tracked files into a disposable directory,
+installs the frozen registry pins, checks the existing production pages, records
+the available registry API, then installs the explicit archive and TanStack
+adapter into the snapshot. Helicon's Astro island and Terminus's Next client
+boundary use their real production builds and Tailwind configuration, with live
+development aliases disabled. The original checkout/pins are never modified.
+
+```sh
+pnpm build
+pnpm pack --out /tmp/radiant-dev57.tgz
+pnpm exec node scripts/verify-cognitap.mjs /path/to/cognitap /tmp/radiant-dev57.tgz
+```
+
+Keep `output/browser/cognitap-compositions/` with the source revision, temporary
+lockfile, builds, registry limitation and archive results. It is a manual
+cross-repository checkpoint, not an implicit CI checkout of another project's
+moving main branch. The [DEV-57 record](verification/2026-10-25-installed-compositions.md)
+distinguishes the old Button-only registry baseline, unreleased archive results,
+and missing actual screen-reader evidence. None substitutes for another.
 
 Each migration issue and PR should record:
 

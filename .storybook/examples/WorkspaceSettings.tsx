@@ -15,10 +15,10 @@ import {
   CollapsibleTrigger,
   Link
 } from '../../src/index.js'
-import { ProfileExample } from './ProfileForm.js'
+import { ProfileExample, type FormOwner } from './ProfileForm.js'
 
 /** One product composition; its fields/actions reuse the canonical form. */
-export function WorkspaceSettings() {
+export function WorkspaceSettings({ owner = 'native' }: { owner?: FormOwner }) {
   const privacyId = useId()
   return (
     <div
@@ -42,7 +42,7 @@ export function WorkspaceSettings() {
               <AccordionTrigger>Profile</AccordionTrigger>
               <AccordionContent>
                 <ProfileExample
-                  owner="native"
+                  owner={owner}
                   placement="dialog"
                 />
               </AccordionContent>

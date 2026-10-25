@@ -199,6 +199,15 @@ Adapt the existing form's state owner and placement rather than copying a second
 form or replacing its actions with bespoke styled hosts. Application imports
 come from `@cognitap/radiant`; implementation deep imports are unsupported.
 
+The installed composition checkpoint reuses these exact recipes with public
+package imports. When copying TypeScript recipe sources into an application,
+follow its local module-resolution rules: Cognitap's current Next/Turbopack
+setup needs extensionless local TSX imports, whereas the NodeNext installed
+fixture uses `.js` specifiers. This adaptation does not change Radiant's compiled
+JavaScript imports. See the [checkpoint commands](https://github.com/cognitap/radiant/blob/main/docs/testing.md#evidence-and-readiness).
+An older registry package cannot verify newer exported components; use a matching
+build/archive checkpoint and keep the registry limitation explicit until release.
+
 For a change to this contract, update its guide/reference and canonical example
 together, then run the [verification gate](https://github.com/cognitap/radiant/blob/main/docs/testing.md).
 Use the [browser/AT matrix](accessibility.md) for target combinations, manual
