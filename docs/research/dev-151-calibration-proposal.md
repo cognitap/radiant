@@ -27,9 +27,11 @@ establish a universally superior aesthetic.
 
 ## Comparison artifact
 
-Open `src/themes/dev-151-color-calibration.prototype.html` directly in a browser.
-It is self-contained and needs no packages, server or network. Its four guided
-comparisons cover vivid, muted, pale, and dark/neutral cases. Free controls expose
+The [self-contained comparison HTML](https://github.com/cognitap/radiant/blob/b12143dade91adff0408707e94dbac94276725d4/src/themes/dev-151-color-calibration.prototype.html)
+is preserved in the [original prototype snapshot](https://github.com/cognitap/radiant/tree/b12143dade91adff0408707e94dbac94276725d4),
+not in the production source tree. Download that single HTML file and open it
+locally; it needs no packages, server or network. Its four guided comparisons
+cover vivid, muted, pale, and dark/neutral cases. Free controls expose
 the exact source, source-derived vividness, tone distribution, neutral tint, hue
 alignment, near-neutral fallback hue, and shared/hue-aware shade curves.
 
@@ -38,8 +40,9 @@ or reshape the brand ramp around it. The right-hand comparison offers a regular
 ramp with the source kept separately, or an explicitly adjusted source. Both
 sides show the full wall, a smaller working palette and light/dark illustrations.
 
-The experiment is disposable and belongs on `prototype/dev-151-color-calibration`,
-outside main. Production code still follows DEV-152/153/154/155 and their gates.
+The disposable experiment remains recoverable at the pinned commit above.
+Only the accepted decision and research notes belong in main. Production code
+still follows DEV-152/153/154/155 and their gates.
 Public workshop presentation belongs in radiant-docs later; this HTML is a
 color-behavior experiment beside the theme module, not a new production route.
 
@@ -61,7 +64,7 @@ color-behavior experiment beside the theme module, not a new production route.
 
 ## What the evidence supports
 
-[Machine-readable results](dev-151-calibration-results.json) record 12 input
+[Machine-readable results](https://github.com/cognitap/radiant/blob/b12143dade91adff0408707e94dbac94276725d4/docs/research/dev-151-calibration-results.json) record 12 input
 fixtures under two tone models and four policies: **96 profiles**. They include
 the exact source, actual brand ramp, mapped semantic colors, contrast ratios and
 adjacent ΔE, plus the prototype SHA-256 and runtime for reproduction.
@@ -102,7 +105,7 @@ working-palette recommendations remain DEV-154 work.
   light/dark illustrations. This is not production component, broad font,
   chart-distinguishability or assistive-technology certification.
 - No tests or dependencies were added to the production library, and no public
-  theme API was changed. Preserve the prototype on its throwaway branch.
+  theme API was changed. Preserve the prototype at the pinned snapshot above.
 
 The owner reviewed the comparison and selected the exact-anchored reshaping
 method on 25 October 2026. DEV-151's fidelity decision is resolved. DEV-153 must
