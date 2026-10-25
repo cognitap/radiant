@@ -4,6 +4,13 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Verify the canonical native/TanStack forms and ten-family Workspace composition
+  through an installed production archive (DEV-57), including hydration, native
+  keyboard/form/reset behavior and modal cleanup. Add an opt-in Cognitap
+  production checkpoint that preserves its registry pins and distinguishes the
+  historical Button-only package from unreleased archive evidence. Actual AT
+  verification remains explicitly pending; these checks do not publish a release.
+
 - Verify installed styling artifacts through production builds (DEV-135):
   compiled CSS and Tailwind, with both reset choices, across all eight presets
   in light/dark. The required gate now retains versioned results and captures.
