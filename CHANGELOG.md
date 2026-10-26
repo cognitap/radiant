@@ -4,6 +4,17 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+## 0.0.4
+
+Experimental, additive workshop APIs for portable theme documents, deterministic
+color walls, semantic palettes and bounded appearance controls. Existing 0.0.3
+components and themes require no migration. See `docs/theming.md` for the
+document format, merge/replace rules, supported controls and installed CSS routes.
+Output is opaque sRGB; Display P3 generation and font loading are not included.
+Automated Chromium and installed-consumer checks do not establish manual
+screen-reader, Safari/Firefox or stable-library readiness. The public workshop
+is delivered independently by radiant-docs after it pins this registry release.
+
 - Add `updateThemeAppearance` for generated palette/canvas integration and bounded
   spacing, density, radius, border, elevation and backdrop controls (DEV-155).
   Preserve independent modes, unrelated settings and component exceptions;
