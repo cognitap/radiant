@@ -1,8 +1,8 @@
-# DEV-162: Typography model, second proposal
+# DEV-162: Accepted typography model
 
-Date: 2026-10-26. Status: **revised proposal; owner acceptance pending**.
-DEV-162 is the design checkpoint within DEV-161. DEV-163 stays blocked until
-the model is accepted. This PR changes research documents only.
+Date: 2026-10-26. Status: **Study 02 accepted by the owner: “good”**.
+This records DEV-162's design baseline for DEV-163 within the DEV-161 chapter.
+Production implementation and chapter acceptance remain downstream work.
 
 ## Review outcome and direction
 
@@ -14,9 +14,10 @@ are superseded. Study 01 is a historical experiment, not an accepted contract.
 Study 02 separates **font assignments**, **text styles**, and **rhythm**. It adds
 independent heading-font choice, explicit paragraph spacing, adjustable hierarchy,
 composed pages and a selected-style inspector. Starting points identify their
-fonts. These are new candidates for review, not owner-approved replacements.
+fonts. The owner accepted this revised direction, including the model, naming
+and proof exploration, on 26 October 2026.
 
-## Proposed vocabulary
+## Vocabulary
 
 | Term            | Meaning                                                                                                                                                      |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -51,7 +52,7 @@ families rather than suggesting arbitrary fonts have been calibrated.
 | Source Serif 4 + Inter | Source Serif 4 | Source Serif 4 | Inter         | IBM Plex Mono |
 | Plex Sans + Plex Mono  | IBM Plex Sans  | IBM Plex Sans  | IBM Plex Sans | IBM Plex Mono |
 
-The proposed default is Inter. Each assignment changes independently. These names
+The accepted starting default is Inter. Each assignment changes independently. These names
 identify combinations, not product categories or quality ranks. Selecting a whole
 starting point explicitly resets typography; other theme sections and deliberate
 component exceptions remain untouched.
@@ -64,8 +65,8 @@ component exceptions remain untouched.
 | UI / Inter or IBM Plex Sans | 16px              | 1.5     | Layout owned       |
 | Code / IBM Plex Mono        | 14px              | 1.65    | 80ch block maximum |
 
-These candidate bases replace Study 01's 18/20px prose and 14px UI. They await
-visual review. The observations establish rendering behavior on the recorded
+These accepted bases replace Study 01's 18/20px prose and 14px UI. The owner
+reviewed them in Study 02. The observations establish rendering behavior on the recorded
 specimens, not universally better reading performance.
 
 Profiles are contextual: a serif in UI or mono in Body receives neutral manual
@@ -109,7 +110,8 @@ Production sizes use rem, tracking em, and line height unitless numbers.
 
 Inline code uses Code at .9em with inherited weight/leading and zero tracking;
 it does not adopt a standalone block line box. Emphasis uses real italic and
-strong text an available weight. The inventory and names remain open for review.
+strong text an available weight. This inventory and naming are the accepted
+implementation baseline.
 
 ### Responsive sizing and flow
 
@@ -145,7 +147,7 @@ and generated CSS through the existing typography section and ThemeDocument.
 No competing theme compiler or font-loader runtime. Before DEV-163/167 adopts
 styles, prove legacy partial themes, component overrides, caller utilities,
 nested scopes, modes, and existing control-size relationships. Exact public
-function names/types belong to implementation after model acceptance.
+function names/types belong to DEV-163's implementation of this accepted model.
 
 ## Proof-sheet workflow
 
@@ -171,7 +173,7 @@ inline markup survives remounting; editing that copy is plain-text editing.
 ## References and observations
 
 - Study 01, rejected: [snapshot f5243cf](https://github.com/cognitap/radiant-docs/blob/f5243cf/examples/workshop/typography-rhythm.prototype.html).
-- Study 02, current candidate: [self-contained HTML](https://github.com/cognitap/radiant-docs/blob/a0c140a/examples/workshop/typography-rhythm.prototype.html), commit `a0c140a`, on `prototype/dev-162-typography-rhythms`.
+- Study 02, accepted: [self-contained HTML](https://github.com/cognitap/radiant-docs/blob/a0c140a/examples/workshop/typography-rhythm.prototype.html), commit `a0c140a`, on `prototype/dev-162-typography-rhythms`.
 
 Download one HTML and open it directly. Both snapshots embed eight actual pinned
 WOFF2 files and complete upstream licenses. The experiment is website owned,
@@ -201,7 +203,7 @@ all four compositions for Inter and Source Serif at 800px, plus the studio.
 The owner's [shadcn/typeset reference](https://ui.shadcn.com/docs/typeset) already
 provides font/context presets, size/leading/flow, container-aware prose, themes
 and copyable setup. Separate prose presets alone would not meet the ambition.
-This proposal adds explicit UI styles, studied font profiles, independent heading
+The accepted model adds explicit UI styles, studied font profiles, independent heading
 assignment, style inspection and shared responsive compositions; their production
 value still needs proof.
 
@@ -220,6 +222,8 @@ characters. No broad-script, shaping, RTL, AT or universal readability claim.
 Production loading, keyboard/focus, hydration, installed CSS routes, scopes and
 existing-family adoption remain DEV-163–169 work.
 
-Owner review remains open for **visual typography, model/naming and exploration**.
-Do not implement either experiment's model before acceptance. Diagnostics and
-saved treatment comparisons remain future scope, as agreed for DEV-161.
+Owner review of **visual typography, model/naming and exploration** is resolved
+for Study 02. DEV-163 should implement this baseline while the prototype remains
+outside main. Final production visual review, installed behavior and chapter
+publication remain DEV-169's responsibility. Diagnostics and saved treatment
+comparisons remain future scope, as agreed for DEV-161.
