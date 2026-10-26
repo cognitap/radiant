@@ -303,6 +303,9 @@ a metric to automatic behavior, omit that key from the next recipe and **replace
 the typography section, retaining other metadata/explicit values. Merge semantics
 cannot delete a stored leaf by omission. To select a fresh starting point,
 replace its recipe; merging only a preset ID intentionally retains old overrides.
+When merging a saved font assignment, change its family and profile together
+(use `manual` for an unfamiliar font), or replace the recipe. Merging only a
+family retains a previously stored profile.
 
 ### Semantic HTML and local width
 
