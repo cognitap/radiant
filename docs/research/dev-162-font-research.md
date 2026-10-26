@@ -37,7 +37,9 @@ Official repositories were queried directly. WOFF2 responses were fetched and th
 | IBM Plex Sans  | wght 100/400/700; wdth 85/100/100 |           230,368 | Same sample coverage                                             |
 | IBM Plex Mono  | wght 100/400/700                  |            83,488 | Hungarian, accented Latin and Cyrillic samples; Greek α/Ω absent |
 
-Arabic ا and CJK 漢 were absent from all four checked files. These are codepoint presence checks, not shaping or full language coverage certification. Recheck the actual chosen subset if later optimizing files. The Roman axes are verified; matching italic URLs below have valid WOFF2 signatures but their axes were not separately inspected.
+Arabic ا and CJK 漢 were absent from all four checked Roman files. These are codepoint presence checks, not shaping or full language coverage certification. Recheck the actual chosen subset if later optimizing files.
+
+Follow-up inspection parsed the corresponding four official italic TTF `fvar` tables with the same standard-library method. Their axes, order, defaults and bounds exactly match the Roman table above. Weights 400/500/600/700 are available in both styles throughout the set. These are separate true italic faces, with no `ital` or `slnt` axis. Italic glyph coverage was not separately inspected. Inter's italic TTF comes from its official release archive because the repository's `docs/font-files/` directory does not contain that TTF.
 
 ### Exact browser download URLs
 
@@ -48,6 +50,7 @@ Copy these upstream files unmodified to a local trial assets directory; do not m
 - [Roman WOFF2](https://raw.githubusercontent.com/rsms/inter/v4.1/docs/font-files/InterVariable.woff2)
 - [Italic WOFF2](https://raw.githubusercontent.com/rsms/inter/v4.1/docs/font-files/InterVariable-Italic.woff2) — 387,976 bytes
 - [Roman TTF, used to verify axes](https://raw.githubusercontent.com/rsms/inter/v4.1/docs/font-files/InterVariable.ttf)
+- [Italic TTF release archive](https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip), member `InterVariable-Italic.ttf`, used to verify italic axes
 - Roman WOFF2 SHA-256: `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3`
 
 #### Source Serif 4
@@ -55,6 +58,7 @@ Copy these upstream files unmodified to a local trial assets directory; do not m
 - [Roman WOFF2](https://raw.githubusercontent.com/adobe-fonts/source-serif/4.005R/WOFF2/VAR/SourceSerif4Variable-Roman.ttf.woff2)
 - [Italic WOFF2](https://raw.githubusercontent.com/adobe-fonts/source-serif/4.005R/WOFF2/VAR/SourceSerif4Variable-Italic.ttf.woff2) — 346,688 bytes
 - [Roman TTF, used to verify axes](https://raw.githubusercontent.com/adobe-fonts/source-serif/4.005R/VAR/SourceSerif4Variable-Roman.ttf)
+- [Italic TTF, used to verify axes](https://raw.githubusercontent.com/adobe-fonts/source-serif/4.005R/VAR/SourceSerif4Variable-Italic.ttf)
 - Roman WOFF2 SHA-256: `940a76eda1388de39d38c8e7a79bf6ea058a387faee0a9f33c8d25c6ba05e1be`
 
 #### IBM Plex Sans
@@ -62,6 +66,7 @@ Copy these upstream files unmodified to a local trial assets directory; do not m
 - [Roman WOFF2](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-sans-variable/fonts/complete/woff2/IBM%20Plex%20Sans%20Var-Roman.woff2)
 - [Italic WOFF2](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-sans-variable/fonts/complete/woff2/IBM%20Plex%20Sans%20Var-Italic.woff2) — 262,364 bytes
 - [Roman TTF, used to verify axes](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-sans-variable/fonts/complete/ttf/IBM%20Plex%20Sans%20Var-Roman.ttf)
+- [Italic TTF, used to verify axes](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-sans-variable/fonts/complete/ttf/IBM%20Plex%20Sans%20Var-Italic.ttf)
 - Roman WOFF2 SHA-256: `e978248b6b56da9e372975322a98dd9a51135d1b375e32ed6d5ca69f3aab792d`
 
 #### IBM Plex Mono
@@ -69,6 +74,7 @@ Copy these upstream files unmodified to a local trial assets directory; do not m
 - [Roman WOFF2](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-mono-variable/fonts/complete/woff2/IBM%20Plex%20Mono%20Var-Roman.woff2)
 - [Italic WOFF2](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-mono-variable/fonts/complete/woff2/IBM%20Plex%20Mono%20Var-Italic.woff2) — 96,788 bytes
 - [Roman TTF, used to verify axes](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-mono-variable/fonts/complete/ttf/IBM%20Plex%20Mono%20Var-Roman.ttf)
+- [Italic TTF, used to verify axes](https://raw.githubusercontent.com/IBM/plex/71f558992315a12ca1f06a2215d57962a1992162/packages/plex-mono-variable/fonts/complete/ttf/IBM%20Plex%20Mono%20Var-Italic.ttf)
 - Roman WOFF2 SHA-256: `ef55d69e81baa6523a9b6e015d746e707bc7e9579f18703a169cb18c36dd567b`
 
 ## License sources

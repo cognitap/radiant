@@ -76,8 +76,9 @@ normalization, width squeezing, AI selection or readability score is implied.
 Default width is 100%; optical sizing is automatic only where the file supports
 it. Axis exploration is manual tuning. Weight/style choices must match available
 files/ranges. Report incompatible retained overrides; do not silently claim an
-unavailable requested weight renders exactly. The font study distinguishes
-verified Roman axes from matching italic files whose axes were not inspected.
+unavailable requested weight renders exactly. Matching Roman and italic axes are
+verified in the font study; real italic is a separately loaded style, not a
+synthetic slant or a claimed `ital`/`slnt` axis.
 
 ## Text styles and hierarchy
 
