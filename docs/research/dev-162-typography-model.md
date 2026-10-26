@@ -1,250 +1,224 @@
-# DEV-162: Typography roles and font-aware starting points
+# DEV-162: Typography model, second proposal
 
-Date: 2026-10-26. Status: proposal for owner review, before DEV-163 implementation.
-This is the first design checkpoint within DEV-161, not completion of that chapter.
-No public interface, component styling, package version or production workshop
-changes in this proposal.
+Date: 2026-10-26. Status: **revised proposal; owner acceptance pending**.
+DEV-162 is the design checkpoint within DEV-161. DEV-163 stays blocked until
+the model is accepted. This PR changes research documents only.
 
-## Proposed decision
+## Review outcome and direction
 
-Use **one typography system with separate reading and interface rhythms**, four
-font slots, reusable text roles and explicit role overrides. Offer **Product**,
-**Editorial** and **Technical** starting combinations. Start the workshop with
-Product; selecting another combination remains a deliberate user choice.
+The owner rejected Study 01 across visual hierarchy/fonts/metrics, role/rhythm
+structure, proof-sheet exploration, and naming, specifically “reading”. Its
+Product/Editorial/Technical names, original font slots and fixed breakpoint model
+are superseded. Study 01 is a historical experiment, not an accepted contract.
 
-A numeric scale alone cannot describe a caption, a paragraph, a form label and a
-landing headline. Keep their responsibilities visible instead of applying one
-ratio or one global tracking value to every text node.
+Study 02 separates **font assignments**, **text styles**, and **rhythm**. It adds
+independent heading-font choice, explicit paragraph spacing, adjustable hierarchy,
+composed pages and a selected-style inspector. Starting points identify their
+fonts. These are new candidates for review, not owner-approved replacements.
 
-The [font study](dev-162-font-research.md) owns upstream sources, licenses,
-verified artifacts, supported axes and script limitations. The values below are
-Radiant design choices evaluated on the recorded specimens, not upstream
-endorsements or evidence of a universally best reading speed.
+## Proposed vocabulary
 
-## Roles and font ownership
+| Term            | Meaning                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Typeface        | A family and its available files, weights, styles and axes.                                                                                                  |
+| Font assignment | Where a typeface is used by default: **Body**, **Headings**, **UI**, **Code**. These may all use one family; four assignments do not require four downloads. |
+| Text style      | A reusable assignment, size, weight, leading, tracking and optional maximum measure.                                                                         |
+| Prose rhythm    | Body size, leading, paragraph/block spacing, measure and heading hierarchy for continuous content.                                                           |
+| UI rhythm       | Text size and leading for interface copy, controls and data. Geometry owns control dimensions and layout gaps.                                               |
+| Style override  | An explicit change to one style that survives updates to generated defaults.                                                                                 |
+| Proof           | A real composition at a declared CSS width, sharing settings and editable copy.                                                                              |
 
-Four slots choose independently loaded families: **reading**, **interface**,
-**display**, and **code**. A role resolves a family, size, weight, unitless line
-height, em tracking and optional maximum inline measure. The slots are related
-defaults; an explicit role override can choose another family or metric.
+Body supplies paragraphs, lead, small text and quotations. Headings supplies prose
+titles/sections and display; UI supplies product titles, labels, values and
+metadata; Code supplies block and inline code. A style can override its assignment.
+UI titles deliberately use UI rather than the editorial heading treatment.
 
-| Role                | Purpose                                        | Family slot |
-| ------------------- | ---------------------------------------------- | ----------- |
-| `prose.body`        | Paragraphs and list items                      | reading     |
-| `prose.lead`        | Article introduction                           | reading     |
-| `prose.heading1`    | Article title                                  | reading     |
-| `prose.heading2`    | Major reading section                          | reading     |
-| `prose.heading3`    | Smaller reading section                        | reading     |
-| `prose.caption`     | Figure captions and reading annotations        | reading     |
-| `prose.quote`       | Block quotations                               | reading     |
-| `interface.body`    | Product copy, control values and table cells   | interface   |
-| `interface.label`   | Field labels, action labels and table headings | interface   |
-| `interface.support` | Descriptions, instructions and error messages  | interface   |
-| `interface.caption` | Metadata and short annotations                 | interface   |
-| `interface.title`   | Card, dialog and disclosure titles             | interface   |
-| `display`           | Landing headline                               | display     |
-| `code.block`        | Preformatted code with its own scroll region   | code        |
-| `code.inline`       | Identifiers within prose or product copy       | code        |
+Styles do not replace HTML semantics. A prose title and a UI title can each style
+a real `h1`; smaller styles can serve `h3`–`h6` while retaining the real level.
+Error copy adds invalid color/relationships to supporting text. Links, emphasis
+and inline code retain their inline responsibilities. No new catalog families
+are prerequisites.
 
-Roles express presentation, not heading levels, color or accessibility semantics.
-An `h4`–`h6` can use the smaller heading treatment while retaining its real level;
-a card title can remain an `h2` with the interface-title treatment. An error uses
-the support role plus the existing invalid color and relationship contract.
-Inline links inherit the surrounding typography and retain link presentation.
-Do not introduce new catalog families as a prerequisite.
+## Font starting points
 
-### Reference metrics
+The [primary-source font study](dev-162-font-research.md) records exact artifacts,
+licenses, axes, checksums and script limits. Keep four deliberately supported
+families rather than suggesting arbitrary fonts have been calibrated.
 
-These values describe Product at a 16px root; production sizes use rem, tracking
-uses em, and line height is unitless. The reading base is R = 18px and the
-interface base is U = 14px. Changes to R and U are independent.
+| Starting point         | Body           | Headings       | UI            | Code          |
+| ---------------------- | -------------- | -------------- | ------------- | ------------- |
+| Inter                  | Inter          | Inter          | Inter         | IBM Plex Mono |
+| Source Serif 4 + Inter | Source Serif 4 | Source Serif 4 | Inter         | IBM Plex Mono |
+| Plex Sans + Plex Mono  | IBM Plex Sans  | IBM Plex Sans  | IBM Plex Sans | IBM Plex Mono |
 
-| Role              | Compact → wide size | Weight  | Leading | Tracking | Maximum measure |
-| ----------------- | ------------------- | ------- | ------- | -------- | --------------- |
-| prose.body        | R → R               | 400     | 1.65    | 0        | 64ch            |
-| prose.lead        | 1.125R → 1.125R     | 400     | 1.5     | 0        | 55ch            |
-| prose.heading1    | 32/18 R → 44/18 R   | 600     | 1.2     | -.015em  | 26ch            |
-| prose.heading2    | 25/18 R → 30/18 R   | 600     | 1.2     | -.015em  | 26ch            |
-| prose.heading3    | 20/18 R → 22/18 R   | 600     | 1.2     | -.015em  | 26ch            |
-| prose.caption     | .8125R → .8125R     | 400     | 1.5     | 0        | reading measure |
-| prose.quote       | 1.125R → 1.125R     | 400     | 1.5     | 0        | reading measure |
-| interface.body    | U → U               | 400     | 1.45    | 0        | layout owned    |
-| interface.label   | U → U               | 500     | 1.4     | 0        | layout owned    |
-| interface.support | 13/14 U → 13/14 U   | 400     | 1.5     | 0        | layout owned    |
-| interface.caption | 12/14 U → 12/14 U   | 400     | 1.5     | 0        | layout owned    |
-| interface.title   | 18/14 U → 18/14 U   | 600     | 1.3     | -.01em   | layout owned    |
-| display           | 2.25rem → 4rem      | 600     | 1.08    | -.025em  | 18ch            |
-| code.block        | .875rem → .875rem   | 400     | 1.6     | 0        | 80ch            |
-| code.inline       | .9 × inherited size | inherit | inherit | 0        | inline          |
+The proposed default is Inter. Each assignment changes independently. These names
+identify combinations, not product categories or quality ranks. Selecting a whole
+starting point explicitly resets typography; other theme sections and deliberate
+component exceptions remain untouched.
 
-Inline code inherits weight so emphasis can remain emphasis; an available font
-weight must be loaded. The prototype's role table labels the normal 400 case.
-Do not force a fixed line height on inline code that enlarges its parent line.
-The study's form action uses a deliberate 600-weight label exception; ordinary
-field labels use 500. Component exceptions continue to have their own owner.
+| Studied context/profile     | Size at 16px root | Leading | Maximum measure    |
+| --------------------------- | ----------------- | ------- | ------------------ |
+| Body / Inter                | 20px              | 1.6     | 64ch               |
+| Body / Source Serif 4       | 21px              | 1.65    | 62ch               |
+| Body / IBM Plex Sans        | 20px              | 1.6     | 62ch               |
+| UI / Inter or IBM Plex Sans | 16px              | 1.5     | Layout owned       |
+| Code / IBM Plex Mono        | 14px              | 1.65    | 80ch block maximum |
 
-Reading rhythm also owns paragraph/list/quote/code block spacing: 1em after a
-block, 1.5em before a heading and .6em after it, with the first heading's leading
-gap removed. Adjacent margins collapse rather than add. List indentation and
-quote treatment remain semantic, locally scoped prose styling.
+These candidate bases replace Study 01's 18/20px prose and 14px UI. They await
+visual review. The observations establish rendering behavior on the recorded
+specimens, not universally better reading performance.
 
-Interface rhythm owns size and leading, not control height or layout gaps.
-Spacing & surfaces continues to own control metrics and layout spacing. Controls
-need minimum heights and enough padding for wrapped/enlarged labels; typography
-must not shrink or condense a label to make a fixed-height box fit. Existing
-small/medium/large control-size relationships remain explicit in DEV-167.
+Profiles are contextual: a serif in UI or mono in Body receives neutral manual
+metrics and an uncalibrated label. Neutral Body is 20px/1.65/64ch; neutral UI is
+16px/1.5. This is also the unfamiliar-custom-font path in DEV-164. No x-height
+normalization, width squeezing, AI selection or readability score is implied.
 
-### Responsive rule
+Default width is 100%; optical sizing is automatic only where the file supports
+it. Axis exploration is manual tuning. Weight/style choices must match available
+files/ranges. Report incompatible retained overrides; do not silently claim an
+unavailable requested weight renders exactly. The font study distinguishes
+verified Roman axes from matching italic files whose axes were not inspected.
 
-Body, supporting type and interface sizes remain stable rem values. Prose
-headings use the wide endpoint once **their specimen's content container** is at
-least 32rem wide; display uses its wide endpoint at 48rem. The proof canvas itself
-switches to a two-column comparison at 64rem. These are separate responsibilities.
+## Text styles and hierarchy
 
-Use an opt-in, documented typography container for these role relationships,
-with the compact treatment as a safe fallback. A wide screen containing a narrow
-card must not automatically receive a large article heading. Measure is a maximum,
-never a minimum width. Prose wraps, including long words/URLs; preformatted code
-and genuinely two-dimensional data may scroll inside their own labelled region.
+R is the Body reference size, U the UI reference size, Q the heading scale.
+Study 02 offers Q = 1.125, 1.2, 1.25 or 1.333, starting at 1.25. Scale generates a
+hierarchy; font choice, leading, paragraph spacing, measure and context remain
+independent decisions. Reference values below use R = 20px, U = 16px, Q = 1.25.
+Production sizes use rem, tracking em, and line height unitless numbers.
 
-The initial experiment selected heading sizes from the whole comparison width.
-At a 768px canvas this produced wide headings inside a roughly 363px article
-column. The revised model uses a specimen-local container and keeps the canvas
-layout decision separate. DEV-163 must prove that distinction through installed
-CSS, including nested scopes and both consumption routes.
+| Style              | Assignment | Narrow → wide reference   | Weight | Leading      | Tracking | Measure      |
+| ------------------ | ---------- | ------------------------- | ------ | ------------ | -------- | ------------ |
+| Prose / Title      | Headings   | R×Q³ → R×Q⁵ (39.1→61px)   | 600    | 1.12         | -.025em  | 22ch         |
+| Prose / Heading    | Headings   | R×Q → R×Q² (25→31.25px)   | 600    | 1.25         | -.015em  | 30ch         |
+| Prose / Subheading | Headings   | R×1.1 → R×Q (22→25px)     | 600    | 1.3          | -.01em   | 36ch         |
+| Prose / Body       | Body       | R (20px)                  | 400    | Body leading | 0        | Body measure |
+| Prose / Lead       | Body       | R×1.125 (22.5px)          | 400    | 1.5          | 0        | 55ch         |
+| Prose / Small      | Body       | R×.8 (16px)               | 400    | 1.5          | 0        | Body measure |
+| Prose / Quote      | Body       | R×1.25 (25px)             | 400    | 1.4          | -.01em   | Body measure |
+| UI / Title         | UI         | U×1.25 (20px)             | 600    | 1.3          | -.015em  | Layout owned |
+| UI / Body          | UI         | U (16px)                  | 400    | UI leading   | 0        | Layout owned |
+| UI / Label         | UI         | U (16px)                  | 500    | 1.4          | 0        | Layout owned |
+| UI / Supporting    | UI         | U×.9375 (15px)            | 400    | 1.5          | 0        | Layout owned |
+| UI / Caption       | UI         | U×.875 (14px)             | 400    | 1.5          | 0        | Layout owned |
+| UI / Metric        | UI         | U×2 (32px)                | 600    | 1.15         | -.03em   | Layout owned |
+| UI / Eyebrow       | UI         | U×.75 (12px)              | 600    | 1.4          | .1em     | Layout owned |
+| Display            | Headings   | R×Q³ → R×Q⁶ (39.1→76.3px) | 600    | 1.06         | -.035em  | 18ch         |
+| Code / Block       | Code       | 14px                      | 400    | 1.65         | 0        | 80ch         |
 
-## Supported starting combinations
+Inline code uses Code at .9em with inherited weight/leading and zero tracking;
+it does not adopt a standalone block line box. Emphasis uses real italic and
+strong text an available weight. The inventory and names remain open for review.
 
-| Combination | Reading                          | Interface                | Display        | Code          |
-| ----------- | -------------------------------- | ------------------------ | -------------- | ------------- |
-| Product     | Inter 18px / 1.65 / 64ch         | Inter 14px / 1.45        | Inter          | IBM Plex Mono |
-| Editorial   | Source Serif 4 20px / 1.6 / 62ch | Inter 14px / 1.45        | Source Serif 4 | IBM Plex Mono |
-| Technical   | IBM Plex Sans 18px / 1.6 / 62ch  | IBM Plex Sans 14px / 1.5 | IBM Plex Sans  | IBM Plex Mono |
+### Responsive sizing and flow
 
-Reading heading/lead/caption relationships scale from each combination's reading
-base. Thus Editorial's heading1 is approximately 35.6px → 48.9px, not Product's
-32px → 44px. Display is independent at 36px → 64px. Preserve the whole combination
-as a starting point while allowing every slot and role to change independently.
+Body and UI sizes remain stable rem values. Headings/display interpolate between
+explicit narrow/wide endpoints over a **24rem–56rem local container** range,
+bounded with `clamp`. The preferred value is a rem intercept plus a cqi slope
+calculated from those endpoints/range. Use the content/specimen width, never the
+whole workshop viewport. Nested prose columns establish their own container.
+An opt-in documented container is required; compact values are the fallback.
 
-The supported recommendation set is intentionally narrow: those three
-combinations, Inter/Source Serif/Plex Sans reading profiles, Inter/Plex Sans
-interface profiles, and Plex Mono code at normal width. All use actual regular,
-italic and available 400/500/600 weights, automatic optical sizing where the
-chosen font provides it, and tabular numerals for numeric data cells. Do not
-automatically apply tabular figures to prose. A cross-slot combination can use
-the known profile for each slot, but its overall composition still needs review.
+Measure is a maximum, never a minimum or exact character count. `ch` depends on
+the face's zero advance and optical size. Prose wraps instead of disappearing or
+condensing. Code and genuinely two-dimensional data may scroll within labelled
+regions; surrounding copy must reflow. Production browser zoom must be verified;
+container-responsive text is not automatic evidence of 200% resize conformance.
 
-Inter provides wght 100–900 and opsz 14–32; Source Serif provides wght 200–900 and
-opsz 8–60; Plex Sans provides wght 100–700 and wdth 85–100; Plex Mono provides
-wght 100–700. Default width is 100%. Explicit optical-size and width exploration
-is manual advanced tuning; the study does not validate every axis combination.
-The research note distinguishes verified Roman axes from the matching italic
-files, whose axes were not separately inspected.
+Paragraph/block spacing is visible, initially 1.25em. Paragraphs, lists, figures,
+quotes and code blocks use that flow amount; section headings receive 1.6× flow
+before and .5× after. Flow styles stay local to prose. UI layout gaps, control
+padding and minimum heights remain geometry responsibilities. Labels must wrap
+and grow with text rather than be squeezed into a fixed-height control.
 
-Font-aware here means **recorded, contextual starting metrics for known files**.
-It does not mean a universal x-height formula, optical normalization, automatic
-fallback metric matching, or AI selection. Use the actual file revision and
-supported metadata when offering a recommendation. Never guess a font's axes or
-weight coverage from its name.
+### Overrides and integration
 
-## Overrides, custom fonts and theme integration
+Manual context metrics survive a font switch. A context reset removes only its
+manual rhythm metrics, preserving explicit style overrides. Resetting a style
+removes only its override. A whole starting-point selection explicitly resets the
+typography recipe. None of these operations implicitly resets another theme
+section or deliberate component exception.
 
-Separate generated defaults from deliberate author decisions. A manual reading
-metric survives switching the reading family until that metric or reading
-context is reset. Interface changes leave reading decisions alone, and vice
-versa. Explicit role overrides survive regenerating the base rhythms; resetting
-one role removes only its override. A typography reset leaves color, geometry,
-motion and deliberate component exceptions untouched. Selecting a whole starting
-combination can explicitly reset its typography recipe, with that effect stated
-in the editor.
+Library capabilities own deterministic resolution, validation, serializable data
+and generated CSS through the existing typography section and ThemeDocument.
+No competing theme compiler or font-loader runtime. Before DEV-163/167 adopts
+styles, prove legacy partial themes, component overrides, caller utilities,
+nested scopes, modes, and existing control-size relationships. Exact public
+function names/types belong to implementation after model acceptance.
 
-Custom/system/unfamiliar fonts use the same roles and manual controls. Start from
-neutral metrics (18px/1.65/64ch reading, 14px/1.5 interface) and label them
-uncalibrated. Let the user select available weights/styles, leading, tracking,
-measure and responsive endpoints after inspecting actual content. A Mono-as-prose
-or Serif-as-interface trial illustrates this path; it is not promoted into the
-supported recommendation set.
+## Proof-sheet workflow
 
-Library responsibilities in DEV-163: pure deterministic role resolution, typed
-serializable values, validation, CSS generation and existing theme compilation.
-Use the current typography section and ThemeDocument seam; do not create a
-second theme compiler or font-loader runtime. Keep existing partial-theme leaves
-and component exceptions working, with a documented precedence/migration rule
-before adopting roles across existing families in DEV-167. Exact function names
-and types belong to the implementation PR, not this research note.
+Study 02 replaces stacked demonstration boxes with **Article, Product, Data and
+Landing** compositions. Article has publication identity, title/lead/byline,
+long prose, headings, figure/caption, list, quote, emphasis and inline/block code.
+Product has a workspace frame, navigation, form, long action/error copy and
+members. Data has metrics, project table and supporting panels. Landing has
+navigation, hero, action, feature section, testimonial and footer.
 
-Website responsibilities in DEV-164/165/166/168: curated asset metadata, explicit
-loading and failure states, browser-local FontFace trials, real editable proof
-sheets and controls, font setup guidance and shared-configuration presentation.
-Loaded files stay local; exported themes carry family, file/source requirements,
-weights/styles/axes and fallback instructions, never local bytes or blob URLs.
-Choose a theme without silently requesting fonts. Public curated loading must
-use pinned self-hosted assets with the complete upstream licenses, loaded only
-when selected; do not depend on raw GitHub URLs at runtime.
+Controls sit beside the proof. Click text to inspect and override its assignment,
+endpoint sizes, weight, leading, tracking and measure. There are no hidden size
+overrides in the proof's layout stylesheet. The study uses semantic HTML and
+native controls; this does not replace production Radiant component evidence.
 
-## Study and reference specimens
+Views use 800/640/390/320 CSS px. Compare widths renders 800px and 390px frames
+from one model and copy state. Frames are visually scaled to fit, with scale
+stated; internal CSS widths remain as labelled. This is responsive proof, not
+saved treatment comparisons. Editing stays in memory, without accounts or uploads.
+Switching compositions/widths preserves edited copy and form values. Unedited
+inline markup survives remounting; editing that copy is plain-text editing.
 
-The self-contained [typography rhythm prototype](https://github.com/cognitap/radiant-docs/blob/f5243cf/examples/workshop/typography-rhythm.prototype.html)
-is preserved at commit `f5243cf` on `prototype/dev-162-typography-rhythms` in
-radiant-docs. Download the HTML and open it directly; all eight actual WOFF2
-files and their complete licenses are embedded. The prototype is outside main
-and must not be merged or copied into production.
+## References and observations
 
-It contains an editable article with long title, lead, headings, lists, quotation,
-caption, link, real italic/emphasis and code; a form with accented names, long
-action and error text; a dense project table with aligned currency; and editable
-landing copy. These remain the same content while selecting combinations,
-widths, independent metrics and reading/interface resets. An isolated-reading
-view makes maximum measure visible without the comparison grid constraining it.
+- Study 01, rejected: [snapshot f5243cf](https://github.com/cognitap/radiant-docs/blob/f5243cf/examples/workshop/typography-rhythm.prototype.html).
+- Study 02, current candidate: [self-contained HTML](https://github.com/cognitap/radiant-docs/blob/a0c140a/examples/workshop/typography-rhythm.prototype.html), commit `a0c140a`, on `prototype/dev-162-typography-rhythms`.
 
-Observation method: headless Playwright with Chromium **156.0.8078.4**, 1440×1000
-viewport, each selected font explicitly awaited at regular 400/600 and italic
-400 before measurement. Four scenarios (three supported combinations plus an
-uncalibrated Mono-reading/Serif-interface trial), four proof widths (1120, 768,
-390, 320 CSS px), and four settings (normal, spacing override, 200% root font
-size, dark): **64 rendered combinations**, each containing all four compositions.
-No page runtime errors were observed; all eight faces loaded. The proof, sheet,
-article, interface and landing boxes had no scrollWidth/clientWidth overflow
-beyond 1px. Tables/code intentionally retain their own scroll regions.
+Download one HTML and open it directly. Both snapshots embed eight actual pinned
+WOFF2 files and complete upstream licenses. The experiment is website owned,
+outside main. Do not merge it or its embedded assets into production. Captures
+and raw observations remain in ignored `output/dev162/`; the pinned HTML is the
+durable reference.
 
-| Observation, ordinary setting         | Product | Editorial | Technical | Manual trial |
-| ------------------------------------- | ------- | --------- | --------- | ------------ |
-| Isolated maximum reading width        | 722.2px | 620px     | 669.6px   | 691.2px      |
-| First paragraph lines at 1120px proof | 4       | 4         | 4         | 5            |
-| First paragraph lines at 390px proof  | 7       | 7         | 6         | 8            |
-| First paragraph lines at 320px proof  | 8       | 9         | 8         | 11           |
+Study 02 uses headless Chromium **156.0.8078.4**, 1600×1100 host viewport, awaiting
+all faces explicitly. **72 combinations**: three font starting points × four
+compositions × four ordinary widths (48), plus spacing override, 200% root text
+and dark at 320px for Inter and Source Serif (24). Eight faces loaded, with no
+page runtime errors. Body/content/prose/panel/hero/stat/column boxes had no width
+overflow beyond 1px; table/code scrolling stays local.
 
-At 20px, the measured `x` ink ascent was approximately 10.72px for Inter, 9.5px
-for Source Serif, and 10.32px for both Plex faces. The zero advances were 12.5,
-10, 12 and 12px respectively. This supports inspecting size and measure per
-font; it does not prove equal legibility. Automatic optical sizing also means
-the physical value of `ch` can vary with size. A `64ch` measure is not a promise
-of 64 actual characters on a line.
+An initial run exposed the article's process figure overflowing at 320px with
+enlarged text; it now stacks. Inspection also caught unedited emphasis/code
+being flattened on remount; only actual edits are now stored as plain text.
 
-Reference captures were inspected at 1120px and 390px for all four scenarios.
-The three supported combinations preserve a clear article/UI distinction;
-the manual Mono trial visibly expands line count and needs deliberate tuning.
-The prototype's controls also expose independent resets and editable copy for
-owner review. Raw captures and measurement JSON stay in ignored local
-`output/dev162/`; the pinned HTML is the durable reference source.
+Recorded interactions: edited article title shared across both widths; 1.85 body
+leading retained after family switch and context reset; style reset restored the
+Inter profile's 1.6; Source Serif headings with Inter body. The inspector follows
+known font weight ranges and flags incompatible retained weights. Captures cover
+all four compositions for Inter and Source Serif at 800px, plus the studio.
 
-### Evidence limits and downstream acceptance
+## Reference comparison and limits
 
-The spacing stress applies line-height 1.5, paragraph spacing 2em, tracking .12em
-and word spacing .16em together. These are user override tests, not required
-authored defaults ([W3C explanation](https://www.w3.org/WAI/WCAG22/Understanding/text-spacing.html)).
-The 320px proof is a layout probe; the 200% root-size case is a text-scaling
-probe. Neither substitutes for full-page browser zoom, production component
-behavior or manual assistive-technology acceptance. Keep actual browser zoom,
-keyboard/focus, hydration, fallback/failed fonts, component role adoption and
-installed compiled-CSS/Tailwind proof in their downstream delivery issues.
+The owner's [shadcn/typeset reference](https://ui.shadcn.com/docs/typeset) already
+provides font/context presets, size/leading/flow, container-aware prose, themes
+and copyable setup. Separate prose presets alone would not meet the ambition.
+This proposal adds explicit UI styles, studied font profiles, independent heading
+assignment, style inspection and shared responsive compositions; their production
+value still needs proof.
 
-The specimen is English-first Latin text with a Hungarian name. Font table checks
-cover selected Latin/Greek/Cyrillic codepoints; Plex Mono lacks the checked Greek
-characters, and all four lack the checked Arabic/CJK characters. No broad-script,
-RTL, shaping, accessibility-conformance or universal readability claim follows.
+Website delivery owns pinned curated assets/licenses, explicit loading/failure
+states, local font trials, controls and font setup. The library never downloads
+fonts. Exports identify required families, weights/styles/axes, fallback and
+setup; local bytes/blob URLs stay local. Roles must round-trip through the shared
+full/selective theme handoff.
 
-Owner review remains open: keep Product as the default with Editorial/Technical
-available, or adjust the role hierarchy, rhythm or starting combinations before
-DEV-163 fixes their public contract. Diagnostics and saved side-by-side treatments
-remain future scope, as agreed for DEV-161.
+The spacing probe applies leading 1.5, paragraph spacing 2em, tracking .12em and
+word spacing .16em together ([W3C explanation](https://www.w3.org/WAI/WCAG22/Understanding/text-spacing.html)).
+These are user override tests, not required authored defaults. Embedded 320px
+proof and 200% root-size probes do not establish browser zoom or WCAG conformance.
+The font study records Latin/Greek/Cyrillic sample limits and absent Arabic/CJK
+characters. No broad-script, shaping, RTL, AT or universal readability claim.
+Production loading, keyboard/focus, hydration, installed CSS routes, scopes and
+existing-family adoption remain DEV-163–169 work.
+
+Owner review remains open for **visual typography, model/naming and exploration**.
+Do not implement either experiment's model before acceptance. Diagnostics and
+saved treatment comparisons remain future scope, as agreed for DEV-161.

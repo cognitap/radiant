@@ -8,11 +8,11 @@ Start with four families: **Inter**, **Source Serif 4**, **IBM Plex Sans**, and 
 
 Use three starting combinations:
 
-| Recipe    | UI            | Prose          | Display        | Code          |
-| --------- | ------------- | -------------- | -------------- | ------------- |
-| Product   | Inter         | Inter          | Inter          | IBM Plex Mono |
-| Editorial | Inter         | Source Serif 4 | Source Serif 4 | IBM Plex Mono |
-| Technical | IBM Plex Sans | IBM Plex Sans  | IBM Plex Sans  | IBM Plex Mono |
+| Starting point         | Body           | Headings       | UI            | Code          |
+| ---------------------- | -------------- | -------------- | ------------- | ------------- |
+| Inter                  | Inter          | Inter          | Inter         | IBM Plex Mono |
+| Source Serif 4 + Inter | Source Serif 4 | Source Serif 4 | Inter         | IBM Plex Mono |
+| Plex Sans + Plex Mono  | IBM Plex Sans  | IBM Plex Sans  | IBM Plex Sans | IBM Plex Mono |
 
 These combinations are our recommendation, not upstream endorsements. The role/rhythm proposal chooses starting metrics after actual-font specimen evaluation. Avoid using a single geometric ratio for labels, prose, controls, headings, and display: they have different jobs.
 
