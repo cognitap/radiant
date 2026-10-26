@@ -85,8 +85,8 @@ const meta = {
     fidelity: 'anchored',
     lightness: 'hue-aware',
     distribution: 1,
-    neutralTint: 0.012,
-    hueAlignment: 0.6,
+    wallPreset: 'balanced',
+    rampPreset: 'balanced',
     neutralHue: 255
   },
   argTypes: {
@@ -107,6 +107,9 @@ const meta = {
         '#FFFFFF'
       ]
     },
+    wallPreset: { control: 'select', options: ['classic', 'balanced', 'expressive'] },
+    rampPreset: { control: 'select', options: ['classic', 'balanced', 'expressive'] },
+    brandVividness: { control: { type: 'range', min: 0, max: 1, step: 0.01 } },
     fidelity: { control: 'select', options: ['anchored', 'unanchored'] },
     lightness: { control: 'select', options: ['hue-aware', 'shared'] },
     vividness: { control: { type: 'range', min: 0, max: 1, step: 0.01 } },

@@ -221,10 +221,16 @@ keys fail before import can silently discard data.
 ## Generate a color wall
 
 ```ts
-import { generateColorWall } from '@cognitap/radiant/color'
+import { generateColorWall, colorCalibrationPresets } from '@cognitap/radiant/color'
 import { updateThemeDocument } from '@cognitap/radiant'
 
-const wall = generateColorWall({ brand: '#7C3AED' })
+const wall = generateColorWall({
+  brand: '#7C3AED',
+  wallPreset: 'expressive',
+  rampPreset: 'balanced'
+})
+// Registry entries supply stable IDs, names and descriptions for public controls.
+console.log(colorCalibrationPresets)
 // Optional dials are materialised, so this reproduces every output swatch.
 const replay = generateColorWall(JSON.parse(JSON.stringify(wall.input)))
 
@@ -256,23 +262,40 @@ materialised controls and algorithm `version: 1` for replay. Persist that input
 as a generator recipe separately; the current version-1 theme document stores
 its color output, not a new untyped generation-settings field.
 
-| Input          | Default                                                              | Supported range / meaning                                                                                                                                                |
-| -------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `brand`        | Required                                                             | Opaque six-digit sRGB hex. Alpha, CSS functions, named colors and P3 sources are rejected explicitly.                                                                    |
-| `version`      | `1`                                                                  | Only the calibrated algorithm version 1 is supported.                                                                                                                    |
-| `gamut`        | `srgb`                                                               | Only sRGB output is currently supported. No automatic P3 fallback or source replacement.                                                                                 |
-| `fidelity`     | `anchored`                                                           | `anchored` preserves the original at its nearest-lightness numbered stop; `unanchored` keeps the regular ramp and separate original.                                     |
-| `vividness`    | Source C / available C, clamped to .10–.92; .35 for low-chroma input | 0–1. Controls generated chroma; it never changes the exact source anchor.                                                                                                |
-| `lightness`    | `hue-aware`                                                          | `hue-aware` adapts the middle toward each hue's gamut cusp; `shared` uses the common reference curve.                                                                    |
-| `distribution` | `1`                                                                  | .75–1.35. Redistributes intermediate shades while retaining endpoints/middle in regular chromatic ramps.                                                                 |
-| `neutralTint`  | `.012`                                                               | 0–.035 peak chroma in the Neutral ramp; zero produces untinted grays.                                                                                                    |
-| `hueAlignment` | `.6`                                                                 | 0–1. Rotate the wall so its nearest named family moves toward the brand hue; family order/spacing stays intact.                                                          |
-| `neutralHue`   | `255`                                                                | Any finite degrees, wrapped into [0, 360). Explicit direction when source C < .02; the near-neutral Brand ramp remains neutral apart from its exact source neighborhood. |
+| Input            | Default                                            | Supported range / meaning                                                                                                                                                |
+| ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `brand`          | Required                                           | Opaque six-digit sRGB hex. Alpha, CSS functions, named colors and P3 sources are rejected explicitly.                                                                    |
+| `version`        | `1`                                                | Only the calibrated algorithm version 1 is supported.                                                                                                                    |
+| `gamut`          | `srgb`                                             | Only sRGB output is currently supported. No automatic P3 fallback or source replacement.                                                                                 |
+| `fidelity`       | `anchored`                                         | `anchored` preserves the original at its nearest-lightness numbered stop; `unanchored` keeps the regular ramp and separate original.                                     |
+| `wallPreset`     | `balanced`                                         | `classic`, `balanced`, `expressive`; selects the supporting wall's curves, automatic vividness, neutral tint and hue alignment.                                          |
+| `rampPreset`     | `balanced`                                         | Same three IDs, independently selects brand curves, automatic vividness and anchor reshaping.                                                                            |
+| `brandVividness` | Source-derived by ramp preset                      | 0–1 brand-ramp chroma, independent of wall vividness; never changes the exact source.                                                                                    |
+| `vividness`      | Source-derived by wall preset                      | 0–1 supporting-wall chroma; it never changes the brand ramp.                                                                                                             |
+| `lightness`      | `hue-aware`                                        | `hue-aware` adapts the middle toward each hue's gamut cusp; `shared` uses the common reference curve.                                                                    |
+| `distribution`   | `1`                                                | .75–1.35. Redistributes intermediate shades while retaining endpoints/middle in regular chromatic ramps.                                                                 |
+| `neutralTint`    | Classic `.012`, Balanced `.008`, Expressive `.016` | 0–.035 peak chroma in the Neutral ramp; zero produces untinted grays.                                                                                                    |
+| `hueAlignment`   | Classic `.6`, Balanced `.25`, Expressive `.5`      | 0–1. Rotate the wall so its nearest named family moves toward the brand hue; family order/spacing stays intact.                                                          |
+| `neutralHue`     | `255`                                              | Any finite degrees, wrapped into [0, 360). Explicit direction when source C < .02; the near-neutral Brand ramp remains neutral apart from its exact source neighborhood. |
 
-The calibration follows the [accepted DEV-151 decision](https://github.com/cognitap/radiant/blob/50044fc0d6d66c94b2e3dfb02fc17c0d2828aff6/docs/research/dev-151-calibration-proposal.md).
+Classic retains the [accepted DEV-151 calibration](https://github.com/cognitap/radiant/blob/50044fc0d6d66c94b2e3dfb02fc17c0d2828aff6/docs/research/dev-151-calibration-proposal.md).
 It uses the reference lightness curve .985, .965, .93, .87, .79, .70, .61, .52,
 .43, .34, .24, hue-relative gamut fractions and a smooth chroma envelope. Anchored
 fidelity reshapes neighboring lightness and chroma around the unchanged source.
+Balanced and Expressive use monotone cubic lightness reshaping and local gamut-relative
+chroma blending around the anchor; Classic retains linear lightness reshaping.
+For automatic settings, let `m = sqrt(clamp(source C / .28, 0, 1))`. Balanced uses
+wall strength `.45 + .4m` and brand strength `.18 + .65m`; Expressive uses
+`.6 + .3m` and `.28 + .62m`. Classic uses source C / available C, clamped to
+.10–.92 (.35 for low-chroma sources), for both. Hue-aware midpoints, envelope
+limits and distribution curves follow the selected preset independently.
+`distribution` multiplies each preset's exponent (Classic 1, Balanced .95,
+Expressive 1.05); `shared` fixes the midpoint at .7. Explicit dials override
+preset defaults, and every effective input is materialised for exact replay.
+Public editors should clear wall-owned dials (vividness/tint/alignment) when
+selecting a wall preset, and brandVividness when selecting a ramp preset; retain
+independent controls and explicit semantic pins.
+
 Nearest-lightness ties prefer the earlier/lighter stop. Black and white can
 occupy the endpoint stops. Metrics and anchor selection use actual quantized
 colors, rather than assuming requested OKLCH values survived mapping unchanged.
@@ -330,7 +353,7 @@ The result has five parts:
 
 Defaults use Brand as primary, Neutral for surfaces, Emerald for success, Amber
 for warning and Red for danger. The support family is nearest to primary hue +
-120°. Low-chroma candidates use the wall's explicit hue direction and nominal
+150°. Low-chroma candidates use the wall's explicit hue direction and nominal
 family geometry rather than numerical hue noise. `working` can replace any of
 these family IDs with another existing wall family. Duplicate families are
 allowed deliberately; color alone does not establish status meaning or chart
@@ -339,9 +362,11 @@ separation. Use labels/icons as appropriate.
 Light canvas/surface start at Neutral 50/100, dark at 950/900. Foreground,
 secondary text, borders, focus, invalid state and action shades are selected
 against the actual emitted opaque surfaces, independently for each mode. Solid
-pairs target a 6:1 internal text margin where available, with 4.5:1 as the reported
-minimum. Primary fill also targets 3:1 against both surfaces because it identifies
-checked Checkbox/Radio state. Exact source identity stays separate: yellow may
+pairs require 4.5:1 text contrast. Among eligible primary shades, choose the
+smallest Oklab distance to the original brand, including lightness and both
+chromatic axes. Primary fill also requires 3:1 against both surfaces because it
+identifies checked Checkbox/Radio state. Thus a readable exact source is retained
+when its boundaries also pass; otherwise a nearby readable shade is selected. Exact source identity stays separate: yellow may
 remain the exact Brand 200 while a darker related shade supplies the light action.
 Black/white ink can be selected when it gives the strongest text contrast.
 

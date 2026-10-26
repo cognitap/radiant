@@ -6,6 +6,11 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## 0.0.4
 
+- Expose independent Classic, Balanced and Expressive wall/brand-ramp presets,
+  with Balanced defaults, separate vividness controls and materialised replay.
+  Semantic action fills now choose the nearby readable brand shade at 4.5:1
+  text and 3:1 surface boundaries; explicit semantic overrides stay authored.
+
 Experimental, additive workshop APIs for portable theme documents, deterministic
 color walls, semantic palettes and bounded appearance controls. Existing 0.0.3
 components and themes require no migration. See `docs/theming.md` for the

@@ -1,6 +1,13 @@
 import { generateColorWall, type ColorWall, type ColorWallInput } from '@cognitap/radiant/color'
 import { updateThemeDocument, themeDocumentFromDefinition } from '@cognitap/radiant'
-const input: ColorWallInput = { brand: '#7C3AED', vividness: 0.7, neutralHue: -105 }
+const input: ColorWallInput = {
+  brand: '#7C3AED',
+  wallPreset: 'expressive',
+  rampPreset: 'balanced',
+  brandVividness: 0.4,
+  vividness: 0.7,
+  neutralHue: -105
+}
 const wall: ColorWall = generateColorWall(input)
 generateColorWall(wall.input)
 updateThemeDocument(
@@ -41,3 +48,6 @@ recommendColorPalette(wall, { modes: { system: {} } })
 recommendColorPalette(wall, { modes: { light: { activePink: '#ffffff' } } })
 // @ts-expect-error Recommendations are deeply readonly.
 palette.color.modes.light.accent = '#ffffff'
+
+// @ts-expect-error Presets have stable public IDs.
+generateColorWall({ brand: '#7C3AED', wallPreset: 'studio' })

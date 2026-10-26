@@ -56,7 +56,8 @@ contract. Section imports preserve unrelated settings and deliberate component
 exceptions. See [portable documents and import semantics](theming.md#portable-workshop-documents). The pure
 `generateColorWall` interface supplies calibrated sRGB palette metadata through
 `@cognitap/radiant/color`; see [color-wall inputs and output](theming.md#generate-a-color-wall). Use
-`recommendColorPalette` to select a limited working set, map light/dark color and
+`colorCalibrationPresets` for independent wall/ramp treatments (Classic, Balanced,
+Expressive; Balanced by default), and `recommendColorPalette` to select a limited working set, map light/dark color and
 canvas layers, and inspect named contrast pairs before compiling a theme.
 Apply these together with bounded geometry using `updateThemeAppearance`; it
 updates existing spacing, control and surface roles without removing authored

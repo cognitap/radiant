@@ -133,26 +133,32 @@ function pair(
   target: number,
   boundary: boolean,
   fixedBackground?: string,
-  fixedForeground?: string
+  fixedForeground?: string,
+  source?: ReturnType<typeof measureHex>
 ): PaletteColorPair {
   const candidates = fixedBackground === undefined ? values : [fixedBackground]
   const foregrounds = fixedForeground === undefined ? inks : [fixedForeground]
   const ink = (background: string) =>
     foregrounds.reduce((a, b) => (contrast(a, background) >= contrast(b, background) ? a : b))
-  const eligible = candidates.filter(
-    bg =>
-      contrast(ink(bg), bg) >= 6 &&
-      (!boundary || backgrounds.every(surface => contrast(bg, surface) >= 3))
-  )
   const acceptable = candidates.filter(
     bg =>
       contrast(ink(bg), bg) >= 4.5 &&
       (!boundary || backgrounds.every(surface => contrast(bg, surface) >= 3))
   )
-  const pool = eligible.length ? eligible : acceptable.length ? acceptable : candidates
-  const background = pool.reduce((a, b) =>
-    Math.abs(measureHex(a).L - target) <= Math.abs(measureHex(b).L - target) ? a : b
-  )
+  const pool = acceptable.length ? acceptable : candidates
+  // Perceptual distance includes both lightness and the chromatic axes. A caller's
+  // explicit working-family choice still bounds the candidate pool.
+  const distance = (value: string) => {
+    const color = measureHex(value)
+    if (!source) return Math.abs(color.L - target)
+    const radians = Math.PI / 180
+    return Math.hypot(
+      color.L - source.L,
+      color.C * Math.cos(color.h * radians) - source.C * Math.cos(source.h * radians),
+      color.C * Math.sin(color.h * radians) - source.C * Math.sin(source.h * radians)
+    )
+  }
+  const background = pool.reduce((a, b) => (distance(a) <= distance(b) ? a : b))
   return { background, foreground: ink(background) }
 }
 
@@ -238,8 +244,8 @@ export function recommendColorPalette(
   )
   if (!supporting.length) throw new TypeError('colorWall requires supporting hue families.')
   const support = supporting.reduce((a, b) => {
-    return Math.abs(hueDifference(hueOf(a), hue + 120)) <=
-      Math.abs(hueDifference(hueOf(b), hue + 120))
+    return Math.abs(hueDifference(hueOf(a), hue + 150)) <=
+      Math.abs(hueDifference(hueOf(b), hue + 150))
       ? a
       : b
   })
@@ -291,9 +297,10 @@ export function recommendColorPalette(
         swatches(palette(selected[role])),
         inks,
         backgrounds,
-        role === 'neutral' ? (light ? 0.93 : 0.43) : light ? 0.6 : 0.75,
+        role === 'neutral' ? (light ? 0.93 : 0.43) : light ? 0.62 : 0.75,
         role === 'primary',
-        ...fills[role]
+        ...fills[role],
+        role === 'primary' ? source : undefined
       )
     }
     const colors: SharedTokens['color'] = {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { generateColorWall } from '../dist/library/color/index.js'
+import { generateColorWall, colorCalibrationPresets } from '../dist/library/color/index.js'
 import {
   defineThemeDocument,
   updateThemeDocument,
@@ -86,7 +86,7 @@ test('the accepted fixtures produce complete, ordered, in-gamut walls for both f
         assertWall(generateColorWall({ brand, lightness, fidelity }))
 })
 
-test('selected anchored shades retain the accepted DEV-151 visual reference values', () => {
+test('Classic anchored shades retain the accepted DEV-151 visual reference values', () => {
   // Small reference samples from b12143d, not a generated dump of complete walls.
   for (const [brand, anchor, shades] of [
     ['#7C3AED', 600, ['#F1EFFD', '#8B62EF', '#3A1478']],
@@ -96,7 +96,7 @@ test('selected anchored shades retain the accepted DEV-151 visual reference valu
     ['#7F6A75', 600, ['#F3F1F2', '#9D8491', '#3B3036']],
     ['#17111F', 950, ['#F1EFF4', '#836E9F', '#2C223A']]
   ]) {
-    const wall = generateColorWall({ brand })
+    const wall = generateColorWall({ brand, wallPreset: 'classic', rampPreset: 'classic' })
     assert.equal(wall.color.anchor.stop, anchor)
     assert.deepEqual(
       wall.color.palettes[0].swatches
@@ -137,7 +137,13 @@ test('explicit dials retain predictable neutral, hue and fixed-source behavior',
     untinted.color.palettes[0].swatches.find(s => s.stop === untinted.color.anchor.stop).value,
     '#7C3AED'
   )
-  const aligned = generateColorWall({ brand: '#7C3AED', hueAlignment: 1, fidelity: 'unanchored' })
+  const aligned = generateColorWall({
+    brand: '#7C3AED',
+    wallPreset: 'classic',
+    rampPreset: 'classic',
+    hueAlignment: 1,
+    fidelity: 'unanchored'
+  })
   assert.deepEqual(
     aligned.color.palettes[0].swatches,
     aligned.color.palettes.find(p => p.id === 'violet').swatches
@@ -163,6 +169,9 @@ test('control limits and seeded arbitrary sources preserve strict rendered order
     assertWall(
       generateColorWall({
         brand,
+        wallPreset: colorCalibrationPresets[i % 3].id,
+        rampPreset: colorCalibrationPresets[Math.floor(i / 3) % 3].id,
+        brandVividness: i & 64 ? 0 : 1,
         vividness: i & 1 ? 0 : 1,
         distribution: i & 2 ? 0.75 : 1.35,
         neutralTint: i & 4 ? 0 : 0.035,
@@ -203,6 +212,9 @@ test('unsupported inputs, versions, gamuts and dial ranges fail explicitly', () 
     [{ brand: 'color(display-p3 1 0 0)' }, /wide-gamut/],
     [{ version: 2 }, /version/],
     [{ gamut: 'display-p3' }, /gamut/],
+    [{ wallPreset: 'automatic' }, /wallPreset/],
+    [{ rampPreset: null }, /rampPreset/],
+    [{ brandVividness: 1.01 }, /brandVividness/],
     [{ vividness: NaN }, /vividness/],
     [{ vividness: 1.01 }, /vividness/],
     [{ distribution: 0.74 }, /distribution/],
@@ -217,4 +229,30 @@ test('unsupported inputs, versions, gamuts and dial ranges fail explicitly', () 
       () => generateColorWall(input === null ? null : { brand: '#7C3AED', ...input }),
       path
     )
+})
+
+test('named wall and ramp presets combine independently and materialise replayable controls', () => {
+  assert.deepEqual(
+    colorCalibrationPresets.map(p => p.id),
+    ['classic', 'balanced', 'expressive']
+  )
+  assert.ok(Object.isFrozen(colorCalibrationPresets[0]))
+  for (const brand of [...fixtures, '#000001', '#FFFFFE', '#010101', '#FEFEFE'])
+    for (const { id: wallPreset } of colorCalibrationPresets)
+      for (const { id: rampPreset } of colorCalibrationPresets) {
+        const wall = generateColorWall({ brand, wallPreset, rampPreset })
+        assertWall(wall)
+        assert.deepEqual(generateColorWall(JSON.parse(JSON.stringify(wall.input))), wall)
+        const otherRamp = generateColorWall({ brand, wallPreset, rampPreset: 'classic' })
+        assert.deepEqual(wall.color.palettes.slice(1), otherRamp.color.palettes.slice(1))
+        const otherWall = generateColorWall({ brand, wallPreset: 'classic', rampPreset })
+        assert.deepEqual(wall.color.palettes[0], otherWall.color.palettes[0])
+      }
+  const automatic = generateColorWall({ brand: '#7F6A75' })
+  assert.equal(automatic.input.wallPreset, 'balanced')
+  assert.equal(automatic.input.rampPreset, 'balanced')
+  assert.notEqual(automatic.input.vividness, automatic.input.brandVividness)
+  const brandOnly = generateColorWall({ ...automatic.input, brandVividness: 0 })
+  assert.deepEqual(brandOnly.color.palettes.slice(1), automatic.color.palettes.slice(1))
+  assert.notDeepEqual(brandOnly.color.palettes[0], automatic.color.palettes[0])
 })

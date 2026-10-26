@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { generateColorWall, recommendColorPalette } from '../dist/library/color/index.js'
+import {
+  generateColorWall,
+  recommendColorPalette,
+  colorCalibrationPresets
+} from '../dist/library/color/index.js'
 import {
   compileThemeDocument,
   themeDocumentFromDefinition,
@@ -77,6 +81,8 @@ test('seeded control limits retain contrast without changing the generated sourc
     const brand = '#' + (seed & 0xffffff).toString(16).padStart(6, '0')
     const wall = generateColorWall({
       brand,
+      wallPreset: colorCalibrationPresets[i % 3].id,
+      rampPreset: colorCalibrationPresets[Math.floor(i / 3) % 3].id,
       vividness: i & 1 ? 0 : 1,
       neutralTint: i & 2 ? 0 : 0.035,
       distribution: i & 4 ? 0.75 : 1.35
@@ -105,7 +111,7 @@ test('working families and independent role overrides are deliberate and preserv
   assert.deepEqual(darkOnly.color.modes.light, base.color.modes.light)
   assert.deepEqual(recommendColorPalette(wall, { working: { primary: undefined } }), base)
   const desaturated = recommendColorPalette(generateColorWall({ brand: '#808080', vividness: 0 }))
-  assert.equal(desaturated.working.support.paletteId, 'rose')
+  assert.equal(desaturated.working.support.paletteId, 'orange')
 })
 
 test('failed deliberate choices are retained with actual pair measurements and actionable messages', () => {
@@ -232,4 +238,18 @@ test('unsupported mappings and malformed wall inputs fail clearly instead of pro
       }),
     /gamut/
   )
+})
+
+test('all preset combinations retain readable semantic pairs and exact readable brands avoid unnecessary darkening', () => {
+  for (const brand of fixtures)
+    for (const { id: wallPreset } of colorCalibrationPresets)
+      for (const { id: rampPreset } of colorCalibrationPresets)
+        verify(recommendColorPalette(generateColorWall({ brand, wallPreset, rampPreset })))
+  for (const brand of ['#FF0000', '#0000FF']) {
+    const palette = recommendColorPalette(generateColorWall({ brand }))
+    assert.equal(palette.working.primary.light.background, brand)
+  }
+  const yellow = recommendColorPalette(generateColorWall({ brand: '#FFFF00' }))
+  assert.notEqual(yellow.working.primary.light.background, '#FFFF00')
+  assert.equal(yellow.working.primary.dark.background, '#FFFF00')
 })
