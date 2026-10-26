@@ -118,8 +118,8 @@ export type {
   ThemeFontMetadata
 } from './themes/index.js'
 
-export { generateColorWall } from './color/index.js'
-export type { ColorWall, ColorWallInput } from './color/index.js'
+export { generateColorWall, colorCalibrationPresets } from './color/index.js'
+export type { ColorWall, ColorWallInput, ColorCalibrationPreset } from './color/index.js'
 export { recommendColorPalette } from './color/index.js'
 export type {
   ColorPalette,
