@@ -917,6 +917,11 @@ are removed. Use `ThemeComponentOverrides` for reusable configuration and
 
 ### With Tailwind
 
+For opt-in prose and reusable text styles, see
+[responsive typography](docs/theming.md#responsive-typography). The pure
+`@cognitap/radiant/typography` entry resolves font-aware starting points through
+the existing theme compiler; applications still own font loading.
+
 Applications on Tailwind 4.3.3+ can import the source entry instead of
 `styles.css`, so their own build generates Radiant's utilities. Use one route,
 not both, or the utilities are duplicated:

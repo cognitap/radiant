@@ -27,7 +27,7 @@ test('the customization entry generates library and application utilities once w
     assert.equal(css.match(selector)?.length, 1, `Expected one generated ${selector}`)
   }
   assert.doesNotMatch(css, /@(import|theme|source|tailwind)\b/)
-  assert.doesNotMatch(css, /h1\s*,\s*h2\s*,\s*h3\b/)
+  assert.doesNotMatch(css, /(?:^|[{}])\s*h1\s*,\s*h2\s*,\s*h3\b/)
 })
 
 test('the compiled stylesheet includes focus, disabled, and forced-colors rules', () => {

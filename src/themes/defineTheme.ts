@@ -75,7 +75,11 @@ function validateTokens(value: unknown, baseline: object, path: string) {
     } else {
       validateScalar(
         item,
-        key === 'disabledOpacity' ? 'opacity' : key.endsWith('Weight') ? 'weight' : 'css',
+        key === 'disabledOpacity'
+          ? 'opacity'
+          : key.endsWith('Weight') || key === 'weight'
+            ? 'weight'
+            : 'css',
         `${path}.${key}`
       )
     }

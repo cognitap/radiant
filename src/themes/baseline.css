@@ -32,6 +32,137 @@
   --rad-color-danger: var(--_rad-light, oklch(0.56 0.19 25)) var(--_rad-dark, oklch(0.72 0.17 25));
   --rad-color-danger-foreground: var(--_rad-light, oklch(0.99 0 0))
     var(--_rad-dark, oklch(0.2 0.04 25));
+  --rad-typography-roles-prose-title-family: var(--rad-typography-family);
+  --rad-typography-roles-prose-title-size: 2.44140625rem;
+  --rad-typography-roles-prose-title-fluid-size: clamp(
+    2.44140625rem,
+    calc(1.41143799rem + 4.29153442cqi),
+    3.81469727rem
+  );
+  --rad-typography-roles-prose-title-weight: 600;
+  --rad-typography-roles-prose-title-line-height: 1.12;
+  --rad-typography-roles-prose-title-letter-spacing: -0.025em;
+  --rad-typography-roles-prose-title-measure: 22ch;
+  --rad-typography-roles-prose-heading-family: var(--rad-typography-family);
+  --rad-typography-roles-prose-heading-size: 1.5625rem;
+  --rad-typography-roles-prose-heading-fluid-size: clamp(
+    1.5625rem,
+    calc(1.26953125rem + 1.22070313cqi),
+    1.953125rem
+  );
+  --rad-typography-roles-prose-heading-weight: 600;
+  --rad-typography-roles-prose-heading-line-height: 1.25;
+  --rad-typography-roles-prose-heading-letter-spacing: -0.015em;
+  --rad-typography-roles-prose-heading-measure: 30ch;
+  --rad-typography-roles-prose-subheading-family: var(--rad-typography-family);
+  --rad-typography-roles-prose-subheading-size: 1.375rem;
+  --rad-typography-roles-prose-subheading-fluid-size: clamp(
+    1.375rem,
+    calc(1.234375rem + 0.5859375cqi),
+    1.5625rem
+  );
+  --rad-typography-roles-prose-subheading-weight: 600;
+  --rad-typography-roles-prose-subheading-line-height: 1.3;
+  --rad-typography-roles-prose-subheading-letter-spacing: -0.01em;
+  --rad-typography-roles-prose-subheading-measure: 36ch;
+  --rad-typography-roles-prose-body-family: var(--rad-typography-family);
+  --rad-typography-roles-prose-body-size: 1.25rem;
+  --rad-typography-roles-prose-body-fluid-size: 1.25rem;
+  --rad-typography-roles-prose-body-weight: 400;
+  --rad-typography-roles-prose-body-line-height: 1.6;
+  --rad-typography-roles-prose-body-letter-spacing: 0em;
+  --rad-typography-roles-prose-body-measure: 64ch;
+  --rad-typography-roles-prose-lead-family: var(--rad-typography-family);
+  --rad-typography-roles-prose-lead-size: 1.40625rem;
+  --rad-typography-roles-prose-lead-fluid-size: 1.40625rem;
+  --rad-typography-roles-prose-lead-weight: 400;
+  --rad-typography-roles-prose-lead-line-height: 1.5;
+  --rad-typography-roles-prose-lead-letter-spacing: 0em;
+  --rad-typography-roles-prose-lead-measure: 55ch;
+  --rad-typography-roles-prose-small-family: var(--rad-typography-family);
+  --rad-typography-roles-prose-small-size: 1rem;
+  --rad-typography-roles-prose-small-fluid-size: 1rem;
+  --rad-typography-roles-prose-small-weight: 400;
+  --rad-typography-roles-prose-small-line-height: 1.5;
+  --rad-typography-roles-prose-small-letter-spacing: 0em;
+  --rad-typography-roles-prose-small-measure: 64ch;
+  --rad-typography-roles-prose-quote-family: var(--rad-typography-family);
+  --rad-typography-roles-prose-quote-size: 1.5625rem;
+  --rad-typography-roles-prose-quote-fluid-size: 1.5625rem;
+  --rad-typography-roles-prose-quote-weight: 400;
+  --rad-typography-roles-prose-quote-line-height: 1.4;
+  --rad-typography-roles-prose-quote-letter-spacing: -0.01em;
+  --rad-typography-roles-prose-quote-measure: 64ch;
+  --rad-typography-roles-ui-title-family: var(--rad-typography-family);
+  --rad-typography-roles-ui-title-size: 1.25rem;
+  --rad-typography-roles-ui-title-fluid-size: 1.25rem;
+  --rad-typography-roles-ui-title-weight: 600;
+  --rad-typography-roles-ui-title-line-height: 1.3;
+  --rad-typography-roles-ui-title-letter-spacing: -0.015em;
+  --rad-typography-roles-ui-title-measure: none;
+  --rad-typography-roles-ui-body-family: var(--rad-typography-family);
+  --rad-typography-roles-ui-body-size: 1rem;
+  --rad-typography-roles-ui-body-fluid-size: 1rem;
+  --rad-typography-roles-ui-body-weight: 400;
+  --rad-typography-roles-ui-body-line-height: 1.5;
+  --rad-typography-roles-ui-body-letter-spacing: 0em;
+  --rad-typography-roles-ui-body-measure: none;
+  --rad-typography-roles-ui-label-family: var(--rad-typography-family);
+  --rad-typography-roles-ui-label-size: 1rem;
+  --rad-typography-roles-ui-label-fluid-size: 1rem;
+  --rad-typography-roles-ui-label-weight: 500;
+  --rad-typography-roles-ui-label-line-height: 1.4;
+  --rad-typography-roles-ui-label-letter-spacing: 0em;
+  --rad-typography-roles-ui-label-measure: none;
+  --rad-typography-roles-ui-supporting-family: var(--rad-typography-family);
+  --rad-typography-roles-ui-supporting-size: 0.9375rem;
+  --rad-typography-roles-ui-supporting-fluid-size: 0.9375rem;
+  --rad-typography-roles-ui-supporting-weight: 400;
+  --rad-typography-roles-ui-supporting-line-height: 1.5;
+  --rad-typography-roles-ui-supporting-letter-spacing: 0em;
+  --rad-typography-roles-ui-supporting-measure: none;
+  --rad-typography-roles-ui-caption-family: var(--rad-typography-family);
+  --rad-typography-roles-ui-caption-size: 0.875rem;
+  --rad-typography-roles-ui-caption-fluid-size: 0.875rem;
+  --rad-typography-roles-ui-caption-weight: 400;
+  --rad-typography-roles-ui-caption-line-height: 1.5;
+  --rad-typography-roles-ui-caption-letter-spacing: 0em;
+  --rad-typography-roles-ui-caption-measure: none;
+  --rad-typography-roles-ui-metric-family: var(--rad-typography-family);
+  --rad-typography-roles-ui-metric-size: 2rem;
+  --rad-typography-roles-ui-metric-fluid-size: 2rem;
+  --rad-typography-roles-ui-metric-weight: 600;
+  --rad-typography-roles-ui-metric-line-height: 1.15;
+  --rad-typography-roles-ui-metric-letter-spacing: -0.03em;
+  --rad-typography-roles-ui-metric-measure: none;
+  --rad-typography-roles-ui-eyebrow-family: var(--rad-typography-family);
+  --rad-typography-roles-ui-eyebrow-size: 0.75rem;
+  --rad-typography-roles-ui-eyebrow-fluid-size: 0.75rem;
+  --rad-typography-roles-ui-eyebrow-weight: 600;
+  --rad-typography-roles-ui-eyebrow-line-height: 1.4;
+  --rad-typography-roles-ui-eyebrow-letter-spacing: 0.1em;
+  --rad-typography-roles-ui-eyebrow-measure: none;
+  --rad-typography-roles-display-family: var(--rad-typography-family);
+  --rad-typography-roles-display-size: 2.44140625rem;
+  --rad-typography-roles-display-fluid-size: clamp(
+    2.44140625rem,
+    calc(0.69618225rem + 7.27176666cqi),
+    4.76837158rem
+  );
+  --rad-typography-roles-display-weight: 600;
+  --rad-typography-roles-display-line-height: 1.06;
+  --rad-typography-roles-display-letter-spacing: -0.035em;
+  --rad-typography-roles-display-measure: 18ch;
+  --rad-typography-roles-code-family: ui-monospace, monospace;
+  --rad-typography-roles-code-size: 0.875rem;
+  --rad-typography-roles-code-fluid-size: 0.875rem;
+  --rad-typography-roles-code-weight: 400;
+  --rad-typography-roles-code-line-height: 1.65;
+  --rad-typography-roles-code-letter-spacing: 0em;
+  --rad-typography-roles-code-measure: 80ch;
+  --rad-typography-flow-paragraph: 1.25em;
+  --rad-typography-flow-heading-before: 2em;
+  --rad-typography-flow-heading-after: 0.625em;
   --rad-typography-family: system-ui, sans-serif;
   --rad-typography-body-size: 0.875rem;
   --rad-typography-small-size: 0.8125rem;

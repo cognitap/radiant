@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { build, preview, version as viteVersion } from 'vite'
 import { chromium } from 'playwright'
 import { browserEnvironment } from './record-browser-environment.mjs'
+import { verifyTypography } from './verify-typography.mjs'
 
 const output = fileURLToPath(new URL('../output/browser/installed-styles/', import.meta.url))
 const rootSource = fileURLToPath(new URL('../src/', import.meta.url))
@@ -67,7 +68,7 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
         path.join(consumer, 'index.html'),
         `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Installed styles</title></head><body data-route="${route.name}"><div id="root"></div><script type="module" src="/entry.js"></script></body></html>`
       )
-      const appCSS = `.app-override{border-radius:31px;padding-inline:23px}.app-override:hover{background-color:#123456}.app-override:disabled{opacity:1}`
+      const appCSS = `.app-override{border-radius:31px;padding-inline:23px}.app-override:hover{background-color:#123456}.app-override:disabled{opacity:1}.type-app-override{font-size:30px;line-height:2;font-weight:700;font-family:monospace;letter-spacing:.025em;max-inline-size:none}`
       writeFileSync(
         path.join(consumer, 'app.css'),
         `${route.imports}\n${route.name.startsWith('compiled') ? appCSS : ''}`
@@ -341,6 +342,11 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
             }
           })
         }
+      report.typography ??= []
+      report.typography.push({
+        route: route.name,
+        cases: await verifyTypography(page, route.name, directory)
+      })
       await page.close()
       page = undefined
       await new Promise(resolve => server.httpServer.close(resolve))

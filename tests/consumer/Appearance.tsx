@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { TypographyProof } from './Typography.js'
 import {
   Accordion,
   AccordionContent,
@@ -228,6 +229,7 @@ function Appearance() {
         <Button>Sibling action</Button>
         <Input aria-label="Sibling input" />
       </ThemeScope>
+      <TypographyProof mode={mode} />
       <p id="destination">Local destination.</p>
     </main>
   )

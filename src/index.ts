@@ -94,6 +94,8 @@ export type {
 export { ThemeScope } from './ThemeScope.js'
 export type { ThemeScopeProps } from './ThemeScope.js'
 export type { ButtonProps, ButtonRenderProps, ButtonVariant } from './Button.js'
+export { generateTypography, typographyPresets, typographyRoles } from './typography/index.js'
+export type * from './typography/types.js'
 export type { ControlSize, Tone } from './presentation.js'
 
 export {

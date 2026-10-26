@@ -980,8 +980,28 @@ test('default styles and the optional reset are compiled and self-contained', ()
   assert.match(styles, /--rad-color-accent\s*:/)
   assert.doesNotMatch(styles, /--(?:color-primary|color-background|radius-control|ease-spring)\s*:/)
   assert.match(styles, /\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/)
-  assert.doesNotMatch(styles, /h1\s*,\s*h2\s*,\s*h3\b/)
+  assert.doesNotMatch(styles, /(?:^|[{}])\s*h1\s*,\s*h2\s*,\s*h3\b/)
   assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)
+})
+
+test('installed pure typography exports replay through the public document compiler', async () => {
+  const typography = await import('@cognitap/radiant/typography')
+  const root = await import('@cognitap/radiant')
+  assert.equal(typography.generateTypography, root.generateTypography)
+  const result = typography.generateTypography({ preset: 'source-serif' })
+  assert.equal(typography.typographyRoles.length, 16)
+  assert.ok(Object.isFrozen(typography.typographyPresets.inter.fonts))
+  const document = root.defineThemeDocument({
+    kind: 'radiant-theme',
+    version: 1,
+    id: 'installed-type',
+    name: 'Installed type',
+    sections: { typography: { typesetting: JSON.parse(JSON.stringify(result.input)) } }
+  })
+  assert.equal(
+    root.compileThemeDocument(document).modes.light['--rad-typography-roles-prose-body-size'],
+    '1.3125rem'
+  )
 })
 
 test('the installed package declares shared React and needs no Tailwind', () => {
