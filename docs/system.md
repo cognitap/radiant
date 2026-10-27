@@ -255,3 +255,10 @@ springs](motion.md#native-action-springs) for event and style ownership.
 MotionProvider also enables native disclosure height and Dialog presentation.
 Native close and focus restoration stay immediate; a bounded inert visual copy
 may finish Dialog exit. See [native transition ownership](motion.md#disclosure-and-dialog-transitions).
+
+Use `useSpringFollow` for committed numeric targets or subscribed sources. For
+resize/reorder, `useSpringLayout` measures direct-child layout slots containing
+dedicated motion parts; actual native content stays in place and text reflows
+without scaling. See [layout geometry and ownership](motion.md#layout-resize-and-reorder)
+before composing the wrappers. Both opt-in interfaces use theme profiles and
+live reduced motion. Their canonical interactive proofs remain in System/Motion.

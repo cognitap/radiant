@@ -1,9 +1,17 @@
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './Collapsible.js'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogClose } from './Dialog.js'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button.js'
-import { MotionProvider, useSpringStyle, useSpringDrag } from './motion/react.js'
+import { Card, CardTitle, CardDescription } from './Card.js'
+import { bindSpringStyle } from './motion/index.js'
+import {
+  MotionProvider,
+  useSpringStyle,
+  useSpringDrag,
+  useSpringFollow,
+  useSpringLayout
+} from './motion/react.js'
 
 function RuntimeBinding() {
   const ref = useRef<HTMLButtonElement>(null)
@@ -126,3 +134,158 @@ function DragProof() {
   )
 }
 export const DragSnap: StoryObj<typeof meta> = { render: () => <DragProof /> }
+
+function FollowProof() {
+  const [target, setTarget] = useState(80)
+  const [running, setRunning] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const output = useRef<HTMLOutputElement>(null)
+  const spring = useSpringFollow(target)
+  useEffect(() => {
+    if (!ref.current) return
+    return bindSpringStyle(ref.current, spring, 'translateX')
+  }, [spring])
+  useEffect(
+    () =>
+      spring.subscribe(value => {
+        if (output.current) output.current.value = `${value.toFixed(1)}px`
+      }),
+    [spring]
+  )
+  useEffect(() => {
+    if (!running) return
+    let frame: number
+    const start = performance.now()
+    const tick = (now: number) => {
+      setTarget(80 + Math.sin((now - start) / 400) * 70)
+      frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [running])
+  return (
+    <div className="grid gap-4">
+      <div
+        className="relative h-20 w-64 rounded-lg bg-neutral-200"
+        onPointerMove={event => {
+          if (!running)
+            setTarget(
+              Math.max(
+                0,
+                Math.min(160, event.clientX - event.currentTarget.getBoundingClientRect().left)
+              )
+            )
+        }}
+      >
+        <div
+          aria-hidden="true"
+          className="absolute size-8 rounded-full border-2 border-neutral-700"
+          style={{ translate: `${target}px 0` }}
+        />
+        <div
+          ref={ref}
+          aria-hidden="true"
+          className="absolute top-10 size-8 rounded-full bg-neutral-700"
+        />
+      </div>
+      <label>
+        Following target
+        <input
+          type="range"
+          min={0}
+          max={160}
+          value={target}
+          onChange={event => {
+            setRunning(false)
+            setTarget(Number(event.currentTarget.value))
+          }}
+        />
+      </label>
+      <Button onClick={() => setRunning(value => !value)}>
+        {running ? 'Pause moving target' : 'Start moving target'}
+      </Button>
+      <Button
+        onClick={() => {
+          setRunning(false)
+          setTarget(80)
+        }}
+      >
+        Reset target
+      </Button>
+      <p>
+        Move across the track, use the slider, or start the moving target. The filled marker follows
+        the outlined destination. Reduced motion follows immediately.
+      </p>
+      <output
+        ref={output}
+        aria-live="off"
+      >
+        80px
+      </output>
+    </div>
+  )
+}
+export const FollowingValues: StoryObj<typeof meta> = { render: () => <FollowProof /> }
+
+function LayoutProof() {
+  const root = useRef<HTMLDivElement>(null)
+  const [items, setItems] = useState(['Alpha', 'Beta', 'Gamma'])
+  const [wide, setWide] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  useSpringLayout(root)
+  return (
+    <div className="grid gap-4">
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => setItems(values => [...values.slice(1), values[0]!])}>
+          Reorder cards
+        </Button>
+        <Button onClick={() => setWide(value => !value)}>Change layout width</Button>
+        <Button onClick={() => setExpanded(value => !value)}>Change card content</Button>
+      </div>
+      <div className="max-h-96 overflow-auto border border-neutral-400 p-2">
+        <div
+          ref={root}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: 16,
+            width: wide ? 460 : 300,
+            maxWidth: '100%'
+          }}
+        >
+          {items.map(item => (
+            <div
+              key={item}
+              data-rad-layout-slot=""
+              style={{ display: 'flow-root' }}
+            >
+              <Card
+                data-rad-layout-part=""
+                className="p-4"
+              >
+                <CardTitle level={3}>{item}</CardTitle>
+                <CardDescription>
+                  {expanded
+                    ? 'Content can change while these cards move. Text reflows at the animated width; borders and children are never scaled.'
+                    : 'Real content, natural layout.'}
+                </CardDescription>
+                <Button
+                  controlSize="small"
+                  aria-label={`Toggle details for ${item}`}
+                  onClick={() => setExpanded(value => !value)}
+                >
+                  Details
+                </Button>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p>
+        Interrupt repeatedly using any control. Slot identity follows the keyed DOM. Native buttons
+        and focus stay with the actual content; reduced motion applies layout immediately.
+      </p>
+    </div>
+  )
+}
+export const LayoutResizeReorder: StoryObj<typeof meta> = { render: () => <LayoutProof /> }
