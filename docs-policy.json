@@ -1,0 +1,67 @@
+{
+  "defaultBudget": 600,
+  "budgets": {
+    "CHANGELOG.md": null,
+    "README.md": 500,
+    "docs/architecture.md": 1500,
+    "docs/theming.md": 2000
+  },
+  "ticketPrefixes": ["DEV"],
+  "forbiddenPaths": ["docs/verification/**", "docs/research/**", "docs/**/*-audit-*.md"],
+  "ignore": [".github/**"],
+  "baseline": {
+    "words": {
+      "README.md": 5094,
+      "docs/accessibility.md": 1077,
+      "docs/contracts/README.md": 2732,
+      "docs/contracts/migration.md": 973,
+      "docs/react-bindings.md": 973,
+      "docs/research/dev-151-calibration-proposal.md": 768,
+      "docs/research/dev-151-color-calibration.md": 737,
+      "docs/research/dev-162-font-research.md": 1551,
+      "docs/research/dev-162-typography-model.md": 1449,
+      "docs/storybook-audit-2026-10.md": 1087,
+      "docs/storybook.md": 1170,
+      "docs/system.md": 1529,
+      "docs/testing.md": 1463,
+      "docs/theming.md": 5013,
+      "docs/verification/2026-10-25-harmonisation.md": 613,
+      "docs/verification/2026-10-25-installed-compositions.md": 1374,
+      "docs/verification/2026-10-25-installed-styles.md": 876
+    },
+    "ticketRefs": {
+      "CHANGELOG.md": 21,
+      "RELEASE_POLICY.md": 1,
+      "docs/accessibility.md": 6,
+      "docs/contracts/README.md": 25,
+      "docs/contracts/migration.md": 9,
+      "docs/react-bindings.md": 4,
+      "docs/research/dev-151-calibration-proposal.md": 8,
+      "docs/research/dev-151-color-calibration.md": 1,
+      "docs/research/dev-162-font-research.md": 1,
+      "docs/research/dev-162-typography-model.md": 11,
+      "docs/storybook-audit-2026-10.md": 4,
+      "docs/testing.md": 7,
+      "docs/theming.md": 6,
+      "docs/verification/2026-10-25-chromium.md": 1,
+      "docs/verification/2026-10-25-harmonisation.md": 8,
+      "docs/verification/2026-10-25-installed-compositions.md": 7,
+      "docs/verification/2026-10-25-installed-styles.md": 6,
+      "docs/verification/2026-10-26-typography.md": 4,
+      "docs/verification/2026-10-27-component-typography.md": 2
+    },
+    "forbidden": [
+      "docs/research/dev-151-calibration-proposal.md",
+      "docs/research/dev-151-color-calibration.md",
+      "docs/research/dev-162-font-research.md",
+      "docs/research/dev-162-typography-model.md",
+      "docs/storybook-audit-2026-10.md",
+      "docs/verification/2026-10-25-chromium.md",
+      "docs/verification/2026-10-25-harmonisation.md",
+      "docs/verification/2026-10-25-installed-compositions.md",
+      "docs/verification/2026-10-25-installed-styles.md",
+      "docs/verification/2026-10-26-typography.md",
+      "docs/verification/2026-10-27-component-typography.md"
+    ]
+  }
+}
