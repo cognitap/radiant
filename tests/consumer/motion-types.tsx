@@ -76,3 +76,36 @@ function DragBinding() {
   )
 }
 void DragBinding
+
+import { bindSpringSource, type SpringSource } from '@cognitap/radiant/motion'
+import { useSpringFollow } from '@cognitap/radiant/motion/react'
+const source: SpringSource = spring
+const detachSource = bindSpringSource(createSpring(0), source)
+detachSource()
+function Following({ target }: { target: number | SpringSource }) {
+  const follower = useSpringFollow(target)
+  return <Button onClick={() => follower.stop()}>Pause</Button>
+}
+void Following
+// @ts-expect-error targets use consistent numeric units
+useSpringFollow('20%')
+
+import { bindSpringLayout, type SpringLayoutController } from '@cognitap/radiant/motion'
+import { useSpringLayout } from '@cognitap/radiant/motion/react'
+function LayoutBinding() {
+  const ref = useRef<HTMLDivElement>(null)
+  const layout = useSpringLayout(ref)
+  layout.get(document.createElement('div'))?.width.toFixed(1)
+  // @ts-expect-error React owns theme policy and lifecycle
+  layout.configure({ enabled: true })
+  return (
+    <div ref={ref}>
+      <div data-rad-layout-slot="">
+        <div data-rad-layout-part="">Card</div>
+      </div>
+    </div>
+  )
+}
+const bindLayout: (root: HTMLElement) => SpringLayoutController = bindSpringLayout
+void bindLayout
+void LayoutBinding
