@@ -4,6 +4,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add subscribed spring sources and a React changing-target follower with momentum-preserving retargeting (DEV-176).
+
 - Add one-axis spring drag/release/snap controllers and native/React bindings,
   with signed velocity, re-grab/cancel, bounded presentation, native touch
   scrolling and keyboard alternatives (DEV-175).

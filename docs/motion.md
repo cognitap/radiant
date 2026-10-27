@@ -281,3 +281,48 @@ or keyboard goals immediately, rather than disabling functional controls.
 
 See System/Motion → DragSnap for a real handle, explicit native button alternatives,
 range target and position readout. The public editor composes these APIs in DEV-178.
+
+## Following changing targets
+
+```tsx
+import { useEffect, useRef } from 'react'
+import { bindSpringStyle } from '@cognitap/radiant/motion'
+import { useSpringFollow } from '@cognitap/radiant/motion/react'
+
+function Follower({ target }: { target: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const spring = useSpringFollow(target)
+  useEffect(() => {
+    if (ref.current) return bindSpringStyle(ref.current, spring, 'translateX')
+  }, [spring])
+  return (
+    <div
+      ref={ref}
+      aria-hidden="true"
+    />
+  )
+}
+```
+
+`useSpringFollow(target, interaction?, reducedValue?)` accepts either a finite numeric
+prop or a `SpringSource` with synchronous `get()` and `subscribe(listener)` methods.
+A source notifies with its latest numeric destination; it must offer a server-safe
+snapshot when used during SSR. The hook reads props after commit and external
+notifications directly, without storing each animated frame in React state. Source
+replacement detaches the old subscription and retargets the same spring. Target
+changes preserve current position and momentum; theme parameter changes wait until
+rest. Off/reduced motion follows the latest destination immediately, or uses the
+explicit neutral value. Initial server markup is unchanged by the binding.
+
+For manual ownership, `bindSpringSource(spring, source)` subscribes an existing
+controller and reads the current snapshot. Its idempotent cleanup only detaches
+the source: the last destination can finish. Call `spring.stop()` after detaching
+to freeze presentation, or `destroy()` to dispose an owned controller. Calling
+`stop()` while still bound freezes only until the next source notification. Never
+bind a source to itself or create cyclic follower chains. One binding owns targets
+at a time; the binding never owns or destroys its source. Numeric units, property
+ownership and parameter rules are the same as `createSpring`.
+
+System/Motion → FollowingValues offers pointer, native range and moving-target
+controls with a visible destination, follower and numeric readout. This is a
+library development proof; the public workshop remains DEV-178.

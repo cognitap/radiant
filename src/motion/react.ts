@@ -17,6 +17,7 @@ import { createSpringDrag, type SpringDragController, type SpringDragOptions } f
 import { bindSpringDrag } from './dragBrowser.js'
 import { createSpring, type SpringController } from './runtime.js'
 import { bindSpringStyle, type SpringStyleProperty } from './browser.js'
+import { bindSpringSource, type SpringSource } from './follow.js'
 
 // Start conservatively for SSR/hydration; only subscribing reads the browser.
 const listeners = new Set<() => void>()
@@ -209,4 +210,22 @@ export function useSpringDrag(
     []
   )
   return control
+}
+
+/** Follow committed numeric props or an external source without rendering each spring frame. */
+export function useSpringFollow(
+  target: number | SpringSource,
+  interaction: MotionInteraction = 'follow',
+  reducedValue?: number
+): SpringController {
+  const spring = useSpring(
+    typeof target === 'number' ? target : target.get(),
+    interaction,
+    reducedValue
+  )
+  useEffect(() => {
+    if (typeof target === 'number') spring.to(target)
+    else return bindSpringSource(spring, target)
+  }, [spring, target])
+  return spring
 }

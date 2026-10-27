@@ -76,3 +76,16 @@ function DragBinding() {
   )
 }
 void DragBinding
+
+import { bindSpringSource, type SpringSource } from '@cognitap/radiant/motion'
+import { useSpringFollow } from '@cognitap/radiant/motion/react'
+const source: SpringSource = spring
+const detachSource = bindSpringSource(createSpring(0), source)
+detachSource()
+function Following({ target }: { target: number | SpringSource }) {
+  const follower = useSpringFollow(target)
+  return <Button onClick={() => follower.stop()}>Pause</Button>
+}
+void Following
+// @ts-expect-error targets use consistent numeric units
+useSpringFollow('20%')

@@ -20,3 +20,6 @@ export type { LayoutBounds } from './layout.js'
 export { createSpringDrag } from './drag.js'
 export type { SpringDragOptions, SpringDragController } from './drag.js'
 export { bindSpringDrag } from './dragBrowser.js'
+
+export { bindSpringSource } from './follow.js'
+export type { SpringSource } from './follow.js'
