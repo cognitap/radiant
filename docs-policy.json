@@ -7,7 +7,5 @@
     "docs/architecture.md": 1500
   },
   "banned": ["docs/verification/**", "docs/research/**", "docs/*-audit-*.md"],
-  "legacy": {
-    "docs/motion.md": 2489
-  }
+  "legacy": {}
 }
