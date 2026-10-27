@@ -761,8 +761,8 @@ the muted foreground unless the component supplies its own `mark` color.
 
 Component overrides use the existing family configuration keys, grouped under
 `button`, `link`, `field`, `input`, `checkbox`, `radio`, `radioGroup`, `dialog`,
-`collapsible`, `accordion`, and `card`. Public declaration types are the
-closed-key reference. `radioGroup.gap` controls group layout;
+`collapsible`, `accordion`, and `card`. Every key is listed in
+[`src/themes/components.ts`](../src/themes/components.ts). `radioGroup.gap` controls group layout;
 `radio.labelGap` controls spacing within a single option. Button-only fonts,
 uppercase text, sheen, shadows, squash, and pressed shape belong under
 `components.button`. Passive surfaces have their own shared surface tokens.
@@ -978,7 +978,7 @@ The theme registry is readonly; choose a preset by
 `theme.id` rather than editing the registry or relying on its display name.
 Storybook's global Theme and Mode controls use this same preset registry.
 Button and Link now share `variant`, `tone`, and `controlSize`; see the
-[README action migration table](../README.md#action-api-migration-breaking).
+[changelog](../CHANGELOG.md).
 Action-only geometry, elevation and motion remain deliberate Button component
 overrides consumed by both Button and action-shaped Link. Inline/subtle Link
 retains its own decoration and focus overrides. Soft and unfilled ink mixes the

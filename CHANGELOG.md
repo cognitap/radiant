@@ -182,7 +182,19 @@ compatibility-export and ambient-token availability notes.
   `ControlSize`; remove `ButtonRadius` and use theme/local CSS. `ButtonVariant`
   and `LinkVariant` reflect the new vocabulary; `Tone` is a shared export.
   Selectors migrate from `data-size` to `data-control-size`, with `data-tone`
-  recording palette independently. See the README's action migration table.
+  recording palette independently.
+
+  | Previous API                                    | Replacement                                                       |
+  | ----------------------------------------------- | ----------------------------------------------------------------- |
+  | Button `variant="primary"`                      | `variant="solid" tone="accent"` (the defaults)                    |
+  | Button `variant="secondary"`                    | `variant="soft" tone="neutral"`                                   |
+  | Button `variant="warning"` / `"destructive"`    | `variant="solid" tone="warning"` / `"danger"`                     |
+  | Button `variant="outline"` / `"ghost"`          | Same variant, add `tone="neutral"` to keep the previous palette   |
+  | Link `variant="button" tone={oldButtonVariant}` | The matching variant/tone pair above                              |
+  | `size="small" / "default" / "large"`            | `controlSize="small" / "medium" / "large"`                        |
+  | `radius="full"`                                 | `className="rounded-full"`, or a `components.button.radius` theme |
+  | `[data-size]`                                   | `[data-control-size]`                                             |
+
 - Soft actions support all four tones; unfilled action/text-link ink derives
   from the selected palette and scope foreground. Neutral soft/outline/ghost
   preserve the previous neutral palette. The private shared recipe retains
