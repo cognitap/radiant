@@ -4,33 +4,32 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
-- **Breaking typography/layout adoption (DEV-167):** existing component text now
-  consumes UI Body/Title/Label/Supporting roles. Recipes style production
-  components as well as semantic specimens. Inline/subtle links inherit parent
-  typography. UI leading is explicit, and selection/disclosure labels now use
-  label weight; review wrapping/layouts. Control sizes and component/caller
-  exceptions retain precedence. Baseline UI roles bridge the earlier tokens and
-  preset settings; migrate to explicit roles or a typesetting recipe as described
-  in [the theming guide](docs/theming.md#component-roles-and-earlier-themes).
-  This is source preparation only; chapter publication remains DEV-169.
-
 ## 0.0.5
 
-- Add opt-in responsive typography: Body/Headings/UI/Code assignments, 16 text
-  styles, independent prose/UI rhythm, font-aware starting points, deliberate
-  style overrides and weight-range warnings (DEV-163). Export the pure
-  `@cognitap/radiant/typography` entry and compile `typography.typesetting` through
-  the existing portable theme document. Semantic HTML hooks share generated CSS
-  across compiled and Tailwind routes, with local containers and compact fallback.
-- Preserve legacy typography tokens and existing component exceptions. Existing
-  component role adoption and the public editor remain later chapter work. Font
-  loading stays consumer-owned. New authoring keys require matching JavaScript
-  and CSS; older parsers reject them. This prepares an experimental release;
-  publication and the exact public docs pin remain the chapter acceptance step.
+- Add responsive typography: Body/Headings/UI/Code assignments, 16 reusable
+  styles, independent prose/UI rhythm, font-aware starting points, responsive
+  local-container sizes, deliberate style overrides and weight warnings. Export
+  the pure `@cognitap/radiant/typography` entry and compile the normalized
+  `typography.typesetting` recipe through portable theme documents (DEV-163).
+- **Breaking layout adoption (DEV-167):** production component text consumes UI
+  Body/Title/Label/Supporting roles. Inline/subtle links inherit surrounding
+  text. UI leading is explicit and selection/disclosure labels use label weight;
+  review wrapping/layouts. Control-size metrics and component/caller overrides
+  retain precedence. Baseline role aliases preserve earlier theme and preset
+  settings; see [component mapping and migration](docs/theming.md#component-roles-and-earlier-themes).
+- Preserve available font axis ranges as portable metadata in full/selective
+  theme documents (DEV-168). `ThemeFontAxis` records tag/min/default/max; the
+  parser rejects malformed, duplicate and unbounded ranges. Axes describe file
+  capabilities; trial-only adjustments and local binary files are not exported.
+  Metadata never loads a font or changes compiled paint.
 
-Automated installed Chromium evidence covers roles, widths, modes/scopes, caller
-overrides and text probes. It does not establish broad font/script, browser/AT
-or final production chapter readiness.
+Experimental 0.x release. Use matching package JavaScript/CSS. Older parsers
+reject new recipe/axis keys. Applications own font files, licensing, loading and
+script/fallback verification. Automated installed Chromium evidence covers both
+CSS routes, modes/scopes, caller overrides, responsive roles and canonical forms;
+it is not manual browser/AT or broad font/script certification. The public
+workshop is promoted by the coordinated DEV-169 docs PR after registry integrity
+is verified.
 
 ## 0.0.4
 

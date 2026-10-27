@@ -117,6 +117,7 @@ export type {
   ThemeBrandSource,
   ThemePalette,
   ThemeTypographySection,
+  ThemeFontAxis,
   ThemeFontMetadata
 } from './themes/index.js'
 

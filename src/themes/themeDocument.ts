@@ -158,11 +158,37 @@ function validateFonts(value: unknown, path: string) {
   for (const [i, font] of value.entries()) {
     const p = `${path}.${i}`
     record(font, p)
-    keys(font, ['id', 'family', 'source', 'weights', 'styles'], p)
+    keys(font, ['id', 'family', 'source', 'weights', 'styles', 'axes'], p)
     textValue(font.id, `${p}.id`)
     textValue(font.family, `${p}.family`)
     unique(font.id, ids, `${p}.id`)
     choice(font.source, ['system', 'catalog', 'local'], `${p}.source`)
+    if (font.axes !== undefined) {
+      list(font.axes, `${p}.axes`)
+      if (font.axes.length > 32) throw new TypeError(`${p}.axes supports at most 32 axes.`)
+      const tags = new Set<unknown>()
+      for (const [j, axis] of font.axes.entries()) {
+        const at = `${p}.axes.${j}`
+        record(axis, at)
+        keys(axis, ['tag', 'min', 'default', 'max'], at)
+        if (typeof axis.tag !== 'string' || !/^[A-Za-z][A-Za-z0-9]{3}$/.test(axis.tag))
+          throw new TypeError(
+            `${at}.tag must contain four ASCII letters/digits, starting with a letter.`
+          )
+        unique(axis.tag, tags, `${at}.tag`)
+        for (const key of ['min', 'default', 'max'])
+          if (
+            typeof axis[key] !== 'number' ||
+            !Number.isFinite(axis[key]) ||
+            Math.abs(axis[key]) > 1000000
+          )
+            throw new TypeError(
+              `${at}.${key} must be a finite number between -1000000 and 1000000.`
+            )
+        if (Number(axis.min) > Number(axis.default) || Number(axis.default) > Number(axis.max))
+          throw new TypeError(`${at} must satisfy min <= default <= max.`)
+      }
+    }
     for (const key of ['weights', 'styles']) {
       if (font[key] === undefined) continue
       list(font[key], `${p}.${key}`)
@@ -170,7 +196,7 @@ function validateFonts(value: unknown, path: string) {
       for (const [j, item] of font[key].entries()) {
         const at = `${p}.${key}.${j}`
         if (key === 'styles') choice(item, ['normal', 'italic'], at)
-        else if (typeof item !== 'number' || item < 1 || item > 1000)
+        else if (typeof item !== 'number' || !Number.isFinite(item) || item < 1 || item > 1000)
           throw new TypeError(`${at} must be a weight from 1 to 1000.`)
         unique(item, seen, at)
       }
