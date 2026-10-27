@@ -4,6 +4,16 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- **Breaking typography/layout adoption (DEV-167):** existing component text now
+  consumes UI Body/Title/Label/Supporting roles. Recipes style production
+  components as well as semantic specimens. Inline/subtle links inherit parent
+  typography. UI leading is explicit, and selection/disclosure labels now use
+  label weight; review wrapping/layouts. Control sizes and component/caller
+  exceptions retain precedence. Baseline UI roles bridge the earlier tokens and
+  preset settings; migrate to explicit roles or a typesetting recipe as described
+  in [the theming guide](docs/theming.md#component-roles-and-earlier-themes).
+  This is source preparation only; chapter publication remains DEV-169.
+
 ## 0.0.5
 
 - Add opt-in responsive typography: Body/Headings/UI/Code assignments, 16 text

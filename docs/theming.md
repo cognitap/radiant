@@ -354,14 +354,58 @@ fonts or automatically select assignments. The role baseline follows the legacy
 shared family, with system monospace for code. Generated presets explicitly
 select their named families.
 
-Existing `family`, `bodySize`, `smallSize`, `headingSize`, weights and tracking
-remain valid and continue to style existing families. Adding typesetting does
-**not** overwrite these legacy leaves or migrate component styling. New `roles`
-and `flow` are ordinary shared token leaves with partial/mode overrides. DEV-167
-owns component adoption. Older 0.0.4 parsers reject the new authoring keys; consume
-matching package JavaScript/CSS and defer the public docs pin to chapter promotion.
+### Component roles and earlier themes
 
-Canonical examples: **System → Typography → Roles / Prose**. The installed
+Production families now consume the same UI roles as the workshop specimens:
+
+| Text host                                                                  | Shared role               | Deliberate size owner                                |
+| -------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------- |
+| ThemeScope, Card, DialogContent, Field, Collapsible and disclosure content | `ui-body`                 | Role; `collapsible.contentSize` remains an exception |
+| CardTitle, DialogTitle                                                     | `ui-title`                | Role; component title size/weight overrides win      |
+| Field label/legend, CollapsibleTrigger, AccordionTrigger                   | `ui-label`                | Role; Field label overrides win                      |
+| Button, action-shaped Link                                                 | `ui-label`                | Existing `controlSize` and Button font-size slots    |
+| Input                                                                      | `ui-body`                 | Existing `controlSize` and Input font-size slot      |
+| Checkbox/Radio label                                                       | `ui-label`                | Existing `controlSize` and label-size slots          |
+| Field help/error, CardDescription, DialogDescription                       | `ui-supporting`           | Role; existing component size slots win              |
+| Inline/subtle Link                                                         | Inherits surrounding text | Parent text, including prose and code assignments    |
+
+Roles supply family, weight, line height and tracking. Component UI text uses
+`size` (the compact endpoint), without prose measure limits or prose margins.
+Control sizes deliberately keep their 13/14/15px font metrics and 32/40/48px
+height/min-height defaults. Changing UI rhythm/style size therefore changes
+ordinary interface copy and labels, while size-constrained controls retain their
+metrics. To change those metrics, author `control.small/medium/large.fontSize`
+(and height/padding as needed), or a supported component font-size exception.
+Button and action-shaped Link share the Button-only typography exceptions.
+Accordion and Dialog actions reuse disclosure/Button styling respectively.
+
+The baseline `ui-body`, `ui-label`, `ui-title` and `ui-supporting` roles alias
+legacy family, size, weight and tracking leaves. Earlier themes and every built-in
+preset therefore retain their authored families/sizes/weights and deliberate
+Button exceptions. Baseline UI leading is now explicit: Body/Supporting 1.5,
+Label 1.4 and Title 1.3. Checkbox/Radio labels and disclosure triggers now use the
+shared label weight rather than inheriting body weight. These wrapping/rhythm
+changes require matching package JavaScript/CSS and layout review.
+
+To migrate a theme, replace `family/bodySize/bodyWeight` with `roles['ui-body']`,
+`smallSize` with `roles['ui-supporting'].size`, `headingSize/headingWeight` with
+`roles['ui-title']`, and `labelWeight` with `roles['ui-label'].weight`. The earlier
+shared family/tracking fields affect all four baseline roles; specify those
+leaves on each role to retain that breadth. Prefer a `typesetting` recipe when
+you want independently assigned Body/Headings/UI/Code families and repeatable
+rhythms. A recipe materializes these roles and then explicit `values`/mode role
+leaves override it; legacy leaves no longer control recipe-owned roles. There
+is no implicit recipe adoption or destructive migration of stored documents.
+Local component variables, caller utilities and ordinary CSS retain precedence.
+When migrating a legacy CSS variable applied directly to a text host, set the
+corresponding role variable on that host; inherited role aliases may already
+have resolved on the enclosing theme scope.
+
+New `roles` and `flow` are ordinary shared token leaves with partial/mode
+overrides. Older 0.0.4 parsers reject the new authoring keys; consume matching
+package JavaScript/CSS and defer the public docs pin to chapter promotion.
+
+Canonical examples: **System → Typography → Roles / Prose / Components / Serif Interface / Mono Interface**. The installed
 artifact gate verifies all 16 roles at 320/390/640/800px, both modes, nested
 containers and named/mode-only scopes, caller overrides, flow, inline code and
 root-enlargement/text-spacing probes through compiled CSS and Tailwind, each

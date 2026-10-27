@@ -9,7 +9,7 @@ const colorMotionClass =
 
 const cardVariants = cva([
   colorMotionClass,
-  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
+  'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
   'box-border grid w-full gap-[var(--rad-card-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
   'rounded-[var(--rad-card-radius,var(--rad-surface-radius,0.75rem))]',
   '[corner-shape:var(--rad-card-corner-shape,var(--rad-surface-corner-shape,round))]',
@@ -29,17 +29,19 @@ const cardHeaderVariants = cva([
 
 const cardTitleVariants = cva([
   colorMotionClass,
-  'm-0 min-w-0 break-words leading-snug',
-  '[font-size:var(--rad-card-title-size,var(--rad-typography-heading-size,1.125rem))]',
-  '[font-weight:var(--rad-card-title-weight,var(--rad-typography-heading-weight,600))]',
+  'm-0 min-w-0 break-words',
+  'font-[family-name:var(--rad-typography-roles-ui-title-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-title-letter-spacing,-0.015em)]',
+  'text-[length:var(--rad-card-title-size,var(--rad-typography-roles-ui-title-size,1.125rem))] leading-[var(--rad-typography-roles-ui-title-line-height,1.3)]',
+  'font-[number:var(--rad-card-title-weight,var(--rad-typography-roles-ui-title-weight,600))]',
   'forced-colors:text-[CanvasText]'
 ])
 
 const cardDescriptionVariants = cva([
   colorMotionClass,
-  'm-0 min-w-0 break-words leading-snug',
+  'm-0 min-w-0 break-words',
   '[color:var(--rad-card-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
-  '[font-size:var(--rad-card-description-size,var(--rad-typography-small-size,0.8125rem))]',
+  'font-[family-name:var(--rad-typography-roles-ui-supporting-family,system-ui,sans-serif)] font-[number:var(--rad-typography-roles-ui-supporting-weight,400)] tracking-[var(--rad-typography-roles-ui-supporting-letter-spacing,0em)]',
+  'text-[length:var(--rad-card-description-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)]',
   'forced-colors:text-[CanvasText]'
 ])
 

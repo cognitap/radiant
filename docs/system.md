@@ -57,8 +57,10 @@ exceptions. See [portable documents and import semantics](theming.md#portable-wo
 `generateTypography` interface and `typography.typesetting` recipe supply opt-in
 font assignments, 16 text styles and independent prose/UI rhythms through the
 same compiler. Use the semantic HTML hooks and local container documented under
-[responsive typography](theming.md#responsive-typography); existing component
-typography retains its legacy leaves until its deliberate adoption. The pure
+[responsive typography](theming.md#responsive-typography); production component text consumes the shared UI roles. Control sizes retain
+their font-size/geometry metrics, and inline links inherit their surrounding text.
+The baseline UI roles bridge the legacy typography leaves; recipes and explicit
+role values take ownership when supplied. The pure
 `generateColorWall` interface supplies calibrated sRGB palette metadata through
 `@cognitap/radiant/color`; see [color-wall inputs and output](theming.md#generate-a-color-wall). Use
 `colorCalibrationPresets` for independent wall/ramp treatments (Classic, Balanced,

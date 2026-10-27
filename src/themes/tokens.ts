@@ -207,16 +207,7 @@ const light: SharedTokens = {
     dangerForeground: 'oklch(0.99 0 0)'
   },
   typography: {
-    ...typographyTokens(
-      typographyStyles(baselineProse, { size: 16, lineHeight: 1.5 }),
-      {
-        body: 'var(--rad-typography-family)',
-        headings: 'var(--rad-typography-family)',
-        ui: 'var(--rad-typography-family)',
-        code: 'ui-monospace, monospace'
-      },
-      baselineProse.paragraphSpacing
-    ),
+    ...baselineTypographyTokens(),
     family: 'system-ui, sans-serif',
     bodySize: '0.875rem',
     smallSize: '0.8125rem',
@@ -317,6 +308,38 @@ export function freezeTree<T extends object>(value: T): Readonly<T> {
     if (item && typeof item === 'object') freezeTree(item)
   }
   return Object.freeze(value)
+}
+
+// Legacy/preset leaves remain a bridge until a recipe or explicit role owns them.
+// UI measures stay layout-owned; controls retain their independent size metrics.
+function baselineTypographyTokens(): TypographyTokens {
+  const tokens = typographyTokens(
+    typographyStyles(baselineProse, { size: 16, lineHeight: 1.5 }),
+    {
+      body: 'var(--rad-typography-family)',
+      headings: 'var(--rad-typography-family)',
+      ui: 'var(--rad-typography-family)',
+      code: 'ui-monospace, monospace'
+    },
+    baselineProse.paragraphSpacing
+  )
+  const roles = { ...tokens.roles }
+  for (const [role, size, weight] of [
+    ['ui-body', 'bodySize', 'bodyWeight'],
+    ['ui-label', 'bodySize', 'labelWeight'],
+    ['ui-title', 'headingSize', 'headingWeight'],
+    ['ui-supporting', 'smallSize', 'bodyWeight']
+  ] as const) {
+    const leaf = (name: string) => `var(--rad-typography-${kebabCase(name)})`
+    roles[role] = {
+      ...tokens.roles[role],
+      size: leaf(size),
+      fluidSize: leaf(size),
+      weight: leaf(weight),
+      letterSpacing: leaf('letterSpacing')
+    }
+  }
+  return { ...tokens, roles }
 }
 
 export const tokenDefaults = freezeTree({ light, dark })

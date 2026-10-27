@@ -21,8 +21,8 @@ export const actionTone = cva('', {
 
 export const actionVariants = cva(
   [
-    'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--rad-button-border-style,var(--rad-control-border-style,solid))] [border-width:var(--rad-button-border-width,var(--rad-control-border-width,1px))] [border-color:var(--rad-button-border-color,var(--_btn-edge))] text-center [font-family:var(--rad-button-font-family,var(--rad-typography-family,system-ui,sans-serif))] [text-transform:var(--rad-button-text-transform,none)] antialiased',
-    '[font-weight:var(--rad-button-font-weight,var(--rad-typography-label-weight,550))] [letter-spacing:var(--rad-button-letter-spacing,var(--rad-typography-letter-spacing,-0.011em))] [font-size:var(--_btn-fs)]',
+    'relative box-border inline-flex shrink-0 select-none items-center justify-center [border-style:var(--rad-button-border-style,var(--rad-control-border-style,solid))] [border-width:var(--rad-button-border-width,var(--rad-control-border-width,1px))] [border-color:var(--rad-button-border-color,var(--_btn-edge))] text-center font-[family-name:var(--rad-button-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] [text-transform:var(--rad-button-text-transform,none)] antialiased',
+    'font-[number:var(--rad-button-font-weight,var(--rad-typography-roles-ui-label-weight,550))] tracking-[var(--rad-button-letter-spacing,var(--rad-typography-roles-ui-label-letter-spacing,-0.011em))] text-[length:var(--_btn-fs)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]',
     'min-h-(--_btn-h) px-(--_btn-px) bg-(--_btn-bg) text-(--_btn-fg) no-underline',
     'bg-[linear-gradient(to_bottom,rgb(255_255_255/var(--_btn-sheen)),rgb(255_255_255/0))]',
     '[--_btn-corner:var(--rad-button-corner-shape,var(--rad-control-corner-shape,round))] rounded-(--_btn-radius) [corner-shape:var(--_btn-corner)]',
