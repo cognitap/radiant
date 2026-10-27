@@ -1,3 +1,105 @@
+import type {
+  TypographyProseRhythm,
+  TypographyUIRhythm,
+  TypographyStyle,
+  TypographyRole,
+  TypographyTokens,
+  TypographyAssignment
+} from '../typography/types.js'
+
+/** Canonical calculations live beside the defaults so source CSS generation stays self-contained. */
+export function typographyStyles(
+  prose: TypographyProseRhythm,
+  ui: TypographyUIRhythm
+): Record<TypographyRole, TypographyStyle> {
+  const { size: r, lineHeight, measure, headingScale: q } = prose
+  const u = ui.size
+  const style = (
+    assignment: TypographyAssignment,
+    narrow: number,
+    wide: number,
+    weight: number,
+    leading: number,
+    tracking = 0,
+    width = 0
+  ): TypographyStyle => ({
+    assignment,
+    narrow,
+    wide,
+    weight,
+    lineHeight: leading,
+    tracking,
+    measure: width
+  })
+  return {
+    'prose-title': style('headings', r * q ** 3, r * q ** 5, 600, 1.12, -0.025, 22),
+    'prose-heading': style('headings', r * q, r * q ** 2, 600, 1.25, -0.015, 30),
+    'prose-subheading': style('headings', r * 1.1, r * q, 600, 1.3, -0.01, 36),
+    'prose-body': style('body', r, r, 400, lineHeight, 0, measure),
+    'prose-lead': style('body', r * 1.125, r * 1.125, 400, 1.5, 0, 55),
+    'prose-small': style('body', r * 0.8, r * 0.8, 400, 1.5, 0, measure),
+    'prose-quote': style('body', r * 1.25, r * 1.25, 400, 1.4, -0.01, measure),
+    'ui-title': style('ui', u * 1.25, u * 1.25, 600, 1.3, -0.015),
+    'ui-body': style('ui', u, u, 400, ui.lineHeight),
+    'ui-label': style('ui', u, u, 500, 1.4),
+    'ui-supporting': style('ui', u * 0.9375, u * 0.9375, 400, 1.5),
+    'ui-caption': style('ui', u * 0.875, u * 0.875, 400, 1.5),
+    'ui-metric': style('ui', u * 2, u * 2, 600, 1.15, -0.03),
+    'ui-eyebrow': style('ui', u * 0.75, u * 0.75, 600, 1.4, 0.1),
+    display: style('headings', r * q ** 3, r * q ** 6, 600, 1.06, -0.035, 18),
+    code: style('code', 14, 14, 400, 1.65, 0, 80)
+  }
+}
+
+const baselineProse: TypographyProseRhythm = {
+  size: 20,
+  lineHeight: 1.6,
+  paragraphSpacing: 1.25,
+  measure: 64,
+  headingScale: 1.25
+}
+export const typographyRoles = Object.freeze(
+  Object.keys(typographyStyles(baselineProse, { size: 16, lineHeight: 1.5 })) as TypographyRole[]
+)
+
+function decimal(value: number): string {
+  return String(Number(value.toFixed(8)))
+}
+
+export function typographyTokens(
+  styles: Readonly<Record<TypographyRole, TypographyStyle>>,
+  families: Readonly<Record<TypographyAssignment, string>>,
+  flow: number
+): TypographyTokens {
+  const roles = {} as Record<TypographyRole, TypographyTokens['roles'][TypographyRole]>
+  for (const role of typographyRoles) {
+    const s = styles[role]
+    const slope = (s.wide - s.narrow) / 512
+    const intercept = s.narrow / 16 - slope * 24
+    const size = `${decimal(s.narrow / 16)}rem`
+    roles[role] = {
+      family: families[s.assignment],
+      size,
+      fluidSize:
+        s.narrow === s.wide
+          ? size
+          : `clamp(${size}, calc(${decimal(intercept)}rem + ${decimal(slope * 100)}cqi), ${decimal(s.wide / 16)}rem)`,
+      weight: s.weight,
+      lineHeight: decimal(s.lineHeight),
+      letterSpacing: `${decimal(s.tracking)}em`,
+      measure: s.measure ? `${decimal(s.measure)}ch` : 'none'
+    }
+  }
+  return {
+    roles,
+    flow: {
+      paragraph: `${decimal(flow)}em`,
+      headingBefore: `${decimal(flow * 1.6)}em`,
+      headingAfter: `${decimal(flow * 0.5)}em`
+    }
+  }
+}
+
 /** The complete shared-token registry. CSS names are derived from these paths. */
 export interface SharedTokens {
   color: {
@@ -28,6 +130,8 @@ export interface SharedTokens {
     labelWeight: string | number
     headingWeight: string | number
     letterSpacing: string
+    roles: TypographyTokens['roles']
+    flow: TypographyTokens['flow']
   }
   control: {
     small: ControlMetrics
@@ -103,6 +207,16 @@ const light: SharedTokens = {
     dangerForeground: 'oklch(0.99 0 0)'
   },
   typography: {
+    ...typographyTokens(
+      typographyStyles(baselineProse, { size: 16, lineHeight: 1.5 }),
+      {
+        body: 'var(--rad-typography-family)',
+        headings: 'var(--rad-typography-family)',
+        ui: 'var(--rad-typography-family)',
+        code: 'ui-monospace, monospace'
+      },
+      baselineProse.paragraphSpacing
+    ),
     family: 'system-ui, sans-serif',
     bodySize: '0.875rem',
     smallSize: '0.8125rem',

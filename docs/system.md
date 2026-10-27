@@ -54,6 +54,11 @@ For public workshop editing, use the versioned `ThemeDocument` authoring API.
 Its token sections compile through `defineTheme` into the same `ThemeScope`
 contract. Section imports preserve unrelated settings and deliberate component
 exceptions. See [portable documents and import semantics](theming.md#portable-workshop-documents). The pure
+`generateTypography` interface and `typography.typesetting` recipe supply opt-in
+font assignments, 16 text styles and independent prose/UI rhythms through the
+same compiler. Use the semantic HTML hooks and local container documented under
+[responsive typography](theming.md#responsive-typography); existing component
+typography retains its legacy leaves until its deliberate adoption. The pure
 `generateColorWall` interface supplies calibrated sRGB palette metadata through
 `@cognitap/radiant/color`; see [color-wall inputs and output](theming.md#generate-a-color-wall). Use
 `colorCalibrationPresets` for independent wall/ramp treatments (Classic, Balanced,

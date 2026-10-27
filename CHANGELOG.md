@@ -4,6 +4,24 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+## 0.0.5
+
+- Add opt-in responsive typography: Body/Headings/UI/Code assignments, 16 text
+  styles, independent prose/UI rhythm, font-aware starting points, deliberate
+  style overrides and weight-range warnings (DEV-163). Export the pure
+  `@cognitap/radiant/typography` entry and compile `typography.typesetting` through
+  the existing portable theme document. Semantic HTML hooks share generated CSS
+  across compiled and Tailwind routes, with local containers and compact fallback.
+- Preserve legacy typography tokens and existing component exceptions. Existing
+  component role adoption and the public editor remain later chapter work. Font
+  loading stays consumer-owned. New authoring keys require matching JavaScript
+  and CSS; older parsers reject them. This prepares an experimental release;
+  publication and the exact public docs pin remain the chapter acceptance step.
+
+Automated installed Chromium evidence covers roles, widths, modes/scopes, caller
+overrides and text probes. It does not establish broad font/script, browser/AT
+or final production chapter readiness.
+
 ## 0.0.4
 
 - Expose independent Classic, Balanced and Expressive wall/brand-ramp presets,

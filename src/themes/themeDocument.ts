@@ -1,5 +1,6 @@
 import { defineTheme, type Theme, type ThemeDefinition, type ThemeLayer } from './defineTheme.js'
 import { freezeTree, tokenDefaults } from './tokens.js'
+import { generateTypography } from '../typography/index.js'
 import type {
   ThemeColorSection,
   ThemeDocument,
@@ -183,12 +184,15 @@ function toDefinition(sections: ThemeSections, id: string, name: string): ThemeD
   for (const sectionName of sectionNames) {
     const section = sections[sectionName]
     if (!section) continue
+    if (sectionName === 'typography' && sections.typography?.typesetting !== undefined) {
+      common.tokens.typography = generateTypography(sections.typography.typesetting).tokens
+    }
     for (const mode of ['common', 'light', 'dark'] as const) {
       const values = mode === 'common' ? section.values : section.modes?.[mode]
       if (values === undefined) continue
       const layer = mode === 'common' ? common : modes[mode]
       if (sectionName === 'components') layer.components = values as ThemeLayer['components']
-      else layer.tokens[sectionName] = values
+      else layer.tokens[sectionName] = merge(layer.tokens[sectionName], values)
     }
   }
   return { id, name, ...common, modes }
@@ -222,7 +226,7 @@ export function parseThemeDocument(input: unknown): ThemeDocument | ThemeSection
         ...(name === 'color'
           ? ['brand', 'fidelity', 'palettes', 'anchor']
           : name === 'typography'
-            ? ['fonts']
+            ? ['fonts', 'typesetting']
             : [])
       ],
       path

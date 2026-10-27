@@ -218,6 +218,158 @@ arrays, strings, booleans, null and finite numbers, restricted further by their
 field schema. Functions, class/binary instances, cycles, accessors and unsupported
 keys fail before import can silently discard data.
 
+## Responsive typography
+
+Typesetting is opt-in and uses the existing theme compiler. The accepted
+[role model](research/dev-162-typography-model.md) separates Body/Headings/UI/Code
+font assignments, 16 text styles and independent prose/UI rhythms.
+
+```tsx
+import { ThemeScope, compileThemeDocument, defineThemeDocument,
+  generateTypography, updateThemeDocument } from '@cognitap/radiant'
+
+const document = defineThemeDocument({
+  kind: 'radiant-theme', version: 1, id: 'publication', name: 'Publication',
+  sections: { typography: { typesetting: {
+    preset: 'source-serif',
+    prose: { paragraphSpacing: 1.4 },
+    styles: { 'prose-title': { weight: 650 } },
+  } } },
+})
+const theme = compileThemeDocument(document)
+
+// Inside your application, with either documented CSS route:
+<ThemeScope theme={theme}>
+  <article data-rad-prose="" data-rad-type-container="">
+    <h1>A shared language for careful work</h1>
+    <p data-rad-text="prose-lead">A lead can use its own reusable style.</p>
+    <p>Body copy with <em>emphasis</em> and <code>inline.code</code>.</p>
+    <h2>A new section</h2>
+    <p>Paragraph and heading spacing follow the prose rhythm.</p>
+  </article>
+</ThemeScope>
+
+const next = updateThemeDocument(document, {
+  typography: { typesetting: { ui: { size: 18 } } },
+})
+const result = generateTypography(next.sections.typography!.typesetting)
+```
+
+`generateTypography`, `typographyPresets`, `typographyRoles` and their types also
+export from the pure `@cognitap/radiant/typography` entry. It imports no React,
+reads no browser globals and loads no fonts. For plain definitions, pass
+`result.tokens` as `tokens.typography` to `defineTheme`. `prose`, `ui`, and
+`styles` expose calculated settings. Immutable `result.input` is JSON-replayable
+and preserves manual/automatic ownership instead of pinning calculated metrics.
+
+### Authoring and precedence
+
+`typography.typesetting` generates common defaults. Explicit `typography.values`
+leaves override them, followed by `typography.modes.light/dark` leaves. Existing
+component exceptions retain their precedence. Typography-only section exports
+carry recipes, explicit values and font descriptors through the existing
+merge/replace import rules; no second compiler or loading path is introduced.
+
+`preset` is `inter` (default), `source-serif`, or `plex`. Each `fonts.body`,
+`headings`, `ui` and `code` accepts a CSS `family` list and optional `profile`:
+`inter`, `source-serif-4`, `plex-sans`, `plex-mono`, or `manual`. A new family
+without a profile selects manual defaults. A profile is an explicit claim about
+the supplied font, not detection of an installed file. Consumers own that setup.
+
+| Manual setting             | Bounds                  | Default                               |
+| -------------------------- | ----------------------- | ------------------------------------- |
+| `prose.size`               | 12–40 reference px      | Inter/Plex: 20, Serif: 21, manual: 20 |
+| `prose.lineHeight`         | 1–3                     | Inter/Plex: 1.6, Serif/manual: 1.65   |
+| `prose.paragraphSpacing`   | 0–4em                   | 1.25em                                |
+| `prose.measure`            | 20–120ch                | Inter/manual: 64, Serif/Plex: 62      |
+| `prose.headingScale`       | 1.1–1.5                 | 1.25                                  |
+| `ui.size`, `ui.lineHeight` | 12–32 reference px, 1–3 | 16px / 1.5                            |
+
+Each `styles[role]` accepts `assignment`, `narrow`, `wide`, `weight`, `lineHeight`,
+`tracking` and `measure`. Endpoint sizes are reference pixels at a 16px root,
+emitted as rem. Narrow is 8–256px; wide 8–512px and at least narrow. Weight is
+1–1000, leading .8–3, tracking -.2–.5em and measure 0–120ch; zero measure means
+layout-owned. These are predictable bounds, not a guarantee every combination
+will look good.
+
+`recommendations.body/ui` flags known contextual starting points. Other fonts
+remain manually tunable. `warnings` identifies style weights outside a claimed
+profile's range, retaining the authored value rather than silently clamping it.
+Inspect warnings before accepting a theme. There is no universal readability
+score or implicit normalization.
+
+Context updates preserve explicit `styles` overrides. To reset a style or return
+a metric to automatic behavior, omit that key from the next recipe and **replace**
+the typography section, retaining other metadata/explicit values. Merge semantics
+cannot delete a stored leaf by omission. To select a fresh starting point,
+replace its recipe; merging only a preset ID intentionally retains old overrides.
+When merging a saved font assignment, change its family and profile together
+(use `manual` for an unfamiliar font), or replace the recipe. Merging only a
+family retains a previously stored profile.
+
+### Semantic HTML and local width
+
+- `data-rad-text="prose-title"` selects presentation on any semantic element; it
+  does not set heading levels or ARIA roles. `typographyRoles` lists all 16 values:
+  prose title/heading/subheading/body/lead/small/quote; UI title/body/label/
+  supporting/caption/metric/eyebrow; display; code.
+- `data-rad-prose` opts a container into Body typography, maximum measure and
+  flow. Its **direct** headings, paragraphs/lists, captions, quotes and `pre`
+  blocks receive their corresponding styles. Nested section wrappers can opt
+  into prose explicitly.
+- Explicit `data-rad-text` wins over automatic element mapping. A direct block
+  with `data-rad-not-prose` or a Radiant `data-slot` host skips mapping/flow;
+  ordinary inherited font properties still inherit. Opt-out is not a reset.
+- `data-rad-type-container` establishes the named `radiant-type` inline-size
+  container. Put it on the content column, including nested columns. Heading/
+  display sizing interpolates over 24–56rem of local width. Body/UI sizes stay
+  fixed rem values. Without an opt-in ancestor, roles use their compact endpoint.
+
+Hooks are low-specificity rules in the components layer. Utilities, ordinary
+application CSS and inline styles override them. Token shorthand utilities are
+registered by property in the existing class merger, for example
+`text-(--rad-typography-roles-prose-title-size)` and
+`font-(--rad-typography-roles-prose-title-family)`. An application Tailwind build
+must generate new utilities; importing precompiled library CSS does not do that.
+
+Measure is a maximum, not minimum width or exact character count. Prose wraps
+long words; preformatted code scrolls within its box. Give scrollable code
+keyboard access and an appropriate name where needed. UI styles leave measure
+to the layout. Inline code uses .9em and inherited weight/leading, not block-code
+line boxes. Actual italic/weight assets are required; text-style hosts disable
+synthetic font styles.
+
+Direct token authoring uses `roles[role].size` for the compact endpoint and
+`fluidSize` for the responsive expression. Set both to fix a style at all widths,
+or set equal `narrow`/`wide` inputs. Other role leaves are `family`, `weight`,
+`lineHeight`, `letterSpacing` and `measure`; prose flow leaves are
+`flow.paragraph`, `headingBefore` and `headingAfter`.
+
+### Fonts, migration and verification
+
+Load chosen families/styles/weights with your application's font loader or
+self-hosted `@font-face`. Presets contain family/fallback lists, not font URLs,
+bytes or loaders. `typography.fonts` remains portable metadata; it does not load
+fonts or automatically select assignments. The role baseline follows the legacy
+shared family, with system monospace for code. Generated presets explicitly
+select their named families.
+
+Existing `family`, `bodySize`, `smallSize`, `headingSize`, weights and tracking
+remain valid and continue to style existing families. Adding typesetting does
+**not** overwrite these legacy leaves or migrate component styling. New `roles`
+and `flow` are ordinary shared token leaves with partial/mode overrides. DEV-167
+owns component adoption. Older 0.0.4 parsers reject the new authoring keys; consume
+matching package JavaScript/CSS and defer the public docs pin to chapter promotion.
+
+Canonical examples: **System → Typography → Roles / Prose**. The installed
+artifact gate verifies all 16 roles at 320/390/640/800px, both modes, nested
+containers and named/mode-only scopes, caller overrides, flow, inline code and
+root-enlargement/text-spacing probes through compiled CSS and Tailwind, each
+with/without reset. These fixtures use system fallbacks; actual-font quality
+remains bounded by DEV-162's recorded study. Browser zoom, manual AT, more scripts/
+browsers, production component adoption and final public review remain chapter
+acceptance work.
+
 ## Generate a color wall
 
 ```ts

@@ -1,4 +1,5 @@
 @import './themes/baseline.css';
+@import './typography.css';
 
 @source '.';
 @source not './**/*.stories.*';

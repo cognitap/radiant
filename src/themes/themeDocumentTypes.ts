@@ -1,5 +1,6 @@
 import type { ThemeComponentOverrides } from './components.js'
 import type { ThemeTokens } from './tokens.js'
+import type { TypographyInput } from '../typography/types.js'
 
 /** One existing token group, with independently authored mode layers. */
 export interface ThemeSection<T> {
@@ -46,6 +47,8 @@ export interface ThemeFontMetadata {
 
 export interface ThemeTypographySection extends ThemeSection<ThemeTokens['typography']> {
   readonly fonts?: readonly ThemeFontMetadata[]
+  /** Generated defaults; explicit values and mode values override these leaves. */
+  readonly typesetting?: TypographyInput
 }
 
 /** Token groups are the extension seams for richer typesetting and spring authoring. */
