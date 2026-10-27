@@ -1,145 +1,77 @@
-# Inspecting Radiant in Storybook
-
-Use the [architecture doc](architecture.md) for the shared theme, state, host-target and
-composition contract; this guide explains how to inspect its live examples.
+# Storybook
 
 Run `pnpm storybook` and open [localhost:6006](http://localhost:6006).
 
-The toolbar has two independent choices:
+The toolbar has two independent choices, and both carry across stories and
+Docs:
 
-- **Theme** (initially labelled **Radiant**) selects a preset from Radiant's public `themes` registry. Radiant is
-  the default. Preset IDs, rather than labels or list positions, identify themes.
-- **Mode** (initially labelled **System**) selects Light, Dark, or System. System is the default and follows the
-  browser's appearance preference. An explicit Light or Dark choice overrides it.
+- **Theme** picks a preset from the public `themes` registry. The default is
+  Radiant.
+- **Mode** picks Light, Dark or System. The default is System, which follows the
+  browser.
 
-The choices follow you between stories and documentation. Canvas backgrounds,
-foregrounds, typography, and documentation previews use the same public
-`ThemeScope` as applications. The Storybook sidebar and toolbars keep their own
-appearance. There is no independent background selector to put a dark palette
-on a light canvas.
+Stories are wrapped in the same `ThemeScope` that applications use. The
+Storybook UI itself keeps its own look. **System → Theming → Comparison** shows
+every preset side by side in the selected mode; it is the only story that
+picks presets itself.
 
-**System → Theming → Comparison** is the deliberate exception to theme selection:
-it shows every named preset side by side, while inheriting the selected mode.
-Use ordinary component stories to inspect one preset across different families.
-See [the theming guide](theming.md) for token defaults, font requirements, nested
-scopes, and authoring a theme.
+## Writing stories
 
-## Story conventions
+Stories import from `./index.js`, the public exports. Each family uses the same
+kinds of story:
 
-Component stories use public exports from `./index.js`. A reader should find
-the same small structure in each family:
+| Kind          | Purpose                                              | Examples                                                 |
+| ------------- | ---------------------------------------------------- | -------------------------------------------------------- |
+| Default       | The smallest useful example, with controls           | One Button, one labelled Input, one disclosure           |
+| States        | Differences worth inspecting                         | Disabled, pending, invalid, checked/mixed, open          |
+| Composition   | How the family works with native elements and others | Field relationships, native forms, actions inside Dialog |
+| Customisation | One focused styling or adapter example               | A token override, a class, a router adapter              |
 
-| Kind          | Purpose                                                      | Examples                                                 |
-| ------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
-| Default       | The smallest useful, named example, with adjustable controls | One Button, one labelled Input, one disclosure           |
-| States        | Meaningful differences that need inspection                  | Disabled, pending, invalid, checked/mixed, open          |
-| Composition   | How the family works with native elements and other families | Field relationships, native forms, actions inside Dialog |
-| Customisation | A focused local styling or adaptation example                | A semantic token override, a class, a router adapter     |
+Only add the states a family really has. Card has no disabled state.
 
-Keep useful state names in the sidebar; these kinds describe the organisation,
-not a requirement to create four copies of every example. Card does not need
-invented disabled or pending states. A controlled example explains ownership;
-it does not add a second theme wrapper. Examples use the currently implemented
-public interface; later contract migrations update them with their modules.
+- **No themes in stories.** Layout wrappers may set width, grid or spacing, but
+  never a preset, canvas or mode.
+- **Use the public parts.** Raw native hosts belong only in clearly named
+  adapter examples, such as Button's native adapter or Link's router adapter.
+- **Make actions visible.** Show a result, and keep navigation inside the preview
+  with fragment links unless the destination is deliberately external.
+- **Keep instances independent.** Docs can render a story twice, so give radio
+  examples their own form or a unique group name.
+- **Fit both frames.** Layouts must fit Canvas and the narrower Docs frame.
+  Stories are not scanned for library utilities, so use inline styles or
+  register example classes in `.storybook/styles.css`.
+- **Open dialogs from a trigger in Docs.** An initially open dialog takes focus
+  and scrolls the Docs page.
 
-Ordinary stories inherit the central theme and mode. Layout wrappers may set
-width, grid, or spacing, but do not choose a preset, paint a fixed canvas, or
-override the global mode. Keep preset comparisons in the one system comparison
-page. Local customisation should demonstrate a narrow exception to the selected
-theme, rather than another hardcoded theme gallery.
-
-Meta descriptions identify the native host, relevant props, and named parts.
-Preserve native form, controlled-state, focus, nesting, and adapter examples
-when removing presentation duplication. **Recipes → Workspace → Settings** is the
-canonical assembled product interface across all ten families. It combines Card,
-Accordion, Collapsible and Link with the existing profile form in Dialog; that
-form composes Field, Input, Checkbox, RadioGroup/Radio and Button. Its play saves
-preferences, restores focus, opens nested help and verifies the Link destination.
-The example inherits the toolbar's theme and mode without its own ThemeScope.
-
-**Recipes → Forms** contains the canonical
-native and TanStack profile forms. Its placement control reuses either recipe
-standalone, in Card, or in Dialog. It replaces the small Field/Input form stories;
-the source is `.storybook/examples/ProfileForm.tsx`, outside the shipped library.
-
-Docs can render a story more than once. Give independent native radio examples
-their own form owners or unique group names, so selecting an option in one
-preview cannot silently clear another preview's selection.
-
-Raw hosts belong to explicitly identified interoperability or Customisation
-examples: Button's native adapter, Link's router adapter, Field's native control
-adapter, Dialog's ancestor form and outside-trigger cases. Ordinary product
-examples use the public Radiant parts and default Button composition. Native
-forms, details/summary, headings and fragment destinations retain their semantics.
-The comparison gallery and decorative art in Card Customisation remain deliberate
-inspection/customisation examples rather than ordinary product styling.
-
-Keep example navigation inside the preview with unique native fragment targets,
-or use a deliberate external destination. Actions should expose a visible result.
-Preserve supplied callbacks and adjustable args. Layout wrappers must fit both
-Canvas and the narrower Docs frame; a percentage width alone can shrink to the
-intrinsic child width in a centered preview. Stories are excluded from the
-library utility scan: use inline layout styles, or explicitly register private
-example utilities in `.storybook/styles.css`.
-
-An initially open dialog can take focus and scroll the whole Docs page. Open
-nonmodal Docs examples from a trigger; Canvas can still demonstrate their
-initially open state.
+The canonical examples are **Recipes → Forms**, the native and TanStack profile
+form placed standalone, in Card or in Dialog
+(`.storybook/examples/ProfileForm.tsx`), and **Recipes → Workspace → Settings**,
+all ten families together. Reuse them rather than writing new forms.
 
 ## Verification
 
-Use the **Accessibility** panel and testing widget alongside keyboard, focus,
-and contrast checks. `pnpm test:browser` renders every story, runs its play and
-fails on axe violations in all eight themes and both explicit modes. It also
-runs native keyboard, modal, cancellation/ref, lifecycle and hydration scenarios.
-Routine CI uses `pnpm check:ci`: every story in Radiant Light/Dark and all native
-browser scenarios, alongside runtime/package checks and the Storybook build.
-The full `pnpm check` audit retains every theme/mode and installed production
-styling/composition checks; run it locally or through the manual workflow's
-**full** input for theme/styling changes and release verification.
-See [verification conventions](testing.md) for setup,
-focused runs, failure artifacts and migration evidence. Automated accessibility
-checks cover only part of WCAG. Use the [browser/AT matrix](accessibility.md)
-for versioned evidence, manual scenarios and the unverified combinations.
+`pnpm test:browser` runs every story's play and axe in every preset and mode;
+see [testing](testing.md). Plays run when you open a story in Canvas. In Docs
+they only run if you opt in. Use the Accessibility panel and the testing widget
+while you work.
 
-Dialog Default compares its unadapted Trigger and Close with a canonical Button
-in the same scope. This guards the actual default call site; a comparison that
-manually replaces every action with Button would hide a broken default.
+For a shared styling change, check by hand:
 
-The comparison story's play function checks the actual rendered canvases,
-component palettes, Sharp 3D borders/shadows, and controls inside Card content
-and footers. Checkbox and RadioGroup States
-check disabled selection visibility and alignment; Field Customisation checks
-the native host's visible boundary and forwarded relationships. These checks
-read the rendered result without moving focus in Docs. Plays run when a Canvas
-story is opened in a browser; Docs requires opting into autoplay or invoking
-them explicitly. The browser test integration executes these same plays in CI;
-it does not require visiting each story manually.
+- every story and Docs page in each preset, in explicit Light and Dark, after
+  fonts load;
+- a narrow viewport;
+- hover, press, keyboard focus, disabled selection, form reset, nested
+  disclosures and opening a modal on the affected families;
+- translucent controls against their real background.
 
-When changing global application, verify toolbar selection and navigation,
-Canvas and Docs, Ticket to Default reset, explicit modes versus System, ghost
-text against the actual canvas, and a native modal Dialog. Check the running
-Storybook, not only a separately constructed stylesheet fixture.
+For a change to the Storybook preview itself, also check:
 
-For a shared styling change, inspect every story and Docs page in all eight
-themes, in explicit Light and Dark, after fonts and rendering have settled.
-Review screenshots as well as dimensions and computed colors. Add narrow
-viewport checks, then exercise hover, press, keyboard focus, disabled selection,
-native form reset, nested disclosures, and modal opening on the affected
-families. Check translucent controls against their actual painted background.
-Check default composition against the shared component contract as well as
-visual legibility. A known default-action violation must be fixed or explicitly
-reported as unresolved; a future migration issue is not a reason to call the
-audit complete. Keep ordinary comparisons on default composition so explicit
-replacement callbacks cannot mask missing component reuse.
-For manual interaction checks, add `embed=true` to the iframe URL so Storybook's
-play does not compete with your inputs. The normal browser matrix still executes
-plays. Wait for the story scope as well as the Docs scope to apply the selected
-theme/mode before capturing a toolbar change. If a long-running development
-session retains stale Docs after story edits, repeat on a fresh Storybook server
-before treating that state as a runtime regression.
+- toolbar selection and navigation, in both Canvas and Docs;
+- that switching from Ticket to Default resets correctly;
+- explicit modes against System;
+- ghost text against the real canvas, and a native modal Dialog.
 
-Recheck corrected combinations after the source change.
-
-The configuration follows Storybook's [globals and toolbar interface](https://storybook.js.org/docs/essentials/toolbars-and-globals)
-and [custom documentation container interface](https://storybook.js.org/docs/writing-docs/autodocs#customize-the-docs-container).
+For manual interaction, add `embed=true` to the iframe URL so plays don't
+interfere. If Docs look stale after editing a story, restart Storybook before
+treating it as a bug. For screen readers and WCAG, see
+[accessibility](accessibility.md).
