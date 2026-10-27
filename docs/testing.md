@@ -23,9 +23,6 @@ The [browser/AT matrix and evidence process](accessibility.md) defines support
 targets, manual scenarios, WCAG mapping and how to report unverified combinations.
 Automated Chromium results are one evidence category within that matrix.
 
-The [ten-family coverage audit](verification/2026-10-25-harmonisation.md) maps the
-harmonised contract to executable checks and records the remaining readiness gaps.
-
 ## Running browser checks
 
 After installing dependencies, install the matching browser once:
@@ -131,9 +128,7 @@ the package/type check without these production browser fixtures.
 archive integrity, build tools, observed styles and pass/fail cases. Production
 bundles and representative Glass/Sharp 3D captures are beside it; a full CI
 audit includes them in **browser-results**. This receipt belongs to the installed run,
-separately from the subsequent Storybook/platform JUnit report. Review/preserve
-the [artifact evidence record](verification/2026-10-25-installed-styles.md)
-before the same 14-day expiry. Ordinary `pnpm test`/`test:package` and release
+separately from the subsequent Storybook/platform JUnit report. Ordinary `pnpm test`/`test:package` and release
 preparation retain the package/type check without requiring a browser.
 
 For the realistic installed composition checkpoint:
@@ -178,9 +173,7 @@ pnpm exec node scripts/verify-cognitap.mjs /path/to/cognitap /tmp/radiant-dev57.
 Keep `output/browser/cognitap-compositions/` with the source revision, temporary
 lockfile, builds, registry limitation and archive results. It is a manual
 cross-repository checkpoint, not an implicit CI checkout of another project's
-moving main branch. The [DEV-57 record](verification/2026-10-25-installed-compositions.md)
-distinguishes the old Button-only registry baseline, unreleased archive results,
-and missing actual screen-reader evidence. None substitutes for another.
+moving main branch.
 
 Each migration issue and PR should record:
 

@@ -228,8 +228,8 @@ keys fail before import can silently discard data.
 
 ## Responsive typography
 
-Typesetting is opt-in and uses the existing theme compiler. The accepted
-[role model](research/dev-162-typography-model.md) separates Body/Headings/UI/Code
+Typesetting is opt-in and uses the existing theme compiler. The role model
+separates Body/Headings/UI/Code
 font assignments, 16 text styles and independent prose/UI rhythms.
 
 ```tsx
@@ -983,26 +983,3 @@ Action-only geometry, elevation and motion remain deliberate Button component
 overrides consumed by both Button and action-shaped Link. Inline/subtle Link
 retains its own decoration and focus overrides. Soft and unfilled ink mixes the
 selected tone toward the scope foreground; explicit Link colour overrides win.
-
-### Cleanup inventory (DEV-132)
-
-| Area                                                                        | Disposition                                                                                  |
-| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Ten family helpers/types, `radiantTheme`, resolved `style`/`surface` fields | Removed directly under the experimental 0.x policy; replacements above                       |
-| Old unprefixed color/radius aliases and ambient easing variables            | Removed from the source and compiled styling routes                                          |
-| Old action variants, `size`/`radius` presentation props and `data-size`     | Already retired by the action/form migrations; no compatibility path restored                |
-| Shared semantic tokens and typed `components` overrides                     | Retained as the canonical theme authoring contract                                           |
-| `ThemeStyle`, native props, named parts, state hooks and `render`           | Retained for local styling and native composition                                            |
-| Button and action-shaped Link presentation                                  | One private `actionStyles` implementation; action-only Button slots are intentionally shared |
-| Dialog actions and Accordion sections                                       | Compose Button and Collapsible respectively; no parallel action/disclosure paint             |
-
-Every component slot in the registry has a reader. Input, Field, Checkbox,
-Radio, Dialog, Collapsible and Card resolve their own override, then a shared
-role or neutral default. Only Button and action-shaped Link consume action
-slots; inline/subtle Link keeps its own decoration/focus contract. Existing
-preset values and light/dark mode maps are unchanged by this cleanup.
-
-This removes compatibility paths without publishing a package. The next
-release must carry these breaking migration notes under the
-[release policy](../RELEASE_POLICY.md); earlier changelog entries describe their
-delivery-time behavior.

@@ -267,30 +267,3 @@ Storybook. Keep display names human-readable; never use them as persistent
 identity. Fonts need documented loading and fallbacks. Theme mode is independent
 of identity. Preset completeness is covered by the runtime and browser checks;
 this original inventory alone is not verification evidence.
-
-## Removal and verification ledger
-
-The runtime migration must remove Button fallback chains from Input,
-Checkbox, Radio, Dialog, Collapsible, and Card; Link also stops inheriting
-Button focus/motion variables. Input/Checkbox/Radio currently reference
-`--button-focus-color`, although Button's helper emits `--color-focus` instead.
-Replace that stale path with shared focus roles. Dialog's independent
-`dialogActionVariants` must disappear when its actions compose Button.
-
-Audit hardcoded font sizes, icon/indicator dimensions, `min-h-6`, gaps, and
-colors as well as exported variables. A complete token map alone does not fix
-those consumers. Register new non-color utilities with `cn` as required by
-AGENTS.md and verify caller class overrides in the later implementation issues.
-
-Storybook removes per-story theme wrappers, `--themes` story-id exceptions,
-copied frame helpers, and repeated component theme galleries. A global selector
-uses the same preset registry and ThemeScope behavior for Canvas and Docs;
-one intentional comparison page covers cross-theme inspection.
-
-Later changes must verify named-theme resets, local partial overrides, mode
-inheritance, Button-only override isolation, native input size preservation,
-part/ref/event composition, disabled/pending/form behavior, and both compiled
-CSS and Tailwind consumption. Documentation-only DEV-104 does not implement
-or claim those checks pass. Mark public API/token/part changes breaking and
-provide release migration notes under RELEASE_POLICY.md; do not leave old
-helpers or exports in an undocumented indefinite compatibility layer.
