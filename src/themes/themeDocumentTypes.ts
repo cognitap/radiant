@@ -36,6 +36,14 @@ export interface ThemeColorSection extends ThemeSection<ThemeTokens['color']> {
   readonly anchor?: { readonly paletteId: string; readonly stop: ThemeColorStop }
 }
 
+/** Available OpenType axis range, never a font file or a trial-only setting. */
+export interface ThemeFontAxis {
+  readonly tag: string
+  readonly min: number
+  readonly default: number
+  readonly max: number
+}
+
 /** Portable descriptors only. The consuming application owns loading and local availability. */
 export interface ThemeFontMetadata {
   readonly id: string
@@ -43,6 +51,7 @@ export interface ThemeFontMetadata {
   readonly source: 'system' | 'catalog' | 'local'
   readonly weights?: readonly number[]
   readonly styles?: readonly ('normal' | 'italic')[]
+  readonly axes?: readonly ThemeFontAxis[]
 }
 
 export interface ThemeTypographySection extends ThemeSection<ThemeTokens['typography']> {

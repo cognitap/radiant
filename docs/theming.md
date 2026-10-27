@@ -209,6 +209,14 @@ or regenerated palette; the compiler never silently adjusts the source.
 fonts and determines availability. Local font bytes, file paths/handles, URLs,
 DOM objects and runtime functions have no fields in the schema. A local family
 name can travel with the configuration, but the local font itself does not.
+Optional `axes` records available OpenType ranges as `{ tag, min, default, max }`.
+Axis tags are unique four-character ASCII identifiers; at most 32 finite, ordered
+ranges are accepted per font. These are capabilities for setup and inspection,
+not selected variations. Trial-only axis adjustments remain in the typeface lab.
+Full/selective documents retain these descriptors; compiling them does not change
+paint or load font files. Compressed custom files without inspected axes remain
+unverified rather than receiving invented capabilities.
+
 Font metadata does not set `typography.values.family` automatically.
 
 Full and selective authoring JSON preserve those descriptors; only selecting

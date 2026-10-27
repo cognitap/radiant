@@ -377,3 +377,66 @@ test('imports reject data loss, executable values, binary objects, accessors and
     color: {}
   })
 })
+
+test('portable font axis requirements survive full/selective imports without changing compiled paint', () => {
+  const font = {
+    id: 'brand',
+    family: 'Brand font',
+    source: 'local',
+    weights: [450],
+    styles: ['normal'],
+    axes: [
+      { tag: 'wght', min: 100, default: 400, max: 900 },
+      { tag: 'opsz', min: 8, default: 20, max: 72 }
+    ]
+  }
+  const document = defineThemeDocument({
+    kind: 'radiant-theme',
+    version: 1,
+    id: 'font-axes',
+    name: 'Font axes',
+    sections: { typography: { fonts: [font] } }
+  })
+  const parsed = parseThemeDocument(JSON.parse(JSON.stringify(document)))
+  assert.deepEqual(parsed.sections.typography.fonts, [font])
+  const selected = exportThemeSections(parsed, ['typography'])
+  assert.deepEqual(selected.sections.typography.fonts[0].axes, font.axes)
+  const target = defineThemeDocument({
+    kind: 'radiant-theme',
+    version: 1,
+    id: 'target',
+    name: 'Target',
+    sections: {
+      color: { values: { accent: '#123456' } },
+      components: { values: { button: { radius: '23px' } } }
+    }
+  })
+  const applied = updateThemeDocument(target, selected.sections, 'replace')
+  assert.deepEqual(applied.sections.color, target.sections.color)
+  assert.deepEqual(applied.sections.components, target.sections.components)
+  assert.deepEqual(
+    compileThemeDocument(applied),
+    compileThemeDocument(updateThemeDocument(applied, { typography: { fonts: [] } }, 'replace'))
+  )
+  for (const axes of [
+    [{ tag: 'bad', min: 0, default: 0, max: 1 }],
+    [{ tag: 'wght', min: 100, default: 50, max: 900 }],
+    [{ tag: 'wght', min: 100, default: 400, max: Infinity }],
+    [font.axes[0], font.axes[0]],
+    [{ ...font.axes[0], bytes: 'private' }],
+    Array.from({ length: 33 }, (_, i) => ({
+      tag: 'A' + String(i).padStart(3, '0'),
+      min: 0,
+      default: 0,
+      max: 1
+    }))
+  ])
+    assert.throws(
+      () =>
+        defineThemeDocument({
+          ...document,
+          sections: { typography: { fonts: [{ ...font, axes }] } }
+        }),
+      /axes/
+    )
+})

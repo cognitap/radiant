@@ -53,5 +53,6 @@ export type {
   ThemeBrandSource,
   ThemePalette,
   ThemeTypographySection,
+  ThemeFontAxis,
   ThemeFontMetadata
 } from './themeDocument.js'

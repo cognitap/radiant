@@ -222,3 +222,19 @@ updateThemeAppearance(workshop, { geometry: { values: { spring: {} } } })
 updateThemeAppearance(workshop, { geometry: { modes: { system: {} } } })
 // @ts-expect-error A raw wall has no semantic roles or canvas layer; map it first.
 updateThemeAppearance(workshop, { palette: generateColorWall({ brand: '#7C3AED' }) })
+
+const fontAxis: import('@cognitap/radiant').ThemeFontAxis = {
+  tag: 'opsz',
+  min: 8,
+  default: 20,
+  max: 72
+}
+const fontRequirements: import('@cognitap/radiant').ThemeFontMetadata = {
+  id: 'brand',
+  family: 'Brand font',
+  source: 'local',
+  axes: [fontAxis],
+  weights: [450],
+  styles: ['normal']
+}
+void fontRequirements
