@@ -8,8 +8,6 @@
   },
   "banned": ["docs/verification/**", "docs/research/**", "docs/*-audit-*.md"],
   "legacy": {
-    "RELEASE_POLICY.md": 532,
-    "docs/adr/0001-spring-engine-boundaries.md": 356,
     "docs/motion.md": 2489
   }
 }
