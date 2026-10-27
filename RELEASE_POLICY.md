@@ -54,7 +54,7 @@ The manual **Release Radiant** workflow prepares and uploads a candidate. With
 publishes that same archive and checks that npm's integrity matches the
 receipt. Preparation refuses to publish while the manifest is `private`.
 
-### First publication (DEV-94)
+### First publication
 
 Confirm the npm account can publish to the `@cognitap` scope and recheck the MIT
 notice, then remove `private` in a reviewed change. Publish the first candidate
