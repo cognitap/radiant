@@ -31,6 +31,16 @@ When behavior changes, rewrite the existing text; do not append. Use short,
 plain sentences without ticket IDs, dates or disclaimers. Verification
 evidence, research and test counts go in the pull request, never the repo.
 
-`pnpm docs:check` enforces word budgets from `docs-policy.json`. Files under
-`legacy` are pending cleanup: they may only shrink. Never add to `legacy` or
-raise a budget; cut the text.
+`pnpm docs:check` enforces the word budgets in `docs-policy.json`. When a file
+is over budget, cut text. Never raise a budget or add a `legacy` entry.
+
+Where things go:
+
+- Component props and behavior: that component's page on the docs site
+  (cognitap/radiant-docs), not this repo.
+- Design decisions and cross-family rules: `docs/architecture.md`.
+- Themes and tokens: `docs/theming.md`. Motion: `docs/motion.md`.
+- Setup and commands: `CONTRIBUTING.md` and `docs/testing.md`.
+- `README.md` stays a short introduction.
+- `CHANGELOG.md`: one line per user-visible change under Unreleased. Give a
+  breaking change a short before and after. Leave out tests, CI and refactors.
