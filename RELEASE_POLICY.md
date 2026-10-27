@@ -26,8 +26,8 @@ environment support.
 Only the latest release is maintained: the latest `0.x` before `1.0.0`, then the
 current major. There are no backports or response deadlines.
 
-Every published version gets a changelog entry covering consumer-facing changes
-and known verification gaps. Mark breaking changes and include migration steps.
+Every published version gets a changelog entry with one line per user-visible
+change. Mark breaking changes and show a short before and after.
 From `1.0.0`, deprecate in a minor before removing in a major; during `0.x`,
 direct removal is allowed.
 
