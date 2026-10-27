@@ -4,6 +4,8 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add grouped natural-flow layout measurement with interruptible resize/reorder springs and React lifecycle bindings (DEV-177).
+
 - Add subscribed spring sources and a React changing-target follower with momentum-preserving retargeting (DEV-176).
 
 - Add one-axis spring drag/release/snap controllers and native/React bindings,

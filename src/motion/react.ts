@@ -2,6 +2,7 @@
 import {
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -18,6 +19,7 @@ import { bindSpringDrag } from './dragBrowser.js'
 import { createSpring, type SpringController } from './runtime.js'
 import { bindSpringStyle, type SpringStyleProperty } from './browser.js'
 import { bindSpringSource, type SpringSource } from './follow.js'
+import { bindSpringLayout, type SpringLayoutController } from './layoutDom.js'
 
 // Start conservatively for SSR/hydration; only subscribing reads the browser.
 const listeners = new Set<() => void>()
@@ -228,4 +230,43 @@ export function useSpringFollow(
     else return bindSpringSource(spring, target)
   }, [spring, target])
   return spring
+}
+
+/** Batch direct-child layout slots after each commit and observe later intrinsic changes. */
+export function useSpringLayout(
+  ref: RefObject<HTMLElement | null>
+): Pick<SpringLayoutController, 'measure' | 'get' | 'getVelocity' | 'isAnimating'> {
+  const profile = useContext(MotionProfileContext)
+  const reduced = useReducedMotion()
+  const resolved = resolveMotion(profile, 'layout', reduced)
+  const binding = useRef<{ node: HTMLElement; controller: SpringLayoutController } | null>(null)
+  const [controller] = useState<
+    Pick<SpringLayoutController, 'measure' | 'get' | 'getVelocity' | 'isAnimating'>
+  >(() => ({
+    measure: () => binding.current?.controller.measure(),
+    get: slot => binding.current?.controller.get(slot),
+    getVelocity: slot => binding.current?.controller.getVelocity(slot),
+    isAnimating: () => binding.current?.controller.isAnimating() ?? false
+  }))
+  useLayoutEffect(() => {
+    if (binding.current?.node !== ref.current) {
+      binding.current?.controller.destroy()
+      binding.current = null
+    }
+    if (!ref.current) return
+    if (!binding.current)
+      binding.current = { node: ref.current, controller: bindSpringLayout(ref.current, resolved) }
+    else {
+      binding.current.controller.configure(resolved)
+      binding.current.controller.measure()
+    }
+  })
+  useLayoutEffect(
+    () => () => {
+      binding.current?.controller.destroy()
+      binding.current = null
+    },
+    []
+  )
+  return controller
 }

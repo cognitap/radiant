@@ -1151,3 +1151,10 @@ test('installed changing-target source binding keeps source and controller owner
   follower.destroy()
   source.destroy()
 })
+
+test('installed layout adapters import safely on the server without React projection', async () => {
+  const { bindSpringLayout } = await import('@cognitap/radiant/motion')
+  const { useSpringLayout } = await import('@cognitap/radiant/motion/react')
+  assert.equal(typeof bindSpringLayout, 'function')
+  assert.equal(typeof useSpringLayout, 'function')
+})

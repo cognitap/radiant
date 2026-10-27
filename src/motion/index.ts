@@ -23,3 +23,6 @@ export { bindSpringDrag } from './dragBrowser.js'
 
 export { bindSpringSource } from './follow.js'
 export type { SpringSource } from './follow.js'
+
+export { bindSpringLayout } from './layoutDom.js'
+export type { SpringLayoutController } from './layoutDom.js'

@@ -2,8 +2,9 @@
 
 Radiant uses Motion 14.7.1 physics with a Radiant-owned layout adapter, as recorded
 in the [accepted engine decision](adr/0001-spring-engine-boundaries.md). These APIs
-are experimental in 0.x. Built-in Button, disclosure/Dialog, drag and general layout
-integration follow in DEV-173–177; importing the runtime does not change their behavior.
+are experimental in 0.x. Opt-in bindings cover native Button, disclosure/Dialog,
+drag/snap, changing-target values and measured layout groups. Importing numeric
+interfaces alone does not enable native component motion.
 
 ## Theme configuration
 
@@ -88,9 +89,9 @@ A dedicated motion part is required when the caller already owns that property.
 local-pixel `{x, y, width, height}`. Measurements must share a stable coordinate
 space; dimensions must be nonnegative. Off snaps all axes to the latest measured
 bounds. Subscribers observe per-axis updates, not one atomic frame callback.
-This is the accepted layout adapter's numeric foundation; it does not measure DOM,
-project nested transforms or manage reorder/scroll/resize observers. Production
-measurement/host integration and geometry breadth are DEV-177.
+This is the layout adapter's numeric foundation. The grouped browser and React
+interfaces described under [layout resize and reorder](#layout-resize-and-reorder)
+own natural-flow measurement, scheduling and presentation.
 
 ## React lifecycle
 
@@ -326,3 +327,103 @@ ownership and parameter rules are the same as `createSpring`.
 System/Motion → FollowingValues offers pointer, native range and moving-target
 controls with a visible destination, follower and numeric readout. This is a
 library development proof; the public workshop remains DEV-178.
+
+## Layout resize and reorder
+
+```tsx
+import { useRef } from 'react'
+import { Card, CardTitle } from '@cognitap/radiant'
+import { useSpringLayout } from '@cognitap/radiant/motion/react'
+
+function Cards({ items }: { items: { id: string; title: string }[] }) {
+  const root = useRef<HTMLDivElement>(null)
+  useSpringLayout(root)
+  return (
+    <div
+      ref={root}
+      className="grid grid-cols-2 gap-4"
+    >
+      {items.map(item => (
+        <div
+          key={item.id}
+          data-rad-layout-slot=""
+          className="flow-root"
+        >
+          <Card data-rad-layout-part="">
+            <CardTitle>{item.title}</CardTitle>
+          </Card>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+The root owns a group of **direct-child** `data-rad-layout-slot` wrappers. Each
+slot has one first-child `data-rad-layout-part` containing the actual content.
+Keep keys and the slot/part DOM identities stable during reorder; replacement
+starts a new item at its natural bounds. New and removed items appear/disappear
+immediately; this interface does not provide enter/exit presence or drag sorting.
+Native semantic elements stay inside the motion part or, for passive Card, can
+be the part itself. A part can have padding, borders, backgrounds and a grid/flex
+content layout. Children, text and borders are never scaled or cloned.
+
+`useSpringLayout(ref)` measures the group in a layout effect after each commit,
+before paint. It supplies `measure()`, `get(slot)`, `getVelocity(slot)` and
+`isAnimating()`. Snapshots use local pixel `{x,y,width,height}` bounds and velocities
+in pixels/second, or undefined for an unregistered/disposed slot. Theme `layout`
+physics, system reduced motion and lifetime remain hook-owned. The stable handle
+survives root replacement; SSR does not measure or alter markup. No animated
+frame is stored in React state. See System/Motion → LayoutResizeReorder for a
+responsive Card grid with reorder, width and dynamic-content controls.
+
+For manual ownership, `bindSpringLayout(root, options?)` measures a mounted browser
+root and returns the same inspection/measurement interface plus `configure` and
+idempotent `destroy`. Supply `enabled` from your live reduced-motion policy, as
+with `createSpring`. Options use the same physical parameter rules; scalar
+`reducedValue` is rejected. Destroy removes observers, listeners, pending adapter
+frames and springs, and restores inline properties still owned by the binding.
+
+Every measurement releases **all** slot reservations/projections before reading
+natural layout, then retargets one persistent upstream spring per coordinate axis.
+Slots reserve their final natural width/height while their motion parts render the
+current position and physical width/height. Text reflows at the animated width;
+height does not scale or implicitly clip content. The group restores normal flow
+at rest. Off/reduced motion snaps to the natural layout immediately. Profile
+parameter changes take effect at rest without replacing in-flight momentum.
+
+Root/slot ResizeObservers, subtree content/class/open/hidden/style mutations,
+resource loads, viewport resize and font completion schedule a grouped measurement.
+Imperative callers can call `measure()` synchronously after a transaction to avoid
+a frame before mutation-observer work. Style writes on the reserved slot/part are
+ignored by the mutation observer to avoid observing the animation itself: call
+`measure()` explicitly after changing their author-owned styles. React commits do
+this automatically. Scrolling the root or an outer scroller preserves local
+coordinates; scrolling is not a new motion target. Native overflow clipping and
+scrollbar ownership remain with the application.
+
+Geometry requirements:
+
+- Use dedicated, normal-flow, unpadded, borderless slots. Slots can carry grid/flex
+  placement and margins; use `flow-root` to avoid collapsed content margins.
+  Parts must have zero outer margin and fill their slot naturally. Put decoration
+  and padding on the part or content. Keep one part as the slot's only element.
+- Reserve slot position/width/height/box-sizing/flex and part position/insets/width/
+  height/box-sizing/translate for the binding. No competing transitions, transforms
+  or individual translate/rotate/scale on these wrappers; transformed native
+  controls **inside** a part keep their own presentation. Insets must start at
+  their normal-flow defaults. Unsupported wrapper geometry is rejected rather
+  than silently projecting distorted measurements.
+- The coordinate plane must be unscaled/unrotated, with no CSS zoom/perspective on
+  the root/ancestors. Common ancestor translation is supported. Fixed/sticky or
+  absolute slots, cross-root shared-element morphing, nested independently animated
+  layout groups and arbitrary transformed coordinate systems are outside this
+  contract. Ordinary nested content, native modal top layers and internal scrollers
+  retain their owners. Scroll-position/sticky pinning is not synthesized.
+- Layout motion never delays semantic changes, takes focus, moves DOM or duplicates
+  native controls. DOM reorder is still the application's operation; if it removes
+  or moves the focused host, apply the application's intended focus policy. Keep
+  overflow visible when focus outlines or content must extend beyond animated bounds.
+
+The public workshop and theme handoff remain DEV-178/179; this ships the reusable
+library interface and its development proof, without publishing a package.

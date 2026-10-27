@@ -3,8 +3,15 @@ import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogClose } from '
 import { useEffect, useRef, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button.js'
+import { Card, CardTitle, CardDescription } from './Card.js'
 import { bindSpringStyle } from './motion/index.js'
-import { MotionProvider, useSpringStyle, useSpringDrag, useSpringFollow } from './motion/react.js'
+import {
+  MotionProvider,
+  useSpringStyle,
+  useSpringDrag,
+  useSpringFollow,
+  useSpringLayout
+} from './motion/react.js'
 
 function RuntimeBinding() {
   const ref = useRef<HTMLButtonElement>(null)
@@ -219,3 +226,66 @@ function FollowProof() {
   )
 }
 export const FollowingValues: StoryObj<typeof meta> = { render: () => <FollowProof /> }
+
+function LayoutProof() {
+  const root = useRef<HTMLDivElement>(null)
+  const [items, setItems] = useState(['Alpha', 'Beta', 'Gamma'])
+  const [wide, setWide] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  useSpringLayout(root)
+  return (
+    <div className="grid gap-4">
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => setItems(values => [...values.slice(1), values[0]!])}>
+          Reorder cards
+        </Button>
+        <Button onClick={() => setWide(value => !value)}>Change layout width</Button>
+        <Button onClick={() => setExpanded(value => !value)}>Change card content</Button>
+      </div>
+      <div className="max-h-96 overflow-auto border border-neutral-400 p-2">
+        <div
+          ref={root}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: 16,
+            width: wide ? 460 : 300,
+            maxWidth: '100%'
+          }}
+        >
+          {items.map(item => (
+            <div
+              key={item}
+              data-rad-layout-slot=""
+              style={{ display: 'flow-root' }}
+            >
+              <Card
+                data-rad-layout-part=""
+                className="p-4"
+              >
+                <CardTitle level={3}>{item}</CardTitle>
+                <CardDescription>
+                  {expanded
+                    ? 'Content can change while these cards move. Text reflows at the animated width; borders and children are never scaled.'
+                    : 'Real content, natural layout.'}
+                </CardDescription>
+                <Button
+                  controlSize="small"
+                  aria-label={`Toggle details for ${item}`}
+                  onClick={() => setExpanded(value => !value)}
+                >
+                  Details
+                </Button>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p>
+        Interrupt repeatedly using any control. Slot identity follows the keyed DOM. Native buttons
+        and focus stay with the actual content; reduced motion applies layout immediately.
+      </p>
+    </div>
+  )
+}
+export const LayoutResizeReorder: StoryObj<typeof meta> = { render: () => <LayoutProof /> }
