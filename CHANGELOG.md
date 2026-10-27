@@ -4,6 +4,10 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add one-axis spring drag/release/snap controllers and native/React bindings,
+  with signed velocity, re-grab/cancel, bounded presentation, native touch
+  scrolling and keyboard alternatives (DEV-175).
+
 - Add MotionProvider disclosure height springs and native Dialog entry/inert visual
   exit, with immediate semantic close, focus restoration, interruption, live
   reduced-motion cancellation and documented snapshot fallback (DEV-174).

@@ -1,9 +1,9 @@
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './Collapsible.js'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogClose } from './Dialog.js'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button.js'
-import { MotionProvider, useSpringStyle } from './motion/react.js'
+import { MotionProvider, useSpringStyle, useSpringDrag } from './motion/react.js'
 
 function RuntimeBinding() {
   const ref = useRef<HTMLButtonElement>(null)
@@ -74,3 +74,55 @@ export const Transitions: StoryObj<typeof meta> = {
     </MotionProvider>
   )
 }
+
+function DragProof() {
+  const ref = useRef<HTMLButtonElement>(null)
+  const output = useRef<HTMLOutputElement>(null)
+  const drag = useSpringDrag(ref, 0, { min: 0, max: 160, snapPoints: [0, 80, 160] })
+  useEffect(
+    () =>
+      drag.subscribe(value => {
+        if (output.current) output.current.value = `${value.toFixed(1)}px`
+      }),
+    [drag]
+  )
+  return (
+    <div className="grid gap-4">
+      <div className="relative h-20 w-64 rounded-lg bg-neutral-200">
+        <Button
+          ref={ref}
+          style={{ transform: 'rotate(-2deg)' }}
+          aria-describedby="drag-help"
+        >
+          Drag me
+        </Button>
+      </div>
+      <p id="drag-help">
+        Drag sideways or focus the handle and use arrows, Home and End. Escape cancels a drag.
+        Vertical touch scrolling remains available.
+      </p>
+      <div>
+        <Button onClick={() => drag.step('first')}>Start</Button>
+        <Button onClick={() => drag.to(80)}>Middle</Button>
+        <Button onClick={() => drag.step('last')}>End</Button>
+      </div>
+      <label>
+        Target position
+        <input
+          type="range"
+          min={0}
+          max={160}
+          defaultValue={0}
+          onChange={event => drag.to(Number(event.currentTarget.value))}
+        />
+      </label>
+      <output
+        ref={output}
+        aria-live="off"
+      >
+        0px
+      </output>
+    </div>
+  )
+}
+export const DragSnap: StoryObj<typeof meta> = { render: () => <DragProof /> }

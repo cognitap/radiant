@@ -220,3 +220,64 @@ or fail to reproduce their content. The visual copy is not a retained modal or
 interactive surface. Exotic containing blocks/positioning and live content during
 exit are outside this snapshot contract; use local off when they need a different
 presentation. See System/Motion → Transitions and the native browser proof.
+
+## Drag, release and snap
+
+```tsx
+import { useRef } from 'react'
+import { Button } from '@cognitap/radiant'
+import { useSpringDrag } from '@cognitap/radiant/motion/react'
+
+function Handle() {
+  const ref = useRef<HTMLButtonElement>(null)
+  const drag = useSpringDrag(ref, 0, { min: 0, max: 160, snapPoints: [0, 80, 160] })
+  return (
+    <>
+      <Button ref={ref}>Drag or use arrow keys</Button>
+      <Button onClick={() => drag.step('first')}>Start</Button>
+      <Button onClick={() => drag.step('last')}>End</Button>
+    </>
+  )
+}
+```
+
+The hook reserves the handle's individual translate, keeps transform untouched,
+and owns its binding/controller cleanup. It exposes `get`, `getVelocity`,
+`subscribe`, `isAnimating`, `to`, `cancel` and `step`. Use a dedicated handle
+without competing translate/transform animation. Initial position is mount-only;
+changing bounds/snap points/theme updates the existing controller. Replacing a
+host rebinds it; it does not replace the native host/ref or create a wrapper.
+
+The framework-neutral `createSpringDrag(initial, options)` additionally exposes
+`begin`, `move(position, time)`, `release(time)`, `jump`, `stop`, `configure` and
+`destroy`. Bounds are finite pixels with min < max. Snap points are detached,
+sorted, deduplicated and must be nonempty/in bounds; omitted points mean the two
+bounds. `bindSpringDrag(element, controller, axis?)` supplies native browser input
+and presentation; dispose the binding and then its owned controller separately.
+The axis is x by default, or y. Geometry conversion/reordering is DEV-177.
+
+Direct manipulation jumps to bounded pointer positions. Release uses signed
+velocity from fresh monotonic samples (milliseconds; zero after 80ms inactivity,
+clamped to ±3000px/s). It projects 180ms ahead and selects the nearest bounded
+snap point; ties choose the lower point. Motion receives the actual signed release
+velocity through its public value API. `createSpring.to(target, velocity?)` also
+supports an explicitly seeded velocity in units/second. Ordinary target changes
+still retain the running follower's momentum; explicit velocity starts a new
+trajectory at the current position. No solver, sampled bounce curve or website-only
+physics engine is added.
+
+Bounds hard-clamp presentation and direct input, while upstream physics can
+overshoot internally. This is not a collision/bounce or free 2D drag engine.
+Re-grab freezes the current presentation; cancellation returns to the last
+committed goal with zero release velocity. Escape cancels an active drag; arrows
+select adjacent points, Home/End choose extremes. Native focus and tap/Enter/Space
+click remain native; a completed drag suppresses its following click once.
+Consumer prevention/propagation runs before the document-bubble gesture handlers.
+Disabled/pending and lost capture/blur cancel the gesture. Horizontal handles use
+pan-y and vertical handles pan-x when no inline touch-action is authored, retaining
+perpendicular native scrolling; caller touch-action values remain owned by the
+caller. Off/reduced motion preserves useful direct manipulation and snaps release
+or keyboard goals immediately, rather than disabling functional controls.
+
+See System/Motion → DragSnap for a real handle, explicit native button alternatives,
+range target and position readout. The public editor composes these APIs in DEV-178.

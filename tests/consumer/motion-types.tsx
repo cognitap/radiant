@@ -53,3 +53,26 @@ const actions = (
   </MotionProvider>
 )
 void actions
+
+import { createSpringDrag, bindSpringDrag } from '@cognitap/radiant/motion'
+import { useSpringDrag } from '@cognitap/radiant/motion/react'
+const drag = createSpringDrag(0, { min: 0, max: 160, snapPoints: [0, 80, 160] })
+drag.begin()
+drag.move(40, 10)
+drag.release(20)
+drag.destroy()
+void bindSpringDrag
+void useSpringDrag
+function DragBinding() {
+  const ref = useRef<HTMLButtonElement>(null)
+  const control = useSpringDrag(ref, 0, { min: 0, max: 160, snapPoints: [0, 80, 160], axis: 'x' })
+  return (
+    <Button
+      ref={ref}
+      onClick={() => control.step('last')}
+    >
+      Drag
+    </Button>
+  )
+}
+void DragBinding

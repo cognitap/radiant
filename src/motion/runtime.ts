@@ -11,7 +11,7 @@ export interface SpringController {
   get(): number
   getVelocity(): number
   isAnimating(): boolean
-  to(target: number): void
+  to(target: number, velocity?: number): void
   jump(target: number): void
   /** Stop at the current presentation and discard the old goal. */
   stop(): void
@@ -58,12 +58,20 @@ export function createSpring(initial: number, options: SpringOptions = {}): Spri
     get: () => value.get(),
     getVelocity: () => (destroyed ? 0 : value.getVelocity()),
     isAnimating: () => !destroyed && value.isAnimating(),
-    to(next) {
+    to(next, velocity) {
       finite(next)
+      if (velocity !== undefined) finite(velocity)
       if (destroyed) return
       target = next
-      if (enabled) value.set(next)
-      else value.jump(reducedValue ?? target)
+      if (enabled) {
+        if (velocity !== undefined) {
+          const current = value.get()
+          value.jump(current)
+          applyPending()
+          value.setWithVelocity(current - velocity / 60, current, 1000 / 60)
+        }
+        value.set(next)
+      } else value.jump(reducedValue ?? target)
     },
     jump(next) {
       finite(next)

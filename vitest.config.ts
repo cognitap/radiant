@@ -4,7 +4,7 @@ import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 import tailwindcss from '@tailwindcss/vite'
 import { observeLinkDownload, observeLinkPopup } from './tests/browser/navigationCommands.js'
-import { touchButton } from './tests/browser/touchCommands.js'
+import { touchButton, dragHandle } from './tests/browser/touchCommands.js'
 import { emulatePreferences } from './tests/browser/mediaCommands.js'
 import { themes } from './src/themes/index.js'
 
@@ -49,7 +49,13 @@ export default defineConfig({
           name: 'browser-platform',
           include: ['tests/browser/**/*.test.tsx'],
           browser: {
-            commands: { observeLinkDownload, observeLinkPopup, emulatePreferences, touchButton },
+            commands: {
+              observeLinkDownload,
+              observeLinkPopup,
+              emulatePreferences,
+              touchButton,
+              dragHandle
+            },
             enabled: true,
             provider: playwright(),
             headless: true,
