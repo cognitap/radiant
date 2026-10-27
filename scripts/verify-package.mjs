@@ -30,6 +30,13 @@ const run = (command, args, cwd = consumer) =>
 
 try {
   cpSync(new URL('../tests/consumer/', import.meta.url), consumer, { recursive: true })
+  writeFileSync(
+    path.join(consumer, 'TypographyComponents.tsx'),
+    readFileSync(
+      new URL('../.storybook/examples/TypographyComponents.tsx', import.meta.url),
+      'utf8'
+    ).replace("'../../src/index.js'", "'@cognitap/radiant'")
+  )
   if (compositions) {
     const { copyRecipes } = await import('./verify-compositions.mjs')
     copyRecipes(consumer)

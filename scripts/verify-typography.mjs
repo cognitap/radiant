@@ -18,7 +18,7 @@ const expected = {
   'prose-quote': [r * 1.25, r * 1.25, 400, 1.4, -0.01],
   'ui-title': [20, 20, 600, 1.3, -0.015],
   'ui-body': [16, 16, 400, 1.5, 0],
-  'ui-label': [16, 16, 650, 1.4, 0],
+  'ui-label': [18, 18, 650, 1.4, 0],
   'ui-supporting': [15, 15, 400, 1.5, 0],
   'ui-caption': [14, 14, 400, 1.5, 0],
   'ui-metric': [32, 32, 600, 1.15, -0.03],
@@ -31,6 +31,95 @@ const size = (a, b, width, root = 16) =>
     (b * root) / 16,
     Math.max((a * root) / 16, (a / 16 - ((b - a) / 512) * 24) * root + ((b - a) / 512) * width)
   )
+
+async function verifyComponentTypography(page, width) {
+  const root = page.getByTestId('type-components')
+  const styles = async locator =>
+    locator.evaluate(e => {
+      const s = getComputedStyle(e)
+      return {
+        size: s.fontSize,
+        family: s.fontFamily,
+        weight: s.fontWeight,
+        leading: s.lineHeight,
+        tracking: s.letterSpacing,
+        height: s.height,
+        minHeight: s.minHeight
+      }
+    })
+  const body = await styles(page.getByTestId('component-body'))
+  near(body.size, 16, 'component UI Body size')
+  assert.match(body.family, /Arial/)
+  near(body.leading, 24, 'component UI Body leading')
+  const title = await styles(page.getByTestId('component-title'))
+  near(title.size, 20, 'component UI Title size')
+  assert.match(title.family, /Georgia/)
+  near(title.leading, 26, 'component UI Title leading')
+  const supporting = await styles(page.getByTestId('component-supporting'))
+  near(supporting.size, 15, 'component UI Supporting size')
+  assert.match(supporting.family, /monospace/)
+  for (const slot of ['field-description', 'field-error', 'dialog-description']) {
+    const text = await styles(root.locator(`[data-slot~="${slot}"]`).first())
+    assert.deepEqual(text, { ...supporting, height: text.height, minHeight: text.minHeight })
+  }
+  const label = await styles(root.locator('[data-slot=field-label]').first())
+  near(label.size, 18, 'field label follows its own role, not UI Body')
+  assert.equal(label.weight, '650')
+  for (const [size, pixels, height] of [
+    ['small', 13, 32],
+    ['medium', 14, 40],
+    ['large', 15, 48]
+  ]) {
+    const controls = page.getByTestId(`component-${size}`)
+    for (const selector of ['button', 'a', 'input[type=text]']) {
+      const text = await styles(controls.locator(selector))
+      near(text.size, pixels, `${size}/${selector} retains control size`)
+      assert.match(text.family, /Arial/)
+      assert.equal(text.weight, selector === 'input[type=text]' ? '400' : '775')
+      near(
+        selector === 'input[type=text]' ? text.height : text.minHeight,
+        height,
+        'control geometry'
+      )
+      near(
+        text.leading,
+        pixels * (selector === 'input[type=text]' ? 1.5 : 1.4),
+        'control role leading'
+      )
+    }
+    for (const slot of ['checkbox-label', 'radio-label']) {
+      const text = await styles(controls.locator(`[data-slot=${slot}]`))
+      near(text.size, pixels, 'selection label retains control size')
+      assert.equal(text.weight, '650')
+      assert.match(text.family, /Arial/)
+    }
+  }
+  for (const slot of ['collapsible-trigger', 'accordion-trigger']) {
+    const text = await styles(root.locator(`[data-slot~="${slot}"]`).first())
+    near(text.size, 18, 'disclosure uses UI Label')
+    assert.equal(text.weight, '650')
+  }
+  const inline = await styles(page.getByTestId('component-inline'))
+  assert.deepEqual(inline, { ...body, height: inline.height, minHeight: inline.minHeight })
+  const caller = await styles(page.getByTestId('component-caller'))
+  near(caller.size, 30, 'component caller size')
+  near(caller.leading, 60, 'component caller leading')
+  assert.equal(caller.weight, '700')
+  assert.match(caller.family, /monospace/)
+  const exception = await styles(page.getByTestId('component-exception'))
+  near(exception.size, 27, 'component local exception size')
+  assert.equal(exception.weight, '725')
+  assert.ok(
+    await root.evaluate(e => e.scrollWidth <= e.clientWidth + 1),
+    `components wrap at ${width}px`
+  )
+  // Actual labels and errors retain their native control relationships.
+  const input = root.getByRole('textbox', { name: 'Workspace name' })
+  await input.fill('Updated workspace')
+  assert.equal(await input.inputValue(), 'Updated workspace')
+  assert.equal(await input.getAttribute('aria-invalid'), 'true')
+  assert.ok((await input.getAttribute('aria-describedby')).split(' ').length === 2)
+}
 
 export async function verifyTypography(page, route, output) {
   const cases = []
@@ -67,6 +156,7 @@ export async function verifyTypography(page, route, output) {
         r * q ** 3,
         'compact fallback outside opt-in container'
       )
+      await verifyComponentTypography(page, width)
       const prose = await page.getByTestId('type-prose').evaluate(e => ({
         width: e.getBoundingClientRect().width,
         scroll: e.scrollWidth,
@@ -124,7 +214,7 @@ export async function verifyTypography(page, route, output) {
           .getByTestId('type-reset')
           .locator('span')
           .evaluate(e => getComputedStyle(e).fontWeight),
-        '500',
+        '550',
         'named reset clears role exception'
       )
       cases.push({ mode, width, result: 'pass', roles: 16 })

@@ -1,3 +1,4 @@
+import { TypographyComponents } from './TypographyComponents.js'
 import {
   Button,
   ThemeScope,
@@ -15,7 +16,18 @@ const document = defineThemeDocument({
   name: 'Installed typesetting',
   sections: {
     typography: {
-      typesetting: { preset: 'source-serif', styles: { 'ui-label': { weight: 650 } } },
+      typesetting: {
+        preset: 'source-serif',
+        fonts: {
+          ui: { family: 'Arial', profile: 'manual' },
+          headings: { family: 'Georgia', profile: 'manual' }
+        },
+        styles: {
+          'ui-label': { weight: 650, narrow: 18, wide: 18 },
+          'ui-title': { assignment: 'headings' },
+          'ui-supporting': { assignment: 'code' }
+        }
+      },
       modes: { dark: { roles: { 'ui-caption': { letterSpacing: '0.02em' } } } }
     },
     components: { values: { button: { fontWeight: 775 } } }
@@ -119,6 +131,7 @@ export function TypographyProof({ mode }: { mode: ThemeMode }) {
         >
           <span data-rad-text="ui-label">Named reset</span>
         </ThemeScope>
+        <TypographyComponents />
         <Button data-testid="type-button">Existing component exception</Button>
       </section>
     </ThemeScope>

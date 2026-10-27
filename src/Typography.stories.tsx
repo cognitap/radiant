@@ -1,3 +1,5 @@
+import { TypographyComponents } from '../.storybook/examples/TypographyComponents.js'
+import { ThemeScope, defineTheme, generateTypography } from './index.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { typographyRoles } from './index.js'
 
@@ -81,5 +83,44 @@ export const Prose: Story = {
         configuration.
       </p>
     </article>
+  )
+}
+
+// The toolbar covers every preset and mode; these variants expose font and density changes.
+export const Components: Story = { render: () => <TypographyComponents /> }
+export const SerifInterface: Story = {
+  render: () => (
+    <ThemeScope
+      theme={defineTheme({
+        id: 'serif-interface',
+        name: 'Serif interface',
+        tokens: {
+          typography: generateTypography({
+            fonts: { ui: { family: 'Georgia', profile: 'manual' } },
+            ui: { size: 18, lineHeight: 1.7 }
+          }).tokens
+        }
+      })}
+    >
+      <TypographyComponents />
+    </ThemeScope>
+  )
+}
+export const MonoInterface: Story = {
+  render: () => (
+    <ThemeScope
+      theme={defineTheme({
+        id: 'mono-interface',
+        name: 'Mono interface',
+        tokens: {
+          typography: generateTypography({
+            fonts: { ui: { family: 'monospace', profile: 'manual' } },
+            ui: { size: 14, lineHeight: 1.6 }
+          }).tokens
+        }
+      })}
+    >
+      <TypographyComponents />
+    </ThemeScope>
   )
 }

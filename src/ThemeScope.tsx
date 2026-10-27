@@ -11,7 +11,7 @@ type ScopeState = { theme: Theme; overrides: ThemeStyle }
 const ThemeContext = createContext<ScopeState | null>(null)
 const variables = new Set(Object.keys(defaultTheme.modes.light))
 const scopeClass =
-  '[background:var(--rad-surface-canvas)] [color:var(--rad-color-foreground)] [font-family:var(--rad-typography-family)] [font-size:var(--rad-typography-body-size)] [font-weight:var(--rad-typography-body-weight)] [letter-spacing:var(--rad-typography-letter-spacing)]'
+  '[background:var(--rad-surface-canvas)] [color:var(--rad-color-foreground)] font-[family-name:var(--rad-typography-roles-ui-body-family)] text-[length:var(--rad-typography-roles-ui-body-size)] font-[number:var(--rad-typography-roles-ui-body-weight)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing)] leading-[var(--rad-typography-roles-ui-body-line-height)]'
 
 export type ThemeScopeProps = Omit<ComponentProps<'div'>, 'style'> & {
   theme?: Theme

@@ -7,7 +7,6 @@ import type { ThemeStyle } from './themes/defineTheme.js'
 
 const linkVariants = cva(
   [
-    '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)]',
     '[color:var(--_link-color)] [text-underline-offset:var(--rad-link-underline-offset,0.1875rem)]',
     'transition-colors duration-[var(--rad-link-color-duration,var(--rad-motion-color-duration,150ms))]',
     'hover:[color:var(--_link-hover)]',

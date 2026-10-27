@@ -10,7 +10,7 @@ import type { PartStyle } from './presentation.js'
 
 const fieldVariants = cva(
   [
-    '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
+    'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
     'grid min-w-0 [gap:var(--rad-field-gap,var(--rad-spacing-field-gap,0.375rem))]',
     // Dim controls/labels once; help and error text must stay readable.
     'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1]',
@@ -30,13 +30,13 @@ const fieldVariants = cva(
 )
 
 const labelClass =
-  'min-w-0 break-words p-0 [color:var(--rad-field-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [font-size:var(--rad-field-label-size,var(--rad-typography-body-size,0.875rem))] [font-weight:var(--rad-field-label-weight,var(--rad-typography-label-weight,550))] leading-snug forced-colors:text-[CanvasText]'
+  'min-w-0 break-words p-0 [color:var(--rad-field-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-field-label-size,var(--rad-typography-roles-ui-label-size,0.875rem))] font-[number:var(--rad-field-label-weight,var(--rad-typography-roles-ui-label-weight,550))] forced-colors:text-[CanvasText] font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,0em)]'
 
 const descriptionClass =
-  'min-w-0 break-words [color:var(--rad-field-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] [font-size:var(--rad-field-description-size,var(--rad-typography-small-size,0.8125rem))] leading-snug forced-colors:text-[CanvasText]'
+  'min-w-0 break-words [color:var(--rad-field-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] text-[length:var(--rad-field-description-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] forced-colors:text-[CanvasText] font-[family-name:var(--rad-typography-roles-ui-supporting-family,system-ui,sans-serif)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-supporting-letter-spacing,0em)] font-[number:var(--rad-typography-roles-ui-supporting-weight,400)]'
 
 const errorClass =
-  'min-w-0 break-words [color:var(--rad-field-error-color,var(--rad-color-invalid,oklch(0.56_0.19_25)))] [font-size:var(--rad-field-error-size,var(--rad-typography-small-size,0.8125rem))] leading-snug forced-colors:text-[CanvasText]'
+  'min-w-0 break-words [color:var(--rad-field-error-color,var(--rad-color-invalid,oklch(0.56_0.19_25)))] text-[length:var(--rad-field-error-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] forced-colors:text-[CanvasText] font-[family-name:var(--rad-typography-roles-ui-supporting-family,system-ui,sans-serif)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-supporting-letter-spacing,0em)] font-[number:var(--rad-typography-roles-ui-supporting-weight,400)]'
 
 const requiredClass =
   'ms-[0.25em] [color:var(--rad-field-required-color,var(--rad-color-invalid,oklch(0.56_0.19_25)))] forced-colors:text-[CanvasText]'

@@ -182,6 +182,19 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
                   'text-decoration-line'
                 ].map(property => [property, getComputedStyle(element).getPropertyValue(property)])
               )
+            const legacyProbe = document.createElement('span')
+            Object.assign(legacyProbe.style, {
+              fontFamily: 'var(--rad-typography-family)',
+              fontSize: 'var(--rad-typography-heading-size)',
+              fontWeight: 'var(--rad-typography-heading-weight)',
+              letterSpacing: 'var(--rad-typography-letter-spacing)'
+            })
+            selected.append(legacyProbe)
+            const legacyTitle = styles(legacyProbe)
+            legacyProbe.style.fontSize = 'var(--rad-typography-body-size)'
+            legacyProbe.style.fontWeight = 'var(--rad-typography-label-weight)'
+            const legacyLabel = styles(legacyProbe)
+            legacyProbe.remove()
             const snapshot = Object.fromEntries(
               [
                 'button',
@@ -201,6 +214,10 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
               styles(document.querySelector(`[data-testid=${scope}] ${selector}`))
             return {
               snapshot,
+              legacyTitle,
+              legacyLabel,
+              title: styles(selected.querySelector('[data-slot=card-title]')),
+              label: styles(selected.querySelector('[data-slot=field-label]')),
               brand: [control('brand', 'button'), control('brand', 'input')],
               reset: [control('reset', 'button'), control('reset', 'input')],
               sibling: [control('sibling', 'button'), control('sibling', 'input')],
@@ -231,6 +248,19 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
           assert.equal(measured.caller.padding.split(' ')[1], '23px')
           assert.equal(measured.disabledOpacity, '1')
           assert.equal(measured.resetMargin === 0, route.reset)
+          for (const property of ['font-family', 'font-size', 'font-weight', 'letter-spacing']) {
+            assert.equal(
+              measured.title[property],
+              measured.legacyTitle[property],
+              `${current}: legacy title ${property}`
+            )
+            assert.equal(
+              measured.label[property],
+              measured.legacyLabel[property],
+              `${current}: legacy label ${property}`
+            )
+          }
+          assert.equal(measured.indicatorLabel['font-weight'], measured.legacyLabel['font-weight'])
           assert.equal(measured.labelStyle, 'italic')
           assert.equal(measured.snapshot.a['text-decoration-line'], 'none')
           if (theme === 'generated-workshop') {
@@ -298,7 +328,7 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
                 `${current}: ${state} paint guard`
               )
             }
-          const panel = page.getByRole('dialog', { includeHidden: true })
+          const panel = page.getByRole('dialog', { name: 'Artifact dialog', includeHidden: true })
           assert.equal(await panel.isVisible(), false)
           await page.getByRole('button', { name: 'Open artifact dialog' }).press('Space')
           assert.equal(await panel.isVisible(), true)

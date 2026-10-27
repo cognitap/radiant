@@ -918,7 +918,11 @@ are removed. Use `ThemeComponentOverrides` for reusable configuration and
 ### With Tailwind
 
 For opt-in prose and reusable text styles, see
-[responsive typography](docs/theming.md#responsive-typography). The pure
+[responsive typography](docs/theming.md#responsive-typography).
+Existing components consume the shared UI roles, while control sizes and explicit
+component exceptions retain their metrics. See [component mapping and migration](docs/theming.md#component-roles-and-earlier-themes).
+
+The pure
 `@cognitap/radiant/typography` entry resolves font-aware starting points through
 the existing theme compiler; applications still own font loading.
 

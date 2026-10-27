@@ -13,8 +13,8 @@ const colorMotionClass =
 
 const collapsibleVariants = cva([
   colorMotionClass,
-  '[font-family:var(--rad-typography-family,system-ui,sans-serif)] [letter-spacing:var(--rad-typography-letter-spacing,-0.011em)] [font-size:var(--rad-typography-body-size,0.875rem)] [font-weight:var(--rad-typography-body-weight,400)]',
-  'group box-border grid w-full gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
+  'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
+  'group box-border grid w-full min-w-0 gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
   'rounded-[var(--rad-collapsible-radius,var(--rad-surface-radius,0.75rem))]',
   '[corner-shape:var(--rad-collapsible-corner-shape,var(--rad-surface-corner-shape,round))]',
   '[border-width:var(--rad-collapsible-border-width,var(--rad-surface-border-width,1px))]',
@@ -35,7 +35,8 @@ const collapsibleVariants = cva([
 
 const collapsibleTriggerVariants = cva([
   colorMotionClass,
-  'flex w-full cursor-pointer items-center gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))]',
+  'font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-label-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-label-weight,550)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,0em)]',
+  'box-border flex w-full min-w-0 cursor-pointer break-words items-center gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))]',
   'list-none p-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))]',
   '[&::-webkit-details-marker]:hidden [&::marker]:content-none',
   'focus-visible:rounded-[var(--rad-collapsible-radius,var(--rad-surface-radius,0.75rem))]',
@@ -59,7 +60,7 @@ const collapsibleContentVariants = cva([
   colorMotionClass,
   'min-w-0 px-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))] pb-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))]',
   '[color:var(--rad-collapsible-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
-  '[font-size:var(--rad-collapsible-content-size,var(--rad-typography-body-size,0.875rem))]',
+  'text-[length:var(--rad-collapsible-content-size,var(--rad-typography-roles-ui-body-size,0.875rem))]',
   'forced-colors:text-[CanvasText]'
 ])
 
