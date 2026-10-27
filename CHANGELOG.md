@@ -4,6 +4,10 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add opt-in Motion spring runtime, theme profiles and React/native style lifecycle
+  bindings, with live reduced-motion cancellation and a persistent per-axis layout
+  foundation. Existing component motion remains unchanged until its integration.
+
 ## 0.0.5
 
 - Add responsive typography: Body/Headings/UI/Code assignments, 16 reusable

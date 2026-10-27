@@ -1,3 +1,4 @@
+import type { MotionProfileInput } from '../motion/config.js'
 import type { ThemeComponentOverrides } from './components.js'
 import type { ThemeTokens } from './tokens.js'
 import type { TypographyInput } from '../typography/types.js'
@@ -60,13 +61,19 @@ export interface ThemeTypographySection extends ThemeSection<ThemeTokens['typogr
   readonly typesetting?: TypographyInput
 }
 
+export interface ThemeMotionSection extends ThemeSection<ThemeTokens['motion']> {
+  readonly profile?: MotionProfileInput
+}
+
 /** Token groups are the extension seams for richer typesetting and spring authoring. */
 export type ThemeSections = {
-  readonly [K in keyof ThemeTokens]?: K extends 'color'
-    ? ThemeColorSection
-    : K extends 'typography'
-      ? ThemeTypographySection
-      : ThemeSection<ThemeTokens[K]>
+  readonly [K in keyof ThemeTokens]?: K extends 'motion'
+    ? ThemeMotionSection
+    : K extends 'color'
+      ? ThemeColorSection
+      : K extends 'typography'
+        ? ThemeTypographySection
+        : ThemeSection<ThemeTokens[K]>
 } & {
   readonly components?: ThemeSection<ThemeComponentOverrides>
 }
