@@ -152,3 +152,41 @@ parameters. Add `motion` to the theme, opt into these runtime bindings and disab
 competing CSS presentation on the reserved property; migrate each built-in family
 in its issue. Color fades may continue to use CSS durations. No tokens are removed
 or renamed here. JavaScript and CSS still need matching package versions.
+
+## Native action springs
+
+```tsx
+import { Button } from '@cognitap/radiant'
+import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
+
+;<MotionProvider>
+  <Button type="submit">Save</Button>
+  <Button motion="off">Immediate spatial feedback</Button>
+  <MotionLink
+    variant="solid"
+    href="/account"
+  >
+    Account
+  </MotionLink>
+</MotionProvider>
+```
+
+MotionProvider adds no DOM wrapper. Within it, real Button hosts and composed
+DialogTrigger/DialogClose actions use the theme's press spring for compression
+and release, including re-press during rebound. The pressed scale comes from
+`--rad-button-press-scale` (default .97, supported .5–1). MotionLink is an opt-in
+client adapter for action-shaped Link; ordinary Link keeps its server contract.
+Inline/subtle links do not compress, and Space keeps native anchor scrolling.
+
+Native clicks/submission/navigation are never synthesized or delayed. Consumer
+handlers run first; cancelling press input prevents compression. Pointer/touch,
+Enter/Space, repeat, outside release, pointer cancellation, lost capture, blur,
+disabled fieldsets and pending changes retain their native meanings. Off and
+system reduced-motion cancel to neutral. The adapter reserves individual scale,
+leaves caller transform intact, and removes scale from CSS transitions. Recognized
+caller scale utilities or inline scale/scale transitions retain ownership and opt
+out of the spring. For arbitrary external scale styles, set `motion="off"` and
+keep one owner. Cleanup restores prior presentation and removes listeners.
+
+See [System/Motion → ButtonPress](../src/Motion.stories.tsx) for the canonical
+interactive proof. The public workshop composes these production APIs in DEV-178.

@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button.js'
-import { useSpringStyle } from './motion/react.js'
+import { MotionProvider, useSpringStyle } from './motion/react.js'
 
 function RuntimeBinding() {
   const ref = useRef<HTMLButtonElement>(null)
@@ -42,3 +42,12 @@ const meta = {
 } satisfies Meta<typeof RuntimeBinding>
 export default meta
 export const Runtime: StoryObj<typeof meta> = {}
+
+export const ButtonPress: StoryObj<typeof meta> = {
+  render: () => (
+    <MotionProvider>
+      <Button>Press and quickly press again</Button>
+      <Button motion="off">Motion off</Button>
+    </MotionProvider>
+  )
+}

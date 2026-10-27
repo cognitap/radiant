@@ -245,3 +245,9 @@ duration/easing tokens. Opt-in numeric and React lifecycle interfaces live in
 physics engine. See the [motion runtime contract](motion.md) and canonical
 [System/Motion binding](../src/Motion.stories.tsx). Built-in family integration
 follows separately; native state, event composition and refs keep their owners.
+
+Opt into native Button and composed Dialog action springs with the wrapper-free
+`MotionProvider` from `/motion/react`. `Button motion="off"` suppresses its spatial
+feedback. The optional `MotionLink` adapter gives action-shaped anchors spring
+compression while ordinary Link stays server-renderable. See [native action
+springs](motion.md#native-action-springs) for event and style ownership.

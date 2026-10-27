@@ -7,6 +7,9 @@ import {
   useSyncExternalStore,
   type RefObject
 } from 'react'
+import { createElement, type ReactNode } from 'react'
+import { MotionHostContext } from './host.js'
+import { bindPressMotion } from './press.js'
 import { MotionProfileContext } from './context.js'
 import { resolveMotion, type MotionInteraction } from './config.js'
 import { createSpring, type SpringController } from './runtime.js'
@@ -117,3 +120,11 @@ export function useSpringStyle(
   })
   return spring
 }
+
+const hostRuntime = { press: bindPressMotion }
+/** Opt into native Radiant spring interactions without adding a DOM wrapper. */
+export function MotionProvider({ children }: { children?: ReactNode }) {
+  return createElement(MotionHostContext.Provider, { value: hostRuntime }, children)
+}
+export { MotionLink } from './MotionLink.js'
+export type { MotionLinkProps } from './MotionLink.js'

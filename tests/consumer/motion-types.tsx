@@ -39,3 +39,17 @@ void bindSpringStyle
 bindSpringStyle(document.createElement('button'), spring, 'transform')
 // @ts-expect-error arbitrary CSS-unit strings are unsupported
 spring.to('10rem')
+
+import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
+const actions = (
+  <MotionProvider>
+    <Button motion="off">Off</Button>
+    <MotionLink
+      variant="solid"
+      href="/next"
+    >
+      Next
+    </MotionLink>
+  </MotionProvider>
+)
+void actions
