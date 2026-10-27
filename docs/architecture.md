@@ -1,7 +1,7 @@
 # Architecture
 
-How Radiant's ten families fit together and why. Props and types are in the
-[README](../README.md); themes are in [theming](theming.md); springs are in
+How Radiant's ten families fit together and why. Props are on the
+[docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, Link, Field, Input, Checkbox, RadioGroup (with Radio),
@@ -20,9 +20,8 @@ Each piece of behavior has one owner:
 | Appearance                                             | Shared tokens and component overrides           |
 | Content, validation, routing, fetching and persistence | The consumer                                    |
 
-Why: the browser already gets keyboard, focus and form behavior right, and
-reimplementing it adds bugs. Radiant wraps native elements. It does not replace
-them, and it has no headless-library dependency.
+Why: the browser already gets keyboard, focus and form behavior right.
+Radiant wraps native elements and has no headless-library dependency.
 
 Import rules:
 
@@ -45,9 +44,8 @@ Dialog owns open state. Collapsible owns one disclosure, and Accordion composes
 Collapsible for a set of them.
 
 Composed families reuse the real thing: DialogTrigger and DialogClose are
-Buttons, RadioGroup is a Field, and an Accordion item is a Collapsible. That way
-theme, keyboard behavior and relationships travel together, and there is no
-second styling path to drift.
+Buttons, RadioGroup is a Field, and an Accordion item is a Collapsible, so
+theme, keyboard behavior and relationships travel together.
 
 ## Presentation
 
@@ -105,7 +103,9 @@ host, never a wrapper:
 Internal parts take `className` and `style` through a `parts` map. Field has
 `label`, `description`, `error` and `required`. Checkbox and Radio have
 `wrapper`, `label` and `indicator`, and RadioGroup adds `options`. These hooks
-cannot replace IDs, ARIA, handlers or refs.
+cannot replace IDs, ARIA, handlers or refs. Caller classes merge after the
+defaults and caller `style` wins. Identity and presentation data attributes
+cannot be overridden.
 
 `data-slot` is a space-separated set, so select with `~=`, as in
 `[data-slot~="button"]`. Composed parts keep their base identity:
@@ -120,8 +120,8 @@ Actions set `data-variant`, `data-tone` and `data-control-size`.
 ## State and forms
 
 Each state axis has one owner for the life of a mount. Pass `value`, `checked`
-or `open` to control it, or `default*` to set an initial value. To change owner,
-remount with a new `key`. A controlled callback is a request, and the consumer
+or `open` to control it, or `default*` to set an initial value. Passing both, or switching owner during
+a mount, throws; remount with a new `key` instead. A controlled callback is a request, and the consumer
 may refuse it. No-op requests and prop syncs fire no callback.
 
 | Family                     | State                        | Callback                                     | Empty   |
@@ -161,8 +161,8 @@ For cancellable actions, disabled and pending guards run first, then the
 consumer handler, then the state request if `defaultPrevented` is false. Native
 change, toggle and blur are observations and cannot veto anything. Library and
 caller refs get the same host, and callback-ref cleanup functions are honored.
-`useField`, `useDialog`, `useCollapsible` and `useAccordion` return `null`
-outside their owner. Parts that need a root throw when misplaced. Lifecycle,
+`useField`, `useDialog`, `useCollapsible` and `useAccordion` read and request
+state, and return `null` outside their owner. Parts that need a root throw when misplaced. Lifecycle,
 SSR and hydration details are in [React bindings](react-bindings.md).
 
 ## What customization must keep
