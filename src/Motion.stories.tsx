@@ -1,3 +1,5 @@
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './Collapsible.js'
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogClose } from './Dialog.js'
 import { useRef } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button.js'
@@ -48,6 +50,27 @@ export const ButtonPress: StoryObj<typeof meta> = {
     <MotionProvider>
       <Button>Press and quickly press again</Button>
       <Button motion="off">Motion off</Button>
+    </MotionProvider>
+  )
+}
+
+export const Transitions: StoryObj<typeof meta> = {
+  render: () => (
+    <MotionProvider>
+      <Collapsible>
+        <CollapsibleTrigger>Interrupt this disclosure</CollapsibleTrigger>
+        <CollapsibleContent>
+          <p>Open, close and reopen before the height settles.</p>
+        </CollapsibleContent>
+      </Collapsible>
+      <Dialog>
+        <DialogTrigger>Open spring dialog</DialogTrigger>
+        <DialogContent>
+          <DialogTitle>Native modal</DialogTitle>
+          <p>Escape restores focus immediately. The inert visual exit can finish independently.</p>
+          <DialogClose>Close</DialogClose>
+        </DialogContent>
+      </Dialog>
     </MotionProvider>
   )
 }

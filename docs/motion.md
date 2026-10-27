@@ -190,3 +190,33 @@ keep one owner. Cleanup restores prior presentation and removes listeners.
 
 See [System/Motion → ButtonPress](../src/Motion.stories.tsx) for the canonical
 interactive proof. The public workshop composes these production APIs in DEV-178.
+
+## Disclosure and Dialog transitions
+
+The same MotionProvider enables native Collapsible/Accordion height springs and
+Dialog entry/exit presentation. `Collapsible motion="off"` and
+`DialogContent motion="off"` opt out locally; theme off and live system reduced
+motion snap immediately. Native open state, callbacks, Escape cancellation,
+modal/top-layer behavior and focus restoration keep their existing owners.
+
+Disclosure animates the `::details-content` height using a reserved internal CSS
+variable. Real children keep natural size and are measured with ResizeObserver;
+there is no child/border scaling. Closed content can finish a visual collapse,
+but is inert and ARIA-hidden immediately. Authored inert/hidden values are restored
+on opening/disposal. Custom layouts whose direct content margins/positioning do
+not fit this measurement should opt out. Browsers without `::details-content`
+visibility support retain native immediate collapse as progressive fallback.
+
+Dialog closes natively immediately. For safe ordinary HTML content, an inert,
+ARIA-hidden presentation `div` can finish a spring exit outside the top layer.
+It carries no IDs, form names, autofocus or event handlers; form controls are
+disabled, and pointer events pass through. It is removed at rest, reduced motion,
+reopen or disposal. Reopening reuses the current spring state and cancels the copy.
+Caller transform remains intact; authored scale/scale transitions retain ownership.
+
+Nested native dialogs, custom elements, scripts/styles, embedded documents,
+canvas and media use immediate visual exit: cloning those could trigger behavior
+or fail to reproduce their content. The visual copy is not a retained modal or
+interactive surface. Exotic containing blocks/positioning and live content during
+exit are outside this snapshot contract; use local off when they need a different
+presentation. See System/Motion → Transitions and the native browser proof.

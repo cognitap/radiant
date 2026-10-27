@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { createElement, type ReactNode } from 'react'
 import { MotionHostContext } from './host.js'
+import { bindDisclosureMotion, bindDialogMotion } from './transitions.js'
 import { bindPressMotion } from './press.js'
 import { MotionProfileContext } from './context.js'
 import { resolveMotion, type MotionInteraction } from './config.js'
@@ -121,7 +122,11 @@ export function useSpringStyle(
   return spring
 }
 
-const hostRuntime = { press: bindPressMotion }
+const hostRuntime = {
+  press: bindPressMotion,
+  disclosure: bindDisclosureMotion,
+  dialog: bindDialogMotion
+}
 /** Opt into native Radiant spring interactions without adding a DOM wrapper. */
 export function MotionProvider({ children }: { children?: ReactNode }) {
   return createElement(MotionHostContext.Provider, { value: hostRuntime }, children)

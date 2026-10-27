@@ -4,6 +4,8 @@ import type { ComponentProps, MouseEvent, ReactNode } from 'react'
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { cva } from 'class-variance-authority'
 import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
+import { callerOwnsPress } from './motion/pressPolicy.js'
+import { useTransitionHost } from './motion/host.js'
 import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
@@ -93,6 +95,7 @@ export type DialogTriggerProps = ButtonProps
 
 export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open' | 'style'> & {
   style?: ThemeStyle
+  motion?: 'inherit' | 'off'
 }
 
 export type DialogTitleProps = Omit<ComponentProps<'h2'>, 'style'> & { style?: ThemeStyle }
@@ -184,6 +187,7 @@ export function DialogTrigger(props: DialogTriggerProps) {
 }
 
 export function DialogContent({
+  motion = 'inherit',
   className,
   onClick,
   onCancel,
@@ -193,7 +197,12 @@ export function DialogContent({
 }: DialogContentProps) {
   const dialog = useDialogContext()
   const nodeRef = useRef<HTMLDialogElement>(null)
-  const hostRef = useComposedRefs(nodeRef, ref)
+  const transition = useTransitionHost<HTMLDialogElement>(
+    'dialog',
+    ref,
+    motion === 'off' || callerOwnsPress(props.style, className)
+  )
+  const hostRef = useComposedRefs(nodeRef, transition.active ? transition.ref : ref)
   const unmounting = useRef(false)
   const previousModal = useRef(dialog.modal)
   // Bumps after the browser closes a dialog whose controlled `open` value is still true.

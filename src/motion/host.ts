@@ -12,6 +12,8 @@ export interface MotionHostBinding {
 }
 export interface MotionHostRuntime {
   press(node: HTMLElement, profile: MotionProfile): MotionHostBinding
+  disclosure?(node: HTMLElement, profile: MotionProfile): MotionHostBinding
+  dialog?(node: HTMLElement, profile: MotionProfile): MotionHostBinding
 }
 export const MotionHostContext = createContext<MotionHostRuntime | null>(null)
 /** Engine-free bridge: only the opt-in provider supplies implementation. */
@@ -51,4 +53,36 @@ export function usePressHost<Node extends HTMLElement>(
       binding.current?.value.release?.()
     }
   }
+}
+
+/** Shared lifecycle for native presentation adapters; no engine enters the root path. */
+export function useTransitionHost<Node extends HTMLElement>(
+  kind: 'disclosure' | 'dialog',
+  ref: Ref<Node> | undefined,
+  disabled: boolean
+) {
+  const runtime = useContext(MotionHostContext)
+  const profile = useContext(MotionProfileContext)
+  const node = useRef<Node>(null)
+  const binding = useRef<{ node: Node; value: MotionHostBinding } | null>(null)
+  const composed = useComposedRefs(node, ref)
+  useEffect(() => {
+    const attach = runtime?.[kind]
+    if (disabled || !attach || !node.current || binding.current?.node !== node.current) {
+      binding.current?.value.destroy()
+      binding.current = null
+    }
+    if (!disabled && attach && node.current) {
+      binding.current ??= { node: node.current, value: attach(node.current, profile) }
+      binding.current.value.update(profile)
+    }
+  })
+  useEffect(
+    () => () => {
+      binding.current?.value.destroy()
+      binding.current = null
+    },
+    []
+  )
+  return { ref: composed, active: !disabled && runtime?.[kind] !== undefined }
 }

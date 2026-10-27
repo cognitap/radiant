@@ -251,3 +251,7 @@ Opt into native Button and composed Dialog action springs with the wrapper-free
 feedback. The optional `MotionLink` adapter gives action-shaped anchors spring
 compression while ordinary Link stays server-renderable. See [native action
 springs](motion.md#native-action-springs) for event and style ownership.
+
+MotionProvider also enables native disclosure height and Dialog presentation.
+Native close and focus restoration stay immediate; a bounded inert visual copy
+may finish Dialog exit. See [native transition ownership](motion.md#disclosure-and-dialog-transitions).

@@ -4,6 +4,10 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
+- Add MotionProvider disclosure height springs and native Dialog entry/inert visual
+  exit, with immediate semantic close, focus restoration, interruption, live
+  reduced-motion cancellation and documented snapshot fallback (DEV-174).
+
 - Add opt-in native Button/composed-action springs through MotionProvider, plus
   a MotionLink adapter, with momentum-aware re-press, cancellation, native input
   semantics and caller style ownership (DEV-173).
