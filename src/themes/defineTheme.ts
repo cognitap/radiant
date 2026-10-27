@@ -1,3 +1,8 @@
+import {
+  defineMotionProfile,
+  type MotionProfile,
+  type MotionProfileInput
+} from '../motion/config.js'
 import type { CSSProperties } from 'react'
 import {
   flattenTokens,
@@ -24,6 +29,7 @@ export interface ThemeLayer {
   readonly components?: ThemeComponentOverrides
 }
 export interface ThemeDefinition extends ThemeLayer {
+  readonly motion?: MotionProfileInput
   readonly id: string
   readonly name: string
   readonly modes?: { readonly light?: ThemeLayer; readonly dark?: ThemeLayer }
@@ -31,6 +37,7 @@ export interface ThemeDefinition extends ThemeLayer {
 
 /** Resolved, immutable data. Safe to pass through server/client serialization. */
 export interface Theme {
+  readonly motion: MotionProfile
   readonly id: string
   readonly name: string
   readonly modes: {
@@ -111,7 +118,7 @@ export function defineTheme(definition: ThemeDefinition): Theme {
   assertRecord(definition, 'theme')
   assertKeys(
     definition,
-    { id: true, name: true, tokens: true, components: true, modes: true },
+    { id: true, name: true, tokens: true, components: true, modes: true, motion: true },
     'theme'
   )
   if (typeof definition.id !== 'string' || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(definition.id)) {
@@ -144,6 +151,7 @@ export function defineTheme(definition: ThemeDefinition): Theme {
   return freezeTree({
     id: definition.id,
     name: definition.name,
-    modes
+    modes,
+    motion: defineMotionProfile(definition.motion)
   })
 }

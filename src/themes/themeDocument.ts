@@ -205,11 +205,16 @@ function validateFonts(value: unknown, path: string) {
 }
 
 function toDefinition(sections: ThemeSections, id: string, name: string): ThemeDefinition {
-  const common: { tokens: RecordValue; components?: ThemeLayer['components'] } = { tokens: {} }
+  const common: {
+    tokens: RecordValue
+    components?: ThemeLayer['components']
+    motion?: ThemeDefinition['motion']
+  } = { tokens: {} }
   const modes = { light: { tokens: {} } as typeof common, dark: { tokens: {} } as typeof common }
   for (const sectionName of sectionNames) {
     const section = sections[sectionName]
     if (!section) continue
+    if (sectionName === 'motion') common.motion = sections.motion?.profile
     if (sectionName === 'typography' && sections.typography?.typesetting !== undefined) {
       common.tokens.typography = generateTypography(sections.typography.typesetting).tokens
     }
@@ -249,11 +254,13 @@ export function parseThemeDocument(input: unknown): ThemeDocument | ThemeSection
       [
         'values',
         'modes',
-        ...(name === 'color'
-          ? ['brand', 'fidelity', 'palettes', 'anchor']
-          : name === 'typography'
-            ? ['fonts', 'typesetting']
-            : [])
+        ...(name === 'motion'
+          ? ['profile']
+          : name === 'color'
+            ? ['brand', 'fidelity', 'palettes', 'anchor']
+            : name === 'typography'
+              ? ['fonts', 'typesetting']
+              : [])
       ],
       path
     )
@@ -351,6 +358,7 @@ export function themeDocumentFromDefinition(definition: ThemeDefinition): ThemeD
     const section: RecordValue = {}
     const values = name === 'components' ? copy.components : copy.tokens?.[name]
     if (values !== undefined) section.values = values
+    if (name === 'motion' && copy.motion !== undefined) section.profile = copy.motion
     const modes: RecordValue = {}
     for (const mode of ['light', 'dark'] as const) {
       const values =

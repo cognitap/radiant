@@ -115,7 +115,7 @@ test('every preset materialises complete light and dark tokens without legacy va
   const expectedKeys = Object.keys(defaultTheme.modes.light).sort()
   for (const theme of themes) {
     assert.ok(theme.name.trim())
-    assert.deepEqual(Object.keys(theme).sort(), ['id', 'modes', 'name'])
+    assert.deepEqual(Object.keys(theme).sort(), ['id', 'modes', 'motion', 'name'])
     for (const mode of ['light', 'dark']) {
       assert.deepEqual(Object.keys(theme.modes[mode]).sort(), expectedKeys, `${theme.id}/${mode}`)
       for (const [key, value] of Object.entries(theme.modes[mode])) {

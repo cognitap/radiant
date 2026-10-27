@@ -1,5 +1,7 @@
 'use client'
 
+import { MotionProfileContext } from './motion/context.js'
+
 import { createContext, useContext } from 'react'
 import type { ComponentProps } from 'react'
 import { cn } from './cn.js'
@@ -42,23 +44,25 @@ export function ThemeScope({ theme, mode, style, className, children, ...props }
 
   return (
     <ThemeContext.Provider value={{ theme: selected, overrides }}>
-      <div
-        {...props}
-        data-rad-theme={theme?.id}
-        data-rad-mode={mode}
-        className={cn(scopeClass, className)}
-        style={{
-          ...resolved,
-          ...(mode === undefined
-            ? parent === null
-              ? { colorScheme: 'light dark' }
-              : {}
-            : { colorScheme: mode === 'system' ? 'light dark' : mode }),
-          ...style
-        }}
-      >
-        {children}
-      </div>
+      <MotionProfileContext.Provider value={selected.motion ?? defaultTheme.motion}>
+        <div
+          {...props}
+          data-rad-theme={theme?.id}
+          data-rad-mode={mode}
+          className={cn(scopeClass, className)}
+          style={{
+            ...resolved,
+            ...(mode === undefined
+              ? parent === null
+                ? { colorScheme: 'light dark' }
+                : {}
+              : { colorScheme: mode === 'system' ? 'light dark' : mode }),
+            ...style
+          }}
+        >
+          {children}
+        </div>
+      </MotionProfileContext.Provider>
     </ThemeContext.Provider>
   )
 }

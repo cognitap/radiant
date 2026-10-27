@@ -524,3 +524,5 @@ const disabledCard: CardProps = { disabled: true }
 // @ts-expect-error CardTitle uses a native heading level.
 const invalidCardHeading: CardTitleProps = { level: 7 }
 void [disabledCard, invalidCardHeading]
+
+import './motion-types.js'

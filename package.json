@@ -16,6 +16,7 @@
     "CHANGELOG.md",
     "RELEASE_POLICY.md",
     "docs/system.md",
+    "docs/motion.md",
     "docs/accessibility.md",
     "docs/theming.md",
     "dist/library",
@@ -46,6 +47,14 @@
     "./typography": {
       "types": "./dist/library/typography/index.d.ts",
       "default": "./dist/library/typography/index.js"
+    },
+    "./motion": {
+      "types": "./dist/library/motion/index.d.ts",
+      "default": "./dist/library/motion/index.js"
+    },
+    "./motion/react": {
+      "types": "./dist/library/motion/react.d.ts",
+      "default": "./dist/library/motion/react.js"
     }
   },
   "publishConfig": {
@@ -83,7 +92,8 @@
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",
-    "cn": "0.4.0"
+    "cn": "0.4.0",
+    "motion": "14.7.1"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.6.1",

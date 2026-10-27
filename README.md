@@ -1029,3 +1029,11 @@ for other checkouts and type checking.
 - [Changelog](CHANGELOG.md): consumer-facing changes per release
 - [CONTRIBUTING.md](CONTRIBUTING.md): maintainer workflow and bug reports
 - [AGENTS.md](AGENTS.md): component and styling conventions
+
+### Spring runtime (unreleased)
+
+Configure serializable `defineTheme({motion: ...})` profiles and opt into
+`@cognitap/radiant/motion` or `/motion/react`. See the [runtime and migration
+guide](docs/motion.md) for physical values, native bindings, live reduced motion,
+cleanup and the accepted Radiant layout boundary. Existing component animations
+are unchanged until their individual integrations.

@@ -236,3 +236,22 @@ Check relevant keyboard/form/ref behavior and actual appearance in both modes;
 automated accessibility results do not establish complete visual or assistive
 technology readiness. Historical design decisions and acceptance sketches remain
 in the [harmonisation record](https://github.com/cognitap/radiant/blob/main/docs/contracts/README.md).
+
+## Spring runtime
+
+Themes can carry serializable physical motion profiles separately from CSS
+duration/easing tokens. Opt-in numeric and React lifecycle interfaces live in
+`@cognitap/radiant/motion` and `/motion/react`; ordinary root imports carry no
+physics engine. See the [motion runtime contract](motion.md) and canonical
+[System/Motion binding](../src/Motion.stories.tsx). Built-in family integration
+follows separately; native state, event composition and refs keep their owners.
+
+Opt into native Button and composed Dialog action springs with the wrapper-free
+`MotionProvider` from `/motion/react`. `Button motion="off"` suppresses its spatial
+feedback. The optional `MotionLink` adapter gives action-shaped anchors spring
+compression while ordinary Link stays server-renderable. See [native action
+springs](motion.md#native-action-springs) for event and style ownership.
+
+MotionProvider also enables native disclosure height and Dialog presentation.
+Native close and focus restoration stay immediate; a bounded inert visual copy
+may finish Dialog exit. See [native transition ownership](motion.md#disclosure-and-dialog-transitions).

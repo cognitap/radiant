@@ -116,6 +116,7 @@ export type {
   ThemeColorStop,
   ThemeBrandSource,
   ThemePalette,
+  ThemeMotionSection,
   ThemeTypographySection,
   ThemeFontAxis,
   ThemeFontMetadata
@@ -132,3 +133,11 @@ export type {
   PaletteContrastCheck,
   WorkingPaletteRole
 } from './color/index.js'
+
+export { defineMotionProfile, defaultMotionProfile } from './motion/config.js'
+export type {
+  MotionProfile,
+  MotionProfileInput,
+  MotionInteraction,
+  SpringParameters
+} from './motion/config.js'
