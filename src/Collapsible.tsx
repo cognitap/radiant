@@ -3,6 +3,7 @@
 import type { ComponentProps, ToggleEvent } from 'react'
 import { createContext, useContext, useId } from 'react'
 import { cva } from 'class-variance-authority'
+import { useTransitionHost } from './motion/host.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
@@ -67,6 +68,7 @@ const collapsibleContentVariants = cva([
 export type CollapsibleProps = Omit<ComponentProps<'details'>, 'open' | 'onToggle' | 'style'> &
   ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
     style?: ThemeStyle
+    motion?: 'inherit' | 'off'
     'data-slot'?: string
     onOpenChange?: (open: boolean) => void
     onToggle?: (event: ToggleEvent<HTMLDetailsElement>) => void
@@ -103,12 +105,15 @@ function useCollapsibleContext() {
 export function Collapsible({
   open,
   defaultOpen,
+  motion = 'inherit',
+  ref,
   onOpenChange,
   onToggle,
   className,
   children,
   ...props
 }: CollapsibleProps) {
+  const transition = useTransitionHost<HTMLDetailsElement>('disclosure', ref, motion === 'off')
   const contentId = useId()
   const {
     value: isOpen,
@@ -126,7 +131,14 @@ export function Collapsible({
     <CollapsibleContext.Provider value={{ open: isOpen, contentId, setOpen }}>
       <details
         {...props}
-        className={cn(collapsibleVariants(), className)}
+        ref={transition.active ? transition.ref : ref}
+        className={cn(
+          collapsibleVariants(),
+          transition.active &&
+            '[&::details-content]:[content-visibility:visible] [&::details-content]:transition-none [&:not([open])::details-content]:h-[var(--_rad-spring-details-height,0px)] open:[&::details-content]:h-[var(--_rad-spring-details-height,auto)]',
+          motion === 'off' && '[&::details-content]:transition-none',
+          className
+        )}
         data-slot={joinIds('collapsible', props['data-slot'])}
         data-state={isOpen ? 'open' : 'closed'}
         open={isOpen}

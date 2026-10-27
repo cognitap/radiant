@@ -898,7 +898,7 @@ test('the installed public theme API supports serializable themes and nested bas
   })) {
     for (const mode of ['light', 'dark']) assert.equal(theme.modes[mode][variable], value)
   }
-  assert.deepEqual(Object.keys(theme).sort(), ['id', 'modes', 'name'])
+  assert.deepEqual(Object.keys(theme).sort(), ['id', 'modes', 'motion', 'name'])
   assert.match(html, /data-rad-theme="consumer" data-rad-mode="dark"/)
   assert.match(html, /data-rad-theme="default"/)
   assert.match(html, /--rad-button-font-family:initial/)
@@ -1100,4 +1100,37 @@ test('the installed color entry generates portable walls without React or browse
     cwd: new URL('.', import.meta.url),
     stdio: 'pipe'
   })
+})
+
+test('opt-in motion exports work on the server and root imports exclude the engine', async () => {
+  execFileSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      `
+    import assert from 'node:assert/strict';
+    import {registerHooks} from 'node:module';
+    registerHooks({resolve(specifier, context, next) {
+      assert.ok(!/^(?:motion|framer-motion|motion-dom|motion-utils)(?:\\/|$)/.test(specifier), 'Root imported animation engine');
+      return next(specifier,context);
+    }});
+    const {defineTheme} = await import('@cognitap/radiant');
+    assert.equal(defineTheme({id:'root',name:'Root'}).motion.mode,'system');
+  `
+    ],
+    { stdio: 'pipe' }
+  )
+  const { createSpring, createLayoutSpring } = await import('@cognitap/radiant/motion')
+  const bindings = await import('@cognitap/radiant/motion/react')
+  assert.equal(typeof bindings.useSpringStyle, 'function')
+  assert.equal(typeof bindings.MotionProvider, 'function')
+  assert.equal(typeof bindings.MotionLink, 'function')
+  assert.equal(typeof bindings.useSpringDrag, 'function')
+  const value = createSpring(0, { enabled: false })
+  value.to(42)
+  assert.equal(value.get(), 42)
+  value.destroy()
+  const layout = createLayoutSpring({ x: 0, y: 0, width: 100, height: 20 }, { enabled: false })
+  layout.destroy()
 })

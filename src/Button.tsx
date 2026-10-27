@@ -2,6 +2,8 @@
 
 import type { ComponentProps, ReactElement } from 'react'
 import { Fragment, isValidElement } from 'react'
+import { callerOwnsPress, springPressClass, offPressClass } from './motion/pressPolicy.js'
+import { usePressHost } from './motion/host.js'
 import { actionVariants } from './actionStyles.js'
 import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
 import { cn } from './cn.js'
@@ -31,10 +33,14 @@ export type ButtonProps = Omit<ComponentProps<'button'>, 'style'> & {
   iconOnly?: boolean
   fullWidth?: boolean
   pending?: boolean
+  /** Requires MotionProvider. Off also suppresses legacy spatial transitions. */
+  motion?: 'inherit' | 'off'
 }
 
 export function Button({
   render,
+  motion = 'inherit',
+  ref,
   type = 'button',
   variant = 'solid',
   tone = 'accent',
@@ -47,15 +53,56 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
+  const callerOwnsScale = callerOwnsPress(props.style, className)
+  const press = usePressHost(ref, motion === 'off' || callerOwnsScale)
+  const spatial = (press.active || motion === 'off') && !callerOwnsScale
   const buttonProps: ButtonRenderProps = {
     ...props,
+    ref: press.active ? press.ref : ref,
+    onPointerDown: event => {
+      props.onPointerDown?.(event)
+      if (!pending && !event.defaultPrevented) press.press(event.nativeEvent)
+    },
+    onPointerUp: event => {
+      props.onPointerUp?.(event)
+      press.release()
+    },
+    onPointerCancel: event => {
+      props.onPointerCancel?.(event)
+      press.release()
+    },
+    onPointerLeave: event => {
+      props.onPointerLeave?.(event)
+      press.release()
+    },
+    onLostPointerCapture: event => {
+      props.onLostPointerCapture?.(event)
+      press.release()
+    },
+    onBlur: event => {
+      props.onBlur?.(event)
+      press.release()
+    },
+    onKeyDown: event => {
+      props.onKeyDown?.(event)
+      if (!pending && !event.defaultPrevented) press.press(event.nativeEvent)
+    },
+    onKeyUp: event => {
+      props.onKeyUp?.(event)
+      press.release()
+    },
     type,
     'aria-busy': pending || props['aria-busy'],
     'data-slot': joinIds('button', props['data-slot']) ?? 'button',
     'data-variant': variant,
     'data-tone': tone,
     'data-control-size': controlSize,
-    className: cn(actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }), className),
+    className: cn(
+      actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }),
+      spatial && springPressClass,
+      motion === 'off' && !callerOwnsScale && offPressClass,
+      className
+    ),
     onClick: composeAction(
       onClick,
       undefined,
@@ -76,6 +123,7 @@ export function Button({
     )
   }
   if (!render) return <button {...buttonProps}>{buttonProps.children}</button>
+  // oxlint-disable-next-line react/refs -- The render contract forwards refs; it does not read ref.current.
   const element = render(buttonProps)
   if (
     !isValidElement(element) ||

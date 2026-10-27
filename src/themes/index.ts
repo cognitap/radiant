@@ -52,6 +52,7 @@ export type {
   ThemeColorStop,
   ThemeBrandSource,
   ThemePalette,
+  ThemeMotionSection,
   ThemeTypographySection,
   ThemeFontAxis,
   ThemeFontMetadata

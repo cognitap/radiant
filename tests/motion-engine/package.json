@@ -1,0 +1,16 @@
+{
+  "name": "radiant-engine-proof",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@cognitap/radiant": "0.0.5",
+    "@react-spring/web": "10.1.2",
+    "motion": "14.7.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright": "1.64.1"
+  }
+}
