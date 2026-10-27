@@ -39,7 +39,7 @@ The open manual rows are known evidence gaps, not failures observed on those sys
    revision, working-tree changes, CSS route (compiled or Tailwind), optional
    reset, custom overrides and font loading. Installed-consumer evidence must
    also identify its package version/archive integrity and fixture revision.
-2. Open the [canonical stories and assembled recipes](system.md#reuse-the-canonical-examples).
+2. Open the [canonical stories and assembled recipes](architecture.md#examples-and-type-fixtures).
    Inspect native and TanStack form owners, standalone/Card/Dialog placement,
    and both default and replacement action paths. Use default Radiant parts in
    the ordinary path so an adapter cannot hide a broken composition.
@@ -180,4 +180,4 @@ content, responsive layouts, complete tasks and any overrides/host replacements.
 Page language/titles, consistent navigation, authentication, data-entry/error
 prevention and other page/process criteria also need product-level applicability
 and evidence. Neither a passing library matrix nor a paid certificate replaces
-that evaluation. Follow the [system guide](system.md) when composing the controls.
+that evaluation. Follow the [architecture doc](architecture.md) when composing the controls.

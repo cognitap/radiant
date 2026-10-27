@@ -1,6 +1,6 @@
 # Inspecting Radiant in Storybook
 
-Use the [system guide](system.md) for the shared theme, state, host-target and
+Use the [architecture doc](architecture.md) for the shared theme, state, host-target and
 composition contract; this guide explains how to inspect its live examples.
 
 Run `pnpm storybook` and open [localhost:6006](http://localhost:6006).
