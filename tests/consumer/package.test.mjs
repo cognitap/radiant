@@ -1020,7 +1020,7 @@ test('the archive includes MIT licensing and public documentation', () => {
     'README.md',
     'CHANGELOG.md',
     'RELEASE_POLICY.md',
-    'docs/system.md',
+    'docs/architecture.md',
     'docs/accessibility.md',
     'docs/theming.md'
   ]) {

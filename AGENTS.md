@@ -1,7 +1,7 @@
 # Radiant
 
 Before changing public props, themes, named parts or composition examples, read
-[the system guide](docs/system.md) for the shared contract and canonical sources.
+[the architecture doc](docs/architecture.md) for the shared contract and canonical sources.
 
 Use PascalCase for component names and component filenames: `Button` in
 `Button.tsx`. Match that casing in colocated stories and tests:

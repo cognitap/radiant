@@ -6,8 +6,8 @@ React interaction components and presentation primitives, published as
 combines ten families through shared themes, native controls and composed actions
 and surfaces.
 
-Start with the [Radiant system guide](docs/system.md) for setup, theme/mode rules,
-public anatomy, state ownership and canonical form/Dialog/Card examples. This
+Start with the [architecture doc](docs/architecture.md) for composition, hosts,
+state ownership and canonical form/Dialog/Card examples. This
 README is the detailed component reference. It describes the current source;
 changes under [Unreleased](CHANGELOG.md#unreleased) need a release before npm
 consumers can use them. Check your installed version's release notes.
@@ -36,8 +36,8 @@ import { Field, Input } from '@cognitap/radiant'
 
 All components share a neutral light/dark baseline: control dimensions,
 typography, surfaces, focus, and motion. Follow the
-[system guide](docs/system.md#set-up-styles-and-themes) to choose or author a
-theme, or the [canonical recipes](docs/system.md#reuse-the-canonical-examples)
+[theming reference](docs/theming.md) to choose or author a
+theme, or the [canonical recipes](docs/architecture.md#examples-and-type-fixtures)
 to compose controls into a form, Card or Dialog.
 
 For a global reset (Tailwind Preflight), also import `@cognitap/radiant/reset.css`
@@ -345,7 +345,7 @@ Dialog form closes it and restores trigger focus; reset leaves the Dialog open.
 
 TanStack is an optional development/example dependency. Neither the recipes nor
 the integration are exported by the library. The ownership decisions are in
-[the system guide](docs/system.md#state-and-forms).
+[the architecture doc](docs/architecture.md#state-and-forms).
 
 ### Input
 
@@ -903,9 +903,8 @@ placement; these share the same fields and actions rather than separate demos.
 
 Use `defineTheme` for shared semantic tokens and deliberate `components`
 exceptions; apply its result with `ThemeScope`. Theme and light/dark/system mode
-are independent. The [system guide](docs/system.md#set-up-styles-and-themes)
-explains scopes, precedence, fonts and local styling; the
-[theming reference](docs/theming.md) contains the canonical authoring example,
+are independent. The
+[theming reference](docs/theming.md) explains scopes, precedence, fonts and local styling, and contains the canonical authoring example,
 complete token defaults and preset reference.
 
 Migrating older code? Follow the
@@ -952,12 +951,8 @@ Utilities passed in `className` replace matching defaults, including `hover:` an
 
 ## Development
 
-The [system guide](docs/system.md) defines the current ten-family consumer
-contract and canonical sources. [GLOSSARY.md](GLOSSARY.md) defines the shared
-vocabulary. The [harmonisation design record](docs/contracts/README.md) and
-[migration inventory](docs/contracts/migration.md) preserve the original decisions
-and compile-only acceptance sketches. `pnpm typecheck:contracts` checks those
-sketches' type consistency; runtime and browser checks establish behavior.
+The [architecture doc](docs/architecture.md) defines the ten-family contract.
+[GLOSSARY.md](GLOSSARY.md) defines the shared vocabulary.
 
 The [React binding reference](docs/react-bindings.md) details the implemented
 ref, event, ID, state ownership and mounted lifecycle conventions and their
@@ -1022,7 +1017,7 @@ for other checkouts and type checking.
 ## Further reading
 
 - [Browser/accessibility matrix](docs/accessibility.md): support targets, manual checks, WCAG evidence and unverified combinations
-- [System guide](docs/system.md): the current ten-family theming, composition and customisation contract
+- [System guide](docs/architecture.md): the current ten-family theming, composition and customisation contract
 - [Theming reference](docs/theming.md): token defaults, presets, fonts and migration steps
 - [Storybook inspection](docs/storybook.md): global Theme/Mode controls and canonical live recipes
 - [Release policy](RELEASE_POLICY.md): versioning, compatibility, and the release workflow

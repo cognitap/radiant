@@ -1,8 +1,7 @@
 # Shared React composition and lifecycle
 
-The [system guide](system.md) describes public state, event and ref conventions.
-This reference covers the private runtime seams delivered by DEV-48 under the
-[harmonisation design record](contracts/README.md). They ship inside the single
+The [architecture doc](architecture.md) describes public state, event and ref conventions.
+This reference covers the private runtime seams. They ship inside the single
 Radiant package and are not public exports or supported import subpaths.
 
 | Module                              | Responsibility                                                              | Current consumers                                  |

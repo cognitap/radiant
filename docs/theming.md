@@ -1,7 +1,7 @@
 # Theming Radiant
 
 This is the theme authoring, token and migration reference. Start with the
-[system guide](system.md) for shared composition, ownership and styling rules.
+[architecture doc](architecture.md) for shared composition, ownership and styling rules.
 
 Radiant has one shared theme model: semantic tokens define the design system,
 and component overrides describe deliberate exceptions. `Button` does not own
@@ -789,7 +789,7 @@ Appearance overrides must preserve closed Dialog/details visibility, dialog
 geometry and scrolling, real control hit targets, and accessible names. Keep
 focus, invalid, disabled, and pending cues visible. The library retains
 forced-colors system colors and reduced-motion alternatives; a theme must not
-erase them with replacement CSS. See the [system guide's functional CSS obligations](system.md#preserve-behavior-when-customising)
+erase them with replacement CSS. See the [customization rules](architecture.md#what-customization-must-keep)
 for host replacement and the behavior that overrides must preserve. Importing the optional reset is not required for
 these behaviors.
 

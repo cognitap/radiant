@@ -8,18 +8,15 @@
   },
   "banned": ["docs/verification/**", "docs/research/**", "docs/*-audit-*.md"],
   "legacy": {
-    "CHANGELOG.md": 3735,
-    "README.md": 5157,
+    "CHANGELOG.md": 3712,
+    "README.md": 5118,
     "RELEASE_POLICY.md": 530,
     "docs/accessibility.md": 1010,
     "docs/adr/0001-spring-engine-boundaries.md": 356,
-    "docs/contracts/README.md": 2717,
-    "docs/contracts/migration.md": 772,
     "docs/motion.md": 2489,
-    "docs/react-bindings.md": 973,
+    "docs/react-bindings.md": 965,
     "docs/storybook.md": 1161,
-    "docs/system.md": 1713,
     "docs/testing.md": 1413,
-    "docs/theming.md": 4867
+    "docs/theming.md": 4864
   }
 }
