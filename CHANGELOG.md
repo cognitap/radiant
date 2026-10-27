@@ -33,7 +33,12 @@ CSS tokens remain available.
   text. UI leading is explicit and selection/disclosure labels use label weight;
   review wrapping/layouts. Control-size metrics and component/caller overrides
   retain precedence. Baseline role aliases preserve earlier theme and preset
-  settings; see [component mapping and migration](docs/theming.md#component-roles-and-earlier-themes).
+  settings. To migrate a theme to roles, replace `family`/`bodySize`/`bodyWeight`
+  with `roles['ui-body']`, `smallSize` with `roles['ui-supporting'].size`,
+  `headingSize`/`headingWeight` with `roles['ui-title']`, and `labelWeight` with
+  `roles['ui-label'].weight`. The old shared family and tracking fed all four
+  roles, so set them on each role to keep that reach. A CSS variable set directly
+  on a text host moves to the matching role variable on that host.
 - Preserve available font axis ranges as portable metadata in full/selective
   theme documents (DEV-168). `ThemeFontAxis` records tag/min/default/max; the
   parser rejects malformed, duplicate and unbounded ranges. Axes describe file
@@ -138,7 +143,31 @@ and is not claimed by this release.
 - Remove unused unprefixed Tailwind color/radius aliases and ambient
   `--ease-spring`, `--ease-snap`, `--ease-settle` variables. Use prefixed roles
   directly and define literal motion curves or application-owned variables.
-  See the [migration steps and cleanup inventory](docs/theming.md#migration-from-button-centred-themes).
+  Use JavaScript and CSS from the same version. To migrate:
+  1. Replace `<div style={theme.style}>` with `<ThemeScope theme={theme}>`, and
+     author hand-written `{ name, style }` themes with `defineTheme`.
+  2. Move shared settings out of `buttonTheme` into `tokens` (font into
+     `typography.family`, sizes into `control`, shape and borders into `control`
+     and `surface`, focus into `color.focus`/`focus`, timing into `motion`).
+  3. Replace the `*Theme()` helpers and types with `components.<family>`, typed by
+     `ThemeComponentOverrides`, or a local `ThemeStyle`.
+  4. Remove `glowHover`, and replace `--ease-*` with literal curves in `motion`.
+  5. Replace classes such as `bg-primary` with `bg-(--rad-color-accent)` and
+     `rounded-control` with `rounded-(--rad-control-radius)`.
+
+  | Old variable                                            | Replacement                                                   |
+  | ------------------------------------------------------- | ------------------------------------------------------------- |
+  | `--color-background`                                    | `--rad-color-surface` (canvas is `--rad-surface-canvas`)      |
+  | `--color-foreground`, `--color-border`, `--color-focus` | The matching `--rad-color-*` role                             |
+  | `--color-primary`, `--color-primary-foreground`         | `--rad-color-accent`, `--rad-color-accent-foreground`         |
+  | `--color-secondary`, `--color-secondary-foreground`     | `--rad-color-neutral`, `--rad-color-neutral-foreground`       |
+  | `--color-warning`, `--color-warning-foreground`         | `--rad-color-warning`, `--rad-color-warning-foreground`       |
+  | `--color-destructive`, `--color-destructive-foreground` | `--rad-color-danger`, `--rad-color-danger-foreground`         |
+  | `--radius-control`                                      | `--rad-control-radius`                                        |
+  | `--button-*`, `--input-*` and other family variables    | `--rad-button-*`, `--rad-input-*` and so on                   |
+  | `--radio-gap`                                           | `--rad-radio-group-gap`                                       |
+  | `--button-focus-color`                                  | `--rad-color-focus`, or `--rad-button-focus-color` for Button |
+
   Preset mode values, native composition and shared action styling are preserved.
   Button/Link local styles now accept typed CSS custom properties directly.
 
