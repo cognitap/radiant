@@ -4,25 +4,22 @@ See the [release policy](RELEASE_POLICY.md) for versioning and migration rules.
 
 ## Unreleased
 
-- Add grouped natural-flow layout measurement with interruptible resize/reorder springs and React lifecycle bindings (DEV-177).
+## 0.0.6
 
-- Add subscribed spring sources and a React changing-target follower with momentum-preserving retargeting (DEV-176).
+- Add serializable motion profiles and opt-in `motion` and `motion/react` entries
+  powered by Motion springs. Root imports stay engine-free.
+- Add MotionProvider for native Button/Link press feedback, disclosure height
+  and Dialog presentation. Native actions, dismissal and focus stay immediate.
+- Add bounded one-axis drag/release/snap with signed velocity, cancellation,
+  re-grab and keyboard alternatives.
+- Add subscribed sources, React changing-target followers and measured grid/flex
+  resize/reorder. Interrupted targets retain position and momentum.
+- Apply live reduced motion, theme off and lifecycle cleanup. Layout uses
+  dedicated, unscaled slots/parts; nested animated groups and shared-element
+  morphing are excluded. See [motion usage](docs/motion.md).
 
-- Add one-axis spring drag/release/snap controllers and native/React bindings,
-  with signed velocity, re-grab/cancel, bounded presentation, native touch
-  scrolling and keyboard alternatives (DEV-175).
-
-- Add MotionProvider disclosure height springs and native Dialog entry/inert visual
-  exit, with immediate semantic close, focus restoration, interruption, live
-  reduced-motion cancellation and documented snapshot fallback (DEV-174).
-
-- Add opt-in native Button/composed-action springs through MotionProvider, plus
-  a MotionLink adapter, with momentum-aware re-press, cancellation, native input
-  semantics and caller style ownership (DEV-173).
-
-- Add opt-in Motion spring runtime, theme profiles and React/native style lifecycle
-  bindings, with live reduced-motion cancellation and a persistent per-axis layout
-  foundation. Existing component motion remains unchanged until its integration.
+Opt in explicitly and use matching package JavaScript/CSS. Legacy duration/easing
+CSS tokens remain available.
 
 ## 0.0.5
 

@@ -99,6 +99,7 @@ function DragProof() {
       <div className="relative h-20 w-64 rounded-lg bg-neutral-200">
         <Button
           ref={ref}
+          className="transition-colors"
           style={{ transform: 'rotate(-2deg)' }}
           aria-describedby="drag-help"
         >
