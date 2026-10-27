@@ -234,7 +234,12 @@ function Handle() {
   const drag = useSpringDrag(ref, 0, { min: 0, max: 160, snapPoints: [0, 80, 160] })
   return (
     <>
-      <Button ref={ref}>Drag or use arrow keys</Button>
+      <Button
+        ref={ref}
+        className="transition-colors"
+      >
+        Drag or use arrow keys
+      </Button>
       <Button onClick={() => drag.step('first')}>Start</Button>
       <Button onClick={() => drag.step('last')}>End</Button>
     </>
