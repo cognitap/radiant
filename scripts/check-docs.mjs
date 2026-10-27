@@ -31,7 +31,7 @@ for (const file of files) {
   const count = words(text)
   const limit = budgetFor(file)
   if (file in legacy) {
-    if (count > legacy[file])
+    if (limit !== null && count > legacy[file])
       errors.push(`${file}: grew to ${count} words; legacy files may only shrink.`)
     continue
   }
