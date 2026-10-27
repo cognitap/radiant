@@ -38,5 +38,5 @@ covers measured local x/y/width/height and real keyed DOM reorder/resize with
 retained momentum. DEV-177 must expand and verify production geometry, scrolling,
 nesting, clipping, focus and cancellation before general layout support ships.
 
-[Research and primary sources](../research/dev-171-spring-engines.md),
-[proof, measurements and limits](../verification/2026-10-27-spring-engine.md).
+[Research and primary sources](https://github.com/cognitap/radiant/blob/1146ff3/docs/research/dev-171-spring-engines.md),
+[proof, measurements and limits](https://github.com/cognitap/radiant/blob/1146ff3/docs/verification/2026-10-27-spring-engine.md).

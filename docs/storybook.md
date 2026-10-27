@@ -139,8 +139,7 @@ theme/mode before capturing a toolbar change. If a long-running development
 session retains stale Docs after story edits, repeat on a fresh Storybook server
 before treating that state as a runtime regression.
 
-Recheck corrected combinations after the source change. The
-[October 2026 audit](storybook-audit-2026-10.md) records the first complete pass.
+Recheck corrected combinations after the source change.
 
 The configuration follows Storybook's [globals and toolbar interface](https://storybook.js.org/docs/essentials/toolbars-and-globals)
 and [custom documentation container interface](https://storybook.js.org/docs/writing-docs/autodocs#customize-the-docs-container).

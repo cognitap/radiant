@@ -21,20 +21,16 @@ Record built-in VoiceOver against the exact OS version/build if a separate AT
 version is unavailable. A desktop engine test does not verify a mobile browser,
 and Playwright WebKit does not establish Safari/VoiceOver behavior.
 
-| Target                                                                                             | Input / AT                                                                      | Evidence as of 2026-10-25                                                                                                                                      |
-| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pinned Playwright Chromium on the local macOS host                                                 | Automated browser input and axe; no AT                                          | Version-complete environment captured; execution result in [E47-local](https://github.com/cognitap/radiant/blob/main/docs/verification/2026-10-25-chromium.md) |
-| Pinned Playwright Chromium on Linux CI                                                             | Same automated suite; no AT                                                     | Each new run records its own environment and JUnit report; inspect that run's artifacts                                                                        |
-| Windows + Firefox                                                                                  | Keyboard and NVDA                                                               | **Not run**; browser, OS and NVDA versions unrecorded                                                                                                          |
-| macOS + Safari                                                                                     | Keyboard and VoiceOver                                                          | **Not run**; installed OS availability is not a test result                                                                                                    |
-| iOS + Safari on a physical iPhone/iPad                                                             | Touch exploration and VoiceOver; external keyboard when claimed                 | **Not run**; device, OS/build, Safari and AT configuration unrecorded                                                                                          |
-| Android + Chrome on a physical device                                                              | Touch exploration and TalkBack; external keyboard when claimed                  | **Not run**; device, OS/build, Chrome and TalkBack versions unrecorded                                                                                         |
-| Desktop Chrome / Edge on supported Windows/macOS; Firefox and Safari on their supported desktop OS | Keyboard, zoom, visual rendering; real Windows contrast themes where applicable | **Not run as a version-complete manual matrix**; the historical Chrome review below is narrower evidence                                                       |
+| Target                                                                                             | Input / AT                                                                      | Evidence as of 2026-10-25                                                                                |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Pinned Playwright Chromium on the local macOS host                                                 | Automated browser input and axe; no AT                                          | Version-complete environment captured                                                                    |
+| Pinned Playwright Chromium on Linux CI                                                             | Same automated suite; no AT                                                     | Each new run records its own environment and JUnit report; inspect that run's artifacts                  |
+| Windows + Firefox                                                                                  | Keyboard and NVDA                                                               | **Not run**; browser, OS and NVDA versions unrecorded                                                    |
+| macOS + Safari                                                                                     | Keyboard and VoiceOver                                                          | **Not run**; installed OS availability is not a test result                                              |
+| iOS + Safari on a physical iPhone/iPad                                                             | Touch exploration and VoiceOver; external keyboard when claimed                 | **Not run**; device, OS/build, Safari and AT configuration unrecorded                                    |
+| Android + Chrome on a physical device                                                              | Touch exploration and TalkBack; external keyboard when claimed                  | **Not run**; device, OS/build, Chrome and TalkBack versions unrecorded                                   |
+| Desktop Chrome / Edge on supported Windows/macOS; Firefox and Safari on their supported desktop OS | Keyboard, zoom, visual rendering; real Windows contrast themes where applicable | **Not run as a version-complete manual matrix**; the historical Chrome review below is narrower evidence |
 
-The [2026-10 Storybook audit](https://github.com/cognitap/radiant/blob/main/docs/storybook-audit-2026-10.md)
-records earlier Chrome visual/interaction work and corrections. Its browser/OS
-builds were not captured, and AT was explicitly outside its scope. Preserve that
-history without promoting it to a version-complete browser or screen-reader pass.
 The open manual rows are known evidence gaps, not failures observed on those systems.
 
 ## Prepare a reproducible run
@@ -150,10 +146,8 @@ case selection, logs and manual evidence. A failed or interrupted suite does not
 inherit a prior pass from the receipt. The current command runs Chromium only.
 
 CI uploads these files as **browser-results** with a 14-day retention period.
-Before they expire, retain the version/result summary and relevant captures in a
-reviewed `docs/verification/YYYY-MM-DD-<scope>.md` record or durable issue/PR
-attachments. Link the exact CI run and commit; keep older records immutable and
-append a new verification when code, browser/AT, OS, theme or adapter changes.
+Before they expire, put the version/result summary and relevant captures in the
+pull request, with a link to the exact CI run and commit.
 A preview/run of the environment recorder alone has no test-result status.
 
 Use this structure for each actual manual or automated run:
