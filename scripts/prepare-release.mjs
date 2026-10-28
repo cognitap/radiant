@@ -23,7 +23,7 @@ assert.match(
 const notes = changelog.split(/^## /m).find(section => section.startsWith(`${version}\n`))
 assert.ok(notes?.slice(version.length).trim(), `Add CHANGELOG.md notes under ## ${version}.`)
 if (process.env.RELEASE_PUBLISH === 'true') {
-  assert.ok(!manifest.private, 'Publication stays disabled until DEV-94 removes private.')
+  assert.ok(!manifest.private, 'Remove private from package.json before publishing.')
 }
 assert.equal(git('status', '--porcelain'), '', 'Commit all changes before preparing a release.')
 

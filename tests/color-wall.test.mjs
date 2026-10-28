@@ -86,7 +86,7 @@ test('the accepted fixtures produce complete, ordered, in-gamut walls for both f
         assertWall(generateColorWall({ brand, lightness, fidelity }))
 })
 
-test('Classic anchored shades retain the accepted DEV-151 visual reference values', () => {
+test('Classic anchored shades retain the accepted visual reference values', () => {
   // Small reference samples from b12143d, not a generated dump of complete walls.
   for (const [brand, anchor, shades] of [
     ['#7C3AED', 600, ['#F1EFFD', '#8B62EF', '#3A1478']],
