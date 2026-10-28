@@ -68,8 +68,10 @@ const collapsibleContentVariants = cva([
 export type CollapsibleProps = Omit<ComponentProps<'details'>, 'open' | 'onToggle' | 'style'> &
   ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
     style?: ThemeStyle
+    /** Height/marker presentation only. Native disclosure state never waits for motion. */
     motion?: 'inherit' | 'off'
     'data-slot'?: string
+    /** Use this to write controlled state; onToggle remains a native observation. */
     onOpenChange?: (open: boolean) => void
     onToggle?: (event: ToggleEvent<HTMLDetailsElement>) => void
   }
@@ -80,11 +82,13 @@ export type CollapsibleState = {
   setOpen: (open: boolean) => void
 }
 
+/** One direct-child native summary. Keep buttons and links in Content. */
 export type CollapsibleTriggerProps = Omit<ComponentProps<'summary'>, 'style'> & {
   style?: ThemeStyle
   'data-slot'?: string
 }
 
+/** Native div host; keep content in normal flow for natural-height measurement. */
 export type CollapsibleContentProps = Omit<ComponentProps<'div'>, 'style'> & {
   style?: ThemeStyle
   'data-slot'?: string
@@ -115,6 +119,7 @@ export function Collapsible({
 }: CollapsibleProps) {
   const transition = useTransitionHost<HTMLDetailsElement>('disclosure', ref, motion === 'off')
   const contentId = useId()
+  const motionOff = motion === 'off' || transition.off
   const {
     value: isOpen,
     request: setOpen,
@@ -135,8 +140,9 @@ export function Collapsible({
         className={cn(
           collapsibleVariants(),
           transition.active &&
+            transition.ready &&
             '[&::details-content]:[content-visibility:visible] [&::details-content]:transition-none [&:not([open])::details-content]:h-[var(--_rad-spring-details-height,0px)] open:[&::details-content]:h-[var(--_rad-spring-details-height,auto)]',
-          motion === 'off' && '[&::details-content]:transition-none',
+          motionOff && '[&::details-content]:transition-none [&>summary>svg]:transition-none',
           className
         )}
         data-slot={joinIds('collapsible', props['data-slot'])}

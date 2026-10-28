@@ -1,6 +1,10 @@
 import { useId, useState } from 'react'
 import { ShipmentTracking } from '../.storybook/examples/ShipmentTracking.js'
-import { expect, userEvent, within } from 'storybook/test'
+import {
+  CollapsibleSettingsExample,
+  CollapsibleHeightExample
+} from '../.storybook/examples/CollapsibleExamples.js'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   Button,
@@ -9,6 +13,7 @@ import {
   CollapsibleTrigger,
   Field,
   Input,
+  themes,
   type ThemeStyle
 } from './index.js'
 
@@ -168,4 +173,52 @@ export const Nested: Story = {
 
 export const Controlled: Story = {
   render: () => <HeldOpen />
+}
+
+export const AdvancedSettings: Story = {
+  render: (_, { globals }) => (
+    <CollapsibleSettingsExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement)
+    const summary = canvas.getByText('Advanced delivery options', { exact: true })
+    await userEvent.click(summary)
+    await expect(summary.closest('[data-rad-theme]')).toHaveAttribute(
+      'data-rad-theme',
+      globals.theme
+    )
+    const topic = canvas.getByRole('textbox', { name: 'Topic 1' })
+    await userEvent.clear(topic)
+    await userEvent.type(topic, 'Design notes')
+    await userEvent.click(canvas.getByRole('button', { name: 'Add a topic' }))
+    await expect(canvas.getByRole('textbox', { name: 'Topic 2' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Done with advanced options' }))
+    await expect(summary).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save preferences' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Design notes, Release notes')
+    await userEvent.click(summary)
+    await expect(topic).toHaveValue('Design notes')
+  }
+}
+
+export const HeightPlayground: Story = {
+  render: (_, { globals }) => (
+    <CollapsibleHeightExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Replace detail' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Add detail' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('2 notes')
+    await userEvent.click(canvas.getByRole('button', { name: 'Quick close and reopen' }))
+    await waitFor(async () => {
+      await expect(canvas.getByRole('textbox', { name: 'A retained thought' })).toBeVisible()
+    })
+  }
 }

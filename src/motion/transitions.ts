@@ -23,8 +23,20 @@ export function bindDisclosureMotion(host: HTMLElement, initial: MotionProfile):
     node.style.setProperty('--_rad-spring-details-height', `${Math.max(0, value)}px`)
   const off = spring.subscribe(render)
   render(spring.get())
+  const observed = new Set<HTMLElement>()
   function sync() {
-    for (const child of contents()) {
+    const current = new Set(contents())
+    for (const child of observed) {
+      if (current.has(child)) continue
+      resize.unobserve(child)
+      restore(child)
+      observed.delete(child)
+    }
+    for (const child of current) {
+      if (!observed.has(child)) {
+        observed.add(child)
+        resize.observe(child)
+      }
       if (!node.open) {
         if (!saved.has(child))
           saved.set(child, { inert: child.inert, hidden: child.getAttribute('aria-hidden') })
@@ -45,7 +57,6 @@ export function bindDisclosureMotion(host: HTMLElement, initial: MotionProfile):
   const observer = new MutationObserver(sync)
   observer.observe(node, { attributes: true, attributeFilter: ['open'], childList: true })
   const resize = new ResizeObserver(sync)
-  contents().forEach(child => resize.observe(child))
   function update(next: MotionProfile) {
     profile = next
     spring.configure(resolveMotion(profile, 'disclosure', query.matches))
@@ -59,6 +70,7 @@ export function bindDisclosureMotion(host: HTMLElement, initial: MotionProfile):
     destroy() {
       observer.disconnect()
       resize.disconnect()
+      observed.clear()
       query.removeEventListener('change', preference)
       off()
       spring.destroy()

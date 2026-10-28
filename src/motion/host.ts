@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useEffect, useRef, type Ref } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type Ref } from 'react'
 import type { MotionProfile } from './config.js'
 import { MotionProfileContext } from './context.js'
 import { useComposedRefs } from '../react/useComposedRefs.js'
@@ -67,6 +67,7 @@ export function useTransitionHost<Node extends HTMLElement>(
   const node = useRef<Node>(null)
   const binding = useRef<{ node: Node; value: MotionHostBinding } | null>(null)
   const composed = useComposedRefs(node, ref)
+  const [ready, setReady] = useState(false)
   useEffect(() => {
     const attach = runtime?.[kind]
     if (disabled || !attach || !node.current || binding.current?.node !== node.current) {
@@ -77,7 +78,8 @@ export function useTransitionHost<Node extends HTMLElement>(
       binding.current ??= { node: node.current, value: attach(node.current, profile) }
       binding.current.value.update(profile)
     }
-  })
+    setReady(binding.current !== null)
+  }, [disabled, kind, runtime, profile, composed])
   useEffect(
     () => () => {
       binding.current?.value.destroy()
@@ -85,5 +87,10 @@ export function useTransitionHost<Node extends HTMLElement>(
     },
     []
   )
-  return { ref: composed, active: !disabled && runtime?.[kind] !== undefined }
+  return {
+    ref: composed,
+    active: !disabled && runtime?.[kind] !== undefined,
+    ready,
+    off: profile.mode === 'off'
+  }
 }
