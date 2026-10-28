@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Field, Input, type ThemeStyle } from './index.js'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { themes } from './index.js'
+import { InputProfileExample, InputSizeComparison } from '../.storybook/examples/InputExamples.js'
 
 function Controlled() {
   const [value, setValue] = useState('Hello')
@@ -114,4 +117,60 @@ export const WithField: Story = {
 export const ControlledStory: Story = {
   name: 'Controlled',
   render: () => <Controlled />
+}
+
+export const ProfileEditor: Story = {
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        story:
+          'A controlled display name and browser-owned email, with native validation, reset and a local save simulation. Public spring hooks animate a decorative focus cue and surrounding validation space. The inputs keep native editing and focus. Expand the comparison to inspect shared Input, Checkbox and RadioGroup metrics.'
+      }
+    }
+  },
+  render: (_args, context) => (
+    <InputProfileExample
+      theme={themes.find(theme => theme.id === context.globals.theme)}
+      mode={context.globals.mode === 'dark' ? 'dark' : 'light'}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const name = canvas.getByRole('textbox', { name: 'Display name' })
+    const email = canvas.getByRole('textbox', { name: 'Work email' })
+    await userEvent.clear(name)
+    await userEvent.tab()
+    await expect(name).toHaveAttribute('aria-invalid', 'true')
+    await userEvent.type(name, 'Grace Hopper')
+    await expect(name).not.toHaveAttribute('aria-invalid')
+    await userEvent.clear(email)
+    await userEvent.type(email, 'invalid')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save profile' }))
+    await expect(email).toHaveFocus()
+    await expect(email).toHaveAttribute('aria-invalid', 'true')
+    await userEvent.clear(email)
+    await userEvent.type(email, 'grace@example.com')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save profile' }))
+    await expect(name).toHaveAttribute('readonly')
+    await expect(canvas.getByRole('button', { name: 'Save profile' })).toHaveAttribute(
+      'aria-busy',
+      'true'
+    )
+    await waitFor(() =>
+      expect(canvas.getByText('Saved locally: Grace Hopper · grace@example.com.')).toBeVisible()
+    )
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Disable email' }))
+    await expect(email).toBeDisabled()
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset draft' }))
+    await expect(name).toHaveValue('Ada Lovelace')
+    await expect(email).toHaveValue('ada@example.com')
+    await expect(canvas.queryByRole('alert')).toBeNull()
+  }
+}
+
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <InputSizeComparison />
 }

@@ -41,10 +41,13 @@ const inputVariants = cva([
 
 export type InputProps = Omit<ComponentProps<'input'>, 'value' | 'defaultValue' | 'style'> &
   ValueOwner<Exclude<ComponentProps<'input'>['value'], undefined>> & {
+    /** Shared visual metrics. Native size remains a numeric character-width hint. */
     controlSize?: ControlSize
+    /** Applied to the native input, including caller-owned motion styles. */
     style?: ThemeStyle
   }
 
+/** Native editing, selection, events and ref; Field supplies owned form relationships. */
 export function Input({
   className,
   controlSize = 'medium',

@@ -59,6 +59,13 @@ try {
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('FieldExamples.tsx')
+  writeFileSync(
+    path.join(consumer, 'InputExamples.tsx'),
+    readFileSync(new URL('../.storybook/examples/InputExamples.tsx', import.meta.url), 'utf8')
+      .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
+  )
+  consumerConfig.files.push('InputExamples.tsx')
   writeFileSync(path.join(consumer, 'tsconfig.json'), JSON.stringify(consumerConfig))
   if (compositions) {
     const { copyRecipes } = await import('./verify-compositions.mjs')
