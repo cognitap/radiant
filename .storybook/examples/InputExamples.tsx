@@ -159,7 +159,7 @@ function ProfileEditor({ controlSize, off }: { controlSize: ControlSize; off: bo
           ref={form}
           aria-label="Edit public profile"
           noValidate
-          style={{ display: 'grid', gap: '1.5rem', overflowX: 'clip', overflowClipMargin: '.5rem' }}
+          style={{ display: 'grid', gap: '1.5rem' }}
           onReset={() => {
             setName('Ada Lovelace')
             setTouched(false)
