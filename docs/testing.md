@@ -6,7 +6,7 @@
 | ------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pnpm check:ci`           | Every change; CI runs it on pull requests and `main` | Generated themes, format, lint, types, runtime and package tests, Storybook build, smoke browser tests |
 | `pnpm check`              | Theme, styling or composition changes, and releases  | Everything above, every story in every preset and mode, installed styling and composition checks       |
-| `pnpm test`               | Runtime changes                                      | `tests/*.test.mjs` and the packed, installed package                                                   |
+| `pnpm test`               | Runtime changes                                      | `tests/*.test.mjs`, packed package and installed SSR browser checks                                    |
 | `pnpm test:browser`       | Story or browser behavior changes                    | Every story in every preset, light and dark, plus `tests/browser/`                                     |
 | `pnpm test:browser:smoke` | A quick browser pass                                 | Every story in Radiant light and dark, plus `tests/browser/`                                           |
 
@@ -50,7 +50,7 @@ CI uploads them as **browser-results** and keeps them for 14 days.
   Wrap changes in `act`, wait for the outcome, and clean up every fixture.
 - **`tests/*.test.mjs`:** SSR, hydration, state ownership, cancellation, refs and
   form behavior that need no browser.
-- **`tests/consumer/`:** the packed package's exports and types.
+- **`tests/consumer/`:** packed exports, types and held-script disclosure hydration.
 
 A styling change also needs a browser check against the generated CSS.
 
@@ -60,6 +60,9 @@ A styling change also needs a browser check against the generated CSS.
 pnpm test:package --styles   # both CSS routes, with and without the reset
 pnpm test:compositions       # the canonical forms and Workspace, installed
 ```
+
+`pnpm test` and `test:package` require Chromium. Their installed SSR check holds
+client scripts while disclosures toggle, then verifies hydration and ownership.
 
 Both install the packed package into a temporary consumer and build it for
 production, using no repository source. They cover every preset in both modes.

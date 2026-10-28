@@ -9,7 +9,7 @@ paths.
 | `src/internal/ids.ts`               | Keep owned IDs first and deduplicate external ID references                 | Field, Input, Checkbox, Radio, Dialog              |
 | `src/internal/events.ts`            | Activation guard → consumer → uncancelled library action                    | Button, Dialog actions/backdrop, Accordion trigger |
 | `src/internal/selection.ts`         | Accordion membership, equality and single/multiple transitions              | Accordion                                          |
-| `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup | Checkbox, Radio, DialogContent                     |
+| `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup | Checkbox, Radio, DialogContent, Collapsible        |
 | `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression | Dialog, Collapsible, Accordion                     |
 | `src/react/useNativeOwner.ts`       | Diagnose mixed owners and mode changes without storing native values        | Input, Checkbox, standalone Radio, RadioGroup      |
 
@@ -66,6 +66,10 @@ Button's client boundary.
   must clean up on update and unmount.
 - Server markup and the first client render share IDs and relationships. A
   server-rendered Dialog stays closed until its effect opens it.
+- Collapsible reconciles its native host once at mount. Local state adopts a
+  completed pre-hydration toggle and notifies once; controlled hosts restore
+  their owner's value silently. Accordion's root owns its item hosts. Only the
+  editable details host suppresses expected hydration attribute warnings.
 - `use client` goes only on interactive, context and hook modules. The package
   entry, Card, static Link and pure policy stay server-safe.
 

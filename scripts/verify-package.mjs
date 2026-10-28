@@ -9,9 +9,10 @@ const { devDependencies } = JSON.parse(readFileSync(new URL('../package.json', i
 const consumer = mkdtempSync(path.join(tmpdir(), 'radiant-consumer-'))
 const styles = process.argv.includes('--styles')
 const compositions = process.argv.includes('--compositions')
+const hydration = process.argv.includes('--hydration')
 const archiveArg = process.argv
   .slice(2)
-  .find(argument => !['--styles', '--compositions'].includes(argument))
+  .find(argument => !['--styles', '--compositions', '--hydration'].includes(argument))
 const archive = path.resolve(archiveArg ?? path.join(consumer, 'radiant.tgz'))
 for (const name of [styles && 'installed-styles', compositions && 'installed-compositions'].filter(
   Boolean
@@ -107,7 +108,7 @@ try {
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
-  consumerConfig.files.push('CardExamples.tsx')
+  consumerConfig.files.push('CardExamples.tsx', 'DisclosureHydration.tsx')
   writeFileSync(path.join(consumer, 'tsconfig.json'), JSON.stringify(consumerConfig))
   if (compositions) {
     const { copyRecipes } = await import('./verify-compositions.mjs')
@@ -135,6 +136,10 @@ try {
   ]
   run('npm', install)
   run('npm', ['test'])
+  if (hydration) {
+    const { verifyInstalledDisclosureHydration } = await import('./verify-disclosure-hydration.mjs')
+    await verifyInstalledDisclosureHydration(consumer, archive)
+  }
   if (styles) {
     const { verifyInstalledStyles } = await import('./verify-installed-styles.mjs')
     await verifyInstalledStyles(consumer, archive, () =>

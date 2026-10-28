@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Reconcile native disclosure changes made before hydration: local Collapsible state adopts once, while controlled disclosures and Accordion items restore their owner's value without a change request.
+
 - Align Card root minimum-width styling with its compound parts in narrow layouts.
 
 - Let Accordion roots shrink inside narrow grid and flex layouts, matching their Collapsible items.
