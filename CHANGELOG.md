@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Align Card root minimum-width styling with its compound parts in narrow layouts.
+
 - Let Accordion roots shrink inside narrow grid and flex layouts, matching their Collapsible items.
 
 - Keep disclosure resize observation and inert cleanup current, preserve the native pre-hydration fallback, and honor motion off for height and markers.

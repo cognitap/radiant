@@ -101,6 +101,13 @@ try {
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('AccordionExamples.tsx')
+  writeFileSync(
+    path.join(consumer, 'CardExamples.tsx'),
+    readFileSync(new URL('../.storybook/examples/CardExamples.tsx', import.meta.url), 'utf8')
+      .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
+  )
+  consumerConfig.files.push('CardExamples.tsx')
   writeFileSync(path.join(consumer, 'tsconfig.json'), JSON.stringify(consumerConfig))
   if (compositions) {
     const { copyRecipes } = await import('./verify-compositions.mjs')
