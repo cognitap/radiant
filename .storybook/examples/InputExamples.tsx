@@ -53,7 +53,13 @@ export function InputProfileExample({
     <ThemeScope
       theme={selected}
       mode={mode}
-      style={{ maxWidth: '42rem', minWidth: 0, overflowX: 'clip', overflowClipMargin: '.5rem' }}
+      style={{
+        maxWidth: '42rem',
+        minWidth: 0,
+        boxSizing: 'border-box',
+        paddingInline: '.5rem',
+        overflowX: 'clip'
+      }}
     >
       <MotionProvider>
         <Checkbox
