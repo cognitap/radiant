@@ -10,7 +10,7 @@ const colorMotionClass =
 const cardVariants = cva([
   colorMotionClass,
   'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
-  'box-border grid w-full gap-[var(--rad-card-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
+  'box-border grid w-full min-w-0 gap-[var(--rad-card-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
   'rounded-[var(--rad-card-radius,var(--rad-surface-radius,0.75rem))]',
   '[corner-shape:var(--rad-card-corner-shape,var(--rad-surface-corner-shape,round))]',
   '[border-width:var(--rad-card-border-width,var(--rad-surface-border-width,1px))]',
@@ -67,11 +67,13 @@ type CardPartProps<Host extends 'div' | 'h2' | 'p'> = Omit<ComponentProps<Host>,
   'data-slot'?: string
 }
 
+/** Passive div host. Compose native actions, form state and dedicated motion wrappers explicitly. */
 export type CardProps = CardPartProps<'div'>
 
 export type CardHeaderProps = CardPartProps<'div'>
 
 export type CardTitleProps = CardPartProps<'h2'> & {
+  /** Semantic heading host; choose a level that fits the surrounding page outline. */
   level?: CardHeadingLevel
 }
 

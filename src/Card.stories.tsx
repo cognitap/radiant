@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { CardDashboardExample } from '../.storybook/examples/CardExamples.js'
 import { ProfileExample } from '../.storybook/examples/ProfileForm.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
@@ -10,7 +11,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Link
+  Link,
+  themes
 } from './index.js'
 
 const meta = {
@@ -138,4 +140,62 @@ export const Quiet: Story = {
       <CardContent>The glaze fires overnight.</CardContent>
     </Card>
   )
+}
+
+export const ProjectDashboard: Story = {
+  render: (_, { globals }) => (
+    <CardDashboardExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement)
+    const project = within(canvas.getByRole('article', { name: 'Calmer inbox' }))
+    const note = project.getByRole('textbox', { name: 'Project note' })
+    await expect(note.closest('[data-rad-theme]')).toHaveAttribute('data-rad-theme', globals.theme)
+    await userEvent.clear(note)
+    await userEvent.type(note, 'Keep the good ideas.')
+    await userEvent.click(project.getByRole('button', { name: 'Show details' }))
+    await userEvent.click(project.getByRole('button', { name: 'Add step' }))
+    await expect(project.getByText('Step 2.', { exact: false })).toBeVisible()
+    await userEvent.click(project.getByRole('button', { name: /Move (next|first): Calmer inbox/ }))
+    await expect(
+      project.getByRole('button', { name: /Move (next|first): Calmer inbox/ })
+    ).toHaveFocus()
+    await userEvent.click(project.getByRole('button', { name: 'Save note' }))
+    await expect(project.getByRole('status')).toHaveTextContent(
+      'Saved locally: Keep the good ideas.'
+    )
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Stack cards' }))
+    await waitFor(async () => {
+      await expect(note).toHaveValue('Keep the good ideas.')
+    })
+  }
+}
+
+export const StaticDashboard: Story = {
+  render: (_, { globals }) => (
+    <CardDashboardExample
+      staticMotion
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' })).toBeChecked()
+    await expect(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' })).toBeDisabled()
+    const project = within(canvas.getByRole('article', { name: 'Launch notes' }))
+    await userEvent.click(project.getByRole('button', { name: 'Show details' }))
+    await expect(project.getByRole('button', { name: 'Hide details' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+    await userEvent.click(project.getByRole('button', { name: /Move (next|first): Launch notes/ }))
+    await expect(canvasElement.querySelector('[data-project]')).toHaveAttribute(
+      'data-project',
+      'launch'
+    )
+  }
 }

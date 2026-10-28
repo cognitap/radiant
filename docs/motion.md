@@ -117,7 +117,9 @@ and only the settling is instant.
       data-rad-layout-slot=""
       className="flow-root"
     >
-      <Card data-rad-layout-part="">{item.title}</Card>
+      <div data-rad-layout-part="">
+        <Card>{item.title}</Card>
+      </div>
     </div>
   ))}
 </div>
@@ -126,6 +128,8 @@ and only the settling is instant.
 Each direct child of the root is a slot with one part inside. Keep their keys
 stable. Text reflows at the animated width; nothing is scaled or cloned. Items
 that enter or leave appear at once.
+
+The [Card dashboard](../.storybook/examples/CardExamples.tsx) preserves styles and focus.
 
 - Slots carry no padding, border or positioning. Put decoration on the part,
   which needs no outer margin.
