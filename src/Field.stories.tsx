@@ -2,6 +2,8 @@ import type { ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { Checkbox, Field, Input } from './index.js'
+import { themes } from './index.js'
+import { FieldValidationExample } from '../.storybook/examples/FieldExamples.js'
 
 function ToneInput(props: ComponentProps<'input'>) {
   return (
@@ -172,4 +174,54 @@ export const Group: Story = {
       />
     </Field>
   )
+}
+
+export const LiveValidation: Story = {
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        story:
+          'Copyable public APIs: useSpringLayout moves dedicated wrappers around Fields. Help and error relationships update immediately, without scaling native controls. Validation belongs to the form. Try motion off or change your system reduced-motion preference.'
+      }
+    }
+  },
+  render: (_args, context) => (
+    <FieldValidationExample
+      theme={themes.find(theme => theme.id === context.globals.theme)}
+      mode={context.globals.mode === 'dark' ? 'dark' : 'light'}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const name = canvas.getByRole('textbox', { name: 'Workspace name' })
+    const address = canvas.getByRole('textbox', { name: 'Workspace address' })
+    await userEvent.click(canvas.getByRole('button', { name: 'Create workspace' }))
+    await expect(name).toHaveFocus()
+    await expect(name).toHaveAttribute('aria-invalid', 'true')
+    await expect(canvas.getAllByRole('alert')).toHaveLength(2)
+    await userEvent.type(name, 'Orbit Studio')
+    await expect(name).not.toHaveAttribute('aria-invalid')
+    await userEvent.clear(address)
+    await userEvent.type(address, 'Wrong Address')
+    await userEvent.tab()
+    await expect(address).toHaveAttribute('aria-invalid', 'true')
+    await userEvent.clear(address)
+    await userEvent.type(address, 'orbit-studio')
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Team feed' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Create workspace' }))
+    await expect(
+      canvas.getByText('Created locally: Orbit Studio · orbit-studio · Team feed.')
+    ).toBeVisible()
+    await expect(canvas.queryByRole('alert')).toBeNull()
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Show helpful hints' }))
+    await expect(name).not.toHaveAttribute('aria-describedby')
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Lock publishing channels' }))
+    await expect(canvas.getByRole('checkbox', { name: 'Team feed' })).toBeDisabled()
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset draft' }))
+    await expect(name).toHaveValue('')
+    await expect(address).toHaveValue('orbit-studio')
+    await expect(canvas.queryByRole('alert')).toBeNull()
+  }
 }

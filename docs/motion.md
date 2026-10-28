@@ -136,3 +136,9 @@ that enter or leave appear at once.
 
 React commits measure automatically. Call `measure()` after changing a slot's
 or part's own styles. Moving focus during a reorder is the application's job.
+
+For validation forms, put each Field inside a dedicated part wrapper, as in the
+[live Field example](../.storybook/examples/FieldExamples.tsx). Keep stable slots
+for fields and actions. Field's error, IDs and invalid state update in the same
+commit; only surrounding space moves. Avoid using Field's grid or the input as
+the motion part. The consumer still owns validation and focus.
