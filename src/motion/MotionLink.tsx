@@ -3,7 +3,10 @@ import { Link, type LinkProps } from '../Link.js'
 import { cn } from '../cn.js'
 import { usePressHost } from './host.js'
 import { callerOwnsPress, springPressClass, offPressClass } from './pressPolicy.js'
-export type MotionLinkProps = LinkProps & { motion?: 'inherit' | 'off' }
+export type MotionLinkProps = LinkProps & {
+  /** Inherit the theme's spring policy; off suppresses spatial feedback. Requires MotionProvider. */
+  motion?: 'inherit' | 'off'
+}
 /** Optional client adapter for action-shaped Link; ordinary Link stays server-renderable. */
 export function MotionLink({ ref, motion = 'inherit', className, ...props }: MotionLinkProps) {
   const owns = callerOwnsPress(props.style, className)
@@ -43,6 +46,10 @@ export function MotionLink({ ref, motion = 'inherit', className, ...props }: Mot
       }}
       onPointerLeave={event => {
         props.onPointerLeave?.(event)
+        release(event.nativeEvent)
+      }}
+      onLostPointerCapture={event => {
+        props.onLostPointerCapture?.(event)
         release(event.nativeEvent)
       }}
       onBlur={event => {

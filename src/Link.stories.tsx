@@ -1,51 +1,13 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
-import { Button, Link, type LinkProps, type LinkRenderProps } from './index.js'
+import { Button, Link, type LinkProps } from './index.js'
 
-// This belongs to the consumer router, not Link: an ordinary same-origin click
-// may route in the application while other activations keep native navigation.
-function RouterAnchor({
-  navigate,
-  onClick,
-  href,
-  target,
-  download,
-  children,
-  ...props
-}: LinkRenderProps & {
-  navigate: (href: string) => void
-}) {
-  return (
-    <a
-      {...props}
-      href={href}
-      target={target}
-      download={download}
-      onClick={event => {
-        onClick?.(event)
-        if (
-          event.defaultPrevented ||
-          event.button !== 0 ||
-          event.metaKey ||
-          event.ctrlKey ||
-          event.shiftKey ||
-          event.altKey ||
-          (target && target !== '_self') ||
-          (download !== undefined && download !== false) ||
-          !href ||
-          new URL(href, event.currentTarget.ownerDocument.baseURI).origin !==
-            event.currentTarget.ownerDocument.location.origin
-        )
-          return
-        event.preventDefault()
-        navigate(href)
-      }}
-    >
-      {children}
-    </a>
-  )
-}
+import {
+  LinkPlayground,
+  RoutedLinkExample,
+  RouterAnchor
+} from '../.storybook/examples/LinkExamples.js'
 
 function LinkDestination({
   args,
@@ -174,7 +136,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native `<a>` for navigation, with inline/subtle decoration or solid/soft/outline/ghost action treatment. tone selects palette; controlSize selects action dimensions; Link has no invented disabled or pending state. className, style and ref target the anchor (data-slot="link"). render receives anchor props for a consumer-owned router adapter.'
+          'A native anchor for navigation. inline/subtle inherit text size; solid/soft/outline/ghost share Button presentation through variant, tone and controlSize. Link stays server-renderable. For theme-driven press springs, import MotionProvider and MotionLink from @cognitap/radiant/motion/react; inline/subtle never compress, motion="off" disables spatial feedback and reduced motion always wins. Enter navigates; Space scrolls. className, style and ref target the anchor. render forwards resolved props/ref/children to one native or router anchor; modified clicks, targets and downloads retain browser behavior. Use Button for actions or pending/disabled states.'
       }
     }
   }
@@ -192,6 +154,55 @@ export const Default: Story = {
       destination="Guide: anchors keep native navigation and can be adapted by your application router."
     />
   )
+}
+
+export const Playground: Story = {
+  args: {
+    children: 'Explore the launchpad',
+    variant: 'solid',
+    tone: 'accent',
+    controlSize: 'large'
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Compare one action-shaped MotionLink with Button in the selected theme and mode. The local switch turns off spatial feedback; native navigation and system reduced motion keep their meanings.'
+      }
+    }
+  },
+  render: args => <LinkPlayground {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Save for later' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Added to your reading list.')
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
+    await expect(canvas.getByRole('link', { name: 'Explore the launchpad' })).toHaveAttribute(
+      'href',
+      `#${canvas.getByRole('region', { name: 'Launch notes' }).id}`
+    )
+  }
+}
+
+export const MotionRouter: Story = {
+  args: { children: 'Open installation guide', variant: 'outline', tone: 'neutral' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A consumer-owned adapter forwards every resolved prop and ref to one anchor. Normal click and Enter update this route preview; cancelled events, modified clicks, downloads and other targets bypass interception. Use your framework router in the same render callback.'
+      }
+    }
+  },
+  render: args => <RoutedLinkExample {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const link = canvas.getByRole('link', { name: 'Open installation guide' })
+    await userEvent.click(link)
+    await expect(canvas.getByRole('status')).toHaveTextContent('The installation guide is open.')
+    await userEvent.keyboard(' ')
+    await expect(link).toHaveFocus()
+  }
 }
 
 export const Composition: Story = {

@@ -42,10 +42,15 @@ export type LinkRenderProps = Omit<ComponentProps<'a'>, 'style'> & {
 
 export type LinkProps = Omit<ComponentProps<'a'>, 'style'> & {
   style?: ThemeStyle
+  /** Inline/subtle inherit text metrics; action treatments share Button's presentation. */
   variant?: LinkVariant
+  /** Semantic palette, independent of treatment. */
   tone?: Tone
+  /** Shared action dimensions; inline/subtle keep their surrounding text size. */
   controlSize?: ControlSize
+  /** Default target to _blank and rel to noopener noreferrer; explicit native values win. */
   external?: boolean
+  /** Forward every resolved prop, ref and child to one native or router anchor. */
   render?: (props: LinkRenderProps) => ReactElement
 }
 

@@ -41,6 +41,27 @@ bindSpringStyle(document.createElement('button'), spring, 'transform')
 spring.to('10rem')
 
 import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
+import type { MotionLinkProps } from '@cognitap/radiant/motion/react'
+import type { LinkProps, LinkRenderProps } from '@cognitap/radiant'
+const motionAnchor: MotionLinkProps = {
+  href: '/guide',
+  variant: 'outline',
+  tone: 'neutral',
+  controlSize: 'large',
+  motion: 'off',
+  ref: (node: HTMLAnchorElement | null) => () => void node,
+  render: (resolved: LinkRenderProps) => <a {...resolved}>{resolved.children}</a>,
+  download: 'guide.html',
+  target: '_self',
+  rel: 'author'
+}
+// @ts-expect-error Only the opt-in client adapter accepts motion.
+const plainMotion: LinkProps = { motion: 'off' }
+// @ts-expect-error Links retain native navigation instead of pending actions.
+const pendingMotion: MotionLinkProps = { pending: true }
+// @ts-expect-error Links retain native navigation instead of disabled actions.
+const disabledMotion: MotionLinkProps = { disabled: true }
+void [motionAnchor, plainMotion, pendingMotion, disabledMotion]
 const actions = (
   <MotionProvider>
     <Button motion="off">Off</Button>
