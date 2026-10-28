@@ -11,9 +11,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Link,
-  themes
+  Link
 } from './index.js'
+import { themes } from './examples/index.js'
 
 const meta = {
   title: 'Components/Card',

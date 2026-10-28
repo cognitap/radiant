@@ -3,7 +3,8 @@ import test from 'node:test'
 import { act, createElement as h, createRef } from 'react'
 import { renderToString } from 'react-dom/server'
 import { JSDOM } from 'jsdom'
-import { ThemeScope, Button, defineTheme, defaultTheme, ticket } from '../dist/library/index.js'
+import { ThemeScope, Button, defineTheme, defaultTheme } from '../dist/library/index.js'
+import { ticket } from '../dist/library/examples/index.js'
 
 const brand = defineTheme({
   id: 'scope-brand',

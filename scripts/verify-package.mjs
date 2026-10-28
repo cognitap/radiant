@@ -36,12 +36,15 @@ try {
     readFileSync(
       new URL('../.storybook/examples/TypographyComponents.tsx', import.meta.url),
       'utf8'
-    ).replace("'../../src/index.js'", "'@cognitap/radiant'")
+    )
+      .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
   )
   writeFileSync(
     path.join(consumer, 'ButtonExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/ButtonExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   const consumerConfig = JSON.parse(readFileSync(path.join(consumer, 'tsconfig.json'), 'utf8'))
@@ -50,6 +53,7 @@ try {
     path.join(consumer, 'LinkExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/LinkExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('LinkExamples.tsx')
@@ -57,6 +61,7 @@ try {
     path.join(consumer, 'FieldExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/FieldExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('FieldExamples.tsx')
@@ -64,6 +69,7 @@ try {
     path.join(consumer, 'InputExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/InputExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('InputExamples.tsx')
@@ -71,6 +77,7 @@ try {
     path.join(consumer, 'CheckboxExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/CheckboxExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('CheckboxExamples.tsx')
@@ -78,6 +85,7 @@ try {
     path.join(consumer, 'RadioExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/RadioExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('RadioExamples.tsx')
@@ -85,6 +93,7 @@ try {
     path.join(consumer, 'DialogExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/DialogExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('DialogExamples.tsx')
@@ -92,6 +101,7 @@ try {
     path.join(consumer, 'CollapsibleExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/CollapsibleExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('CollapsibleExamples.tsx')
@@ -99,6 +109,7 @@ try {
     path.join(consumer, 'AccordionExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/AccordionExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('AccordionExamples.tsx')
@@ -106,6 +117,7 @@ try {
     path.join(consumer, 'CardExamples.tsx'),
     readFileSync(new URL('../.storybook/examples/CardExamples.tsx', import.meta.url), 'utf8')
       .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/examples/index.js'", "'@cognitap/radiant/examples'")
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('CardExamples.tsx', 'DisclosureHydration.tsx')

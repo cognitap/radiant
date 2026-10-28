@@ -48,6 +48,10 @@
       "types": "./dist/library/typography/index.d.ts",
       "default": "./dist/library/typography/index.js"
     },
+    "./examples": {
+      "types": "./dist/library/examples/index.d.ts",
+      "default": "./dist/library/examples/index.js"
+    },
     "./motion": {
       "types": "./dist/library/motion/index.d.ts",
       "default": "./dist/library/motion/index.js"

@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { Checkbox, Field, Input } from './index.js'
-import { themes } from './index.js'
+import { themes } from './examples/index.js'
 import { FieldValidationExample } from '../.storybook/examples/FieldExamples.js'
 
 function ToneInput(props: ComponentProps<'input'>) {

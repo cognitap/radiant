@@ -1,31 +1,31 @@
-import { defineTheme } from './defineTheme.js'
-import { spring } from './preset-values.js'
+import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
+import { snap, spring } from './preset-values.js'
 
-export const expressive = defineTheme({
-  id: 'expressive',
-  name: 'Expressive',
+export const softDefinition: ThemeDefinition = {
+  id: 'soft-squircle',
+  name: 'Soft squircle',
   tokens: {
     color: {
       surface: '#ffffff',
-      foreground: '#402266',
-      mutedForeground: '#746084',
-      border: '#cbb6e0',
-      accent: '#6732b4',
+      foreground: '#24314d',
+      mutedForeground: '#5c6880',
+      border: '#c5cfe6',
+      accent: '#2858c9',
       accentForeground: '#ffffff',
-      neutral: '#eee4fa',
-      neutralForeground: '#452267',
+      neutral: '#eaf0ff',
+      neutralForeground: '#234581',
       warning: '#efc355',
       warningForeground: '#44300c',
       danger: '#b52c34',
       dangerForeground: '#ffffff',
-      focus: '#6732b4',
-      placeholder: '#746084',
-      disabledBackground: '#eee4fa',
-      disabledBorder: '#cbb6e0',
+      focus: '#2858c9',
+      placeholder: '#5c6880',
+      disabledBackground: '#eaf0ff',
+      disabledBorder: '#c5cfe6',
       invalid: '#b52c34'
     },
     typography: {
-      family: "'Poppins', system-ui, sans-serif",
+      family: "'Nunito', system-ui, sans-serif",
       bodySize: '1rem',
       smallSize: '0.875rem',
       headingSize: '1.25rem',
@@ -42,8 +42,8 @@ export const expressive = defineTheme({
         indicatorSize: '1rem'
       },
       medium: {
-        height: '3rem',
-        paddingInline: '1.5rem',
+        height: '2.75rem',
+        paddingInline: '1.125rem',
         fontSize: '0.875rem',
         indicatorSize: '1.125rem'
       },
@@ -53,15 +53,15 @@ export const expressive = defineTheme({
         fontSize: '0.9375rem',
         indicatorSize: '1.25rem'
       },
-      radius: '1.5rem',
-      cornerShape: 'round',
+      radius: '1rem',
+      cornerShape: 'squircle',
       borderWidth: '1px',
       borderStyle: 'solid'
     },
     surface: {
-      canvas: '#f7f0ff',
-      radius: '1.5rem',
-      cornerShape: 'round',
+      canvas: '#f3f6ff',
+      radius: '1rem',
+      cornerShape: 'squircle',
       borderWidth: '1px',
       borderStyle: 'solid',
       padding: '1.5rem',
@@ -71,14 +71,14 @@ export const expressive = defineTheme({
       backdrop: 'rgb(15 12 25 / 0.45)'
     },
     focus: {
-      width: '6px',
-      offset: '2px',
-      style: 'double'
+      width: '2px',
+      offset: '4px',
+      style: 'solid'
     },
     motion: {
-      pressDuration: '450ms',
-      pressEase: spring,
-      releaseDuration: '450ms',
+      pressDuration: '90ms',
+      pressEase: snap,
+      releaseDuration: '520ms',
       releaseEase: spring,
       colorDuration: '150ms',
       disclosureDuration: '180ms'
@@ -87,41 +87,40 @@ export const expressive = defineTheme({
   },
   components: {
     button: {
-      radiusPressed: '0.75rem',
-      sheen: 0,
-      glow: '0%',
-      hoverLift: '0px',
-      fontWeight: 600,
-      shadow: '0 0 #0000',
-      shadowPressed: '0 0 #0000',
-      highlight: 0,
-      pressScale: 0.98
+      radiusPressed: '0.375rem',
+      fontWeight: 800,
+      shadow: '0 1px 1px rgb(0 0 0 / 0.12)',
+      shadowPressed: '0 1px 1px rgb(0 0 0 / 0.12)',
+      sheen: 0.08,
+      glow: '55%',
+      highlight: 0.22,
+      pressScale: 0.96
     }
   },
   modes: {
     dark: {
       tokens: {
         color: {
-          surface: '#271c36',
-          foreground: '#f5eaff',
-          mutedForeground: '#c8b2dc',
-          border: '#806297',
-          accent: '#c4a0ff',
-          accentForeground: '#301253',
-          neutral: '#423055',
-          neutralForeground: '#f2e3ff',
+          surface: '#1a2237',
+          foreground: '#edf2ff',
+          mutedForeground: '#b2c2e5',
+          border: '#596d9b',
+          accent: '#9cbaff',
+          accentForeground: '#142e68',
+          neutral: '#2c3b5f',
+          neutralForeground: '#e3ebff',
           warning: '#efc355',
           warningForeground: '#352507',
           danger: '#ff9298',
           dangerForeground: '#3c111a',
-          focus: '#d1b4ff',
-          placeholder: '#c8b2dc',
-          disabledBackground: '#423055',
-          disabledBorder: '#806297',
+          focus: '#a9c4ff',
+          placeholder: '#b2c2e5',
+          disabledBackground: '#2c3b5f',
+          disabledBorder: '#596d9b',
           invalid: '#ff9298'
         },
         surface: {
-          canvas: '#191122',
+          canvas: '#10182a',
           shadow: '0 1px 4px rgb(0 0 0 / 0.4)',
           overlayShadow: '0 20px 60px rgb(0 0 0 / 0.65)',
           backdrop: 'rgb(0 0 0 / 0.65)'
@@ -129,4 +128,6 @@ export const expressive = defineTheme({
       }
     }
   }
-})
+}
+
+export const soft = defineTheme(softDefinition)

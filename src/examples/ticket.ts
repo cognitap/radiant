@@ -1,7 +1,7 @@
-import { defineTheme } from './defineTheme.js'
+import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, settle } from './preset-values.js'
 
-export const ticket = defineTheme({
+export const ticketDefinition: ThemeDefinition = {
   id: 'ticket',
   name: 'Ticket',
   tokens: {
@@ -138,4 +138,6 @@ export const ticket = defineTheme({
       }
     }
   }
-})
+}
+
+export const ticket = defineTheme(ticketDefinition)

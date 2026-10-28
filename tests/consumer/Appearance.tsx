@@ -33,9 +33,9 @@ import {
   recommendColorPalette,
   themeDocumentFromDefinition,
   updateThemeAppearance,
-  themes,
   type ThemeMode
 } from '@cognitap/radiant'
+import { themes } from '@cognitap/radiant/examples'
 
 const brand = defineTheme({
   id: 'artifact-brand',

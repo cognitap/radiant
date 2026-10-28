@@ -15,9 +15,9 @@ import {
   DialogTrigger,
   type DialogRenderProps,
   Field,
-  Input,
-  themes
+  Input
 } from './index.js'
+import { themes } from './examples/index.js'
 
 function ProfileForm() {
   const [summary, setSummary] = useState('No save yet')

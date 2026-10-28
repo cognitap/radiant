@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, defaultTheme, themes, ThemeScope } from '@cognitap/radiant'
+import { Button, defaultTheme, ThemeScope } from '@cognitap/radiant'
+import { themes } from '@cognitap/radiant/examples'
 import { ProfileExample, type FormOwner, type FormPlacement } from './ProfileForm.js'
 import { WorkspaceSettings } from './WorkspaceSettings.js'
 

@@ -33,7 +33,6 @@ import {
   Link,
   Radio,
   RadioGroup,
-  themes,
   ThemeScope,
   defineTheme,
   defineThemeDocument,
@@ -45,6 +44,7 @@ import {
   defaultTheme,
   useField
 } from '@cognitap/radiant'
+import { themes } from '@cognitap/radiant/examples'
 
 const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
 const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))

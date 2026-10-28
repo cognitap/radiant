@@ -12,11 +12,11 @@ import {
   Radio,
   RadioGroup,
   ThemeScope,
-  radiant,
   type ControlSize,
   type Theme,
   type ThemeMode
 } from '../../src/index.js'
+import { radiant } from '../../src/examples/index.js'
 import {
   MotionProvider,
   useReducedMotion,

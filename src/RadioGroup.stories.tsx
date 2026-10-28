@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { RadioPlanExample, RadioStatePlayground } from '../.storybook/examples/RadioExamples.js'
-import { Button, Radio, RadioGroup, themes, type ThemeStyle } from './index.js'
+import { Button, Radio, RadioGroup, type ThemeStyle } from './index.js'
+import { themes } from './examples/index.js'
 
 function NativeForm() {
   const [summary, setSummary] = useState('No changes saved.')

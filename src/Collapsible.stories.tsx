@@ -13,9 +13,9 @@ import {
   CollapsibleTrigger,
   Field,
   Input,
-  themes,
   type ThemeStyle
 } from './index.js'
+import { themes } from './examples/index.js'
 
 function ExclusiveGroup() {
   const name = useId()

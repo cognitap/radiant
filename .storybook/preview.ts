@@ -1,6 +1,6 @@
 import type { Preview } from '@storybook/react-vite'
 import { ThemedDocsContainer, withTheme } from './ThemePreview.js'
-import { themes } from '../src/index.js'
+import { themes } from '../src/examples/index.js'
 import './styles.css'
 
 const preview: Preview = {

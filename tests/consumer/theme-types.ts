@@ -15,13 +15,12 @@ import {
   type ThemeDocument,
   type ThemeSectionExport,
   type ThemeSections,
-  radiant,
-  themes,
   type Theme,
   type ThemeDefinition,
   type ThemeComponentOverrides,
   type ThemeStyle
 } from '@cognitap/radiant'
+import { radiant, themes } from '@cognitap/radiant/examples'
 
 const definition: ThemeDefinition = {
   id: 'consumer-brand',

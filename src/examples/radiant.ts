@@ -1,7 +1,7 @@
-import { defineTheme } from './defineTheme.js'
+import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, settle } from './preset-values.js'
 
-export const radiant = defineTheme({
+export const radiantDefinition: ThemeDefinition = {
   id: 'radiant',
   name: 'Radiant',
   tokens: {
@@ -126,4 +126,6 @@ export const radiant = defineTheme({
       }
     }
   }
-})
+}
+
+export const radiant = defineTheme(radiantDefinition)
