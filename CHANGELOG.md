@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Wrap long Radio labels within narrow layouts without shrinking the native indicator.
+
 - Wrap long Checkbox labels within narrow layouts without shrinking the native indicator.
 
 - Release MotionLink springs on lost pointer capture or removed destinations while preserving native anchor navigation.
