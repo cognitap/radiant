@@ -7,7 +7,7 @@ import { useComposedRefs } from '../react/useComposedRefs.js'
 export interface MotionHostBinding {
   update(profile: MotionProfile): void
   press?(event: PointerEvent | KeyboardEvent): void
-  release?(): void
+  release?(event?: PointerEvent | KeyboardEvent): void
   destroy(): void
 }
 export interface MotionHostRuntime {
@@ -46,11 +46,12 @@ export function usePressHost<Node extends HTMLElement>(
   return {
     ref: composed,
     active: runtime !== null && !disabled,
+    off: profile.mode === 'off',
     press(event: PointerEvent | KeyboardEvent) {
       binding.current?.value.press?.(event)
     },
-    release() {
-      binding.current?.value.release?.()
+    release(event?: PointerEvent | KeyboardEvent) {
+      binding.current?.value.release?.(event)
     }
   }
 }

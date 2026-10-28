@@ -1,8 +1,6 @@
 'use client'
-import { useContext } from 'react'
 import { Link, type LinkProps } from '../Link.js'
 import { cn } from '../cn.js'
-import { MotionHostContext } from './host.js'
 import { usePressHost } from './host.js'
 import { callerOwnsPress, springPressClass, offPressClass } from './pressPolicy.js'
 export type MotionLinkProps = LinkProps & { motion?: 'inherit' | 'off' }
@@ -15,12 +13,12 @@ export function MotionLink({ ref, motion = 'inherit', className, ...props }: Mot
     props.variant === undefined ||
     props.variant === 'inline' ||
     props.variant === 'subtle'
-  const runtime = useContext(MotionHostContext)
-  const active = runtime !== null && !disabled
   const {
     ref: motionRef,
     press: startPress,
-    release
+    release,
+    off,
+    active
   } = usePressHost<HTMLAnchorElement>(ref, disabled)
   return (
     <Link
@@ -28,7 +26,7 @@ export function MotionLink({ ref, motion = 'inherit', className, ...props }: Mot
       ref={active ? motionRef : ref}
       className={cn(
         active && springPressClass,
-        motion === 'off' && !owns && offPressClass,
+        (motion === 'off' || off) && !owns && offPressClass,
         className
       )}
       onPointerDown={event => {
@@ -37,15 +35,15 @@ export function MotionLink({ ref, motion = 'inherit', className, ...props }: Mot
       }}
       onPointerUp={event => {
         props.onPointerUp?.(event)
-        release()
+        release(event.nativeEvent)
       }}
       onPointerCancel={event => {
         props.onPointerCancel?.(event)
-        release()
+        release(event.nativeEvent)
       }}
       onPointerLeave={event => {
         props.onPointerLeave?.(event)
-        release()
+        release(event.nativeEvent)
       }}
       onBlur={event => {
         props.onBlur?.(event)
@@ -57,7 +55,7 @@ export function MotionLink({ ref, motion = 'inherit', className, ...props }: Mot
       }}
       onKeyUp={event => {
         props.onKeyUp?.(event)
-        release()
+        release(event.nativeEvent)
       }}
     />
   )

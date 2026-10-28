@@ -27,11 +27,16 @@ export type ButtonProps = Omit<ComponentProps<'button'>, 'style'> & {
   'data-slot'?: string
   /** Forward resolved presentation, children, native attributes and ref to one button host. */
   render?: (props: ButtonRenderProps) => ReactElement
+  /** Visual treatment; native submission behavior stays on type. */
   variant?: ButtonVariant
+  /** Semantic action palette, independent of treatment. */
   tone?: Tone
+  /** Shared action dimensions; defaults to medium. */
   controlSize?: ControlSize
+  /** Square action; supply an accessible name for icon-only children. */
   iconOnly?: boolean
   fullWidth?: boolean
+  /** Block activation and show progress while preserving focus and the label. */
   pending?: boolean
   /** Requires MotionProvider. Off also suppresses legacy spatial transitions. */
   motion?: 'inherit' | 'off'
@@ -55,7 +60,8 @@ export function Button({
 }: ButtonProps) {
   const callerOwnsScale = callerOwnsPress(props.style, className)
   const press = usePressHost(ref, motion === 'off' || callerOwnsScale)
-  const spatial = (press.active || motion === 'off') && !callerOwnsScale
+  const motionOff = motion === 'off' || press.off
+  const spatial = (press.active || motionOff) && !callerOwnsScale
   const buttonProps: ButtonRenderProps = {
     ...props,
     ref: press.active ? press.ref : ref,
@@ -65,19 +71,19 @@ export function Button({
     },
     onPointerUp: event => {
       props.onPointerUp?.(event)
-      press.release()
+      press.release(event.nativeEvent)
     },
     onPointerCancel: event => {
       props.onPointerCancel?.(event)
-      press.release()
+      press.release(event.nativeEvent)
     },
     onPointerLeave: event => {
       props.onPointerLeave?.(event)
-      press.release()
+      press.release(event.nativeEvent)
     },
     onLostPointerCapture: event => {
       props.onLostPointerCapture?.(event)
-      press.release()
+      press.release(event.nativeEvent)
     },
     onBlur: event => {
       props.onBlur?.(event)
@@ -89,7 +95,7 @@ export function Button({
     },
     onKeyUp: event => {
       props.onKeyUp?.(event)
-      press.release()
+      press.release(event.nativeEvent)
     },
     type,
     'aria-busy': pending || props['aria-busy'],
@@ -100,7 +106,7 @@ export function Button({
     className: cn(
       actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }),
       spatial && springPressClass,
-      motion === 'off' && !callerOwnsScale && offPressClass,
+      motionOff && !callerOwnsScale && offPressClass,
       className
     ),
     onClick: composeAction(

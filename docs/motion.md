@@ -50,7 +50,8 @@ import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
 
 - Button, DialogTrigger and DialogClose compress on press, using
   `--rad-button-press-scale` (default 0.97, range 0.5–1). Use `MotionLink` for
-  action-shaped links; plain Link stays server-renderable.
+  action-shaped links; plain Link stays server-renderable. Only the active
+  pointer or key releases its press.
 - Collapsible and Accordion animate their height. Children keep their natural
   size and are never scaled. Closed content is inert at once.
 - Dialog springs open. On close it closes natively at once, and an inert copy
@@ -58,10 +59,11 @@ import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
   custom elements close without the copy.
 
 Set `motion="off"` on Button, Collapsible or DialogContent to opt out locally.
-Clicks, submission, navigation, focus and Escape are never delayed or
-synthesized, and a handler that calls `preventDefault` stops the compression.
-If you set `scale` inline or with a scale utility, the spring leaves it alone;
-for any other scale styling, set `motion="off"`.
+Theme off and reduced motion suppress springs and CSS lift/shift. Pending and
+disabled cancel a held press; re-enabling never replays it. Native activation,
+focus and Escape stay immediate; `preventDefault` cancels compression.
+Caller scale utilities and inline scale/scale transitions opt out. Other scale
+styles need `motion="off"`. Explore the [Button playground and async save](../src/Button.stories.tsx).
 
 ## Hooks and functions
 

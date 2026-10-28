@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Keep Button presses tied to their active input, cancel unavailable motion cleanly, and honor theme motion off for CSS lift and shift.
+
 ## 0.0.6
 
 - Add opt-in spring motion in `@cognitap/radiant/motion` and `/motion/react`, with serializable motion profiles in themes. Root imports stay free of the engine.

@@ -54,18 +54,195 @@ afterEach(async () => {
   hosts.splice(0).forEach(node => node.remove())
   await commands.emulatePreferences({ reducedMotion: 'no-preference' })
 })
-function pointer(node: HTMLElement, type: string) {
+function pointer(node: HTMLElement, type: string, pointerId = 1) {
   node.dispatchEvent(
     new PointerEvent(type, {
       bubbles: true,
       button: 0,
-      pointerId: 1,
+      pointerId,
       isPrimary: true,
       pointerType: 'mouse'
     })
   )
 }
 const scale = (node: HTMLElement) => Number(node.style.scale || 1)
+
+test('only the active pointer or key releases a press; blur and lost capture cancel it', async () => {
+  const leave = vi.fn()
+  const { host } = await mount(
+    <Button
+      onPointerLeave={leave}
+      style={{ '--rad-button-press-scale': '.8' }}
+    >
+      Hold
+    </Button>
+  )
+  const button = host.querySelector('button')!
+  pointer(button, 'pointerdown')
+  await until(() => scale(button) < 0.85)
+  pointer(document.body, 'pointerup', 2)
+  document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift', bubbles: true }))
+  for (let i = 0; i < 10; i++) await frame()
+  expect(scale(button)).toBeLessThan(0.85)
+  pointer(button, 'lostpointercapture')
+  await until(() => Math.abs(scale(button) - 1) < 0.001)
+
+  await act(async () => button.focus())
+  await act(async () => userEvent.keyboard('[Space>]'))
+  await until(() => scale(button) < 0.85)
+  await act(async () => userEvent.keyboard('[ShiftLeft>][/ShiftLeft]'))
+  pointer(button, 'pointerout')
+  expect(leave).toHaveBeenCalledOnce()
+  for (let i = 0; i < 10; i++) await frame()
+  expect(scale(button)).toBeLessThan(0.85)
+  await act(async () => userEvent.keyboard('[/Space]'))
+  await until(() => Math.abs(scale(button) - 1) < 0.001)
+  pointer(button, 'pointerdown')
+  await until(() => scale(button) < 0.85)
+  await act(async () => button.blur())
+  await until(() => Math.abs(scale(button) - 1) < 0.001)
+})
+
+test('pending and disabled changes neutralize a held press without losing native props or ref cleanup', async () => {
+  const clicks = vi.fn()
+  const cleanup = vi.fn()
+  const ref = vi.fn(() => cleanup)
+  const render = (pending = false, disabled = false) => (
+    <Button
+      ref={ref}
+      pending={pending}
+      disabled={disabled}
+      onClick={clicks}
+      name="intent"
+      value="save"
+      render={props => <button {...props} />}
+    >
+      Save changes
+    </Button>
+  )
+  const { host, root } = await mount(render())
+  const button = host.querySelector('button')!
+  await act(async () => button.focus())
+  pointer(button, 'pointerdown')
+  await until(() => scale(button) < 0.99)
+  await act(async () => root.render(scope(render(true))))
+  expect(scale(button)).toBe(1)
+  expect(button).toHaveFocus()
+  expect(button).toHaveAccessibleName('Save changes')
+  expect(button).toHaveAttribute('aria-busy', 'true')
+  expect(button).not.toBeDisabled()
+  await act(async () => button.click())
+  expect(clicks).not.toHaveBeenCalled()
+  await act(async () => root.render(scope(render())))
+  for (let i = 0; i < 5; i++) await frame()
+  expect(scale(button)).toBe(1)
+  pointer(button, 'pointerdown')
+  await until(() => scale(button) < 0.99)
+  await act(async () => root.render(scope(render(false, true))))
+  expect(scale(button)).toBe(1)
+  expect(button).toBeDisabled()
+  expect(button).toHaveAttribute('name', 'intent')
+  expect(button).toHaveAttribute('value', 'save')
+  const cleaned = cleanup.mock.calls.length
+  await act(async () => root.render(null))
+  expect(cleanup).toHaveBeenCalledTimes(cleaned + 1)
+  expect(button.style.scale).toBe('')
+})
+
+test('theme motion off suppresses CSS lift and press shifts for Button and composed actions', async () => {
+  const disabledTheme = defineTheme({
+    id: 'press-off',
+    name: 'Press off',
+    motion: { mode: 'off' },
+    components: { button: { hoverLift: '-6px', pressShift: '4px', pressShiftX: '3px' } }
+  })
+  const { host, root } = await mount(null)
+  for (const provider of [false, true]) {
+    const actions = (
+      <>
+        <Button>Off button</Button>
+        <Dialog>
+          <DialogTrigger>Off trigger</DialogTrigger>
+        </Dialog>
+        <MotionLink
+          variant="solid"
+          href="#off"
+        >
+          Off link
+        </MotionLink>
+      </>
+    )
+    await act(async () =>
+      root.render(
+        <ThemeScope theme={disabledTheme}>
+          {provider ? <MotionProvider>{actions}</MotionProvider> : actions}
+        </ThemeScope>
+      )
+    )
+    for (const action of host.querySelectorAll<HTMLElement>('button, a')) {
+      await userEvent.hover(action)
+      expect(getComputedStyle(action).translate).toBe('0px')
+      pointer(action, 'pointerdown')
+      for (let i = 0; i < 5; i++) await frame()
+      expect(scale(action)).toBe(1)
+      expect(getComputedStyle(action).translate).toBe('0px')
+      pointer(action, 'pointerup')
+      await userEvent.unhover(action)
+    }
+  }
+})
+
+test('unrelated filter and transition styles do not opt out of springs; scale ownership still wins', async () => {
+  const { host, root } = await mount(
+    <Button
+      className="grayscale-0"
+      style={{ transition: 'opacity 100ms allow-discrete' }}
+    >
+      Filtered
+    </Button>
+  )
+  const button = host.querySelector('button')!
+  pointer(button, 'pointerdown')
+  await until(() => scale(button) < 0.99)
+  await act(async () =>
+    root.render(scope(<Button style={{ scale: '.9', transform: 'rotate(4deg)' }}>Owned</Button>))
+  )
+  expect(button.style.scale).toBe('0.9')
+  pointer(button, 'pointerdown')
+  for (let i = 0; i < 5; i++) await frame()
+  expect(button.style.scale).toBe('0.9')
+  expect(button.style.transform).toBe('rotate(4deg)')
+  await act(async () => root.render(null))
+  expect(button.style.scale).toBe('0.9')
+})
+
+test('live local, theme and reduced-motion changes cancel a hold without replaying it', async () => {
+  const view = (off = false, selected = theme) => (
+    <ThemeScope theme={selected}>
+      <Button motion={off ? 'off' : 'inherit'}>Live policy</Button>
+    </ThemeScope>
+  )
+  const { host, root } = await mount(view())
+  const button = host.querySelector('button')!
+  const stoppedTheme = defineTheme({ id: 'stopped', name: 'Stopped', motion: { mode: 'off' } })
+  for (const policy of ['local', 'theme', 'system'] as const) {
+    pointer(button, 'pointerdown')
+    await until(() => scale(button) < 0.99)
+    await act(async () => {
+      if (policy === 'system') await commands.emulatePreferences({ reducedMotion: 'reduce' })
+      else if (policy === 'local') root.render(scope(view(true)))
+      else root.render(scope(view(false, stoppedTheme)))
+    })
+    const stopped = host.querySelector('button')!
+    await until(() => scale(stopped) === 1)
+    await act(async () => {
+      if (policy === 'system') await commands.emulatePreferences({ reducedMotion: 'no-preference' })
+      else root.render(scope(view()))
+    })
+    for (let i = 0; i < 8; i++) await frame()
+    expect(scale(host.querySelector('button')!)).toBe(1)
+  }
+})
 
 test('real Button press/release/re-press retains momentum and CSS does not tween scale', async () => {
   const ref = createRef<HTMLButtonElement>()
@@ -187,9 +364,9 @@ test('off/reduced motion, styling ownership, real Dialog actions and hydration',
     await frame()
   })
   await until(() => scale(open) === 1)
-  await userEvent.click(open)
+  await act(async () => userEvent.click(open))
   expect(host.querySelector('dialog')!.matches(':modal')).toBe(true)
-  await userEvent.keyboard('{Escape}')
+  await act(async () => userEvent.keyboard('{Escape}'))
   await until(() => !host.querySelector('dialog')!.open)
   expect(document.activeElement).toBe(open)
   await act(async () =>

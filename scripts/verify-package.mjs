@@ -37,6 +37,15 @@ try {
       'utf8'
     ).replace("'../../src/index.js'", "'@cognitap/radiant'")
   )
+  writeFileSync(
+    path.join(consumer, 'ButtonExamples.tsx'),
+    readFileSync(new URL('../.storybook/examples/ButtonExamples.tsx', import.meta.url), 'utf8')
+      .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
+  )
+  const consumerConfig = JSON.parse(readFileSync(path.join(consumer, 'tsconfig.json'), 'utf8'))
+  consumerConfig.files.push('ButtonExamples.tsx')
+  writeFileSync(path.join(consumer, 'tsconfig.json'), JSON.stringify(consumerConfig))
   if (compositions) {
     const { copyRecipes } = await import('./verify-compositions.mjs')
     copyRecipes(consumer)
