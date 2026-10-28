@@ -1,6 +1,8 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
+import { ButtonPlayground, SaveChanges } from '../.storybook/examples/ButtonExamples.js'
+import { MotionProvider } from './motion/react.js'
 import {
   Button,
   Link,
@@ -18,6 +20,11 @@ const meta = {
   title: 'Components/Button',
   component: Button,
   args: { children: 'Continue', disabled: false, onClick: fn() },
+  render: args => (
+    <MotionProvider>
+      <Button {...args} />
+    </MotionProvider>
+  ),
   argTypes: {
     children: { control: 'text' },
     variant: { control: 'inline-radio', options: variants },
@@ -27,13 +34,14 @@ const meta = {
     fullWidth: { control: 'boolean' },
     disabled: { control: 'boolean' },
     pending: { control: 'boolean' },
+    motion: { control: 'inline-radio', options: ['inherit', 'off'] },
     render: { control: false }
   },
   parameters: {
     docs: {
       description: {
         component:
-          'A native `<button>` with type="button" by default. variant selects treatment, tone selects palette, and controlSize selects visual dimensions; disabled is native and pending suppresses activation while retaining focus. className, style and ref target the button; data-slot="button" identifies it. The inner label and pending mark preserve its accessible name. render receives resolved native props/ref/children for one custom button host; Dialog actions inherit that same Button interface.'
+          'A native button, defaulting to type="button". Choose variant, tone and controlSize independently. pending blocks activation, marks aria-busy and keeps focus and the accessible name; disabled uses native behavior. MotionProvider from @cognitap/radiant/motion/react enables theme-driven press springs; motion="off" stops spatial feedback and system reduced motion always wins. className, style and ref target the button. render forwards fully resolved props/ref/children to one custom button host. Dialog actions share this interface. Start with Default, then try Playground and Save Changes.'
       }
     }
   }
@@ -69,6 +77,67 @@ const arrow = (
 )
 
 export const Default: Story = {}
+
+export const Playground: Story = {
+  args: { children: 'Launch workspace', variant: 'solid', tone: 'accent', controlSize: 'large' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Explore press/release feedback with Controls and the global Theme/Mode toolbar. The local motion switch compares the same action without spatial motion; the system reduced-motion preference is respected automatically.'
+      }
+    }
+  },
+  render: args => <ButtonPlayground {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const launch = canvas.getByRole('button', { name: 'Launch workspace' })
+    await userEvent.click(launch)
+    await userEvent.keyboard('{Enter} ')
+    await expect(canvas.getByRole('status')).toHaveTextContent('3 actions completed')
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
+    await userEvent.click(launch)
+    await expect(canvas.getByRole('status')).toHaveTextContent('4 actions completed')
+  }
+}
+
+export const SaveChangesExample: Story = {
+  name: 'Save changes',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A native form submits through Button. The simulated async request shows pending, success and recoverable failure. Discard confirmation uses default Dialog actions with the same API and springs. Copy the [example source](https://github.com/cognitap/radiant/blob/main/.storybook/examples/ButtonExamples.tsx) and replace the simulated request with your persistence call.'
+      }
+    }
+  },
+  render: args => <SaveChanges {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const save = canvas.getByRole('button', { name: 'Save changes' })
+    const name = canvas.getByRole('textbox', { name: 'Workspace name' })
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Orbit Lab')
+    await userEvent.click(save)
+    await expect(save).toHaveAttribute('aria-busy', 'true')
+    await expect(save).not.toBeDisabled()
+    await expect(save).toHaveFocus()
+    await userEvent.click(save)
+    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Saved “Orbit Lab”.'))
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Simulate a failed request' }))
+    await userEvent.click(save)
+    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Could not save.'))
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Simulate a failed request' }))
+    await userEvent.click(save)
+    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Saved “Orbit Lab”.'))
+    const discard = canvas.getByRole('button', { name: 'Discard draft' })
+    await userEvent.click(discard)
+    await userEvent.click(canvas.getByRole('button', { name: 'Discard changes' }))
+    await expect(name).toHaveValue('Orbit Studio')
+    await expect(discard).toHaveFocus()
+    await expect(canvas.getByRole('status')).toHaveTextContent('Draft discarded.')
+  }
+}
 
 function ConsumerButton({ children, ...props }: ButtonRenderProps) {
   return <button {...props}>{children}</button>

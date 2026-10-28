@@ -2,8 +2,10 @@ import type { CSSProperties } from 'react'
 export function callerOwnsPress(style: CSSProperties | undefined, className: string | undefined) {
   return (
     style?.scale !== undefined ||
-    /(?:scale-|\[scale:|transition-all|transition-\[[^\]]*scale)/.test(className ?? '') ||
-    /(?:scale|all)/.test(String(style?.transition ?? style?.transitionProperty ?? ''))
+    /(?:^|[\s:!])(?:-?scale-|\[scale:|transition-all(?:$|[\s!])|transition-\[[^\]]*(?:\bscale\b|\ball\b))/.test(
+      className ?? ''
+    ) ||
+    /\b(?:scale|all)\b/.test(`${style?.transition ?? ''} ${style?.transitionProperty ?? ''}`)
   )
 }
 export const springPressClass =

@@ -15,20 +15,35 @@ export function bindPressMotion(
     reducedValue: 1
   })
   const unbind = bindSpringStyle(node, spring, 'scale')
+  let pressed: { key: string } | { pointerId: number } | null = null
   const blocked = () =>
     node.matches(':disabled') ||
     node.getAttribute('aria-busy') === 'true' ||
     node.getAttribute('aria-disabled') === 'true'
-  const release = () => spring.to(1)
+  function release(event?: PointerEvent | KeyboardEvent) {
+    if (!pressed) return
+    if (event) {
+      if ('key' in event) {
+        if (!('key' in pressed) || event.key !== pressed.key) return
+      } else if (!('pointerId' in pressed) || event.pointerId !== pressed.pointerId) return
+    }
+    pressed = null
+    spring.to(1)
+  }
+  function reset() {
+    pressed = null
+    spring.jump(1)
+  }
   function update(next: MotionProfile) {
     profile = next
-    spring.configure({ ...resolveMotion(profile, 'press', query.matches), reducedValue: 1 })
-    if (blocked()) spring.jump(1)
+    const resolved = resolveMotion(profile, 'press', query.matches)
+    spring.configure({ ...resolved, reducedValue: 1 })
+    if (blocked() || !resolved.enabled) reset()
   }
   const changed = () => update(profile)
   query.addEventListener('change', changed)
   const observer = new MutationObserver(() => {
-    if (blocked()) spring.jump(1)
+    if (blocked()) reset()
   })
   observer.observe(node, {
     attributes: true,
@@ -42,21 +57,25 @@ export function bindPressMotion(
   document.addEventListener('pointerup', release)
   document.addEventListener('pointercancel', release)
   document.addEventListener('keyup', release)
-  document.defaultView!.addEventListener('blur', release)
+  const blur = () => release()
+  document.defaultView!.addEventListener('blur', blur)
   return {
     update,
     press(event) {
-      if (event.defaultPrevented || blocked()) {
-        release()
-        return
-      }
+      if (event.defaultPrevented || blocked()) return
+      if (!resolveMotion(profile, 'press', query.matches).enabled) return
       if ('key' in event) {
         if (
           event.repeat ||
           !['Enter', ...(node.tagName === 'BUTTON' ? [' '] : [])].includes(event.key)
         )
           return
-      } else if (event.button !== 0 || event.isPrimary === false) return
+        if (pressed) return
+        pressed = { key: event.key }
+      } else {
+        if (event.button !== 0 || event.isPrimary === false || pressed) return
+        pressed = { pointerId: event.pointerId }
+      }
       const scale = Number(
         getComputedStyle(node).getPropertyValue('--rad-button-press-scale').trim() || '.97'
       )
@@ -69,7 +88,7 @@ export function bindPressMotion(
       document.removeEventListener('pointerup', release)
       document.removeEventListener('pointercancel', release)
       document.removeEventListener('keyup', release)
-      document.defaultView!.removeEventListener('blur', release)
+      document.defaultView!.removeEventListener('blur', blur)
       spring.destroy()
       unbind()
     }
