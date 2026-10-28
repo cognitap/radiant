@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Keep disclosure resize observation and inert cleanup current, preserve the native pre-hydration fallback, and honor motion off for height and markers.
+
 - Bound Dialog visual exits to two seconds and 500 descendants, and skip nested dialogs and customized built-in elements.
 
 - Wrap long Radio labels within narrow layouts without shrinking the native indicator.

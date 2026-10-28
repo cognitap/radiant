@@ -87,6 +87,13 @@ try {
       .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
   )
   consumerConfig.files.push('DialogExamples.tsx')
+  writeFileSync(
+    path.join(consumer, 'CollapsibleExamples.tsx'),
+    readFileSync(new URL('../.storybook/examples/CollapsibleExamples.tsx', import.meta.url), 'utf8')
+      .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
+  )
+  consumerConfig.files.push('CollapsibleExamples.tsx')
   writeFileSync(path.join(consumer, 'tsconfig.json'), JSON.stringify(consumerConfig))
   if (compositions) {
     const { copyRecipes } = await import('./verify-compositions.mjs')
