@@ -44,3 +44,29 @@ Where things go:
 - `README.md` stays a short introduction.
 - `CHANGELOG.md`: one line per user-visible change under Unreleased. Give a
   breaking change a short before and after. Leave out tests, CI and refactors.
+
+## Releases
+
+Follow [the release policy](RELEASE_POLICY.md) for versions and the workflow.
+Every release takes the same steps, in order:
+
+1. Open a pull request named `Release Radiant <version>`. Run
+   `pnpm version patch --no-git-tag-version`, move the Unreleased notes under
+   `## <version>` and leave an empty Unreleased heading above it. Run
+   `pnpm release:prepare` after committing; it needs a clean checkout.
+2. Squash-merge once CI passes.
+3. Run the **Release Radiant** workflow on `main` with `publish` selected.
+4. Confirm the release: `pnpm view @cognitap/radiant@<version> dist.integrity`
+   must match `integrity` in the workflow's `release.json` artifact. If the
+   publish step passed but the integrity step failed, npm was still catching
+   up; check again before doing anything else. Never rerun publish for a
+   version npm already has.
+5. Create the GitHub release `v<version>`, titled `Radiant <version>`, at the
+   `sourceCommit` in `release.json`. Open with "Experimental 0.x release.", list
+   the changelog lines, link the npm version page and name the source commit.
+6. Bump `@cognitap/radiant` in cognitap/radiant-docs: `package.json`, the
+   `minimumReleaseAgeExclude` entry in `pnpm-workspace.yaml` and the lockfile.
+   Rewrite its releases page for the new version.
+
+The npmjs.com package page can show the previous version for a while after
+publishing. The registry, `pnpm view` and installs are what count.
