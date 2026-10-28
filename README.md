@@ -56,7 +56,7 @@ in `className` replace the matching defaults, including `hover:` and
 
 ## Documentation
 
-- [Docs site](https://github.com/cognitap/radiant-docs): a guide and live example for each component
+- [Docs site](https://radiant-docs.pages.dev): a guide and live example for each component
 - [Architecture](docs/architecture.md): how the families fit together and why
 - [Theming](docs/theming.md): tokens, presets, fonts and modes
 - [Motion](docs/motion.md): opt-in spring animation
