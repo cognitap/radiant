@@ -400,7 +400,7 @@ createElement(
   accordionProps,
   createElement(
     AccordionItem,
-    { value: 'shipping', disabled: true },
+    { value: 'shipping', disabled: true, motion: 'off', ref: createRef<HTMLDetailsElement>() },
     createElement(AccordionTrigger, { level: 3 }, 'Shipping'),
     createElement(AccordionContent, null, 'Ships in two days.')
   )

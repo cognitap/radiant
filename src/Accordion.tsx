@@ -16,7 +16,7 @@ import type {
 } from './Collapsible.js'
 
 const accordionClass =
-  'grid w-full gap-[var(--rad-accordion-gap,var(--rad-spacing-group-gap,0.75rem))]'
+  'grid w-full min-w-0 gap-[var(--rad-accordion-gap,var(--rad-spacing-group-gap,0.75rem))]'
 const triggerClass =
   'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1] data-disabled:cursor-not-allowed data-disabled:opacity-[var(--_rad-disabled-opacity,var(--rad-state-disabled-opacity,0.5))] forced-colors:data-disabled:opacity-100'
 const headingClass = 'm-0 min-w-0 break-words [font:inherit]'
@@ -56,6 +56,7 @@ type AccordionMultipleProps = AccordionBaseProps &
 
 export type AccordionProps = AccordionSingleProps | AccordionMultipleProps
 
+/** Stable, distinct value within this owner. Selection and native name belong to Accordion. */
 export type AccordionItemProps = Omit<
   CollapsibleProps,
   'open' | 'defaultOpen' | 'onOpenChange' | 'name'
@@ -65,6 +66,7 @@ export type AccordionItemProps = Omit<
 }
 
 export type AccordionTriggerProps = CollapsibleTriggerProps & {
+  /** Heading inside the native summary; null leaves heading composition to the caller. */
   level?: AccordionHeadingLevel | null
 }
 
@@ -76,6 +78,7 @@ export type AccordionState = {
   type: 'single' | 'multiple'
   value: AccordionValue
   disabled: boolean
+  /** Request selection; a controlled owner may decline. Root disabled guards requests. */
   setItemOpen: (value: string, open: boolean) => void
 }
 
