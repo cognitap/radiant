@@ -1,13 +1,14 @@
 'use client'
 
 import type { ComponentProps, ToggleEvent } from 'react'
-import { createContext, useContext, useId } from 'react'
+import { createContext, useContext, useId, useLayoutEffect, useRef } from 'react'
 import { cva } from 'class-variance-authority'
 import { useTransitionHost } from './motion/host.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import { useControllableState } from './react/useControllableState.js'
+import { useComposedRefs } from './react/useComposedRefs.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -117,7 +118,13 @@ export function Collapsible({
   children,
   ...props
 }: CollapsibleProps) {
-  const transition = useTransitionHost<HTMLDetailsElement>('disclosure', ref, motion === 'off')
+  const node = useRef<HTMLDetailsElement>(null)
+  const nativeRef = useComposedRefs(node, ref)
+  const transition = useTransitionHost<HTMLDetailsElement>(
+    'disclosure',
+    nativeRef,
+    motion === 'off'
+  )
   const contentId = useId()
   const motionOff = motion === 'off' || transition.off
   const {
@@ -131,12 +138,23 @@ export function Collapsible({
     initialValue: false,
     onChange: onOpenChange
   })
+  const reconciled = useRef<HTMLDetailsElement | null>(null)
+  useLayoutEffect(() => {
+    const host = node.current
+    if (!host || reconciled.current === host) return
+    reconciled.current = host
+    // A native toggle may have completed before React installed its listener.
+    // Adoption is one local change; restoring a controlled owner is not a request.
+    if (controlled) host.open = isOpen
+    else setOpen(host.open)
+  }, [controlled, isOpen, setOpen])
 
   return (
     <CollapsibleContext.Provider value={{ open: isOpen, contentId, setOpen }}>
       <details
         {...props}
-        ref={transition.active ? transition.ref : ref}
+        ref={transition.active ? transition.ref : nativeRef}
+        suppressHydrationWarning
         className={cn(
           collapsibleVariants(),
           transition.active &&
