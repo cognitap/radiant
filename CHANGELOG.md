@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Breaking: the example themes moved out of the core entry. Before, `import { jelly, themes } from '@cognitap/radiant'`. After, `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core, and `themeDefinitions` exposes each example's definition.
+
 - Reconcile native disclosure changes made before hydration: local Collapsible state adopts once, while controlled disclosures and Accordion items restore their owner's value without a change request.
 
 - Align Card root minimum-width styling with its compound parts in narrow layouts.

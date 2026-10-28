@@ -1,17 +1,17 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { defineTheme, defaultTheme } from '../dist/library/index.js'
 import {
-  defineTheme,
-  defaultTheme,
   expressive,
   glass,
   jelly,
   radiant,
   sharp,
   soft,
+  themeDefinitions,
   themes,
   ticket
-} from '../dist/library/index.js'
+} from '../dist/library/examples/index.js'
 
 test('partial themes resolve baseline, common values and mode overrides independently', () => {
   const theme = defineTheme({
@@ -109,6 +109,26 @@ test('the preset registry has stable identities and readonly theme values', () =
       theme.modes.dark['--rad-color-accent'] = 'pink'
     }, TypeError)
   }
+})
+
+test('each example definition compiles to the theme it is published beside', () => {
+  assert.deepEqual(themeDefinitions.map(defineTheme), themes)
+  assert.ok(Object.isFrozen(themeDefinitions[0].tokens.color))
+})
+
+test('the core entry ships only the baseline theme', async () => {
+  const core = await import('../dist/library/index.js')
+  for (const name of [
+    'themes',
+    'radiant',
+    'soft',
+    'expressive',
+    'glass',
+    'sharp',
+    'jelly',
+    'ticket'
+  ])
+    assert.equal(core[name], undefined, `${name} belongs to @cognitap/radiant/examples`)
 })
 
 test('every preset materialises complete light and dark tokens without legacy variable dependencies', () => {

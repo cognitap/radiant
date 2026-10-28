@@ -1,7 +1,7 @@
-import { defineTheme } from './defineTheme.js'
+import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, settle } from './preset-values.js'
 
-export const sharp = defineTheme({
+export const sharpDefinition: ThemeDefinition = {
   id: 'sharp-3d',
   name: 'Sharp 3D',
   tokens: {
@@ -139,4 +139,6 @@ export const sharp = defineTheme({
       }
     }
   }
-})
+}
+
+export const sharp = defineTheme(sharpDefinition)

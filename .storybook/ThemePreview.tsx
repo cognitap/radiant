@@ -4,7 +4,8 @@ import type { Decorator } from '@storybook/react-vite'
 import { DocsContainer } from '@storybook/addon-docs/blocks'
 import type { DocsContainerProps } from '@storybook/addon-docs/blocks'
 import { GLOBALS_UPDATED } from 'storybook/internal/core-events'
-import { ThemeScope, themes } from '../src/index.js'
+import { ThemeScope } from '../src/index.js'
+import { themes } from '../src/examples/index.js'
 import type { ThemeMode } from '../src/index.js'
 
 type Globals = Record<string, unknown>

@@ -10,10 +10,10 @@ import {
   ThemeScope,
   defaultTheme,
   defineTheme,
-  themes,
   type Theme,
   type ThemeMode
 } from '../../src/index.js'
+import { themes } from '../../src/examples/index.js'
 import { WorkspaceSettings } from '../../.storybook/examples/WorkspaceSettings.js'
 import '../../.storybook/styles.css'
 

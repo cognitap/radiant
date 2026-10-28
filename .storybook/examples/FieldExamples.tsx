@@ -10,12 +10,12 @@ import {
   Field,
   Input,
   ThemeScope,
-  radiant,
   type ControlSize,
   type Theme,
   type ThemeMode,
   type ThemeStyle
 } from '../../src/index.js'
+import { radiant } from '../../src/examples/index.js'
 import { MotionProvider, useReducedMotion, useSpringLayout } from '../../src/motion/react.js'
 
 const subscribe = () => () => {}

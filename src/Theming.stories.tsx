@@ -23,9 +23,9 @@ import {
   Link,
   Radio,
   RadioGroup,
-  ThemeScope,
-  themes
+  ThemeScope
 } from './index.js'
+import { themes } from './examples/index.js'
 
 const meta = {
   title: 'System/Theming',

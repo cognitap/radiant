@@ -1,7 +1,7 @@
-import { defineTheme } from './defineTheme.js'
+import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, spring } from './preset-values.js'
 
-export const glass = defineTheme({
+export const glassDefinition: ThemeDefinition = {
   id: 'glass',
   name: 'Glass',
   tokens: {
@@ -132,4 +132,6 @@ export const glass = defineTheme({
       }
     }
   }
-})
+}
+
+export const glass = defineTheme(glassDefinition)

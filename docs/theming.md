@@ -48,7 +48,7 @@ otherwise give its dark value too.
 ## Apply it
 
 ```tsx
-import { Button, ThemeScope, defaultTheme, ticket } from '@cognitap/radiant'
+import { Button, ThemeScope, defaultTheme } from '@cognitap/radiant'
 
 ;<ThemeScope
   theme={garden}
@@ -133,21 +133,29 @@ Some defaults to know:
 Restyling must keep components usable. See
 [what customization must keep](architecture.md#what-customization-must-keep).
 
-## Presets and fonts
+## Example themes and fonts
 
-The readonly `themes` registry holds these presets. Each is also a named export
-with its own light and dark palette.
+The core entry ships one theme, `defaultTheme`. The other presets are examples
+to copy or start from, published separately at `@cognitap/radiant/examples`.
+Its readonly `themes` registry lists them, each is a named export, and
+`themeDefinitions` holds the definition behind each theme in the same order.
+Pass a definition to `themeDocumentFromDefinition` to edit it as a document;
+the theme workshop starts from these.
 
-| ID              | Name          | Export         | Font             | Button exception                     |
-| --------------- | ------------- | -------------- | ---------------- | ------------------------------------ |
-| `radiant`       | Radiant       | `radiant`      | Inter            | Weight 550                           |
-| `default`       | Default       | `defaultTheme` | System sans      | None                                 |
-| `soft-squircle` | Soft squircle | `soft`         | Nunito           | Weight 800                           |
-| `expressive`    | Expressive    | `expressive`   | Poppins          | Weight 600                           |
-| `glass`         | Glass         | `glass`        | Manrope          | Weight 700; backdrop filter          |
-| `sharp-3d`      | Sharp 3D      | `sharp`        | System sans      | Archivo Black, weight 400, uppercase |
-| `jelly`         | Jelly         | `jelly`        | Baloo 2          | Weight 700                           |
-| `ticket`        | Ticket        | `ticket`       | Barlow Condensed | Weight 600, uppercase                |
+```tsx
+import { jelly } from '@cognitap/radiant/examples'
+```
+
+| ID              | Name          | Export                | Font             | Button exception                     |
+| --------------- | ------------- | --------------------- | ---------------- | ------------------------------------ |
+| `radiant`       | Radiant       | `radiant`             | Inter            | Weight 550                           |
+| `default`       | Default       | `defaultTheme` (core) | System sans      | None                                 |
+| `soft-squircle` | Soft squircle | `soft`                | Nunito           | Weight 800                           |
+| `expressive`    | Expressive    | `expressive`          | Poppins          | Weight 600                           |
+| `glass`         | Glass         | `glass`               | Manrope          | Weight 700; backdrop filter          |
+| `sharp-3d`      | Sharp 3D      | `sharp`               | System sans      | Archivo Black, weight 400, uppercase |
+| `jelly`         | Jelly         | `jelly`               | Baloo 2          | Weight 700                           |
+| `ticket`        | Ticket        | `ticket`              | Barlow Condensed | Weight 600, uppercase                |
 
 Choosing a theme never downloads a font. Load the families yourself with weights
 400, 600 and 700 plus the Button weight above. Every family falls back to

@@ -17,9 +17,9 @@ import {
   CollapsibleTrigger,
   Field,
   Input,
-  themes,
   type ThemeStyle
 } from './index.js'
+import { themes } from './examples/index.js'
 
 function ShippingSections({ multiple = false }: { multiple?: boolean }) {
   const sections = (

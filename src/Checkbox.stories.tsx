@@ -4,7 +4,7 @@ import {
   CheckboxPermissionsExample,
   CheckboxStatePlayground
 } from '../.storybook/examples/CheckboxExamples.js'
-import { themes } from './index.js'
+import { themes } from './examples/index.js'
 import { MotionProvider } from './motion/react.js'
 import { expect, userEvent, within } from 'storybook/test'
 import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'

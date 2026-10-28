@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { observeLinkDownload, observeLinkPopup } from './tests/browser/navigationCommands.js'
 import { touchButton, dragHandle } from './tests/browser/touchCommands.js'
 import { emulatePreferences } from './tests/browser/mediaCommands.js'
-import { themes } from './src/themes/index.js'
+import { themes } from './src/examples/index.js'
 
 export default defineConfig({
   test: {

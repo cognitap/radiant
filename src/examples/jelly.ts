@@ -1,7 +1,7 @@
-import { defineTheme } from './defineTheme.js'
+import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, spring } from './preset-values.js'
 
-export const jelly = defineTheme({
+export const jellyDefinition: ThemeDefinition = {
   id: 'jelly',
   name: 'Jelly',
   tokens: {
@@ -127,4 +127,6 @@ export const jelly = defineTheme({
       }
     }
   }
-})
+}
+
+export const jelly = defineTheme(jellyDefinition)

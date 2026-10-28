@@ -92,7 +92,7 @@ test('static rendering entries do not depend on client bindings', () => {
       }
     }
   }
-  for (const entry of ['index.js', 'Card.js', 'Link.js', 'themes/index.js']) {
+  for (const entry of ['index.js', 'Card.js', 'Link.js', 'themes/index.js', 'examples/index.js']) {
     const filename = fileURLToPath(new URL(`../dist/library/${entry}`, import.meta.url))
     if (entry === 'index.js') {
       assert.doesNotMatch(readFileSync(filename, 'utf8'), /^['"]use client['"]/)

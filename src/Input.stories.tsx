@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Field, Input, type ThemeStyle } from './index.js'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { themes } from './index.js'
+import { themes } from './examples/index.js'
 import { InputProfileExample, InputSizeComparison } from '../.storybook/examples/InputExamples.js'
 
 function Controlled() {

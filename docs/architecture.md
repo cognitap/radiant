@@ -73,6 +73,11 @@ baseline**, and never fall back through another family's override. Why: a
 change to shared tokens should reach every family, and an exception should stay
 local. A Button-only font does not become body text.
 
+The core entry ships only the neutral baseline, `defaultTheme`. Styled presets
+are examples at `@cognitap/radiant/examples`, and Storybook, the docs and the
+theme workshop all read that one copy. Why: a preset is a starting point to copy
+or edit, not a contract the library has to keep stable.
+
 `ThemeScope` is a plain `div` that applies a theme to its subtree. It does not
 touch the document or persist anything. Without `theme` or `mode` it inherits.
 A named theme starts fresh from the library defaults, so a nested `default`
