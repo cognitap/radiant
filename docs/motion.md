@@ -141,4 +141,7 @@ For validation forms, put each Field inside a dedicated part wrapper, as in the
 [live Field example](../.storybook/examples/FieldExamples.tsx). Keep stable slots
 for fields and actions. Field's error, IDs and invalid state update in the same
 commit; only surrounding space moves. Avoid using Field's grid or the input as
-the motion part. The consumer still owns validation and focus.
+the motion part. The consumer still owns validation and focus. The
+[Input profile editor](../.storybook/examples/InputExamples.tsx) also springs a
+decorative focus cue. Keep the native focus ring, caret and caller styles on the
+input; bind presentation springs to separate elements.
