@@ -43,6 +43,7 @@ const requiredClass =
 
 export type FieldLayout = 'control' | 'group'
 
+/** Forward every prop to one native control; merge any external description IDs. */
 export type FieldControlProps = {
   id: string
   required?: boolean
@@ -68,13 +69,16 @@ export type FieldState = {
 type FieldOwn = {
   /** Additional identities; Field always retains its base identity. */
   'data-slot'?: string
+  /** The control label, or the group's native legend. */
   label: ReactNode
   description?: ReactNode
+  /** Consumer-owned validation content. Present errors immediately mark the owner invalid. */
   error?: ReactNode
   required?: boolean
   disabled?: boolean
   requiredIndicator?: ReactNode
   style?: ThemeStyle
+  /** Presentation only; Field keeps each part's IDs, ARIA and native semantics. */
   parts?: {
     label?: PartStyle
     description?: PartStyle
@@ -88,7 +92,9 @@ type FieldControl = FieldOwn &
     layout?: 'control'
     form?: never
     name?: never
+    /** The input's ID. Root id/ref still target Field's div. */
     controlId?: string
+    /** Radiant controls connect automatically; native adapters forward the callback props. */
     children?: ReactNode | ((control: FieldControlProps) => ReactNode)
   }
 
@@ -103,6 +109,7 @@ export type FieldProps = FieldControl | FieldGroup
 
 const FieldContext = createContext<FieldState | null>(null)
 
+/** Nearest Field metadata, or null. Groups have no single target: controlProps is null. */
 export function useField(): FieldState | null {
   return useContext(FieldContext)
 }
@@ -144,6 +151,7 @@ function definedProps(props: FieldControlProps): FieldControlProps {
   ) as FieldControlProps
 }
 
+/** Owns label/help/error relationships; the consumer owns values, validation and focus. */
 export function Field(props: FieldProps) {
   const {
     label,
