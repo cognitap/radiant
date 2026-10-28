@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import {
+  DialogProfileExample,
+  DialogTransitionExample
+} from '../.storybook/examples/DialogExamples.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import {
@@ -11,7 +15,8 @@ import {
   DialogTrigger,
   type DialogRenderProps,
   Field,
-  Input
+  Input,
+  themes
 } from './index.js'
 
 function ProfileForm() {
@@ -316,4 +321,57 @@ export const AbsentTrigger: Story = {
 
 export const Dismissal: Story = {
   render: () => <HeldOpen />
+}
+
+export const ProfileEditor: Story = {
+  render: (_, { globals }) => (
+    <DialogProfileExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button', { name: 'Edit your details' })
+    await userEvent.click(trigger)
+    const panel = canvas.getByRole('dialog', { name: 'A little more you.' })
+    await expect(panel.closest('[data-rad-theme]')).toHaveAttribute('data-rad-theme', globals.theme)
+    const name = within(panel).getByRole('textbox', { name: 'Display name' })
+    await userEvent.clear(name)
+    await userEvent.click(within(panel).getByRole('button', { name: 'Save profile' }))
+    await expect(name).toHaveFocus()
+    await expect(within(panel).getByRole('alert')).toHaveTextContent('Use at least two characters')
+    await userEvent.type(name, 'Grace Hopper')
+    await userEvent.click(within(panel).getByRole('button', { name: 'Save profile' }))
+    await waitFor(async () => {
+      await expect(canvas.getByText('Saved locally: Grace Hopper · ada@example.com.')).toBeVisible()
+    })
+    await waitFor(async () => {
+      await expect(panel).not.toBeVisible()
+    })
+    await expect(trigger).toHaveFocus()
+    await userEvent.click(trigger)
+    await expect(name).toHaveValue('Grace Hopper')
+  }
+}
+
+export const TransitionPlayground: Story = {
+  render: (_, { globals }) => (
+    <DialogTransitionExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Open transition lab' }))
+    const panel = canvas.getByRole('dialog', { name: 'Room to explore.' })
+    await userEvent.click(within(panel).getByRole('checkbox', { name: 'More detail' }))
+    await expect(within(panel).getByText('Chapter 8.', { exact: false })).toBeVisible()
+    await userEvent.click(within(panel).getByRole('button', { name: 'Close and reopen' }))
+    await waitFor(async () => {
+      await expect(panel).toBeVisible()
+    })
+    await expect(panel).toHaveAttribute('data-state', 'open')
+  }
 }

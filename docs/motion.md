@@ -54,9 +54,9 @@ import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
   pointer or key releases its press.
 - Collapsible and Accordion animate their height. Children keep their natural
   size and are never scaled. Closed content is inert at once.
-- Dialog springs open. On close it closes natively at once, and an inert copy
-  finishes the exit. Dialogs holding nested dialogs, media, canvas, embeds or
-  custom elements close without the copy.
+- Dialog springs open and closes natively immediately. An inert copy finishes
+  exit, bounded to 500 descendants and two seconds. Nested dialogs, media,
+  canvas, embeds and custom elements (including customized built-ins) skip it.
 
 Set `motion="off"` on Button, MotionLink, Collapsible or DialogContent.
 Theme off and reduced motion suppress springs and CSS lift/shift. Pending and
