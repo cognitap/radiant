@@ -355,6 +355,23 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
           if (route.reset && ['glass', 'sharp-3d'].includes(theme))
             await page.screenshot({ path: path.join(output, `${current}.png`), fullPage: true })
           assert.deepEqual(errors, [])
+          const select = page.getByRole('combobox', { name: 'Installed destination', exact: true })
+          await select.click()
+          const picker = page.getByRole('listbox', { name: 'Installed destination', exact: true })
+          const nativeSelectStyle = await picker.evaluate(node => ({
+            background: getComputedStyle(node).backgroundColor,
+            border: getComputedStyle(node).borderTopStyle,
+            width: node.getBoundingClientRect().width
+          }))
+          assert.equal(await picker.isVisible(), true)
+          assert.notEqual(nativeSelectStyle.border, 'none')
+          assert.ok(nativeSelectStyle.width >= 24)
+          await page.keyboard.press('Home')
+          await page.keyboard.press('ArrowDown')
+          await page.keyboard.press('Enter')
+          assert.equal(await select.textContent().then(text => text.includes('Rome')), true)
+          assert.equal(await picker.isVisible(), false)
+          assert.deepEqual(errors, [])
           report.cases.push({
             route: route.name,
             reset: route.reset,
@@ -373,6 +390,15 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
           })
         }
       report.typography ??= []
+      await page.setViewportSize({ width: 320, height: 900 })
+      await page.getByRole('combobox', { name: 'Installed destination', exact: true }).click()
+      const narrowSelect = await page
+        .getByRole('listbox', { name: 'Installed destination', exact: true })
+        .boundingBox()
+      assert.ok(narrowSelect.x >= 0 && narrowSelect.x + narrowSelect.width <= 320)
+      await page.screenshot({ path: path.join(directory, 'select-320.png'), fullPage: true })
+      await page.keyboard.press('Escape')
+      await page.setViewportSize({ width: 1000, height: 1400 })
       report.typography.push({
         route: route.name,
         cases: await verifyTypography(page, route.name, directory)

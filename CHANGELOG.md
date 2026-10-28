@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Add Select with compound picker parts, focused-option navigation, Field integration, native form/reset/autofill bridging, viewport placement and opt-in spring motion.
+
 ## 0.0.7
 
 - Breaking: the example themes moved out of the core entry. Before, `import { jelly, themes } from '@cognitap/radiant'`. After, `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core, and `themeDefinitions` exposes each example's definition.

@@ -33,6 +33,7 @@ export function useControllableState<Value>({
     throw new TypeError(`${name} accepts a controlled value or a default, not both.`)
   }
   const current = value !== undefined ? value : uncontrolled
+  const initial = useRef(uncontrolled)
   const accepted = useRef(current)
   const request = (update: Value | ((current: Value) => Value)) => {
     const previous = controlled ? current : accepted.current
@@ -46,5 +47,10 @@ export function useControllableState<Value>({
     }
     onChange?.(next)
   }
-  return { value: current, request, controlled }
+  const reset = () => {
+    if (controlled) return
+    accepted.current = initial.current
+    setUncontrolled(initial.current)
+  }
+  return { value: current, request, controlled, reset }
 }

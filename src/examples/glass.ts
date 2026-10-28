@@ -87,6 +87,10 @@ export const glassDefinition: ThemeDefinition = {
     state: { disabledOpacity: 0.5 }
   },
   components: {
+    select: {
+      contentBackground: 'rgb(255 255 255 / 0.92)',
+      contentBackdropFilter: 'blur(18px) saturate(190%)'
+    },
     dialog: { backdropFilter: 'blur(18px) saturate(190%)' },
     button: {
       fontWeight: 700,
@@ -102,6 +106,7 @@ export const glassDefinition: ThemeDefinition = {
   },
   modes: {
     dark: {
+      components: { select: { contentBackground: 'rgb(27 25 48 / 0.94)' } },
       tokens: {
         color: {
           surface: 'rgb(27 25 48 / 0.9)',

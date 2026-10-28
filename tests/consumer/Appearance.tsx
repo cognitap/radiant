@@ -25,6 +25,7 @@ import {
   Link,
   Radio,
   RadioGroup,
+  Select,
   ThemeScope,
   defaultTheme,
   defineTheme,
@@ -135,6 +136,18 @@ function Appearance() {
               <Input
                 name="email"
                 defaultValue="ada@example.com"
+              />
+            </Field>
+            <Field label="Installed destination">
+              <Select
+                name="destination"
+                defaultValue="rome"
+                items={[
+                  { value: 'oslo', label: 'Oslo' },
+                  { value: 'paris', label: 'Paris', disabled: true },
+                  { value: 'rome', label: 'Rome' },
+                  { value: 'tokyo', label: 'Tokyo' }
+                ]}
               />
             </Field>
             <Checkbox
