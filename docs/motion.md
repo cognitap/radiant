@@ -137,11 +137,13 @@ that enter or leave appear at once.
 React commits measure automatically. Call `measure()` after changing a slot's
 or part's own styles. Moving focus during a reorder is the application's job.
 
-For validation forms, put each Field inside a dedicated part wrapper, as in the
-[live Field example](../.storybook/examples/FieldExamples.tsx). Keep stable slots
-for fields and actions. Field's error, IDs and invalid state update in the same
-commit; only surrounding space moves. Avoid using Field's grid or the input as
-the motion part. The consumer still owns validation and focus. The
-[Input profile editor](../.storybook/examples/InputExamples.tsx) also springs a
-decorative focus cue. Keep the native focus ring, caret and caller styles on the
-input; bind presentation springs to separate elements.
+Wrap Fields in dedicated parts with stable slots, as in the
+[Field example](../.storybook/examples/FieldExamples.tsx). Only surrounding space
+moves; errors and relationships stay immediate. Keep validation and focus in the
+consumer. The [Input editor](../.storybook/examples/InputExamples.tsx) springs a
+separate focus cue, preserving the native ring, caret and caller styles.
+
+The [Checkbox permissions example](../.storybook/examples/CheckboxExamples.tsx)
+uses `useSpring` and `parts.indicator` for decorative entry feedback. Checked and
+mixed semantics stay native. Disabled changes settle the glyph, and indicator
+customization takes ownership. The local adapter keeps frame writes outside React.
