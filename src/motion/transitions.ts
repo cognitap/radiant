@@ -74,35 +74,48 @@ export function bindDialogMotion(host: HTMLElement, initial: MotionProfile): Mot
   let profile = initial
   const query = node.ownerDocument.defaultView!.matchMedia('(prefers-reduced-motion: reduce)')
   let open = node.open
-  const geometry = () => ({
-    left: node.offsetLeft,
-    top: node.offsetTop,
-    width: node.offsetWidth,
-    height: node.offsetHeight,
-    variables: Array.from(getComputedStyle(node))
-      .filter(key => key.startsWith('--'))
-      .map(key => [key, getComputedStyle(node).getPropertyValue(key)])
-  })
+  const geometry = () => {
+    const style = getComputedStyle(node)
+    return {
+      left: node.offsetLeft,
+      top: node.offsetTop,
+      width: node.offsetWidth,
+      height: node.offsetHeight,
+      variables: Array.from(style)
+        .filter(key => key.startsWith('--'))
+        .map(key => [key, style.getPropertyValue(key)])
+    }
+  }
   let bounds = node.open ? geometry() : null
   let ghost: HTMLDivElement | null = null
+  let exitTimer: number | undefined
   const spring = createSpring(open ? 1 : 0.94, {
     ...resolveMotion(profile, 'dialog', query.matches),
     reducedValue: open ? 1 : 0.94
   })
   const unbind = bindSpringStyle(node, spring, 'scale')
   function clear() {
+    node.ownerDocument.defaultView!.clearTimeout(exitTimer)
+    exitTimer = undefined
     ghost?.remove()
     ghost = null
   }
   function snapshot() {
     clear()
     if (!bounds || bounds.width === 0) return
+    const descendants = node.querySelectorAll('*')
+    // A visual copy is optional: bound its work and avoid activating nested platform lifecycles.
     if (
+      descendants.length > 500 ||
+      node.hasAttribute('is') ||
       node.parentElement?.closest('dialog[open]') ||
-      Array.from(node.querySelectorAll('*')).some(
+      Array.from(descendants).some(
         child =>
           child.localName.includes('-') ||
-          /^(script|style|link|iframe|object|embed|canvas|video|audio)$/.test(child.localName)
+          child.hasAttribute('is') ||
+          /^(dialog|script|style|link|iframe|object|embed|canvas|video|audio)$/.test(
+            child.localName
+          )
       )
     )
       return
@@ -145,6 +158,11 @@ export function bindDialogMotion(host: HTMLElement, initial: MotionProfile): Mot
       transition: 'none'
     })
     node.ownerDocument.body.append(ghost)
+    // Theme physics can be arbitrarily slow. Never retain an invisible copy or engine work indefinitely.
+    exitTimer = node.ownerDocument.defaultView!.setTimeout(() => {
+      clear()
+      if (!node.open) spring.jump(0.94)
+    }, 2000)
   }
   const off = spring.subscribe(value => {
     if (ghost) {
@@ -165,7 +183,8 @@ export function bindDialogMotion(host: HTMLElement, initial: MotionProfile): Mot
     } else {
       if (enabled) snapshot()
       spring.configure({ reducedValue: 0.94 })
-      spring.to(0.94)
+      if (ghost) spring.to(0.94)
+      else spring.jump(0.94)
       if (!enabled) clear()
     }
   }

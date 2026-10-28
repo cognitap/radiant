@@ -67,6 +67,7 @@ export type DialogProps = (
   | { open: boolean; defaultOpen?: never }
   | { open?: undefined; defaultOpen?: boolean }
 ) & {
+  /** A change request. The controlled owner may decline it; prop syncs do not notify. */
   onOpenChange?: (open: boolean) => void
   /** `true` calls `showModal()`. `false` calls `show()` and leaves the rest of the page active. */
   modal?: boolean
@@ -91,10 +92,12 @@ export type DialogState = {
 
 export type DialogRenderProps = ButtonRenderProps
 
+/** Button props/render/ref contract, with protected dialog relationships. */
 export type DialogTriggerProps = ButtonProps
 
 export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open' | 'style'> & {
   style?: ThemeStyle
+  /** Opt-in MotionProvider presentation; native close and focus never wait for an exit. */
   motion?: 'inherit' | 'off'
 }
 
