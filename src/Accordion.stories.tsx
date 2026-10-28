@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
+import {
+  AccordionGuideExample,
+  AccordionSelectionExample
+} from '../.storybook/examples/AccordionExamples.js'
 import { ShipmentTracking } from '../.storybook/examples/ShipmentTracking.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
@@ -13,6 +17,7 @@ import {
   CollapsibleTrigger,
   Field,
   Input,
+  themes,
   type ThemeStyle
 } from './index.js'
 
@@ -199,4 +204,55 @@ export const Controlled: Story = {
 
 export const Nested: Story = {
   render: () => <NestedSection />
+}
+
+export const FieldGuide: Story = {
+  render: (_, { globals }) => (
+    <AccordionGuideExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement)
+    const name = canvas.getByRole('textbox', { name: 'Workspace name' })
+    await expect(name.closest('[data-rad-theme]')).toHaveAttribute('data-rad-theme', globals.theme)
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Our studio')
+    const habits = canvas.getByText('02 · How do I keep it useful?', { exact: true })
+    await userEvent.click(habits)
+    await userEvent.click(canvas.getByRole('button', { name: 'One more tip' }))
+    await expect(canvas.getByText('Habit 2.', { exact: true })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Got it' }))
+    await expect(habits.closest('summary')).toHaveFocus()
+    await userEvent.click(canvas.getByText('01 · Where should I begin?', { exact: true }))
+    await expect(name).toHaveValue('Our studio')
+  }
+}
+
+export const SelectionPlayground: Story = {
+  render: (_, { globals }) => (
+    <AccordionSelectionExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Add detail' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Quick switch' }))
+    await waitFor(async () => {
+      await expect(canvas.getByRole('textbox', { name: 'A retained note' })).toBeVisible()
+    })
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Allow multiple sections' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Open both' }))
+    await expect(canvas.getByText('Rhythm', { exact: true }).closest('details')).toHaveAttribute(
+      'open'
+    )
+    await expect(canvas.getByRole('textbox', { name: 'A retained note' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Close all' }))
+    await expect(
+      canvas.getByRole('textbox', { name: 'A retained note', hidden: true })
+    ).not.toBeVisible()
+  }
 }
