@@ -44,10 +44,10 @@ const dotClass =
   'pointer-events-none absolute inset-[30%] rounded-[var(--rad-radio-radius,999px)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText] forced-colors:peer-disabled:bg-[GrayText]'
 
 const rowClass =
-  'inline-flex min-h-6 cursor-pointer items-center gap-[var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
+  'inline-flex min-h-6 min-w-0 max-w-full cursor-pointer items-center gap-[var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 
 const labelClass =
-  'font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-[number:var(--rad-typography-roles-ui-label-weight,400)] [color:var(--rad-radio-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-radio-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
+  'min-w-0 break-words font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-[number:var(--rad-typography-roles-ui-label-weight,400)] [color:var(--rad-radio-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-radio-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
 
 const optionsClass =
   'grid justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
@@ -70,10 +70,13 @@ export type RadioGroupProps = Omit<
   'layout' | 'children' | 'onChange' | 'defaultValue' | 'parts'
 > &
   ValueOwner<string | null> & {
+    /** Stable native group name. Options supply distinct string values, including ''. */
     name: string
+    /** Shared Input/Checkbox/Radio metrics; each option may override them. */
     controlSize?: ControlSize
     parts?: NonNullable<FieldProps['parts']> & { options?: PartStyle }
     onChange?: (event: ChangeEvent<HTMLInputElement>) => void
+    /** Receives the selected string. Use this or onChange to write state, not both. */
     onValueChange?: (value: string) => void
     children?: ReactNode
   }
@@ -83,10 +86,13 @@ export type RadioProps = Omit<
   'type' | 'value' | 'checked' | 'defaultChecked' | 'style'
 > &
   CheckedOwner & {
+    /** Convenience label. Without it, provide an accessible name on the native input. */
     label?: ReactNode
+    /** Submitted data, independent of standalone checked/defaultChecked ownership. */
     value: string
     controlSize?: ControlSize
     style?: ThemeStyle
+    /** Presentation only. Root styling, native props and ref still reach the input. */
     parts?: ControlParts
   }
 
@@ -94,6 +100,7 @@ function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
 }
 
+/** Native fieldset: owns option name and selection; controlled form reset belongs to the caller. */
 export function RadioGroup({
   name,
   value,
@@ -142,6 +149,7 @@ export function RadioGroup({
   )
 }
 
+/** Native radio. Inside RadioGroup, omit checked/defaultChecked and conflicting names. */
 export function Radio({
   className,
   controlSize: controlSizeProp,
