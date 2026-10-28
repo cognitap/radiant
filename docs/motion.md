@@ -58,12 +58,13 @@ import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
   finishes the exit. Dialogs holding nested dialogs, media, canvas, embeds or
   custom elements close without the copy.
 
-Set `motion="off"` on Button, Collapsible or DialogContent to opt out locally.
+Set `motion="off"` on Button, MotionLink, Collapsible or DialogContent.
 Theme off and reduced motion suppress springs and CSS lift/shift. Pending and
 disabled cancel a held press; re-enabling never replays it. Native activation,
 focus and Escape stay immediate; `preventDefault` cancels compression.
 Caller scale utilities and inline scale/scale transitions opt out. Other scale
-styles need `motion="off"`. Explore the [Button playground and async save](../src/Button.stories.tsx).
+styles need `motion="off"`. Explore the [Link playground](../src/Link.stories.tsx)
+and [Button async save](../src/Button.stories.tsx).
 
 ## Hooks and functions
 

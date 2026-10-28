@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import { Link, ThemeScope, glass, type LinkRenderProps } from '../../src/index.js'
+import { MotionProvider, MotionLink } from '../../src/motion/react.js'
 import '../../.storybook/styles.css'
 
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
@@ -14,7 +15,7 @@ async function mount(children: ReactNode) {
   document.body.append(host)
   const root = createRoot(host)
   mounted.push({ root, host })
-  await act(async () => root.render(children))
+  await act(async () => root.render(<MotionProvider>{children}</MotionProvider>))
   return { root, host }
 }
 
@@ -69,8 +70,13 @@ function RouterAnchor({
   )
 }
 
-for (const mode of ['light', 'dark'] as const) {
-  test(`${mode}: native and adapted action links keep click, Enter, Space and form semantics`, async () => {
+const cases = [
+  { Anchor: Link, family: 'Link' },
+  { Anchor: MotionLink, family: 'MotionLink' }
+].flatMap(action => (['light', 'dark'] as const).map(mode => ({ ...action, mode })))
+
+for (const { Anchor, family, mode } of cases) {
+  test(`${family} ${mode}: native and adapted action links keep click, Enter, Space and form semantics`, async () => {
     const submitted = vi.fn()
     for (const variant of ['inline', 'solid'] as const) {
       for (const render of [
@@ -89,14 +95,14 @@ for (const mode of ['light', 'dark'] as const) {
                 submitted()
               }}
             >
-              <Link
+              <Anchor
                 href="#link-destination"
                 variant={variant}
                 onClick={clicked}
                 render={render}
               >
                 Guide
-              </Link>
+              </Anchor>
             </form>
             <section
               id="link-destination"
@@ -128,13 +134,13 @@ for (const mode of ['light', 'dark'] as const) {
     expect(submitted).not.toHaveBeenCalled()
   })
 
-  test(`${mode}: router adapters preserve cancellation, current handlers and keyboard activation`, async () => {
+  test(`${family} ${mode}: router adapters preserve cancellation, current handlers and keyboard activation`, async () => {
     const navigate = vi.fn()
     const cancelled = vi.fn((event: MouseEvent<HTMLAnchorElement>) => event.preventDefault())
     const accepted = vi.fn()
     const tree = (onClick: LinkRenderProps['onClick']) => (
       <ThemeScope mode={mode}>
-        <Link
+        <Anchor
           href="#router-destination"
           variant="outline"
           onClick={onClick}
@@ -146,7 +152,7 @@ for (const mode of ['light', 'dark'] as const) {
           )}
         >
           Open guide
-        </Link>
+        </Anchor>
       </ThemeScope>
     )
     const { host, root } = await mount(tree(cancelled))
@@ -155,7 +161,7 @@ for (const mode of ['light', 'dark'] as const) {
     expect(cancelled).toHaveBeenCalledTimes(1)
     expect(navigate).not.toHaveBeenCalled()
     expect(location.hash).toBe(new URL(originalURL).hash)
-    await act(async () => root.render(tree(accepted)))
+    await act(async () => root.render(<MotionProvider>{tree(accepted)}</MotionProvider>))
     await act(async () => userEvent.keyboard('{Enter}'))
     expect(accepted).toHaveBeenCalledTimes(1)
     expect(cancelled).toHaveBeenCalledTimes(1)
@@ -164,13 +170,13 @@ for (const mode of ['light', 'dark'] as const) {
     expect(location.hash).toBe(new URL(originalURL).hash)
   })
 
-  test(`${mode}: modified and middle clicks, external targets and downloads stay browser-owned`, async () => {
+  test(`${family} ${mode}: modified and middle clicks, external targets and downloads stay browser-owned`, async () => {
     const navigate = vi.fn()
     const href = `${location.origin}/tests/browser/fixtures/navigation.html?mode=${mode}`
     const downloadHref = 'data:text/plain;charset=utf-8,Radiant%20guide'
     await mount(
       <ThemeScope mode={mode}>
-        <Link
+        <Anchor
           href={href}
           variant="solid"
           data-testid="popup-link"
@@ -182,8 +188,8 @@ for (const mode of ['light', 'dark'] as const) {
           )}
         >
           Guide
-        </Link>
-        <Link
+        </Anchor>
+        <Anchor
           href={href}
           external
           data-testid="external-link"
@@ -195,8 +201,8 @@ for (const mode of ['light', 'dark'] as const) {
           )}
         >
           External guide
-        </Link>
-        <Link
+        </Anchor>
+        <Anchor
           href={downloadHref}
           download="guide.txt"
           data-testid="download-link"
@@ -208,7 +214,7 @@ for (const mode of ['light', 'dark'] as const) {
           )}
         >
           Download guide
-        </Link>
+        </Anchor>
       </ThemeScope>
     )
     for (const activation of ['modified', 'middle'] as const) {

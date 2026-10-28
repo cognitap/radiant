@@ -17,6 +17,7 @@ export function bindPressMotion(
   const unbind = bindSpringStyle(node, spring, 'scale')
   let pressed: { key: string } | { pointerId: number } | null = null
   const blocked = () =>
+    (node.tagName === 'A' && !node.hasAttribute('href')) ||
     node.matches(':disabled') ||
     node.getAttribute('aria-busy') === 'true' ||
     node.getAttribute('aria-disabled') === 'true'
@@ -47,7 +48,7 @@ export function bindPressMotion(
   })
   observer.observe(node, {
     attributes: true,
-    attributeFilter: ['disabled', 'aria-busy', 'aria-disabled']
+    attributeFilter: ['disabled', 'aria-busy', 'aria-disabled', 'href']
   })
   for (let parent = node.parentElement; parent; parent = parent.parentElement) {
     if (parent.tagName === 'FIELDSET')

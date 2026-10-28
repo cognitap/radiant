@@ -45,6 +45,13 @@ try {
   )
   const consumerConfig = JSON.parse(readFileSync(path.join(consumer, 'tsconfig.json'), 'utf8'))
   consumerConfig.files.push('ButtonExamples.tsx')
+  writeFileSync(
+    path.join(consumer, 'LinkExamples.tsx'),
+    readFileSync(new URL('../.storybook/examples/LinkExamples.tsx', import.meta.url), 'utf8')
+      .replace("'../../src/index.js'", "'@cognitap/radiant'")
+      .replace("'../../src/motion/react.js'", "'@cognitap/radiant/motion/react'")
+  )
+  consumerConfig.files.push('LinkExamples.tsx')
   writeFileSync(path.join(consumer, 'tsconfig.json'), JSON.stringify(consumerConfig))
   if (compositions) {
     const { copyRecipes } = await import('./verify-compositions.mjs')
