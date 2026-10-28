@@ -43,19 +43,23 @@ const markClass =
   'pointer-events-none absolute inset-0 size-full scale-65 [color:var(--rad-checkbox-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-checkbox-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
 
 const rowClass =
-  'inline-flex min-h-6 cursor-pointer items-center gap-[var(--rad-checkbox-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
+  'inline-flex min-h-6 min-w-0 max-w-full cursor-pointer items-center gap-[var(--rad-checkbox-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 
 const labelClass =
-  'font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-[number:var(--rad-typography-roles-ui-label-weight,400)] [color:var(--rad-checkbox-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-checkbox-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
+  'min-w-0 break-words font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-[number:var(--rad-typography-roles-ui-label-weight,400)] [color:var(--rad-checkbox-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-checkbox-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
 
 export type CheckboxProps = Omit<
   ComponentProps<'input'>,
   'type' | 'checked' | 'defaultChecked' | 'style'
 > &
   CheckedOwner & {
+    /** Convenience label; omit it when Field supplies the single control's label. */
     label?: ReactNode
+    /** Native mixed presentation, independent of checked and the submitted value. */
     indeterminate?: boolean
+    /** Shared visual metrics, matching Input and RadioGroup. */
     controlSize?: ControlSize
+    /** Input styles. Parts style the wrapper, label and decorative indicators. */
     style?: ThemeStyle
     parts?: ControlParts
   }
@@ -64,6 +68,7 @@ function hasContent(value: ReactNode) {
   return value != null && value !== false && value !== ''
 }
 
+/** Native selection and form behavior. Read event.target.checked for state, value for data. */
 export function Checkbox({
   className,
   controlSize = 'medium',

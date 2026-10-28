@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+- Wrap long Checkbox labels within narrow layouts without shrinking the native indicator.
+
 - Release MotionLink springs on lost pointer capture or removed destinations while preserving native anchor navigation.
 
 - Keep Button presses tied to their active input, cancel unavailable motion cleanly, and honor theme motion off for CSS lift and shift.

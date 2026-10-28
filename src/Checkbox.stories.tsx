@@ -1,5 +1,11 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import {
+  CheckboxPermissionsExample,
+  CheckboxStatePlayground
+} from '../.storybook/examples/CheckboxExamples.js'
+import { themes } from './index.js'
+import { MotionProvider } from './motion/react.js'
 import { expect, userEvent, within } from 'storybook/test'
 import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Checkbox, Field, type ThemeStyle } from './index.js'
@@ -187,5 +193,65 @@ export const Group: Story = {
         value="sms"
       />
     </Field>
+  )
+}
+
+export const Permissions: Story = {
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        story:
+          'Copyable public APIs: the local CheckboxFeedback adapter uses useSpring and parts.indicator to animate only the decorative glyph. Native selection and form values remain immediate. Select all includes editable permissions, while disabled audit access stays owner-managed. Theme off and live reduced motion settle the same spring.'
+      }
+    }
+  },
+  render: (_args, context) => (
+    <CheckboxPermissionsExample
+      theme={themes.find(theme => theme.id === context.globals.theme)}
+      mode={context.globals.mode === 'dark' ? 'dark' : 'light'}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const all = canvas.getByRole('checkbox', { name: 'Select all editable permissions' })
+    const invite = canvas.getByRole('checkbox', { name: 'Invite collaborators' })
+    const audit = canvas.getByRole('checkbox', { name: 'View audit log · owner managed' })
+    const summary = canvas.getByRole('checkbox', { name: 'Email me an access summary' })
+    await expect((all as HTMLInputElement).indeterminate).toBe(true)
+    await userEvent.click(all)
+    await expect(all).toBeChecked()
+    await expect((all as HTMLInputElement).indeterminate).toBe(false)
+    await expect(audit).toBeDisabled()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save permissions' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent(
+      'invite, publish, export · summary on'
+    )
+    all.focus()
+    await userEvent.keyboard(' ')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save permissions' }))
+    await expect(invite).toHaveFocus()
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Choose at least one permission.')
+    await userEvent.click(summary)
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset draft' }))
+    await expect(invite).toBeChecked()
+    await expect(summary).toBeChecked()
+    await expect((all as HTMLInputElement).indeterminate).toBe(true)
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Lock permissions' }))
+    await expect(invite).toBeDisabled()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save permissions' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent(
+      'permissions omitted (locked) · summary on'
+    )
+  }
+}
+
+export const IndicatorPlayground: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <MotionProvider>
+      <CheckboxStatePlayground />
+    </MotionProvider>
   )
 }
