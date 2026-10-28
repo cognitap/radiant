@@ -45,7 +45,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Opt-in runtime binding reference. Native activation remains with Button; built-in Button spring policy is DEV-173. The theme supplies physics and live reduced motion suppresses the presentation.'
+          'Opt-in runtime binding reference. Native activation remains with Button. The theme supplies physics and live reduced motion suppresses the presentation.'
       }
     }
   }

@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The same profile fields and actions with native or optional TanStack ownership (DEV-43). Choose Standalone, Card or Dialog with the placement control. Email validates on blur, after change once touched, and on submit. Reset restores defaults and clears errors. Each form has its own native form owner and inherits the global theme and mode. The live recipes are in .storybook/examples/ProfileForm.tsx; TanStack stays outside the shipped library.'
+          'The same profile fields and actions with native or optional TanStack ownership. Choose Standalone, Card or Dialog with the placement control. Email validates on blur, after change once touched, and on submit. Reset restores defaults and clears errors. Each form has its own native form owner and inherits the global theme and mode. The live recipes are in .storybook/examples/ProfileForm.tsx; TanStack stays outside the shipped library.'
       }
     }
   }

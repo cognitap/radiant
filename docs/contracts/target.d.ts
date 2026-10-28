@@ -1,12 +1,12 @@
 /**
- * Future contract projection for DEV-104. Declaration-only; no runtime module.
+ * Contract projection. Declaration-only; no runtime module.
  * This names the normative token paths and representative APIs used by the
  * examples. It is not a complete replacement for the package declarations.
  */
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
 import type { ButtonProps, ButtonVariant, ControlSize, ThemeStyle } from '../../src/index.js'
 
-// DEV-44 now owns the executable theme contract. Keep these sketches tied to it.
+// The theme contract is executable; keep these sketches tied to it.
 export { defineTheme, ThemeScope } from '../../src/index.js'
 export type {
   SharedTokens,
@@ -18,7 +18,7 @@ export type {
   ThemeStyle
 } from '../../src/index.js'
 
-// DEV-117 now owns the executable action vocabulary; examples check real exports.
+// Examples check the real action exports.
 export { Button, Link } from '../../src/index.js'
 export type {
   ButtonProps,

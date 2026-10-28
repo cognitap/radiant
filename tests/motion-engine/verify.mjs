@@ -268,7 +268,7 @@ export async function verify(baseURL, output) {
       composedWidth,
       widthTrace,
       boundary:
-        'Dedicated local pixel motion parts, persistent upstream springs; production geometry breadth remains DEV-177.'
+        'Dedicated local pixel motion parts, persistent upstream springs; production geometry breadth is out of scope.'
     })
     await button('Open native dialog').click()
     const dialog = page.getByRole('dialog')
@@ -389,8 +389,8 @@ export async function verify(baseURL, output) {
           browser: browser.version(),
           limitations: [
             'Chromium proof; no manual AT/cross-browser certification',
-            'Dialog proves entry plus immediate native close; full animated exit remains gated in DEV-174',
-            'Radiant layout adapter owns dedicated local pixel motion parts; general geometry remains DEV-177'
+            'Dialog proves entry plus immediate native close; full animated exit is out of scope',
+            'Radiant layout adapter owns dedicated local pixel motion parts; general geometry is out of scope'
           ]
         },
         null,

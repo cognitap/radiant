@@ -53,7 +53,7 @@ try {
   )
   const url = `http://127.0.0.1:${server.address().port}`
   if (serve) {
-    console.log(`DEV-171 research proof (not a production API): ${url}`)
+    console.log(`Research proof (not a production API): ${url}`)
     await new Promise(resolve => {
       process.once('SIGINT', resolve)
       process.once('SIGTERM', resolve)

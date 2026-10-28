@@ -443,7 +443,7 @@ function Modal() {
       <h2>6 · Native Dialog lifecycle boundary</h2>
       <p>
         Spring entry, immediate native dismissal and cancellation. This does not claim a retained
-        top-layer spring exit; that requires a separate presence decision in DEV-174.
+        top-layer spring exit; that requires a separate presence decision.
       </p>
       <Dialog
         open={open}
@@ -483,10 +483,7 @@ function App() {
       <MotionConfig reducedMotion="user">
         <main data-motion={enabled ? 'spring' : 'off'}>
           <h1>Spring engine suitability proof</h1>
-          <p>
-            DEV-171 · installed Radiant 0.0.5 · Motion 14.7.1 · research fixture, not a production
-            API.
-          </p>
+          <p>Installed Radiant 0.0.5 · Motion 14.7.1 · research fixture, not a production API.</p>
           <label>
             <input
               type="checkbox"
