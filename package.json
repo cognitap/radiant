@@ -92,7 +92,7 @@
     "theme:generate": "node scripts/generate-theme-css.mjs",
     "theme:check": "node scripts/generate-theme-css.mjs --check",
     "watch:theme": "node scripts/generate-theme-css.mjs --watch",
-    "test:browser": "pnpm theme:generate && node scripts/record-browser-environment.mjs && vitest run",
+    "test:browser": "pnpm theme:generate && vitest run",
     "test:browser:smoke": "pnpm test:browser --project=storybook-radiant-light --project=storybook-radiant-dark --project=browser-platform"
   },
   "dependencies": {
