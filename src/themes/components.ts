@@ -381,6 +381,21 @@ export const componentRegistry = {
     descriptionColor: 'css',
     descriptionSize: 'css'
   },
+  menu: {
+    width: 'css',
+    padding: 'css',
+    radius: 'css',
+    background: 'css',
+    color: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    shadow: 'css',
+    itemPadding: 'css',
+    itemRadius: 'css',
+    itemFocusBackground: 'css',
+    itemFocusColor: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 

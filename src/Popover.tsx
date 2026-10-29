@@ -91,6 +91,7 @@ export type PopoverRenderProps = ButtonRenderProps
 export type PopoverPortalProps = { children?: ReactNode }
 export type PopoverContentProps = Omit<ComponentProps<'div'>, 'style' | 'popover' | 'id'> & {
   style?: ThemeStyle
+  'data-slot'?: string
   side?: PopoverSide
   align?: PopoverAlign
   sideOffset?: number
@@ -184,7 +185,7 @@ export function PopoverContent({
       ref={transitionRef}
       id={popover.contentId}
       popover="manual"
-      data-slot="popover-content"
+      data-slot={joinIds('popover-content', props['data-slot'])}
       data-state={popover.open ? 'open' : 'closed'}
       data-side={side}
       data-align={align}

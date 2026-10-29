@@ -2,6 +2,7 @@ import type * as Radiant from '@cognitap/radiant'
 import './alert-dialog-types.js'
 import './popover-types.js'
 import './tooltip-types.js'
+import './menu-types.js'
 import { createElement, createRef, type ComponentProps, type Ref, useRef } from 'react'
 import {
   updateThemeDocument,

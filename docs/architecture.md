@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's nineteen families fit together and why. Props are on the
+How Radiant's twenty families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, Link, Field, Input, Textarea, Select, Combobox, Checkbox, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Popover, Tooltip, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Popover, Tooltip, Menu, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -106,7 +106,7 @@ host, never a wrapper:
 | Input / Checkbox / Switch / Slider / Radio                      | Native `input`                                      |
 | Textarea                                                        | Native `textarea`                                   |
 | Select / SelectPortal / Combobox / ComboboxPortal               | None; state / portal                                |
-| Popover / PopoverPortal                                         | None; state / portal                                |
+| Popover, Tooltip, Menu / their Portals                          | None; state / portal                                |
 | PopoverTrigger / PopoverClose / PopoverContent                  | Button's `button` / Button's `button` / `div`       |
 | SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
 | ComboboxInput / ComboboxContent / ComboboxItem                  | Native `input` / `div` / `div`                      |
@@ -195,7 +195,7 @@ For cancellable actions, disabled and pending guards run first, then the
 consumer handler, then the state request if `defaultPrevented` is false. Native
 change, toggle and blur are observations and cannot veto anything. Library and
 caller refs get the same host, and callback-ref cleanup functions are honored.
-`useField`, `useDialog`, `useCombobox`, `useTabs`, `useCollapsible` and `useAccordion` read and request
+`useField`, `useDialog`, `usePopover`, `useTooltip`, `useMenu`, `useCombobox`, `useTabs`, `useCollapsible` and `useAccordion` read and request
 state, and return `null` outside their owner. Parts that need a root throw when misplaced. Lifecycle,
 SSR and hydration details are in [React bindings](react-bindings.md).
 

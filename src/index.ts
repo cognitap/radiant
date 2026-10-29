@@ -241,3 +241,14 @@ export type {
   MotionInteraction,
   SpringParameters
 } from './motion/config.js'
+
+export { Menu, MenuTrigger, MenuContent, MenuItem, MenuPortal, useMenu } from './Menu.js'
+export type {
+  MenuProps,
+  MenuState,
+  MenuTriggerProps,
+  MenuContentProps,
+  MenuItemProps,
+  MenuPortalProps,
+  MenuRenderProps
+} from './Menu.js'
