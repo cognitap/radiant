@@ -1051,3 +1051,5 @@ void bindLayout
 void LayoutBinding
 
 import './textarea-types.js'
+
+import './switch-types.js'

@@ -34,6 +34,8 @@ export type {
   SelectItemTextProps,
   SelectGroupProps
 } from './Select.js'
+export { Switch } from './Switch.js'
+export type { SwitchProps } from './Switch.js'
 export { Checkbox } from './Checkbox.js'
 export type { CheckboxProps } from './Checkbox.js'
 export { Radio, RadioGroup } from './RadioGroup.js'
