@@ -78,7 +78,7 @@
     "build:storybook": "pnpm theme:generate && storybook build --output-dir dist/storybook --disable-telemetry",
     "test": "pnpm build && node --test tests/*.test.mjs && node scripts/pack-and-test.ts",
     "test:package": "pnpm build && node scripts/pack-and-test.ts",
-    "typecheck": "tsc --noEmit && pnpm typecheck:contracts",
+    "typecheck": "pnpm build:js && tsc --noEmit && pnpm typecheck:contracts",
     "typecheck:contracts": "tsc -p docs/contracts/tsconfig.json",
     "lint": "oxlint --deny-warnings",
     "format": "oxfmt",
