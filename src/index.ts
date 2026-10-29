@@ -9,6 +9,14 @@ export { Textarea } from './Textarea.js'
 export type { TextareaProps } from './Textarea.js'
 export { Slider } from './Slider.js'
 export type { SliderProps } from './Slider.js'
+export { Tabs, TabsList, TabsTrigger, TabsContent, useTabs } from './Tabs.js'
+export type {
+  TabsProps,
+  TabsListProps,
+  TabsTriggerProps,
+  TabsContentProps,
+  TabsState
+} from './Tabs.js'
 export {
   Select,
   SelectTrigger,

@@ -7,10 +7,10 @@ paths.
 | Module                              | Responsibility                                                              | Current consumers                                                       |
 | ----------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | `src/internal/ids.ts`               | Keep owned IDs first and deduplicate external ID references                 | Field, Input, Textarea, Slider, Checkbox, Switch, Radio, Dialog         |
-| `src/internal/events.ts`            | Activation guard → consumer → uncancelled library action                    | Button, Dialog actions/backdrop, Accordion trigger                      |
+| `src/internal/events.ts`            | Activation guard → consumer → uncancelled library action                    | Button, Dialog actions/backdrop, Accordion trigger, Tabs                |
 | `src/internal/selection.ts`         | Accordion membership, equality and single/multiple transitions              | Accordion                                                               |
-| `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup | Checkbox, Switch, Radio, DialogContent, Collapsible                     |
-| `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression | Dialog, Collapsible, Accordion                                          |
+| `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup | Checkbox, Switch, Radio, DialogContent, Collapsible, TabsList           |
+| `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression | Dialog, Collapsible, Accordion, Tabs                                    |
 | `src/react/useNativeOwner.ts`       | Diagnose mixed owners and mode changes without storing native values        | Input, Textarea, Slider, Checkbox, Switch, standalone Radio, RadioGroup |
 
 Switch's private `useSwitchDrag` binding owns provisional pointer movement and

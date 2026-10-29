@@ -4,17 +4,19 @@
 
 ## Unreleased
 
+- Add Tabs.
+
 ## 0.0.11
 
 - Add native Slider.
 
 ## 0.0.10
 
-- Add draggable Switch with Field, forms, shared sizing and theme overrides.
+- Add draggable Switch with Field, forms, sizing and theme overrides.
 
 ## 0.0.9
 
-- Add Textarea with Field, forms, themes and native resizing.
+- Add Textarea with Field, forms, themes and resizing.
 
 ## 0.0.8
 
