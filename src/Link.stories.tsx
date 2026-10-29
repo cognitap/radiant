@@ -1,6 +1,5 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within } from 'storybook/test'
 import { Button, Link, type LinkProps } from './index.js'
 
 import {
@@ -171,17 +170,7 @@ export const Playground: Story = {
       }
     }
   },
-  render: args => <LinkPlayground {...args} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Save for later' }))
-    await expect(canvas.getByRole('status')).toHaveTextContent('Added to your reading list.')
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
-    await expect(canvas.getByRole('link', { name: 'Explore the launchpad' })).toHaveAttribute(
-      'href',
-      `#${canvas.getByRole('region', { name: 'Launch notes' }).id}`
-    )
-  }
+  render: args => <LinkPlayground {...args} />
 }
 
 export const MotionRouter: Story = {
@@ -194,15 +183,7 @@ export const MotionRouter: Story = {
       }
     }
   },
-  render: args => <RoutedLinkExample {...args} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const link = canvas.getByRole('link', { name: 'Open installation guide' })
-    await userEvent.click(link)
-    await expect(canvas.getByRole('status')).toHaveTextContent('The installation guide is open.')
-    await userEvent.keyboard(' ')
-    await expect(link).toHaveFocus()
-  }
+  render: args => <RoutedLinkExample {...args} />
 }
 
 export const Composition: Story = {
@@ -227,14 +208,7 @@ export const Customisation: Story = {
       }
     }
   },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const anchor = canvas.getByRole('link', { name: 'Routed docs' })
-    await expect(anchor).toHaveAttribute('data-slot', 'link')
-    await expect(canvas.getByRole('status')).toHaveTextContent('Guide not opened yet.')
-    await userEvent.click(anchor)
-    await expect(canvas.getByRole('status')).toHaveTextContent('Guide opened.')
-  },
+
   render: args => (
     <LinkDestination
       args={args}

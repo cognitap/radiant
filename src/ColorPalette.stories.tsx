@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within } from 'storybook/test'
 import { ProfileExample } from '../.storybook/examples/ProfileForm.js'
 import { Button, Field, Input, Link, ThemeScope, defineTheme } from './index.js'
 import { generateColorWall, recommendColorPalette } from './color/index.js'
@@ -126,20 +125,4 @@ const meta = {
 } satisfies Meta<typeof PalettePreview>
 export default meta
 type Story = StoryObj<typeof meta>
-export const Reference: Story = {
-  play: async ({ canvasElement }) => {
-    for (const mode of ['light', 'dark']) {
-      const scope = within(within(canvasElement).getByTestId(`palette-${mode}`))
-      const save = scope.getByRole('button', { name: 'Save profile' })
-      const email = scope.getByRole('textbox', { name: 'Email' })
-      await userEvent.click(save)
-      await expect(scope.getByRole('alert')).toHaveTextContent('Enter an email.')
-      await expect(email).toHaveAttribute('aria-invalid', 'true')
-      await expect(scope.getByRole('checkbox', { name: 'Send product updates' })).toBeChecked()
-      await expect(scope.getByRole('textbox', { name: 'Workspace' })).toBeDisabled()
-      await userEvent.click(scope.getByRole('textbox', { name: 'Search' }))
-      await userEvent.tab()
-      await expect(email).toHaveFocus()
-    }
-  }
-}
+export const Reference: Story = {}

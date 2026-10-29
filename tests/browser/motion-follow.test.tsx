@@ -18,11 +18,7 @@ vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
 let reduced = true
 const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 async function until(check: () => boolean) {
-  for (let i = 0; i < 180; i++) {
-    if (check()) return
-    await frame()
-  }
-  throw new Error('Follower did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 const roots: Root[] = []
 const hosts: HTMLElement[] = []

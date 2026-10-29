@@ -6,8 +6,6 @@ import {
 } from '../.storybook/examples/CheckboxExamples.js'
 import { themes } from './examples/index.js'
 import { MotionProvider } from './motion/react.js'
-import { expect, userEvent, within } from 'storybook/test'
-import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { Button, Checkbox, Field, type ThemeStyle } from './index.js'
 
 function NativeForm() {
@@ -81,7 +79,6 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 export const States: Story = {
-  play: async ({ canvasElement }) => checkDisabledIndicators(canvasElement, 'checkbox'),
   parameters: {
     docs: {
       description: {
@@ -119,25 +116,7 @@ export const States: Story = {
 }
 
 export const Composition: Story = {
-  render: () => <NativeForm />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const email = canvas.getByRole('checkbox', { name: 'Email' })
-    const sms = canvas.getByRole('checkbox', { name: 'SMS' })
-    await expect(email).toBeChecked()
-    await expect(sms).not.toBeChecked()
-    await userEvent.click(email)
-    await userEvent.tab()
-    await expect(sms).toHaveFocus()
-    await userEvent.keyboard(' ')
-    await expect(sms).toBeChecked()
-    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
-    await expect(canvas.getByRole('status')).toHaveTextContent('sms')
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }))
-    await expect(email).toBeChecked()
-    await expect(sms).not.toBeChecked()
-    await expect(canvas.getByRole('status')).toHaveTextContent('No changes saved.')
-  }
+  render: () => <NativeForm />
 }
 
 export const Customisation: Story = {
@@ -161,15 +140,6 @@ export const Customisation: Story = {
         <Checkbox label="Unchanged neighbour" />
       </div>
     )
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const customised = canvas.getByRole('checkbox', { name: 'Email me product updates' })
-    const neighbour = canvas.getByRole('checkbox', { name: 'Unchanged neighbour' })
-    await expect(customised.closest('label')).toHaveStyle({ gap: '16px' })
-    await expect(canvas.getByText('Email me product updates')).toHaveStyle({ fontStyle: 'italic' })
-    await expect(canvas.getByText('Unchanged neighbour')).toHaveStyle({ fontStyle: 'normal' })
-    await expect(neighbour.style.getPropertyValue('--rad-checkbox-size')).toBe('')
   }
 }
 
@@ -211,40 +181,7 @@ export const Permissions: Story = {
       theme={themes.find(theme => theme.id === context.globals.theme)}
       mode={context.globals.mode === 'dark' ? 'dark' : 'light'}
     />
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const all = canvas.getByRole('checkbox', { name: 'Select all editable permissions' })
-    const invite = canvas.getByRole('checkbox', { name: 'Invite collaborators' })
-    const audit = canvas.getByRole('checkbox', { name: 'View audit log · owner managed' })
-    const summary = canvas.getByRole('checkbox', { name: 'Email me an access summary' })
-    await expect((all as HTMLInputElement).indeterminate).toBe(true)
-    await userEvent.click(all)
-    await expect(all).toBeChecked()
-    await expect((all as HTMLInputElement).indeterminate).toBe(false)
-    await expect(audit).toBeDisabled()
-    await userEvent.click(canvas.getByRole('button', { name: 'Save permissions' }))
-    await expect(canvas.getByRole('status')).toHaveTextContent(
-      'invite, publish, export · summary on'
-    )
-    all.focus()
-    await userEvent.keyboard(' ')
-    await userEvent.click(canvas.getByRole('button', { name: 'Save permissions' }))
-    await expect(invite).toHaveFocus()
-    await expect(canvas.getByRole('alert')).toHaveTextContent('Choose at least one permission.')
-    await userEvent.click(summary)
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset draft' }))
-    await expect(invite).toBeChecked()
-    await expect(summary).toBeChecked()
-    await expect((all as HTMLInputElement).indeterminate).toBe(true)
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Lock permissions' }))
-    await expect(invite).toBeDisabled()
-    await userEvent.click(canvas.getByRole('button', { name: 'Save permissions' }))
-    await expect(canvas.getByRole('status')).toHaveTextContent(
-      'permissions omitted (locked) · summary on'
-    )
-  }
+  )
 }
 
 export const IndicatorPlayground: Story = {

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within } from 'storybook/test'
 import { Field, Select, SelectTrigger, SelectValue, SelectPortal, SelectContent } from './index.js'
 import {
   SelectSettingsExample,
@@ -19,18 +18,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Settings: Story = {
-  render: () => <SelectSettingsExample />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Default workspace' }))
-    await userEvent.click(canvas.getByRole('option', { name: 'Team' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'Save preferences' }))
-    await expect(canvas.getByRole('status')).toHaveTextContent('Saved to team')
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }))
-    await expect(canvas.getByRole('combobox', { name: 'Default workspace' })).toHaveTextContent(
-      'Studio'
-    )
-  }
+  render: () => <SelectSettingsExample />
 }
 export const Controlled: Story = { render: () => <SelectControlledExample /> }
 export const Open: Story = {

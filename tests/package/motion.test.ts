@@ -10,8 +10,7 @@ import {
   exportThemeSections,
   themeDocumentFromDefinition
 } from '@cognitap/radiant'
-import { createSpring, createLayoutSpring, bindSpringStyle } from '@cognitap/radiant/motion'
-import { JSDOM } from 'jsdom'
+import { createSpring, createLayoutSpring } from '@cognitap/radiant/motion'
 
 test('theme profiles are validated immutable serializable data, independent of CSS motion tokens', () => {
   const input = {
@@ -64,28 +63,6 @@ test('off, neutral, stop and destruction leave no scheduled animation or stale g
   assert.equal(spring.get(), 2)
   assert.equal(spring.isAnimating(), false)
   assert.throws(() => spring.to(NaN), /finite/)
-})
-test('DOM binding reserves one property, preserves caller transform and restores prior style', () => {
-  const { document } = new JSDOM(
-    '<button style="transform: rotate(7deg); scale: .8 !important">Submit</button>'
-  ).window
-  const button = document.querySelector('button')
-  const spring = createSpring(1, { enabled: false })
-  const cleanup = bindSpringStyle(button, spring, 'scale')
-  spring.to(0.96)
-  assert.equal(button.style.scale, '0.96')
-  assert.equal(button.style.transform, 'rotate(7deg)')
-  cleanup()
-  assert.equal(button.style.scale, '0.8')
-  assert.equal(button.style.getPropertyPriority('scale'), 'important')
-  spring.to(0.5)
-  assert.equal(button.style.scale, '0.8')
-  const cleanupAgain = bindSpringStyle(button, spring, 'scale')
-  button.style.scale = '0.7'
-  cleanupAgain()
-  assert.equal(button.style.scale, '0.7')
-  assert.throws(() => bindSpringStyle(button, spring, 'transform'), /Unsupported/)
-  spring.destroy()
 })
 test('layout coordinates are independent persistent springs, off settles to measured geometry atomically', () => {
   const initial = { x: 0, y: 0, width: 120, height: 80 }

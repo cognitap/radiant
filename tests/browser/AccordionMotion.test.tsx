@@ -44,13 +44,7 @@ async function mount(tree: ReactNode, hydrate = false) {
   return { root: root!, host }
 }
 async function until(check: () => boolean) {
-  for (let i = 0; i < 240; i++) {
-    if (check()) return
-    await act(async () => {
-      await frame()
-    })
-  }
-  throw new Error('Accordion did not reach the expected state')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 const height = (node: HTMLElement) =>
   parseFloat(node.style.getPropertyValue('--_rad-spring-details-height'))
@@ -446,4 +440,46 @@ test('selection lab remounts type, preserves the app draft and cancels replay on
   await new Promise(resolve => setTimeout(resolve, 120))
   expect(details.style.getPropertyValue('--_rad-spring-details-height')).toBe('')
   expect(host.children).toHaveLength(0)
+})
+
+test('several accordion requests in one event keep earlier accepted values', async () => {
+  const changes = vi.fn()
+  function Actions() {
+    const state = useAccordion()!
+    return (
+      <button
+        onClick={() => {
+          state.setItemOpen('shipping', true)
+          state.setItemOpen('returns', true)
+          state.setItemOpen('returns', true)
+        }}
+      >
+        Open both
+      </button>
+    )
+  }
+  const { host, root } = await mount(
+    <Accordion
+      type="multiple"
+      defaultValue={[]}
+      onValueChange={changes}
+    >
+      <Actions />
+    </Accordion>
+  )
+  await act(async () => host.querySelector('button')!.click())
+  expect(changes.mock.calls.map(call => call[0])).toEqual([['shipping'], ['shipping', 'returns']])
+  await act(async () =>
+    root.render(
+      <Accordion
+        type="multiple"
+        defaultValue={['other']}
+        onValueChange={changes}
+      >
+        <Actions />
+      </Accordion>
+    )
+  )
+  await act(async () => host.querySelector('button')!.click())
+  expect(changes).toHaveBeenCalledTimes(2)
 })

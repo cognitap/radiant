@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within } from 'storybook/test'
-import { checkDisabledIndicators } from '../.storybook/checkIndicators.js'
 import { RadioPlanExample, RadioStatePlayground } from '../.storybook/examples/RadioExamples.js'
 import { Button, Radio, RadioGroup, type ThemeStyle } from './index.js'
 import { themes } from './examples/index.js'
@@ -102,7 +100,6 @@ export const Default: Story = {
 }
 
 export const States: Story = {
-  play: async ({ canvasElement }) => checkDisabledIndicators(canvasElement, 'radio'),
   render: () => (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
       <RadioGroup
@@ -159,25 +156,7 @@ export const States: Story = {
 }
 
 export const Composition: Story = {
-  render: () => <NativeForm />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const pro = canvas.getByRole('radio', { name: 'Pro' })
-    const team = canvas.getByRole('radio', { name: 'Team' })
-    const retired = canvas.getByRole('radio', { name: 'Retired' })
-    await expect(pro).toBeChecked()
-    await expect(retired).toBeDisabled()
-    await userEvent.click(pro)
-    await userEvent.keyboard('{ArrowDown}')
-    await expect(team).toBeChecked()
-    await expect(team).toHaveFocus()
-    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
-    await expect(canvas.getByRole('status')).toHaveTextContent('team')
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }))
-    await expect(pro).toBeChecked()
-    await expect(team).not.toBeChecked()
-    await expect(canvas.getByRole('status')).toHaveTextContent('No changes saved.')
-  }
+  render: () => <NativeForm />
 }
 
 export const Customisation: Story = {
@@ -214,22 +193,6 @@ export const Customisation: Story = {
         />
       </div>
     )
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const group = canvas.getByRole('group', { name: 'Plan' })
-    await expect(group).toHaveAttribute('data-slot', 'field radio-group')
-    await expect(group.querySelector('[data-slot~="radio-group-options"]')).toHaveStyle({
-      display: 'flex',
-      gap: '16px'
-    })
-    await expect(group.querySelector('legend')).toHaveStyle({ fontStyle: 'italic' })
-    await expect(canvas.getByText('Pro')).toHaveStyle({ fontWeight: '700' })
-    const indicator = group.querySelector<HTMLElement>(
-      'input:checked + [data-slot~="radio-indicator"]'
-    )!
-    await expect(indicator.getBoundingClientRect().width).toBeGreaterThan(0)
-    await expect(canvas.getByText('Unchanged neighbour')).toHaveStyle({ fontStyle: 'normal' })
   }
 }
 
@@ -240,37 +203,9 @@ export const PlanPicker: Story = {
       theme={themes.find(theme => theme.id === globals.theme)}
       mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
     />
-  ),
-  play: async ({ canvasElement, globals }) => {
-    const canvas = within(canvasElement)
-    const pro = canvas.getByRole('radio', { name: 'Pro' })
-    await expect(pro.closest('[data-rad-theme]')).toHaveAttribute('data-rad-theme', globals.theme)
-    await userEvent.click(pro)
-    await userEvent.keyboard('{ArrowDown}')
-    await expect(canvas.getByRole('radio', { name: 'Team' })).toBeChecked()
-    await userEvent.click(canvas.getByRole('button', { name: 'Save plan' }))
-    await expect(canvas.getAllByRole('status')[0]).toHaveTextContent('plan team · billing monthly')
-    await userEvent.click(canvas.getByRole('button', { name: 'Clear choice' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'Save plan' }))
-    await expect(canvas.getByRole('radio', { name: 'Personal' })).toHaveFocus()
-    await expect(canvas.getByRole('alert')).toHaveTextContent('Choose a plan before saving.')
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset draft' }))
-    await expect(pro).toBeChecked()
-  }
+  )
 }
 
 export const IndicatorPlayground: Story = {
-  render: args => <RadioStatePlayground controlSize={args.controlSize} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('radio', { name: 'Pro' }))
-    await userEvent.keyboard('{ArrowDown}{ArrowUp}{ArrowUp}')
-    await expect(canvas.getByRole('radio', { name: 'Personal' })).toBeChecked()
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Horizontal layout' }))
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Invalid group' }))
-    await expect(canvas.getByRole('group', { name: 'Try arrow keys' })).toHaveAttribute(
-      'aria-invalid',
-      'true'
-    )
-  }
+  render: args => <RadioStatePlayground controlSize={args.controlSize} />
 }

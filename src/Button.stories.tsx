@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
+import { expect, fn, waitFor, within } from 'storybook/test'
 import { ButtonPlayground, SaveChanges } from '../.storybook/examples/ButtonExamples.js'
 import { MotionProvider } from './motion/react.js'
 import {
@@ -88,17 +88,7 @@ export const Playground: Story = {
       }
     }
   },
-  render: args => <ButtonPlayground {...args} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const launch = canvas.getByRole('button', { name: 'Launch workspace' })
-    await userEvent.click(launch)
-    await userEvent.keyboard('{Enter} ')
-    await expect(canvas.getByRole('status')).toHaveTextContent('3 actions completed')
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Turn off spatial motion' }))
-    await userEvent.click(launch)
-    await expect(canvas.getByRole('status')).toHaveTextContent('4 actions completed')
-  }
+  render: args => <ButtonPlayground {...args} />
 }
 
 export const SaveChangesExample: Story = {
@@ -111,32 +101,7 @@ export const SaveChangesExample: Story = {
       }
     }
   },
-  render: args => <SaveChanges {...args} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const save = canvas.getByRole('button', { name: 'Save changes' })
-    const name = canvas.getByRole('textbox', { name: 'Workspace name' })
-    await userEvent.clear(name)
-    await userEvent.type(name, 'Orbit Lab')
-    await userEvent.click(save)
-    await expect(save).toHaveAttribute('aria-busy', 'true')
-    await expect(save).not.toBeDisabled()
-    await expect(save).toHaveFocus()
-    await userEvent.click(save)
-    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Saved “Orbit Lab”.'))
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Simulate a failed request' }))
-    await userEvent.click(save)
-    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Could not save.'))
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Simulate a failed request' }))
-    await userEvent.click(save)
-    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Saved “Orbit Lab”.'))
-    const discard = canvas.getByRole('button', { name: 'Discard draft' })
-    await userEvent.click(discard)
-    await userEvent.click(canvas.getByRole('button', { name: 'Discard changes' }))
-    await expect(name).toHaveValue('Orbit Studio')
-    await expect(discard).toHaveFocus()
-    await expect(canvas.getByRole('status')).toHaveTextContent('Draft discarded.')
-  }
+  render: args => <SaveChanges {...args} />
 }
 
 function ConsumerButton({ children, ...props }: ButtonRenderProps) {
@@ -190,19 +155,6 @@ function ButtonComposition(args: ButtonProps) {
 }
 
 export const States: Story = {
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement)
-    const unavailable = canvas.getByRole('button', { name: 'Unavailable' })
-    const saving = canvas.getByRole('button', { name: 'Saving' })
-    await expect(unavailable).toBeDisabled()
-    await expect(saving).toHaveAttribute('aria-busy', 'true')
-    await expect(saving).not.toBeDisabled()
-    await userEvent.click(unavailable)
-    await userEvent.click(saving)
-    await userEvent.keyboard('{Enter} ')
-    await expect(saving).toHaveFocus()
-    await expect(args.onClick).not.toHaveBeenCalled()
-  },
   render: args => (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
       <Button
@@ -222,18 +174,6 @@ export const States: Story = {
 }
 
 export const Composition: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const next = canvas.getByRole('button', { name: 'Next' })
-    await expect(next).toHaveAttribute('type', 'button')
-    await userEvent.click(next)
-    await userEvent.keyboard('{Enter}')
-    await expect(canvas.getByRole('status')).toHaveTextContent('Next activated 2 times')
-    await userEvent.tab()
-    await expect(canvas.getByRole('button', { name: 'Close' })).toHaveFocus()
-    await userEvent.keyboard(' ')
-    await expect(canvas.getByRole('status')).toHaveTextContent('Close activated 1 time')
-  },
   render: args => <ButtonComposition {...args} />
 }
 

@@ -11,11 +11,7 @@ import type {} from './mediaCommands.js'
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
 const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 async function until(check: () => boolean) {
-  for (let i = 0; i < 240; i++) {
-    if (check()) return
-    await frame()
-  }
-  throw new Error('Layout condition did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 const cleanup: (() => void)[] = []
 const roots: Root[] = []

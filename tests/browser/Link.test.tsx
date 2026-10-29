@@ -1,5 +1,14 @@
-import { act, type MouseEvent, type ReactNode } from 'react'
+import {
+  act,
+  createElement,
+  createRef,
+  Fragment,
+  type MouseEvent,
+  type ReactNode,
+  type Ref
+} from 'react'
 import { createRoot, type Root } from 'react-dom/client'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import { Link, ThemeScope, type LinkRenderProps } from '../../src/index.js'
@@ -236,3 +245,141 @@ for (const { Anchor, family, mode } of cases) {
     expect(location.href).toBe(originalURL)
   })
 }
+
+test('adapted links keep resolved identity and consume presentation props', () => {
+  const ref = createRef<HTMLAnchorElement>()
+  const onClick = () => {}
+  const style = { color: 'rebeccapurple', '--rad-button-radius': '1rem' }
+  for (const variant of ['inline', 'subtle', 'solid', 'soft', 'outline', 'ghost'] as const) {
+    let resolved: LinkRenderProps | undefined
+    const props = {
+      href: '/guide',
+      variant,
+      tone: 'warning' as const,
+      controlSize: 'large' as const,
+      external: true,
+      download: 'guide.txt',
+      ref,
+      onClick,
+      style,
+      className: 'rounded-full',
+      'aria-describedby': 'help',
+      id: 'guide-link',
+      'data-slot': 'pretend-button',
+      'data-variant': 'primary',
+      'data-tone': 'ghost',
+      'data-control-size': 'default',
+      'data-consumer': 'retained'
+    }
+    const native = renderToStaticMarkup(<Link {...props}>Guide</Link>)
+    const adapted = renderToStaticMarkup(
+      <Link
+        {...props}
+        render={anchorProps => {
+          resolved = anchorProps
+          return <a {...anchorProps}>{anchorProps.children}</a>
+        }}
+      >
+        Guide
+      </Link>
+    )
+    const anchor = new DOMParser().parseFromString(native, 'text/html').querySelector('a')!
+    expect(adapted).toBe(native)
+    expect(anchor.dataset.slot).toBe('link')
+    expect(anchor.dataset.variant).toBe(variant)
+    expect(anchor.dataset.tone).toBe('warning')
+    expect(anchor.dataset.controlSize).toBe('large')
+    expect(anchor.dataset.consumer).toBe('retained')
+    expect(resolved?.ref).toBe(ref)
+    expect(resolved?.onClick).toBe(onClick)
+    expect(resolved?.style).toBe(style)
+    expect(resolved?.target).toBe('_blank')
+    expect(resolved?.rel).toBe('noopener noreferrer')
+    for (const name of ['variant', 'tone', 'controlSize', 'external', 'render'] as const)
+      expect(Object.hasOwn(resolved ?? {}, name)).toBe(false)
+  }
+})
+
+test('a link replacement must return one anchor', () => {
+  const anchor = createElement('a', { href: '/guide' }, 'Guide')
+  for (const render of [
+    () => null,
+    () => 'Guide',
+    () => [anchor],
+    () => createElement(Fragment, null, anchor),
+    () => createElement('button', null, 'Guide')
+  ])
+    expect(() => renderToStaticMarkup(createElement(Link, { render } as never))).toThrow(
+      /Link.*render.*anchor/i
+    )
+})
+
+test('default and router link refs stay on one anchor until replacement', async () => {
+  function RouterAnchor(props: LinkRenderProps) {
+    return (
+      <a
+        {...props}
+        data-router=""
+      >
+        {props.children}
+      </a>
+    )
+  }
+  for (const render of [undefined, (props: LinkRenderProps) => <RouterAnchor {...props} />]) {
+    const attached: Array<HTMLAnchorElement | null> = []
+    const cleaned: HTMLAnchorElement[] = []
+    const ref: Ref<HTMLAnchorElement> = anchor => {
+      attached.push(anchor)
+      return () => {
+        if (anchor) cleaned.push(anchor)
+      }
+    }
+    const { host, root } = await mount(
+      <Link
+        href="#guide"
+        render={render}
+        ref={ref}
+        title="Original"
+      >
+        Guide
+      </Link>
+    )
+    const anchor = host.querySelector('a')!
+    expect(attached).toEqual([anchor])
+    expect(host.querySelectorAll('a')).toHaveLength(1)
+    await act(async () =>
+      root.render(
+        <MotionProvider>
+          <Link
+            href="#guide"
+            render={render}
+            ref={ref}
+            title="Updated"
+          >
+            Guide
+          </Link>
+        </MotionProvider>
+      )
+    )
+    expect(attached).toEqual([anchor])
+    expect(cleaned).toEqual([])
+    const nextRef = createRef<HTMLAnchorElement>()
+    await act(async () =>
+      root.render(
+        <MotionProvider>
+          <Link
+            href="#guide"
+            render={render}
+            ref={nextRef}
+          >
+            Guide
+          </Link>
+        </MotionProvider>
+      )
+    )
+    expect(cleaned).toEqual([anchor])
+    expect(nextRef.current).toBe(anchor)
+    await act(async () => root.render(null))
+    expect(nextRef.current).toBeNull()
+  }
+})

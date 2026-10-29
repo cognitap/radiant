@@ -1,4 +1,12 @@
-import { act, createRef, StrictMode, useLayoutEffect, useRef, type ReactNode } from 'react'
+import {
+  act,
+  createElement,
+  createRef,
+  StrictMode,
+  useLayoutEffect,
+  useRef,
+  type ReactNode
+} from 'react'
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
@@ -26,13 +34,7 @@ const theme = defineTheme({
 const mounted: Array<{ root: Root; host: HTMLDivElement }> = []
 const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 async function until(check: () => boolean) {
-  for (let i = 0; i < 240; i++) {
-    if (check()) return
-    await act(async () => {
-      await frame()
-    })
-  }
-  throw new Error('Card layout did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 async function mount(tree: ReactNode, hydrate = false) {
   const host = document.createElement('div')
@@ -107,6 +109,20 @@ test('parts keep native hosts, heading semantics, caller styling, additive ident
   expect(footer.current!.tagName).toBe('DIV')
   await act(async () => root.render(null))
   expect(cleanup).toHaveBeenCalledTimes(1)
+})
+
+test('an explicit region and heading level stay on the card', async () => {
+  const { host } = await mount(
+    createElement(
+      Card,
+      { role: 'region', 'aria-labelledby': 'pack-title' },
+      createElement(CardTitle, { id: 'pack-title', level: 3 }, 'Pack')
+    )
+  )
+  const card = host.querySelector('[data-slot=card]')!
+  expect(card.getAttribute('role')).toBe('region')
+  expect(card.getAttribute('aria-labelledby')).toBe('pack-title')
+  expect(card.querySelector('h3')?.id).toBe('pack-title')
 })
 
 type Layout = ReturnType<typeof useSpringLayout>

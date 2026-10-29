@@ -43,13 +43,7 @@ async function mount(tree: ReactNode, hydrate = false) {
   return { root: root!, host }
 }
 async function until(check: () => boolean) {
-  for (let i = 0; i < 180; i++) {
-    if (check()) return
-    await act(async () => {
-      await frame()
-    })
-  }
-  throw new Error('Radio feedback did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 const progress = (node: HTMLElement) =>
   Number(node.style.getPropertyValue('--example-radio-feedback'))
@@ -294,4 +288,39 @@ test('long convenience labels wrap inside a narrow host without shrinking the na
     container.getBoundingClientRect().right + 1
   )
   expect(host.querySelector('input')!.getBoundingClientRect().width).toBeGreaterThanOrEqual(16)
+})
+
+test('RadioGroup rejects a child that brings its own name or selection', () => {
+  const reject = (child: ReactNode) =>
+    expect(() =>
+      renderToString(
+        <RadioGroup
+          label="Plan"
+          name="plan"
+        >
+          {child}
+        </RadioGroup>
+      )
+    ).toThrow(/RadioGroup owns name and selection/)
+  reject(
+    <Radio
+      name="other"
+      value="pro"
+      label="Pro"
+    />
+  )
+  reject(
+    <Radio
+      checked={false}
+      value="pro"
+      label="Pro"
+    />
+  )
+  reject(
+    <Radio
+      defaultChecked={false}
+      value="pro"
+      label="Pro"
+    />
+  )
 })

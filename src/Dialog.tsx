@@ -321,7 +321,7 @@ function openDialog(node: HTMLDialogElement, modal: boolean) {
     node.show()
     return
   }
-  // jsdom does not implement the dialog methods. The attribute still marks it open.
+  // Without dialog methods, the attribute still marks it open.
   node.setAttribute('open', '')
 }
 

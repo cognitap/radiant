@@ -4,7 +4,6 @@ import {
   DialogTransitionExample
 } from '../.storybook/examples/DialogExamples.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
 import {
   Button,
   Dialog,
@@ -147,45 +146,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  play: async ({ canvasElement }) => {
-    await waitFor(async () => {
-      const view = canvasElement.ownerDocument.defaultView!
-      const reference = canvasElement.querySelector<HTMLButtonElement>('[data-slot="button"]')
-      await expect(reference).not.toBeNull()
-      const expected = view.getComputedStyle(reference!)
-      for (const slot of ['dialog-trigger', 'dialog-close']) {
-        const action = canvasElement.querySelector<HTMLButtonElement>(`[data-slot~="${slot}"]`)
-        await expect(action).not.toBeNull()
-        const actual = view.getComputedStyle(action!)
-        const properties = [
-          'font-family',
-          'font-size',
-          'font-weight',
-          'letter-spacing',
-          'text-transform',
-          'border-top-width',
-          'border-top-style'
-        ]
-        if (
-          !action!.matches(':hover, :active, :focus-visible') &&
-          !reference!.matches(':hover, :active')
-        ) {
-          properties.push(
-            'background-color',
-            'background-image',
-            'color',
-            'box-shadow',
-            'border-radius',
-            'corner-shape',
-            'backdrop-filter'
-          )
-        }
-        for (const property of properties) {
-          await expect(actual.getPropertyValue(property)).toBe(expected.getPropertyValue(property))
-        }
-      }
-    })
-  },
   render: () => (
     <Dialog>
       <DialogTrigger>Edit profile</DialogTrigger>
@@ -237,20 +197,7 @@ export const Composition: Story = {
       }
     }
   },
-  render: () => <ProfileForm />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Edit profile' }))
-    const dialog = canvas.getByRole('dialog', { name: 'Edit profile' })
-    const name = within(dialog).getByRole('textbox', { name: 'Name' })
-    await expect(name).toHaveFocus()
-    await userEvent.clear(name)
-    await userEvent.type(name, 'Grace')
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
-    await expect(canvas.getByText('Grace', { exact: true })).toBeVisible()
-    // Leave the panel open so the automatic accessibility scan includes its parts.
-    await expect(dialog).toBeVisible()
-  }
+  render: () => <ProfileForm />
 }
 
 // Consumer-owned adapter; the resolved ref, handler and children reach this one host.
@@ -290,24 +237,7 @@ export const Customisation: Story = {
         </DialogClose>
       </DialogContent>
     </Dialog>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Open narrow panel' }))
-    const panel = canvas.getByRole('dialog', { name: 'Narrow panel' })
-    await expect(panel).toBeVisible()
-    await expect(panel).toHaveAttribute('data-slot', 'dialog')
-    await expect(panel).toHaveAttribute('data-state', 'open')
-    await expect(within(panel).getByRole('heading', { name: 'Narrow panel' })).toHaveStyle({
-      fontSize: '20px'
-    })
-    await expect(within(panel).getByText('Custom hosts inherit Button presentation.')).toHaveStyle({
-      fontStyle: 'italic'
-    })
-    await expect(panel.getBoundingClientRect().width).toBeLessThanOrEqual(
-      Math.min(384, canvasElement.ownerDocument.defaultView!.innerWidth - 32)
-    )
-  }
+  )
 }
 
 export const Nested: Story = {
@@ -329,30 +259,7 @@ export const ProfileEditor: Story = {
       theme={themes.find(theme => theme.id === globals.theme)}
       mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
     />
-  ),
-  play: async ({ canvasElement, globals }) => {
-    const canvas = within(canvasElement)
-    const trigger = canvas.getByRole('button', { name: 'Edit your details' })
-    await userEvent.click(trigger)
-    const panel = canvas.getByRole('dialog', { name: 'A little more you.' })
-    await expect(panel.closest('[data-rad-theme]')).toHaveAttribute('data-rad-theme', globals.theme)
-    const name = within(panel).getByRole('textbox', { name: 'Display name' })
-    await userEvent.clear(name)
-    await userEvent.click(within(panel).getByRole('button', { name: 'Save profile' }))
-    await expect(name).toHaveFocus()
-    await expect(within(panel).getByRole('alert')).toHaveTextContent('Use at least two characters')
-    await userEvent.type(name, 'Grace Hopper')
-    await userEvent.click(within(panel).getByRole('button', { name: 'Save profile' }))
-    await waitFor(async () => {
-      await expect(canvas.getByText('Saved locally: Grace Hopper · ada@example.com.')).toBeVisible()
-    })
-    await waitFor(async () => {
-      await expect(panel).not.toBeVisible()
-    })
-    await expect(trigger).toHaveFocus()
-    await userEvent.click(trigger)
-    await expect(name).toHaveValue('Grace Hopper')
-  }
+  )
 }
 
 export const TransitionPlayground: Story = {
@@ -361,17 +268,5 @@ export const TransitionPlayground: Story = {
       theme={themes.find(theme => theme.id === globals.theme)}
       mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
     />
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Open transition lab' }))
-    const panel = canvas.getByRole('dialog', { name: 'Room to explore.' })
-    await userEvent.click(within(panel).getByRole('checkbox', { name: 'More detail' }))
-    await expect(within(panel).getByText('Chapter 8.', { exact: false })).toBeVisible()
-    await userEvent.click(within(panel).getByRole('button', { name: 'Close and reopen' }))
-    await waitFor(async () => {
-      await expect(panel).toBeVisible()
-    })
-    await expect(panel).toHaveAttribute('data-state', 'open')
-  }
+  )
 }

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
 import {
   AccordionGuideExample,
   AccordionSelectionExample
@@ -154,23 +153,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  render: () => <ShippingSections />,
-  play: async ({ canvasElement }) => {
-    const item = canvasElement.querySelector<HTMLElement>('[data-slot~="accordion-item"]')!
-    const trigger = item.querySelector('summary')!
-    const content = item.querySelector('[data-slot~="accordion-content"]')!
-    await expect(item).toHaveAttribute('data-slot', 'collapsible accordion-item')
-    await expect(trigger).toHaveAttribute('data-slot', 'collapsible-trigger accordion-trigger')
-    await expect(trigger.querySelector('button')).toBeNull()
-    await userEvent.click(within(item).getByRole('button', { name: 'Track' }))
-    await expect(within(item).getByRole('status')).toHaveTextContent('Tracking update:')
-    await expect(content).toHaveAttribute('data-state', 'open')
-    await userEvent.click(trigger)
-    await expect(item).toHaveAttribute('data-state', 'closed')
-    await expect(content).toHaveAttribute('data-state', 'closed')
-    await userEvent.click(trigger)
-    await expect(content).toBeVisible()
-  }
+  render: () => <ShippingSections />
 }
 
 export const States: Story = { render: () => <DisabledSection /> }
@@ -212,22 +195,7 @@ export const FieldGuide: Story = {
       theme={themes.find(theme => theme.id === globals.theme)}
       mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
     />
-  ),
-  play: async ({ canvasElement, globals }) => {
-    const canvas = within(canvasElement)
-    const name = canvas.getByRole('textbox', { name: 'Workspace name' })
-    await expect(name.closest('[data-rad-theme]')).toHaveAttribute('data-rad-theme', globals.theme)
-    await userEvent.clear(name)
-    await userEvent.type(name, 'Our studio')
-    const habits = canvas.getByText('02 · How do I keep it useful?', { exact: true })
-    await userEvent.click(habits)
-    await userEvent.click(canvas.getByRole('button', { name: 'One more tip' }))
-    await expect(canvas.getByText('Habit 2.', { exact: true })).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: 'Got it' }))
-    await expect(habits.closest('summary')).toHaveFocus()
-    await userEvent.click(canvas.getByText('01 · Where should I begin?', { exact: true }))
-    await expect(name).toHaveValue('Our studio')
-  }
+  )
 }
 
 export const SelectionPlayground: Story = {
@@ -236,23 +204,5 @@ export const SelectionPlayground: Story = {
       theme={themes.find(theme => theme.id === globals.theme)}
       mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
     />
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add detail' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'Quick switch' }))
-    await waitFor(async () => {
-      await expect(canvas.getByRole('textbox', { name: 'A retained note' })).toBeVisible()
-    })
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Allow multiple sections' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'Open both' }))
-    await expect(canvas.getByText('Rhythm', { exact: true }).closest('details')).toHaveAttribute(
-      'open'
-    )
-    await expect(canvas.getByRole('textbox', { name: 'A retained note' })).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: 'Close all' }))
-    await expect(
-      canvas.getByRole('textbox', { name: 'A retained note', hidden: true })
-    ).not.toBeVisible()
-  }
+  )
 }

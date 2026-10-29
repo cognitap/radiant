@@ -47,13 +47,7 @@ async function mount(tree: ReactNode, hydrate = false) {
   return { root: root!, host }
 }
 async function until(check: () => boolean) {
-  for (let i = 0; i < 240; i++) {
-    if (check()) return
-    await act(async () => {
-      await frame()
-    })
-  }
-  throw new Error('Dialog motion did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 afterEach(async () => {
   for (const dispose of disposals.splice(0)) dispose()
@@ -98,7 +92,7 @@ test('nested dialogs, large trees, media and custom elements skip visual exit co
   ]) {
     const node = native(content)
     node.close()
-    await frame()
+    await expect.poll(() => Number(node.style.scale)).toBe(0.94)
     expect(document.querySelector('[data-rad-motion-exit]')).toBeNull()
   }
 })
@@ -106,11 +100,9 @@ test('nested dialogs, large trees, media and custom elements skip visual exit co
 test('a slow exit has a finite lifetime and settles the closed host', async () => {
   const node = native('<h2>Slow dialog</h2><button>Close</button>', true)
   node.close()
-  await frame()
+  await expect.poll(() => document.querySelector('[data-rad-motion-exit]')).not.toBeNull()
   const ghost = document.querySelector('[data-rad-motion-exit]')!
-  expect(ghost).not.toBeNull()
-  await new Promise(resolve => setTimeout(resolve, 2200))
-  expect(ghost.isConnected).toBe(false)
+  await expect.poll(() => ghost.isConnected, { timeout: 4_000 }).toBe(false)
   expect(Number(node.style.scale)).toBe(0.94)
 })
 
@@ -118,7 +110,7 @@ test('a modal exit stays at its viewport position after the native panel closes'
   const node = native('<h2>Position</h2>')
   const before = node.getBoundingClientRect()
   node.close()
-  await frame()
+  await expect.poll(() => document.querySelector('[data-rad-motion-exit]')).not.toBeNull()
   const ghost = document.querySelector('[data-rad-motion-exit]')!
   expect(ghost).not.toBeNull()
   const after = ghost.getBoundingClientRect()
@@ -208,8 +200,8 @@ for (const mode of ['light', 'dark'] as const) {
     await until(() => !panel.open)
     expect(document.activeElement).toBe(trigger)
     expect(panel.matches(':modal')).toBe(false)
+    await expect.poll(() => document.querySelector('[data-rad-motion-exit]')).not.toBeNull()
     const ghost = document.querySelector<HTMLElement>('[data-rad-motion-exit]')!
-    expect(ghost).not.toBeNull()
     expect(ghost.inert).toBe(true)
     expect(ghost.getAttribute('aria-hidden')).toBe('true')
     expect(ghost.querySelector('[id],[name],[form],[autofocus]')).toBeNull()
@@ -273,7 +265,7 @@ test('live reduced/off policy, caller scale and callback ref cleanup keep their 
   await until(() => Number(node.style.scale) > 0.99)
   await act(async () => root.render(tree(false)))
   expect(node.open).toBe(false)
-  expect(document.querySelector('[data-rad-motion-exit]')).not.toBeNull()
+  await expect.poll(() => document.querySelector('[data-rad-motion-exit]')).not.toBeNull()
   await act(async () => {
     await commands.emulatePreferences({ reducedMotion: 'reduce' })
     await frame()
@@ -319,6 +311,26 @@ test('a controlled owner can refuse native Escape dismissal without duplicate re
   expect(changes).toHaveBeenCalledExactlyOnceWith(false)
   expect(panel.open).toBe(true)
   expect(document.querySelector('[data-rad-motion-exit]')).toBeNull()
+})
+
+test('a dialog keeps owned and external description ids together', async () => {
+  const { host } = await mount(
+    <Dialog>
+      <DialogContent aria-describedby="help help extra">
+        <DialogTitle>Panel</DialogTitle>
+        <DialogDescription>Owned description</DialogDescription>
+        <DialogClose>Close</DialogClose>
+      </DialogContent>
+      <p id="help">Help</p>
+      <p id="extra">Extra</p>
+    </Dialog>
+  )
+  const owned = host.querySelector('[data-slot="dialog-description"]')!.id
+  expect(host.querySelector('dialog')!.getAttribute('aria-describedby')!.split(' ')).toEqual([
+    owned,
+    'help',
+    'extra'
+  ])
 })
 
 test('the profile flow hydrates, validates, protects pending work, saves and restores focus', async () => {

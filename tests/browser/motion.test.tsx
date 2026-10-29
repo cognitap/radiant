@@ -4,7 +4,12 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import { Button, ThemeScope, defineTheme, type Theme } from '../../src/index.js'
-import { createSpring, createLayoutSpring, type SpringController } from '../../src/motion/index.js'
+import {
+  bindSpringStyle,
+  createSpring,
+  createLayoutSpring,
+  type SpringController
+} from '../../src/motion/index.js'
 import { useSpringStyle } from '../../src/motion/react.js'
 import type {} from './mediaCommands.js'
 
@@ -13,11 +18,7 @@ const roots: Root[] = []
 const hosts: HTMLElement[] = []
 const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 async function until(check: () => boolean) {
-  for (let i = 0; i < 180; i++) {
-    if (check()) return
-    await frame()
-  }
-  throw new Error('Motion condition did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 async function mount(node: ReactNode) {
   const host = document.createElement('div')
@@ -197,4 +198,28 @@ test('server HTML hydrates without mismatch and without motion before preference
   expect(errors).toEqual([])
   expect(host.querySelector('button')).toBe(button)
   expect(button.style.transform).toBe('rotate(7deg)')
+})
+
+test('style binding reserves scale, keeps caller transform and restores an important value', () => {
+  const button = document.createElement('button')
+  button.style.transform = 'rotate(7deg)'
+  button.style.setProperty('scale', '0.8', 'important')
+  document.body.append(button)
+  hosts.push(button)
+  const spring = createSpring(1, { enabled: false })
+  const cleanup = bindSpringStyle(button, spring, 'scale')
+  spring.to(0.96)
+  expect(button.style.scale).toBe('0.96')
+  expect(button.style.transform).toBe('rotate(7deg)')
+  cleanup()
+  expect(button.style.scale).toBe('0.8')
+  expect(button.style.getPropertyPriority('scale')).toBe('important')
+  spring.to(0.5)
+  expect(button.style.scale).toBe('0.8')
+  const cleanupAgain = bindSpringStyle(button, spring, 'scale')
+  button.style.scale = '0.7'
+  cleanupAgain()
+  expect(button.style.scale).toBe('0.7')
+  expect(() => bindSpringStyle(button, spring, 'transform' as 'scale')).toThrow(/Unsupported/)
+  spring.destroy()
 })
