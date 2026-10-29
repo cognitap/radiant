@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add AlertDialog.
+
 ## 0.0.13
 
 - Add Combobox.
