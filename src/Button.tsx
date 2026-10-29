@@ -6,6 +6,7 @@ import { callerOwnsPress, springPressClass, offPressClass } from './motion/press
 import { usePressHost } from './motion/host.js'
 import { actionVariants } from './actionStyles.js'
 import type { ButtonVariant, ControlSize, Tone } from './presentation.js'
+import { Spinner } from './Spinner.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { composeAction } from './internal/events.js'
@@ -124,7 +125,7 @@ export function Button({
         >
           {children}
         </span>
-        {pending ? <PendingMark /> : null}
+        {pending ? <PendingMark motion={motionOff ? 'off' : 'inherit'} /> : null}
       </>
     )
   }
@@ -143,13 +144,16 @@ export function Button({
   return element
 }
 
-function PendingMark() {
+function PendingMark({ motion }: { motion: 'inherit' | 'off' }) {
   return (
     <span
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 flex items-center justify-center motion-reduce:hidden"
     >
-      <span className="size-[1.1em] animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
+      <Spinner
+        motion={motion}
+        className="size-[1.1em]"
+      />
     </span>
   )
 }

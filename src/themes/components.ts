@@ -436,6 +436,15 @@ export const componentRegistry = {
     borderWidth: 'css',
     borderStyle: 'css'
   },
+  spinner: {
+    size: 'css',
+    sizeSmall: 'css',
+    sizeLarge: 'css',
+    color: 'css',
+    strokeWidth: 'css',
+    duration: 'css',
+    trackOpacity: 'opacity'
+  },
   radioGroup: { gap: 'css' }
 } as const
 
