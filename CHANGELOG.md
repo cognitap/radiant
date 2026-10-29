@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Toast.
+
 ## 0.0.18
 
 - Add Alert.
@@ -62,9 +64,7 @@
 
 - Bound Dialog visual exits to two seconds and 500 descendants, and skip nested dialogs and customized built-in elements.
 
-- Wrap long Radio labels within narrow layouts without shrinking the native indicator.
-
-- Wrap long Checkbox labels within narrow layouts without shrinking the native indicator.
+- Wrap long Radio and Checkbox labels in narrow layouts without shrinking native indicators.
 
 - Release MotionLink springs on lost pointer capture or removed destinations while preserving native anchor navigation.
 

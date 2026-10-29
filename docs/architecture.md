@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's twenty-one families fit together and why. Props are on the
+How Radiant's twenty-two families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, Link, Field, Input, Textarea, Select, Combobox, Checkbox, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Popover, Tooltip, Menu, Alert, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Popover, Tooltip, Menu, Alert, Toast, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -45,7 +45,7 @@ Extract a shared module only when a policy really repeats.
 
 Use Button for actions and Link for navigation, even when a Link looks like a
 button. Field owns label, help and error relationships. Card groups content.
-Dialog owns open state. Collapsible owns one disclosure, and Accordion composes
+Dialog owns open state. Toast composes Alert and Button with a local FIFO queue and pausable timing. Collapsible owns one disclosure, and Accordion composes
 Collapsible for a set of them.
 
 AlertDialog specializes Dialog's native lifecycle, surface tokens and motion for
