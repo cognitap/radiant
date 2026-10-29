@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+## 0.0.9
+
 - Add Textarea with Field, forms, themes and native resizing.
 
 ## 0.0.8
