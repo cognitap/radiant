@@ -247,6 +247,7 @@ test('surface styles/ref, reduced motion and forced colors retain command semant
   expect(getComputedStyle(p.panel).width).toBe('240px')
   expect(getComputedStyle(p.panel).padding).toBe('12px')
   expect(getComputedStyle(p.options[0]).borderRadius).toBe('13px')
+  expect(getComputedStyle(p.options[0]).borderTopWidth).toBe('0px')
   await commands.emulatePreferences({ reducedMotion: 'reduce', forcedColors: 'active' })
   expect(getComputedStyle(p.options[0]).outlineStyle).not.toBe('none')
   expect(getComputedStyle(p.panel).display).not.toBe('none')

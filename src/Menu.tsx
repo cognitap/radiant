@@ -228,7 +228,7 @@ export function MenuItem({
       data-slot={joinIds('menu-item', props['data-slot'])}
       data-text-value={textValue}
       className={cn(
-        'h-auto w-full justify-start [background-image:none] inset-shadow-none border-0 bg-transparent text-start text-inherit shadow-none p-[var(--rad-menu-item-padding,0.625rem)] rounded-[var(--rad-menu-item-radius,var(--rad-control-radius,0.5rem))]',
+        'h-auto w-full justify-start [background-image:none] inset-shadow-none [border-width:0] [border-style:none] bg-transparent text-start text-inherit shadow-none p-[var(--rad-menu-item-padding,0.625rem)] rounded-[var(--rad-menu-item-radius,var(--rad-control-radius,0.5rem))]',
         'hover:bg-[var(--rad-menu-item-focus-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))] focus:bg-[var(--rad-menu-item-focus-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))] focus:[color:var(--rad-menu-item-focus-color,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground)))]',
         'aria-disabled:cursor-not-allowed aria-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] forced-colors:aria-disabled:text-[GrayText] forced-colors:aria-disabled:opacity-100 forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText]',
         className
