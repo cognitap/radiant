@@ -60,7 +60,6 @@ export function TextareaDraftExample() {
               rows={4}
               maxLength={300}
               onChange={event => setMessage(event.target.value)}
-              onBlur={() => setTouched(true)}
             />
           </Field>
           <Field

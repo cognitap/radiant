@@ -372,6 +372,8 @@ test('workspace example validates, submits multiline values and resets both valu
   const [save, reset] = host.querySelectorAll('button')
   await act(async () => {
     await userEvent.clear(introduction)
+  })
+  await act(async () => {
     await userEvent.click(save)
   })
   expect(document.activeElement).toBe(introduction)
@@ -379,6 +381,8 @@ test('workspace example validates, submits multiline values and resets both valu
   await act(async () => {
     await userEvent.fill(introduction, 'Make room for ideas.\nOne small step at a time.')
     await userEvent.fill(notes, 'Invite the team.')
+  })
+  await act(async () => {
     await userEvent.click(save)
   })
   expect(host.querySelector('output')!.textContent).toContain(
