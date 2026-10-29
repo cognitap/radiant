@@ -1049,3 +1049,5 @@ function LayoutBinding() {
 const bindLayout: (root: HTMLElement) => SpringLayoutController = bindSpringLayout
 void bindLayout
 void LayoutBinding
+
+import './textarea-types.js'

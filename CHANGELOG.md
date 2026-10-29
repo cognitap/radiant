@@ -1,9 +1,11 @@
 # Changelog
 
-One line per user-visible change. See the [release policy](RELEASE_POLICY.md)
+See the [release policy](RELEASE_POLICY.md)
 for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
+
+- Add Textarea with Field, forms, themes and native resizing.
 
 ## 0.0.8
 

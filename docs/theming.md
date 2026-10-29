@@ -90,7 +90,7 @@ example, `components.button.radius` changes Button only, while
 component never falls back to another component's override.
 
 Component keys are grouped by family under `components`: `button`, `link`,
-`field`, `input`, `checkbox`, `radio`, `radioGroup`, `dialog`, `collapsible`,
+`field`, `input`, `textarea`, `select`, `checkbox`, `radio`, `radioGroup`, `dialog`, `collapsible`,
 `accordion` and `card`. Every key is listed in
 [`src/themes/components.ts`](../src/themes/components.ts). Button-only fonts,
 uppercase, shadows, squash and pressed shape belong under `components.button`.
@@ -231,7 +231,7 @@ Components use the UI roles:
 | ThemeScope, Card, DialogContent, Field, disclosure body             | `ui-body`                 |
 | CardTitle, DialogTitle                                              | `ui-title`                |
 | Field label, disclosure triggers, Button, Checkbox and Radio labels | `ui-label`                |
-| Input                                                               | `ui-body`                 |
+| Input, Textarea                                                     | `ui-body`                 |
 | Field help and error, CardDescription, DialogDescription            | `ui-supporting`           |
 | Inline Link                                                         | Inherits surrounding text |
 
