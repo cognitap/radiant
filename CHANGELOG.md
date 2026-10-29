@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Menu.
+
 ## 0.0.16
 
 - Add Tooltip.
@@ -38,7 +40,7 @@
 
 ## 0.0.8
 
-- Add Select with item focus, Field/forms, themes and springs; match trigger width without drift or flashes.
+- Add Select with item focus, Field/forms, themes, springs and stable trigger-width alignment.
 
 ## 0.0.7
 
