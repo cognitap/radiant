@@ -17,7 +17,12 @@ import { Button, type ButtonProps } from './Button.js'
 import { useField, useFieldControl } from './Field.js'
 import { cn } from './cn.js'
 import { controlMetrics } from './controlStyles.js'
-import { comboboxInputClass, comboboxContentClass, comboboxItemClass } from './comboboxStyles.js'
+import {
+  comboboxInputClass,
+  comboboxContentClass,
+  comboboxItemClass,
+  comboboxActionClass
+} from './comboboxStyles.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useTransitionHost } from './motion/host.js'
@@ -310,10 +315,7 @@ export function Combobox({
             data-slot="combobox-control"
           >
             <ComboboxInput />
-            <div className="absolute inset-y-0 end-2 flex items-center gap-1">
-              <ComboboxClear className="h-7 w-7 p-0" />
-              <ComboboxTrigger className="h-7 w-7 p-0" />
-            </div>
+            <ComboboxTrigger className="absolute inset-y-0 end-0 w-12" />
           </div>
           <ComboboxPortal>
             <ComboboxContent />
@@ -474,9 +476,25 @@ export function ComboboxInput({
   )
 }
 
-export type ComboboxTriggerProps = Omit<ButtonProps, 'type' | 'disabled' | 'pending'>
+export type ComboboxTriggerProps = Omit<
+  ButtonProps,
+  | 'type'
+  | 'disabled'
+  | 'pending'
+  | 'variant'
+  | 'tone'
+  | 'controlSize'
+  | 'iconOnly'
+  | 'fullWidth'
+  | 'motion'
+  | 'tabIndex'
+  | 'aria-controls'
+  | 'aria-expanded'
+>
 export function ComboboxTrigger({
   children,
+  className,
+  render,
   onClick,
   onPointerDown,
   ...props
@@ -490,6 +508,12 @@ export function ComboboxTrigger({
       type="button"
       disabled={box.disabled}
       pending={false}
+      motion="off"
+      controlSize={box.controlSize}
+      render={resolved => {
+        const native = { ...resolved, className: cn(comboboxActionClass, className) }
+        return render ? render(native) : <button {...native} />
+      }}
       tabIndex={-1}
       aria-label={props['aria-label'] ?? 'Show options'}
       aria-controls={box.open ? box.listId : undefined}
@@ -508,12 +532,33 @@ export function ComboboxTrigger({
         }
       }}
     >
-      {children ?? <span aria-hidden="true">⌄</span>}
+      {children ?? (
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path
+            d="m4 6 4 4 4-4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+        </svg>
+      )}
     </Button>
   )
 }
 export type ComboboxClearProps = ComboboxTriggerProps
-export function ComboboxClear({ children, onClick, onPointerDown, ...props }: ComboboxClearProps) {
+export function ComboboxClear({
+  children,
+  className,
+  render,
+  onClick,
+  onPointerDown,
+  ...props
+}: ComboboxClearProps) {
   const box = useComboboxContext()
   if (box.value === null) return null
   return (
@@ -524,6 +569,12 @@ export function ComboboxClear({ children, onClick, onPointerDown, ...props }: Co
       type="button"
       disabled={box.disabled}
       pending={false}
+      motion="off"
+      controlSize={box.controlSize}
+      render={resolved => {
+        const native = { ...resolved, className: cn(comboboxActionClass, className) }
+        return render ? render(native) : <button {...native} />
+      }}
       tabIndex={-1}
       aria-label={props['aria-label'] ?? 'Clear selection'}
       data-slot="button combobox-clear"
@@ -536,7 +587,21 @@ export function ComboboxClear({ children, onClick, onPointerDown, ...props }: Co
         if (!event.defaultPrevented) box.commit(null)
       }}
     >
-      {children ?? <span aria-hidden="true">×</span>}
+      {children ?? (
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path
+            d="m5 5 6 6m0-6-6 6"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+        </svg>
+      )}
     </Button>
   )
 }

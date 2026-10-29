@@ -6,6 +6,8 @@ import { userEvent, commands } from 'vitest/browser'
 import {
   Combobox,
   ComboboxInput,
+  ComboboxTrigger,
+  ComboboxClear,
   ComboboxContent,
   ComboboxPortal,
   ComboboxItem,
@@ -596,4 +598,78 @@ test('hook is null outside owner and requests retain the same state/form contrac
   await click(host.querySelector('button')!)
   expect(input(host).value).toBe('')
   expect(native(host).value).toBe('')
+})
+
+test('default control has one integrated Select chevron, independent of Button styling', async () => {
+  const { host } = await mount(
+    <ThemeScope
+      theme={defineTheme({
+        id: 'adornment',
+        name: 'Adornment',
+        components: {
+          button: {
+            height: '80px',
+            borderWidth: '8px',
+            ghostShadow: '0 0 12px red',
+            fontSize: '40px'
+          }
+        }
+      })}
+    >
+      <Field label="City">
+        <Combobox
+          items={items}
+          defaultValue="oslo"
+        />
+      </Field>
+    </ThemeScope>
+  )
+  const trigger = host.querySelector<HTMLButtonElement>('[data-slot~="combobox-trigger"]')!
+  expect(host.querySelectorAll('button')).toHaveLength(1)
+  expect(host.querySelector('[data-slot~="combobox-clear"]')).toBeNull()
+  const css = getComputedStyle(trigger)
+  expect(css.borderWidth).toBe('0px')
+  expect(css.boxShadow).not.toContain('255, 0, 0')
+  expect(css.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(trigger.querySelector('path')?.getAttribute('d')).toBe('m4 6 4 4 4-4')
+  expect(trigger.getBoundingClientRect().height).toBe(input(host).getBoundingClientRect().height)
+  expect(trigger.getBoundingClientRect().right).toBe(input(host).getBoundingClientRect().right)
+  await click(trigger)
+  expect(document.activeElement).toBe(input(host))
+  expect(input(host).getAttribute('aria-expanded')).toBe('true')
+  await click(trigger)
+  expect(input(host).getAttribute('aria-expanded')).toBe('false')
+})
+
+test('opt-in clear action forwards its native ref/render and clears without stealing input focus', async () => {
+  const ref = createRef<HTMLButtonElement>()
+  const change = vi.fn()
+  const { host } = await mount(
+    <Field label="City">
+      <Combobox
+        items={items}
+        defaultValue="oslo"
+        onValueChange={change}
+      >
+        <div className="relative">
+          <ComboboxInput />
+          <ComboboxClear
+            ref={ref}
+            render={props => <button {...props} />}
+          />
+          <ComboboxTrigger />
+        </div>
+        <ComboboxPortal>
+          <ComboboxContent />
+        </ComboboxPortal>
+      </Combobox>
+    </Field>
+  )
+  const clear = ref.current!
+  expect(clear.dataset.slot).toContain('combobox-clear')
+  await click(clear)
+  expect(change).toHaveBeenCalledExactlyOnceWith(null)
+  expect(input(host).value).toBe('')
+  expect(document.activeElement).toBe(input(host))
+  expect(host.querySelector('[data-slot~="combobox-clear"]')).toBeNull()
 })

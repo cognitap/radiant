@@ -9,6 +9,7 @@ import {
   useCombobox,
   defineTheme,
   type ComboboxProps,
+  type ComboboxTriggerProps,
   type ComboboxInputProps,
   type ComboboxOption
 } from '@cognitap/radiant'
@@ -85,3 +86,7 @@ const name: ComboboxInputProps = { name: 'query' }
 // @ts-expect-error Relationships belong to the owner.
 const active: ComboboxInputProps = { 'aria-activedescendant': 'other' }
 void [mixed, query, open, multiple, unreadable, inputValue, name, active]
+
+// @ts-expect-error Adornments use Combobox presentation, not action treatments.
+const actionVariant: ComboboxTriggerProps = { variant: 'solid' }
+void actionVariant

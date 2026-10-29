@@ -2,7 +2,7 @@ import { controlBorderClass } from './controlStyles.js'
 
 export const comboboxInputClass = [
   controlBorderClass,
-  'box-border w-full min-w-0 text-start pe-20',
+  'box-border w-full min-w-0 text-start pe-12',
   'h-[var(--rad-combobox-height,var(--_rad-control-height))] px-[var(--rad-combobox-padding,var(--_rad-control-padding))]',
   'font-[family-name:var(--rad-combobox-font-family,var(--rad-typography-roles-ui-body-family,system-ui,sans-serif))] text-[length:var(--rad-combobox-font-size,var(--_rad-control-font-size))] font-[number:var(--rad-combobox-font-weight,var(--rad-typography-roles-ui-body-weight,400))] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)]',
   '[color:var(--rad-combobox-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-combobox-background,var(--rad-color-surface,white))]',
@@ -30,4 +30,12 @@ export const comboboxItemClass = [
   'data-highlighted:[background:var(--rad-combobox-item-background,var(--rad-color-accent))] data-highlighted:[color:var(--rad-combobox-item-color,var(--rad-color-accent-foreground))]',
   'data-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] data-disabled:cursor-not-allowed',
   'forced-colors:data-highlighted:bg-[Highlight] forced-colors:data-highlighted:text-[HighlightText] forced-colors:data-disabled:text-[GrayText] forced-colors:data-disabled:opacity-100'
+].join(' ')
+
+/** An input adornment keeps Button semantics without inheriting action presentation. */
+export const comboboxActionClass = [
+  'inline-flex shrink-0 items-center justify-center border-0 bg-transparent p-0 [font:inherit]',
+  '[color:var(--rad-combobox-color,var(--rad-color-foreground))] shadow-none cursor-pointer',
+  'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-combobox-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)]',
+  'disabled:cursor-not-allowed forced-colors:text-[CanvasText] forced-colors:disabled:text-[GrayText]'
 ].join(' ')
