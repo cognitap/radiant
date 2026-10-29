@@ -949,6 +949,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Popover',
     'Tooltip',
     'Menu',
+    'Toast',
     'Collapsible',
     'Accordion',
     'ThemeScope'

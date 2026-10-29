@@ -9,6 +9,9 @@ const roleClasses = (prefix: string, leaf: string) =>
 export const cn: CnFunction = createCn({
   extend: {
     classGroups: {
+      right: ['right-(--rad-toast-inset)'],
+      bottom: ['bottom-(--rad-toast-inset)'],
+      z: ['z-(--rad-toast-z-index)'],
       'font-family': [
         ...roleClasses('font', 'family'),
         'font-(--rad-combobox-font-family)',
@@ -17,6 +20,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-family)'
       ],
       'font-weight': [
+        'font-(--rad-toast-title-weight)',
         'font-(--rad-alert-title-weight)',
         'font-(--rad-tooltip-font-weight)',
         ...roleClasses('font', 'weight'),
@@ -26,6 +30,8 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-toast-title-size)',
+        'text-(--rad-toast-description-size)',
         'text-(--rad-alert-title-size)',
         'text-(--rad-alert-description-size)',
         'text-(--rad-tooltip-font-size)',
@@ -45,6 +51,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-toast-width)',
         'w-(--rad-menu-width)',
         'w-(--rad-popover-width)',
         'w-(--rad-switch-width)',
@@ -54,6 +61,7 @@ export const cn: CnFunction = createCn({
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: ['size-(--rad-slider-thumb-size)', 'size-(--rad-slider-track-size)'],
       gap: [
+        'gap-(--rad-toast-gap)',
         'gap-(--rad-alert-gap)',
         'gap-(--rad-popover-gap)',
         'gap-(--rad-switch-gap)',
@@ -69,6 +77,7 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-toast-padding)',
         'p-(--rad-alert-padding)',
         'p-(--rad-menu-padding)',
         'p-(--rad-menu-item-padding)',
@@ -80,6 +89,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-toast-radius)',
         'rounded-(--rad-alert-radius)',
         'rounded-(--rad-menu-radius)',
         'rounded-(--rad-menu-item-radius)',
@@ -101,6 +111,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-toast-border-width)',
         'border-(--rad-alert-border-width)',
         'border-(--rad-menu-border-width)',
         'border-(--rad-tooltip-border-width)',
@@ -113,6 +124,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
+        'border-(--rad-toast-border-style)',
         'border-(--rad-alert-border-style)',
         'border-(--rad-menu-border-style)',
         'border-(--rad-tooltip-border-style)',
@@ -123,6 +135,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-switch-border-style)'
       ],
       shadow: [
+        'shadow-(--rad-toast-shadow)',
         'shadow-(--rad-alert-shadow)',
         'shadow-(--rad-menu-shadow)',
         'shadow-(--rad-tooltip-shadow)',

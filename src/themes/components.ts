@@ -410,6 +410,23 @@ export const componentRegistry = {
     titleWeight: 'weight',
     descriptionSize: 'css'
   },
+  toast: {
+    radius: 'css',
+    padding: 'css',
+    gap: 'css',
+    background: 'css',
+    color: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    shadow: 'css',
+    titleSize: 'css',
+    titleWeight: 'weight',
+    descriptionSize: 'css',
+    width: 'css',
+    inset: 'css',
+    zIndex: 'number'
+  },
   radioGroup: { gap: 'css' }
 } as const
 
