@@ -168,6 +168,42 @@ test('every preset materialises complete light and dark tokens without legacy va
   assert.equal(ticket.modes.light['--rad-typography-body-weight'], 400)
 })
 
+function luminance(hex) {
+  const channel = index => {
+    const value = parseInt(hex.slice(index, index + 2), 16) / 255
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  }
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5)
+}
+test('every exported theme keeps text contrast in light and dark', () => {
+  const hex = /^#[0-9a-f]{6}$/i
+  const pairs = [
+    ['--rad-color-foreground', '--rad-color-surface'],
+    ['--rad-color-foreground', '--rad-surface-canvas'],
+    ['--rad-color-accent-foreground', '--rad-color-accent'],
+    ['--rad-color-neutral-foreground', '--rad-color-neutral'],
+    ['--rad-color-warning-foreground', '--rad-color-warning'],
+    ['--rad-color-danger-foreground', '--rad-color-danger']
+  ]
+  let checked = 0
+  for (const theme of themes)
+    for (const mode of ['light', 'dark'])
+      for (const [foreground, background] of pairs) {
+        const ink = theme.modes[mode][foreground]
+        const fill = theme.modes[mode][background]
+        if (!hex.test(ink) || !hex.test(fill)) continue
+        checked += 1
+        const ratio =
+          (Math.max(luminance(ink), luminance(fill)) + 0.05) /
+          (Math.min(luminance(ink), luminance(fill)) + 0.05)
+        assert.ok(
+          ratio >= 4.5,
+          `${theme.id} ${mode} ${foreground} on ${background} is ${ratio.toFixed(2)}:1`
+        )
+      }
+  assert.ok(checked > 0)
+})
+
 test('theme authoring validates unknown keys, identities, modes and value kinds at runtime', () => {
   const valid = { id: 'custom', name: 'Custom' }
   const invalid = [

@@ -1,9 +1,8 @@
 // @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { act, createElement as h, createRef } from 'react'
+import { createElement as h } from 'react'
 import { renderToString } from 'react-dom/server'
-import { JSDOM } from 'jsdom'
 import { ThemeScope, Button, defineTheme, defaultTheme } from '@cognitap/radiant'
 import { ticket } from '@cognitap/radiant/examples'
 
@@ -14,22 +13,36 @@ const brand = defineTheme({
   modes: { dark: { tokens: { color: { accent: 'pink' } } } }
 })
 
-function parse(node) {
-  return new JSDOM(renderToString(node)).window.document
+function opening(html, marker) {
+  const at = html.indexOf(marker)
+  assert.notEqual(at, -1, marker)
+  const start = html.lastIndexOf('<', at)
+  return html.slice(start, html.indexOf('>', at) + 1)
+}
+function attr(tag, name) {
+  return new RegExp(`(?:^|\\s)${name}="([^"]*)"`).exec(tag)?.[1] ?? null
+}
+function styleProp(tag, name) {
+  const style = attr(tag, 'style') ?? ''
+  const part = style
+    .split(';')
+    .map(item => item.trim())
+    .find(item => item.startsWith(`${name}:`))
+  return part ? part.slice(name.length + 1).trim() : ''
 }
 
 test('omitted theme and mode inherit ordinary CSS without materialising a new baseline', () => {
-  const doc = parse(
+  const html = renderToString(
     h('div', { style: { '--rad-color-accent': 'red' } }, h(ThemeScope, { id: 'inherited' }, 'Text'))
   )
-  const scope = doc.getElementById('inherited')
-  assert.equal(scope.style.getPropertyValue('--rad-color-accent'), '')
-  assert.equal(scope.getAttribute('data-rad-mode'), null)
-  assert.equal(scope.getAttribute('data-rad-theme'), null)
+  const scope = opening(html, 'id="inherited"')
+  assert.equal(styleProp(scope, '--rad-color-accent'), '')
+  assert.equal(attr(scope, 'data-rad-mode'), null)
+  assert.equal(attr(scope, 'data-rad-theme'), null)
 })
 
 test('named scopes reset component exceptions while mode-only scopes retain the selected theme', () => {
-  const doc = parse(
+  const html = renderToString(
     h(
       ThemeScope,
       { theme: brand, mode: 'light', style: { '--rad-control-radius': '2rem' } },
@@ -37,19 +50,19 @@ test('named scopes reset component exceptions while mode-only scopes retain the 
       h(ThemeScope, { theme: defaultTheme, id: 'reset' }, h(Button, null, 'Default'))
     )
   )
-  const dark = doc.getElementById('dark')
-  assert.equal(dark.style.getPropertyValue('--rad-control-radius'), '2rem')
-  assert.match(dark.style.getPropertyValue('--rad-color-accent'), /red.*pink/)
-  assert.equal(dark.getAttribute('data-rad-mode'), 'dark')
-  const reset = doc.getElementById('reset')
-  assert.equal(reset.style.getPropertyValue('--rad-control-radius'), '0.5rem')
-  assert.equal(reset.style.getPropertyValue('--rad-button-radius'), 'initial')
-  assert.equal(reset.getAttribute('data-rad-mode'), null)
+  const dark = opening(html, 'id="dark"')
+  assert.equal(styleProp(dark, '--rad-control-radius'), '2rem')
+  assert.match(styleProp(dark, '--rad-color-accent'), /red.*pink/)
+  assert.equal(attr(dark, 'data-rad-mode'), 'dark')
+  const reset = opening(html, 'id="reset"')
+  assert.equal(styleProp(reset, '--rad-control-radius'), '0.5rem')
+  assert.equal(styleProp(reset, '--rad-button-radius'), 'initial')
+  assert.equal(attr(reset, 'data-rad-mode'), null)
 })
 
 test('local host styles win, named themes clear inherited inline exceptions and plain scopes retain them', () => {
   const style = { '--rad-button-radius': '4rem', fontStyle: 'italic' }
-  const doc = parse(
+  const html = renderToString(
     h(
       ThemeScope,
       { theme: ticket, style },
@@ -57,9 +70,9 @@ test('local host styles win, named themes clear inherited inline exceptions and 
       h(ThemeScope, { id: 'reset', theme: defaultTheme, style: { '--rad-button-radius': '3rem' } })
     )
   )
-  assert.equal(doc.querySelector('[data-rad-theme="ticket"]').style.fontStyle, 'italic')
-  assert.equal(doc.getElementById('plain').style.getPropertyValue('--rad-button-radius'), '')
-  assert.equal(doc.getElementById('reset').style.getPropertyValue('--rad-button-radius'), '3rem')
+  assert.equal(styleProp(opening(html, 'data-rad-theme="ticket"'), 'font-style'), 'italic')
+  assert.equal(styleProp(opening(html, 'id="plain"'), '--rad-button-radius'), '')
+  assert.equal(styleProp(opening(html, 'id="reset"'), '--rad-button-radius'), '3rem')
   assert.deepEqual(style, { '--rad-button-radius': '4rem', fontStyle: 'italic' })
 })
 
@@ -85,53 +98,6 @@ test('server scope output is independent of browser preference and storage APIs'
       if (descriptor) Object.defineProperty(globalThis, key, descriptor)
       else delete globalThis[key]
     }
-  }
-})
-
-test('scope host refs, handlers and server hydration preserve the documented div interface', async () => {
-  const nodeRef = createRef()
-  let clicks = 0
-  const node = h(
-    ThemeScope,
-    { theme: brand, mode: 'system', ref: nodeRef, id: 'scope', onClick: () => clicks++ },
-    h(Button, null, 'Save')
-  )
-  const dom = new JSDOM(`<div id="root">${renderToString(node)}</div>`, {
-    pretendToBeVisual: true,
-    url: 'http://localhost/'
-  })
-  const previous = new Map()
-  for (const key of ['window', 'document', 'HTMLElement', 'Node']) {
-    previous.set(key, Object.getOwnPropertyDescriptor(globalThis, key))
-    Object.defineProperty(globalThis, key, { configurable: true, value: dom.window[key] })
-  }
-  previous.set(
-    'IS_REACT_ACT_ENVIRONMENT',
-    Object.getOwnPropertyDescriptor(globalThis, 'IS_REACT_ACT_ENVIRONMENT')
-  )
-  globalThis.IS_REACT_ACT_ENVIRONMENT = true
-  const errors = []
-  let root
-  try {
-    const { hydrateRoot } = await import('react-dom/client')
-    await act(async () => {
-      root = hydrateRoot(document.getElementById('root'), node, {
-        onRecoverableError: error => errors.push(error.message)
-      })
-    })
-    assert.deepEqual(errors, [])
-    assert.equal(nodeRef.current.tagName, 'DIV')
-    assert.equal(nodeRef.current.id, 'scope')
-    await act(async () => nodeRef.current.click())
-    assert.equal(clicks, 1)
-    await act(async () => root.unmount())
-    assert.equal(nodeRef.current, null)
-  } finally {
-    for (const [key, descriptor] of previous) {
-      if (descriptor) Object.defineProperty(globalThis, key, descriptor)
-      else delete globalThis[key]
-    }
-    dom.window.close()
   }
 })
 

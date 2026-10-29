@@ -1,5 +1,6 @@
-import { act, type ReactNode } from 'react'
-import { createRoot, type Root } from 'react-dom/client'
+import { act, createRef, type ReactNode } from 'react'
+import { createRoot, hydrateRoot, type Root } from 'react-dom/client'
+import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, page, userEvent } from 'vitest/browser'
 import {
@@ -214,3 +215,41 @@ for (const mode of ['light', 'dark'] as const) {
     })
   }
 }
+
+test('a server-rendered scope hydrates onto one div and releases its ref', async () => {
+  const brand = defineTheme({
+    id: 'scope-brand',
+    name: 'Scope brand',
+    tokens: { color: { accent: 'red' }, control: { radius: '1rem' } },
+    modes: { dark: { tokens: { color: { accent: 'pink' } } } }
+  })
+  const ref = createRef<HTMLDivElement>()
+  let clicks = 0
+  const tree = (
+    <ThemeScope
+      ref={ref}
+      id="scope"
+      theme={brand}
+      mode="system"
+      onClick={() => {
+        clicks += 1
+      }}
+    >
+      <Button>Save</Button>
+    </ThemeScope>
+  )
+  host = document.createElement('div')
+  host.innerHTML = renderToString(tree)
+  document.body.append(host)
+  const errors: unknown[] = []
+  await act(async () => {
+    root = hydrateRoot(host, tree, { onRecoverableError: error => errors.push(error) })
+  })
+  expect(errors).toEqual([])
+  expect(ref.current?.tagName).toBe('DIV')
+  expect(ref.current?.id).toBe('scope')
+  await act(async () => ref.current?.click())
+  expect(clicks).toBe(1)
+  await act(async () => root.unmount())
+  expect(ref.current).toBeNull()
+})

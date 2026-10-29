@@ -110,13 +110,7 @@ async function mount(tree: ReactNode, hydrate = false) {
   return { host, root: root! }
 }
 async function until(check: () => boolean) {
-  for (let i = 0; i < 180; i++) {
-    if (check()) return
-    await act(async () => {
-      await frame()
-    })
-  }
-  throw new Error('Input motion did not reach expected state')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 async function preference(reducedMotion: 'reduce' | 'no-preference') {
   await act(async () => {

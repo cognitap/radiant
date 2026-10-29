@@ -39,13 +39,7 @@ async function mount(tree: ReactNode, hydrate = false) {
   return { root: root!, host }
 }
 async function until(check: () => boolean) {
-  for (let i = 0; i < 180; i++) {
-    if (check()) return
-    await act(async () => {
-      await frame()
-    })
-  }
-  throw new Error('Checkbox feedback did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 const progress = (node: HTMLElement) =>
   Number(node.style.getPropertyValue('--example-checkbox-feedback'))

@@ -49,13 +49,7 @@ async function mount(tree: ReactNode, hydrate = false) {
   return { root: root!, host }
 }
 async function until(check: () => boolean) {
-  for (let i = 0; i < 240; i++) {
-    if (check()) return
-    await act(async () => {
-      await frame()
-    })
-  }
-  throw new Error('Disclosure motion did not settle')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 const height = (node: HTMLElement) =>
   parseFloat(node.style.getPropertyValue('--_rad-spring-details-height'))

@@ -6,7 +6,7 @@
 | ------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pnpm check:ci`           | Every change; CI runs it on pull requests and `main` | Generated themes, format, lint, types, runtime and package tests, Storybook build, smoke browser tests |
 | `pnpm check`              | Theme, styling or composition changes, and releases  | Everything above, every story in every preset and mode                                                 |
-| `pnpm test`               | Runtime changes                                      | `tests/*.test.mjs` and the packed package                                                              |
+| `pnpm test`               | Runtime changes                                      | Repo checks in `tests/*.test.mjs` and the packed package                                               |
 | `pnpm test:browser`       | Story or browser behavior changes                    | Every story in every preset, light and dark, plus `tests/browser/`                                     |
 | `pnpm test:browser:smoke` | A quick browser pass                                 | Every story in Radiant light and dark, plus `tests/browser/`                                           |
 
@@ -20,9 +20,10 @@ pnpm exec playwright install chromium   # --with-deps on Linux
 pnpm test:browser
 ```
 
-They need no running Storybook. Every story renders, runs its play function and
-fails on any axe violation, in every preset and mode. New stories and presets
-join the matrix automatically. There are no retries and no rule exclusions.
+They need no running Storybook. Every story renders and fails on any axe
+violation. Routine CI keeps Radiant light and Radiant dark. The full preset
+matrix is **Run workflow → full**. New stories join that matrix automatically.
+There are no retries and no rule exclusions.
 
 Focus a run on one project or test:
 
@@ -31,26 +32,23 @@ pnpm test:browser --project=storybook-glass-dark src/Checkbox.stories.tsx
 pnpm test:browser --project=browser-platform -t StrictMode
 ```
 
-The `browser-platform` project in `tests/browser/` uses real browser input. It
-covers what a story play cannot prove: native Escape, Tab, summary activation,
-`method="dialog"`, modal focus, refs, StrictMode remounts, hydration, new tabs
-and downloads. It also emulates reduced motion and forced colors across every
-preset.
+`tests/browser/` is where component behavior lives: keyboard, forms, motion,
+refs, StrictMode, hydration, new tabs and downloads. One file owns each
+behavior. Motion waits poll for the settled element. Mid-flight spring values
+stay in the pure `createSpring` test.
 
 Results go to `output/browser/`: `junit.xml` and failure screenshots in
 `attachments/`. CI uploads them as **browser-results** and keeps them for 14 days.
 
 ## Where a test belongs
 
-- **Story play:** visible behavior of a public story. Query by role and name, act
-  through the control, and assert what a user sees or what the form submits.
-  Don't test private state or class strings.
-- **`tests/browser/`:** behavior that needs native input or lifecycle ordering.
-  Wrap changes in `act`, wait for the outcome, and clean up every fixture.
-- **`tests/*.test.mjs`:** SSR, hydration, state ownership, cancellation, refs and
-  form behavior that need no browser.
-- **`tests/package/`:** packed exports and types. Import `@cognitap/radiant`, never
-  `src` or `dist`.
+- **Story:** render and axe in light and dark. Do not repeat keyboard, form, or
+  motion behavior.
+- **`tests/browser/`:** component behavior. Wrap changes in `act`, wait for the
+  outcome, and clean up every fixture.
+- **`tests/*.test.mjs`:** repo-only checks that read source or the built library.
+- **`tests/package/`:** packed exports, types, and contrast for every exported
+  theme. Import `@cognitap/radiant`, never `src` or `dist`.
 
 A styling change also needs a browser check against the generated CSS.
 

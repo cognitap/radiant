@@ -1,9 +1,10 @@
-import { act, createRef, StrictMode, type ReactNode } from 'react'
+import { act, createElement, createRef, StrictMode, type ReactNode, type Ref } from 'react'
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import {
+  Accordion,
   Button,
   type ButtonRenderProps,
   Checkbox,
@@ -20,6 +21,8 @@ import {
   Input,
   Link,
   Radio,
+  useCollapsible,
+  useDialog,
   RadioGroup,
   defaultTheme,
   ThemeScope
@@ -702,4 +705,166 @@ test('mounted dialog effects and cleanup use the host document inside an iframe'
   await act(async () => root.render(null))
   expect(dialog.open).toBe(false)
   expect(released).toHaveBeenCalledExactlyOnceWith(dialog)
+})
+
+test('composed native refs stay attached through ordinary renders and clean up once', async () => {
+  async function check(
+    renderNode: (ref: Ref<HTMLElement>, title: string) => ReactNode,
+    selector: string
+  ) {
+    const attached: unknown[] = []
+    const cleaned: unknown[] = []
+    const ref = (node: HTMLElement | null) => {
+      attached.push(node)
+      if (node)
+        return () => {
+          cleaned.push(node)
+        }
+    }
+    const { node, root } = await mount(renderNode(ref, 'First'))
+    const target = node.querySelector(selector)
+    expect(attached).toEqual([target])
+    await act(async () => root.render(renderNode(ref, 'Updated')))
+    expect(attached).toEqual([target])
+    expect(cleaned).toEqual([])
+    await act(async () => root.render(null))
+    expect(cleaned).toEqual([target])
+  }
+  await check(
+    (ref, title) => (
+      <Input
+        ref={ref as never}
+        title={title}
+        aria-label="Option"
+        readOnly
+      />
+    ),
+    'input'
+  )
+  await check(
+    (ref, title) => (
+      <Checkbox
+        ref={ref as never}
+        title={title}
+        aria-label="Option"
+        readOnly
+        indeterminate
+      />
+    ),
+    'input'
+  )
+  await check(
+    (ref, title) => (
+      <Radio
+        ref={ref as never}
+        title={title}
+        aria-label="Option"
+        value="yes"
+        readOnly
+      />
+    ),
+    'input'
+  )
+  await check(
+    (ref, title) => (
+      <Dialog>
+        <DialogContent
+          ref={ref as never}
+          title={title}
+        >
+          <DialogTitle>Panel</DialogTitle>
+          <DialogDescription>Details</DialogDescription>
+        </DialogContent>
+      </Dialog>
+    ),
+    'dialog'
+  )
+})
+
+test('open-state hooks ignore a no-op and use the current callback', async () => {
+  const changes: unknown[] = []
+  function DialogActions() {
+    const state = useDialog()!
+    return (
+      <>
+        <button onClick={() => state.setOpen(state.open)}>Keep</button>
+        <button
+          onClick={() => {
+            state.setOpen(!state.open)
+            state.setOpen(!state.open)
+          }}
+        >
+          Toggle
+        </button>
+      </>
+    )
+  }
+  function CollapsibleActions() {
+    const state = useCollapsible()!
+    return (
+      <>
+        <button onClick={() => state.setOpen(state.open)}>Keep</button>
+        <button
+          onClick={() => {
+            state.setOpen(!state.open)
+            state.setOpen(!state.open)
+          }}
+        >
+          Toggle
+        </button>
+      </>
+    )
+  }
+  const dialog = (callback: (open: boolean) => void) => (
+    <Dialog
+      defaultOpen={false}
+      onOpenChange={callback}
+    >
+      <DialogActions />
+    </Dialog>
+  )
+  const disclosure = (callback: (open: boolean) => void) => (
+    <Collapsible
+      defaultOpen={false}
+      onOpenChange={callback}
+    >
+      <CollapsibleActions />
+    </Collapsible>
+  )
+  for (const tree of [dialog, disclosure]) {
+    changes.length = 0
+    const { node, root } = await mount(tree(value => changes.push(['old', value])))
+    await act(async () => node.querySelector('button')!.click())
+    expect(changes).toEqual([])
+    await act(async () => root.render(tree(value => changes.push(['new', value]))))
+    await act(async () => node.querySelectorAll('button')[1]!.click())
+    expect(changes).toEqual([['new', true]])
+    await act(async () => root.render(null))
+  }
+})
+
+test('state owners reject mixed control and a change of accordion type', async () => {
+  const switched = await mount(<Dialog open={false} />)
+  await expect(act(async () => switched.root.render(<Dialog />))).rejects.toThrow(
+    /cannot switch between controlled and uncontrolled/
+  )
+  const uncontrolled = await mount(<Dialog defaultOpen={false} />)
+  await expect(act(async () => uncontrolled.root.render(<Dialog open={false} />))).rejects.toThrow(
+    /cannot switch between controlled and uncontrolled/
+  )
+  await expect(
+    mount(createElement(Dialog, { open: false, defaultOpen: false } as never))
+  ).rejects.toThrow(/controlled value or a default, not both/)
+  await expect(
+    mount(createElement(Input, { value: '', defaultValue: '', readOnly: true } as never))
+  ).rejects.toThrow(/controlled value or a default, not both/)
+  await expect(
+    mount(
+      createElement(Checkbox, { checked: false, defaultChecked: false, readOnly: true } as never)
+    )
+  ).rejects.toThrow(/controlled value or a default, not both/)
+  const accordion = await mount(<Accordion type="single" />)
+  await expect(
+    act(async () => accordion.root.render(<Accordion type="multiple" />))
+  ).rejects.toThrow(/cannot change type/)
 })

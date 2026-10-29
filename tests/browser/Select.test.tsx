@@ -1,10 +1,11 @@
-import { act, createRef, StrictMode, useState, type ReactNode } from 'react'
+import { act, createElement, createRef, StrictMode, useState, type ReactNode } from 'react'
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { userEvent, commands } from 'vitest/browser'
 import {
   Select,
+  SelectItem,
   SelectTrigger,
   SelectValue,
   SelectPortal,
@@ -484,4 +485,55 @@ test('dynamic item removal keeps keyboard focus usable; outside press and unmoun
   await render(<p>Unmounted</p>)
   expect(old.isConnected).toBe(false)
   expect(document.querySelector('[data-slot="select-content"]')).toBe(null)
+})
+
+test('an empty string selection stays distinct from the placeholder', () => {
+  const choices = [
+    { value: '', label: 'No destination' },
+    { value: 'rome', label: 'Rome' }
+  ]
+  expect(
+    renderToString(
+      <Select
+        items={choices}
+        value=""
+      />
+    )
+  ).toContain('>No destination')
+  expect(
+    renderToString(
+      <Select
+        items={choices}
+        value={null}
+      />
+    )
+  ).toContain('Select an option')
+})
+
+test('Select rejects contradictory owners, duplicate values and unnamed rich labels', () => {
+  const choices = [
+    { value: '', label: 'No destination' },
+    { value: 'rome', label: 'Rome' }
+  ]
+  expect(() =>
+    renderToString(
+      createElement(Select, { items: choices, value: 'rome', defaultValue: '' } as never)
+    )
+  ).toThrow(TypeError)
+  expect(() =>
+    renderToString(
+      createElement(Select, { items: choices, open: true, defaultOpen: false } as never)
+    )
+  ).toThrow(TypeError)
+  expect(() => renderToString(<Select items={[choices[0]!, choices[0]!]} />)).toThrow(TypeError)
+  expect(() =>
+    renderToString(
+      createElement(Select, {
+        items: [{ value: 'r', label: createElement('span', null, 'Rome') }]
+      } as never)
+    )
+  ).toThrow(TypeError)
+  expect(() => renderToString(<SelectTrigger />)).toThrow(/inside Select/)
+  expect(() => renderToString(<SelectItem value="rome" />)).toThrow(/inside Select/)
+  expect(() => renderToString(<SelectValue />)).toThrow(/inside Select/)
 })

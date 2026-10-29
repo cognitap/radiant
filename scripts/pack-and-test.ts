@@ -29,7 +29,6 @@ try {
     '@types/react',
     '@types/react-dom',
     'typescript',
-    'jsdom',
     'tailwindcss',
     '@tailwindcss/cli'
   ].map(name => `${name}@${devDependencies[name]}`)

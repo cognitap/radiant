@@ -27,11 +27,7 @@ const roots: Root[] = []
 const hosts: HTMLElement[] = []
 const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 async function until(check: () => boolean) {
-  for (let i = 0; i < 180; i++) {
-    if (check()) return
-    await frame()
-  }
-  throw new Error('Transition did not reach expected state')
+  await expect.poll(check, { timeout: 4_000 }).toBe(true)
 }
 async function mount(children: ReactNode) {
   const host = document.createElement('div')
@@ -141,8 +137,8 @@ test('Dialog closes semantically now, exits inertly, preserves focus and reverse
   await until(() => !dialog.open)
   expect(dialog.matches(':modal')).toBe(false)
   expect(document.activeElement).toBe(trigger)
+  await expect.poll(() => document.querySelector('[data-rad-motion-exit]')).not.toBeNull()
   const ghost = document.querySelector('[data-rad-motion-exit]') as HTMLElement
-  expect(ghost).not.toBeNull()
   expect(ghost.inert).toBe(true)
   expect(ghost.tagName).toBe('DIV')
   expect(getComputedStyle(ghost).display).toBe('grid')
