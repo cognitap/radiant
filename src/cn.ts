@@ -12,19 +12,22 @@ export const cn: CnFunction = createCn({
       'font-family': [
         ...roleClasses('font', 'family'),
         'font-(--rad-select-font-family)',
-        'font-(--rad-textarea-font-family)'
+        'font-(--rad-textarea-font-family)',
+        'font-(--rad-tabs-font-family)'
       ],
       'font-weight': [
         ...roleClasses('font', 'weight'),
         'font-(--rad-select-font-weight)',
-        'font-(--rad-textarea-font-weight)'
+        'font-(--rad-textarea-font-weight)',
+        'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
         ...roleClasses('text', 'size'),
         ...roleClasses('text', 'fluid-size'),
         'text-(--rad-select-font-size)',
         'text-(--rad-textarea-font-size)',
-        'text-(--rad-switch-label-size)'
+        'text-(--rad-switch-label-size)',
+        'text-(--rad-tabs-font-size)'
       ],
       h: [
         'h-(--rad-select-height)',
@@ -34,11 +37,19 @@ export const cn: CnFunction = createCn({
       ],
       w: ['w-(--rad-switch-width)', 'w-(--rad-slider-height)', 'w-(--rad-slider-length)'],
       size: ['size-(--rad-slider-thumb-size)', 'size-(--rad-slider-track-size)'],
-      gap: ['gap-(--rad-switch-gap)'],
-      'min-h': ['min-h-(--rad-textarea-min-height)'],
+      gap: ['gap-(--rad-switch-gap)', 'gap-(--rad-tabs-gap)', 'gap-(--rad-tabs-list-gap)'],
+      'min-h': ['min-h-(--rad-textarea-min-height)', 'min-h-(--rad-tabs-trigger-height)'],
       py: ['py-(--rad-textarea-padding-block)'],
-      px: ['px-(--rad-select-padding)', 'px-(--rad-textarea-padding)'],
-      p: ['p-(--rad-select-content-padding)'],
+      px: [
+        'px-(--rad-select-padding)',
+        'px-(--rad-textarea-padding)',
+        'px-(--rad-tabs-trigger-padding)'
+      ],
+      p: [
+        'p-(--rad-select-content-padding)',
+        'p-(--rad-tabs-list-padding)',
+        'p-(--rad-tabs-content-padding)'
+      ],
       rounded: [
         'rounded-(--rad-select-radius)',
         'rounded-(--rad-textarea-radius)',
@@ -47,13 +58,17 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-select-content-radius)',
         'rounded-(--rad-select-item-radius)',
         'rounded-(--rad-slider-track-radius)',
-        'rounded-(--rad-slider-thumb-radius)'
+        'rounded-(--rad-slider-thumb-radius)',
+        'rounded-(--rad-tabs-list-radius)',
+        'rounded-(--rad-tabs-trigger-radius)',
+        'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
         'border-(--rad-select-border-width)',
         'border-(--rad-textarea-border-width)',
         'border-(--rad-switch-border-width)',
-        'border-(--rad-slider-thumb-border-width)'
+        'border-(--rad-slider-thumb-border-width)',
+        'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
         'border-(--rad-select-border-style)',
@@ -70,23 +85,28 @@ export const cn: CnFunction = createCn({
         '[corner-shape:var(--rad-select-corner-shape)]',
         '[corner-shape:var(--rad-textarea-corner-shape)]',
         '[corner-shape:var(--rad-switch-corner-shape)]',
-        '[corner-shape:var(--rad-slider-corner-shape)]'
+        '[corner-shape:var(--rad-slider-corner-shape)]',
+        '[corner-shape:var(--rad-tabs-corner-shape)]'
       ],
       'outline-w': [
         'outline-(--rad-textarea-focus-width)',
         'outline-(--rad-switch-focus-width)',
-        'outline-(--rad-slider-focus-width)'
+        'outline-(--rad-slider-focus-width)',
+        'outline-(--rad-tabs-focus-width)'
       ],
       'outline-offset': [
         'outline-offset-(--rad-textarea-focus-offset)',
         'outline-offset-(--rad-switch-focus-offset)',
-        'outline-offset-(--rad-slider-focus-offset)'
+        'outline-offset-(--rad-slider-focus-offset)',
+        'outline-offset-(--rad-tabs-focus-offset)'
       ],
       'outline-style': [
         'outline-(--rad-textarea-focus-style)',
         'outline-(--rad-switch-focus-style)',
-        'outline-(--rad-slider-focus-style)'
+        'outline-(--rad-slider-focus-style)',
+        'outline-(--rad-tabs-focus-style)'
       ],
+      opacity: ['opacity-(--rad-tabs-disabled-opacity)'],
       'backdrop-filter': ['[backdrop-filter:var(--rad-select-content-backdrop-filter)]'],
       leading: roleClasses('leading', 'line-height'),
       tracking: roleClasses('tracking', 'letter-spacing'),

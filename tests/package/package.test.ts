@@ -35,6 +35,11 @@ import {
   Input,
   Textarea,
   Slider,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  useTabs,
   Link,
   Radio,
   RadioGroup,
@@ -935,6 +940,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Input',
     'Textarea',
     'Slider',
+    'Tabs',
     'Checkbox',
     'Switch',
     'RadioGroup',
@@ -965,6 +971,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Textarea.tsx',
     'src/Checkbox.tsx',
     'src/Switch.tsx',
+    'src/Tabs.tsx',
     'src/RadioGroup.tsx',
     'src/Dialog.tsx',
     'src/Collapsible.tsx',
@@ -1237,4 +1244,56 @@ test('Slider server markup preserves native numeric ownership and rejects unsupp
   for (const value of [null, NaN, Infinity, '40', [10, 90]]) {
     assert.throws(() => renderToStaticMarkup(createElement(Slider, { value })), /finite numbers/)
   }
+})
+
+test('Tabs render owned SSR relationships and reject conflicting or missing selection owners', () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Tabs,
+      { defaultValue: 'first tab' },
+      createElement(
+        TabsList,
+        { 'aria-label': 'Sections' },
+        createElement(TabsTrigger, { value: 'first tab' }, 'First'),
+        createElement(TabsTrigger, { value: 'second' }, 'Second')
+      ),
+      createElement(TabsContent, { value: 'first tab' }, 'Visible content'),
+      createElement(TabsContent, { value: 'second' }, 'Unvisited content')
+    )
+  )
+  const tabs = [...html.matchAll(/<button\b[^>]*>/g)].map(match => match[0])
+  const panels = [...html.matchAll(/<div\b[^>]*role="tabpanel"[^>]*>/g)].map(match => match[0])
+  assert.equal(tabs.length, 2)
+  assert.equal(panels.length, 2)
+  for (let index = 0; index < 2; index++) {
+    const id = / id="([^"]+)"/.exec(tabs[index])[1]
+    const controls = /aria-controls="([^"]+)"/.exec(tabs[index])[1]
+    assert.ok(panels[index].includes(`id="${controls}"`))
+    assert.ok(panels[index].includes(`aria-labelledby="${id}"`))
+    assert.match(tabs[index], /type="button"/)
+    assert.match(tabs[index], /data-slot="button tabs-trigger"/)
+  }
+  assert.match(tabs[0], /aria-selected="true"/)
+  assert.match(panels[1], /hidden=""/)
+  assert.ok(html.includes('Visible content'))
+  assert.ok(!html.includes('Unvisited content'))
+  assert.throws(
+    () => renderToStaticMarkup(createElement(Tabs, { value: 'one', defaultValue: 'two' })),
+    /controlled value or a default/
+  )
+  assert.throws(() => renderToStaticMarkup(createElement(Tabs, {})), /initial tab/)
+  assert.throws(() => renderToStaticMarkup(createElement(Tabs, { value: null })), /strings/)
+  assert.throws(() => renderToStaticMarkup(createElement(TabsList)), /inside Tabs/)
+  assert.throws(
+    () =>
+      renderToStaticMarkup(
+        createElement(Tabs, { defaultValue: 'one' }, createElement(TabsTrigger, { value: 'one' }))
+      ),
+    /inside TabsList/
+  )
+  function Outside() {
+    assert.equal(useTabs(), null)
+    return null
+  }
+  renderToStaticMarkup(createElement(Outside))
 })

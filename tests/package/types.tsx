@@ -1055,3 +1055,5 @@ import './textarea-types.js'
 import './switch-types.js'
 
 import './slider-types.js'
+
+import './tabs-types.js'

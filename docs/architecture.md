@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's fourteen families fit together and why. Props are on the
+How Radiant's fifteen families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, Link, Field, Input, Textarea, Select, Checkbox, Switch, Slider, RadioGroup (with Radio),
-Dialog, Collapsible, Accordion and Card. All ship in one package,
+Dialog, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -60,7 +60,7 @@ Actions take three independent props:
 | `controlSize` | `small`, `medium`, `large`                                                | `medium`                      |
 
 A variant picks the treatment and a tone picks the palette. Input, Textarea, Checkbox, Switch, Slider,
-Radio and RadioGroup share `controlSize` but have no variants. Native meanings
+Radio, RadioGroup and Tabs share `controlSize` but have no variants. Native meanings
 win: `Input.size` stays a character count, and a checkbox `value` stays its
 submitted data. Radius is a theme decision, not a prop.
 
@@ -101,6 +101,8 @@ host, never a wrapper:
 | Textarea                                                        | Native `textarea`                                   |
 | Select / SelectPortal                                           | None; state / portal                                |
 | SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
+| Tabs / TabsList / TabsContent                                   | `div`                                               |
+| TabsTrigger                                                     | Button's `button`                                   |
 | RadioGroup                                                      | Field's `fieldset`                                  |
 | Dialog                                                          | None; it only owns state                            |
 | DialogTrigger / DialogClose                                     | Button's `button`                                   |
@@ -135,16 +137,17 @@ or `open` to control it, or `default*` to set an initial value. Passing both, or
 a mount, throws; remount with a new `key` instead. A controlled callback is a request, and the consumer
 may refuse it. No-op requests and prop syncs fire no callback.
 
-| Family                             | State                        | Callback                                     | Empty           |
-| ---------------------------------- | ---------------------------- | -------------------------------------------- | --------------- |
-| Input, Textarea                    | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`            |
-| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false`         |
-| Slider                             | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | Native midpoint |
-| RadioGroup                         | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`          |
-| Select                             | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`          |
-| Dialog, Collapsible                | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false`         |
-| Accordion single                   | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`          |
-| Accordion multiple                 | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`            |
+| Family                             | State                        | Callback                                     | Empty                  |
+| ---------------------------------- | ---------------------------- | -------------------------------------------- | ---------------------- |
+| Input, Textarea                    | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`                   |
+| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false`                |
+| Slider                             | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | Native midpoint        |
+| RadioGroup                         | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`                 |
+| Select                             | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`                 |
+| Tabs                               | `value` / `defaultValue`     | `onValueChange(string)`                      | Initial value required |
+| Dialog, Collapsible                | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false`                |
+| Accordion single                   | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`                 |
+| Accordion multiple                 | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`                   |
 
 RadioGroup owns its options' `name` and selection. Use one of `onValueChange`
 or `onChange` to write state, not both. `''` is a valid option value, and `null`
@@ -157,7 +160,7 @@ add up: a child cannot re-enable or un-require what its Field set.
 
 The consumer owns validation, touched and dirty state, error text, submission
 and persistence. Native reset restores uncontrolled inputs. A controlled adapter
-resets its own values. Reset never changes Dialog or disclosure state. Why: form
+resets its own values. Reset never changes Dialog, Tabs or disclosure state. Why: form
 libraries differ, and Radiant should fit any of them without a hidden form
 store. TanStack Form is an optional example adapter, not a dependency.
 
@@ -180,7 +183,7 @@ For cancellable actions, disabled and pending guards run first, then the
 consumer handler, then the state request if `defaultPrevented` is false. Native
 change, toggle and blur are observations and cannot veto anything. Library and
 caller refs get the same host, and callback-ref cleanup functions are honored.
-`useField`, `useDialog`, `useCollapsible` and `useAccordion` read and request
+`useField`, `useDialog`, `useTabs`, `useCollapsible` and `useAccordion` read and request
 state, and return `null` outside their owner. Parts that need a root throw when misplaced. Lifecycle,
 SSR and hydration details are in [React bindings](react-bindings.md).
 
