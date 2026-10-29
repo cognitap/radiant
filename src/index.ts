@@ -252,3 +252,13 @@ export type {
   MenuPortalProps,
   MenuRenderProps
 } from './Menu.js'
+
+export { Alert, AlertTitle, AlertDescription } from './Alert.js'
+export type {
+  AlertProps,
+  AlertTitleProps,
+  AlertDescriptionProps,
+  AlertAnnouncement,
+  AlertTone,
+  AlertHeadingLevel
+} from './Alert.js'

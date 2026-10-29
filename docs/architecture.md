@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's twenty families fit together and why. Props are on the
+How Radiant's twenty-one families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, Link, Field, Input, Textarea, Select, Combobox, Checkbox, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Popover, Tooltip, Menu, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Popover, Tooltip, Menu, Alert, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -120,7 +120,7 @@ host, never a wrapper:
 | Collapsible / CollapsibleTrigger / CollapsibleContent           | `details` / `summary` / `div`                       |
 | Accordion / AccordionItem / AccordionTrigger / AccordionContent | `div` / `details` / `summary` / `div`               |
 | Card / CardHeader / CardContent / CardFooter                    | `div`                                               |
-| CardTitle / CardDescription                                     | Heading chosen by `level` / `p`                     |
+| CardTitle and AlertTitle / CardDescription and AlertDescription | Heading chosen by `level` / `p`                     |
 
 Internal parts take `className` and `style` through a `parts` map. Field has
 `label`, `description`, `error` and `required`. Checkbox, Switch and Radio have

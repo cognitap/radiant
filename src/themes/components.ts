@@ -396,6 +396,20 @@ export const componentRegistry = {
     itemFocusBackground: 'css',
     itemFocusColor: 'css'
   },
+  alert: {
+    radius: 'css',
+    padding: 'css',
+    gap: 'css',
+    background: 'css',
+    color: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    shadow: 'css',
+    titleSize: 'css',
+    titleWeight: 'weight',
+    descriptionSize: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 
