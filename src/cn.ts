@@ -44,6 +44,7 @@ export const cn: CnFunction = createCn({
         'text-(--rad-tabs-font-size)'
       ],
       h: [
+        'h-(--rad-skeleton-height)',
         'h-(--rad-progress-height)',
         'h-(--rad-combobox-height)',
         'h-(--rad-select-height)',
@@ -52,6 +53,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-skeleton-width)',
         'w-(--rad-toast-width)',
         'w-(--rad-menu-width)',
         'w-(--rad-popover-width)',
@@ -96,6 +98,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-skeleton-radius)',
         'rounded-(--rad-progress-radius)',
         'rounded-(--rad-toast-radius)',
         'rounded-(--rad-alert-radius)',
@@ -187,7 +190,10 @@ export const cn: CnFunction = createCn({
         'outline-(--rad-slider-focus-style)',
         'outline-(--rad-tabs-focus-style)'
       ],
-      'animation-duration': ['[animation-duration:var(--rad-spinner-duration)]'],
+      'animation-duration': [
+        '[animation-duration:var(--rad-spinner-duration)]',
+        '[animation-duration:var(--rad-skeleton-duration)]'
+      ],
       'stroke-w': ['stroke-(--rad-spinner-stroke-width)'],
       opacity: ['opacity-(--rad-spinner-track-opacity)', 'opacity-(--rad-tabs-disabled-opacity)'],
       'backdrop-filter': [
