@@ -5,6 +5,7 @@ import './tooltip-types.js'
 import './menu-types.js'
 import './alert-types.js'
 import './toast-types.js'
+import './progress-types.js'
 import { createElement, createRef, type ComponentProps, type Ref, useRef } from 'react'
 import {
   updateThemeDocument,
