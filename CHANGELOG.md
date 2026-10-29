@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Spinner.
+
 ## 0.0.20
 
 - Add Progress.

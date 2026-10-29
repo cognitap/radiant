@@ -288,3 +288,6 @@ export type {
 
 export { Progress } from './Progress.js'
 export type { ProgressProps } from './Progress.js'
+
+export { Spinner } from './Spinner.js'
+export type { SpinnerProps } from './Spinner.js'

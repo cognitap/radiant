@@ -60,7 +60,13 @@ export const cn: CnFunction = createCn({
         'w-(--rad-slider-length)'
       ],
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
-      size: ['size-(--rad-slider-thumb-size)', 'size-(--rad-slider-track-size)'],
+      size: [
+        'size-(--rad-spinner-size)',
+        'size-(--rad-spinner-size-small)',
+        'size-(--rad-spinner-size-large)',
+        'size-(--rad-slider-thumb-size)',
+        'size-(--rad-slider-track-size)'
+      ],
       gap: [
         'gap-(--rad-toast-gap)',
         'gap-(--rad-alert-gap)',
@@ -181,7 +187,9 @@ export const cn: CnFunction = createCn({
         'outline-(--rad-slider-focus-style)',
         'outline-(--rad-tabs-focus-style)'
       ],
-      opacity: ['opacity-(--rad-tabs-disabled-opacity)'],
+      'animation-duration': ['[animation-duration:var(--rad-spinner-duration)]'],
+      'stroke-w': ['stroke-(--rad-spinner-stroke-width)'],
+      opacity: ['opacity-(--rad-spinner-track-opacity)', 'opacity-(--rad-tabs-disabled-opacity)'],
       'backdrop-filter': [
         '[backdrop-filter:var(--rad-popover-backdrop-filter)]',
         '[backdrop-filter:var(--rad-combobox-content-backdrop-filter)]',
