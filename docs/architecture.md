@@ -125,7 +125,8 @@ Why: styling written for Button still reaches a DialogTrigger.
 Style real state: native `:disabled`, `:checked` and `open`, plus `aria-busy`
 for pending. Field and RadioGroup set `data-invalid`, `data-disabled` and
 `data-required`. Disclosures and DialogContent set `data-state="open|closed"`.
-Actions set `data-variant`, `data-tone` and `data-control-size`.
+Actions set `data-variant`, `data-tone` and `data-control-size`. Switch uses
+`data-dragging` during a provisional pointer gesture; `:checked` stays committed.
 
 ## State and forms
 

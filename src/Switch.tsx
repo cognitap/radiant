@@ -3,6 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
+import { useSwitchDrag } from './react/useSwitchDrag.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useNativeOwner, type CheckedOwner } from './react/useNativeOwner.js'
 import { controlBorderClass, controlMetrics } from './controlStyles.js'
@@ -12,7 +13,7 @@ import type { ControlSize, ControlParts } from './presentation.js'
 
 const switchVariants = cva([
   controlBorderClass,
-  'peer col-start-1 row-start-1 m-0 box-border appearance-none',
+  'peer col-start-1 row-start-1 m-0 box-border appearance-none touch-pan-y select-none cursor-grab data-dragging:cursor-grabbing',
   'h-[var(--rad-switch-height,calc(var(--_rad-control-indicator-size)*1.25))]',
   'w-[var(--rad-switch-width,calc(var(--_rad-control-indicator-size)*2.25))]',
   'rounded-[var(--rad-switch-radius,var(--rad-control-radius,0.5rem))]',
@@ -38,7 +39,7 @@ const switchVariants = cva([
 ])
 
 const thumbClass =
-  'size-full w-auto shrink-0 aspect-square forced-colors:[forced-color-adjust:none] rounded-[var(--rad-switch-thumb-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-switch-corner-shape,var(--rad-control-corner-shape,round))] bg-current'
+  'block size-full shrink-0 forced-colors:[forced-color-adjust:none] rounded-[var(--rad-switch-thumb-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-switch-corner-shape,var(--rad-control-corner-shape,round))] bg-current'
 const indicatorClass =
   'pointer-events-none absolute inset-[3px] flex justify-start peer-checked:justify-end [color:var(--rad-switch-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] peer-checked:[color:var(--rad-switch-checked-thumb,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-switch-disabled-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[CanvasText] forced-colors:peer-checked:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
 
@@ -88,6 +89,9 @@ export function Switch({
     'aria-required': ariaRequired
   })
   const nodeRef = useRef<HTMLInputElement>(null)
+  const railRef = useRef<HTMLSpanElement>(null)
+  const handleRef = useRef<HTMLSpanElement>(null)
+  const drag = useSwitchDrag(nodeRef, railRef, handleRef)
   const initialise = useCallback(
     (node: HTMLInputElement | null) => {
       nodeRef.current = node
@@ -108,25 +112,45 @@ export function Switch({
       <input
         {...props}
         {...control}
+        onPointerDown={event => {
+          props.onPointerDown?.(event)
+          drag.start(event.nativeEvent)
+        }}
+        onKeyDown={event => {
+          props.onKeyDown?.(event)
+          if (drag.escape(event.nativeEvent)) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+        }}
         checked={checked}
         defaultChecked={defaultChecked}
         ref={hostRef}
         className={cn(switchVariants(), controlMetrics({ controlSize }), className)}
         data-control-size={controlSize}
         data-slot="switch"
+        data-dragging={undefined}
         type="checkbox"
         role="switch"
         aria-checked={undefined}
       />
       <span
         aria-hidden="true"
+        ref={railRef}
+        dir={props.dir}
+        style={{ direction: props.style?.direction }}
         className={indicatorClass}
       >
         <span
-          className={cn(thumbClass, parts?.indicator?.className)}
-          style={parts?.indicator?.style}
-          data-slot="switch-indicator"
-        />
+          ref={handleRef}
+          className="h-full w-auto shrink-0 aspect-square"
+        >
+          <span
+            className={cn(thumbClass, parts?.indicator?.className)}
+            style={parts?.indicator?.style}
+            data-slot="switch-indicator"
+          />
+        </span>
       </span>
     </span>
   )

@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'An on/off setting with a stable label. It uses a native checkbox with a fixed switch role: Space, checked state, change/blur, forms, required validation and reset stay native. Choose defaultChecked or checked/onChange and keep one owner per mount. Use Checkbox for checklist choices or mixed selection. className/style/native props/ref target the input; parts.wrapper, parts.label and parts.indicator style the surrounding row, label and decorative thumb. Field supplies its protected ID, help, error and required/disabled relationships. There is no mixed state or readOnly prop.'
+          'An on/off setting with a stable label. It uses a native checkbox with a fixed switch role: Space, checked state, change/blur, forms, required validation and reset stay native. Choose defaultChecked or checked/onChange and keep one owner per mount. Use Checkbox for checklist choices or mixed selection. className/style/native props/ref target the input; parts.wrapper, parts.label and parts.indicator style the surrounding row, label and decorative thumb. Field supplies its protected ID, help, error and required/disabled relationships. Drag horizontally to preview a change; release beyond the midpoint commits once. Escape or cancellation restores the current value. Vertical touch movement remains available for scrolling. There is no mixed state or readOnly prop.'
       }
     }
   }
@@ -126,5 +126,21 @@ export const RightToLeft: Story = {
         defaultChecked
       />
     </div>
+  )
+}
+
+export const Draggable: Story = {
+  render: args => (
+    <Field
+      label="Focus mode"
+      description="Drag the thumb or press Space to change this setting."
+      style={{ maxWidth: '24rem' }}
+    >
+      <Switch
+        {...args}
+        label={undefined}
+        style={{ '--rad-switch-width': '4rem', '--rad-switch-height': '2rem' }}
+      />
+    </Field>
   )
 }

@@ -13,6 +13,10 @@ paths.
 | `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression | Dialog, Collapsible, Accordion                                  |
 | `src/react/useNativeOwner.ts`       | Diagnose mixed owners and mode changes without storing native values        | Input, Textarea, Checkbox, Switch, standalone Radio, RadioGroup |
 
+Switch's private `useSwitchDrag` binding owns provisional pointer movement and
+capture cleanup. Release commits through native input activation; cancellation
+restores the owner's checked presentation without a change event.
+
 `tests/architecture.test.mjs` enforces the import rules: `internal` never imports
 React or a family, and bindings never import a family. Adding an outside helper
 dependency needs a review of ownership, maintenance and packaging first. Don't

@@ -4,7 +4,7 @@
 
 ## Unreleased
 
-- Add native Switch with Field, forms, shared sizing and theme overrides.
+- Add draggable Switch with Field, forms, shared sizing and theme overrides.
 
 ## 0.0.9
 
