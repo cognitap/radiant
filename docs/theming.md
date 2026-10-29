@@ -90,7 +90,7 @@ example, `components.button.radius` changes Button only, while
 component never falls back to another component's override.
 
 Component keys are grouped by family under `components`: `button`, `link`,
-`field`, `input`, `textarea`, `select`, `checkbox`, `switch`, `radio`, `radioGroup`, `dialog`, `collapsible`,
+`field`, `input`, `textarea`, `slider`, `select`, `checkbox`, `switch`, `radio`, `radioGroup`, `dialog`, `collapsible`,
 `accordion` and `card`. Every key is listed in
 [`src/themes/components.ts`](../src/themes/components.ts). Button-only fonts,
 uppercase, shadows, squash and pressed shape belong under `components.button`.

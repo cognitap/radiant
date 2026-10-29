@@ -4,14 +4,14 @@ The private modules behind the public behavior in
 [architecture](architecture.md). They are not exports or supported import
 paths.
 
-| Module                              | Responsibility                                                              | Current consumers                                               |
-| ----------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `src/internal/ids.ts`               | Keep owned IDs first and deduplicate external ID references                 | Field, Input, Textarea, Checkbox, Switch, Radio, Dialog         |
-| `src/internal/events.ts`            | Activation guard → consumer → uncancelled library action                    | Button, Dialog actions/backdrop, Accordion trigger              |
-| `src/internal/selection.ts`         | Accordion membership, equality and single/multiple transitions              | Accordion                                                       |
-| `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup | Checkbox, Switch, Radio, DialogContent, Collapsible             |
-| `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression | Dialog, Collapsible, Accordion                                  |
-| `src/react/useNativeOwner.ts`       | Diagnose mixed owners and mode changes without storing native values        | Input, Textarea, Checkbox, Switch, standalone Radio, RadioGroup |
+| Module                              | Responsibility                                                              | Current consumers                                                       |
+| ----------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `src/internal/ids.ts`               | Keep owned IDs first and deduplicate external ID references                 | Field, Input, Textarea, Slider, Checkbox, Switch, Radio, Dialog         |
+| `src/internal/events.ts`            | Activation guard → consumer → uncancelled library action                    | Button, Dialog actions/backdrop, Accordion trigger                      |
+| `src/internal/selection.ts`         | Accordion membership, equality and single/multiple transitions              | Accordion                                                               |
+| `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup | Checkbox, Switch, Radio, DialogContent, Collapsible                     |
+| `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression | Dialog, Collapsible, Accordion                                          |
+| `src/react/useNativeOwner.ts`       | Diagnose mixed owners and mode changes without storing native values        | Input, Textarea, Slider, Checkbox, Switch, standalone Radio, RadioGroup |
 
 Switch's private `useSwitchDrag` binding owns provisional pointer movement and
 capture cleanup. Release commits through native input activation; cancellation
@@ -33,7 +33,7 @@ add a provider or state engine for plain native controls.
   when the native state differs from its owner. A refused controlled toggle
   restores the native state without firing again.
 - Nested toggle and close events never change a parent owner.
-- Input, Textarea, Checkbox, Switch and Radio keep React and browser change, blur and reset
+- Input, Textarea, Slider, Checkbox, Switch and Radio keep React and browser change, blur and reset
   behavior. The state hook is not a reset engine.
 - RadioGroup owns the name and selection, and options cannot supply their own.
 - Field's private `useFieldControl` resolves IDs, descriptions, required, error

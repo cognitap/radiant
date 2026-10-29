@@ -26,8 +26,14 @@ export const cn: CnFunction = createCn({
         'text-(--rad-textarea-font-size)',
         'text-(--rad-switch-label-size)'
       ],
-      h: ['h-(--rad-select-height)', 'h-(--rad-switch-height)'],
-      w: ['w-(--rad-switch-width)'],
+      h: [
+        'h-(--rad-select-height)',
+        'h-(--rad-switch-height)',
+        'h-(--rad-slider-height)',
+        'h-(--rad-slider-length)'
+      ],
+      w: ['w-(--rad-switch-width)', 'w-(--rad-slider-height)', 'w-(--rad-slider-length)'],
+      size: ['size-(--rad-slider-thumb-size)', 'size-(--rad-slider-track-size)'],
       gap: ['gap-(--rad-switch-gap)'],
       'min-h': ['min-h-(--rad-textarea-min-height)'],
       py: ['py-(--rad-textarea-padding-block)'],
@@ -39,12 +45,15 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-switch-radius)',
         'rounded-(--rad-switch-thumb-radius)',
         'rounded-(--rad-select-content-radius)',
-        'rounded-(--rad-select-item-radius)'
+        'rounded-(--rad-select-item-radius)',
+        'rounded-(--rad-slider-track-radius)',
+        'rounded-(--rad-slider-thumb-radius)'
       ],
       'border-w': [
         'border-(--rad-select-border-width)',
         'border-(--rad-textarea-border-width)',
-        'border-(--rad-switch-border-width)'
+        'border-(--rad-switch-border-width)',
+        'border-(--rad-slider-thumb-border-width)'
       ],
       'border-style': [
         'border-(--rad-select-border-style)',
@@ -54,21 +63,29 @@ export const cn: CnFunction = createCn({
       shadow: [
         'shadow-(--rad-select-shadow)',
         'shadow-(--rad-select-content-shadow)',
-        'shadow-(--rad-textarea-shadow)'
+        'shadow-(--rad-textarea-shadow)',
+        'shadow-(--rad-slider-thumb-shadow)'
       ],
       'corner-shape': [
         '[corner-shape:var(--rad-select-corner-shape)]',
         '[corner-shape:var(--rad-textarea-corner-shape)]',
-        '[corner-shape:var(--rad-switch-corner-shape)]'
+        '[corner-shape:var(--rad-switch-corner-shape)]',
+        '[corner-shape:var(--rad-slider-corner-shape)]'
       ],
-      'outline-w': ['outline-(--rad-textarea-focus-width)', 'outline-(--rad-switch-focus-width)'],
+      'outline-w': [
+        'outline-(--rad-textarea-focus-width)',
+        'outline-(--rad-switch-focus-width)',
+        'outline-(--rad-slider-focus-width)'
+      ],
       'outline-offset': [
         'outline-offset-(--rad-textarea-focus-offset)',
-        'outline-offset-(--rad-switch-focus-offset)'
+        'outline-offset-(--rad-switch-focus-offset)',
+        'outline-offset-(--rad-slider-focus-offset)'
       ],
       'outline-style': [
         'outline-(--rad-textarea-focus-style)',
-        'outline-(--rad-switch-focus-style)'
+        'outline-(--rad-switch-focus-style)',
+        'outline-(--rad-slider-focus-style)'
       ],
       'backdrop-filter': ['[backdrop-filter:var(--rad-select-content-backdrop-filter)]'],
       leading: roleClasses('leading', 'line-height'),
