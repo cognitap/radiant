@@ -2,8 +2,7 @@
 
 Radiant's spring motion is opt-in. It uses Motion's physics behind
 Radiant-owned bindings; see the [engine decision](adr/0001-spring-engine-boundaries.md).
-The root package carries only configuration and types. Import
-`@cognitap/radiant/motion` or `/motion/react` to use the runtime.
+Import `@cognitap/radiant/motion` or `/motion/react` for the runtime.
 
 ## Theme profiles
 
@@ -24,7 +23,7 @@ const theme = defineTheme({
 | `interactions.<name>` | `press`, `disclosure`, `dialog`, `follow`, `drag`, `layout`; each inherits `spring` |
 | `mode`                | `system` (default) or `off`                                                         |
 
-The system reduced-motion setting always wins. A nested ThemeScope inherits its
+Reduced motion always wins. ThemeScope inherits its
 theme's profile, and switching light or dark mode does not change it. Theme
 documents store it at `sections.motion.profile`. The CSS duration and easing
 tokens still drive ordinary CSS transitions.
@@ -58,8 +57,9 @@ import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
 - Dialog springs open and closes natively immediately. An inert copy finishes
   exit, bounded to 500 descendants and two seconds. Nested dialogs, media,
   canvas, embeds and custom elements (including customized built-ins) skip it.
+- Select reuses Button press and dialog springs for popup opacity. Closing is immediate.
 
-Set `motion="off"` on Button, MotionLink, Collapsible or DialogContent.
+Set `motion="off"` on Button, MotionLink, Collapsible, SelectContent or DialogContent.
 Theme off and reduced motion suppress springs and CSS lift/shift. Pending and
 disabled cancel a held press; re-enabling never replays it. Native activation,
 focus and Escape stay immediate; `preventDefault` cancels compression.

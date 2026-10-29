@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's ten families fit together and why. Props are on the
+How Radiant's eleven families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Button, Link, Field, Input, Checkbox, RadioGroup (with Radio),
+The families are Button, Link, Field, Input, Select, Checkbox, RadioGroup (with Radio),
 Dialog, Collapsible, Accordion and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -21,7 +21,9 @@ Each piece of behavior has one owner:
 | Content, validation, routing, fetching and persistence | The consumer                                    |
 
 Why: the browser already gets keyboard, focus and form behavior right.
-Radiant wraps native elements and has no headless-library dependency.
+Radiant has no headless-library dependency. Select owns its themed listbox and
+item focus, while a visually hidden native select supplies form semantics.
+Its local portal uses the top layer, preserving theme inheritance and modal ancestry.
 
 Import rules:
 
@@ -96,6 +98,8 @@ host, never a wrapper:
 | Button / Link                                                   | `button` / `a`, including through `render`          |
 | Field                                                           | `div` in control layout; `fieldset` in group layout |
 | Input / Checkbox / Radio                                        | Native `input`                                      |
+| Select / SelectPortal                                           | None; state / portal                                |
+| SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
 | RadioGroup                                                      | Field's `fieldset`                                  |
 | Dialog                                                          | None; it only owns state                            |
 | DialogTrigger / DialogClose                                     | Button's `button`                                   |
@@ -134,6 +138,7 @@ may refuse it. No-op requests and prop syncs fire no callback.
 | Input                      | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`    |
 | Checkbox, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false` |
 | RadioGroup                 | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`  |
+| Select                     | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
 | Dialog, Collapsible        | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false` |
 | Accordion single           | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
 | Accordion multiple         | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`    |
@@ -152,6 +157,12 @@ and persistence. Native reset restores uncontrolled inputs. A controlled adapter
 resets its own values. Reset never changes Dialog or disclosure state. Why: form
 libraries differ, and Radiant should fit any of them without a hidden form
 store. TanStack Form is an optional example adapter, not a dependency.
+
+Select takes one `items` registry for SSR labels, native options and typeahead.
+Rich labels supply `textValue`. The focused option and committed value are
+distinct; activation commits, Escape dismisses and restores trigger focus.
+Native reset silently restores uncontrolled selection. Controlled resets stay
+with the owner. User selections emit form change; prop syncs do not.
 
 ## Replacement and events
 

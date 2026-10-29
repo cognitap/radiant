@@ -4,8 +4,8 @@ React components built on native HTML elements, with shared themes. Published
 as [`@cognitap/radiant`](https://www.npmjs.com/package/@cognitap/radiant) under
 the [MIT license](LICENSE). Radiant is experimental during 0.x.
 
-It has ten families: Button, Link, Field, Input, Checkbox, RadioGroup, Dialog,
-Collapsible, Accordion and Card.
+It has eleven families: Button, Link, Field, Input, Select, Checkbox, RadioGroup,
+Dialog, Collapsible, Accordion and Card.
 
 ## Install
 

@@ -5,6 +5,33 @@ export { Field, useField } from './Field.js'
 export type { FieldControlProps, FieldLayout, FieldProps, FieldState } from './Field.js'
 export { Input } from './Input.js'
 export type { InputProps } from './Input.js'
+export {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectIcon,
+  SelectPortal,
+  SelectContent,
+  SelectViewport,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator,
+  SelectGroup,
+  useSelect
+} from './Select.js'
+export type {
+  SelectProps,
+  SelectOption,
+  SelectState,
+  SelectTriggerProps,
+  SelectValueProps,
+  SelectIconProps,
+  SelectContentProps,
+  SelectViewportProps,
+  SelectItemProps,
+  SelectItemTextProps,
+  SelectGroupProps
+} from './Select.js'
 export { Checkbox } from './Checkbox.js'
 export type { CheckboxProps } from './Checkbox.js'
 export { Radio, RadioGroup } from './RadioGroup.js'

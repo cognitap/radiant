@@ -12,6 +12,7 @@ import { createElement, type ReactNode } from 'react'
 import { MotionHostContext } from './host.js'
 import { bindDisclosureMotion, bindDialogMotion } from './transitions.js'
 import { bindPressMotion } from './press.js'
+import { bindPopupMotion } from './popup.js'
 import { MotionProfileContext } from './context.js'
 import { resolveMotion, type MotionInteraction } from './config.js'
 import { createSpringDrag, type SpringDragController, type SpringDragOptions } from './drag.js'
@@ -134,7 +135,8 @@ export function useSpringStyle(
 const hostRuntime = {
   press: bindPressMotion,
   disclosure: bindDisclosureMotion,
-  dialog: bindDialogMotion
+  dialog: bindDialogMotion,
+  popup: bindPopupMotion
 }
 /** Opt into native Radiant spring interactions without adding a DOM wrapper. */
 export function MotionProvider({ children }: { children?: ReactNode }) {

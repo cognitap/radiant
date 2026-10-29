@@ -1,6 +1,7 @@
 import './color-types.js'
 import './theme-types.js'
 import './typography-types.js'
+import './select-types.js'
 import { createElement, createRef, type Ref } from 'react'
 import {
   Button,
