@@ -2,16 +2,12 @@
 
 ## Which check to run
 
-| Command                   | When                                                 | What it runs                                                                                           |
-| ------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `pnpm check:ci`           | Every change; CI runs it on pull requests and `main` | Generated themes, format, lint, types, runtime and package tests, Storybook build, smoke browser tests |
-| `pnpm check`              | Theme, styling or composition changes, and releases  | Everything above, every story in every preset and mode                                                 |
-| `pnpm test`               | Runtime changes                                      | Repo checks in `tests/*.test.mjs` and the packed package                                               |
-| `pnpm test:browser`       | Story or browser behavior changes                    | Every story in every preset, light and dark, plus `tests/browser/`                                     |
-| `pnpm test:browser:smoke` | A quick browser pass                                 | Every story in Radiant light and dark, plus `tests/browser/`                                           |
-
-In GitHub Actions, run the full check with **Run workflow → full**. The
-**Library checks** job must stay a required status.
+| Command             | When                              | What it runs                                                                                                         |
+| ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`        | Every change; CI runs it          | Theme check, format, lint, types, docs policy, build, repo checks, packed package, Storybook, Radiant light and dark |
+| `pnpm test`         | Runtime changes                   | Repo checks in `tests/*.test.mjs` and the packed package                                                             |
+| `pnpm test:browser` | Story or browser behavior changes | Every story in every preset, light and dark, plus `tests/browser/`                                                   |
+| `pnpm test:package` | Package export changes            | The packed package                                                                                                   |
 
 ## Browser tests
 
@@ -21,8 +17,8 @@ pnpm test:browser
 ```
 
 They need no running Storybook. Every story renders and fails on any axe
-violation. Routine CI keeps Radiant light and Radiant dark. The full preset
-matrix is **Run workflow → full**. New stories join that matrix automatically.
+violation. `pnpm check` runs Radiant light and Radiant dark. `pnpm test:browser`
+runs every preset. New stories join that matrix automatically.
 There are no retries and no rule exclusions.
 
 Focus a run on one project or test:
