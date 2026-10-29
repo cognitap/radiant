@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.11
+
 - Add native Slider.
 
 ## 0.0.10
