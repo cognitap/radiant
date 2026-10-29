@@ -21,6 +21,15 @@ export type {
   ComboboxStatusProps
 } from './Combobox.js'
 export { Button } from './Button.js'
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipPortal, useTooltip } from './Tooltip.js'
+export type {
+  TooltipProps,
+  TooltipState,
+  TooltipTriggerProps,
+  TooltipContentProps,
+  TooltipPortalProps,
+  TooltipRenderProps
+} from './Tooltip.js'
 export {
   Popover,
   PopoverTrigger,

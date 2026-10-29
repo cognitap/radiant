@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Tooltip.
+
 ## 0.0.15
 
 - Add Popover.
@@ -34,7 +36,7 @@
 
 ## 0.0.8
 
-- Add Select with item focus, Field/native forms, themes and springs; open at trigger width without drift or flashes.
+- Add Select with item focus, Field/forms, themes and springs; match trigger width without drift or flashes.
 
 ## 0.0.7
 

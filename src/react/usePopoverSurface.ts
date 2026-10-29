@@ -6,8 +6,8 @@ import { positionPopover, type PopoverAlign, type PopoverSide } from '../interna
 // Each document owns its layers; imports never inspect a browser global.
 const layers = new WeakMap<Document, HTMLElement[]>()
 
-export function usePopoverSurface(
-  nodeRef: RefObject<HTMLDivElement | null>,
+export function usePopoverSurface<Node extends HTMLElement>(
+  nodeRef: RefObject<Node | null>,
   trigger: HTMLButtonElement | null,
   open: boolean,
   close: (restore: boolean) => void,

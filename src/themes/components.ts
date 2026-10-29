@@ -288,6 +288,19 @@ export const componentRegistry = {
     focusOffset: 'css',
     focusStyle: 'css'
   },
+  tooltip: {
+    maxWidth: 'css',
+    padding: 'css',
+    radius: 'css',
+    background: 'css',
+    color: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    shadow: 'css',
+    fontSize: 'css',
+    fontWeight: 'weight'
+  },
   popover: {
     width: 'css',
     padding: 'css',
