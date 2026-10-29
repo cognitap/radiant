@@ -51,7 +51,7 @@ jobs:
     if: ${{ inputs.publish && github.repository == 'cognitap/radiant' && github.ref == 'refs/heads/main' }}
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     environment: npm
     permissions:
       contents: read
@@ -74,15 +74,25 @@ jobs:
           artifact-ids: ${{ needs.prepare.outputs.artifact-id }}
           path: dist/release/
 
-      - name: Publish the prepared archive with trusted publishing
-        run: pnpm publish dist/release/radiant.tgz --no-git-checks --ignore-scripts --access public --tag latest --registry https://registry.npmjs.org/ --publish-wait-timeout 300000
-
-      - name: Confirm registry integrity
+      - name: Publish and verify the prepared archive
         run: |
-          version=$(jq -r .version dist/release/release.json)
-          published=$(pnpm view "@cognitap/radiant@$version" dist.integrity --registry https://registry.npmjs.org/ --json | jq -r .)
-          expected=$(jq -r .integrity dist/release/release.json)
-          if [ "$published" != "$expected" ]; then
-            printf 'published %s\nexpected  %s\n' "$published" "$expected"
-            exit 1
-          fi
+          version=$(jq -er .version dist/release/release.json)
+          expected=$(jq -er .integrity dist/release/release.json)
+          for attempt in {0..30}; do
+            if published=$(curl -fsS --max-time 10 -H 'Cache-Control: no-cache' "https://registry.npmjs.org/@cognitap%2Fradiant/$version" | jq -er .dist.integrity); then
+              if [ "$published" != "$expected" ]; then
+                echo 'Registry integrity differs from the release archive.' >&2
+                exit 1
+              fi
+              echo "Verified @cognitap/radiant@$version."
+              exit 0
+            fi
+            if [ "$attempt" -eq 0 ]; then
+              # An upload can succeed even when the publish command fails.
+              pnpm publish dist/release/radiant.tgz --no-git-checks --ignore-scripts --access public --tag latest --registry https://registry.npmjs.org/ --publish-wait-timeout 300000 || echo 'Publish returned an error; checking npm.'
+            else
+              sleep 5
+            fi
+          done
+          echo "Could not verify @cognitap/radiant@$version after 30 registry checks." >&2
+          exit 1

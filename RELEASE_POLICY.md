@@ -68,10 +68,11 @@ stored token; the first authenticated local publication has no CI provenance.
 
 ### Failed publication and fixes
 
-Fix the cause, such as scope access or trusted-publisher configuration, and
-rerun the failed publish job; it reuses the original candidate. Never change
-source or regenerate a candidate to retry. After a timeout, check whether npm
-accepted the upload before retrying:
+Fix the cause and rerun the failed publish job; it reuses the original
+candidate. The job checks npm before uploading, skips an existing version
+only when its integrity matches, and retries verification while npm propagates
+the release. A different integrity fails immediately. Never change source or
+regenerate a candidate to retry. To verify manually:
 
 ```sh
 pnpm view @cognitap/radiant@<version> dist.integrity
