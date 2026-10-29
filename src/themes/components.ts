@@ -288,6 +288,24 @@ export const componentRegistry = {
     focusOffset: 'css',
     focusStyle: 'css'
   },
+  popover: {
+    width: 'css',
+    padding: 'css',
+    gap: 'css',
+    radius: 'css',
+    cornerShape: 'css',
+    background: 'css',
+    color: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    shadow: 'css',
+    backdropFilter: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
   dialog: {
     width: 'css',
     padding: 'css',

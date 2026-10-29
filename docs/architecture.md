@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's seventeen families fit together and why. Props are on the
+How Radiant's eighteen families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, Link, Field, Input, Textarea, Select, Combobox, Checkbox, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Popover, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -23,7 +23,7 @@ Each piece of behavior has one owner:
 Why: the browser already gets keyboard, focus and form behavior right.
 Radiant has no headless-library dependency. Select owns its themed listbox and
 item focus, while a visually hidden native select supplies form semantics.
-Select and Combobox portals use the local top layer, preserving theme and modal ancestry.
+Select, Combobox and Popover use the local top layer, preserving theme and modal ancestry.
 Combobox keeps DOM focus on its native input and submits the committed key through
 a hidden text control. Search text never becomes a selection. Applications own async
 requests, cancellation and selected labels; results never trigger selection.
@@ -106,6 +106,8 @@ host, never a wrapper:
 | Input / Checkbox / Switch / Slider / Radio                      | Native `input`                                      |
 | Textarea                                                        | Native `textarea`                                   |
 | Select / SelectPortal / Combobox / ComboboxPortal               | None; state / portal                                |
+| Popover / PopoverPortal                                         | None; state / portal                                |
+| PopoverTrigger / PopoverClose / PopoverContent                  | Button's `button` / Button's `button` / `div`       |
 | SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
 | ComboboxInput / ComboboxContent / ComboboxItem                  | Native `input` / `div` / `div`                      |
 | ComboboxTrigger / ComboboxClear                                 | Button's `button`                                   |
@@ -155,6 +157,7 @@ may refuse it. No-op requests and prop syncs fire no callback.
 | Combobox                           | `value` / `defaultValue`; `query` / `defaultQuery` | `onValueChange(string \| null)`; `onQueryChange(string)` | `null`; `''`           |
 | Tabs                               | `value` / `defaultValue`                           | `onValueChange(string)`                                  | Initial value required |
 | Dialog, AlertDialog, Collapsible   | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                  | `false`                |
+| Popover                            | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                  | `false`                |
 | Accordion single                   | `value` / `defaultValue`                           | `onValueChange(string \| null)`                          | `null`                 |
 | Accordion multiple                 | `value` / `defaultValue`                           | `onValueChange(string[])`                                | `[]`                   |
 

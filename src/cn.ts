@@ -39,9 +39,19 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-height)',
         'h-(--rad-slider-length)'
       ],
-      w: ['w-(--rad-switch-width)', 'w-(--rad-slider-height)', 'w-(--rad-slider-length)'],
+      w: [
+        'w-(--rad-popover-width)',
+        'w-(--rad-switch-width)',
+        'w-(--rad-slider-height)',
+        'w-(--rad-slider-length)'
+      ],
       size: ['size-(--rad-slider-thumb-size)', 'size-(--rad-slider-track-size)'],
-      gap: ['gap-(--rad-switch-gap)', 'gap-(--rad-tabs-gap)', 'gap-(--rad-tabs-list-gap)'],
+      gap: [
+        'gap-(--rad-popover-gap)',
+        'gap-(--rad-switch-gap)',
+        'gap-(--rad-tabs-gap)',
+        'gap-(--rad-tabs-list-gap)'
+      ],
       'min-h': ['min-h-(--rad-textarea-min-height)', 'min-h-(--rad-tabs-trigger-height)'],
       py: ['py-(--rad-textarea-padding-block)'],
       px: [
@@ -51,12 +61,14 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-popover-padding)',
         'p-(--rad-combobox-content-padding)',
         'p-(--rad-select-content-padding)',
         'p-(--rad-tabs-list-padding)',
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-popover-radius)',
         'rounded-(--rad-combobox-radius)',
         'rounded-(--rad-select-radius)',
         'rounded-(--rad-textarea-radius)',
@@ -73,6 +85,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-popover-border-width)',
         'border-(--rad-combobox-border-width)',
         'border-(--rad-select-border-width)',
         'border-(--rad-textarea-border-width)',
@@ -81,12 +94,14 @@ export const cn: CnFunction = createCn({
         'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
+        'border-(--rad-popover-border-style)',
         'border-(--rad-combobox-border-style)',
         'border-(--rad-select-border-style)',
         'border-(--rad-textarea-border-style)',
         'border-(--rad-switch-border-style)'
       ],
       shadow: [
+        'shadow-(--rad-popover-shadow)',
         'shadow-(--rad-combobox-shadow)',
         'shadow-(--rad-select-shadow)',
         'shadow-(--rad-combobox-content-shadow)',
@@ -95,6 +110,7 @@ export const cn: CnFunction = createCn({
         'shadow-(--rad-slider-thumb-shadow)'
       ],
       'corner-shape': [
+        '[corner-shape:var(--rad-popover-corner-shape)]',
         '[corner-shape:var(--rad-combobox-corner-shape)]',
         '[corner-shape:var(--rad-select-corner-shape)]',
         '[corner-shape:var(--rad-textarea-corner-shape)]',
@@ -103,18 +119,21 @@ export const cn: CnFunction = createCn({
         '[corner-shape:var(--rad-tabs-corner-shape)]'
       ],
       'outline-w': [
+        'outline-(--rad-popover-focus-width)',
         'outline-(--rad-textarea-focus-width)',
         'outline-(--rad-switch-focus-width)',
         'outline-(--rad-slider-focus-width)',
         'outline-(--rad-tabs-focus-width)'
       ],
       'outline-offset': [
+        'outline-offset-(--rad-popover-focus-offset)',
         'outline-offset-(--rad-textarea-focus-offset)',
         'outline-offset-(--rad-switch-focus-offset)',
         'outline-offset-(--rad-slider-focus-offset)',
         'outline-offset-(--rad-tabs-focus-offset)'
       ],
       'outline-style': [
+        'outline-(--rad-popover-focus-style)',
         'outline-(--rad-textarea-focus-style)',
         'outline-(--rad-switch-focus-style)',
         'outline-(--rad-slider-focus-style)',
@@ -122,6 +141,7 @@ export const cn: CnFunction = createCn({
       ],
       opacity: ['opacity-(--rad-tabs-disabled-opacity)'],
       'backdrop-filter': [
+        '[backdrop-filter:var(--rad-popover-backdrop-filter)]',
         '[backdrop-filter:var(--rad-combobox-content-backdrop-filter)]',
         '[backdrop-filter:var(--rad-select-content-backdrop-filter)]'
       ],
