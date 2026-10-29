@@ -5,6 +5,8 @@ export { Field, useField } from './Field.js'
 export type { FieldControlProps, FieldLayout, FieldProps, FieldState } from './Field.js'
 export { Input } from './Input.js'
 export type { InputProps } from './Input.js'
+export { Textarea } from './Textarea.js'
+export type { TextareaProps } from './Textarea.js'
 export {
   Select,
   SelectTrigger,

@@ -32,6 +32,7 @@ import {
   DialogTrigger,
   Field,
   Input,
+  Textarea,
   Link,
   Radio,
   RadioGroup,
@@ -470,7 +471,7 @@ test('inputs preserve native attributes and the character-width size', () => {
 })
 
 test('Field protects owned relationships across the native control families', () => {
-  for (const Control of [Input, Checkbox, Radio]) {
+  for (const Control of [Input, Textarea, Checkbox, Radio]) {
     const html = renderToStaticMarkup(
       createElement(
         Field,
@@ -494,7 +495,7 @@ test('Field protects owned relationships across the native control families', ()
         })
       )
     )
-    const input = /<input\b[^>]*>/.exec(html)[0]
+    const input = /<(?:input|textarea)\b[^>]*>/.exec(html)[0]
     assert.match(html, /<label\b[^>]*\sfor="owned"/)
     assert.match(input, /\sid="owned"/)
     assert.match(input, /\srequired=""/)
@@ -930,6 +931,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Button',
     'Field',
     'Input',
+    'Textarea',
     'Checkbox',
     'RadioGroup',
     'Dialog',
@@ -956,6 +958,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Button.tsx',
     'src/Field.tsx',
     'src/Input.tsx',
+    'src/Textarea.tsx',
     'src/Checkbox.tsx',
     'src/RadioGroup.tsx',
     'src/Dialog.tsx',
@@ -1159,4 +1162,24 @@ test('installed layout adapters import safely on the server without React projec
   const { useSpringLayout } = await import('@cognitap/radiant/motion/react')
   assert.equal(typeof bindSpringLayout, 'function')
   assert.equal(typeof useSpringLayout, 'function')
+})
+
+test('Textarea renders native initial text and rejects conflicting value owners', () => {
+  const html = renderToStaticMarkup(
+    createElement(Textarea, { name: 'notes', defaultValue: 'First\nSecond', rows: 4 })
+  )
+  assert.match(html, /^<textarea\b/)
+  assert.match(html, /rows="4"/)
+  assert.match(html, /First\nSecond<\/textarea>/)
+  assert.throws(
+    () =>
+      renderToStaticMarkup(
+        createElement(Textarea, { value: '', defaultValue: 'Initial' } as never)
+      ),
+    /controlled value or a default/
+  )
+  assert.throws(
+    () => renderToStaticMarkup(createElement(Textarea, { value: null } as never)),
+    /empty string/
+  )
 })
