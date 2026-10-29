@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add native Slider.
+
 ## 0.0.10
 
 - Add draggable Switch with Field, forms, shared sizing and theme overrides.

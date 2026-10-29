@@ -7,6 +7,8 @@ export { Input } from './Input.js'
 export type { InputProps } from './Input.js'
 export { Textarea } from './Textarea.js'
 export type { TextareaProps } from './Textarea.js'
+export { Slider } from './Slider.js'
+export type { SliderProps } from './Slider.js'
 export {
   Select,
   SelectTrigger,

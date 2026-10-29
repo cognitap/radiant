@@ -34,6 +34,7 @@ import {
   Field,
   Input,
   Textarea,
+  Slider,
   Link,
   Radio,
   RadioGroup,
@@ -933,6 +934,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Field',
     'Input',
     'Textarea',
+    'Slider',
     'Checkbox',
     'Switch',
     'RadioGroup',
@@ -1210,4 +1212,29 @@ test('Switch server markup uses native checked state, a fixed role and a decorat
       ),
     /controlled value or a default/
   )
+})
+
+test('Slider server markup preserves native numeric ownership and rejects unsupported values', () => {
+  const html = renderToStaticMarkup(
+    createElement(Slider, {
+      name: 'gain',
+      min: -10,
+      max: 10,
+      step: 0.5,
+      defaultValue: 2.5,
+      orientation: 'vertical'
+    })
+  )
+  assert.match(html, /^<input\b/)
+  assert.match(html, /type="range"/)
+  assert.match(html, /value="2.5"/)
+  assert.match(html, /aria-orientation="vertical"/)
+  assert.doesNotMatch(html, /aria-valuenow|aria-valuemin|aria-valuemax|role=/)
+  assert.throws(
+    () => renderToStaticMarkup(createElement(Slider, { value: 0, defaultValue: 50 })),
+    /controlled value or a default/
+  )
+  for (const value of [null, NaN, Infinity, '40', [10, 90]]) {
+    assert.throws(() => renderToStaticMarkup(createElement(Slider, { value })), /finite numbers/)
+  }
 })

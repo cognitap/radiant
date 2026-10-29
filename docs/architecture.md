@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's thirteen families fit together and why. Props are on the
+How Radiant's fourteen families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Button, Link, Field, Input, Textarea, Select, Checkbox, Switch, RadioGroup (with Radio),
+The families are Button, Link, Field, Input, Textarea, Select, Checkbox, Switch, Slider, RadioGroup (with Radio),
 Dialog, Collapsible, Accordion and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -59,7 +59,7 @@ Actions take three independent props:
 | `tone`        | `accent`, `neutral`, `warning`, `danger`                                  | `accent`                      |
 | `controlSize` | `small`, `medium`, `large`                                                | `medium`                      |
 
-A variant picks the treatment and a tone picks the palette. Input, Textarea, Checkbox, Switch,
+A variant picks the treatment and a tone picks the palette. Input, Textarea, Checkbox, Switch, Slider,
 Radio and RadioGroup share `controlSize` but have no variants. Native meanings
 win: `Input.size` stays a character count, and a checkbox `value` stays its
 submitted data. Radius is a theme decision, not a prop.
@@ -97,7 +97,7 @@ host, never a wrapper:
 | --------------------------------------------------------------- | --------------------------------------------------- |
 | Button / Link                                                   | `button` / `a`, including through `render`          |
 | Field                                                           | `div` in control layout; `fieldset` in group layout |
-| Input / Checkbox / Switch / Radio                               | Native `input`                                      |
+| Input / Checkbox / Switch / Slider / Radio                      | Native `input`                                      |
 | Textarea                                                        | Native `textarea`                                   |
 | Select / SelectPortal                                           | None; state / portal                                |
 | SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
@@ -135,15 +135,16 @@ or `open` to control it, or `default*` to set an initial value. Passing both, or
 a mount, throws; remount with a new `key` instead. A controlled callback is a request, and the consumer
 may refuse it. No-op requests and prop syncs fire no callback.
 
-| Family                             | State                        | Callback                                     | Empty   |
-| ---------------------------------- | ---------------------------- | -------------------------------------------- | ------- |
-| Input, Textarea                    | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`    |
-| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false` |
-| RadioGroup                         | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`  |
-| Select                             | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
-| Dialog, Collapsible                | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false` |
-| Accordion single                   | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
-| Accordion multiple                 | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`    |
+| Family                             | State                        | Callback                                     | Empty           |
+| ---------------------------------- | ---------------------------- | -------------------------------------------- | --------------- |
+| Input, Textarea                    | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`            |
+| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false`         |
+| Slider                             | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | Native midpoint |
+| RadioGroup                         | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`          |
+| Select                             | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`          |
+| Dialog, Collapsible                | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false`         |
+| Accordion single                   | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`          |
+| Accordion multiple                 | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`            |
 
 RadioGroup owns its options' `name` and selection. Use one of `onValueChange`
 or `onChange` to write state, not both. `''` is a valid option value, and `null`

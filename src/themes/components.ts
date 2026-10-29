@@ -118,6 +118,27 @@ export const componentRegistry = {
     focusOffset: 'css',
     focusStyle: 'css'
   },
+  slider: {
+    height: 'css',
+    length: 'css',
+    trackSize: 'css',
+    trackRadius: 'css',
+    trackColor: 'css',
+    thumbSize: 'css',
+    thumbRadius: 'css',
+    thumbColor: 'css',
+    thumbBorderWidth: 'css',
+    thumbBorderColor: 'css',
+    thumbShadow: 'css',
+    cornerShape: 'css',
+    invalidTrack: 'css',
+    disabledTrack: 'css',
+    disabledThumb: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css'
+  },
   select: {
     height: 'css',
     padding: 'css',
