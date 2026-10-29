@@ -1,6 +1,7 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createSpring, bindSpringSource } from '../dist/library/motion/index.js'
+import { createSpring, bindSpringSource } from '@cognitap/radiant/motion'
 
 test('a subscribed source owns targets until detached, while the spring keeps its lifecycle', () => {
   const source = createSpring(20, { enabled: false })

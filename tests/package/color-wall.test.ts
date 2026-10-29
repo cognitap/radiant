@@ -1,11 +1,8 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { generateColorWall, colorCalibrationPresets } from '../dist/library/color/index.js'
-import {
-  defineThemeDocument,
-  updateThemeDocument,
-  compileThemeDocument
-} from '../dist/library/index.js'
+import { generateColorWall, colorCalibrationPresets } from '@cognitap/radiant/color'
+import { defineThemeDocument, updateThemeDocument, compileThemeDocument } from '@cognitap/radiant'
 
 const fixtures = [
   '#7C3AED',

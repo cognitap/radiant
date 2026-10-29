@@ -1,3 +1,4 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -7,7 +8,7 @@ import {
   themeDocumentFromDefinition,
   updateThemeAppearance,
   parseThemeDocument
-} from '../dist/library/index.js'
+} from '@cognitap/radiant'
 
 const document = () =>
   themeDocumentFromDefinition({

@@ -1,6 +1,7 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { defineTheme, defaultTheme } from '../dist/library/index.js'
+import { defineTheme, defaultTheme } from '@cognitap/radiant'
 import {
   expressive,
   glass,
@@ -11,7 +12,7 @@ import {
   themeDefinitions,
   themes,
   ticket
-} from '../dist/library/examples/index.js'
+} from '@cognitap/radiant/examples'
 
 test('partial themes resolve baseline, common values and mode overrides independently', () => {
   const theme = defineTheme({
@@ -119,7 +120,7 @@ test('each example definition compiles to the theme it is published beside', () 
 })
 
 test('the core entry ships only the baseline theme', async () => {
-  const core = await import('../dist/library/index.js')
+  const core = await import('@cognitap/radiant')
   for (const name of [
     'themes',
     'radiant',

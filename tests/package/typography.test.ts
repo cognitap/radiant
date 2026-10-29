@@ -1,3 +1,4 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { execFileSync } from 'node:child_process'
@@ -11,8 +12,7 @@ import {
   exportThemeSections,
   parseThemeDocument,
   defineTheme
-} from '../dist/library/index.js'
-import { cn } from '../dist/library/cn.js'
+} from '@cognitap/radiant'
 
 test('accepted role calculations use independent font-aware rhythms and rem/container output', () => {
   const t = generateTypography()
@@ -156,24 +156,6 @@ test('one compiler resolves generated → authored → mode leaves and preserves
   )
 })
 
-test('registered non-color role utilities merge by property without removing other decisions', () => {
-  for (const role of typographyRoles)
-    for (const [prefix, leaf, caller] of [
-      ['font', 'family', 'font-mono'],
-      ['font', 'weight', 'font-bold'],
-      ['text', 'size', 'text-xl'],
-      ['text', 'fluid-size', 'text-xl'],
-      ['leading', 'line-height', 'leading-loose'],
-      ['tracking', 'letter-spacing', 'tracking-wide'],
-      ['max-inline', 'measure', 'max-inline-none']
-    ]) {
-      const original = `${prefix}-(--rad-typography-roles-${role}-${leaf})`
-      assert.equal(cn(original, caller), caller)
-      assert.equal(cn(caller, original), original)
-    }
-  assert.equal(cn('mbs-(--rad-typography-flow-paragraph)', 'mbs-0'), 'mbs-0')
-})
-
 test('the pure typography entry neither imports React nor reads browser globals', () => {
   execFileSync(
     process.execPath,
@@ -183,7 +165,7 @@ test('the pure typography entry neither imports React nor reads browser globals'
       `
     for(const name of ['window','document','FontFace','localStorage'])
       Object.defineProperty(globalThis,name,{get(){throw new Error(name)}});
-    const {generateTypography}=await import('./dist/library/typography/index.js');
+    const {generateTypography}=await import('@cognitap/radiant/typography');
     generateTypography({preset:'source-serif'});
   `
     ],

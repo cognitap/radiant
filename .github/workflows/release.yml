@@ -81,4 +81,8 @@ jobs:
         run: |
           version=$(jq -r .version dist/release/release.json)
           published=$(pnpm view "@cognitap/radiant@$version" dist.integrity --registry https://registry.npmjs.org/ --json | jq -r .)
-          test "$published" = "$(jq -r .integrity dist/release/release.json)"
+          expected=$(jq -r .integrity dist/release/release.json)
+          if [ "$published" != "$expected" ]; then
+            printf 'published %s\nexpected  %s\n' "$published" "$expected"
+            exit 1
+          fi
