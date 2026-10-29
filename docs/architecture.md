@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's sixteen families fit together and why. Props are on the
+How Radiant's seventeen families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, Link, Field, Input, Textarea, Select, Combobox, Checkbox, Switch, Slider, RadioGroup (with Radio),
-Dialog, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -47,6 +47,9 @@ Use Button for actions and Link for navigation, even when a Link looks like a
 button. Field owns label, help and error relationships. Card groups content.
 Dialog owns open state. Collapsible owns one disclosure, and Accordion composes
 Collapsible for a set of them.
+
+AlertDialog specializes Dialog's native lifecycle, surface tokens and motion for
+urgent decisions. Its modal content retains Dialog identities and adds alert-dialog tokens.
 
 Composed families reuse the real thing: DialogTrigger and DialogClose are
 Buttons, RadioGroup is a Field, and an Accordion item is a Collapsible, so
@@ -109,9 +112,9 @@ host, never a wrapper:
 | Tabs / TabsList / TabsContent                                   | `div`                                               |
 | TabsTrigger                                                     | Button's `button`                                   |
 | RadioGroup                                                      | Field's `fieldset`                                  |
-| Dialog                                                          | None; it only owns state                            |
-| DialogTrigger / DialogClose                                     | Button's `button`                                   |
-| DialogContent / DialogTitle / DialogDescription                 | `dialog` / `h2` / `p`                               |
+| Dialog / AlertDialog                                            | None; state owners                                  |
+| Dialog actions / AlertDialog actions                            | Button's `button`                                   |
+| Dialog and AlertDialog Content / Title / Description            | `dialog` / `h2` / `p`                               |
 | Collapsible / CollapsibleTrigger / CollapsibleContent           | `details` / `summary` / `div`                       |
 | Accordion / AccordionItem / AccordionTrigger / AccordionContent | `div` / `details` / `summary` / `div`               |
 | Card / CardHeader / CardContent / CardFooter                    | `div`                                               |
@@ -151,7 +154,7 @@ may refuse it. No-op requests and prop syncs fire no callback.
 | Select                             | `value` / `defaultValue`                           | `onValueChange(string \| null)`                          | `null`                 |
 | Combobox                           | `value` / `defaultValue`; `query` / `defaultQuery` | `onValueChange(string \| null)`; `onQueryChange(string)` | `null`; `''`           |
 | Tabs                               | `value` / `defaultValue`                           | `onValueChange(string)`                                  | Initial value required |
-| Dialog, Collapsible                | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                  | `false`                |
+| Dialog, AlertDialog, Collapsible   | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                  | `false`                |
 | Accordion single                   | `value` / `defaultValue`                           | `onValueChange(string \| null)`                          | `null`                 |
 | Accordion multiple                 | `value` / `defaultValue`                           | `onValueChange(string[])`                                | `[]`                   |
 

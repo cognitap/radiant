@@ -945,6 +945,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Switch',
     'RadioGroup',
     'Dialog',
+    'AlertDialog',
     'Collapsible',
     'Accordion',
     'ThemeScope'
@@ -974,6 +975,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Tabs.tsx',
     'src/RadioGroup.tsx',
     'src/Dialog.tsx',
+    'src/AlertDialog.tsx',
     'src/Collapsible.tsx',
     'src/Accordion.tsx',
     'src/Card.tsx',

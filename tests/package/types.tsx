@@ -1,4 +1,5 @@
 import type * as Radiant from '@cognitap/radiant'
+import './alert-dialog-types.js'
 import { createElement, createRef, type ComponentProps, type Ref, useRef } from 'react'
 import {
   updateThemeDocument,

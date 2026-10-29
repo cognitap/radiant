@@ -92,6 +92,27 @@ export type {
   DialogTriggerProps
 } from './Dialog.js'
 export {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  useAlertDialog
+} from './AlertDialog.js'
+export type {
+  AlertDialogProps,
+  AlertDialogState,
+  AlertDialogRenderProps,
+  AlertDialogTriggerProps,
+  AlertDialogContentProps,
+  AlertDialogTitleProps,
+  AlertDialogDescriptionProps,
+  AlertDialogActionProps,
+  AlertDialogCancelProps
+} from './AlertDialog.js'
+export {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,

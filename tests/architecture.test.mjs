@@ -49,12 +49,14 @@ test('package import and server rendering do not read browser globals or attach 
     for (const name of ['window', 'document', 'localStorage']) {
       Object.defineProperty(globalThis, name, { get() { throw new Error('Unexpected browser read: ' + name); } });
     }
-    const { Dialog, DialogContent, DialogTitle, DialogDescription, Checkbox, Radio } = await import('./dist/library/index.js');
+    const { Dialog, DialogContent, DialogTitle, DialogDescription, AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, Checkbox, Radio } = await import('./dist/library/index.js');
     const ref = () => { throw new Error('A server render attached a DOM ref'); };
     const html = renderToString(h(Dialog, { defaultOpen: true },
       h(DialogContent, { ref }, h(DialogTitle, null, 'Panel'), h(DialogDescription, null, 'Details'),
         h(Checkbox, { ref, label: 'Mixed', indeterminate: true }), h(Radio, { ref, label: 'Choice', value: 'yes' }))));
     assert.doesNotMatch(html.match(/<dialog\\b[^>]*>/)?.[0] ?? '', /\\sopen(?:=|\\s|>)/);
+    const alert = renderToString(h(AlertDialog, { defaultOpen: true }, h(AlertDialogContent, { ref }, h(AlertDialogTitle, null, 'Confirm'), h(AlertDialogDescription, null, 'Message'), h(AlertDialogCancel, { ref }, 'Cancel'))));
+    assert.match(alert, /role="alertdialog"/);
     for (const name of ['joinIds', 'composeAction', 'useComposedRefs', 'useControllableState', 'useNativeOwner', 'useFieldControl']) {
       assert.equal(name in await import('./dist/library/index.js'), false);
     }
