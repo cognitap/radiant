@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Skeleton.
+
 ## 0.0.21
 
 - Add Spinner.

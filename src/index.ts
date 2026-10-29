@@ -291,3 +291,6 @@ export type { ProgressProps } from './Progress.js'
 
 export { Spinner } from './Spinner.js'
 export type { SpinnerProps } from './Spinner.js'
+
+export { Skeleton } from './Skeleton.js'
+export type { SkeletonProps } from './Skeleton.js'

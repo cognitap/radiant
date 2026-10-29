@@ -445,6 +445,13 @@ export const componentRegistry = {
     duration: 'css',
     trackOpacity: 'opacity'
   },
+  skeleton: {
+    width: 'css',
+    height: 'css',
+    radius: 'css',
+    color: 'css',
+    duration: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 

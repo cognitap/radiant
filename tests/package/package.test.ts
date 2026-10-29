@@ -951,6 +951,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Menu',
     'Toast',
     'Spinner',
+    'Skeleton',
     'Collapsible',
     'Accordion',
     'ThemeScope'
