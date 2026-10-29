@@ -17,6 +17,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-family)'
       ],
       'font-weight': [
+        'font-(--rad-tooltip-font-weight)',
         ...roleClasses('font', 'weight'),
         'font-(--rad-combobox-font-weight)',
         'font-(--rad-select-font-weight)',
@@ -24,6 +25,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-tooltip-font-size)',
         ...roleClasses('text', 'size'),
         ...roleClasses('text', 'fluid-size'),
         'text-(--rad-combobox-font-size)',
@@ -45,6 +47,7 @@ export const cn: CnFunction = createCn({
         'w-(--rad-slider-height)',
         'w-(--rad-slider-length)'
       ],
+      'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: ['size-(--rad-slider-thumb-size)', 'size-(--rad-slider-track-size)'],
       gap: [
         'gap-(--rad-popover-gap)',
@@ -61,6 +64,7 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-tooltip-padding)',
         'p-(--rad-popover-padding)',
         'p-(--rad-combobox-content-padding)',
         'p-(--rad-select-content-padding)',
@@ -68,6 +72,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-tooltip-radius)',
         'rounded-(--rad-popover-radius)',
         'rounded-(--rad-combobox-radius)',
         'rounded-(--rad-select-radius)',
@@ -85,6 +90,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-tooltip-border-width)',
         'border-(--rad-popover-border-width)',
         'border-(--rad-combobox-border-width)',
         'border-(--rad-select-border-width)',
@@ -94,6 +100,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
+        'border-(--rad-tooltip-border-style)',
         'border-(--rad-popover-border-style)',
         'border-(--rad-combobox-border-style)',
         'border-(--rad-select-border-style)',
@@ -101,6 +108,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-switch-border-style)'
       ],
       shadow: [
+        'shadow-(--rad-tooltip-shadow)',
         'shadow-(--rad-popover-shadow)',
         'shadow-(--rad-combobox-shadow)',
         'shadow-(--rad-select-shadow)',
