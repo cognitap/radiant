@@ -37,9 +37,8 @@ covers what a story play cannot prove: native Escape, Tab, summary activation,
 and downloads. It also emulates reduced motion and forced colors across every
 preset.
 
-Results go to `output/browser/`: `junit.xml`, failure screenshots in
-`attachments/`, and `environment.json` with the exact browser, OS and commit.
-CI uploads them as **browser-results** and keeps them for 14 days.
+Results go to `output/browser/`: `junit.xml` and failure screenshots in
+`attachments/`. CI uploads them as **browser-results** and keeps them for 14 days.
 
 ## Where a test belongs
 
@@ -71,14 +70,6 @@ Results and captures go to `output/browser/installed-styles/` and
 
 ```sh
 pnpm exec vite preview --host 127.0.0.1 --port 4175 --strictPort --outDir output/browser/installed-compositions/client
-```
-
-To check a build inside Cognitap without changing its checkout:
-
-```sh
-pnpm build
-pnpm pack --out /tmp/radiant.tgz
-pnpm exec node scripts/verify-cognitap.mjs /path/to/cognitap /tmp/radiant.tgz
 ```
 
 ## What to put in the pull request
