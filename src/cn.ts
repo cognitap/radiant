@@ -17,6 +17,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-family)'
       ],
       'font-weight': [
+        'font-(--rad-alert-title-weight)',
         'font-(--rad-tooltip-font-weight)',
         ...roleClasses('font', 'weight'),
         'font-(--rad-combobox-font-weight)',
@@ -25,6 +26,8 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-alert-title-size)',
+        'text-(--rad-alert-description-size)',
         'text-(--rad-tooltip-font-size)',
         ...roleClasses('text', 'size'),
         ...roleClasses('text', 'fluid-size'),
@@ -51,6 +54,7 @@ export const cn: CnFunction = createCn({
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: ['size-(--rad-slider-thumb-size)', 'size-(--rad-slider-track-size)'],
       gap: [
+        'gap-(--rad-alert-gap)',
         'gap-(--rad-popover-gap)',
         'gap-(--rad-switch-gap)',
         'gap-(--rad-tabs-gap)',
@@ -65,6 +69,7 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-alert-padding)',
         'p-(--rad-menu-padding)',
         'p-(--rad-menu-item-padding)',
         'p-(--rad-tooltip-padding)',
@@ -75,6 +80,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-alert-radius)',
         'rounded-(--rad-menu-radius)',
         'rounded-(--rad-menu-item-radius)',
         'rounded-(--rad-tooltip-radius)',
@@ -95,6 +101,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-alert-border-width)',
         'border-(--rad-menu-border-width)',
         'border-(--rad-tooltip-border-width)',
         'border-(--rad-popover-border-width)',
@@ -106,6 +113,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
+        'border-(--rad-alert-border-style)',
         'border-(--rad-menu-border-style)',
         'border-(--rad-tooltip-border-style)',
         'border-(--rad-popover-border-style)',
@@ -115,6 +123,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-switch-border-style)'
       ],
       shadow: [
+        'shadow-(--rad-alert-shadow)',
         'shadow-(--rad-menu-shadow)',
         'shadow-(--rad-tooltip-shadow)',
         'shadow-(--rad-popover-shadow)',

@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority'
 
-// Palette and readable ink are shared by action-shaped and text links. Ink is
+// Palette and readable ink are shared by actions, text links and inline feedback. Ink is
 // mixed toward the scope foreground so pale warning/accent fills stay readable
 // on an unfilled surface in either mode. Neutral preserves the quiet palette.
 const tones = {

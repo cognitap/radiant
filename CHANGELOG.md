@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Alert.
+
 ## 0.0.17
 
 - Add Menu.
@@ -30,7 +32,7 @@
 
 ## 0.0.11
 
-- Add native Slider.
+- Add Slider.
 
 ## 0.0.10
 
