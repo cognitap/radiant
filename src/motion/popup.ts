@@ -12,11 +12,11 @@ export function bindPopupMotion(node: HTMLElement, initial: MotionProfile): Moti
     ...resolveMotion(profile, 'dialog', query.matches),
     reducedValue: 0
   })
-  const previous = node.style.getPropertyValue('--_rad-select-enter')
+  const previous = node.style.getPropertyValue('--_rad-popup-enter')
   let owned = previous
   const render = (value: number) => {
     owned = String(Math.max(0, Math.min(1, value)))
-    node.style.setProperty('--_rad-select-enter', owned)
+    node.style.setProperty('--_rad-popup-enter', owned)
   }
   const off = spring.subscribe(render)
   render(spring.get())
@@ -46,9 +46,9 @@ export function bindPopupMotion(node: HTMLElement, initial: MotionProfile): Moti
       query.removeEventListener('change', sync)
       off()
       spring.destroy()
-      if (node.style.getPropertyValue('--_rad-select-enter') === owned) {
-        if (previous) node.style.setProperty('--_rad-select-enter', previous)
-        else node.style.removeProperty('--_rad-select-enter')
+      if (node.style.getPropertyValue('--_rad-popup-enter') === owned) {
+        if (previous) node.style.setProperty('--_rad-popup-enter', previous)
+        else node.style.removeProperty('--_rad-popup-enter')
       }
     }
   }

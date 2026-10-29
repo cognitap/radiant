@@ -606,7 +606,7 @@ export function SelectContent({
         controlMetrics({ controlSize: select.controlSize }),
         motionActive &&
           !motionOff &&
-          'opacity-[var(--_rad-select-enter,0)] motion-reduce:opacity-100',
+          'opacity-[var(--_rad-popup-enter,0)] motion-reduce:opacity-100',
         className
       )}
       data-slot="select-content"

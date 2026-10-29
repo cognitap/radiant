@@ -1,3 +1,25 @@
+export {
+  Combobox,
+  ComboboxInput,
+  ComboboxTrigger,
+  ComboboxClear,
+  ComboboxPortal,
+  ComboboxContent,
+  ComboboxItem,
+  ComboboxStatus,
+  useCombobox
+} from './Combobox.js'
+export type {
+  ComboboxProps,
+  ComboboxOption,
+  ComboboxState,
+  ComboboxInputProps,
+  ComboboxTriggerProps,
+  ComboboxClearProps,
+  ComboboxContentProps,
+  ComboboxItemProps,
+  ComboboxStatusProps
+} from './Combobox.js'
 export { Button } from './Button.js'
 export { Link } from './Link.js'
 export type { LinkProps, LinkRenderProps, LinkVariant } from './Link.js'
