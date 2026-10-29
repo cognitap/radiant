@@ -13,7 +13,7 @@ import type { ControlSize, ControlParts } from './presentation.js'
 
 const switchVariants = cva([
   controlBorderClass,
-  'peer col-start-1 row-start-1 m-0 box-border appearance-none touch-pan-y select-none cursor-grab data-dragging:cursor-grabbing',
+  'peer col-start-1 row-start-1 m-0 box-border appearance-none touch-pan-y select-none cursor-default',
   'h-[var(--rad-switch-height,calc(var(--_rad-control-indicator-size)*1.25))]',
   'w-[var(--rad-switch-width,calc(var(--_rad-control-indicator-size)*2.25))]',
   'rounded-[var(--rad-switch-radius,var(--rad-control-radius,0.5rem))]',
@@ -44,7 +44,7 @@ const indicatorClass =
   'pointer-events-none absolute inset-[3px] flex justify-start peer-checked:justify-end [color:var(--rad-switch-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] peer-checked:[color:var(--rad-switch-checked-thumb,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-switch-disabled-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[CanvasText] forced-colors:peer-checked:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
 
 const rowClass =
-  'inline-flex min-h-6 min-w-0 max-w-full cursor-pointer items-center gap-[var(--rad-switch-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
+  'inline-flex min-h-6 min-w-0 max-w-full cursor-default items-center gap-[var(--rad-switch-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 const labelClass =
   'min-w-0 break-words font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-[number:var(--rad-typography-roles-ui-label-weight,400)] [color:var(--rad-switch-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-switch-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
 
