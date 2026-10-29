@@ -21,6 +21,25 @@ export type {
   ComboboxStatusProps
 } from './Combobox.js'
 export { Button } from './Button.js'
+export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverClose,
+  PopoverPortal,
+  usePopover
+} from './Popover.js'
+export type {
+  PopoverProps,
+  PopoverState,
+  PopoverTriggerProps,
+  PopoverContentProps,
+  PopoverCloseProps,
+  PopoverPortalProps,
+  PopoverRenderProps,
+  PopoverSide,
+  PopoverAlign
+} from './Popover.js'
 export { Link } from './Link.js'
 export type { LinkProps, LinkRenderProps, LinkVariant } from './Link.js'
 export { Field, useField } from './Field.js'

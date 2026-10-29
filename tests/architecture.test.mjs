@@ -57,6 +57,8 @@ test('package import and server rendering do not read browser globals or attach 
     assert.doesNotMatch(html.match(/<dialog\\b[^>]*>/)?.[0] ?? '', /\\sopen(?:=|\\s|>)/);
     const alert = renderToString(h(AlertDialog, { defaultOpen: true }, h(AlertDialogContent, { ref }, h(AlertDialogTitle, null, 'Confirm'), h(AlertDialogDescription, null, 'Message'), h(AlertDialogCancel, { ref }, 'Cancel'))));
     assert.match(alert, /role="alertdialog"/);
+    const { Popover, PopoverTrigger, PopoverContent } = await import('./dist/library/index.js');
+    assert.match(renderToString(h(Popover, { defaultOpen: true }, h(PopoverTrigger, { ref }, 'Details'), h(PopoverContent, { ref }, 'Content'))), /popover="manual"/);
     for (const name of ['joinIds', 'composeAction', 'useComposedRefs', 'useControllableState', 'useNativeOwner', 'useFieldControl']) {
       assert.equal(name in await import('./dist/library/index.js'), false);
     }

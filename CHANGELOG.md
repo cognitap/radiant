@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Popover.
+
 ## 0.0.14
 
 - Add AlertDialog.
@@ -22,7 +24,7 @@
 
 ## 0.0.10
 
-- Add draggable Switch with Field, forms, sizing and theme overrides.
+- Add draggable Switch with Field, forms, sizing and theming.
 
 ## 0.0.9
 
