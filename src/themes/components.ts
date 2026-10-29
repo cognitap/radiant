@@ -427,6 +427,15 @@ export const componentRegistry = {
     inset: 'css',
     zIndex: 'number'
   },
+  progress: {
+    height: 'css',
+    radius: 'css',
+    trackColor: 'css',
+    indicatorColor: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 
