@@ -5,7 +5,7 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
-- Add Select with compound picker parts, focused-option navigation, Field integration, native form/reset/autofill bridging, viewport placement and opt-in spring motion.
+- Add Select with item focus, Field/native forms, themes and springs; open at trigger width without drift or flashes.
 
 ## 0.0.7
 

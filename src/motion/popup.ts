@@ -14,10 +14,12 @@ export function bindPopupMotion(node: HTMLElement, initial: MotionProfile): Moti
   })
   const previous = node.style.getPropertyValue('--_rad-select-enter')
   let owned = previous
-  const off = spring.subscribe(value => {
+  const render = (value: number) => {
     owned = String(Math.max(0, Math.min(1, value)))
     node.style.setProperty('--_rad-select-enter', owned)
-  })
+  }
+  const off = spring.subscribe(render)
+  render(spring.get())
   const sync = () => {
     const next = node.dataset.state === 'open'
     const resolved = resolveMotion(profile, 'dialog', query.matches)

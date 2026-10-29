@@ -366,6 +366,11 @@ export async function verifyInstalledStyles(consumer, archive, installTailwind) 
           assert.equal(await picker.isVisible(), true)
           assert.notEqual(nativeSelectStyle.border, 'none')
           assert.ok(nativeSelectStyle.width >= 24)
+          const selectBounds = await select.boundingBox()
+          assert.ok(
+            Math.abs(nativeSelectStyle.width - selectBounds.width) <= 1,
+            'Select popup opens at the trigger width'
+          )
           await page.keyboard.press('Home')
           await page.keyboard.press('ArrowDown')
           await page.keyboard.press('Enter')

@@ -444,7 +444,7 @@ export function SelectContent({
   const mergedRef = useComposedRefs(select.content, ref)
   const {
     ref: transitionRef,
-    ready: motionReady,
+    active: motionActive,
     off: motionOff
   } = useTransitionHost('popup', mergedRef, motion === 'off')
   const latest = useRef(select)
@@ -470,9 +470,19 @@ export function SelectContent({
       wasOpen.current = false
       return
     }
+    const seedWidth = () => {
+      const available =
+        (win.visualViewport?.width ?? win.innerWidth) - 2 * Math.max(0, collisionPadding)
+      const width = `${Math.min(trigger.getBoundingClientRect().width, Math.max(0, available))}px`
+      if (node.style.getPropertyValue('--_rad-select-width') !== width)
+        node.style.setProperty('--_rad-select-width', width)
+    }
+    // Top-layer auto layout is viewport-sized. Establish the anchor width before it can paint.
+    seedWidth()
     node.showPopover()
     const place = () => {
       if (!node.isConnected || !node.matches(':popover-open')) return
+      seedWidth()
       const viewport = win.visualViewport
       const selected = Array.from(
         node.querySelectorAll<HTMLElement>('[data-slot~="select-item"]')
@@ -487,7 +497,7 @@ export function SelectContent({
         : node.scrollHeight
       const next = positionSelect({
         trigger: rect,
-        width: node.scrollWidth,
+        width: node.getBoundingClientRect().width,
         height:
           naturalHeight +
           parseFloat(computed.borderTopWidth) +
@@ -594,7 +604,9 @@ export function SelectContent({
       className={cn(
         selectContentClass,
         controlMetrics({ controlSize: select.controlSize }),
-        motionReady && !motionOff && 'opacity-[var(--_rad-select-enter,1)]',
+        motionActive &&
+          !motionOff &&
+          'opacity-[var(--_rad-select-enter,0)] motion-reduce:opacity-100',
         className
       )}
       data-slot="select-content"

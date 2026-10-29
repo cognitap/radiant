@@ -66,6 +66,97 @@ const native = (host: HTMLElement) => host.querySelector<HTMLSelectElement>('sel
 const popup = (host: HTMLElement) =>
   host.querySelector<HTMLElement>('[data-slot="select-content"]')!
 
+test('picker has trigger width on its first visible frame and remains stable across reopening and resize', async () => {
+  const { host } = await mount(
+    <div style={{ width: 280 }}>
+      <Field label="City">
+        <Select
+          items={items}
+          defaultValue="rome"
+        />
+      </Field>
+    </div>
+  )
+  for (const width of [280, 360, 220]) {
+    await act(async () => {
+      ;(host.firstElementChild as HTMLElement).style.width = `${width}px`
+    })
+    for (let opening = 0; opening < 2; opening++) {
+      const frames: number[] = []
+      let frame = 0
+      const sample = () => {
+        if (popup(host).matches(':popover-open'))
+          frames.push(popup(host).getBoundingClientRect().width)
+        frame = requestAnimationFrame(sample)
+      }
+      frame = requestAnimationFrame(sample)
+      try {
+        await click(trigger(host))
+        await expect.poll(() => frames.length).toBeGreaterThanOrEqual(5)
+        const expected = trigger(host).getBoundingClientRect().width
+        expect(
+          frames.every(measured => Math.abs(measured - expected) <= 1),
+          JSON.stringify({ expected, frames })
+        ).toBe(true)
+      } finally {
+        cancelAnimationFrame(frame)
+      }
+      await keys('{Escape}')
+    }
+  }
+})
+
+test('popup motion fades from its initial opacity without a visible flash or geometry animation', async () => {
+  const theme = defineTheme({
+    id: 'select-opening',
+    name: 'Opening',
+    motion: { spring: { stiffness: 100, damping: 30, mass: 1 } }
+  })
+  const { host } = await mount(
+    <ThemeScope theme={theme}>
+      <MotionProvider>
+        <div style={{ width: 280 }}>
+          <Field label="City">
+            <Select
+              items={items}
+              defaultValue="rome"
+            />
+          </Field>
+        </div>
+      </MotionProvider>
+    </ThemeScope>
+  )
+  const frames: { width: number; opacity: number }[] = []
+  let frame = 0
+  const sample = () => {
+    if (popup(host).matches(':popover-open'))
+      frames.push({
+        width: popup(host).getBoundingClientRect().width,
+        opacity: Number(getComputedStyle(popup(host)).opacity)
+      })
+    frame = requestAnimationFrame(sample)
+  }
+  frame = requestAnimationFrame(sample)
+  try {
+    await click(trigger(host))
+    await expect.poll(() => frames.length).toBeGreaterThanOrEqual(8)
+    expect(
+      frames.every(value => Math.abs(value.width - 280) <= 1),
+      JSON.stringify(frames)
+    ).toBe(true)
+    expect(frames[0].opacity).toBeLessThan(1)
+    expect(
+      frames.every(
+        (value, index) => index === 0 || value.opacity >= frames[index - 1].opacity - 0.001
+      ),
+      JSON.stringify(frames)
+    ).toBe(true)
+  } finally {
+    cancelAnimationFrame(frame)
+  }
+  await keys('{Escape}')
+})
+
 test('item focus, disabled skipping, typeahead, selection, Escape and form notifications', async () => {
   const requested = vi.fn()
   const changed = vi.fn()

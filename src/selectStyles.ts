@@ -15,7 +15,7 @@ export const selectTriggerClass = [
 ].join(' ')
 
 export const selectContentClass = [
-  'fixed m-0 box-border min-w-0 overflow-hidden overscroll-contain',
+  'fixed right-auto bottom-auto m-0 box-border min-w-0 overflow-hidden overscroll-contain',
   'left-[var(--_rad-select-left,0px)] top-[var(--_rad-select-top,0px)] w-[var(--_rad-select-width,auto)] max-h-[var(--_rad-select-max-height,calc(100dvh-1rem))]',
   'p-[var(--rad-select-content-padding,0.25rem)] rounded-[var(--rad-select-content-radius,var(--rad-surface-radius,0.75rem))]',
   '[border-width:var(--rad-select-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-select-border-style,var(--rad-surface-border-style,solid))] [border-color:var(--rad-select-border-color,var(--rad-color-border))]',
