@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's twelve families fit together and why. Props are on the
+How Radiant's thirteen families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Button, Link, Field, Input, Textarea, Select, Checkbox, RadioGroup (with Radio),
+The families are Button, Link, Field, Input, Textarea, Select, Checkbox, Switch, RadioGroup (with Radio),
 Dialog, Collapsible, Accordion and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -59,7 +59,7 @@ Actions take three independent props:
 | `tone`        | `accent`, `neutral`, `warning`, `danger`                                  | `accent`                      |
 | `controlSize` | `small`, `medium`, `large`                                                | `medium`                      |
 
-A variant picks the treatment and a tone picks the palette. Input, Textarea, Checkbox,
+A variant picks the treatment and a tone picks the palette. Input, Textarea, Checkbox, Switch,
 Radio and RadioGroup share `controlSize` but have no variants. Native meanings
 win: `Input.size` stays a character count, and a checkbox `value` stays its
 submitted data. Radius is a theme decision, not a prop.
@@ -97,7 +97,7 @@ host, never a wrapper:
 | --------------------------------------------------------------- | --------------------------------------------------- |
 | Button / Link                                                   | `button` / `a`, including through `render`          |
 | Field                                                           | `div` in control layout; `fieldset` in group layout |
-| Input / Checkbox / Radio                                        | Native `input`                                      |
+| Input / Checkbox / Switch / Radio                               | Native `input`                                      |
 | Textarea                                                        | Native `textarea`                                   |
 | Select / SelectPortal                                           | None; state / portal                                |
 | SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
@@ -111,7 +111,7 @@ host, never a wrapper:
 | CardTitle / CardDescription                                     | Heading chosen by `level` / `p`                     |
 
 Internal parts take `className` and `style` through a `parts` map. Field has
-`label`, `description`, `error` and `required`. Checkbox and Radio have
+`label`, `description`, `error` and `required`. Checkbox, Switch and Radio have
 `wrapper`, `label` and `indicator`, and RadioGroup adds `options`. These hooks
 cannot replace IDs, ARIA, handlers or refs. Caller classes merge after the
 defaults and caller `style` wins. Identity and presentation data attributes
@@ -125,7 +125,8 @@ Why: styling written for Button still reaches a DialogTrigger.
 Style real state: native `:disabled`, `:checked` and `open`, plus `aria-busy`
 for pending. Field and RadioGroup set `data-invalid`, `data-disabled` and
 `data-required`. Disclosures and DialogContent set `data-state="open|closed"`.
-Actions set `data-variant`, `data-tone` and `data-control-size`.
+Actions set `data-variant`, `data-tone` and `data-control-size`. Switch uses
+`data-dragging` during a provisional pointer gesture; `:checked` stays committed.
 
 ## State and forms
 
@@ -134,15 +135,15 @@ or `open` to control it, or `default*` to set an initial value. Passing both, or
 a mount, throws; remount with a new `key` instead. A controlled callback is a request, and the consumer
 may refuse it. No-op requests and prop syncs fire no callback.
 
-| Family                     | State                        | Callback                                     | Empty   |
-| -------------------------- | ---------------------------- | -------------------------------------------- | ------- |
-| Input, Textarea            | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`    |
-| Checkbox, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false` |
-| RadioGroup                 | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`  |
-| Select                     | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
-| Dialog, Collapsible        | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false` |
-| Accordion single           | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
-| Accordion multiple         | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`    |
+| Family                             | State                        | Callback                                     | Empty   |
+| ---------------------------------- | ---------------------------- | -------------------------------------------- | ------- |
+| Input, Textarea                    | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`    |
+| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false` |
+| RadioGroup                         | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`  |
+| Select                             | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
+| Dialog, Collapsible                | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false` |
+| Accordion single                   | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`  |
+| Accordion multiple                 | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`    |
 
 RadioGroup owns its options' `name` and selection. Use one of `onValueChange`
 or `onChange` to write state, not both. `''` is a valid option value, and `null`

@@ -23,9 +23,12 @@ export const cn: CnFunction = createCn({
         ...roleClasses('text', 'size'),
         ...roleClasses('text', 'fluid-size'),
         'text-(--rad-select-font-size)',
-        'text-(--rad-textarea-font-size)'
+        'text-(--rad-textarea-font-size)',
+        'text-(--rad-switch-label-size)'
       ],
-      h: ['h-(--rad-select-height)'],
+      h: ['h-(--rad-select-height)', 'h-(--rad-switch-height)'],
+      w: ['w-(--rad-switch-width)'],
+      gap: ['gap-(--rad-switch-gap)'],
       'min-h': ['min-h-(--rad-textarea-min-height)'],
       py: ['py-(--rad-textarea-padding-block)'],
       px: ['px-(--rad-select-padding)', 'px-(--rad-textarea-padding)'],
@@ -33,13 +36,20 @@ export const cn: CnFunction = createCn({
       rounded: [
         'rounded-(--rad-select-radius)',
         'rounded-(--rad-textarea-radius)',
+        'rounded-(--rad-switch-radius)',
+        'rounded-(--rad-switch-thumb-radius)',
         'rounded-(--rad-select-content-radius)',
         'rounded-(--rad-select-item-radius)'
       ],
-      'border-w': ['border-(--rad-select-border-width)', 'border-(--rad-textarea-border-width)'],
+      'border-w': [
+        'border-(--rad-select-border-width)',
+        'border-(--rad-textarea-border-width)',
+        'border-(--rad-switch-border-width)'
+      ],
       'border-style': [
         'border-(--rad-select-border-style)',
-        'border-(--rad-textarea-border-style)'
+        'border-(--rad-textarea-border-style)',
+        'border-(--rad-switch-border-style)'
       ],
       shadow: [
         'shadow-(--rad-select-shadow)',
@@ -48,11 +58,18 @@ export const cn: CnFunction = createCn({
       ],
       'corner-shape': [
         '[corner-shape:var(--rad-select-corner-shape)]',
-        '[corner-shape:var(--rad-textarea-corner-shape)]'
+        '[corner-shape:var(--rad-textarea-corner-shape)]',
+        '[corner-shape:var(--rad-switch-corner-shape)]'
       ],
-      'outline-w': ['outline-(--rad-textarea-focus-width)'],
-      'outline-offset': ['outline-offset-(--rad-textarea-focus-offset)'],
-      'outline-style': ['outline-(--rad-textarea-focus-style)'],
+      'outline-w': ['outline-(--rad-textarea-focus-width)', 'outline-(--rad-switch-focus-width)'],
+      'outline-offset': [
+        'outline-offset-(--rad-textarea-focus-offset)',
+        'outline-offset-(--rad-switch-focus-offset)'
+      ],
+      'outline-style': [
+        'outline-(--rad-textarea-focus-style)',
+        'outline-(--rad-switch-focus-style)'
+      ],
       'backdrop-filter': ['[backdrop-filter:var(--rad-select-content-backdrop-filter)]'],
       leading: roleClasses('leading', 'line-height'),
       tracking: roleClasses('tracking', 'letter-spacing'),

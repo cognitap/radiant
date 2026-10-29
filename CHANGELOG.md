@@ -1,9 +1,10 @@
 # Changelog
 
-See the [release policy](RELEASE_POLICY.md)
-for versioning. Use the JavaScript and CSS from the same version.
+[Release policy](RELEASE_POLICY.md)
 
 ## Unreleased
+
+- Add draggable Switch with Field, forms, shared sizing and theme overrides.
 
 ## 0.0.9
 

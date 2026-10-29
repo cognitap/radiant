@@ -11,6 +11,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import {
   Button,
   Checkbox,
+  Switch,
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -471,7 +472,7 @@ test('inputs preserve native attributes and the character-width size', () => {
 })
 
 test('Field protects owned relationships across the native control families', () => {
-  for (const Control of [Input, Textarea, Checkbox, Radio]) {
+  for (const Control of [Input, Textarea, Checkbox, Switch, Radio]) {
     const html = renderToStaticMarkup(
       createElement(
         Field,
@@ -933,6 +934,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Input',
     'Textarea',
     'Checkbox',
+    'Switch',
     'RadioGroup',
     'Dialog',
     'Collapsible',
@@ -960,6 +962,7 @@ test('exports reject implementation deep imports', async () => {
     'src/Input.tsx',
     'src/Textarea.tsx',
     'src/Checkbox.tsx',
+    'src/Switch.tsx',
     'src/RadioGroup.tsx',
     'src/Dialog.tsx',
     'src/Collapsible.tsx',
@@ -1181,5 +1184,30 @@ test('Textarea renders native initial text and rejects conflicting value owners'
   assert.throws(
     () => renderToStaticMarkup(createElement(Textarea, { value: null } as never)),
     /empty string/
+  )
+})
+
+test('Switch server markup uses native checked state, a fixed role and a decorative thumb', () => {
+  const html = renderToStaticMarkup(
+    createElement(Switch, {
+      label: 'Backups',
+      name: 'backups',
+      value: 'enabled',
+      defaultChecked: true
+    })
+  )
+  assert.match(html, /role="switch"/)
+  assert.match(html, /type="checkbox"/)
+  assert.match(html, /checked=""/)
+  assert.match(html, /name="backups"/)
+  assert.match(html, /value="enabled"/)
+  assert.match(html, /aria-hidden="true"/)
+  assert.doesNotMatch(html, /aria-checked=/)
+  assert.throws(
+    () =>
+      renderToStaticMarkup(
+        createElement(Switch, JSON.parse('{"checked":false,"defaultChecked":true}'))
+      ),
+    /controlled value or a default/
   )
 })

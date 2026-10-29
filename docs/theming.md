@@ -90,7 +90,7 @@ example, `components.button.radius` changes Button only, while
 component never falls back to another component's override.
 
 Component keys are grouped by family under `components`: `button`, `link`,
-`field`, `input`, `textarea`, `select`, `checkbox`, `radio`, `radioGroup`, `dialog`, `collapsible`,
+`field`, `input`, `textarea`, `select`, `checkbox`, `switch`, `radio`, `radioGroup`, `dialog`, `collapsible`,
 `accordion` and `card`. Every key is listed in
 [`src/themes/components.ts`](../src/themes/components.ts). Button-only fonts,
 uppercase, shadows, squash and pressed shape belong under `components.button`.
@@ -126,7 +126,7 @@ Some defaults to know:
 - Checkbox caps an inherited radius at a quarter of its size, so it stays a
   box. An explicit `components.checkbox.radius` still wins.
 - Radio stays circular under any control shape.
-- Input, Checkbox and Radio outlines mix border and foreground colors, so
+- Input, Textarea, Checkbox, Switch and Radio outlines mix border and foreground colors, so
   controls have more contrast than passive dividers.
 - Disabled opacity applies once, not again on a disabled child.
 
@@ -226,14 +226,14 @@ Load real italic and bold faces; synthetic styles are turned off.
 
 Components use the UI roles:
 
-| Text                                                                | Role                      |
-| ------------------------------------------------------------------- | ------------------------- |
-| ThemeScope, Card, DialogContent, Field, disclosure body             | `ui-body`                 |
-| CardTitle, DialogTitle                                              | `ui-title`                |
-| Field label, disclosure triggers, Button, Checkbox and Radio labels | `ui-label`                |
-| Input, Textarea                                                     | `ui-body`                 |
-| Field help and error, CardDescription, DialogDescription            | `ui-supporting`           |
-| Inline Link                                                         | Inherits surrounding text |
+| Text                                                                        | Role                      |
+| --------------------------------------------------------------------------- | ------------------------- |
+| ThemeScope, Card, DialogContent, Field, disclosure body                     | `ui-body`                 |
+| CardTitle, DialogTitle                                                      | `ui-title`                |
+| Field label, disclosure triggers, Button, Checkbox, Switch and Radio labels | `ui-label`                |
+| Input, Textarea                                                             | `ui-body`                 |
+| Field help and error, CardDescription, DialogDescription                    | `ui-supporting`           |
+| Inline Link                                                                 | Inherits surrounding text |
 
 Controls keep their own font size from `control.<size>.fontSize`, so changing
 the UI role size does not resize buttons or inputs.

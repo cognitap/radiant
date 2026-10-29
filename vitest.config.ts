@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config'
 import tailwindcss from '@tailwindcss/vite'
 import { observeLinkDownload, observeLinkPopup } from './tests/browser/navigationCommands.js'
 import { touchButton, dragHandle } from './tests/browser/touchCommands.js'
+import { dragSwitch } from './tests/browser/switchCommands.js'
 import { resizeTextarea } from './tests/browser/textareaCommands.js'
 import { emulatePreferences } from './tests/browser/mediaCommands.js'
 import { themes } from './src/examples/index.js'
@@ -56,7 +57,8 @@ export default defineConfig({
               emulatePreferences,
               touchButton,
               dragHandle,
-              resizeTextarea
+              resizeTextarea,
+              dragSwitch
             },
             enabled: true,
             provider: playwright(),
