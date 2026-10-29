@@ -85,14 +85,12 @@
     "format:check": "oxfmt --check",
     "check:source": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm docs:check",
     "docs:check": "node scripts/check-docs.mjs",
-    "check:ci": "pnpm check:source && pnpm test && pnpm build:storybook && pnpm test:browser:smoke",
-    "check": "pnpm check:source && pnpm test && pnpm build:storybook && pnpm test:browser",
+    "check": "pnpm check:source && pnpm build && node --test tests/*.test.mjs && node scripts/pack-and-test.ts && pnpm build:storybook && pnpm test:browser --project=storybook-radiant-light --project=storybook-radiant-dark",
     "release:prepare": "node scripts/prepare-release.mjs",
     "theme:generate": "node scripts/generate-theme-css.mjs",
     "theme:check": "node scripts/generate-theme-css.mjs --check",
     "watch:theme": "node scripts/generate-theme-css.mjs --watch",
-    "test:browser": "pnpm theme:generate && vitest run",
-    "test:browser:smoke": "pnpm test:browser --project=storybook-radiant-light --project=storybook-radiant-dark --project=browser-platform"
+    "test:browser": "pnpm theme:generate && vitest run"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",

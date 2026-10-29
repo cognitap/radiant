@@ -43,28 +43,25 @@ across component stories and Docs. Defaults are Radiant and System.
 See the [Storybook guide](docs/storybook.md) for the shared story
 structure and verification workflow.
 
-| Command                   | Purpose                                                                             |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| `pnpm storybook`          | Develop components in Storybook.                                                    |
-| `pnpm build`              | Build JavaScript, declarations, and CSS into `dist/library`.                        |
-| `pnpm watch`              | Rebuild on change, except `reset.css` (run `pnpm build` first).                     |
-| `pnpm build:storybook`    | Build static Storybook into `dist/storybook`.                                       |
-| `pnpm lint`               | Run Oxlint, including accessibility rules.                                          |
-| `pnpm format`             | Format with Oxfmt (`format:check` to check only).                                   |
-| `pnpm typecheck`          | Check TypeScript.                                                                   |
-| `pnpm test`               | Run style tests and verify the packed, installed package.                           |
-| `pnpm test:package`       | Verify the packed, installed package only.                                          |
-| `pnpm test:browser`       | Run Storybook plays and axe in every theme/mode, plus native browser scenarios.     |
-| `pnpm test:browser:smoke` | Run every story in Radiant Light/Dark plus native browser scenarios.                |
-| `pnpm check:ci`           | Run source checks, runtime/package tests, builds, and representative browser tests. |
-| `pnpm check`              | Run the full theme, installed styling/composition, and browser audit.               |
-| `pnpm release:prepare`    | Pack and verify a release candidate, then dry-run publishing.                       |
+| Command                | Purpose                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm storybook`       | Develop components in Storybook.                                                                                          |
+| `pnpm build`           | Build JavaScript, declarations, and CSS into `dist/library`.                                                              |
+| `pnpm watch`           | Rebuild on change, except `reset.css` (run `pnpm build` first).                                                           |
+| `pnpm build:storybook` | Build static Storybook into `dist/storybook`.                                                                             |
+| `pnpm lint`            | Run Oxlint, including accessibility rules.                                                                                |
+| `pnpm format`          | Format with Oxfmt (`format:check` to check only).                                                                         |
+| `pnpm typecheck`       | Check TypeScript.                                                                                                         |
+| `pnpm test`            | Run style tests and verify the packed, installed package.                                                                 |
+| `pnpm test:package`    | Verify the packed, installed package only.                                                                                |
+| `pnpm test:browser`    | Run every story in every preset, plus native browser scenarios.                                                           |
+| `pnpm check`           | Theme check, format, lint, types, docs policy, build, repo checks, packed package, Storybook, and Radiant light and dark. |
+| `pnpm release:prepare` | Pack and verify a release candidate, then dry-run publishing.                                                             |
 
 Package verification installs the archive with npm, so it needs network access.
 A Husky pre-commit hook formats staged files with Oxfmt.
-[CI](.github/workflows/ci.yml) runs `pnpm check:ci` for pull requests and pushes
-to `main`. Run `pnpm check` for the exhaustive audit, locally or with the manual
-workflow's **full** input.
+[CI](.github/workflows/ci.yml) runs `pnpm check` for pull requests and pushes
+to `main`.
 See [verification conventions](docs/testing.md) for focused browser runs,
 failure artifacts, and the evidence required by migration issues.
 
