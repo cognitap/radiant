@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's fifteen families fit together and why. Props are on the
+How Radiant's sixteen families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Button, Link, Field, Input, Textarea, Select, Checkbox, Switch, Slider, RadioGroup (with Radio),
+The families are Button, Link, Field, Input, Textarea, Select, Combobox, Checkbox, Switch, Slider, RadioGroup (with Radio),
 Dialog, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -23,7 +23,10 @@ Each piece of behavior has one owner:
 Why: the browser already gets keyboard, focus and form behavior right.
 Radiant has no headless-library dependency. Select owns its themed listbox and
 item focus, while a visually hidden native select supplies form semantics.
-Its local portal uses the top layer, preserving theme inheritance and modal ancestry.
+Select and Combobox portals use the local top layer, preserving theme and modal ancestry.
+Combobox keeps DOM focus on its native input and submits the committed key through
+a hidden text control. Search text never becomes a selection. Applications own async
+requests, cancellation and selected labels; results never trigger selection.
 
 Import rules:
 
@@ -60,7 +63,7 @@ Actions take three independent props:
 | `controlSize` | `small`, `medium`, `large`                                                | `medium`                      |
 
 A variant picks the treatment and a tone picks the palette. Input, Textarea, Checkbox, Switch, Slider,
-Radio, RadioGroup and Tabs share `controlSize` but have no variants. Native meanings
+Radio, RadioGroup, Combobox and Tabs share `controlSize` but have no variants. Native meanings
 win: `Input.size` stays a character count, and a checkbox `value` stays its
 submitted data. Radius is a theme decision, not a prop.
 
@@ -99,8 +102,10 @@ host, never a wrapper:
 | Field                                                           | `div` in control layout; `fieldset` in group layout |
 | Input / Checkbox / Switch / Slider / Radio                      | Native `input`                                      |
 | Textarea                                                        | Native `textarea`                                   |
-| Select / SelectPortal                                           | None; state / portal                                |
+| Select / SelectPortal / Combobox / ComboboxPortal               | None; state / portal                                |
 | SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
+| ComboboxInput / ComboboxContent / ComboboxItem                  | Native `input` / `div` / `div`                      |
+| ComboboxTrigger / ComboboxClear                                 | Button's `button`                                   |
 | Tabs / TabsList / TabsContent                                   | `div`                                               |
 | TabsTrigger                                                     | Button's `button`                                   |
 | RadioGroup                                                      | Field's `fieldset`                                  |
@@ -137,17 +142,18 @@ or `open` to control it, or `default*` to set an initial value. Passing both, or
 a mount, throws; remount with a new `key` instead. A controlled callback is a request, and the consumer
 may refuse it. No-op requests and prop syncs fire no callback.
 
-| Family                             | State                        | Callback                                     | Empty                  |
-| ---------------------------------- | ---------------------------- | -------------------------------------------- | ---------------------- |
-| Input, Textarea                    | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | `''`                   |
-| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked` | Native `onChange`, `onBlur`                  | `false`                |
-| Slider                             | `value` / `defaultValue`     | Native `onChange`, `onBlur`                  | Native midpoint        |
-| RadioGroup                         | `value` / `defaultValue`     | `onValueChange(string)` or native `onChange` | `null`                 |
-| Select                             | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`                 |
-| Tabs                               | `value` / `defaultValue`     | `onValueChange(string)`                      | Initial value required |
-| Dialog, Collapsible                | `open` / `defaultOpen`       | `onOpenChange(boolean)`                      | `false`                |
-| Accordion single                   | `value` / `defaultValue`     | `onValueChange(string \| null)`              | `null`                 |
-| Accordion multiple                 | `value` / `defaultValue`     | `onValueChange(string[])`                    | `[]`                   |
+| Family                             | State                                              | Callback                                                 | Empty                  |
+| ---------------------------------- | -------------------------------------------------- | -------------------------------------------------------- | ---------------------- |
+| Input, Textarea                    | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                              | `''`                   |
+| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked`                       | Native `onChange`, `onBlur`                              | `false`                |
+| Slider                             | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                              | Native midpoint        |
+| RadioGroup                         | `value` / `defaultValue`                           | `onValueChange(string)` or native `onChange`             | `null`                 |
+| Select                             | `value` / `defaultValue`                           | `onValueChange(string \| null)`                          | `null`                 |
+| Combobox                           | `value` / `defaultValue`; `query` / `defaultQuery` | `onValueChange(string \| null)`; `onQueryChange(string)` | `null`; `''`           |
+| Tabs                               | `value` / `defaultValue`                           | `onValueChange(string)`                                  | Initial value required |
+| Dialog, Collapsible                | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                  | `false`                |
+| Accordion single                   | `value` / `defaultValue`                           | `onValueChange(string \| null)`                          | `null`                 |
+| Accordion multiple                 | `value` / `defaultValue`                           | `onValueChange(string[])`                                | `[]`                   |
 
 RadioGroup owns its options' `name` and selection. Use one of `onValueChange`
 or `onChange` to write state, not both. `''` is a valid option value, and `null`
@@ -183,7 +189,7 @@ For cancellable actions, disabled and pending guards run first, then the
 consumer handler, then the state request if `defaultPrevented` is false. Native
 change, toggle and blur are observations and cannot veto anything. Library and
 caller refs get the same host, and callback-ref cleanup functions are honored.
-`useField`, `useDialog`, `useTabs`, `useCollapsible` and `useAccordion` read and request
+`useField`, `useDialog`, `useCombobox`, `useTabs`, `useCollapsible` and `useAccordion` read and request
 state, and return `null` outside their owner. Parts that need a root throw when misplaced. Lifecycle,
 SSR and hydration details are in [React bindings](react-bindings.md).
 

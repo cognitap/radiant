@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Combobox.
+
 ## 0.0.12
 
 - Add Tabs.
@@ -28,7 +30,7 @@
 
 - Breaking: the example themes moved out of the core entry. Before, `import { jelly, themes } from '@cognitap/radiant'`. After, `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core, and `themeDefinitions` exposes each example's definition.
 
-- Reconcile native disclosure changes made before hydration: local Collapsible state adopts once, while controlled disclosures and Accordion items restore their owner's value without a change request.
+- Reconcile pre-hydration disclosure changes: local Collapsible state adopts once; controlled disclosures and Accordion items restore their owner's value without a request.
 
 - Align Card root minimum-width styling with its compound parts in narrow layouts.
 
