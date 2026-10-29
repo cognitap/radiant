@@ -5,6 +5,8 @@ for versioning. Use the JavaScript and CSS from the same version.
 
 ## Unreleased
 
+## 0.0.8
+
 - Add Select with item focus, Field/native forms, themes and springs; open at trigger width without drift or flashes.
 
 ## 0.0.7
