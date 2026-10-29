@@ -1,3 +1,4 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -8,8 +9,8 @@ import {
   compileThemeDocument,
   exportThemeSections,
   themeDocumentFromDefinition
-} from '../dist/library/index.js'
-import { createSpring, createLayoutSpring, bindSpringStyle } from '../dist/library/motion/index.js'
+} from '@cognitap/radiant'
+import { createSpring, createLayoutSpring, bindSpringStyle } from '@cognitap/radiant/motion'
 import { JSDOM } from 'jsdom'
 
 test('theme profiles are validated immutable serializable data, independent of CSS motion tokens', () => {

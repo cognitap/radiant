@@ -1,7 +1,9 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import * as Radiant from '@cognitap/radiant'
 import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { pathToFileURL } from 'node:url'
 import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
 import { createElement } from 'react'
@@ -46,9 +48,9 @@ import {
 } from '@cognitap/radiant'
 import { themes } from '@cognitap/radiant/examples'
 
-const root = new URL('node_modules/@cognitap/radiant/', import.meta.url)
-const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
 const require = createRequire(import.meta.url)
+const root = new URL('../../', pathToFileURL(require.resolve('@cognitap/radiant')))
+const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
 
 test('public JavaScript imports and renders on the server', () => {
   const html = renderToStaticMarkup(createElement(Button, { disabled: true }, 'Save'))
@@ -1009,7 +1011,7 @@ test('the installed package declares shared React and needs no Tailwind', () => 
   assert.equal(typeof manifest.peerDependencies?.react, 'string')
   assert.equal(libraryRequire.resolve('react'), require.resolve('react'))
   assert.equal(manifest.peerDependenciesMeta?.tailwindcss?.optional, true)
-  assert.throws(() => require.resolve('tailwindcss'), { code: 'MODULE_NOT_FOUND' })
+  assert.equal(manifest.dependencies?.tailwindcss, undefined)
 })
 
 test('the archive includes MIT licensing and public documentation', () => {

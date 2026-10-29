@@ -5,8 +5,8 @@
 | Command                   | When                                                 | What it runs                                                                                           |
 | ------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pnpm check:ci`           | Every change; CI runs it on pull requests and `main` | Generated themes, format, lint, types, runtime and package tests, Storybook build, smoke browser tests |
-| `pnpm check`              | Theme, styling or composition changes, and releases  | Everything above, every story in every preset and mode, installed styling and composition checks       |
-| `pnpm test`               | Runtime changes                                      | `tests/*.test.mjs`, packed package and installed SSR browser checks                                    |
+| `pnpm check`              | Theme, styling or composition changes, and releases  | Everything above, every story in every preset and mode                                                 |
+| `pnpm test`               | Runtime changes                                      | `tests/*.test.mjs` and the packed package                                                              |
 | `pnpm test:browser`       | Story or browser behavior changes                    | Every story in every preset, light and dark, plus `tests/browser/`                                     |
 | `pnpm test:browser:smoke` | A quick browser pass                                 | Every story in Radiant light and dark, plus `tests/browser/`                                           |
 
@@ -49,28 +49,20 @@ Results go to `output/browser/`: `junit.xml` and failure screenshots in
   Wrap changes in `act`, wait for the outcome, and clean up every fixture.
 - **`tests/*.test.mjs`:** SSR, hydration, state ownership, cancellation, refs and
   form behavior that need no browser.
-- **`tests/consumer/`:** packed exports, types and held-script disclosure hydration.
+- **`tests/package/`:** packed exports and types. Import `@cognitap/radiant`, never
+  `src` or `dist`.
 
 A styling change also needs a browser check against the generated CSS.
 
 ## Installed-package checks
 
 ```sh
-pnpm test:package --styles   # both CSS routes, with and without the reset
-pnpm test:compositions       # the canonical forms and Workspace, installed
+pnpm test:package
 ```
 
-`pnpm test` and `test:package` require Chromium. Their installed SSR check holds
-client scripts while disclosures toggle, then verifies hydration and ownership.
-
-Both install the packed package into a temporary consumer and build it for
-production, using no repository source. They cover every preset in both modes.
-Results and captures go to `output/browser/installed-styles/` and
-`output/browser/installed-compositions/`. To try the composition build by hand:
-
-```sh
-pnpm exec vite preview --host 127.0.0.1 --port 4175 --strictPort --outDir output/browser/installed-compositions/client
-```
+It packs the library, installs that tarball in a temporary directory, and runs
+`tests/package` there. The same files import `@cognitap/radiant`. `tsc` checks
+`types.tsx` under NodeNext and Bundler. Node does not execute that file.
 
 ## What to put in the pull request
 

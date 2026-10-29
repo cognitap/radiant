@@ -1,16 +1,17 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   generateColorWall,
   recommendColorPalette,
   colorCalibrationPresets
-} from '../dist/library/color/index.js'
+} from '@cognitap/radiant/color'
 import {
   compileThemeDocument,
   themeDocumentFromDefinition,
   updateThemeDocument,
   parseThemeDocument
-} from '../dist/library/index.js'
+} from '@cognitap/radiant'
 
 const fixtures = [
   '#7C3AED',

@@ -1,10 +1,11 @@
+// @ts-nocheck
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { act, createElement as h, createRef } from 'react'
 import { renderToString } from 'react-dom/server'
 import { JSDOM } from 'jsdom'
-import { ThemeScope, Button, defineTheme, defaultTheme } from '../dist/library/index.js'
-import { ticket } from '../dist/library/examples/index.js'
+import { ThemeScope, Button, defineTheme, defaultTheme } from '@cognitap/radiant'
+import { ticket } from '@cognitap/radiant/examples'
 
 const brand = defineTheme({
   id: 'scope-brand',

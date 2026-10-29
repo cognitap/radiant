@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createSpringDrag } from '../dist/library/motion/index.js'
+import { createSpringDrag } from '@cognitap/radiant/motion'
 test('drag uses bounded samples, signed fresh velocity and deterministic projected snap', () => {
   const drag = createSpringDrag(0, { min: 0, max: 160, snapPoints: [0, 80, 160], enabled: false })
   drag.begin()

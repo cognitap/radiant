@@ -30,7 +30,7 @@ assert.equal(git('status', '--porcelain'), '', 'Commit all changes before prepar
 mkdirSync(directory, { recursive: true })
 run('pnpm', ['build'])
 run('pnpm', ['pack', '--out', archive])
-run(process.execPath, ['scripts/verify-package.mjs', archive])
+run(process.execPath, ['scripts/pack-and-test.ts', archive])
 run('pnpm', ['publish', archive, '--dry-run', '--no-git-checks', '--ignore-scripts'])
 
 const receipt = {

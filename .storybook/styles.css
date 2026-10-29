@@ -118,5 +118,5 @@
   max-width: 100%;
 }
 
-/* Motion proofs are excluded from the library scan; keep their utilities Storybook-only. */
-@source inline('absolute bg-neutral-200 bg-neutral-700 border border-2 border-neutral-400 border-neutral-700 flex flex-wrap gap-2 gap-4 grid h-20 max-h-96 overflow-auto p-2 p-4 relative rounded-full rounded-lg size-8 top-10 transition-colors w-64');
+/* Motion proofs and story-only caller utilities are excluded from the library scan. */
+@source inline('absolute bg-neutral-200 bg-neutral-700 border border-2 border-neutral-400 border-neutral-700 flex flex-wrap gap-2 gap-4 grid h-20 max-h-96 overflow-auto p-2 p-4 relative rounded-[31px] rounded-full rounded-lg size-8 top-10 transition-colors w-64');

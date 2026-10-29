@@ -1,7 +1,0 @@
-{
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --test package.test.mjs && tsc -p tsconfig.json && tsc -p tsconfig.json --module ESNext --moduleResolution Bundler"
-  }
-}
