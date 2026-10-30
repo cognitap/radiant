@@ -42,7 +42,10 @@ export type MenuProps = PopoverProps
 export type MenuState = PopoverState
 export type MenuRenderProps = ButtonRenderProps
 export type MenuPortalProps = { children?: ReactNode }
-export type MenuTriggerProps = DistributiveOmit<ButtonProps, 'id' | 'aria-haspopup'>
+export type MenuTriggerProps = DistributiveOmit<
+  ButtonProps,
+  'id' | 'aria-haspopup' | 'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed'
+>
 export type MenuContentProps = Omit<
   PopoverContentProps,
   'role' | 'aria-labelledby' | 'aria-orientation' | 'tabIndex' | 'initialFocusRef'

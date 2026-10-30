@@ -73,3 +73,10 @@ const wrongRef: AlertDialogContentProps = { ref: createRef<HTMLDivElement>() }
 // @ts-expect-error Actions share Button's closed presentation vocabulary.
 const wrongVariant: AlertDialogActionProps = { variant: 'link' }
 void [mixed, nonmodal, backdrop, styledRoot, nativeOpen, role, ariaModal, wrongRef, wrongVariant]
+
+// @ts-expect-error A trigger that opens a dialog is not a toggle.
+export const pressedAlertTrigger: AlertDialogTriggerProps = { defaultPressed: true }
+// @ts-expect-error Dialog actions are not toggles.
+export const pressedAlertAction: AlertDialogActionProps = { pressed: true }
+// @ts-expect-error Dialog actions are not toggles.
+export const pressedAlertCancel: AlertDialogCancelProps = { 'aria-pressed': true }
