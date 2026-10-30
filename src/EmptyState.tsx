@@ -20,7 +20,7 @@ const variants = cva(
       variant: {
         'first-use': '[border-style:dashed]',
         'no-results':
-          '[border-width:0px] [border-style:solid] bg-[var(--rad-empty-state-background,transparent)] p-[var(--rad-empty-state-padding,1rem)]',
+          '[border-width:var(--rad-empty-state-border-width,0px)] [border-style:solid] bg-[var(--rad-empty-state-background,transparent)] p-[var(--rad-empty-state-padding,1rem)]',
         error: '[border-style:solid]'
       }
     },
