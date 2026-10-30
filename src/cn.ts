@@ -97,6 +97,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-password-input-gap)',
         'gap-(--rad-input-group-gap)',
         'gap-(--rad-kbd-gap)',
         'gap-(--rad-otp-field-gap)',

@@ -1102,3 +1102,5 @@ import './kbd-types.js'
 import './input-group-types.js'
 import './native-select-types.js'
 import './meter-types.js'
+
+import './password-input-types.js'

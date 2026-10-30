@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's fifty families fit together and why. Props are on the
+How Radiant's fifty-one families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -120,7 +120,7 @@ host, never a wrapper:
 | Progress / Spinner                                                         | `progress` / `svg`                                  |
 | Button / Link                                                              | `button` / `a`, including through `render`          |
 | Field                                                                      | `div` in control layout; `fieldset` in group layout |
-| Input / Checkbox / Switch / Slider / Radio                                 | Native `input`                                      |
+| Input / PasswordInput / Checkbox / Switch / Slider / Radio                 | Native `input`                                      |
 | Textarea                                                                   | Native `textarea`                                   |
 | NativeSelect                                                               | Native select                                       |
 | Select / SelectPortal / Combobox / ComboboxPortal                          | None; state / portal                                |

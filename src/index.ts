@@ -580,3 +580,5 @@ export type {
   MultiSelectTagsProps,
   MultiSelectRenderProps
 } from './MultiSelect.js'
+
+export { PasswordInput, type PasswordInputProps } from './PasswordInput.js'

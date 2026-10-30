@@ -2,6 +2,7 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  passwordInput: { gap: 'css' },
   meter: {
     height: 'css',
     radius: 'css',
