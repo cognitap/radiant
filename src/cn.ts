@@ -27,6 +27,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-family)'
       ],
       'font-weight': [
+        'font-(--rad-empty-state-title-weight)',
         'font-(--rad-nav-link-font-weight)',
         'font-(--rad-native-select-font-weight)',
         'font-(--rad-toast-title-weight)',
@@ -39,6 +40,8 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-empty-state-title-size)',
+        'text-(--rad-empty-state-description-size)',
         'text-(--rad-nav-link-font-size)',
         'text-(--rad-nav-link-description-size)',
         'text-(--rad-native-select-font-size)',
@@ -91,6 +94,7 @@ export const cn: CnFunction = createCn({
       'max-h': ['max-h-(--rad-command-results-max-height)'],
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: [
+        'size-(--rad-empty-state-icon-size)',
         'size-(--rad-avatar-size)',
         'size-(--rad-avatar-size-small)',
         'size-(--rad-avatar-size-large)',
@@ -102,6 +106,8 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-empty-state-gap)',
+        'gap-(--rad-empty-state-actions-gap)',
         'gap-(--rad-nav-link-gap)',
         'gap-(--rad-password-input-gap)',
         'gap-(--rad-input-group-gap)',
@@ -150,6 +156,7 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-empty-state-padding)',
         'p-(--rad-menubar-padding)',
         'p-(--rad-toolbar-padding)',
         'p-(--rad-toggle-group-padding)',
@@ -165,6 +172,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-empty-state-radius)',
         'rounded-(--rad-nav-link-radius)',
         'rounded-(--rad-meter-radius)',
         'rounded-(--rad-native-select-radius)',
@@ -204,6 +212,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-empty-state-border-width)',
         'border-(--rad-meter-border-width)',
         'border-(--rad-native-select-border-width)',
         'border-(--rad-input-group-border-width)',

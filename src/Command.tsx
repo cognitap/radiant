@@ -49,7 +49,7 @@ export type CommandProps = DialogProps &
     loading?: boolean
     errorText?: ReactNode
     loadingText?: string
-    emptyText?: string
+    emptyText?: ReactNode
     controlSize?: ControlSize
   }
 export type CommandRenderProps = DialogRenderProps
