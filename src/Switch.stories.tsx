@@ -1,9 +1,25 @@
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Field, Switch, type ThemeStyle } from './index.js'
 import {
   SwitchSettingsExample,
   SwitchSizeComparison
 } from '../.storybook/examples/SwitchExamples.js'
+
+function ControlledSwitch() {
+  const [checked, setChecked] = useState(false)
+  return (
+    <div style={{ display: 'grid', justifyItems: 'start', gap: '0.75rem' }}>
+      <Switch
+        label="Do not disturb"
+        name="quiet"
+        checked={checked}
+        onChange={event => setChecked(event.target.checked)}
+      />
+      <output>{checked ? 'Notifications are silenced.' : 'Notifications are on.'}</output>
+    </div>
+  )
+}
 
 const meta = {
   title: 'Components/Switch',
@@ -67,6 +83,14 @@ export const WithField: Story = {
     </Field>
   )
 }
+export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <ControlledSwitch />
+}
+export const FormSubmission: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <SwitchSettingsExample />
+}
 export const Group: Story = {
   render: () => (
     <Field
@@ -85,6 +109,10 @@ export const Group: Story = {
       />
     </Field>
   )
+}
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <SwitchSizeComparison />
 }
 export const Customisation: Story = {
   render: args => {
@@ -105,14 +133,6 @@ export const Customisation: Story = {
       />
     )
   }
-}
-export const WorkspacePreferences: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <SwitchSettingsExample />
-}
-export const SharedControlSizes: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <SwitchSizeComparison />
 }
 export const RightToLeft: Story = {
   render: () => (

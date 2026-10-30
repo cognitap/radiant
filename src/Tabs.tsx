@@ -8,14 +8,15 @@ import {
   useRef,
   type ComponentProps
 } from 'react'
-import { Button, type ButtonProps } from './Button.js'
+import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { cn } from './cn.js'
 import { controlMetrics } from './controlStyles.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
-import type { ControlSize } from './presentation.js'
+import type { ControlSize, Orientation } from './presentation.js'
+import type { ValueOwner } from './react/useNativeOwner.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 const rootClass =
@@ -37,9 +38,9 @@ const triggerClass = [
   '[color:var(--rad-tabs-trigger-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
   'bg-[var(--rad-tabs-trigger-background,transparent)]',
   'hover:bg-[var(--rad-tabs-trigger-hover-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  'data-[state=active]:bg-[var(--rad-tabs-trigger-active-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  'data-[state=active]:[color:var(--rad-tabs-trigger-active-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
-  'data-[state=active]:[border-color:var(--rad-tabs-trigger-active-border,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
+  'data-selected:bg-[var(--rad-tabs-trigger-active-background,var(--rad-color-surface,oklch(1_0_0)))]',
+  'data-selected:[color:var(--rad-tabs-trigger-active-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
+  'data-selected:[border-color:var(--rad-tabs-trigger-active-border,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-tabs-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
   'focus-visible:[outline-width:var(--rad-tabs-focus-width,var(--rad-focus-width,2px))]',
@@ -48,20 +49,18 @@ const triggerClass = [
   'disabled:cursor-not-allowed disabled:opacity-[var(--rad-tabs-disabled-opacity,var(--rad-state-disabled-opacity,0.5))]',
   'disabled:bg-[var(--rad-tabs-trigger-background,transparent)]',
   'forced-colors:border-[ButtonText] forced-colors:text-[ButtonText]',
-  'forced-colors:data-[state=active]:border-[Highlight] forced-colors:data-[state=active]:text-[Highlight]',
+  'forced-colors:data-selected:border-[Highlight] forced-colors:data-selected:text-[Highlight]',
   'forced-colors:disabled:text-[GrayText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:opacity-100'
 ].join(' ')
 const contentClass =
   'min-w-0 rounded-[var(--rad-tabs-content-radius,var(--rad-control-radius,0.5rem))] p-[var(--rad-tabs-content-padding,1rem)] [color:var(--rad-tabs-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-tabs-content-background,var(--rad-color-surface,oklch(1_0_0)))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-tabs-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-tabs-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-tabs-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-tabs-focus-style,var(--rad-focus-style,solid))]'
 
-type SelectionOwner =
-  | { value: string; defaultValue?: never }
-  | { value?: undefined; defaultValue: string }
+type SelectionOwner = ValueOwner<string> & ({ value: string } | { defaultValue: string })
 
 export type TabsProps = Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'style'> &
   SelectionOwner & {
     onValueChange?: (value: string) => void
-    orientation?: 'horizontal' | 'vertical'
+    orientation?: Orientation
     activationMode?: 'automatic' | 'manual'
     loop?: boolean
     disabled?: boolean
@@ -96,6 +95,7 @@ export type TabsTriggerProps = Omit<
   | 'defaultPressed'
   | 'onPressedChange'
 > & { value: string }
+export type TabsRenderProps = ButtonRenderProps
 export type TabsContentProps = Omit<
   ComponentProps<'div'>,
   'id' | 'role' | 'aria-labelledby' | 'aria-hidden' | 'hidden' | 'inert' | 'style'
@@ -110,7 +110,7 @@ export type TabsState = {
   value: string
   setValue: (value: string) => void
   controlled: boolean
-  orientation: 'horizontal' | 'vertical'
+  orientation: Orientation
   activationMode: 'automatic' | 'manual'
   loop: boolean
   disabled: boolean
@@ -344,7 +344,7 @@ export function TabsTrigger({
       aria-disabled={unavailable || undefined}
       tabIndex={selected && !unavailable ? 0 : -1}
       data-value={value}
-      data-state={selected ? 'active' : 'inactive'}
+      data-selected={selected ? '' : undefined}
       data-disabled={unavailable ? '' : undefined}
       data-slot={joinIds('tabs-trigger', props['data-slot'])}
       data-orientation={tabs.orientation}
@@ -433,7 +433,6 @@ export function TabsContent({
       className={cn(contentClass, className)}
       style={{ ...style, display: selected ? style?.display : 'none' }}
       data-slot={joinIds('tabs-content', props['data-slot'])}
-      data-state={selected ? 'active' : 'inactive'}
       data-value={value}
       data-orientation={tabs.orientation}
     >

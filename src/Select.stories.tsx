@@ -20,6 +20,23 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => <SelectSettingsExample />
 }
+export const WithField: Story = {
+  render: () => (
+    <form className="grid w-72 max-w-full gap-3">
+      <Field
+        label="Workspace"
+        required
+        description="Choose a destination before submitting."
+      >
+        <Select
+          items={workspaceOptions}
+          name="workspace"
+        />
+      </Field>
+      <button type="submit">Submit</button>
+    </form>
+  )
+}
 export const Controlled: Story = { render: () => <SelectControlledExample /> }
 export const Open: Story = {
   render: () => (
@@ -37,48 +54,57 @@ export const Open: Story = {
 }
 export const ScrollAndGroups: Story = { render: () => <SelectCitiesExample /> }
 export const InDialog: Story = { render: () => <SelectDialogExample /> }
-export const Required: Story = {
+export const States: Story = {
   render: () => (
-    <form className="grid w-72 max-w-full gap-3">
+    <div className="grid w-72 max-w-full gap-5">
       <Field
-        label="Workspace"
-        required
-        description="Choose a destination before submitting."
+        label="Disabled workspace"
+        disabled
+        description="An administrator manages this setting."
       >
         <Select
           items={workspaceOptions}
-          name="workspace"
+          defaultValue="studio"
         />
       </Field>
-      <button type="submit">Submit</button>
-    </form>
+      <Field
+        label="Invalid workspace"
+        error="Choose an active workspace."
+      >
+        <Select items={workspaceOptions} />
+      </Field>
+      <Field
+        label="Read-only workspace"
+        description="Focusable and submitted with the form, but not editable."
+      >
+        <Select
+          items={workspaceOptions}
+          defaultValue="studio"
+          readOnly
+        />
+      </Field>
+    </div>
   )
 }
-export const Disabled: Story = {
+export const SharedControlSizes: Story = {
   render: () => (
-    <Field
-      label="Workspace"
-      disabled
-      description="An administrator manages this setting."
-    >
-      <Select
-        items={workspaceOptions}
-        defaultValue="studio"
-      />
-    </Field>
+    <div className="grid w-72 max-w-full gap-5">
+      {(['small', 'medium', 'large'] as const).map(size => (
+        <Field
+          label={`${size} workspace`}
+          key={size}
+        >
+          <Select
+            items={workspaceOptions}
+            defaultValue="studio"
+            controlSize={size}
+          />
+        </Field>
+      ))}
+    </div>
   )
 }
-export const Invalid: Story = {
-  render: () => (
-    <Field
-      label="Workspace"
-      error="Choose an active workspace."
-    >
-      <Select items={workspaceOptions} />
-    </Field>
-  )
-}
-export const Customized: Story = {
+export const Customisation: Story = {
   render: () => (
     <Field
       label="Workspace"

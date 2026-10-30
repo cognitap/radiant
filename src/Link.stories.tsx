@@ -2,11 +2,10 @@ import { useId, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button, Link, type LinkProps } from './index.js'
 
-import {
-  LinkPlayground,
-  RoutedLinkExample,
-  RouterAnchor
-} from '../.storybook/examples/LinkExamples.js'
+import { LinkPlayground, RouterAnchor } from '../.storybook/examples/LinkExamples.js'
+
+const destinationClass =
+  'target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]'
 
 function LinkDestination({
   args,
@@ -49,9 +48,82 @@ function LinkDestination({
       <section
         id={`${id}-destination`}
         tabIndex={-1}
-        className="target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]"
+        className={destinationClass}
       >
         {destination}
+      </section>
+    </div>
+  )
+}
+
+function LinksInText() {
+  const id = useId()
+  return (
+    <div style={{ display: 'grid', gap: '1.25rem', maxWidth: '38rem' }}>
+      <p style={{ margin: 0, lineHeight: 1.6 }}>
+        Every component follows the <Link href={`#${id}-guide`}>shared conventions</Link>, so a{' '}
+        <Link
+          href={`#${id}-guide`}
+          tone="neutral"
+        >
+          neutral link
+        </Link>{' '}
+        reads like the text around it.
+      </p>
+      <p style={{ margin: 0, lineHeight: 1.6 }}>
+        Your trial ends in three days.{' '}
+        <Link
+          href={`#${id}-billing`}
+          tone="warning"
+        >
+          Choose a plan
+        </Link>{' '}
+        or{' '}
+        <Link
+          href={`#${id}-billing`}
+          tone="danger"
+        >
+          delete the workspace
+        </Link>
+        .
+      </p>
+      <nav aria-label="Footer">
+        <ul style={{ display: 'flex', gap: '1rem', margin: 0, padding: 0, listStyle: 'none' }}>
+          {(
+            [
+              ['accent', 'Docs'],
+              ['neutral', 'About'],
+              ['warning', 'Status'],
+              ['danger', 'Report abuse']
+            ] as const
+          ).map(([tone, label]) => (
+            <li key={tone}>
+              <Link
+                href={`#${id}-guide`}
+                variant="subtle"
+                tone={tone}
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <section
+        aria-label="Guide"
+        className={destinationClass}
+        id={`${id}-guide`}
+        tabIndex={-1}
+      >
+        Guide: conventions every component shares.
+      </section>
+      <section
+        aria-label="Billing"
+        className={destinationClass}
+        id={`${id}-billing`}
+        tabIndex={-1}
+      >
+        Billing: plans and workspace deletion.
       </section>
     </div>
   )
@@ -60,18 +132,21 @@ function LinkDestination({
 function LinkActions() {
   const id = useId()
   const [clicks, setClicks] = useState(0)
-  const destinationClass =
-    'target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]'
 
   return (
     <div style={{ display: 'grid', gap: '1.25rem', maxWidth: '38rem' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-        <Link
-          href={`#${id}-start`}
-          variant="solid"
-        >
-          Get started
-        </Link>
+        {(['solid', 'soft', 'outline', 'ghost'] as const).map(variant => (
+          <Link
+            key={variant}
+            href={`#${id}-start`}
+            variant={variant}
+          >
+            Get started ({variant})
+          </Link>
+        ))}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
         <Button
           onClick={() => setClicks(count => count + 1)}
           type="button"
@@ -82,9 +157,15 @@ function LinkActions() {
           href={`#${id}-deletion`}
           variant="solid"
           tone="danger"
-          controlSize="small"
         >
           Review deletion
+        </Link>
+        <Link
+          href={`#${id}-deletion`}
+          variant="outline"
+          tone="neutral"
+        >
+          Read the policy
         </Link>
       </div>
       <output style={{ margin: 0 }}>
@@ -106,6 +187,36 @@ function LinkActions() {
       >
         Deletion options: review the consequences before confirming an action.
       </section>
+    </div>
+  )
+}
+
+function LinkSizeComparison() {
+  const id = useId()
+  return (
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}
+        >
+          <Link
+            href={`#${id}`}
+            variant="solid"
+            controlSize={controlSize}
+          >
+            Open {controlSize}
+          </Link>
+          <Button
+            type="button"
+            variant="outline"
+            controlSize={controlSize}
+          >
+            Save {controlSize}
+          </Button>
+        </div>
+      ))}
+      <span id={id}>Size link destination.</span>
     </div>
   )
 }
@@ -155,60 +266,46 @@ export const Default: Story = {
   )
 }
 
-export const Playground: Story = {
-  args: {
-    children: 'Explore the launchpad',
-    variant: 'solid',
-    tone: 'accent',
-    controlSize: 'large'
-  },
+export const InlineInText: Story = {
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         story:
-          'Compare one action-shaped MotionLink with Button in the selected theme and mode. The local switch turns off spatial feedback; native navigation and system reduced motion keep their meanings.'
+          'inline links underline inside prose and inherit its text size. subtle links stay plain until hover, which suits footers and lists. tone colors either treatment.'
       }
     }
   },
-  render: args => <LinkPlayground {...args} />
+  render: () => <LinksInText />
 }
 
-export const MotionRouter: Story = {
-  args: { children: 'Open installation guide', variant: 'outline', tone: 'neutral' },
+export const ToExternalSite: Story = {
+  args: { href: 'https://example.com', external: true, children: 'Example (opens in a new tab)' },
   parameters: {
     docs: {
       description: {
         story:
-          'A consumer-owned adapter forwards every resolved prop and ref to one anchor. Normal click and Enter update this route preview; cancelled events, modified clicks, downloads and other targets bypass interception. Use your framework router in the same render callback.'
+          'external defaults target to _blank and rel to noopener noreferrer. Explicit target or rel values win. Say in the link text that it opens a new tab.'
       }
     }
   },
-  render: args => <RoutedLinkExample {...args} />
+  render: args => (
+    <p style={{ margin: 0, lineHeight: 1.6 }}>
+      Radiant renders a native anchor. Read more on <Link {...args} />.
+    </p>
+  )
 }
 
-export const Composition: Story = {
+export const WithRouter: Story = {
+  args: { children: 'Open the routed guide' },
   parameters: {
     docs: {
       description: {
         story:
-          'Button-styled links share Button hover, pressed, and focus feedback. They remain native anchors: click or Enter navigates to a visible destination below. The native Button updates a counter.'
+          'A consumer-owned router forwards the resolved anchor props and ref. It calls onClick once before routing; cancellation, modified clicks, target and download keep their native meanings. Use your framework router in the same render callback.'
       }
     }
   },
-  render: () => <LinkActions />
-}
-
-export const Customisation: Story = {
-  args: { children: 'Routed docs' },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'A consumer-owned router forwards the resolved anchor props and ref. It calls onClick once before routing; cancellation, modified clicks, target and download keep their native meanings.'
-      }
-    }
-  },
-
   render: args => (
     <LinkDestination
       args={args}
@@ -219,47 +316,38 @@ export const Customisation: Story = {
   )
 }
 
-export const Subtle: Story = {
-  args: { variant: 'subtle', children: 'Settings' },
-  render: args => (
-    <LinkDestination
-      args={args}
-      destination="Settings: choose a theme and color mode from the Storybook toolbar."
-    />
-  )
+export const StyledAsButton: Story = {
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        story:
+          'solid, soft, outline and ghost share Button presentation through variant, tone and controlSize. They stay native anchors: click or Enter navigates, Space scrolls. Use Button for actions and pending or disabled states.'
+      }
+    }
+  },
+  render: () => <LinkActions />
 }
 
-export const External: Story = {
-  args: { href: 'https://example.com', external: true, children: 'Example (external)' }
+export const WithPressMotion: Story = {
+  args: {
+    children: 'Explore the launchpad',
+    variant: 'solid',
+    tone: 'accent',
+    controlSize: 'large'
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'MotionLink from @cognitap/radiant/motion/react adds theme-driven press springs to action-shaped links. inline and subtle never compress. motion="off" turns off spatial feedback, and system reduced motion always wins.'
+      }
+    }
+  },
+  render: args => <LinkPlayground {...args} />
 }
 
-export const Tones: Story = {
-  render: args => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      {(['accent', 'neutral', 'warning', 'danger'] as const).map(tone => (
-        <p
-          key={tone}
-          style={{ margin: 0 }}
-        >
-          <Link
-            {...args}
-            href="#tone-destination"
-            tone={tone}
-          >
-            {tone} inline
-          </Link>
-          {' · '}
-          <Link
-            {...args}
-            href="#tone-destination"
-            variant="subtle"
-            tone={tone}
-          >
-            {tone} subtle
-          </Link>
-        </p>
-      ))}
-      <span id="tone-destination">Tone link destination.</span>
-    </div>
-  )
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <LinkSizeComparison />
 }

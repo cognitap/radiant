@@ -23,6 +23,73 @@ type ExampleProps = Partial<
   >
 > & { disabledActivity?: boolean }
 
+const steps = ['account', 'billing', 'review']
+
+export function TabsControlledExample() {
+  const [step, setStep] = useState('account')
+  const next = steps[steps.indexOf(step) + 1]
+  return (
+    <Tabs
+      value={step}
+      onValueChange={setStep}
+      style={{ maxWidth: '40rem' }}
+    >
+      <TabsList aria-label="Checkout steps">
+        <TabsTrigger value="account">Account</TabsTrigger>
+        <TabsTrigger value="billing">Billing</TabsTrigger>
+        <TabsTrigger value="review">Review</TabsTrigger>
+      </TabsList>
+      {steps.map(value => (
+        <TabsContent
+          key={value}
+          value={value}
+        >
+          <p>Current step: {value}</p>
+          {next ? <Button onClick={() => setStep(next)}>Continue to {next}</Button> : null}
+        </TabsContent>
+      ))}
+    </Tabs>
+  )
+}
+
+export function TabsDisabledExample() {
+  return (
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
+      <TabsExample disabledActivity />
+      <TabsExample disabled />
+    </div>
+  )
+}
+
+export function TabsOverflowExample() {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August']
+  return (
+    <Tabs
+      defaultValue="January"
+      style={{ maxWidth: '20rem' }}
+    >
+      <TabsList aria-label="Monthly reports">
+        {months.map(month => (
+          <TabsTrigger
+            key={month}
+            value={month}
+          >
+            {month}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {months.map(month => (
+        <TabsContent
+          key={month}
+          value={month}
+        >
+          {month} report
+        </TabsContent>
+      ))}
+    </Tabs>
+  )
+}
+
 export function TabsExample({ disabledActivity = false, ...props }: ExampleProps) {
   return (
     <Tabs

@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
+  TabsControlledExample,
+  TabsDisabledExample,
   TabsExample,
+  TabsOverflowExample,
   TabsSizeComparison,
   TabsWorkspaceExample
 } from '../.storybook/examples/TabsExamples.js'
@@ -25,7 +28,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Composable Tabs, TabsList, TabsTrigger and TabsContent. Set value/onValueChange or defaultValue to an existing tab. Arrow keys move through enabled tabs in DOM order; Home/End move to the ends, with RTL and vertical navigation. Automatic activation selects on focus; manual activation waits for click, Enter or Space and suits panels that load on demand. Triggers compose Button and retain its native events/ref/render contract, with independent Tabs presentation. Inactive panel children unmount by default; keepMounted preserves local state inside a hidden, inert panel. Panel hosts and owned IDs remain stable for SSR/hydration. A tab list needs an accessible label; panel tabIndex defaults to zero. Form reset does not reset tab selection.'
+          'Composable Tabs, TabsList, TabsTrigger and TabsContent. Set value/onValueChange or defaultValue to an existing tab. Arrow keys move through enabled tabs in DOM order; Home/End move to the ends, with RTL and vertical navigation. Automatic activation selects on focus; manual activation waits for click, Enter or Space and suits panels that load on demand. Triggers compose Button and retain its native events/ref/render contract, with independent Tabs presentation. The selected trigger has data-selected. Inactive panels are hidden and their children unmount by default; keepMounted preserves local state inside a hidden, inert panel. Panel hosts and owned IDs remain stable for SSR/hydration. A tab list needs an accessible label; panel tabIndex defaults to zero. A horizontal list scrolls when its tabs overflow. Form reset does not reset tab selection.'
       }
     }
   }
@@ -33,12 +36,16 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+const fixed = { parameters: { controls: { disable: true } } }
+
 export const Default: Story = {}
+export const Controlled: Story = { ...fixed, render: () => <TabsControlledExample /> }
 export const ManualActivation: Story = { args: { activationMode: 'manual' } }
 export const Vertical: Story = { args: { orientation: 'vertical' } }
+export const Disabled: Story = { ...fixed, render: () => <TabsDisabledExample /> }
+export const Overflow: Story = { ...fixed, render: () => <TabsOverflowExample /> }
 export const RightToLeft: Story = { args: { dir: 'rtl' } }
-export const Disabled: Story = { args: { disabled: true } }
-export const DisabledTab: Story = { args: { disabledActivity: true } }
+export const WorkspaceSettings: Story = { ...fixed, render: () => <TabsWorkspaceExample /> }
 export const Customisation: Story = {
   args: {
     style: {
@@ -49,11 +56,4 @@ export const Customisation: Story = {
     }
   }
 }
-export const WorkspaceSettings: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <TabsWorkspaceExample />
-}
-export const SharedControlSizes: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <TabsSizeComparison />
-}
+export const SharedControlSizes: Story = { ...fixed, render: () => <TabsSizeComparison /> }
