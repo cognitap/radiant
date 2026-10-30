@@ -638,3 +638,20 @@ export {
   type CommandListProps,
   type CommandItemProps
 } from './Command.js'
+
+export {
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateTitle,
+  EmptyStateDescription,
+  EmptyStateActions,
+  type EmptyStateProps,
+  type EmptyStateVariant,
+  type EmptyStateTone,
+  type EmptyStateIconProps,
+  type EmptyStateTitleProps,
+  type EmptyStateHeadingLevel,
+  type EmptyStateDescriptionProps,
+  type EmptyStateActionsProps
+} from './EmptyState.js'
+export type { HeadingLevel } from './internal/headings.js'

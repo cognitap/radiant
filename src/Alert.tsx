@@ -1,3 +1,4 @@
+import { headings, type HeadingLevel } from './internal/headings.js'
 import type { ComponentProps } from 'react'
 import { cn } from './cn.js'
 import { actionTone } from './actionStyles.js'
@@ -18,8 +19,7 @@ export type AlertProps = Omit<
   /** Static information is silent by default. Live roles carry their native ARIA defaults. */
   announce?: AlertAnnouncement
 }
-const headings = { 1: 'h1', 2: 'h2', 3: 'h3', 4: 'h4', 5: 'h5', 6: 'h6' } as const
-export type AlertHeadingLevel = keyof typeof headings
+export type AlertHeadingLevel = HeadingLevel
 export type AlertTitleProps = Omit<ComponentProps<'h2'>, 'style'> & {
   style?: ThemeStyle
   'data-slot'?: string

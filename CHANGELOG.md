@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add EmptyState for first use, empty searches and recovery, with consumer-chosen headings and actions.
+
 ## 0.0.54
 
 - Add the `Orientation` type, used by Slider and Tabs.

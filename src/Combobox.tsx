@@ -49,7 +49,7 @@ type ComboboxCommonProps = {
   loading?: boolean
   error?: ReactNode
   loadingText?: string
-  emptyText?: string
+  emptyText?: ReactNode
   name?: string
   form?: string
   disabled?: boolean

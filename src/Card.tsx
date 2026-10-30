@@ -1,3 +1,4 @@
+import { headings as headingTag, type HeadingLevel } from './internal/headings.js'
 import type { ComponentProps } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
@@ -51,16 +52,7 @@ const cardFooterVariants = cva([
   'flex min-w-0 flex-wrap items-center gap-[var(--rad-card-footer-gap,var(--rad-spacing-footer-gap,0.5rem))]'
 ])
 
-const headingTag = {
-  1: 'h1',
-  2: 'h2',
-  3: 'h3',
-  4: 'h4',
-  5: 'h5',
-  6: 'h6'
-} as const
-
-export type CardHeadingLevel = keyof typeof headingTag
+export type CardHeadingLevel = HeadingLevel
 
 type CardPartProps<Host extends 'div' | 'h2' | 'p'> = Omit<ComponentProps<Host>, 'style'> & {
   style?: ThemeStyle
