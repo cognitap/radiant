@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Fix OTPField selection collapse.
+
 ## 0.0.41
 
 - Add OTPField: numeric/alphanumeric slots over one native input.
@@ -171,8 +173,8 @@
 
 ## 0.0.6
 
-- Add opt-in springs in `@cognitap/radiant/motion` and `/motion/react`, with serializable theme profiles. Root imports stay engine-free.
-- Add `MotionProvider`: Button and Dialog action springs, disclosure height and Dialog presentation. Dismissal and focus stay immediate.
+- Add opt-in `/motion` and `/motion/react` springs with serializable theme profiles; root imports stay engine-free.
+- Add `MotionProvider` for Button/Dialog actions, disclosure height and Dialog presentation; dismissal/focus stay immediate.
 - Add `MotionLink` spring feedback for action-shaped links.
 - Add one-axis drag with release, snapping, cancellation and keyboard alternatives.
 - Add `useSpringFollow` for changing targets and `useSpringLayout` for grid and flex resize and reorder.

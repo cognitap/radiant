@@ -76,7 +76,10 @@ export function OTPField({
   const normalize = (text: string) =>
     text.replace(mode === 'numeric' ? /[^0-9]/g : /[^a-zA-Z0-9]/g, '').slice(0, length)
   const unavailable = (node: HTMLInputElement) => node.readOnly || node.matches(':disabled')
-  const locate = (node: HTMLInputElement) => setPosition(node.selectionStart ?? 0)
+  const locate = (node: HTMLInputElement) =>
+    setPosition(
+      (node.selectionDirection === 'backward' ? node.selectionStart : node.selectionEnd) ?? 0
+    )
   const replace = (node: HTMLInputElement, next: string, caret: number) => {
     const view = node.ownerDocument.defaultView
     if (!view) return
@@ -209,10 +212,14 @@ export function OTPField({
           const node = event.currentTarget,
             rtl = node.ownerDocument.defaultView?.getComputedStyle(node).direction === 'rtl',
             forward = (event.key === 'ArrowRight') !== rtl,
-            caret = Math.max(
-              0,
-              Math.min(node.value.length, (node.selectionStart ?? 0) + (forward ? 1 : -1))
-            )
+            start = node.selectionStart ?? 0,
+            end = node.selectionEnd ?? start,
+            caret =
+              start !== end
+                ? forward
+                  ? end
+                  : start
+                : Math.max(0, Math.min(node.value.length, start + (forward ? 1 : -1)))
           event.preventDefault()
           node.setSelectionRange(caret, caret)
           locate(node)
