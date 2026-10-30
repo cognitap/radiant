@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.50
+
 - Add NavLink.
 
 ## 0.0.49
