@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.35
+
 - Add HoverCard.
 - Track inline anchor text changes in popup placement.
 - Keep popup portals outside phrasing-only hosts.
