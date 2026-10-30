@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add AspectRatio.
+
 ## 0.0.30
 
 - Add CheckboxGroup.
