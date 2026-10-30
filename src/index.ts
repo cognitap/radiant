@@ -381,3 +381,6 @@ export type {
 
 export { AspectRatio } from './AspectRatio.js'
 export type { AspectRatioProps } from './AspectRatio.js'
+
+export { ScrollArea } from './ScrollArea.js'
+export type { ScrollAreaProps, ScrollAreaOrientation, ScrollAreaVisibility } from './ScrollArea.js'

@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { observeLinkDownload, observeLinkPopup } from './tests/browser/navigationCommands.js'
 import { touchButton, dragHandle } from './tests/browser/touchCommands.js'
 import { dragSlider } from './tests/browser/sliderCommands.js'
+import { scrollViewport } from './tests/browser/scrollCommands.js'
 import { dragSwitch } from './tests/browser/switchCommands.js'
 import { resizeTextarea } from './tests/browser/textareaCommands.js'
 import { emulatePreferences } from './tests/browser/mediaCommands.js'
@@ -60,7 +61,8 @@ export default defineConfig({
               dragHandle,
               resizeTextarea,
               dragSwitch,
-              dragSlider
+              dragSlider,
+              scrollViewport
             },
             enabled: true,
             provider: playwright(),

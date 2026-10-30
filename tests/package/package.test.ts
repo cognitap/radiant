@@ -943,6 +943,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Tabs',
     'Checkbox',
     'CheckboxGroup',
+    'ScrollArea',
     'Switch',
     'RadioGroup',
     'Dialog',

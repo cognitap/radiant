@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add ScrollArea.
+
 ## 0.0.31
 
 - Add AspectRatio.
