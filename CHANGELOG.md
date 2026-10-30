@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.46
+
 - Fix InputGroup addon focus.
 
 ## 0.0.45
