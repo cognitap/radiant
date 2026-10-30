@@ -2,6 +2,26 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  nativeSelect: {
+    height: 'css',
+    padding: 'css',
+    fontFamily: 'css',
+    fontSize: 'css',
+    fontWeight: 'weight',
+    color: 'css',
+    background: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    radius: 'css',
+    cornerShape: 'css',
+    shadow: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    invalidBorder: 'css',
+    disabledBackground: 'css'
+  },
   inputGroup: {
     background: 'css',
     color: 'css',
