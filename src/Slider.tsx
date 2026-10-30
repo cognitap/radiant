@@ -6,7 +6,7 @@ import { useFieldControl } from './Field.js'
 import { controlBorderClass, controlMetrics } from './controlStyles.js'
 import { useNativeOwner, type ValueOwner } from './react/useNativeOwner.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
-import type { ControlSize } from './presentation.js'
+import type { ControlSize, Orientation } from './presentation.js'
 
 const sliderClass = [
   controlBorderClass,
@@ -80,7 +80,7 @@ export type SliderProps = Omit<
   | 'style'
 > &
   ValueOwner<number> & {
-    orientation?: 'horizontal' | 'vertical'
+    orientation?: Orientation
     controlSize?: ControlSize
     /** Native input styles, including slider track/thumb theme variables. */
     style?: ThemeStyle

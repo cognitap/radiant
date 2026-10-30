@@ -11,6 +11,61 @@ import {
   Slider
 } from '../../src/index.js'
 
+export function SliderControlledExample() {
+  const [brightness, setBrightness] = useState(70)
+  return (
+    <div style={{ display: 'grid', gap: '.75rem', maxWidth: '32rem', minWidth: 0 }}>
+      <Field label="Screen brightness">
+        <Slider
+          value={brightness}
+          min={0}
+          max={100}
+          step={10}
+          aria-valuetext={`${brightness} percent`}
+          onChange={event => setBrightness(event.target.valueAsNumber)}
+        />
+      </Field>
+      <p style={{ margin: 0 }}>Brightness: {brightness}%</p>
+      <div>
+        <Button
+          variant="outline"
+          tone="neutral"
+          onClick={() => setBrightness(70)}
+        >
+          Restore default
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export function SliderStepsExample() {
+  return (
+    <Field
+      label="Playback speed"
+      description="Quarter-speed steps, from half to double speed."
+      style={{ maxWidth: '32rem' }}
+    >
+      <Slider
+        name="speed"
+        min={0.5}
+        max={2}
+        step={0.25}
+        defaultValue={1}
+      />
+      <div
+        aria-hidden="true"
+        style={{ display: 'flex', justifyContent: 'space-between' }}
+      >
+        <span>0.5×</span>
+        <span>1×</span>
+        <span>1.5×</span>
+        <span>2×</span>
+      </div>
+    </Field>
+  )
+}
+
 export function SliderSettingsExample() {
   const [volume, setVolume] = useState(50)
   const [feedback, setFeedback] = useState('No changes saved')

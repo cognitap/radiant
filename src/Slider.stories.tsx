@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Field, Slider } from './index.js'
 import {
+  SliderControlledExample,
   SliderSettingsExample,
-  SliderSizeComparison
+  SliderSizeComparison,
+  SliderStepsExample
 } from '../.storybook/examples/SliderExamples.js'
 
 const meta = {
@@ -43,6 +45,14 @@ export const WithField: Story = {
     </Field>
   )
 }
+export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <SliderControlledExample />
+}
+export const Steps: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <SliderStepsExample />
+}
 export const States: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '32rem' }}>
@@ -56,15 +66,10 @@ export const States: Story = {
         <Slider defaultValue={30} />
       </Field>
       <Field
-        label="Playback speed"
-        description="Quarter-speed steps, from 0.5 to 2."
+        label="Output level"
+        error="Lower the level to avoid clipping."
       >
-        <Slider
-          min={0.5}
-          max={2}
-          step={0.25}
-          defaultValue={1}
-        />
+        <Slider defaultValue={90} />
       </Field>
     </div>
   )
