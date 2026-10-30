@@ -53,6 +53,7 @@ export const cn: CnFunction = createCn({
         'text-(--rad-tabs-font-size)'
       ],
       h: [
+        'h-(--rad-scroll-area-size)',
         'h-(--rad-skeleton-height)',
         'h-(--rad-progress-height)',
         'h-(--rad-combobox-height)',
@@ -62,6 +63,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-scroll-area-size)',
         'w-(--rad-skeleton-width)',
         'w-(--rad-toast-width)',
         'w-(--rad-menu-width)',
@@ -122,6 +124,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-scroll-area-radius)',
         'rounded-(--rad-table-radius)',
         'rounded-(--rad-pagination-radius)',
         'rounded-(--rad-avatar-radius)',

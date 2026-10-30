@@ -1078,3 +1078,5 @@ import './tabs-types.js'
 import './combobox-types.js'
 
 import './aspect-ratio-types.js'
+
+import './scroll-area-types.js'
