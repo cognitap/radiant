@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.41
+
 - Add OTPField: numeric/alphanumeric slots over one native input.
 
 ## 0.0.40
