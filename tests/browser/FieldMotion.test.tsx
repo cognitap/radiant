@@ -298,3 +298,25 @@ test('Field adapters hydrate with stable IDs; group metadata stays on the fields
   expect(states.get('control')?.disabled).toBe(true)
   expect([...host.querySelectorAll('[id]')].map(node => node.id)).toEqual(ids)
 })
+
+test('root aria-invalid and aria-describedby reach the control in control layout', async () => {
+  const { host } = await mount(
+    <>
+      <p id="external-help">Shown on the invoice.</p>
+      <Field
+        label="Company"
+        aria-invalid
+        aria-describedby="external-help"
+      >
+        <Input />
+      </Field>
+    </>
+  )
+  const field = host.querySelector('[data-slot~=field]')!
+  const input = host.querySelector('input')!
+  expect(input.getAttribute('aria-invalid')).toBe('true')
+  expect(input.hasAttribute('data-invalid')).toBe(true)
+  expect(input.getAttribute('aria-describedby')!.split(' ')).toContain('external-help')
+  expect(field.hasAttribute('aria-invalid')).toBe(false)
+  expect(field.hasAttribute('aria-describedby')).toBe(false)
+})
