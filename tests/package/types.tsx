@@ -1,3 +1,4 @@
+import './checkbox-group-types.js'
 import './fieldset-types.js'
 import './table-types.js'
 import './pagination-types.js'

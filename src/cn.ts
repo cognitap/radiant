@@ -84,6 +84,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-checkbox-group-gap)',
         'gap-(--rad-fieldset-gap)',
         'gap-(--rad-pagination-gap)',
         'gap-(--rad-breadcrumb-gap)',

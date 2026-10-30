@@ -499,6 +499,7 @@ export const componentRegistry = {
     fontSize: 'css'
   },
   fieldset: { gap: 'css' },
+  checkboxGroup: { gap: 'css' },
   radioGroup: { gap: 'css' }
 } as const
 

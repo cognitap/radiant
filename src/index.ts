@@ -371,3 +371,10 @@ export type {
 
 export { Fieldset } from './Fieldset.js'
 export type { FieldsetProps } from './Fieldset.js'
+
+export { CheckboxGroup } from './CheckboxGroup.js'
+export type {
+  CheckboxGroupProps,
+  CheckboxGroupItem,
+  CheckboxGroupSelectAll
+} from './CheckboxGroup.js'

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add CheckboxGroup.
+
 ## 0.0.29
 
 - Add Fieldset.
