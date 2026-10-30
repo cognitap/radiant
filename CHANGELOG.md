@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.49
+
 - Add PasswordInput.
 
 ## 0.0.48
