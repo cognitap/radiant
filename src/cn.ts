@@ -88,6 +88,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-menubar-gap)',
         'gap-(--rad-toolbar-gap)',
         'gap-(--rad-toggle-group-gap)',
         'gap-(--rad-checkbox-group-gap)',
@@ -116,6 +117,7 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-menubar-padding)',
         'p-(--rad-toolbar-padding)',
         'p-(--rad-toggle-group-padding)',
         'p-(--rad-toast-padding)',
@@ -130,6 +132,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-menubar-radius)',
         'rounded-(--rad-toolbar-radius)',
         'rounded-(--rad-toggle-group-radius)',
         'rounded-(--rad-toggle-group-indicator-radius)',

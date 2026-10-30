@@ -469,3 +469,41 @@ export type {
   ContextMenuSubContentProps,
   ContextMenuState
 } from './ContextMenu.js'
+
+export {
+  Menubar,
+  MenubarMenu,
+  MenubarTrigger,
+  MenubarPortal,
+  MenubarContent,
+  MenubarItem,
+  MenubarGroup,
+  MenubarLabel,
+  MenubarSeparator,
+  MenubarCheckboxItem,
+  MenubarRadioGroup,
+  MenubarRadioItem,
+  MenubarSub,
+  MenubarSubTrigger,
+  MenubarSubContent,
+  useMenubar
+} from './Menubar.js'
+export type {
+  MenubarProps,
+  MenubarMenuProps,
+  MenubarTriggerProps,
+  MenubarPortalProps,
+  MenubarContentProps,
+  MenubarItemProps,
+  MenubarGroupProps,
+  MenubarLabelProps,
+  MenubarSeparatorProps,
+  MenubarCheckboxItemProps,
+  MenubarRadioGroupProps,
+  MenubarRadioItemProps,
+  MenubarSubProps,
+  MenubarSubTriggerProps,
+  MenubarSubContentProps,
+  MenubarState,
+  MenubarRenderProps
+} from './Menubar.js'
