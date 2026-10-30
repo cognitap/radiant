@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.25
+
 - Add Avatar.
 
 ## 0.0.24
