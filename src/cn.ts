@@ -34,6 +34,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-breadcrumb-font-size)',
         'text-(--rad-avatar-font-size)',
         'text-(--rad-badge-font-size)',
         'text-(--rad-toast-title-size)',
@@ -79,6 +80,7 @@ export const cn: CnFunction = createCn({
         'size-(--rad-slider-track-size)'
       ],
       gap: [
+        'gap-(--rad-breadcrumb-gap)',
         'gap-(--rad-toast-gap)',
         'gap-(--rad-alert-gap)',
         'gap-(--rad-popover-gap)',

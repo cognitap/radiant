@@ -303,3 +303,21 @@ export type { BadgeProps, BadgeTone } from './Badge.js'
 
 export { Avatar } from './Avatar.js'
 export type { AvatarProps } from './Avatar.js'
+
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from './Breadcrumb.js'
+export type {
+  BreadcrumbProps,
+  BreadcrumbListProps,
+  BreadcrumbItemProps,
+  BreadcrumbLinkProps,
+  BreadcrumbLinkRenderProps,
+  BreadcrumbPageProps,
+  BreadcrumbSeparatorProps
+} from './Breadcrumb.js'
