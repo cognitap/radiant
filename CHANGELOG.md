@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.27
+
 - Add Pagination.
 
 ## 0.0.26
