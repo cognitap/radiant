@@ -15,6 +15,7 @@ import type { ComponentProps, ReactNode, RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, type ButtonProps } from './Button.js'
 import { useField, useFieldControl } from './Field.js'
+import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
 import { controlMetrics } from './controlStyles.js'
 import { matchSelectText, moveSelectFocus, positionSelect } from './internal/select.js'
@@ -296,7 +297,7 @@ export function Select({
   )
 }
 
-export type SelectTriggerProps = Omit<
+export type SelectTriggerProps = DistributiveOmit<
   ButtonProps,
   'variant' | 'tone' | 'type' | 'pending' | 'controlSize' | 'disabled'
 >

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Button pressed state, defaults and change requests.
+
 ## 0.0.32
 
 - Add ScrollArea.
@@ -109,21 +111,21 @@
 
 - Breaking: the example themes moved out of the core entry. Before, `import { jelly, themes } from '@cognitap/radiant'`. After, `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core, and `themeDefinitions` exposes each example's definition.
 
-- Reconcile pre-hydration disclosure changes: local Collapsible state adopts once; controlled disclosures and Accordion items restore their owner's value without a request.
+- Reconcile pre-hydration disclosures: Collapsible adopts local changes once; controlled Collapsible and Accordion restore ownership without requests.
 
-- Align Card minimum widths with compound parts in narrow layouts.
+- Align Card and compound-part minimum widths.
 
-- Let Accordion roots shrink in narrow grid/flex layouts like Collapsible.
+- Let Accordion shrink in narrow grid/flex layouts like Collapsible.
 
-- Keep disclosure resize observation and inert cleanup current, preserve the native pre-hydration fallback, and honor motion off for height and markers.
+- Update disclosure resize/inert cleanup; retain native pre-hydration fallback and motion-off height/markers.
 
-- Bound Dialog visual exits to two seconds and 500 descendants, and skip nested dialogs and customized built-in elements.
+- Bound Dialog exits to two seconds/500 descendants; skip nested dialogs and customized built-ins.
 
-- Wrap long Radio and Checkbox labels in narrow layouts without shrinking native indicators.
+- Wrap Radio/Checkbox labels without shrinking native indicators.
 
-- Release MotionLink springs on lost pointer capture or removed destinations while preserving native anchor navigation.
+- Release MotionLink springs on lost capture/removed destinations; preserve native navigation.
 
-- Keep Button presses tied to active input; cancel unavailable motion and honor theme-off lift and shift.
+- Bind Button presses to active input; cancel unavailable motion and theme-off lift/shift.
 
 ## 0.0.6
 

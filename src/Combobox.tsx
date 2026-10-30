@@ -15,6 +15,7 @@ import type { ComponentProps, ReactNode, RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, type ButtonProps } from './Button.js'
 import { useField, useFieldControl } from './Field.js'
+import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
 import { controlMetrics } from './controlStyles.js'
 import {
@@ -476,7 +477,7 @@ export function ComboboxInput({
   )
 }
 
-export type ComboboxTriggerProps = Omit<
+export type ComboboxTriggerProps = DistributiveOmit<
   ButtonProps,
   | 'type'
   | 'disabled'

@@ -92,6 +92,9 @@ export type TabsTriggerProps = Omit<
   | 'fullWidth'
   | 'pending'
   | 'motion'
+  | 'pressed'
+  | 'defaultPressed'
+  | 'onPressedChange'
 > & { value: string }
 export type TabsContentProps = Omit<
   ComponentProps<'div'>,
@@ -347,6 +350,9 @@ export function TabsTrigger({
       data-orientation={tabs.orientation}
       motion="off"
       pending={false}
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
       variant="ghost"
       tone="neutral"
       controlSize={controlSize ?? tabs.controlSize}

@@ -71,7 +71,8 @@ win: `Input.size` stays a character count, and a checkbox `value` stays its
 submitted data. Radius is a theme decision, not a prop.
 
 Button defaults to `type="button"`. `pending` blocks activation but keeps focus
-and the accessible name. Link is always an anchor and has no fake `disabled`.
+and the accessible name. Button's optional `pressed` state is independent of press motion.
+Link is always an anchor and has no fake `disabled`.
 
 ## Themes
 
@@ -154,6 +155,7 @@ may refuse it. No-op requests and prop syncs fire no callback.
 | Family                             | State                                              | Callback                                                 | Empty                  |
 | ---------------------------------- | -------------------------------------------------- | -------------------------------------------------------- | ---------------------- |
 | Input, Textarea                    | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                              | `''`                   |
+| Button toggle                      | `pressed` / `defaultPressed`                       | `onPressedChange(boolean)`                               | `false`                |
 | Checkbox, Switch, standalone Radio | `checked` / `defaultChecked`                       | Native `onChange`, `onBlur`                              | `false`                |
 | Slider                             | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                              | Native midpoint        |
 | RadioGroup                         | `value` / `defaultValue`                           | `onValueChange(string)` or native `onChange`             | `null`                 |
