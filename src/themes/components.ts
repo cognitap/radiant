@@ -498,6 +498,7 @@ export const componentRegistry = {
     paddingBlock: 'css',
     fontSize: 'css'
   },
+  fieldset: { gap: 'css' },
   radioGroup: { gap: 'css' }
 } as const
 
