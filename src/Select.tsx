@@ -13,7 +13,7 @@ import {
 } from 'react'
 import type { ComponentProps, ReactNode, RefObject } from 'react'
 import { createPortal } from 'react-dom'
-import { Button, type ButtonProps } from './Button.js'
+import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { useField, useFieldControl } from './Field.js'
 import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
@@ -22,7 +22,7 @@ import { matchSelectText, moveSelectFocus, positionSelect } from './internal/sel
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useTransitionHost } from './motion/host.js'
-import type { ValueOwner } from './react/useNativeOwner.js'
+import type { StateOwner, ValueOwner } from './react/useNativeOwner.js'
 import type { ControlSize } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import { selectContentClass, selectItemClass, selectTriggerClass } from './selectStyles.js'
@@ -32,7 +32,7 @@ export type SelectOption = { value: string; disabled?: boolean } & (
   | { label: ReactNode; textValue: string }
 )
 export type SelectProps = ValueOwner<string | null> &
-  ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
+  StateOwner<'open', boolean> & {
     /** One registry for native options, SSR value text and keyboard matching. Values must be unique. */
     items: readonly SelectOption[]
     onValueChange?: (value: string | null) => void
@@ -42,6 +42,9 @@ export type SelectProps = ValueOwner<string | null> &
     autoComplete?: string
     disabled?: boolean
     required?: boolean
+    /** Keep the value focusable and submitted, but block opening and changes. */
+    readOnly?: boolean
+    'aria-invalid'?: ComponentProps<'button'>['aria-invalid']
     controlSize?: ControlSize
     children?: ReactNode
   }
@@ -58,6 +61,8 @@ type Context = SelectState & {
   entries: { value: string; textValue: string; disabled?: boolean }[]
   controlSize: ControlSize
   required: boolean
+  readOnly: boolean
+  invalid: SelectProps['aria-invalid']
   triggerId: string
   contentId: string
   labelId?: string
@@ -95,6 +100,8 @@ export function Select({
   autoComplete,
   disabled: disabledProp,
   required: requiredProp,
+  readOnly = false,
+  'aria-invalid': invalid,
   controlSize = 'medium',
   children
 }: SelectProps) {
@@ -135,8 +142,8 @@ export function Select({
   const selected = items.find(item => item.value === selection.value)
   const nativeValue = selected?.value ?? ''
   const [initialNativeValue] = useState(nativeValue)
-  const isOpen = expansion.value && !disabled
-  const unavailable = () => disabled || !!trigger?.matches(':disabled')
+  const isOpen = expansion.value && !disabled && !readOnly
+  const unavailable = () => disabled || readOnly || !!trigger?.matches(':disabled')
   const setOpen = (next: boolean) => {
     if (next && unavailable()) return
     searchBuffer.current = { text: '', at: 0 }
@@ -206,14 +213,6 @@ export function Select({
       win.clearTimeout(resetTimer)
     }
   }, [form, trigger])
-  useEffect(() => {
-    if (
-      !isOpen &&
-      restoreFocus.current &&
-      content.current?.contains(content.current.ownerDocument.activeElement)
-    )
-      trigger?.focus({ preventScroll: true })
-  }, [isOpen, trigger])
   const context: Context = {
     value: selection.value,
     setValue: selection.request,
@@ -224,6 +223,8 @@ export function Select({
     entries,
     controlSize,
     required,
+    readOnly,
+    invalid,
     triggerId: field?.controlProps?.id ?? `${ids}-trigger`,
     contentId: `${ids}-content`,
     labelId: field?.layout === 'control' ? field.labelId : undefined,
@@ -259,7 +260,7 @@ export function Select({
         name={name}
         form={form}
         autoComplete={autoComplete}
-        required={required}
+        required={required && !readOnly}
         disabled={disabled}
         aria-hidden="true"
         tabIndex={-1}
@@ -299,8 +300,18 @@ export function Select({
 
 export type SelectTriggerProps = DistributiveOmit<
   ButtonProps,
-  'variant' | 'tone' | 'type' | 'pending' | 'controlSize' | 'disabled'
+  | 'variant'
+  | 'tone'
+  | 'type'
+  | 'pending'
+  | 'controlSize'
+  | 'disabled'
+  | 'pressed'
+  | 'defaultPressed'
+  | 'onPressedChange'
+  | 'aria-pressed'
 >
+export type SelectRenderProps = ButtonRenderProps
 export function SelectTrigger({
   className,
   onClick,
@@ -315,7 +326,7 @@ export function SelectTrigger({
     disabled: select.disabled,
     required: select.required,
     'aria-describedby': props['aria-describedby'],
-    'aria-invalid': props['aria-invalid']
+    'aria-invalid': props['aria-invalid'] ?? select.invalid
   })
   const hostRef = useComposedRefs(select.setTrigger, ref)
   return (
@@ -326,6 +337,9 @@ export function SelectTrigger({
       variant="outline"
       tone="neutral"
       type="button"
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
       controlSize={select.controlSize}
       className={cn(
         selectTriggerClass,
@@ -337,6 +351,7 @@ export function SelectTrigger({
       aria-controls={select.contentId}
       aria-expanded={select.open}
       aria-required={select.required || undefined}
+      aria-readonly={select.readOnly || undefined}
       data-slot="button select-trigger"
       data-state={select.open ? 'open' : 'closed'}
       data-placeholder={select.value === null ? '' : undefined}
@@ -697,7 +712,7 @@ export function SelectItem({
         data-slot="select-item"
         data-value={value}
         data-disabled={item.disabled ? '' : undefined}
-        data-state={select.value === value ? 'checked' : 'unchecked'}
+        data-selected={select.value === value ? '' : undefined}
         className={cn(selectItemClass, className)}
         onClick={event => {
           onClick?.(event)

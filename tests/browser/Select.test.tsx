@@ -537,3 +537,120 @@ test('Select rejects contradictory owners, duplicate values and unnamed rich lab
   expect(() => renderToString(<SelectItem value="rome" />)).toThrow(/inside Select/)
   expect(() => renderToString(<SelectValue />)).toThrow(/inside Select/)
 })
+
+test('root aria-invalid reaches the trigger; the trigger prop still works', async () => {
+  const { host } = await mount(
+    <>
+      <Field label="City">
+        <Select
+          items={items}
+          aria-invalid
+        />
+      </Field>
+      <Select items={items}>
+        <SelectTrigger
+          aria-label="Other city"
+          aria-invalid
+        />
+      </Select>
+    </>
+  )
+  for (const node of host.querySelectorAll('[data-slot~="select-trigger"]')) {
+    expect(node.getAttribute('aria-invalid')).toBe('true')
+    expect(node.hasAttribute('data-invalid')).toBe(true)
+  }
+})
+
+test('selected items carry boolean data-selected beside aria-selected', async () => {
+  const { host } = await mount(
+    <Field label="City">
+      <Select
+        items={items}
+        defaultValue="rome"
+        defaultOpen
+      />
+    </Field>
+  )
+  const options = Array.from(popup(host).querySelectorAll<HTMLElement>('[role=option]'))
+  expect(options.map(option => option.hasAttribute('data-selected'))).toEqual([
+    false,
+    false,
+    true,
+    false
+  ])
+  expect(options.map(option => option.getAttribute('aria-selected'))).toEqual([
+    'false',
+    'false',
+    'true',
+    'false'
+  ])
+  expect(options.some(option => option.hasAttribute('data-state'))).toBe(false)
+})
+
+test('readOnly keeps focus and submission but opens nothing and changes nothing', async () => {
+  const requested = vi.fn()
+  const opened = vi.fn()
+  const { host } = await mount(
+    <form>
+      <Field
+        label="City"
+        required
+      >
+        <Select
+          items={items}
+          name="city"
+          defaultValue="oslo"
+          defaultOpen
+          readOnly
+          onValueChange={requested}
+          onOpenChange={opened}
+        />
+      </Field>
+    </form>
+  )
+  expect(popup(host).matches(':popover-open')).toBe(false)
+  expect(trigger(host).disabled).toBe(false)
+  expect(trigger(host).getAttribute('aria-readonly')).toBe('true')
+  await click(trigger(host))
+  expect(trigger(host).getAttribute('aria-expanded')).toBe('false')
+  expect(document.activeElement).toBe(trigger(host))
+  await keys('{Enter}{ArrowDown} t')
+  expect(popup(host).matches(':popover-open')).toBe(false)
+  await act(async () => {
+    native(host).value = 'tokyo'
+    native(host).dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  expect(native(host).value).toBe('oslo')
+  expect(trigger(host).textContent).toContain('Oslo')
+  expect(requested).not.toHaveBeenCalled()
+  expect(opened).not.toHaveBeenCalled()
+  expect(new FormData(host.querySelector('form')!).get('city')).toBe('oslo')
+})
+
+test('a read-only empty required Select does not block submission', async () => {
+  const { host } = await mount(
+    <form>
+      <Field label="City">
+        <Select
+          items={items}
+          name="city"
+          required
+          readOnly
+        />
+      </Field>
+    </form>
+  )
+  expect(host.querySelector('form')!.checkValidity()).toBe(true)
+})
+
+test('SelectTrigger ignores toggle props', async () => {
+  const { host } = await mount(
+    <Select items={items}>
+      <SelectTrigger
+        aria-label="City"
+        {...({ defaultPressed: true } as object)}
+      />
+    </Select>
+  )
+  expect(trigger(host).hasAttribute('aria-pressed')).toBe(false)
+})

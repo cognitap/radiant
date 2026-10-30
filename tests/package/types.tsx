@@ -445,6 +445,8 @@ export const example = (
       {...selectSelection}
       name="workspace"
       form="profile"
+      readOnly
+      aria-invalid
     >
       <SelectTrigger
         ref={createRef<HTMLButtonElement>()}
@@ -480,6 +482,8 @@ const unnamed: SelectOption = { value: 'team', label: <span>Team</span> }
 void [mixed, mixedOpen, multiple, unnamed]
 // @ts-expect-error Disabled belongs to Select/Field so its form bridge and trigger agree.
 export const disabledPart = <SelectTrigger disabled />
+// @ts-expect-error A trigger that opens a listbox is not a toggle.
+export const pressedTrigger = <SelectTrigger defaultPressed />
 
 const props: ButtonProps = {
   type: 'submit',
