@@ -1,3 +1,4 @@
+import './pagination-types.js'
 import './breadcrumb-types.js'
 import './avatar-types.js'
 import './badge-types.js'

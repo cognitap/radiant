@@ -68,6 +68,7 @@ export const cn: CnFunction = createCn({
         'w-(--rad-slider-height)',
         'w-(--rad-slider-length)'
       ],
+      'min-w': ['min-w-(--rad-pagination-item-min-width)'],
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: [
         'size-(--rad-avatar-size)',
@@ -80,6 +81,7 @@ export const cn: CnFunction = createCn({
         'size-(--rad-slider-track-size)'
       ],
       gap: [
+        'gap-(--rad-pagination-gap)',
         'gap-(--rad-breadcrumb-gap)',
         'gap-(--rad-toast-gap)',
         'gap-(--rad-alert-gap)',
@@ -110,6 +112,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-pagination-radius)',
         'rounded-(--rad-avatar-radius)',
         'rounded-(--rad-badge-radius)',
         'rounded-(--rad-skeleton-radius)',

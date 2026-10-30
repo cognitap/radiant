@@ -321,3 +321,27 @@ export type {
   BreadcrumbPageProps,
   BreadcrumbSeparatorProps
 } from './Breadcrumb.js'
+
+export {
+  Pagination,
+  PaginationList,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationButton,
+  PaginationUnavailable,
+  PaginationEllipsis
+} from './Pagination.js'
+export type {
+  PaginationProps,
+  PaginationListProps,
+  PaginationItemProps,
+  PaginationLinkProps,
+  PaginationPreviousProps,
+  PaginationNextProps,
+  PaginationButtonProps,
+  PaginationUnavailableProps,
+  PaginationEllipsisProps,
+  PaginationLinkRenderProps
+} from './Pagination.js'

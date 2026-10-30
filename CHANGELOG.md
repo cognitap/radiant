@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Pagination.
+
 ## 0.0.26
 
 - Add Breadcrumb.
@@ -86,7 +88,7 @@
 
 - Reconcile pre-hydration disclosure changes: local Collapsible state adopts once; controlled disclosures and Accordion items restore their owner's value without a request.
 
-- Align Card root minimum-width styling with its compound parts in narrow layouts.
+- Align Card minimum widths with compound parts in narrow layouts.
 
 - Let Accordion roots shrink in narrow grid/flex layouts like Collapsible.
 

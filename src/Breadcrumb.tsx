@@ -1,5 +1,9 @@
-import type { ComponentProps, ReactElement } from 'react'
-import { Link, type LinkProps, type LinkRenderProps } from './Link.js'
+import type { ComponentProps } from 'react'
+import {
+  ComposedLink,
+  type ComposedLinkProps,
+  type ComposedLinkRenderProps
+} from './composedLink.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
@@ -12,16 +16,8 @@ export type BreadcrumbListProps = Part<'ol'>
 export type BreadcrumbItemProps = Part<'li'>
 export type BreadcrumbPageProps = Omit<Part<'span'>, 'aria-current'>
 export type BreadcrumbSeparatorProps = Omit<Part<'span'>, 'aria-hidden' | 'tabIndex'>
-export type BreadcrumbLinkRenderProps = Omit<LinkRenderProps, 'data-slot' | 'href'> & {
-  'data-slot': string
-  href: string
-}
-export type BreadcrumbLinkProps = Omit<LinkProps, 'href' | 'render' | 'aria-current' | 'role'> & {
-  href: string
-  current?: boolean
-  'data-slot'?: string
-  render?: (props: BreadcrumbLinkRenderProps) => ReactElement
-}
+export type BreadcrumbLinkRenderProps = ComposedLinkRenderProps
+export type BreadcrumbLinkProps = Omit<ComposedLinkProps, 'aria-current'> & { current?: boolean }
 export function Breadcrumb({ className, ...props }: BreadcrumbProps) {
   const labelledBy = props['aria-labelledby']?.trim()
   const label = props['aria-label']
@@ -78,7 +74,8 @@ export function BreadcrumbLink({
   ...props
 }: BreadcrumbLinkProps) {
   return (
-    <Link
+    <ComposedLink
+      identity="breadcrumb-link"
       {...props}
       href={href}
       variant={variant}
@@ -88,16 +85,8 @@ export function BreadcrumbLink({
         'min-w-0 [overflow-wrap:anywhere] [color:var(--rad-breadcrumb-link-color,var(--rad-color-muted-foreground))] hover:[color:var(--rad-breadcrumb-link-hover-color,var(--rad-color-foreground))]',
         className
       )}
-      render={native => {
-        const resolved: BreadcrumbLinkRenderProps = {
-          ...native,
-          href,
-          role: undefined,
-          'data-slot': joinIds('link breadcrumb-link', slot) ?? 'link breadcrumb-link'
-        }
-        // oxlint-disable-next-line react/refs -- The adapter forwards resolved refs; it does not read ref.current.
-        return render ? render(resolved) : <a {...resolved}>{resolved.children}</a>
-      }}
+      render={render}
+      data-slot={slot}
     />
   )
 }
