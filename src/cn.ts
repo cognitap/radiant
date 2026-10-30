@@ -63,6 +63,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-hover-card-width)',
         'w-(--rad-scroll-area-size)',
         'w-(--rad-skeleton-width)',
         'w-(--rad-toast-width)',

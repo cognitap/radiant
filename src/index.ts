@@ -1,4 +1,19 @@
 export {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+  HoverCardPortal,
+  useHoverCard
+} from './HoverCard.js'
+export type {
+  HoverCardProps,
+  HoverCardState,
+  HoverCardTriggerProps,
+  HoverCardContentProps,
+  HoverCardPortalProps,
+  HoverCardRenderProps
+} from './HoverCard.js'
+export {
   Combobox,
   ComboboxInput,
   ComboboxTrigger,

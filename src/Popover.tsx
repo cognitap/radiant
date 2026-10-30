@@ -32,8 +32,8 @@ export type PopoverProps = (
 }
 export type PopoverState = { open: boolean; setOpen: (open: boolean) => void; contentId: string }
 type Context = PopoverState & {
-  trigger: HTMLButtonElement | null
-  setTrigger: (node: HTMLButtonElement | null) => void
+  trigger: HTMLElement | null
+  setTrigger: (node: HTMLElement | null) => void
   content: RefObject<HTMLDivElement | null>
   restoreFocus: RefObject<boolean>
   close: (restore: boolean) => void
@@ -42,7 +42,8 @@ const PopoverContext = createContext<Context | null>(null)
 export function usePopover(): PopoverState | null {
   return useContext(PopoverContext)
 }
-function usePopoverContext() {
+/** Private native-anchor seam for composed surface families; absent from package exports. */
+export function usePopoverContext() {
   const value = useContext(PopoverContext)
   if (!value) throw new Error('Popover parts must render inside Popover.')
   return value
@@ -56,7 +57,7 @@ export function Popover({ open, defaultOpen, onOpenChange, children }: PopoverPr
     onChange: onOpenChange
   })
   const contentId = useId()
-  const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null)
+  const [trigger, setTrigger] = useState<HTMLElement | null>(null)
   const content = useRef<HTMLDivElement>(null)
   const restoreFocus = useRef(true)
   const setOpen = (next: boolean) => {
@@ -103,7 +104,7 @@ export type PopoverContentProps = Omit<ComponentProps<'div'>, 'style' | 'popover
 
 export function PopoverTrigger({ ref, onClick, ...props }: PopoverTriggerProps) {
   const popover = usePopoverContext()
-  const hostRef = useComposedRefs(popover.setTrigger, ref)
+  const hostRef = useComposedRefs<HTMLButtonElement>(popover.setTrigger, ref)
   return (
     <Button
       {...props}
@@ -132,9 +133,11 @@ export function PopoverClose({ onClick, ...props }: PopoverCloseProps) {
 /** The local portal preserves theme, native form ownership and modal ancestry. */
 export function PopoverPortal({ children }: PopoverPortalProps) {
   const popover = usePopoverContext()
-  return popover.trigger?.parentElement
-    ? createPortal(children, popover.trigger.parentElement)
-    : null
+  // Rich surfaces cannot be inserted into a link's phrasing-only parent (p, span, label).
+  const container = popover.trigger?.parentElement?.closest<HTMLElement>(
+    'div, section, article, aside, main, nav, form, dialog, [popover], li, dd, td, th, fieldset, figure, body'
+  )
+  return container ? createPortal(children, container) : null
 }
 
 const surfaceClass = [
@@ -151,7 +154,17 @@ const surfaceClass = [
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]'
 ].join(' ')
 
-export function PopoverContent({
+export function PopoverContent(props: PopoverContentProps) {
+  return (
+    <PopoverContentRoot
+      {...props}
+      onFocusOutside={undefined}
+    />
+  )
+}
+/** Private focus-leave timing seam; native pointer/Escape dismissal stays shared. */
+export function PopoverContentRoot({
+  onFocusOutside,
   ref,
   className,
   side = 'bottom',
@@ -161,7 +174,7 @@ export function PopoverContent({
   initialFocusRef,
   motion = 'inherit',
   ...props
-}: PopoverContentProps) {
+}: PopoverContentProps & { onFocusOutside?: () => void }) {
   const popover = usePopoverContext()
   if (![sideOffset, collisionPadding].every(value => Number.isFinite(value) && value >= 0))
     throw new TypeError('Popover offsets and padding must be finite, nonnegative numbers.')
@@ -177,7 +190,7 @@ export function PopoverContent({
     popover.open,
     popover.close,
     popover.restoreFocus,
-    { side, align, sideOffset, collisionPadding, initialFocusRef }
+    { side, align, sideOffset, collisionPadding, initialFocusRef, onFocusOutside }
   )
   return (
     <div

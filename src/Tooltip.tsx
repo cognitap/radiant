@@ -2,9 +2,7 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
-  useEffect,
   useId,
   useRef,
   useState,
@@ -20,6 +18,7 @@ import { composeAction } from './internal/events.js'
 import type { PopoverSide, PopoverAlign } from './internal/popover.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
+import { useHoverSurface } from './react/useHoverSurface.js'
 import { usePopoverSurface } from './react/usePopoverSurface.js'
 import { useTransitionHost } from './motion/host.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
@@ -73,81 +72,14 @@ export function Tooltip({
   const contentId = useId()
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null)
   const content = useRef<HTMLSpanElement>(null)
-  const timer = useRef<{ view: Window; id: number } | null>(null)
-  const activity = useRef({ focused: false, hovered: false, suppressed: false, touch: false })
-  const clear = () => {
-    if (timer.current) timer.current.view.clearTimeout(timer.current.id)
-    timer.current = null
-  }
-  const latest = useRef(state.request)
-  useEffect(() => {
-    latest.current = state.request
+  const { enter, leave, dismiss, touch } = useHoverSurface({
+    trigger,
+    content,
+    open: state.value,
+    request: state.request,
+    openDelay,
+    closeDelay
   })
-  useEffect(() => () => clear(), [])
-  const schedule = useCallback(
-    (next: boolean, delay: number) => {
-      clear()
-      const view = trigger?.ownerDocument.defaultView
-      if (!view) return
-      timer.current = {
-        view,
-        id: view.setTimeout(() => {
-          timer.current = null
-          latest.current(next)
-        }, delay)
-      }
-    },
-    [trigger]
-  )
-  const dismiss = () => {
-    clear()
-    activity.current.suppressed = true
-    state.request(false)
-  }
-  const enter = (focus = false) => {
-    if (focus && !activity.current.focused) activity.current.suppressed = false
-    if (focus) activity.current.focused = true
-    else activity.current.hovered = true
-    clear()
-    if (activity.current.suppressed || activity.current.touch) return
-    if (focus) state.request(true)
-    else if (!state.value) schedule(true, openDelay)
-  }
-  const leave = (focus = false) => {
-    if (focus) {
-      activity.current.focused = false
-      activity.current.touch = false
-    } else activity.current.hovered = false
-    if (activity.current.focused || activity.current.hovered) return
-    activity.current.suppressed = false
-    schedule(false, closeDelay)
-  }
-  useEffect(() => {
-    if (!trigger || !state.value) return
-    const move = (event: PointerEvent) => {
-      if (
-        event.pointerType === 'touch' ||
-        activity.current.focused ||
-        activity.current.hovered ||
-        activity.current.suppressed
-      )
-        return
-      const panel = content.current
-      if (!panel) return
-      const a = trigger.getBoundingClientRect()
-      const b = panel.getBoundingClientRect()
-      // Keep a hoverable bridge across the placement gap, including magnified pointer movement.
-      const within =
-        event.clientX >= Math.min(a.left, b.left) &&
-        event.clientX <= Math.max(a.right, b.right) &&
-        event.clientY >= Math.min(a.top, b.top) &&
-        event.clientY <= Math.max(a.bottom, b.bottom)
-      if (within) clear()
-      else if (!timer.current) schedule(false, closeDelay)
-    }
-    trigger.ownerDocument.addEventListener('pointermove', move)
-    return () => trigger.ownerDocument.removeEventListener('pointermove', move)
-  }, [trigger, state.value, closeDelay, schedule])
   return (
     <TooltipContext.Provider
       value={{
@@ -160,10 +92,7 @@ export function Tooltip({
         enter,
         leave,
         dismiss,
-        touch: () => {
-          activity.current.touch = true
-          dismiss()
-        }
+        touch
       }}
     >
       {children}

@@ -4,13 +4,17 @@
 
 ## Unreleased
 
+- Add HoverCard.
+- Track inline anchor text changes in popup placement.
+- Keep popup portals outside phrasing-only hosts.
+
 ## 0.0.34
 
 - Add Toolbar.
 
 ## 0.0.33
 
-- Breaking: ButtonProps is now a union. Before, extend it with `interface`; after, use a type intersection and distributive omission.
+- Breaking: ButtonProps is a union. Before: `interface` extension. After: type intersection and distributive omission.
 - Add ToggleGroup.
 - Add Button pressed state, defaults and change requests.
 
@@ -105,11 +109,11 @@
 
 ## 0.0.10
 
-- Add draggable Switch with Field, forms, sizing and theming.
+- Add draggable Switch: Field, forms, sizing, themes.
 
 ## 0.0.9
 
-- Add Textarea with Field, forms, themes and resizing.
+- Add Textarea: Field, forms, themes, resizing.
 
 ## 0.0.8
 
