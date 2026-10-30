@@ -1095,3 +1095,5 @@ import './drawer-types.js'
 import './multi-select-tags-input-types.js'
 
 import './otp-field-types.js'
+
+import './button-group-types.js'

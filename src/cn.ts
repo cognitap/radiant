@@ -139,6 +139,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-button-group-radius)',
         'rounded-(--rad-menubar-radius)',
         'rounded-(--rad-toolbar-radius)',
         'rounded-(--rad-toggle-group-radius)',

@@ -538,6 +538,8 @@ export type { TagsInputProps } from './TagsInput.js'
 export { ComboboxTags } from './Combobox.js'
 export type { ComboboxMultipleProps, ComboboxMultipleState, ComboboxTagsProps } from './Combobox.js'
 export { OTPField } from './OTPField.js'
+export { ButtonGroup } from './ButtonGroup.js'
+export type { ButtonGroupProps } from './ButtonGroup.js'
 export type { OTPFieldProps, OTPFieldMode } from './OTPField.js'
 export {
   MultiSelect,
