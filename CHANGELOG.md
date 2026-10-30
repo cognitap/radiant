@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Menubar.
+
 ## 0.0.36
 
 - Add ContextMenu.
@@ -26,7 +28,7 @@
 
 - Breaking: ButtonProps is a union. Before: `interface` extension. After: type intersection and distributive omission.
 - Add ToggleGroup.
-- Add Button pressed state, defaults and change requests.
+- Add Button pressed/defaultPressed/onPressedChange.
 
 ## 0.0.32
 

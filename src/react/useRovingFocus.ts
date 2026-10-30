@@ -20,6 +20,7 @@ type Options<Node extends HTMLElement> = {
   loop: boolean
   active?: boolean
   deferTo?: string
+  includeAriaDisabled?: boolean
 }
 
 /** Native hosts and DOM order stay authoritative, including dynamic disabled items. */
@@ -31,7 +32,8 @@ export function useRovingFocus<Node extends HTMLElement>({
   orientation,
   loop,
   active = true,
-  deferTo
+  deferTo,
+  includeAriaDisabled = false
 }: Options<Node>) {
   const ownsFocus = (node: Node) => {
     if (!active) return false
@@ -50,7 +52,7 @@ export function useRovingFocus<Node extends HTMLElement>({
     return items(node).filter(
       item =>
         !item.matches(':disabled') &&
-        item.getAttribute('aria-disabled') !== 'true' &&
+        (includeAriaDisabled || item.getAttribute('aria-disabled') !== 'true') &&
         !item.closest('[inert], [hidden]') &&
         item.getClientRects().length > 0 &&
         !['hidden', 'collapse'].includes(view.getComputedStyle(item).visibility)
@@ -123,6 +125,7 @@ export function useRovingFocus<Node extends HTMLElement>({
     }
   })
   return {
+    items: enabled,
     onFocus(event: FocusEvent<Node>) {
       if (
         ownsFocus(event.currentTarget) &&

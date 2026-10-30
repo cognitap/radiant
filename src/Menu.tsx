@@ -16,7 +16,7 @@ import {
 import {
   PopoverRoot,
   PopoverTrigger,
-  PopoverContent,
+  PopoverContentRoot,
   PopoverCloseRoot,
   PopoverPortal,
   usePopover,
@@ -219,7 +219,22 @@ export function MenuPortal(props: MenuPortalProps) {
   useMenuContext()
   return <PopoverPortal {...props} />
 }
-export function MenuContent({ ref, className, onKeyDown, ...props }: MenuContentProps) {
+export function MenuContent(props: MenuContentProps) {
+  return (
+    <MenuContentRoot
+      {...props}
+      onFocusOutside={undefined}
+    />
+  )
+}
+/** Private bar focus boundary; public Menu retains shared outside dismissal. */
+export function MenuContentRoot({
+  ref,
+  className,
+  onKeyDown,
+  onFocusOutside,
+  ...props
+}: MenuContentProps & { onFocusOutside?: () => void }) {
   const menu = useMenuContext()
   const nested = !!menu.parent || menu.family === 'menubar'
   const triggerId = menu.triggerId
@@ -257,9 +272,11 @@ export function MenuContent({ ref, className, onKeyDown, ...props }: MenuContent
     focusItem(node, edge === 'last' ? options.at(-1) : options[0])
   }, [menu.open, menu.content, menu.intent])
   return (
-    <PopoverContent
+    <PopoverContentRoot
       {...props}
       ref={host}
+      onFocusOutside={onFocusOutside}
+      initialFocusRef={undefined}
       role="menu"
       aria-orientation="vertical"
       aria-labelledby={menu.triggerId}

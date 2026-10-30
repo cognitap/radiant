@@ -1087,3 +1087,5 @@ import './aspect-ratio-types.js'
 import './scroll-area-types.js'
 
 import './context-menu-types.js'
+
+import './menubar-types.js'
