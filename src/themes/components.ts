@@ -500,6 +500,15 @@ export const componentRegistry = {
   },
   fieldset: { gap: 'css' },
   checkboxGroup: { gap: 'css' },
+  toggleGroup: {
+    gap: 'css',
+    padding: 'css',
+    radius: 'css',
+    background: 'css',
+    indicatorColor: 'css',
+    indicatorRadius: 'css',
+    indicatorShadow: 'css'
+  },
   scrollArea: { size: 'css', radius: 'css', thumbColor: 'css', trackColor: 'css' },
   radioGroup: { gap: 'css' }
 } as const

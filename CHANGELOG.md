@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- Add ToggleGroup.
 - Add Button pressed state, defaults and change requests.
 
 ## 0.0.32

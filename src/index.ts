@@ -384,3 +384,13 @@ export type { AspectRatioProps } from './AspectRatio.js'
 
 export { ScrollArea } from './ScrollArea.js'
 export type { ScrollAreaProps, ScrollAreaOrientation, ScrollAreaVisibility } from './ScrollArea.js'
+
+export { ToggleGroup, ToggleGroupItem, useToggleGroup } from './ToggleGroup.js'
+export type {
+  ToggleGroupProps,
+  ToggleGroupItemProps,
+  ToggleGroupState,
+  ToggleGroupValue,
+  ToggleGroupOrientation,
+  ToggleGroupAppearance
+} from './ToggleGroup.js'
