@@ -2,6 +2,9 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  tag: { gap: 'css' },
+  multiSelect: { gap: 'css' },
+  tagsInput: { gap: 'css' },
   drawer: { size: 'css' },
   menubar: { gap: 'css', padding: 'css', radius: 'css', background: 'css' },
   contextMenu: { width: 'css' },

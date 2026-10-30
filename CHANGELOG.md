@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Combobox multiple mode, MultiSelect, TagsInput and removable Tag.
+
 ## 0.0.39
 
 - Fix nested Drawer alignment.
@@ -163,8 +165,8 @@
 
 ## 0.0.6
 
-- Add opt-in spring motion in `@cognitap/radiant/motion` and `/motion/react`, with serializable motion profiles in themes. Root imports stay free of the engine.
-- Add `MotionProvider` for spring press feedback on Button and Dialog actions, disclosure height and Dialog presentation. Dismissal and focus stay immediate.
+- Add opt-in springs in `@cognitap/radiant/motion` and `/motion/react`, with serializable theme profiles. Root imports stay engine-free.
+- Add `MotionProvider`: Button and Dialog action springs, disclosure height and Dialog presentation. Dismissal and focus stay immediate.
 - Add `MotionLink` spring feedback for action-shaped links.
 - Add one-axis drag with release, snapping, cancellation and keyboard alternatives.
 - Add `useSpringFollow` for changing targets and `useSpringLayout` for grid and flex resize and reorder.

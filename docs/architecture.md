@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's forty-one families fit together and why. Props are on the
+How Radiant's forty-four families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Button, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, Textarea, Select, Combobox, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
+The families are Button, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -25,8 +25,11 @@ Radiant has no headless-library dependency. Select owns its themed listbox and
 item focus, while a visually hidden native select supplies form semantics.
 Select, Combobox and Popover use the local top layer, preserving theme and modal ancestry.
 Combobox keeps DOM focus on its native input and submits the committed key through
-a hidden text control. Search text never becomes a selection. Applications own async
+native form controls. Search text never becomes a selection. Applications own async
 requests, cancellation and selected labels; results never trigger selection.
+MultiSelect composes Combobox multiple mode. TagsInput commits free text; both
+submit repeated named values. Their nameless JSON carrier emits accepted array changes.
+Tag composes Badge and Button for removal.
 
 Import rules:
 
@@ -138,6 +141,10 @@ host, never a wrapper:
 | Accordion / AccordionItem / AccordionTrigger / AccordionContent            | `div` / `details` / `summary` / `div`               |
 | Card / CardHeader / CardContent / CardFooter                               | `div`                                               |
 | CardTitle and AlertTitle / CardDescription and AlertDescription            | Heading chosen by `level` / `p`                     |
+
+MultiSelect parts retain Combobox hosts and add `multi-select-*`. TagsInput props/ref
+reach Input; wrapper, tag, removal and message styles use named parts. Tag props/ref
+reach Badge’s span; its removal part styles the actual Button.
 
 Internal parts take `className` and `style` through a `parts` map. Field has
 `label`, `description`, `error` and `required`. Checkbox, Switch and Radio have

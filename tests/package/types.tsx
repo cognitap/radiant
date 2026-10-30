@@ -1091,3 +1091,5 @@ import './context-menu-types.js'
 import './menubar-types.js'
 
 import './drawer-types.js'
+
+import './multi-select-tags-input-types.js'

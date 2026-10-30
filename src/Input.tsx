@@ -48,7 +48,20 @@ export type InputProps = Omit<ComponentProps<'input'>, 'value' | 'defaultValue' 
   }
 
 /** Native editing, selection, events and ref; Field supplies owned form relationships. */
-export function Input({
+export function Input(props: InputProps) {
+  return (
+    <InputRoot
+      {...props}
+      family={undefined}
+      nativeRequired={undefined}
+    />
+  )
+}
+
+/** Private composition seam: hosted families keep Input's actual native control. */
+export function InputRoot({
+  family,
+  nativeRequired,
   className,
   controlSize = 'medium',
   type = 'text',
@@ -59,7 +72,7 @@ export function Input({
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
   ...props
-}: InputProps) {
+}: InputProps & { family?: 'tags-input'; nativeRequired?: false }) {
   const ownsValue = !['checkbox', 'radio', 'file'].includes(type)
   useNativeOwner('Input', props.value, props.defaultValue, ownsValue)
   if (ownsValue && props.value === null)
@@ -77,9 +90,10 @@ export function Input({
     <input
       {...props}
       {...control}
+      required={nativeRequired === false ? false : control.required}
       className={cn(inputVariants(), controlMetrics({ controlSize }), className)}
       data-control-size={controlSize}
-      data-slot="input"
+      data-slot={family ? `input ${family}` : 'input'}
       type={type}
     />
   )

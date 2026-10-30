@@ -530,3 +530,36 @@ export type {
   DrawerSide,
   DrawerState
 } from './Drawer.js'
+
+export { Tag } from './Tag.js'
+export type { TagProps } from './Tag.js'
+export { TagsInput } from './TagsInput.js'
+export type { TagsInputProps } from './TagsInput.js'
+export { ComboboxTags } from './Combobox.js'
+export type { ComboboxMultipleProps, ComboboxMultipleState, ComboboxTagsProps } from './Combobox.js'
+export {
+  MultiSelect,
+  MultiSelectInput,
+  MultiSelectTrigger,
+  MultiSelectClear,
+  MultiSelectPortal,
+  MultiSelectContent,
+  MultiSelectItem,
+  MultiSelectStatus,
+  MultiSelectTags,
+  useMultiSelect
+} from './MultiSelect.js'
+export type {
+  MultiSelectProps,
+  MultiSelectState,
+  MultiSelectOption,
+  MultiSelectInputProps,
+  MultiSelectTriggerProps,
+  MultiSelectClearProps,
+  MultiSelectPortalProps,
+  MultiSelectContentProps,
+  MultiSelectItemProps,
+  MultiSelectStatusProps,
+  MultiSelectTagsProps,
+  MultiSelectRenderProps
+} from './MultiSelect.js'

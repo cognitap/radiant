@@ -88,8 +88,11 @@ export const cn: CnFunction = createCn({
         'size-(--rad-slider-thumb-size)',
         'size-(--rad-slider-track-size)'
       ],
-      mb: ['mb-(--rad-fieldset-gap)'],
+      mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-tag-gap)',
+        'gap-(--rad-multi-select-gap)',
+        'gap-(--rad-tags-input-gap)',
         'gap-(--rad-menubar-gap)',
         'gap-(--rad-toolbar-gap)',
         'gap-(--rad-toggle-group-gap)',
