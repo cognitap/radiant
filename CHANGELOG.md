@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.40
+
 - Add Combobox multiple mode, MultiSelect, TagsInput and removable Tag.
 
 ## 0.0.39
