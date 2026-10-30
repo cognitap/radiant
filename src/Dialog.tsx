@@ -108,7 +108,9 @@ export type DialogDescriptionProps = Omit<ComponentProps<'p'>, 'style'> & { styl
 export type DialogCloseProps = DialogTriggerProps
 
 const DialogContext = createContext<DialogState | null>(null)
-const DialogFamilyContext = createContext<'dialog' | 'alert-dialog' | 'drawer'>('dialog')
+const DialogFamilyContext = createContext<'dialog' | 'alert-dialog' | 'drawer' | 'command'>(
+  'dialog'
+)
 
 /** Private composition seam for specialized Dialog families; not exported from the package. */
 export function useDialogFamily() {
@@ -144,7 +146,7 @@ export function DialogRoot({
   closeOnEscape = true,
   children,
   family = 'dialog'
-}: DialogProps & { family?: 'dialog' | 'alert-dialog' | 'drawer' }) {
+}: DialogProps & { family?: 'dialog' | 'alert-dialog' | 'drawer' | 'command' }) {
   const contentId = useId()
   const titleId = useId()
   const descriptionId = useId()

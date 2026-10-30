@@ -613,3 +613,26 @@ export {
   type AutocompleteItemProps,
   type AutocompleteStatusProps
 } from './Autocomplete.js'
+
+export {
+  Command,
+  CommandTrigger,
+  CommandClose,
+  CommandContent,
+  CommandTitle,
+  CommandDescription,
+  CommandInput,
+  CommandList,
+  CommandItem,
+  type CommandProps,
+  type CommandRenderProps,
+  type CommandOption,
+  type CommandTriggerProps,
+  type CommandCloseProps,
+  type CommandContentProps,
+  type CommandTitleProps,
+  type CommandDescriptionProps,
+  type CommandInputProps,
+  type CommandListProps,
+  type CommandItemProps
+} from './Command.js'

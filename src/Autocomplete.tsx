@@ -83,6 +83,7 @@ export function Autocomplete({
       onValueChange={undefined}
       filter={filter}
       textInput={{ reset: text.reset }}
+      command={undefined}
     />
   )
 }

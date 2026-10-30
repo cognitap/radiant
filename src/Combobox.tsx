@@ -94,6 +94,7 @@ type Context = Omit<ComboboxState, 'value' | 'setValue'> & {
   value: Selection
   multiple: boolean
   textInput?: { name?: string; form?: string }
+  command?: { onCommit: (value: string) => void }
   readOnly: boolean
   setValue(value: Selection): void
   selected: readonly ComboboxOption[]
@@ -139,10 +140,17 @@ export function useAutocompleteParts() {
   const box = useContext(ComboboxContext)
   if (!box?.textInput) throw new Error('Autocomplete parts must render inside Autocomplete.')
 }
-function componentSlot(multiple: boolean, textMode: boolean, name: string) {
+/** Private action-mode seam; never a form selection or a floating popup. */
+export function useCommandParts() {
+  const box = useContext(ComboboxContext)
+  if (!box?.command) throw new Error('Command results must render inside Command.')
+  return box
+}
+function componentSlot(multiple: boolean, textMode: boolean, name: string, command = false) {
   return (
     joinIds(
       name,
+      command ? name.replaceAll('combobox-', 'command-') : undefined,
       multiple
         ? name.replaceAll('combobox-', 'multi-select-')
         : textMode
@@ -162,14 +170,21 @@ export function Combobox(props: ComboboxProps) {
     <ComboboxRoot
       {...props}
       textInput={undefined}
+      command={undefined}
     />
   )
 }
 /** Private composition entry. Text mode edits the actual input instead of a selection carrier. */
-export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () => void } }) {
+export function ComboboxRoot(
+  props: ComboboxProps & {
+    textInput?: { reset: () => void }
+    command?: { onCommit: (value: string) => void }
+  }
+) {
   const {
     items,
     textInput,
+    command,
     value,
     defaultValue,
     selectedItem,
@@ -276,19 +291,20 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
   const visible =
     loading || error ? [] : filter ? items.filter(item => filter(item, search.value)) : items
   const enabled = visible.filter(item => !item.disabled)
-  const activeValue = enabled.some(item => item.value === active) ? active : null
+  const activeValue = isOpen && enabled.some(item => item.value === active) ? active : null
   if (active !== null && activeValue === null) highlight(null)
-  const text = textMode
-    ? search.value
-    : multiple
+  const text =
+    textMode || command
       ? search.value
-      : isOpen && (searching || search.value !== '')
+      : multiple
         ? search.value
-        : selected
-          ? textOf(selected)
-          : typeof selection.value === 'string'
-            ? selection.value
-            : ''
+        : isOpen && (searching || search.value !== '')
+          ? search.value
+          : selected
+            ? textOf(selected)
+            : typeof selection.value === 'string'
+              ? selection.value
+              : ''
   const setOpen = (next: boolean) => {
     if (next && unavailable()) return
     expansion.request(next)
@@ -298,7 +314,7 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
     expansion.request(false)
     highlight(null)
     setSearching(false)
-    if (!textMode) search.request('')
+    if (!textMode && !command) search.request('')
   }
   const setQuery = (next: string) => {
     if (unavailable()) return
@@ -329,6 +345,10 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
   }
   const commit = (next: string | null) => {
     if (unavailable() || (next !== null && !enabled.some(item => item.value === next))) return
+    if (command) {
+      if (next !== null) command.onCommit(next)
+      return
+    }
     if (textMode) {
       const completion = next ?? ''
       if (input && input.value !== completion) {
@@ -366,7 +386,7 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
     latest.current = { selection, search, nativeValue, expansion, textReset: textInput?.reset }
   })
   useLayoutEffect(() => {
-    if (multiple || textMode) return
+    if (multiple || textMode || command) return
     const node = bridge.current
     if (!node) return
     const changedByUser = pending.current && Object.is(pending.current.value, selection.value)
@@ -388,7 +408,7 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
     }
   })
   useEffect(() => {
-    if (multiple || textMode) return
+    if (multiple || textMode || command) return
     const node = bridge.current
     const owner = node?.form
     if (!node || !owner) return
@@ -411,7 +431,7 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
       owner.removeEventListener('reset', reset)
       win.clearTimeout(timer)
     }
-  }, [input, form, multiple, textMode])
+  }, [input, form, multiple, textMode, command])
   useEffect(() => {
     if (!textMode || !input) return
     const view = input.ownerDocument.defaultView
@@ -457,6 +477,7 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
   })
   const context: Context = {
     multiple,
+    command,
     textInput: textMode ? { name, form } : undefined,
     readOnly,
     selected: selectedEntries,
@@ -525,7 +546,7 @@ export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () =>
           </ComboboxPortal>
         </>
       )}
-      {textMode ? null : multiple ? (
+      {textMode || command ? null : multiple ? (
         <>
           <input
             ref={arrayBridgeRef}
@@ -634,7 +655,7 @@ export function ComboboxInput({
         controlMetrics({ controlSize: box.controlSize }),
         className
       )}
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-input')}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-input', !!box.command)}
       data-control-size={box.controlSize}
       aria-autocomplete="list"
       aria-expanded={box.open}
@@ -658,14 +679,26 @@ export function ComboboxInput({
       }}
       onKeyDown={event => {
         onKeyDown?.(event)
-        if (
-          event.defaultPrevented ||
-          event.nativeEvent.isComposing ||
-          event.keyCode === 229 ||
-          event.ctrlKey ||
-          event.metaKey
-        )
-          return
+        if (event.defaultPrevented || event.nativeEvent.isComposing || event.keyCode === 229) return
+        if (box.command) {
+          // The native dialog owns Escape/cancel, including controlled refusal.
+          if (event.key === 'Escape') return
+          // A palette can be rendered inside a form; searching never submits it.
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            if (
+              !event.ctrlKey &&
+              !event.metaKey &&
+              !event.altKey &&
+              !event.shiftKey &&
+              box.open &&
+              box.active !== null
+            )
+              box.commit(box.active)
+            return
+          }
+        }
+        if (event.ctrlKey || event.metaKey) return
         if (
           box.multiple &&
           event.key === 'Backspace' &&
@@ -907,7 +940,7 @@ export function ComboboxContent({
       {...props}
       ref={transitionRef}
       popover="manual"
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-content')}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-content', !!box.command)}
       data-motion={motion}
       data-state={box.open ? 'open' : 'closed'}
       className={cn(
@@ -919,15 +952,35 @@ export function ComboboxContent({
         className
       )}
     >
+      <ComboboxResults aria-label={props['aria-label']}>{children}</ComboboxResults>
+    </div>
+  )
+}
+function ComboboxResults({
+  children,
+  inline = false,
+  ...props
+}: {
+  children?: ReactNode
+  inline?: boolean
+  'aria-label'?: string
+}) {
+  const box = useComboboxContext()
+  return (
+    <>
       <div
         id={box.listId}
         role="listbox"
+        tabIndex={inline ? -1 : undefined}
         aria-multiselectable={box.multiple || undefined}
         aria-label={props['aria-label'] ?? box.input?.getAttribute('aria-label') ?? 'Suggestions'}
         aria-labelledby={props['aria-label'] ? undefined : box.input?.labels?.[0]?.id}
         aria-busy={box.loading || undefined}
-        data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-listbox')}
-        className="max-h-[calc(var(--_rad-combobox-max-height,100dvh)-0.5rem)] overflow-y-auto overscroll-contain"
+        data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-listbox', !!box.command)}
+        className={cn(
+          'min-h-0 overflow-y-auto overscroll-contain',
+          !inline && 'max-h-[calc(var(--_rad-combobox-max-height,100dvh)-0.5rem)]'
+        )}
       >
         {children ??
           box.visible.map(item => (
@@ -938,6 +991,35 @@ export function ComboboxContent({
           ))}
       </div>
       <ComboboxStatus />
+    </>
+  )
+}
+/** Private inline renderer: same result registry and semantics, with no popup lifecycle. */
+export function ComboboxInlineContent({
+  children,
+  className,
+  ref,
+  ...props
+}: Omit<ComponentProps<'div'>, 'style'> & { style?: ThemeStyle }) {
+  const box = useCommandParts()
+  const contentRef = useComposedRefs(box.content, ref)
+  return (
+    <div
+      {...props}
+      ref={contentRef}
+      data-slot="combobox-content command-list"
+      className={cn(
+        'flex min-h-0 min-w-0 flex-col overflow-hidden',
+        controlMetrics({ controlSize: box.controlSize }),
+        className
+      )}
+    >
+      <ComboboxResults
+        inline
+        aria-label={props['aria-label']}
+      >
+        {children}
+      </ComboboxResults>
     </div>
   )
 }
@@ -966,7 +1048,7 @@ export function ComboboxItem({
       onKeyDown={props.onKeyDown}
       aria-selected={box.multiple ? isItemOpen(box.value, value) : box.active === value}
       aria-disabled={item.disabled || undefined}
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-item')}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-item', !!box.command)}
       data-value={value}
       data-highlighted={box.active === value ? '' : undefined}
       data-selected={isItemOpen(box.value, value) ? '' : undefined}
@@ -1011,7 +1093,7 @@ export function ComboboxStatus({ children, className, ...props }: ComboboxStatus
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-status')}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-status', !!box.command)}
       className={cn('px-3 py-2 empty:hidden', className)}
     >
       {box.open ? (children ?? box.status) : null}
