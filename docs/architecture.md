@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's fifty-one families fit together and why. Props are on the
+How Radiant's fifty-two families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -118,7 +118,7 @@ host, never a wrapper:
 | Skeleton                                                                   | `span`                                              |
 | Meter                                                                      | Native meter                                        |
 | Progress / Spinner                                                         | `progress` / `svg`                                  |
-| Button / Link                                                              | `button` / `a`, including through `render`          |
+| Button / Link / NavLink                                                    | `button` / `a`, including through `render`          |
 | Field                                                                      | `div` in control layout; `fieldset` in group layout |
 | Input / PasswordInput / Checkbox / Switch / Slider / Radio                 | Native `input`                                      |
 | Textarea                                                                   | Native `textarea`                                   |
@@ -141,7 +141,9 @@ host, never a wrapper:
 | Dialog / AlertDialog / Drawer                                              | None; state owners                                  |
 | Dialog actions / AlertDialog actions                                       | Button's `button`                                   |
 | Dialog, AlertDialog and Drawer Content / Title / Description               | `dialog` / `h2` / `p`                               |
-| Collapsible / CollapsibleTrigger / CollapsibleContent                      | `details` / `summary` / `div`                       |
+| Collapsible / NavLinkGroup                                                 | `details`                                           |
+| CollapsibleTrigger / NavLinkGroupTrigger                                   | `summary`                                           |
+| CollapsibleContent / NavLinkGroupContent                                   | `div`                                               |
 | Accordion / AccordionItem / AccordionTrigger / AccordionContent            | `div` / `details` / `summary` / `div`               |
 | Card / CardHeader / CardContent / CardFooter                               | `div`                                               |
 | CardTitle and AlertTitle / CardDescription and AlertDescription            | Heading chosen by `level` / `p`                     |

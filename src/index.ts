@@ -582,3 +582,15 @@ export type {
 } from './MultiSelect.js'
 
 export { PasswordInput, type PasswordInputProps } from './PasswordInput.js'
+
+export {
+  NavLink,
+  NavLinkGroup,
+  NavLinkGroupTrigger,
+  NavLinkGroupContent,
+  type NavLinkProps,
+  type NavLinkRenderProps,
+  type NavLinkGroupProps,
+  type NavLinkGroupTriggerProps,
+  type NavLinkGroupContentProps
+} from './NavLink.js'
