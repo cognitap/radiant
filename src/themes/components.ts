@@ -2,6 +2,17 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  meter: {
+    height: 'css',
+    radius: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    trackColor: 'css',
+    indicatorColor: 'css',
+    warningColor: 'css',
+    dangerColor: 'css'
+  },
   nativeSelect: {
     height: 'css',
     padding: 'css',

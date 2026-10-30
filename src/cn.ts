@@ -57,6 +57,7 @@ export const cn: CnFunction = createCn({
         'text-(--rad-tabs-font-size)'
       ],
       h: [
+        'h-(--rad-meter-height)',
         'h-(--rad-native-select-height)',
         'h-(--rad-drawer-size)',
         'h-(--rad-scroll-area-size)',
@@ -154,6 +155,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-meter-radius)',
         'rounded-(--rad-native-select-radius)',
         'rounded-(--rad-input-group-radius)',
         'rounded-(--rad-kbd-radius)',
@@ -191,6 +193,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-meter-border-width)',
         'border-(--rad-native-select-border-width)',
         'border-(--rad-input-group-border-width)',
         'border-(--rad-table-border-width)',
@@ -210,6 +213,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
+        'border-(--rad-meter-border-style)',
         'border-(--rad-native-select-border-style)',
         'border-(--rad-badge-border-style)',
         'border-(--rad-separator-style)',
