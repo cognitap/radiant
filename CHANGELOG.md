@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Fix EmptyState's no-results boundary to honor its border-width token.
+
 ## 0.0.55
 
 - Add EmptyState for first use, empty searches and recovery, with consumer-chosen headings and actions.

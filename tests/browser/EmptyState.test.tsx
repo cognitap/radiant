@@ -27,7 +27,14 @@ test('passive hosts hydrate with real refs, chosen headings, theme slots and cal
         theme={defineTheme({
           id: 'empty-test',
           name: 'Empty test',
-          components: { emptyState: { iconSize: '30px', titleSize: '22px', actionsGap: '17px' } }
+          components: {
+            emptyState: {
+              iconSize: '30px',
+              titleSize: '22px',
+              actionsGap: '17px',
+              borderWidth: '3px'
+            }
+          }
         })}
       >
         <EmptyState
@@ -53,6 +60,12 @@ test('passive hosts hydrate with real refs, chosen headings, theme slots and cal
             <Button>Clear</Button>
           </EmptyStateActions>
         </EmptyState>
+        <EmptyState
+          variant="no-results"
+          data-testid="empty-boundary"
+        >
+          <EmptyStateTitle level={4}>No matching records</EmptyStateTitle>
+        </EmptyState>
       </ThemeScope>
     </StrictMode>,
     true
@@ -67,6 +80,9 @@ test('passive hosts hydrate with real refs, chosen headings, theme slots and cal
   expect(getComputedStyle(title.current!).fontSize).toBe('22px')
   expect(getComputedStyle(root.current!).borderRadius).toBe('19px')
   expect(getComputedStyle(root.current!).padding).toBe('12px')
+  expect(
+    getComputedStyle(host.querySelector('[data-testid="empty-boundary"]')!).borderTopWidth
+  ).toBe('3px')
   expect(getComputedStyle(root.current!).direction).toBe('rtl')
   expect(root.current!.dataset.slot).toBe('empty-state custom')
   expect(getComputedStyle(host.querySelector('[data-slot="empty-state-actions"]')!).gap).toBe(
