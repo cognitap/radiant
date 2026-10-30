@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- Add Table.
+- Preserve external Link defaults in Pagination direction links.
+
 ## 0.0.27
 
 - Add Pagination.
@@ -134,20 +137,20 @@
 
 ## 0.0.4
 
-- Add `ThemeDocument`: a versioned, JSON-portable theme format with section merge, replace and reset.
+- Add versioned, JSON-portable `ThemeDocument` with section merge, replace and reset.
 - Add `generateColorWall` in `@cognitap/radiant/color`: 18 palettes from one brand color, with Classic, Balanced and Expressive presets.
 - Add `recommendColorPalette`: a working palette, light and dark color roles, and contrast checks.
-- Add `updateThemeAppearance`: apply a palette with spacing, density, radius, border, elevation and backdrop settings.
+- Add `updateThemeAppearance` for palettes, spacing, density, radius, border, elevation and backdrops.
 
 ## 0.0.3
 
 - Add Link, Field, Input, Checkbox, RadioGroup, Radio, Dialog, Collapsible, Accordion and Card, each built on the native element.
 - Add `defineTheme` and `ThemeScope`: typed shared tokens, per-component overrides, and light, dark and system modes.
-- Add eight presets in the readonly `themes` registry, each also a named export.
+- Add eight presets as named exports and readonly `themes` entries.
 - Add Button `variant`, `tone`, `controlSize`, `pending`, `iconOnly`, `fullWidth` and `render`.
 - Add `ThemeStyle` for typed `--rad-*` variables in `style`.
 - `data-slot` holds a set of identities. Select with `~=`, as in `[data-slot~="button"]`.
-- Passing a controlled value together with its default, or switching owner during a mount, throws.
+- Controlled/default pairs and ownership changes during a mount throw.
 - **Breaking:** CSS variables gain the `--rad-` prefix and semantic names.
 
   ```css

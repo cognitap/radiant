@@ -345,3 +345,26 @@ export type {
   PaginationEllipsisProps,
   PaginationLinkRenderProps
 } from './Pagination.js'
+
+export {
+  Table,
+  TableCaption,
+  TableHead,
+  TableBody,
+  TableFoot,
+  TableRow,
+  TableHeader,
+  TableCell,
+  TableContainer
+} from './Table.js'
+export type {
+  TableProps,
+  TableCaptionProps,
+  TableHeadProps,
+  TableBodyProps,
+  TableFootProps,
+  TableRowProps,
+  TableHeaderProps,
+  TableCellProps,
+  TableContainerProps
+} from './Table.js'

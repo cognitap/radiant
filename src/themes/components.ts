@@ -485,6 +485,19 @@ export const componentRegistry = {
     separatorColor: 'css'
   },
   pagination: { gap: 'css', radius: 'css', itemMinWidth: 'css' },
+  table: {
+    background: 'css',
+    color: 'css',
+    headerBackground: 'css',
+    headerColor: 'css',
+    captionColor: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    radius: 'css',
+    paddingInline: 'css',
+    paddingBlock: 'css',
+    fontSize: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 

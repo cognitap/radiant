@@ -971,7 +971,8 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Separator',
     'Badge',
     'Breadcrumb',
-    'Pagination'
+    'Pagination',
+    'Table'
   ]) {
     assert.doesNotMatch(
       readFileSync(new URL(`dist/library/${file}.js`, root), 'utf8'),
