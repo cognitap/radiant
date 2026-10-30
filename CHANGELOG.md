@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Fix nested Drawer alignment.
+
 ## 0.0.38
 
 - Add Drawer.
@@ -32,7 +34,7 @@
 
 ## 0.0.33
 
-- Breaking: ButtonProps is a union. Before: `interface` extension. After: type intersection and distributive omission.
+- Breaking: ButtonProps union. Before: `interface` extension. After: type intersection and distributive omission.
 - Add ToggleGroup.
 - Add Button pressed/defaultPressed/onPressedChange.
 
@@ -161,7 +163,7 @@
 
 - Add opt-in spring motion in `@cognitap/radiant/motion` and `/motion/react`, with serializable motion profiles in themes. Root imports stay free of the engine.
 - Add `MotionProvider` for spring press feedback on Button and Dialog actions, disclosure height and Dialog presentation. Dismissal and focus stay immediate.
-- Add `MotionLink` for spring feedback on action-shaped links.
+- Add `MotionLink` spring feedback for action-shaped links.
 - Add one-axis drag with release, snapping, cancellation and keyboard alternatives.
 - Add `useSpringFollow` for changing targets and `useSpringLayout` for grid and flex resize and reorder.
 - Motion follows live reduced-motion settings, `motion="off"` and the theme's motion profile. See [motion](docs/motion.md).

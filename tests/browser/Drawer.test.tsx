@@ -91,6 +91,35 @@ const parts = (host: HTMLElement) => ({
   trigger: host.querySelector<HTMLButtonElement>('[data-slot~="drawer-trigger"]')!,
   viewport: host.querySelector<HTMLElement>('[data-slot="drawer-viewport"]')!
 })
+test('nested Drawer viewports use only their own edge at a partial snap', async () => {
+  for (const [parent, child] of [
+    ['left', 'right'],
+    ['top', 'bottom']
+  ] as const) {
+    const { host } = await mount(
+      <Fixture
+        defaultOpen
+        content={{ side: parent, motion: 'off' }}
+      >
+        <Fixture
+          defaultSnapPoint={0.5}
+          content={{ side: child, motion: 'off' }}
+        />
+      </Fixture>
+    )
+    const nested = host.querySelectorAll<HTMLDialogElement>('dialog')[1]
+    const trigger = host.querySelectorAll<HTMLButtonElement>('[data-slot~="drawer-trigger"]')[1]
+    await user.click(trigger)
+    const viewport = nested.querySelector<HTMLElement>('[data-slot="drawer-viewport"]')!
+    const box = viewport.getBoundingClientRect()
+    expect(box.right).toBeLessThanOrEqual(innerWidth + 2)
+    expect(box.bottom).toBeLessThanOrEqual(innerHeight + 2)
+    expect(box.left).toBeGreaterThanOrEqual(-2)
+    expect(box.top).toBeGreaterThanOrEqual(-2)
+    expect(child === 'right' ? box.width : box.height).toBeGreaterThan(100)
+    await user.keyboard('{Escape}')
+  }
+})
 async function settled(dialog: HTMLElement) {
   await act(async () => {
     await vi.waitFor(
