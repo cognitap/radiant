@@ -4,7 +4,7 @@ import { Field, Input, type ThemeStyle } from './index.js'
 import { themes } from './examples/index.js'
 import { InputProfileExample, InputSizeComparison } from '../.storybook/examples/InputExamples.js'
 
-function Controlled() {
+function ControlledDisplayName() {
   const [value, setValue] = useState('Hello')
   return (
     <Field
@@ -76,6 +76,17 @@ export const States: Story = {
             defaultValue="ada@example.com"
           />
         </Field>
+        <Field
+          label="Read-only email"
+          description="Focusable and submitted with the form, but not editable."
+        >
+          <Input
+            {...lockedProps}
+            aria-label={undefined}
+            readOnly
+            defaultValue="ada@example.com"
+          />
+        </Field>
       </div>
     )
   }
@@ -113,9 +124,8 @@ export const WithField: Story = {
   )
 }
 
-export const ControlledStory: Story = {
-  name: 'Controlled',
-  render: () => <Controlled />
+export const Controlled: Story = {
+  render: () => <ControlledDisplayName />
 }
 
 export const ProfileEditor: Story = {
