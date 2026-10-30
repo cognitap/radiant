@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.24
+
 - Add Badge.
 
 ## 0.0.23
