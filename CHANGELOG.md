@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add NavLink.
+
 ## 0.0.49
 
 - Add PasswordInput.
@@ -218,7 +220,7 @@
 - Add font axis ranges (`ThemeFontAxis`) to theme document font metadata.
 - **Breaking:** component text now uses the UI typography roles. UI line heights are explicit, and checkbox, radio and disclosure labels use the label weight. Check wrapping in your layouts.
 
-  Old typography leaves still apply. To move a theme to roles:
+  Old typography leaves still apply. Migrate themes to roles:
 
   | Before                             | After                         |
   | ---------------------------------- | ----------------------------- |

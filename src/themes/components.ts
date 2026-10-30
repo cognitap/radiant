@@ -2,6 +2,26 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  navLink: {
+    fontFamily: 'css',
+    fontSize: 'css',
+    fontWeight: 'weight',
+    paddingInline: 'css',
+    paddingBlock: 'css',
+    gap: 'css',
+    radius: 'css',
+    color: 'css',
+    hoverBackground: 'css',
+    activeBackground: 'css',
+    activeColor: 'css',
+    indicatorColor: 'css',
+    descriptionColor: 'css',
+    descriptionSize: 'css',
+    indent: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css'
+  },
   passwordInput: { gap: 'css' },
   meter: {
     height: 'css',
