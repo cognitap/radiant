@@ -1,3 +1,4 @@
+import './toolbar-types.js'
 import './toggle-group-types.js'
 import './button-pressed-types.js'
 import './checkbox-group-types.js'

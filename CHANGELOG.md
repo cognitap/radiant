@@ -4,8 +4,11 @@
 
 ## Unreleased
 
+- Add Toolbar.
+
 ## 0.0.33
 
+- Breaking: ButtonProps is now a union. Before, extend it with `interface`; after, use a type intersection and distributive omission.
 - Add ToggleGroup.
 - Add Button pressed state, defaults and change requests.
 

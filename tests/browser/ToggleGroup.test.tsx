@@ -268,7 +268,7 @@ function Composite({ children }: { children: ReactNode }) {
       loop: true
     })
   return (
-    <CompositeFocusContext.Provider value>
+    <CompositeFocusContext.Provider value="[data-composite-proof]">
       <div
         ref={host}
         role="toolbar"
