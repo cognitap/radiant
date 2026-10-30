@@ -1099,3 +1099,4 @@ import './otp-field-types.js'
 import './button-group-types.js'
 
 import './kbd-types.js'
+import './input-group-types.js'

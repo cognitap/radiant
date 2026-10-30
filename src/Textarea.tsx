@@ -55,7 +55,18 @@ export type TextareaProps = Omit<
   }
 
 /** Native editing, selection, events and ref; Field supplies owned form relationships. */
-export function Textarea({
+export function Textarea(props: TextareaProps) {
+  return (
+    <TextareaRoot
+      {...props}
+      family={undefined}
+    />
+  )
+}
+
+/** Private composition seam; the native control retains its Field and value owners. */
+export function TextareaRoot({
+  family,
   className,
   controlSize = 'medium',
   rows = 3,
@@ -66,7 +77,7 @@ export function Textarea({
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
   ...props
-}: TextareaProps) {
+}: TextareaProps & { family?: 'input-group-textarea' }) {
   useNativeOwner('Textarea', props.value, props.defaultValue)
   if (props.value === null)
     throw new TypeError('Textarea value cannot be null. Use an empty string.')
@@ -85,7 +96,7 @@ export function Textarea({
       {...control}
       className={cn(textareaVariants(), controlMetrics({ controlSize }), className)}
       data-control-size={controlSize}
-      data-slot="textarea"
+      data-slot={family ? `textarea ${family}` : 'textarea'}
       rows={rows}
     />
   )

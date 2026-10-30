@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add InputGroup.
+
 ## 0.0.44
 
 - Add Kbd.
@@ -218,7 +220,7 @@
 
 ## 0.0.3
 
-- Add Link, Field, Input, Checkbox, RadioGroup, Radio, Dialog, Collapsible, Accordion and Card, each built on the native element.
+- Add Link, Field, Input, Checkbox, RadioGroup, Radio, Dialog, Collapsible, Accordion and Card using native elements.
 - Add `defineTheme` and `ThemeScope`: typed shared tokens, per-component overrides, and light, dark and system modes.
 - Add eight presets as named exports and readonly `themes` entries.
 - Add Button `variant`, `tone`, `controlSize`, `pending`, `iconOnly`, `fullWidth` and `render`.

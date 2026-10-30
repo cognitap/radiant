@@ -72,7 +72,10 @@ export function InputRoot({
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
   ...props
-}: InputProps & { family?: 'tags-input' | 'otp-field'; nativeRequired?: false }) {
+}: InputProps & {
+  family?: 'tags-input' | 'otp-field' | 'input-group-input'
+  nativeRequired?: false
+}) {
   const ownsValue = !['checkbox', 'radio', 'file'].includes(type)
   useNativeOwner('Input', props.value, props.defaultValue, ownsValue)
   if (ownsValue && props.value === null)
