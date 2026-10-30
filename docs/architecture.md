@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's thirty-six families fit together and why. Props are on the
+How Radiant's thirty-seven families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Button, ToggleGroup, Link, Field, Fieldset, Input, Textarea, Select, Combobox, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Button, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, Textarea, Select, Combobox, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Popover, Tooltip, Menu, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -103,6 +103,7 @@ host, never a wrapper:
 | Family or part                                                  | Host                                                |
 | --------------------------------------------------------------- | --------------------------------------------------- |
 | AspectRatio                                                     | `div`                                               |
+| Toolbar                                                         | `div`                                               |
 | ToggleGroup / ToggleGroupItem                                   | `div` / Button's `button`                           |
 | ScrollArea                                                      | Native `div` scroll viewport                        |
 | Skeleton                                                        | `span`                                              |

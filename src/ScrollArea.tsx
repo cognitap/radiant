@@ -12,6 +12,7 @@ import {
   type ComponentProps,
   type PointerEvent
 } from 'react'
+import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
@@ -20,14 +21,12 @@ import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type ScrollAreaOrientation = 'vertical' | 'horizontal' | 'both'
 export type ScrollAreaVisibility = 'hover' | 'scroll' | 'always'
-type Name =
-  | { 'aria-label': string; 'aria-labelledby'?: string }
-  | { 'aria-label'?: string; 'aria-labelledby': string }
+
 export type ScrollAreaProps = Omit<
   ComponentProps<'div'>,
   'style' | 'role' | 'contentEditable' | 'dangerouslySetInnerHTML'
 > &
-  Name & {
+  AccessibleName & {
     orientation?: ScrollAreaOrientation
     visibility?: ScrollAreaVisibility
     style?: ThemeStyle
@@ -101,8 +100,7 @@ export function ScrollArea({
   onBlur,
   ...props
 }: ScrollAreaProps) {
-  if (!props['aria-label']?.trim() && !props['aria-labelledby']?.trim())
-    throw new TypeError('ScrollArea requires aria-label or aria-labelledby.')
+  requireAccessibleName('ScrollArea', props)
   const owner = useId(),
     root = useRef<HTMLDivElement>(null),
     content = useRef<HTMLDivElement>(null)

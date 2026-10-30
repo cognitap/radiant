@@ -500,6 +500,7 @@ export const componentRegistry = {
   },
   fieldset: { gap: 'css' },
   checkboxGroup: { gap: 'css' },
+  toolbar: { gap: 'css', padding: 'css', radius: 'css', background: 'css' },
   toggleGroup: {
     gap: 'css',
     padding: 'css',

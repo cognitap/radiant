@@ -394,3 +394,6 @@ export type {
   ToggleGroupOrientation,
   ToggleGroupAppearance
 } from './ToggleGroup.js'
+
+export { Toolbar } from './Toolbar.js'
+export type { ToolbarProps, ToolbarOrientation } from './Toolbar.js'

@@ -9,7 +9,7 @@ import {
 } from 'react'
 
 /** A surrounding composite may own all of its nested groups' tab stops. */
-export const CompositeFocusContext = createContext(false)
+export const CompositeFocusContext = createContext<string | null>(null)
 
 type Options<Node extends HTMLElement> = {
   host: RefObject<Node | null>
@@ -19,6 +19,7 @@ type Options<Node extends HTMLElement> = {
   orientation: 'horizontal' | 'vertical'
   loop: boolean
   active?: boolean
+  deferTo?: string
 }
 
 /** Native hosts and DOM order stay authoritative, including dynamic disabled items. */
@@ -29,12 +30,21 @@ export function useRovingFocus<Node extends HTMLElement>({
   preferred,
   orientation,
   loop,
-  active = true
+  active = true,
+  deferTo
 }: Options<Node>) {
+  const ownsFocus = (node: Node) => {
+    if (!active) return false
+    const parent = deferTo ? node.parentElement?.closest(deferTo) : null
+    const surface = node.closest('[popover], dialog')
+    // React context crosses portals; native focus ownership stops at a new surface.
+    return !parent || !!(surface && parent.contains(surface))
+  }
   const items = (node: Node) =>
-    Array.from(node.querySelectorAll<HTMLButtonElement>(selector)).filter(
-      item => item.closest(scope) === node
-    )
+    Array.from(node.querySelectorAll<HTMLElement>(selector)).filter(item => {
+      const surface = item.closest('[popover], dialog')
+      return item.closest(scope) === node && (!surface || !node.contains(surface))
+    })
   const enabled = (node: Node) => {
     const view = node.ownerDocument.defaultView!
     return items(node).filter(
@@ -49,8 +59,16 @@ export function useRovingFocus<Node extends HTMLElement>({
   const sync = (node: Node, preferFocus = true) => {
     const all = items(node),
       available = enabled(node)
+    const focused = node.ownerDocument.activeElement
+    const surface = focused?.closest('[popover], dialog')
+    const nestedEntry =
+      preferFocus &&
+      surface &&
+      node.contains(surface) &&
+      available.find(item => item.tabIndex === 0)
     const entry =
-      (preferFocus && available.find(item => item === node.ownerDocument.activeElement)) ||
+      (preferFocus && available.find(item => item === focused)) ||
+      nestedEntry ||
       available.find(item => item.dataset.value === preferred) ||
       available[0]
     for (const item of all) {
@@ -60,7 +78,7 @@ export function useRovingFocus<Node extends HTMLElement>({
   }
   useLayoutEffect(() => {
     const node = host.current
-    if (!node || !active) return
+    if (!node || !ownsFocus(node)) return
     const view = node.ownerDocument.defaultView!
     const reconcile = () => sync(node)
     reconcile()
@@ -106,15 +124,21 @@ export function useRovingFocus<Node extends HTMLElement>({
   })
   return {
     onFocus(event: FocusEvent<Node>) {
-      if (active) sync(event.currentTarget)
+      if (
+        ownsFocus(event.currentTarget) &&
+        enabled(event.currentTarget).some(
+          item => item === event.currentTarget.ownerDocument.activeElement
+        )
+      )
+        sync(event.currentTarget)
     },
     onBlur(event: FocusEvent<Node>) {
-      if (active && !event.currentTarget.contains(event.relatedTarget))
+      if (ownsFocus(event.currentTarget) && !event.currentTarget.contains(event.relatedTarget))
         sync(event.currentTarget, false)
     },
     onKeyDown(event: KeyboardEvent<Node>) {
       if (
-        !active ||
+        !ownsFocus(event.currentTarget) ||
         event.defaultPrevented ||
         event.altKey ||
         event.ctrlKey ||

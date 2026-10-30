@@ -10,6 +10,7 @@ import {
   type ComponentProps
 } from 'react'
 import { Button, type ButtonProps } from './Button.js'
+import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { isItemOpen, nextSelection, sameSelection, type Selection } from './internal/selection.js'
@@ -20,9 +21,6 @@ import { useTransitionHost } from './motion/host.js'
 import type { ControlSize } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
-type Name =
-  | { 'aria-label': string; 'aria-labelledby'?: string }
-  | { 'aria-label'?: string; 'aria-labelledby': string }
 type Owner<Value> =
   | { value: Value; defaultValue?: never }
   | { value?: undefined; defaultValue?: Value }
@@ -34,7 +32,7 @@ type Base = Omit<
   ComponentProps<'div'>,
   'style' | 'role' | 'defaultValue' | 'contentEditable' | 'dangerouslySetInnerHTML' | 'tabIndex'
 > &
-  Name & {
+  AccessibleName & {
     style?: ThemeStyle
     orientation?: ToggleGroupOrientation
     loop?: boolean
@@ -118,8 +116,7 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
   const [initialType] = useState(type)
   if (type !== initialType)
     throw new TypeError('ToggleGroup cannot change type during a mount. Remount with a new key.')
-  if (!props['aria-label']?.trim() && !props['aria-labelledby']?.trim())
-    throw new TypeError('ToggleGroup requires aria-label or aria-labelledby.')
+  requireAccessibleName('ToggleGroup', props)
   if (type === 'multiple' && appearance === 'segmented')
     throw new TypeError('The segmented indicator requires single selection.')
   const {
@@ -149,7 +146,7 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
     )
   const host = useRef<HTMLDivElement>(null),
     hostRef = useComposedRefs(host, ref),
-    parentOwnsFocus = useContext(CompositeFocusContext)
+    parentScope = useContext(CompositeFocusContext)
   const roving = useRovingFocus({
     host,
     selector: 'button[data-slot~="toggle-group-item"]',
@@ -157,7 +154,7 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
     preferred: Array.isArray(current) ? current[0] : current,
     orientation,
     loop,
-    active: !parentOwnsFocus
+    deferTo: parentScope ?? undefined
   })
   const state: ToggleGroupState = {
     type,
