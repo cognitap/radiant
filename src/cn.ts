@@ -9,6 +9,10 @@ const roleClasses = (prefix: string, leaf: string) =>
 export const cn: CnFunction = createCn({
   extend: {
     classGroups: {
+      'border-w-t': ['border-t-(--rad-separator-thickness)'],
+      'border-w-s': ['border-s-(--rad-separator-thickness)'],
+      my: ['my-(--rad-separator-spacing)'],
+      mx: ['mx-(--rad-separator-spacing)'],
       right: ['right-(--rad-toast-inset)'],
       bottom: ['bottom-(--rad-toast-inset)'],
       z: ['z-(--rad-toast-z-index)'],
@@ -136,6 +140,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
+        'border-(--rad-separator-style)',
         'border-(--rad-progress-border-style)',
         'border-(--rad-toast-border-style)',
         'border-(--rad-alert-border-style)',

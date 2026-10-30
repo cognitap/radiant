@@ -452,6 +452,7 @@ export const componentRegistry = {
     color: 'css',
     duration: 'css'
   },
+  separator: { color: 'css', thickness: 'css', style: 'css', spacing: 'css' },
   radioGroup: { gap: 'css' }
 } as const
 

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Separator.
+
 ## 0.0.22
 
 - Add Skeleton.
