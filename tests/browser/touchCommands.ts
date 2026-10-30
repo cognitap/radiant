@@ -40,7 +40,8 @@ export async function dragHandle(
   delta: number,
   cancel: boolean,
   touch: boolean,
-  deltaY = 0
+  deltaY = 0,
+  holdMs = 0
 ) {
   const frame = await context.frame()
   const element = frame.locator(selector)
@@ -53,6 +54,7 @@ export async function dragHandle(
     await context.page.mouse.move(x, y)
     await context.page.mouse.down()
     await context.page.mouse.move(x + delta, y + deltaY, { steps: 4 })
+    if (holdMs) await context.page.waitForTimeout(holdMs)
     if (cancel) await element.dispatchEvent('pointercancel', { pointerId: 1, bubbles: true })
     await context.page.mouse.up()
     return
@@ -69,6 +71,7 @@ export async function dragHandle(
       touchPoints: [{ x: x + delta, y: y + deltaY, id: 1 }]
     })
     await context.page.waitForTimeout(30)
+    if (holdMs) await context.page.waitForTimeout(holdMs)
     await cdp.send('Input.dispatchTouchEvent', {
       type: cancel ? 'touchCancel' : 'touchEnd',
       touchPoints: []
@@ -84,7 +87,8 @@ declare module 'vitest/browser' {
       delta: number,
       cancel: boolean,
       touch: boolean,
-      deltaY?: number
+      deltaY?: number,
+      holdMs?: number
     ): Promise<void>
   }
 }

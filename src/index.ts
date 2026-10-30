@@ -507,3 +507,26 @@ export type {
   MenubarState,
   MenubarRenderProps
 } from './Menubar.js'
+
+export {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+  DrawerHandle,
+  useDrawer
+} from './Drawer.js'
+export type {
+  DrawerProps,
+  DrawerTriggerProps,
+  DrawerRenderProps,
+  DrawerContentProps,
+  DrawerTitleProps,
+  DrawerDescriptionProps,
+  DrawerCloseProps,
+  DrawerHandleProps,
+  DrawerSide,
+  DrawerState
+} from './Drawer.js'

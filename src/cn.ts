@@ -53,6 +53,7 @@ export const cn: CnFunction = createCn({
         'text-(--rad-tabs-font-size)'
       ],
       h: [
+        'h-(--rad-drawer-size)',
         'h-(--rad-scroll-area-size)',
         'h-(--rad-skeleton-height)',
         'h-(--rad-progress-height)',
@@ -63,6 +64,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-drawer-size)',
         'w-(--rad-context-menu-width)',
         'w-(--rad-hover-card-width)',
         'w-(--rad-scroll-area-size)',
