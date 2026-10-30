@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { RadioPlanExample, RadioStatePlayground } from '../.storybook/examples/RadioExamples.js'
+import { RadioPlanExample } from '../.storybook/examples/RadioExamples.js'
 import { Button, Radio, RadioGroup, type ThemeStyle } from './index.js'
 import { themes } from './examples/index.js'
 
@@ -60,7 +60,6 @@ const meta = {
   component: RadioGroup,
   args: {
     label: 'Plan',
-    name: 'plan',
     controlSize: 'medium'
   },
   argTypes: { controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] } },
@@ -68,7 +67,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A Field fieldset of native radios. The group owns name and selection: choose an initial defaultValue or controlled value, with null for no selection and an empty string for a real empty-valued option. Conflicting option ownership is rejected. controlSize supplies shared option metrics. Group className/style/native props/ref reach the fieldset (data-slot="field radio-group"); parts.options styles radio-group-options. Radio props/ref reach its input; parts.wrapper, parts.label and parts.indicator style its surrounding label or control span, label text and decorative dot.'
+          'A Field fieldset of native radios. The group owns name and selection, and generates a name when none is given; pass name when a form reads the value. Choose an initial defaultValue or controlled value, with null for no selection and an empty string for a real empty-valued option. Conflicting option ownership is rejected. controlSize supplies shared option metrics. Group className/style/native props/ref reach the fieldset (data-slot="field radio-group"); parts.options styles radio-group-options. Radio props/ref reach its input; parts.wrapper, parts.label and parts.indicator style its surrounding label or control span, label text and decorative dot.'
       }
     }
   }
@@ -80,31 +79,28 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: { defaultValue: 'pro' },
   render: args => (
-    <form onSubmit={event => event.preventDefault()}>
-      <RadioGroup {...args}>
-        <Radio
-          label="Free"
-          value="free"
-        />
-        <Radio
-          label="Pro"
-          value="pro"
-        />
-        <Radio
-          label="Team"
-          value="team"
-        />
-      </RadioGroup>
-    </form>
+    <RadioGroup {...args}>
+      <Radio
+        label="Free"
+        value="free"
+      />
+      <Radio
+        label="Pro"
+        value="pro"
+      />
+      <Radio
+        label="Team"
+        value="team"
+      />
+    </RadioGroup>
   )
 }
 
-export const States: Story = {
+export const Disabled: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
       <RadioGroup
         label="One unavailable option"
-        name="disabled-choice"
         defaultValue="free"
       >
         <Radio
@@ -123,24 +119,8 @@ export const States: Story = {
       </RadioGroup>
       <RadioGroup
         label="Unavailable group"
-        name="disabled-group"
         defaultValue="pro"
         disabled
-      >
-        <Radio
-          label="Free"
-          value="free"
-        />
-        <Radio
-          label="Pro"
-          value="pro"
-        />
-      </RadioGroup>
-      <RadioGroup
-        label="Required plan"
-        name="invalid-plan"
-        error="Pick a plan."
-        required
       >
         <Radio
           label="Free"
@@ -155,12 +135,96 @@ export const States: Story = {
   )
 }
 
-export const Composition: Story = {
+export const WithField: Story = {
+  args: {
+    label: 'Plan',
+    description: 'You can change plans at any time.',
+    error: 'Pick a plan.',
+    required: true
+  },
+  render: args => (
+    <RadioGroup {...args}>
+      <Radio
+        label="Free"
+        value="free"
+      />
+      <Radio
+        label="Pro"
+        value="pro"
+      />
+    </RadioGroup>
+  )
+}
+
+function ControlledPlan() {
+  const [value, setValue] = useState<string | null>('pro')
+  return (
+    <div style={{ display: 'grid', justifyItems: 'start', gap: '0.75rem' }}>
+      <RadioGroup
+        label="Plan"
+        value={value}
+        onValueChange={setValue}
+      >
+        <Radio
+          label="Free"
+          value="free"
+        />
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+        <Radio
+          label="Team"
+          value="team"
+        />
+      </RadioGroup>
+      <Button
+        variant="outline"
+        tone="neutral"
+        onClick={() => setValue(null)}
+      >
+        Clear selection
+      </Button>
+      <output>{value ?? 'No selection'}</output>
+    </div>
+  )
+}
+
+export const Controlled: Story = {
+  render: () => <ControlledPlan />
+}
+
+export const FormSubmission: Story = {
   render: () => <NativeForm />
 }
 
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
+      {(['small', 'medium', 'large'] as const).map(size => (
+        <RadioGroup
+          key={size}
+          label={`${size} plan`}
+          controlSize={size}
+          defaultValue="pro"
+        >
+          <Radio
+            label="Free"
+            value="free"
+          />
+          <Radio
+            label="Pro"
+            value="pro"
+          />
+        </RadioGroup>
+      ))}
+    </div>
+  )
+}
+
 export const Customisation: Story = {
-  args: { name: 'custom-plan', defaultValue: 'pro' },
+  args: { defaultValue: 'pro' },
   render: args => {
     const local: ThemeStyle = { '--rad-radio-group-gap': '1rem', '--rad-radio-size': '1.5rem' }
     return (
@@ -204,8 +268,4 @@ export const PlanPicker: Story = {
       mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
     />
   )
-}
-
-export const IndicatorPlayground: Story = {
-  render: args => <RadioStatePlayground controlSize={args.controlSize} />
 }

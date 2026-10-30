@@ -1,6 +1,14 @@
 'use client'
 
-import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
 import type { ChangeEvent, ComponentProps, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
@@ -70,8 +78,8 @@ export type RadioGroupProps = Omit<
   'layout' | 'children' | 'onChange' | 'defaultValue' | 'parts'
 > &
   ValueOwner<string | null> & {
-    /** Stable native group name. Options supply distinct string values, including ''. */
-    name: string
+    /** Native group name, and the form data key. Defaults to a generated name. */
+    name?: string
     /** Shared Input/Checkbox/Radio metrics; each option may override them. */
     controlSize?: ControlSize
     parts?: NonNullable<FieldProps['parts']> & { options?: PartStyle }
@@ -83,7 +91,7 @@ export type RadioGroupProps = Omit<
 
 export type RadioProps = Omit<
   ComponentProps<'input'>,
-  'type' | 'value' | 'checked' | 'defaultChecked' | 'style'
+  'type' | 'value' | 'checked' | 'defaultChecked' | 'readOnly' | 'style'
 > &
   CheckedOwner & {
     /** Convenience label. Without it, provide an accessible name on the native input. */
@@ -113,6 +121,7 @@ export function RadioGroup({
   parts,
   ...fieldProps
 }: RadioGroupProps) {
+  const generatedName = useId()
   const controlled = useNativeOwner('RadioGroup', value, defaultValue)
   const [initialDefault] = useState(defaultValue)
   const { options: optionsPart, ...fieldParts } = parts ?? {}
@@ -127,7 +136,7 @@ export function RadioGroup({
     >
       <RadioGroupContext.Provider
         value={{
-          name,
+          name: name ?? generatedName,
           value,
           defaultValue: initialDefault,
           controlled,
