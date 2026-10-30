@@ -25,7 +25,11 @@ import {
   type AlertDialogContentProps
 } from '../../src/index.js'
 import { MotionProvider } from '../../src/motion/react.js'
-import { DeleteProjectExample } from '../../.storybook/examples/AlertDialogExamples.js'
+import {
+  AsyncActionExample,
+  ControlledExample,
+  DeleteProjectExample
+} from '../../.storybook/examples/AlertDialogExamples.js'
 import '../../.storybook/styles.css'
 
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
@@ -419,4 +423,31 @@ test('consequential example cancels safely and restores workflow focus when dele
   expect(host.querySelector('dialog')).toBeNull()
   expect(host.textContent).toContain('Project deleted.')
   expect(document.activeElement).toBe(host.querySelector('p'))
+})
+
+test('async example holds the decision open while pending, then closes on success', async () => {
+  let settle!: () => void
+  const revoke = () => new Promise<void>(resolve => (settle = resolve))
+  const { host } = await mount(<AsyncActionExample revoke={revoke} />)
+  const p = parts(host)
+  await click(p.trigger)
+  await click(p.action)
+  expect(p.action.getAttribute('aria-busy')).toBe('true')
+  expect(p.cancel.disabled).toBe(true)
+  await key('{Escape}')
+  expect(p.panel.open).toBe(true)
+  await act(async () => settle())
+  await expect.poll(() => p.panel.open).toBe(false)
+  expect(host.textContent).toContain('Access revoked')
+  expect(p.trigger.disabled).toBe(true)
+})
+
+test('controlled example opens from an outside button and reports the decision', async () => {
+  const { host } = await mount(<ControlledExample />)
+  await click(host.querySelector('button')!)
+  expect(parts(host).panel.open).toBe(true)
+  expect(host.textContent).toContain('The dialog is open.')
+  await click(parts(host).action)
+  expect(parts(host).panel.open).toBe(false)
+  expect(host.textContent).toContain('Signed out of 2 other devices. The dialog is closed.')
 })
