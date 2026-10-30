@@ -475,6 +475,15 @@ export const componentRegistry = {
     borderWidth: 'css',
     fontSize: 'css'
   },
+  breadcrumb: {
+    gap: 'css',
+    fontSize: 'css',
+    color: 'css',
+    linkColor: 'css',
+    linkHoverColor: 'css',
+    currentColor: 'css',
+    separatorColor: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 
