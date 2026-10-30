@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.32
+
 - Add ScrollArea.
 
 ## 0.0.31
