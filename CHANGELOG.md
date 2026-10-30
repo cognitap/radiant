@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.56
+
 - Fix EmptyState's no-results boundary to honor its border-width token.
 
 ## 0.0.55
