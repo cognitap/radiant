@@ -434,3 +434,38 @@ export type {
 
 export { Toolbar } from './Toolbar.js'
 export type { ToolbarProps, ToolbarOrientation } from './Toolbar.js'
+
+export {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuPortal,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuGroup,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuCheckboxItem,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+  useContextMenu
+} from './ContextMenu.js'
+export type {
+  ContextMenuProps,
+  ContextMenuTriggerProps,
+  ContextMenuPortalProps,
+  ContextMenuContentProps,
+  ContextMenuItemProps,
+  ContextMenuGroupProps,
+  ContextMenuLabelProps,
+  ContextMenuSeparatorProps,
+  ContextMenuCheckboxItemProps,
+  ContextMenuRadioGroupProps,
+  ContextMenuRadioItemProps,
+  ContextMenuSubProps,
+  ContextMenuSubTriggerProps,
+  ContextMenuSubContentProps,
+  ContextMenuState
+} from './ContextMenu.js'
