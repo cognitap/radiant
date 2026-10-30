@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.45
+
 - Add InputGroup.
 
 ## 0.0.44
