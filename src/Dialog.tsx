@@ -108,9 +108,9 @@ export type DialogDescriptionProps = Omit<ComponentProps<'p'>, 'style'> & { styl
 export type DialogCloseProps = DialogTriggerProps
 
 const DialogContext = createContext<DialogState | null>(null)
-const DialogFamilyContext = createContext<'dialog' | 'alert-dialog'>('dialog')
+const DialogFamilyContext = createContext<'dialog' | 'alert-dialog' | 'drawer'>('dialog')
 
-/** Private composition seam for AlertDialog; not exported from the package. */
+/** Private composition seam for specialized Dialog families; not exported from the package. */
 export function useDialogFamily() {
   return useContext(DialogFamilyContext)
 }
@@ -126,10 +126,15 @@ function useDialogContext() {
 }
 
 export function Dialog(props: DialogProps) {
-  return <DialogRoot {...props} />
+  return (
+    <DialogRoot
+      {...props}
+      family={undefined}
+    />
+  )
 }
 
-/** Private shared owner: both families keep the same native lifecycle. */
+/** Private shared owner: composed families keep the same native lifecycle. */
 export function DialogRoot({
   open,
   defaultOpen,
@@ -139,7 +144,7 @@ export function DialogRoot({
   closeOnEscape = true,
   children,
   family = 'dialog'
-}: DialogProps & { family?: 'dialog' | 'alert-dialog' }) {
+}: DialogProps & { family?: 'dialog' | 'alert-dialog' | 'drawer' }) {
   const contentId = useId()
   const titleId = useId()
   const descriptionId = useId()
@@ -191,9 +196,7 @@ function DialogAction({ action, ...props }: DialogTriggerProps & { action: 'open
       : {}),
     'data-slot': joinIds(
       slot,
-      family === 'alert-dialog'
-        ? `alert-dialog-${action === 'open' ? 'trigger' : 'close'}`
-        : undefined,
+      family !== 'dialog' ? `${family}-${action === 'open' ? 'trigger' : 'close'}` : undefined,
       props['data-slot']
     ),
     onClick: composeAction(props.onClick, () => dialog.setOpen(action === 'open'))
@@ -269,7 +272,7 @@ export function DialogContent({
       aria-describedby={joinIds(dialog.descriptionId, props['aria-describedby'])}
       aria-labelledby={props['aria-label'] ? props['aria-labelledby'] : dialog.titleId}
       className={cn(dialogVariants(), className)}
-      data-slot={family === 'alert-dialog' ? 'dialog alert-dialog' : 'dialog'}
+      data-slot={family === 'dialog' ? 'dialog' : `dialog ${family}`}
       data-state={dialog.open ? 'open' : 'closed'}
       id={dialog.contentId}
       onCancel={event => {
@@ -303,7 +306,7 @@ export function DialogTitle({ className, children, ...props }: DialogTitleProps)
     <h2
       {...props}
       className={cn(dialogTitleVariants(), className)}
-      data-slot={family === 'alert-dialog' ? 'dialog-title alert-dialog-title' : 'dialog-title'}
+      data-slot={family === 'dialog' ? 'dialog-title' : `dialog-title ${family}-title`}
       id={dialog.titleId}
     >
       {children}
@@ -319,9 +322,7 @@ export function DialogDescription({ className, ...props }: DialogDescriptionProp
       {...props}
       className={cn(dialogDescriptionVariants(), className)}
       data-slot={
-        family === 'alert-dialog'
-          ? 'dialog-description alert-dialog-description'
-          : 'dialog-description'
+        family === 'dialog' ? 'dialog-description' : `dialog-description ${family}-description`
       }
       id={dialog.descriptionId}
     />

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Drawer.
+
 ## 0.0.37
 
 - Add Menubar.

@@ -14,6 +14,7 @@ import { bindDisclosureMotion, bindDialogMotion } from './transitions.js'
 import { bindPressMotion } from './press.js'
 import { bindPopupMotion } from './popup.js'
 import { bindIndicatorMotion } from './indicator.js'
+import { bindDrawerMotion } from './drawer.js'
 import { MotionProfileContext } from './context.js'
 import { resolveMotion, type MotionInteraction } from './config.js'
 import { createSpringDrag, type SpringDragController, type SpringDragOptions } from './drag.js'
@@ -134,6 +135,7 @@ export function useSpringStyle(
 }
 
 const hostRuntime = {
+  drawer: bindDrawerMotion,
   press: bindPressMotion,
   disclosure: bindDisclosureMotion,
   dialog: bindDialogMotion,

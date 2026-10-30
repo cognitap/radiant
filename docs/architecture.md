@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's forty families fit together and why. Props are on the
+How Radiant's forty-one families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, Textarea, Select, Combobox, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -47,6 +47,10 @@ Use Button for actions and Link for navigation, even when a Link looks like a
 button. Field owns label, help and error relationships. Card groups content.
 Dialog owns open state. Toast composes Alert and Button with a local FIFO queue and pausable timing. Collapsible owns one disclosure, and Accordion composes
 Collapsible for a set of them.
+
+Drawer composes Dialog with a dedicated Button drag handle. Snap fractions size an internal
+scroll viewport; the native dialog remains the host. Its optional spring adapter
+animates entry and snapping without delaying native close or focus.
 
 AlertDialog specializes Dialog's native lifecycle, surface tokens and motion for
 urgent decisions. Its modal content retains Dialog identities and adds alert-dialog tokens.
@@ -127,9 +131,9 @@ host, never a wrapper:
 | Tabs / TabsList / TabsContent                                              | `div`                                               |
 | TabsTrigger                                                                | Button's `button`                                   |
 | RadioGroup                                                                 | Field's `fieldset`                                  |
-| Dialog / AlertDialog                                                       | None; state owners                                  |
+| Dialog / AlertDialog / Drawer                                              | None; state owners                                  |
 | Dialog actions / AlertDialog actions                                       | Button's `button`                                   |
-| Dialog and AlertDialog Content / Title / Description                       | `dialog` / `h2` / `p`                               |
+| Dialog, AlertDialog and Drawer Content / Title / Description               | `dialog` / `h2` / `p`                               |
 | Collapsible / CollapsibleTrigger / CollapsibleContent                      | `details` / `summary` / `div`                       |
 | Accordion / AccordionItem / AccordionTrigger / AccordionContent            | `div` / `details` / `summary` / `div`               |
 | Card / CardHeader / CardContent / CardFooter                               | `div`                                               |
@@ -160,21 +164,21 @@ or `open` to control it, or `default*` to set an initial value. Passing both, or
 a mount, throws; remount with a new `key` instead. A controlled callback is a request, and the consumer
 may refuse it. No-op requests and prop syncs fire no callback.
 
-| Family                             | State                                              | Callback                                                    | Empty                  |
-| ---------------------------------- | -------------------------------------------------- | ----------------------------------------------------------- | ---------------------- |
-| Input, Textarea                    | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | `''`                   |
-| ToggleGroup single / multiple      | `value` / `defaultValue`                           | `onValueChange(string \| null)` / `onValueChange(string[])` | `null` / `[]`          |
-| Button toggle                      | `pressed` / `defaultPressed`                       | `onPressedChange(boolean)`                                  | `false`                |
-| Checkbox, Switch, standalone Radio | `checked` / `defaultChecked`                       | Native `onChange`, `onBlur`                                 | `false`                |
-| Slider                             | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | Native midpoint        |
-| RadioGroup                         | `value` / `defaultValue`                           | `onValueChange(string)` or native `onChange`                | `null`                 |
-| Select                             | `value` / `defaultValue`                           | `onValueChange(string \| null)`                             | `null`                 |
-| Combobox                           | `value` / `defaultValue`; `query` / `defaultQuery` | `onValueChange(string \| null)`; `onQueryChange(string)`    | `null`; `''`           |
-| Tabs                               | `value` / `defaultValue`                           | `onValueChange(string)`                                     | Initial value required |
-| Dialog, AlertDialog, Collapsible   | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                     | `false`                |
-| Popover                            | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                     | `false`                |
-| Accordion single                   | `value` / `defaultValue`                           | `onValueChange(string \| null)`                             | `null`                 |
-| Accordion multiple                 | `value` / `defaultValue`                           | `onValueChange(string[])`                                   | `[]`                   |
+| Family                                   | State                                              | Callback                                                    | Empty                  |
+| ---------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------- | ---------------------- |
+| Input, Textarea                          | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | `''`                   |
+| ToggleGroup single / multiple            | `value` / `defaultValue`                           | `onValueChange(string \| null)` / `onValueChange(string[])` | `null` / `[]`          |
+| Button toggle                            | `pressed` / `defaultPressed`                       | `onPressedChange(boolean)`                                  | `false`                |
+| Checkbox, Switch, standalone Radio       | `checked` / `defaultChecked`                       | Native `onChange`, `onBlur`                                 | `false`                |
+| Slider                                   | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | Native midpoint        |
+| RadioGroup                               | `value` / `defaultValue`                           | `onValueChange(string)` or native `onChange`                | `null`                 |
+| Select                                   | `value` / `defaultValue`                           | `onValueChange(string \| null)`                             | `null`                 |
+| Combobox                                 | `value` / `defaultValue`; `query` / `defaultQuery` | `onValueChange(string \| null)`; `onQueryChange(string)`    | `null`; `''`           |
+| Tabs                                     | `value` / `defaultValue`                           | `onValueChange(string)`                                     | Initial value required |
+| Dialog, AlertDialog, Drawer, Collapsible | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                     | `false`                |
+| Popover                                  | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                     | `false`                |
+| Accordion single                         | `value` / `defaultValue`                           | `onValueChange(string \| null)`                             | `null`                 |
+| Accordion multiple                       | `value` / `defaultValue`                           | `onValueChange(string[])`                                   | `[]`                   |
 
 RadioGroup owns its options' `name` and selection. Use one of `onValueChange`
 or `onChange` to write state, not both. `''` is a valid option value, and `null`
