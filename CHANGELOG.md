@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.28
+
 - Add Table.
 - Preserve external Link defaults in Pagination direction links.
 
