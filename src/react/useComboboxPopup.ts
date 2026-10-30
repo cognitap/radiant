@@ -13,6 +13,7 @@ export function useComboboxPopup(
   collisionPadding: number
 ) {
   const latest = useRef(dismiss)
+  const reposition = useRef<() => void>(() => {})
   useLayoutEffect(() => {
     latest.current = dismiss
   })
@@ -42,8 +43,8 @@ export function useComboboxPopup(
       const css = win.getComputedStyle(node)
       const anchor = input.getBoundingClientRect()
       const padding = Math.max(0, collisionPadding)
-      const list = node.querySelector<HTMLElement>('[data-slot="combobox-listbox"]')
-      const status = node.querySelector<HTMLElement>('[data-slot="combobox-status"]')
+      const list = node.querySelector<HTMLElement>('[data-slot~="combobox-listbox"]')
+      const status = node.querySelector<HTMLElement>('[data-slot~="combobox-status"]')
       const naturalHeight =
         (list?.scrollHeight ?? node.scrollHeight) +
         (status?.offsetHeight ?? 0) +
@@ -85,6 +86,7 @@ export function useComboboxPopup(
           node.style.setProperty(property, `${value}px`)
       }
     }
+    reposition.current = place
     place()
     let frame = 0
     const schedule = () => {
@@ -115,6 +117,7 @@ export function useComboboxPopup(
     win.visualViewport?.addEventListener('resize', schedule)
     win.visualViewport?.addEventListener('scroll', schedule)
     return () => {
+      reposition.current = () => {}
       observer.disconnect()
       mutations.disconnect()
       win.cancelAnimationFrame(frame)
@@ -127,4 +130,8 @@ export function useComboboxPopup(
       if (node.matches(':popover-open')) node.hidePopover()
     }
   }, [nodeRef, input, open, sideOffset, collisionPadding])
+  // Selected tags can move an unchanged-size input without a resize event.
+  useLayoutEffect(() => {
+    reposition.current()
+  })
 }

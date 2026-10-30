@@ -14,6 +14,10 @@ import {
 import type { ComponentProps, ReactNode, RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, type ButtonProps } from './Button.js'
+import { Tag } from './Tag.js'
+import { sameSelection, nextSelection, isItemOpen, type Selection } from './internal/selection.js'
+import { validateTags } from './internal/tags.js'
+import { useArrayFormBridge } from './react/useArrayFormBridge.js'
 import { useField, useFieldControl } from './Field.js'
 import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
@@ -36,11 +40,8 @@ export type ComboboxOption = { value: string; disabled?: boolean } & (
   | { label: string; textValue?: string }
   | { label: ReactNode; textValue: string }
 )
-export type ComboboxProps = ValueOwner<string | null> & {
+type ComboboxCommonProps = {
   items: readonly ComboboxOption[]
-  onValueChange?: (value: string | null) => void
-  /** Application-owned selected option when it is absent from asynchronous results. */
-  selectedItem?: ComboboxOption
   /** Local text matching by default. Pass null for application-filtered results. */
   filter?: ((item: ComboboxOption, query: string) => boolean) | null
   onQueryChange?: (query: string) => void
@@ -51,6 +52,7 @@ export type ComboboxProps = ValueOwner<string | null> & {
   name?: string
   form?: string
   disabled?: boolean
+  readOnly?: boolean
   required?: boolean
   controlSize?: ControlSize
   children?: ReactNode
@@ -58,6 +60,22 @@ export type ComboboxProps = ValueOwner<string | null> & {
   ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
     onOpenChange?: (open: boolean) => void
   }
+export type ComboboxMultipleProps = ComboboxCommonProps &
+  ValueOwner<string[]> & {
+    multiple: true
+    onValueChange?: (value: string[]) => void
+    selectedItems?: readonly ComboboxOption[]
+    selectedItem?: never
+  }
+export type ComboboxProps =
+  | ComboboxMultipleProps
+  | (ComboboxCommonProps &
+      ValueOwner<string | null> & {
+        multiple?: false
+        onValueChange?: (value: string | null) => void
+        selectedItem?: ComboboxOption
+        selectedItems?: never
+      })
 export type ComboboxState = {
   value: string | null
   query: string
@@ -67,7 +85,17 @@ export type ComboboxState = {
   setQuery(query: string): void
   setOpen(open: boolean): void
 }
-type Context = ComboboxState & {
+export type ComboboxMultipleState = Omit<ComboboxState, 'value' | 'setValue'> & {
+  value: string[]
+  setValue(value: string[]): void
+}
+type Context = Omit<ComboboxState, 'value' | 'setValue'> & {
+  value: Selection
+  multiple: boolean
+  readOnly: boolean
+  setValue(value: Selection): void
+  selected: readonly ComboboxOption[]
+  remove(value: string): void
   items: readonly ComboboxOption[]
   visible: readonly ComboboxOption[]
   active: string | null
@@ -88,8 +116,16 @@ type Context = ComboboxState & {
   commit(value: string | null): void
 }
 const ComboboxContext = createContext<Context | null>(null)
-export function useCombobox(): ComboboxState | null {
-  return useContext(ComboboxContext)
+export function useCombobox(options: { multiple: true }): ComboboxMultipleState | null
+export function useCombobox(options?: { multiple?: false }): ComboboxState | null
+export function useCombobox(options?: {
+  multiple?: boolean
+}): ComboboxState | ComboboxMultipleState | null {
+  const box = useContext(ComboboxContext)
+  if (!box || box.multiple !== !!options?.multiple) return null
+  if (Array.isArray(box.value))
+    return { ...box, value: box.value, setValue: (value: string[]) => box.setValue(value) }
+  return { ...box, value: box.value, setValue: (value: string | null) => box.setValue(value) }
 }
 function useComboboxContext() {
   const context = useContext(ComboboxContext)
@@ -101,31 +137,38 @@ const textOf = (item?: ComboboxOption) =>
 const localFilter = (item: ComboboxOption, query: string) =>
   textOf(item).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
 
-/** Editable search with explicit single selection. Fetching and validation messages belong to the application. */
-export function Combobox({
-  items,
-  value,
-  defaultValue,
-  onValueChange,
-  selectedItem,
-  filter = localFilter,
-  query,
-  defaultQuery,
-  onQueryChange,
-  open,
-  defaultOpen,
-  onOpenChange,
-  loading = false,
-  error,
-  loadingText = 'Loading results…',
-  emptyText = 'No results found.',
-  name,
-  form,
-  disabled: disabledProp,
-  required: requiredProp,
-  controlSize = 'medium',
-  children
-}: ComboboxProps) {
+/** Editable search and committed selection have independent owners; results never select themselves. */
+export function Combobox(props: ComboboxProps) {
+  const {
+    items,
+    value,
+    defaultValue,
+    selectedItem,
+    selectedItems,
+    multiple = false,
+    filter = localFilter,
+    query,
+    defaultQuery,
+    onQueryChange,
+    open,
+    defaultOpen,
+    onOpenChange,
+    loading = false,
+    error,
+    loadingText = 'Loading results…',
+    emptyText = 'No results found.',
+    name,
+    form,
+    disabled: disabledProp,
+    readOnly = false,
+    required: requiredProp,
+    controlSize = 'medium',
+    children
+  } = props
+  const [initialMultiple] = useState(multiple)
+  if (multiple !== initialMultiple)
+    throw new TypeError('Combobox cannot change multiple mode. Remount with a new key.')
+  const selectedOptions = multiple ? (selectedItems ?? []) : selectedItem ? [selectedItem] : []
   const ids = useId()
   const field = useField()
   const disabled = !!(disabledProp || field?.disabled)
@@ -133,18 +176,36 @@ export function Combobox({
   if (new Set(items.map(item => item.value)).size !== items.length)
     throw new TypeError('Combobox item values must be distinct.')
   if (
-    [...items, ...(selectedItem ? [selectedItem] : [])].some(
+    [...items, ...selectedOptions].some(
       item => typeof item.value !== 'string' || !textOf(item).trim()
     )
   )
     throw new TypeError('Combobox items need a string value and readable textValue.')
-  const selection = useControllableState({
+  const selection = useControllableState<Selection>({
     name: 'Combobox',
     value,
-    defaultValue,
-    initialValue: null,
-    onChange: onValueChange
+    defaultValue: Array.isArray(defaultValue) ? [...defaultValue] : defaultValue,
+    initialValue: multiple ? [] : null,
+    equal: sameSelection,
+    onChange(next) {
+      if (props.multiple) {
+        if (!Array.isArray(next)) throw new TypeError('Multiple Combobox value must be an array.')
+        props.onValueChange?.([...next])
+      } else {
+        if (Array.isArray(next))
+          throw new TypeError('Single Combobox value must be a string or null.')
+        props.onValueChange?.(next)
+      }
+    }
   })
+  if (multiple !== Array.isArray(selection.value))
+    throw new TypeError('Combobox value must match its multiple mode.')
+  if (Array.isArray(selection.value)) validateTags(selection.value)
+  const values = Array.isArray(selection.value)
+    ? selection.value
+    : selection.value === null
+      ? []
+      : [selection.value]
   const search = useControllableState({
     name: 'Combobox query',
     value: query,
@@ -165,26 +226,36 @@ export function Combobox({
   const [active, highlight] = useState<string | null>(null)
   const [searching, setSearching] = useState(!!search.value)
   const [retained, setRetained] = useState(() => new Map<string, ComboboxOption>())
-  const currentItem =
-    items.find(item => item.value === selection.value) ??
-    (selectedItem?.value === selection.value ? selectedItem : undefined)
-  if (currentItem && retained.get(currentItem.value) !== currentItem)
-    setRetained(new Map(retained).set(currentItem.value, currentItem))
-  const selected =
-    currentItem ?? (selection.value === null ? undefined : retained.get(selection.value))
-  const unavailable = () => disabled || !!input?.matches(':disabled')
+  const selectedEntries = values.map(value => {
+    const item = items.find(item => item.value === value) ??
+      selectedOptions.find(item => item.value === value) ??
+      retained.get(value) ?? { value, label: multiple ? value || 'Selected option' : value }
+    return item
+  })
+  if (selectedEntries.some(item => retained.get(item.value) !== item))
+    setRetained(
+      new Map<string, ComboboxOption>([
+        ...retained,
+        ...selectedEntries.map((item): [string, ComboboxOption] => [item.value, item])
+      ])
+    )
+  const selected = selectedEntries[0]
+  const unavailable = () => disabled || readOnly || !!input?.matches(':disabled')
   const isOpen = expansion.value && !disabled
   const visible =
     loading || error ? [] : filter ? items.filter(item => filter(item, search.value)) : items
   const enabled = visible.filter(item => !item.disabled)
   const activeValue = enabled.some(item => item.value === active) ? active : null
   if (active !== null && activeValue === null) highlight(null)
-  const text =
-    isOpen && (searching || search.value !== '')
+  const text = multiple
+    ? search.value
+    : isOpen && (searching || search.value !== '')
       ? search.value
       : selected
         ? textOf(selected)
-        : (selection.value ?? '')
+        : typeof selection.value === 'string'
+          ? selection.value
+          : ''
   const setOpen = (next: boolean) => {
     if (next && unavailable()) return
     expansion.request(next)
@@ -204,28 +275,48 @@ export function Combobox({
     setOpen(true)
   }
   const pending = useRef<{ value: string | null } | null>(null)
-  const requestValue = (next: string | null) => {
+  const arrayPending = useRef<string[] | null>(null)
+  const requestValue = (update: Selection | ((current: Selection) => Selection)) => {
     if (unavailable()) return
-    if (next !== selection.value) pending.current = { value: next }
-    selection.request(next)
+    selection.request(current => {
+      const next = typeof update === 'function' ? update(current) : update
+      if (multiple !== Array.isArray(next))
+        throw new TypeError('Combobox value must match its multiple mode.')
+      if (Array.isArray(next)) validateTags(next)
+      if (!sameSelection(current, next)) {
+        if (Array.isArray(next)) arrayPending.current = next
+        else pending.current = { value: next }
+      }
+      return next
+    })
     queueMicrotask(() => {
       pending.current = null
+      arrayPending.current = null
     })
   }
   const commit = (next: string | null) => {
     if (unavailable() || (next !== null && !enabled.some(item => item.value === next))) return
     const item = enabled.find(item => item.value === next)
     if (item) setRetained(previous => new Map(previous).set(item.value, item))
-    requestValue(next)
-    dismiss()
+    if (multiple) {
+      requestValue(current =>
+        next === null ? [] : nextSelection(current, next, !isItemOpen(current, next))
+      )
+      search.request('')
+      setSearching(true)
+    } else {
+      requestValue(next)
+      dismiss()
+    }
     input?.focus({ preventScroll: true })
   }
-  const nativeValue = selection.value ?? ''
+  const nativeValue = typeof selection.value === 'string' ? selection.value : ''
   const latest = useRef({ selection, search, nativeValue, expansion })
   useLayoutEffect(() => {
     latest.current = { selection, search, nativeValue, expansion }
   })
   useLayoutEffect(() => {
+    if (multiple) return
     const node = bridge.current
     if (!node) return
     const changedByUser = pending.current && Object.is(pending.current.value, selection.value)
@@ -247,6 +338,7 @@ export function Combobox({
     }
   })
   useEffect(() => {
+    if (multiple) return
     const node = bridge.current
     const owner = node?.form
     if (!node || !owner) return
@@ -269,7 +361,7 @@ export function Combobox({
       owner.removeEventListener('reset', reset)
       win.clearTimeout(timer)
     }
-  }, [input, form])
+  }, [input, form, multiple])
   useLayoutEffect(() => {
     if (!isOpen || activeValue === null) return
     const option = content.current?.ownerDocument.getElementById(
@@ -277,14 +369,50 @@ export function Combobox({
     )
     option?.scrollIntoView({ block: 'nearest' })
   }, [activeValue, isOpen, ids])
+  const arrayBridgeRef = useArrayFormBridge({
+    values: Array.isArray(selection.value) ? selection.value : [],
+    controlled: selection.controlled,
+    pending: arrayPending,
+    form,
+    validity: required && values.length === 0 ? 'Please select at least one option.' : '',
+    reset() {
+      selection.reset()
+      search.reset()
+      setSearching(false)
+      highlight(null)
+      expansion.request(false)
+    }
+  })
   const context: Context = {
+    multiple,
+    readOnly,
+    selected: selectedEntries,
+    remove(value) {
+      requestValue(current =>
+        Array.isArray(current) ? current.filter(item => item !== value) : current
+      )
+      input?.focus({ preventScroll: true })
+    },
     value: selection.value,
     query: search.value,
     open: isOpen,
     disabled,
     setValue: next => {
-      if (next === null || items.some(item => item.value === next && !item.disabled))
-        requestValue(next)
+      if (Array.isArray(next)) {
+        if (!multiple) throw new TypeError('Single Combobox value must be a string or null.')
+        validateTags(next)
+        if (
+          next.every(
+            value =>
+              values.includes(value) || items.some(item => item.value === value && !item.disabled)
+          )
+        )
+          requestValue([...next])
+      } else {
+        if (multiple) throw new TypeError('Multiple Combobox value must be an array.')
+        if (next === null || items.some(item => item.value === next && !item.disabled))
+          requestValue(next)
+      }
     },
     setQuery,
     setOpen,
@@ -311,9 +439,10 @@ export function Combobox({
     <ComboboxContext.Provider value={context}>
       {children ?? (
         <>
+          {multiple && <ComboboxTags />}
           <div
             className="relative w-full min-w-0"
-            data-slot="combobox-control"
+            data-slot={multiple ? 'combobox-control multi-select-control' : 'combobox-control'}
           >
             <ComboboxInput />
             <ComboboxTrigger className="absolute inset-y-0 end-0 w-12" />
@@ -323,24 +452,59 @@ export function Combobox({
           </ComboboxPortal>
         </>
       )}
-      <input
-        ref={bridge}
-        className="sr-only"
-        data-slot="combobox-native"
-        type="text"
-        name={name}
-        form={form}
-        disabled={disabled}
-        aria-hidden="true"
-        tabIndex={-1}
-        autoComplete="off"
-        defaultValue={nativeValue}
-        onFocus={() => input?.focus()}
-        onInvalid={event => {
-          event.preventDefault()
-          input?.focus()
-        }}
-      />
+      {multiple ? (
+        <>
+          <input
+            ref={arrayBridgeRef}
+            type="text"
+            className="sr-only"
+            data-slot="combobox-native multi-select-native"
+            form={form}
+            disabled={disabled}
+            readOnly={readOnly}
+            aria-hidden="true"
+            tabIndex={-1}
+            autoComplete="off"
+            defaultValue={JSON.stringify(selection.value)}
+            onFocus={() => input?.focus()}
+            onInvalid={event => {
+              event.preventDefault()
+              input?.focus()
+            }}
+          />
+          {values.map(value => (
+            <input
+              key={value}
+              type="hidden"
+              data-slot="multi-select-value"
+              name={name}
+              form={form}
+              disabled={disabled}
+              value={value}
+            />
+          ))}
+        </>
+      ) : (
+        <input
+          ref={bridge}
+          readOnly={readOnly}
+          className="sr-only"
+          data-slot="combobox-native"
+          type="text"
+          name={name}
+          form={form}
+          disabled={disabled}
+          aria-hidden="true"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue={nativeValue}
+          onFocus={() => input?.focus()}
+          onInvalid={event => {
+            event.preventDefault()
+            input?.focus()
+          }}
+        />
+      )}
     </ComboboxContext.Provider>
   )
 }
@@ -387,6 +551,7 @@ export function ComboboxInput({
       type="text"
       role="combobox"
       required={false}
+      readOnly={box.readOnly || props.readOnly}
       autoComplete={props.autoComplete ?? 'off'}
       value={box.text}
       className={cn(
@@ -394,7 +559,7 @@ export function ComboboxInput({
         controlMetrics({ controlSize: box.controlSize }),
         className
       )}
-      data-slot="combobox-input"
+      data-slot={box.multiple ? 'combobox-input multi-select-input' : 'combobox-input'}
       data-control-size={box.controlSize}
       aria-autocomplete="list"
       aria-expanded={box.open}
@@ -426,7 +591,18 @@ export function ComboboxInput({
           event.metaKey
         )
           return
-        if (event.key === 'Escape' && !box.open && box.value !== null) {
+        if (
+          box.multiple &&
+          event.key === 'Backspace' &&
+          box.query === '' &&
+          Array.isArray(box.value) &&
+          box.value.length
+        ) {
+          event.preventDefault()
+          box.remove(box.value.at(-1)!)
+          return
+        }
+        if (!box.multiple && event.key === 'Escape' && !box.open && box.value !== null) {
           event.preventDefault()
           box.commit(null)
           return
@@ -507,7 +683,7 @@ export function ComboboxTrigger({
       tone="neutral"
       {...props}
       type="button"
-      disabled={box.disabled}
+      disabled={box.disabled || box.readOnly}
       pending={false}
       motion="off"
       controlSize={box.controlSize}
@@ -519,7 +695,9 @@ export function ComboboxTrigger({
       aria-label={props['aria-label'] ?? 'Show options'}
       aria-controls={box.open ? box.listId : undefined}
       aria-expanded={box.open}
-      data-slot="button combobox-trigger"
+      data-slot={
+        box.multiple ? 'button combobox-trigger multi-select-trigger' : 'button combobox-trigger'
+      }
       onPointerDown={event => {
         onPointerDown?.(event)
         if (!event.defaultPrevented) event.preventDefault()
@@ -561,14 +739,14 @@ export function ComboboxClear({
   ...props
 }: ComboboxClearProps) {
   const box = useComboboxContext()
-  if (box.value === null) return null
+  if (box.value === null || (Array.isArray(box.value) && !box.value.length)) return null
   return (
     <Button
       variant="ghost"
       tone="neutral"
       {...props}
       type="button"
-      disabled={box.disabled}
+      disabled={box.disabled || box.readOnly}
       pending={false}
       motion="off"
       controlSize={box.controlSize}
@@ -576,9 +754,11 @@ export function ComboboxClear({
         const native = { ...resolved, className: cn(comboboxActionClass, className) }
         return render ? render(native) : <button {...native} />
       }}
-      tabIndex={-1}
+      tabIndex={box.multiple ? 0 : -1}
       aria-label={props['aria-label'] ?? 'Clear selection'}
-      data-slot="button combobox-clear"
+      data-slot={
+        box.multiple ? 'button combobox-clear multi-select-clear' : 'button combobox-clear'
+      }
       onPointerDown={event => {
         onPointerDown?.(event)
         if (!event.defaultPrevented) event.preventDefault()
@@ -641,7 +821,7 @@ export function ComboboxContent({
       {...props}
       ref={transitionRef}
       popover="manual"
-      data-slot="combobox-content"
+      data-slot={box.multiple ? 'combobox-content multi-select-content' : 'combobox-content'}
       data-motion={motion}
       data-state={box.open ? 'open' : 'closed'}
       className={cn(
@@ -656,10 +836,11 @@ export function ComboboxContent({
       <div
         id={box.listId}
         role="listbox"
+        aria-multiselectable={box.multiple || undefined}
         aria-label={props['aria-label'] ?? box.input?.getAttribute('aria-label') ?? 'Suggestions'}
         aria-labelledby={props['aria-label'] ? undefined : box.input?.labels?.[0]?.id}
         aria-busy={box.loading || undefined}
-        data-slot="combobox-listbox"
+        data-slot={box.multiple ? 'combobox-listbox multi-select-listbox' : 'combobox-listbox'}
         className="max-h-[calc(var(--_rad-combobox-max-height,100dvh)-0.5rem)] overflow-y-auto overscroll-contain"
       >
         {children ??
@@ -697,12 +878,12 @@ export function ComboboxItem({
       role="option"
       tabIndex={-1}
       onKeyDown={props.onKeyDown}
-      aria-selected={box.active === value}
+      aria-selected={box.multiple ? isItemOpen(box.value, value) : box.active === value}
       aria-disabled={item.disabled || undefined}
-      data-slot="combobox-item"
+      data-slot={box.multiple ? 'combobox-item multi-select-item' : 'combobox-item'}
       data-value={value}
       data-highlighted={box.active === value ? '' : undefined}
-      data-selected={box.value === value ? '' : undefined}
+      data-selected={isItemOpen(box.value, value) ? '' : undefined}
       data-disabled={item.disabled ? '' : undefined}
       className={cn(comboboxItemClass, className)}
       onPointerDown={event => {
@@ -724,7 +905,7 @@ export function ComboboxItem({
           <span className="min-w-0 flex-1">{item.label}</span>
           <span
             aria-hidden="true"
-            className={cn(box.value !== value && 'invisible')}
+            className={cn(!isItemOpen(box.value, value) && 'invisible')}
           >
             ✓
           </span>
@@ -744,10 +925,40 @@ export function ComboboxStatus({ children, className, ...props }: ComboboxStatus
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      data-slot="combobox-status"
+      data-slot={box.multiple ? 'combobox-status multi-select-status' : 'combobox-status'}
       className={cn('px-3 py-2 empty:hidden', className)}
     >
       {box.open ? (children ?? box.status) : null}
+    </div>
+  )
+}
+
+export type ComboboxTagsProps = Omit<ComponentProps<'div'>, 'children' | 'style'> & {
+  style?: ThemeStyle
+}
+export function ComboboxTags({ className, ...props }: ComboboxTagsProps) {
+  const box = useComboboxContext()
+  if (!box.multiple) throw new Error('ComboboxTags requires a multiple Combobox.')
+  return (
+    <div
+      {...props}
+      data-slot="combobox-tags multi-select-tags"
+      className={cn(
+        'flex flex-wrap items-center gap-[var(--rad-multi-select-gap,0.5rem)] mb-[var(--rad-multi-select-gap,0.5rem)] empty:hidden',
+        className
+      )}
+    >
+      {box.selected.map(item => (
+        <Tag
+          key={item.value}
+          data-slot="multi-select-tag"
+          removeLabel={`Remove ${textOf(item)}`}
+          disabled={box.disabled || box.readOnly}
+          onRemove={() => box.remove(item.value)}
+        >
+          {item.label}
+        </Tag>
+      ))}
     </div>
   )
 }
