@@ -453,6 +453,17 @@ export const componentRegistry = {
     duration: 'css'
   },
   separator: { color: 'css', thickness: 'css', style: 'css', spacing: 'css' },
+  badge: {
+    radius: 'css',
+    background: 'css',
+    color: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    paddingInline: 'css',
+    paddingBlock: 'css',
+    fontSize: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 

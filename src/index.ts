@@ -297,3 +297,6 @@ export type { SkeletonProps } from './Skeleton.js'
 
 export { Separator } from './Separator.js'
 export type { SeparatorProps } from './Separator.js'
+
+export { Badge } from './Badge.js'
+export type { BadgeProps, BadgeTone } from './Badge.js'

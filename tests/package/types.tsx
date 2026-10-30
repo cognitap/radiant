@@ -1,3 +1,4 @@
+import './badge-types.js'
 import './separator-types.js'
 import './skeleton-types.js'
 import './spinner-types.js'

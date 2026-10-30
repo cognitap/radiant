@@ -961,7 +961,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
       /^['"]use client['"]/
     )
   }
-  for (const file of ['index', 'Card', 'Link', 'Alert', 'Progress', 'Separator']) {
+  for (const file of ['index', 'Card', 'Link', 'Alert', 'Progress', 'Separator', 'Badge']) {
     assert.doesNotMatch(
       readFileSync(new URL(`dist/library/${file}.js`, root), 'utf8'),
       /^['"]use client['"]/
