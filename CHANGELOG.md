@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.30
+
 - Add CheckboxGroup.
 
 ## 0.0.29
