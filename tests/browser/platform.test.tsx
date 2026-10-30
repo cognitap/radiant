@@ -747,7 +747,6 @@ test('composed native refs stay attached through ordinary renders and clean up o
         ref={ref as never}
         title={title}
         aria-label="Option"
-        readOnly
         indeterminate
       />
     ),
