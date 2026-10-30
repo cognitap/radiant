@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Badge.
+
 ## 0.0.23
 
 - Add Separator.
