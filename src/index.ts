@@ -294,3 +294,6 @@ export type { SpinnerProps } from './Spinner.js'
 
 export { Skeleton } from './Skeleton.js'
 export type { SkeletonProps } from './Skeleton.js'
+
+export { Separator } from './Separator.js'
+export type { SeparatorProps } from './Separator.js'

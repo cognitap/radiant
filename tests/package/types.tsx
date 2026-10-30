@@ -1,3 +1,4 @@
+import './separator-types.js'
 import './skeleton-types.js'
 import './spinner-types.js'
 import type * as Radiant from '@cognitap/radiant'
