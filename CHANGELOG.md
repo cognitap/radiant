@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.26
+
 - Add Breadcrumb.
 
 ## 0.0.25
