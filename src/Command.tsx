@@ -182,7 +182,7 @@ function CommandResults({
           }
         }}
       >
-        {children}
+        {children ?? false}
       </ComboboxRoot>
     </WithoutField>
   )

@@ -35,6 +35,7 @@ function tree(props = {}) {
   )
 }
 test('Command server markup shares native Dialog and Combobox hosts, groups and Kbd without global bindings or form carriers', () => {
+  assert.equal(render(h(Command, { items, onAction: () => {} })), '')
   const html = render(
     h(
       Field,
