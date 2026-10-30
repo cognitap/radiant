@@ -8,7 +8,8 @@ import {
   DrawerDescription,
   DrawerClose,
   useDrawer,
-  type DrawerProps
+  type DrawerProps,
+  type DrawerHandleProps
 } from '@cognitap/radiant'
 export const drawerTypes = (
   <Drawer
@@ -64,3 +65,10 @@ void conflictingOpen
 void unnamed
 void toggle
 void State
+
+// @ts-expect-error the resize handle owns its button type
+const submitHandle: DrawerHandleProps = { 'aria-label': 'Resize', type: 'submit' }
+// @ts-expect-error drag presentation belongs to Content, not Button press motion
+const motionHandle: DrawerHandleProps = { 'aria-label': 'Resize', motion: 'inherit' }
+void submitHandle
+void motionHandle
