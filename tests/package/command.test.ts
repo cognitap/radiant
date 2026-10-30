@@ -62,5 +62,9 @@ test('Command rejects conflicting owners and malformed registries, and guards re
   ])
     assert.throws(() => render(tree(JSON.parse(JSON.stringify(props)))))
   assert.throws(() => render(h(CommandInput)), /inside Command/)
+  assert.throws(
+    () => render(h(Command, { items, onAction: () => {} }, h(CommandInput, { 'aria-label': ' ' }))),
+    /requires aria-label/
+  )
   assert.throws(() => render(h(Combobox, { items }, h(CommandList))), /inside Command/)
 })

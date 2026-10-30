@@ -12,6 +12,7 @@ import {
   useDialog,
   useDialogFamily,
   type DialogProps,
+  type DialogRenderProps,
   type DialogContentProps,
   type DialogTriggerProps,
   type DialogTitleProps,
@@ -27,6 +28,9 @@ import {
   type ComboboxInputProps,
   type ComboboxItemProps
 } from './Combobox.js'
+import type { StateOwner } from './react/useNativeOwner.js'
+import type { DistributiveOmit } from './internal/types.js'
+import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { WithoutField } from './Field.js'
 import { Kbd, KbdGroup } from './Kbd.js'
 import { cn } from './cn.js'
@@ -36,24 +40,29 @@ import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type CommandOption = ComboboxOption & { group?: string; shortcut?: readonly string[] }
 export type CommandProps = DialogProps &
-  ({ query: string; defaultQuery?: never } | { query?: undefined; defaultQuery?: string }) & {
+  StateOwner<'query', string> & {
     items: readonly CommandOption[]
     onQueryChange?: (query: string) => void
     /** Runs on explicit activation, then requests Dialog close. */
     onAction: (value: string) => void
     filter?: ((item: CommandOption, query: string) => boolean) | null
     loading?: boolean
-    error?: ReactNode
+    errorText?: ReactNode
     loadingText?: string
     emptyText?: string
     controlSize?: ControlSize
   }
-export type CommandTriggerProps = DialogTriggerProps
+export type CommandRenderProps = DialogRenderProps
+export type CommandTriggerProps = DistributiveOmit<
+  DialogTriggerProps,
+  'pressed' | 'defaultPressed' | 'onPressedChange'
+>
 export type CommandCloseProps = DialogTriggerProps
 export type CommandContentProps = DialogContentProps
 export type CommandTitleProps = DialogTitleProps
 export type CommandDescriptionProps = DialogDescriptionProps
-export type CommandInputProps = ComboboxInputProps
+export type CommandInputProps = Omit<ComboboxInputProps, 'aria-label' | 'aria-labelledby'> &
+  (AccessibleName | { 'aria-label'?: undefined; 'aria-labelledby'?: undefined })
 export type CommandListProps = Omit<ComponentProps<'div'>, 'style' | 'role' | 'id'> & {
   style?: ThemeStyle
 }
@@ -75,7 +84,7 @@ export function Command({
   onAction,
   filter,
   loading,
-  error,
+  errorText,
   loadingText,
   emptyText,
   controlSize,
@@ -117,7 +126,7 @@ export function Command({
           onAction={onAction}
           filter={filter}
           loading={loading}
-          error={error}
+          errorText={errorText}
           loadingText={loadingText}
           emptyText={emptyText}
           controlSize={controlSize}
@@ -132,6 +141,7 @@ function CommandResults({
   items,
   onAction,
   filter,
+  errorText,
   children,
   ...props
 }: Pick<
@@ -142,7 +152,7 @@ function CommandResults({
   | 'onAction'
   | 'filter'
   | 'loading'
-  | 'error'
+  | 'errorText'
   | 'loadingText'
   | 'emptyText'
   | 'controlSize'
@@ -156,6 +166,7 @@ function CommandResults({
         {...props}
         items={items}
         value={null}
+        error={errorText}
         open={dialog.open}
         filter={
           filter === null
@@ -178,7 +189,14 @@ function CommandResults({
 }
 export function CommandTrigger(props: CommandTriggerProps) {
   useCommandContext()
-  return <DialogTrigger {...props} />
+  return (
+    <DialogTrigger
+      {...props}
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
+    />
+  )
 }
 export function CommandClose(props: CommandCloseProps) {
   useCommandContext()
@@ -204,10 +222,17 @@ export function CommandDescription(props: CommandDescriptionProps) {
 export function CommandInput({ className, ...props }: CommandInputProps) {
   useCommandContext()
   useCommandParts()
+  const name = {
+    'aria-label': props['aria-labelledby']
+      ? props['aria-label']
+      : (props['aria-label'] ?? 'Search commands'),
+    'aria-labelledby': props['aria-labelledby']
+  }
+  requireAccessibleName('CommandInput', name)
   return (
     <ComboboxInput
-      aria-label={props['aria-labelledby'] ? undefined : 'Search commands'}
       {...props}
+      {...name}
       className={cn('shrink-0 pe-[var(--_rad-control-padding,1rem)]', className)}
     />
   )

@@ -64,7 +64,12 @@ export const Default: Story = {
         closeOnEscape={options.closeOnEscape}
         closeOnBackdrop={options.closeOnBackdrop}
       >
-        <CommandTrigger disabled={options.disabled}>Open commands</CommandTrigger>
+        <CommandTrigger
+          disabled={options.disabled}
+          controlSize={options.controlSize}
+        >
+          Open commands
+        </CommandTrigger>
         <CommandSurface
           {...options}
           title="Workspace commands"
@@ -128,4 +133,46 @@ export const FindingStudyReport: Story = {
     })
     await expect(c.getByText('Completed sessions: 24.')).toBeVisible()
   }
+}
+export const SharedControlSizes: Story = {
+  render: options => (
+    <MotionProvider>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,16rem),1fr))',
+          gap: '1rem',
+          width: '100%'
+        }}
+      >
+        {(['small', 'medium', 'large'] as const).map(controlSize => (
+          <fieldset
+            key={controlSize}
+            style={{
+              minWidth: 0,
+              margin: 0,
+              padding: '1rem',
+              border: '1px solid var(--rad-color-border)'
+            }}
+          >
+            <legend>{controlSize}</legend>
+            <ManageStudyProjects
+              {...options}
+              initialOpen={false}
+              applicationLabel={controlSize + ' project command application'}
+              controlSize={controlSize}
+            />
+          </fieldset>
+        ))}
+      </div>
+    </MotionProvider>
+  )
+}
+export const Controlled: Story = {
+  args: { initialOpen: true },
+  render: options => (
+    <MotionProvider>
+      <FindStudyReport {...options} />
+    </MotionProvider>
+  )
 }

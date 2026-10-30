@@ -18,6 +18,7 @@ import {
 export type CommandTaskOptions = Pick<CommandContentProps, 'className' | 'style' | 'motion'> &
   Pick<CommandProps, 'controlSize' | 'closeOnEscape' | 'closeOnBackdrop' | 'modal'> & {
     dir?: 'ltr' | 'rtl'
+    applicationLabel?: string
     initialOpen?: boolean
     disabled?: boolean
   }
@@ -30,10 +31,12 @@ export const projectActions: CommandOption[] = [
 function Shortcut({
   onOpen,
   onNew,
+  applicationLabel,
   children,
   dir
 }: {
   onOpen: () => void
+  applicationLabel: string
   onNew?: () => void
   children: ReactNode
   dir?: 'ltr' | 'rtl'
@@ -57,7 +60,7 @@ function Shortcut({
   }
   return (
     <section
-      aria-label="Command application"
+      aria-label={applicationLabel}
       dir={dir}
       onKeyDownCapture={shortcut}
       style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '32rem', minWidth: 0 }}
@@ -91,9 +94,20 @@ export function CommandSurface({
     </CommandContent>
   )
 }
-function PaletteTrigger({ children, disabled }: { children: ReactNode; disabled?: boolean }) {
+function PaletteTrigger({
+  children,
+  disabled,
+  controlSize
+}: {
+  children: ReactNode
+  disabled?: boolean
+  controlSize?: CommandProps['controlSize']
+}) {
   return (
-    <CommandTrigger disabled={disabled}>
+    <CommandTrigger
+      disabled={disabled}
+      controlSize={controlSize}
+    >
       <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {children}
         <KbdGroup aria-hidden="true">
@@ -130,6 +144,7 @@ export function ManageStudyProjects({ initialOpen = false, ...options }: Command
   }
   return (
     <Shortcut
+      applicationLabel={options.applicationLabel ?? 'Project command application'}
       dir={options.dir}
       onNew={() => {
         if (!options.disabled) {
@@ -152,7 +167,12 @@ export function ManageStudyProjects({ initialOpen = false, ...options }: Command
         closeOnEscape={options.closeOnEscape}
         closeOnBackdrop={options.closeOnBackdrop}
       >
-        <PaletteTrigger disabled={options.disabled}>Project commands</PaletteTrigger>
+        <PaletteTrigger
+          disabled={options.disabled}
+          controlSize={options.controlSize}
+        >
+          Project commands
+        </PaletteTrigger>
         <CommandSurface
           {...options}
           title="Project commands"
@@ -189,6 +209,7 @@ export function NavigateWorkspace({ initialOpen = false, ...options }: CommandTa
   }, [open, page])
   return (
     <Shortcut
+      applicationLabel={options.applicationLabel ?? 'Workspace navigation application'}
       dir={options.dir}
       onOpen={() => {
         if (!options.disabled) setOpen(true)
@@ -207,7 +228,12 @@ export function NavigateWorkspace({ initialOpen = false, ...options }: CommandTa
         closeOnEscape={options.closeOnEscape}
         closeOnBackdrop={options.closeOnBackdrop}
       >
-        <PaletteTrigger disabled={options.disabled}>Navigate workspace</PaletteTrigger>
+        <PaletteTrigger
+          disabled={options.disabled}
+          controlSize={options.controlSize}
+        >
+          Navigate workspace
+        </PaletteTrigger>
         <CommandSurface
           {...options}
           title="Navigate workspace"
@@ -276,6 +302,7 @@ export function FindStudyReport({ initialOpen = false, ...options }: CommandTask
   }, [query, online])
   return (
     <Shortcut
+      applicationLabel={options.applicationLabel ?? 'Report search application'}
       dir={options.dir}
       onOpen={() => {
         if (!options.disabled) setOpen(true)
@@ -289,7 +316,7 @@ export function FindStudyReport({ initialOpen = false, ...options }: CommandTask
         onQueryChange={setQuery}
         filter={null}
         loading={online && result.query !== query}
-        error={online ? undefined : 'Report search is disconnected.'}
+        errorText={online ? undefined : 'Report search is disconnected.'}
         emptyText="No matching reports."
         onAction={setReport}
         controlSize={options.controlSize}
@@ -297,7 +324,12 @@ export function FindStudyReport({ initialOpen = false, ...options }: CommandTask
         closeOnEscape={options.closeOnEscape}
         closeOnBackdrop={options.closeOnBackdrop}
       >
-        <PaletteTrigger disabled={options.disabled}>Find study report</PaletteTrigger>
+        <PaletteTrigger
+          disabled={options.disabled}
+          controlSize={options.controlSize}
+        >
+          Find study report
+        </PaletteTrigger>
         <CommandContent
           dir={options.dir}
           className={options.className}

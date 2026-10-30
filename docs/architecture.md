@@ -1,11 +1,9 @@
 # Architecture
 
-How Radiant's fifty-four families fit together. Props are on the
-[docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
-[motion](motion.md).
+How Radiant's fifty-four families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
 The families are Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first

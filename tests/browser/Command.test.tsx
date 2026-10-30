@@ -263,7 +263,7 @@ test('application-filtered async results and errors do not run actions or overwr
       filter={null}
       onAction={action}
       loading={loading}
-      error={error}
+      errorText={error}
     />
   )
   const { host, render } = await mount(tree([], true))
@@ -349,7 +349,7 @@ test('consumer shortcuts are scoped to their application and registered action h
       <NavigateWorkspace />
     </>
   )
-  const applications = host.querySelectorAll('section[aria-label="Command application"]'),
+  const applications = host.querySelectorAll('section[aria-label$="application"]'),
     first = applications[0]!,
     second = applications[1]!
   await act(async () => first.querySelector('button')!.focus())

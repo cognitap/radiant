@@ -9,6 +9,8 @@ import {
   CommandList,
   CommandClose,
   type CommandProps,
+  type CommandRenderProps,
+  type CommandTriggerProps,
   type CommandInputProps
 } from '@cognitap/radiant'
 const items = [
@@ -48,3 +50,9 @@ export const name: CommandInputProps = { name: 'command' }
 export const inputValue: CommandInputProps = { value: 'other' }
 // @ts-expect-error The state root has no DOM host.
 export const rootStyle: CommandProps = { items, onAction: () => {}, className: 'custom' }
+
+// @ts-expect-error Search errors are status text, not validation errors.
+export const legacyError: CommandProps = { items, onAction: () => {}, error: 'Unavailable' }
+// @ts-expect-error A disclosure trigger does not own pressed state.
+export const pressedTrigger: CommandTriggerProps = { pressed: true }
+export const renderProps: Pick<CommandRenderProps, 'children'> = { children: 'Open commands' }

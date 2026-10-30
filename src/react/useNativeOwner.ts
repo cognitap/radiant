@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 
+export type StateOwner<Name extends string, Value> =
+  | ({ [Key in Name]: Value } & { [Key in `default${Capitalize<Name>}`]?: never })
+  | ({ [Key in Name]?: undefined } & { [Key in `default${Capitalize<Name>}`]?: Value })
+
 export type ValueOwner<Value> =
   | { value: Value; defaultValue?: never }
   | { value?: undefined; defaultValue?: Value }

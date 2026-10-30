@@ -625,6 +625,7 @@ export {
   CommandList,
   CommandItem,
   type CommandProps,
+  type CommandRenderProps,
   type CommandOption,
   type CommandTriggerProps,
   type CommandCloseProps,
