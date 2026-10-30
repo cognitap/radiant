@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Autocomplete.
+
 ## 0.0.50
 
 - Add NavLink.
@@ -222,7 +224,7 @@
 - Add font axis ranges (`ThemeFontAxis`) to theme document font metadata.
 - **Breaking:** component text now uses the UI typography roles. UI line heights are explicit, and checkbox, radio and disclosure labels use the label weight. Check wrapping in your layouts.
 
-  Old typography leaves still apply. Migrate themes to roles:
+  Earlier leaves still apply. Migrate to roles:
 
   | Before                             | After                         |
   | ---------------------------------- | ----------------------------- |
