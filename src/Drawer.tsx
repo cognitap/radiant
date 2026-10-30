@@ -150,9 +150,9 @@ const surface = [
 const viewport = [
   'absolute inset-y-0 left-0 grid content-start box-border min-w-0 min-h-0 overflow-auto overscroll-contain max-w-full max-h-full',
   'w-[var(--_rad-drawer-visible,100%)]',
-  'in-[[data-physical-side=left]]:left-auto in-[[data-physical-side=left]]:right-0',
-  'in-[[data-physical-side=top]]:inset-x-0 in-[[data-physical-side=top]]:top-auto in-[[data-physical-side=top]]:bottom-0 in-[[data-physical-side=top]]:w-full in-[[data-physical-side=top]]:h-[var(--_rad-drawer-visible,100%)]',
-  'in-[[data-physical-side=bottom]]:inset-x-0 in-[[data-physical-side=bottom]]:bottom-auto in-[[data-physical-side=bottom]]:top-0 in-[[data-physical-side=bottom]]:w-full in-[[data-physical-side=bottom]]:h-[var(--_rad-drawer-visible,100%)]',
+  '[[data-physical-side=left]>&]:left-auto [[data-physical-side=left]>&]:right-0',
+  '[[data-physical-side=top]>&]:inset-x-0 [[data-physical-side=top]>&]:top-auto [[data-physical-side=top]>&]:bottom-0 [[data-physical-side=top]>&]:w-full [[data-physical-side=top]>&]:h-[var(--_rad-drawer-visible,100%)]',
+  '[[data-physical-side=bottom]>&]:inset-x-0 [[data-physical-side=bottom]>&]:bottom-auto [[data-physical-side=bottom]>&]:top-0 [[data-physical-side=bottom]>&]:w-full [[data-physical-side=bottom]>&]:h-[var(--_rad-drawer-visible,100%)]',
   'gap-[var(--rad-dialog-gap,var(--rad-surface-gap,1rem))] p-[var(--rad-dialog-padding,var(--rad-surface-padding,1.5rem))]'
 ]
 export function DrawerContent({
