@@ -80,10 +80,10 @@ function NestedDialogs() {
   )
 }
 
-function OutsideControl() {
+function ControlledDialog() {
   const [open, setOpen] = useState(false)
   return (
-    <div style={{ display: 'flex', gap: '0.75rem' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
       <button type="button">Keep</button>
       <button
         type="button"
@@ -92,6 +92,7 @@ function OutsideControl() {
       >
         Open from outside
       </button>
+      <output>{open ? 'Open' : 'Closed'}</output>
       <Dialog
         onOpenChange={setOpen}
         open={open}
@@ -103,6 +104,28 @@ function OutsideControl() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+function LongContent() {
+  return (
+    <Dialog>
+      <DialogTrigger>Read the terms</DialogTrigger>
+      <DialogContent>
+        <DialogTitle>Workspace terms</DialogTitle>
+        <DialogDescription>The panel stays inside the viewport and scrolls.</DialogDescription>
+        {Array.from({ length: 12 }, (_, index) => (
+          <p
+            key={index}
+            style={{ margin: 0 }}
+          >
+            Section {index + 1}. Members keep access to the projects they were invited to until an
+            owner removes them. Exports include every file the member could open.
+          </p>
+        ))}
+        <DialogClose>I understand</DialogClose>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -161,12 +184,53 @@ export const Default: Story = {
   )
 }
 
-export const States: Story = {
+export const FormSubmission: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'An initially open nonmodal dialog in Canvas. In Docs, open it with the trigger to keep the page at its starting position. It stays in normal document interaction; the default example demonstrates opening a modal dialog.'
+          'A controlled dialog with a validated form. Submit saves and closes; while saving, Escape, backdrop and Cancel are held. Includes a switch that turns off spatial motion.'
+      }
+    }
+  },
+  render: (_, { globals }) => (
+    <DialogProfileExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  )
+}
+
+export const InsideAForm: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The dialog stays inside its ancestor form, so its submit button submits that form. Recipes → Workspace and Recipes → Forms show fuller product compositions.'
+      }
+    }
+  },
+  render: () => <ProfileForm />
+}
+
+export const Controlled: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'open and onOpenChange owned by the caller. The dialog opens from a button outside it and has no DialogTrigger.'
+      }
+    }
+  },
+  render: () => <ControlledDialog />
+}
+
+export const NonModal: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'modal={false} with defaultOpen. An initially open nonmodal dialog in Canvas; in Docs, open it with the trigger. The rest of the page stays interactive.'
       }
     }
   },
@@ -187,17 +251,25 @@ export const States: Story = {
   )
 }
 
-export const Composition: Story = {
-  name: 'Ancestor form interoperability',
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'A focused native interoperability example: the dialog remains inside its ancestor form, and its submit button submits that form. Recipes → Workspace and Recipes → Forms show the canonical product composition.'
-      }
-    }
-  },
-  render: () => <ProfileForm />
+export const Dismissal: Story = {
+  render: () => <HeldOpen />
+}
+
+export const Nested: Story = {
+  render: () => <NestedDialogs />
+}
+
+export const ScrollingContent: Story = {
+  render: () => <LongContent />
+}
+
+export const Motion: Story = {
+  render: (_, { globals }) => (
+    <DialogTransitionExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  )
 }
 
 // Consumer-owned adapter; the resolved ref, handler and children reach this one host.
@@ -237,36 +309,5 @@ export const Customisation: Story = {
         </DialogClose>
       </DialogContent>
     </Dialog>
-  )
-}
-
-export const Nested: Story = {
-  render: () => <NestedDialogs />
-}
-
-export const AbsentTrigger: Story = {
-  name: 'Native trigger interoperability',
-  render: () => <OutsideControl />
-}
-
-export const Dismissal: Story = {
-  render: () => <HeldOpen />
-}
-
-export const ProfileEditor: Story = {
-  render: (_, { globals }) => (
-    <DialogProfileExample
-      theme={themes.find(theme => theme.id === globals.theme)}
-      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
-    />
-  )
-}
-
-export const TransitionPlayground: Story = {
-  render: (_, { globals }) => (
-    <DialogTransitionExample
-      theme={themes.find(theme => theme.id === globals.theme)}
-      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
-    />
   )
 }

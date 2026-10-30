@@ -518,6 +518,10 @@ const renderButton = (resolved: ButtonRenderProps) => {
 createElement(Button, { render: renderButton })
 createElement(DialogTrigger, { render: renderButton })
 createElement(DialogClose, { render: renderButton })
+// @ts-expect-error A trigger that opens a dialog is not a toggle.
+export const pressedDialogTrigger = <DialogTrigger defaultPressed />
+// @ts-expect-error A close action has no toggle state.
+export const pressedDialogClose = <DialogClose aria-pressed />
 // @ts-expect-error Button replacement returns one compatible element.
 createElement(Button, { render: () => 'text' })
 // @ts-expect-error A replacement must retain a host.
