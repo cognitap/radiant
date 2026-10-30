@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add OTPField: numeric/alphanumeric slots over one native input.
+
 ## 0.0.40
 
 - Add Combobox multiple mode, MultiSelect, TagsInput and removable Tag.
@@ -176,7 +178,7 @@
 
 ## 0.0.5
 
-- Add typography recipes (`typography.typesetting`): Body, Headings, UI and Code fonts, 16 text styles and separate prose and UI rhythms.
+- Add typography recipes (`typography.typesetting`): Body/Headings/UI/Code fonts, 16 styles and separate prose/UI rhythms.
 - Add the React-free `@cognitap/radiant/typography` entry with `generateTypography`.
 - Add `data-rad-prose`, `data-rad-text` and `data-rad-type-container` HTML hooks.
 - Add font axis ranges (`ThemeFontAxis`) to theme document font metadata.

@@ -64,6 +64,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-otp-field-slot-size)',
         'w-(--rad-drawer-size)',
         'w-(--rad-context-menu-width)',
         'w-(--rad-hover-card-width)',
@@ -90,6 +91,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-otp-field-gap)',
         'gap-(--rad-tag-gap)',
         'gap-(--rad-multi-select-gap)',
         'gap-(--rad-tags-input-gap)',

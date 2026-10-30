@@ -9,7 +9,7 @@ import type { ThemeStyle } from './themes/defineTheme.js'
 import type { ControlSize } from './presentation.js'
 import { useFieldControl } from './Field.js'
 
-const inputVariants = cva([
+export const inputVariants = cva([
   controlBorderClass,
   'box-border w-full min-w-0',
   'h-[var(--rad-input-height,var(--_rad-control-height))]',
@@ -72,7 +72,7 @@ export function InputRoot({
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
   ...props
-}: InputProps & { family?: 'tags-input'; nativeRequired?: false }) {
+}: InputProps & { family?: 'tags-input' | 'otp-field'; nativeRequired?: false }) {
   const ownsValue = !['checkbox', 'radio', 'file'].includes(type)
   useNativeOwner('Input', props.value, props.defaultValue, ownsValue)
   if (ownsValue && props.value === null)
