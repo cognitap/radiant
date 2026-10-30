@@ -50,7 +50,7 @@ const labelClass =
 
 export type CheckboxProps = Omit<
   ComponentProps<'input'>,
-  'type' | 'checked' | 'defaultChecked' | 'style'
+  'type' | 'checked' | 'defaultChecked' | 'readOnly' | 'style'
 > &
   CheckedOwner & {
     /** Convenience label; omit it when Field supplies the single control's label. */
