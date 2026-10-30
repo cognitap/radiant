@@ -43,7 +43,9 @@ const meta = {
     description: { control: 'text' },
     error: { control: 'text' },
     required: { control: 'boolean' },
+    requiredIndicator: { control: 'text' },
     disabled: { control: 'boolean' },
+    controlId: { control: 'text' },
     layout: { control: 'inline-radio', options: ['control', 'group'] }
   },
   parameters: {
@@ -100,13 +102,13 @@ export const States: Story = {
 
 export const Customisation: Story = {
   name: 'Native control adapter',
+  args: { controlId: 'work-email', requiredIndicator: '(required)' },
   argTypes: { layout: { control: false } },
-
   parameters: {
     docs: {
       description: {
         story:
-          'A native adapter forwards children(controlProps) to its input. parts.label customises the label without changing its relationship to that input. The underline and surface use shared semantic roles; focus stays native.'
+          "A native adapter forwards children(controlProps) to its input, and controlId sets that input's ID. requiredIndicator replaces the asterisk; it stays hidden from assistive technology because aria-required already announces the state. parts.label and parts.required restyle those parts without changing their relationships. The underline and surface use shared semantic roles; focus stays native."
       }
     }
   },
@@ -119,7 +121,7 @@ export const Customisation: Story = {
       disabled={disabled}
       requiredIndicator={requiredIndicator}
       controlId={controlId}
-      parts={{ label: { className: 'italic' } }}
+      parts={{ label: { className: 'italic' }, required: { className: 'font-normal' } }}
     >
       {control => (
         <ToneInput
