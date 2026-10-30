@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.54
+
 - Add the `Orientation` type, used by Slider and Tabs.
 - Select accepts `aria-invalid` on the root and forwards it to the trigger. `SelectTrigger`'s own `aria-invalid` still works and wins.
 - Select accepts `readOnly`. The trigger stays focusable and sets `aria-readonly`, but opens nothing and the value doesn't change. The value still submits, and a read-only Select is not checked for `required`.
