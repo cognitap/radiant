@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Meter.
+
 ## 0.0.47
 
 - Add NativeSelect.
