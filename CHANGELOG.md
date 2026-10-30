@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.57
+
 - **Breaking:** DialogTrigger and DialogClose no longer accept `pressed`, `defaultPressed`, `onPressedChange` or `aria-pressed`, and ignore them at runtime. The AlertDialog, Drawer and Command trigger and close parts change with them. Before: `<DialogTrigger defaultPressed>` rendered `aria-pressed` beside `aria-expanded`. After: a type error, and no `aria-pressed`.
 - **Breaking:** PopoverTrigger and MenuTrigger no longer accept toggle props. Before: `<PopoverTrigger defaultPressed />` type-checked and rendered `aria-pressed` beside `aria-expanded`. After: `pressed`, `defaultPressed`, `onPressedChange` and `aria-pressed` are rejected by the types and ignored at runtime.
 - **Breaking:** ToastAction and ToastClose no longer accept toggle props, because neither is a toggle. Before: `<ToastAction pressed altText="…">` rendered `aria-pressed`. After: a type error, ignored at runtime.
