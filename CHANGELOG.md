@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Fix InputGroup addon focus.
+
 ## 0.0.45
 
 - Add InputGroup.
@@ -173,7 +175,7 @@
 
 - Align Card/compound-part minimum widths.
 
-- Let Accordion shrink in narrow grid/flex layouts like Collapsible.
+- Let Accordion shrink in narrow grid/flex layouts.
 
 - Update disclosure resize/inert cleanup; retain native pre-hydration fallback and motion-off height/markers.
 
@@ -224,7 +226,7 @@
 
 - Add Link, Field, Input, Checkbox, RadioGroup, Radio, Dialog, Collapsible, Accordion and Card using native elements.
 - Add `defineTheme` and `ThemeScope`: typed shared tokens, per-component overrides, and light, dark and system modes.
-- Add eight presets as named exports and readonly `themes` entries.
+- Add eight presets as named exports and readonly `themes`.
 - Add Button `variant`, `tone`, `controlSize`, `pending`, `iconOnly`, `fullWidth` and `render`.
 - Add `ThemeStyle` for typed `--rad-*` variables in `style`.
 - `data-slot` holds a set of identities. Select with `~=`, as in `[data-slot~="button"]`.

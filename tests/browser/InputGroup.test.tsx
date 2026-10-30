@@ -368,3 +368,34 @@ test('forced colors retain the shared boundary, native focus cue and keyboard no
     await commands.emulatePreferences({ forcedColors: 'none', reducedMotion: 'no-preference' })
   }
 })
+
+test('focusable containers outside the addon do not block native focus handoff', async () => {
+  const { host } = await mount(
+    <div tabIndex={-1}>
+      <InputGroup>
+        <InputGroupAddon>radiant.dev/</InputGroupAddon>
+        <InputGroupInput
+          aria-label="Project URL"
+          defaultValue="reader"
+        />
+      </InputGroup>
+      <InputGroup>
+        <InputGroupTextarea
+          aria-label="Study update"
+          defaultValue="Reviewed"
+        />
+        <InputGroupAddon>
+          <Kbd>K</Kbd>
+          <Button>Attach note</Button>
+        </InputGroupAddon>
+      </InputGroup>
+    </div>
+  )
+  const addons = host.querySelectorAll('[data-slot~="input-group-addon"]')
+  await click(addons[0]!)
+  expect(document.activeElement).toBe(host.querySelector('input'))
+  await click(host.querySelector('kbd')!)
+  expect(document.activeElement).toBe(host.querySelector('textarea'))
+  await click(host.querySelector('button')!)
+  expect(document.activeElement).toBe(host.querySelector('button'))
+})
