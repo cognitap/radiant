@@ -109,6 +109,23 @@ test('StrictMode hydration preserves named tab/panel IDs, initial selection and 
   }
 })
 
+test('the selected trigger carries a boolean data-selected that drives its styling; panels expose hidden', async () => {
+  const { host } = await mount(<Fixture />)
+  const { tabs, panels } = parts(host)
+  const idle = getComputedStyle(tabs[2]).borderTopColor
+  expect(tabs.map(tab => tab.getAttribute('data-selected'))).toEqual(['', null, null, null])
+  expect([...tabs, ...panels].some(part => part.hasAttribute('data-state'))).toBe(false)
+  expect(panels.some(panel => panel.hasAttribute('data-selected'))).toBe(false)
+  await act(async () => {
+    await userEvent.click(tabs[2])
+  })
+  expect(tabs[2].getAttribute('data-selected')).toBe('')
+  expect(tabs[0].hasAttribute('data-selected')).toBe(false)
+  expect(getComputedStyle(tabs[2]).borderTopColor).not.toBe(idle)
+  expect(getComputedStyle(tabs[0]).borderTopColor).toBe(idle)
+  expect(panels.map(panel => panel.hidden)).toEqual([true, true, false, true])
+})
+
 for (const dir of ['ltr', 'rtl'] as const) {
   test(`${dir}: automatic focus skips disabled tabs, wraps, and supports Home/End without duplicate callbacks`, async () => {
     const change = vi.fn()
