@@ -118,7 +118,22 @@ export function PopoverTrigger({ ref, onClick, ...props }: PopoverTriggerProps) 
     />
   )
 }
-export function PopoverClose({ onClick, ...props }: PopoverCloseProps) {
+export function PopoverClose(props: PopoverCloseProps) {
+  return (
+    <PopoverCloseRoot
+      {...props}
+      requestClose={undefined}
+      closeOnClick={undefined}
+    />
+  )
+}
+/** Private close-action policy for composed menus; keeps the real Button and identities. */
+export function PopoverCloseRoot({
+  onClick,
+  requestClose,
+  closeOnClick = true,
+  ...props
+}: PopoverCloseProps & { requestClose?: () => void; closeOnClick?: boolean }) {
   const popover = usePopoverContext()
   return (
     <Button
@@ -126,7 +141,9 @@ export function PopoverClose({ onClick, ...props }: PopoverCloseProps) {
       popoverTarget={undefined}
       popoverTargetAction={undefined}
       data-slot={joinIds('popover-close', props['data-slot'])}
-      onClick={composeAction(onClick, () => popover.close(true))}
+      onClick={composeAction(onClick, () => {
+        if (closeOnClick) (requestClose ?? (() => popover.close(true)))()
+      })}
     />
   )
 }

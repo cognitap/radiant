@@ -100,35 +100,38 @@ stays stable. Token names, CSS variables, scopes and presets are in
 Root `className`, `style`, native props and `ref` always reach the documented
 host, never a wrapper:
 
-| Family or part                                                  | Host                                                |
-| --------------------------------------------------------------- | --------------------------------------------------- |
-| AspectRatio                                                     | `div`                                               |
-| Toolbar                                                         | `div`                                               |
-| ToggleGroup / ToggleGroupItem                                   | `div` / Button's `button`                           |
-| ScrollArea                                                      | Native `div` scroll viewport                        |
-| Skeleton                                                        | `span`                                              |
-| Progress / Spinner                                              | `progress` / `svg`                                  |
-| Button / Link                                                   | `button` / `a`, including through `render`          |
-| Field                                                           | `div` in control layout; `fieldset` in group layout |
-| Input / Checkbox / Switch / Slider / Radio                      | Native `input`                                      |
-| Textarea                                                        | Native `textarea`                                   |
-| Select / SelectPortal / Combobox / ComboboxPortal               | None; state / portal                                |
-| Popover, HoverCard, Tooltip, Menu / their Portals               | None; state / portal                                |
-| HoverCardTrigger / HoverCardContent                             | Link's `a` / Popover's `div`                        |
-| PopoverTrigger / PopoverClose / PopoverContent                  | Button's `button` / Button's `button` / `div`       |
-| SelectTrigger / SelectContent / SelectViewport / SelectItem     | Button's `button` / `div` / `div` / `div`           |
-| ComboboxInput / ComboboxContent / ComboboxItem                  | Native `input` / `div` / `div`                      |
-| ComboboxTrigger / ComboboxClear                                 | Button's `button`                                   |
-| Tabs / TabsList / TabsContent                                   | `div`                                               |
-| TabsTrigger                                                     | Button's `button`                                   |
-| RadioGroup                                                      | Field's `fieldset`                                  |
-| Dialog / AlertDialog                                            | None; state owners                                  |
-| Dialog actions / AlertDialog actions                            | Button's `button`                                   |
-| Dialog and AlertDialog Content / Title / Description            | `dialog` / `h2` / `p`                               |
-| Collapsible / CollapsibleTrigger / CollapsibleContent           | `details` / `summary` / `div`                       |
-| Accordion / AccordionItem / AccordionTrigger / AccordionContent | `div` / `details` / `summary` / `div`               |
-| Card / CardHeader / CardContent / CardFooter                    | `div`                                               |
-| CardTitle and AlertTitle / CardDescription and AlertDescription | Heading chosen by `level` / `p`                     |
+| Family or part                                                             | Host                                                |
+| -------------------------------------------------------------------------- | --------------------------------------------------- |
+| AspectRatio                                                                | `div`                                               |
+| Toolbar                                                                    | `div`                                               |
+| ToggleGroup / ToggleGroupItem                                              | `div` / Button's `button`                           |
+| ScrollArea                                                                 | Native `div` scroll viewport                        |
+| Skeleton                                                                   | `span`                                              |
+| Progress / Spinner                                                         | `progress` / `svg`                                  |
+| Button / Link                                                              | `button` / `a`, including through `render`          |
+| Field                                                                      | `div` in control layout; `fieldset` in group layout |
+| Input / Checkbox / Switch / Slider / Radio                                 | Native `input`                                      |
+| Textarea                                                                   | Native `textarea`                                   |
+| Select / SelectPortal / Combobox / ComboboxPortal                          | None; state / portal                                |
+| Popover, HoverCard, Tooltip, Menu, MenuSub / their Portals                 | None; state / portal                                |
+| HoverCardTrigger / HoverCardContent                                        | Link's `a` / Popover's `div`                        |
+| MenuTrigger / MenuItem / MenuCheckboxItem / MenuRadioItem / MenuSubTrigger | Button's button                                     |
+| MenuContent / MenuSubContent / MenuGroup / MenuLabel / MenuRadioGroup      | div                                                 |
+| MenuSeparator                                                              | Separator's hr                                      |
+| PopoverTrigger / PopoverClose / PopoverContent                             | Button's `button` / Button's `button` / `div`       |
+| SelectTrigger / SelectContent / SelectViewport / SelectItem                | Button's `button` / `div` / `div` / `div`           |
+| ComboboxInput / ComboboxContent / ComboboxItem                             | Native `input` / `div` / `div`                      |
+| ComboboxTrigger / ComboboxClear                                            | Button's `button`                                   |
+| Tabs / TabsList / TabsContent                                              | `div`                                               |
+| TabsTrigger                                                                | Button's `button`                                   |
+| RadioGroup                                                                 | Field's `fieldset`                                  |
+| Dialog / AlertDialog                                                       | None; state owners                                  |
+| Dialog actions / AlertDialog actions                                       | Button's `button`                                   |
+| Dialog and AlertDialog Content / Title / Description                       | `dialog` / `h2` / `p`                               |
+| Collapsible / CollapsibleTrigger / CollapsibleContent                      | `details` / `summary` / `div`                       |
+| Accordion / AccordionItem / AccordionTrigger / AccordionContent            | `div` / `details` / `summary` / `div`               |
+| Card / CardHeader / CardContent / CardFooter                               | `div`                                               |
+| CardTitle and AlertTitle / CardDescription and AlertDescription            | Heading chosen by `level` / `p`                     |
 
 Internal parts take `className` and `style` through a `parts` map. Field has
 `label`, `description`, `error` and `required`. Checkbox, Switch and Radio have

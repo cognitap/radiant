@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+- Add Menu groups, labels and separators.
+- Add checkable Menu items.
+- Add Menu submenus.
+- Allow MenuItem closeOnSelect.
+
 ## 0.0.35
 
 - Add HoverCard.
@@ -119,15 +124,15 @@
 
 ## 0.0.8
 
-- Add Select with item focus, Field/forms, themes, springs and stable trigger-width alignment.
+- Add Select: item focus, Field/forms, themes, springs, stable trigger-width alignment.
 
 ## 0.0.7
 
-- Breaking: the example themes moved out of the core entry. Before, `import { jelly, themes } from '@cognitap/radiant'`. After, `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core, and `themeDefinitions` exposes each example's definition.
+- Breaking: example themes moved from core. Before: `import { jelly, themes } from '@cognitap/radiant'`. After: `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core; `themeDefinitions` exposes example definitions.
 
-- Reconcile pre-hydration disclosures: Collapsible adopts local changes once; controlled Collapsible and Accordion restore ownership without requests.
+- Reconcile pre-hydration disclosures: Collapsible adopts local changes once; controlled Collapsible/Accordion restore ownership without requests.
 
-- Align Card and compound-part minimum widths.
+- Align Card/compound-part minimum widths.
 
 - Let Accordion shrink in narrow grid/flex layouts like Collapsible.
 
@@ -135,7 +140,7 @@
 
 - Bound Dialog exits to two seconds/500 descendants; skip nested dialogs and customized built-ins.
 
-- Wrap Radio/Checkbox labels without shrinking native indicators.
+- Wrap Radio/Checkbox labels; retain indicator size.
 
 - Release MotionLink springs on lost capture/removed destinations; preserve native navigation.
 

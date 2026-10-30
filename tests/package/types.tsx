@@ -1,3 +1,4 @@
+import './menu-features-types.js'
 import './hover-card-types.js'
 import './toolbar-types.js'
 import './toggle-group-types.js'

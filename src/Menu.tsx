@@ -2,10 +2,13 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useId,
   useLayoutEffect,
   useRef,
+  useState,
+  type ComponentProps,
   type MouseEvent,
   type ReactNode,
   type RefObject
@@ -14,15 +17,21 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverClose,
+  PopoverCloseRoot,
   PopoverPortal,
   usePopover,
+  usePopoverContext,
   type PopoverProps,
   type PopoverState,
   type PopoverContentProps
 } from './Popover.js'
 import type { ButtonProps, ButtonRenderProps } from './Button.js'
 import type { DistributiveOmit } from './internal/types.js'
+import { Separator, type SeparatorProps } from './Separator.js'
+import { useControllableState } from './react/useControllableState.js'
+import type { ValueOwner } from './react/useNativeOwner.js'
+import type { ThemeStyle } from './themes/defineTheme.js'
+import type { PartStyle } from './presentation.js'
 import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
@@ -43,58 +52,111 @@ export type MenuItemProps = DistributiveOmit<
   'role' | 'tabIndex' | 'aria-disabled' | 'onSelect'
 > & {
   textValue?: string
+  closeOnSelect?: boolean
   onSelect?: (event: MouseEvent<HTMLButtonElement>) => void
 }
+type Intent = 'first' | 'last' | 'none'
+type MenuFamily = 'menu' | 'context-menu' | 'menubar'
 type Context = MenuState & {
+  parent?: Context
+  family: MenuFamily
+  focusIntent?: Intent
+  closeTree(): void
   triggerId: string
   trigger: RefObject<HTMLButtonElement | null>
   content: RefObject<HTMLDivElement | null>
-  intent: RefObject<'first' | 'last'>
-  setIntent: (edge: 'first' | 'last') => void
+  intent: RefObject<Intent>
+  setIntent: (edge: Intent) => void
 }
 const MenuContext = createContext<Context | null>(null)
 export function useMenu(): MenuState | null {
   return useContext(MenuContext)
 }
-function useMenuContext() {
+/** Private composition seam; not exported from the package. */
+export function useMenuContext() {
   const menu = useContext(MenuContext)
   if (!menu) throw new Error('Menu parts must render inside Menu.')
   return menu
 }
-export function Menu({ children, ...props }: MenuProps) {
+export function Menu(props: MenuProps) {
+  return (
+    <MenuRoot
+      {...props}
+      family="menu"
+      parent={undefined}
+      focusIntent={undefined}
+    />
+  )
+}
+/** Composed families share one owner and native surface tree. */
+export function MenuRoot({
+  children,
+  parent,
+  family = 'menu',
+  focusIntent,
+  ...props
+}: MenuProps & { parent?: Context; family?: MenuFamily; focusIntent?: Intent }) {
   return (
     <Popover {...props}>
-      <MenuOwner>{children}</MenuOwner>
+      <MenuOwner
+        parent={parent}
+        family={family}
+        focusIntent={focusIntent}
+      >
+        {children}
+      </MenuOwner>
     </Popover>
   )
 }
-function MenuOwner({ children }: { children?: ReactNode }) {
+function MenuOwner({
+  children,
+  parent,
+  family,
+  focusIntent
+}: {
+  children?: ReactNode
+  parent?: Context
+  family: MenuFamily
+  focusIntent?: Intent
+}) {
   const state = usePopover()!
   const triggerId = useId()
   const trigger = useRef<HTMLButtonElement>(null)
   const content = useRef<HTMLDivElement>(null)
-  const intent = useRef<'first' | 'last'>('first')
+  const intent = useRef<Intent>('first')
   return (
-    <MenuContext.Provider
-      value={{
-        ...state,
-        triggerId,
-        trigger,
-        content,
-        intent,
-        setIntent: edge => {
-          intent.current = edge
-        }
-      }}
-    >
-      {children}
-    </MenuContext.Provider>
+    <RadioContext.Provider value={null}>
+      <MenuContext.Provider
+        value={{
+          ...state,
+          triggerId,
+          trigger,
+          content,
+          intent,
+          parent,
+          family,
+          focusIntent,
+          setIntent: edge => {
+            intent.current = edge
+          },
+          closeTree: () => {
+            state.setOpen(false)
+            parent?.closeTree()
+          }
+        }}
+      >
+        {children}
+      </MenuContext.Provider>
+    </RadioContext.Provider>
   )
 }
+
 function items(node: HTMLElement) {
-  return Array.from(node.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]')).filter(
-    item => item.closest('[role="menu"]') === node
-  )
+  return Array.from(
+    node.querySelectorAll<HTMLButtonElement>(
+      'button[role="menuitem"],button[role="menuitemcheckbox"],button[role="menuitemradio"]'
+    )
+  ).filter(item => item.closest('[role="menu"]') === node)
 }
 function focusItem(node: HTMLElement, item?: HTMLButtonElement) {
   for (const candidate of items(node)) candidate.tabIndex = candidate === item ? 0 : -1
@@ -140,14 +202,40 @@ export function MenuPortal(props: MenuPortalProps) {
 }
 export function MenuContent({ ref, className, onKeyDown, ...props }: MenuContentProps) {
   const menu = useMenuContext()
-  const host = useComposedRefs(menu.content, ref)
+  const nested = !!menu.parent || menu.family === 'menubar'
+  const triggerId = menu.triggerId
+  const capture = useCallback(
+    (node: HTMLDivElement | null) => {
+      const trigger = node?.ownerDocument.getElementById(triggerId)
+      // Establish the submenu's reading order before the native surface opens.
+      if (
+        nested &&
+        node &&
+        trigger &&
+        node.parentElement === trigger.parentElement &&
+        trigger.nextElementSibling !== node &&
+        !node.matches(':popover-open')
+      )
+        trigger.after(node)
+    },
+    [triggerId, nested]
+  )
+  const placed = useComposedRefs(menu.content, capture)
+  const host = useComposedRefs(placed, ref)
   const search = useRef({ text: '', time: 0 })
+  const openIntent = useRef(menu.focusIntent)
+  useLayoutEffect(() => {
+    openIntent.current = menu.focusIntent
+  })
+
   useLayoutEffect(() => {
     search.current = { text: '', time: 0 }
     const node = menu.content.current
     if (!menu.open || !node) return
+    const edge = openIntent.current ?? menu.intent.current
+    if (edge === 'none') return
     const options = items(node)
-    focusItem(node, menu.intent.current === 'last' ? options.at(-1) : options[0])
+    focusItem(node, edge === 'last' ? options.at(-1) : options[0])
   }, [menu.open, menu.content, menu.intent])
   return (
     <PopoverContent
@@ -172,8 +260,10 @@ export function MenuContent({ ref, className, onKeyDown, ...props }: MenuContent
         if (target.closest('[role="menu"]') !== node) return
         if (event.key === 'Tab') {
           // Let the browser continue from the opener after closing, in either direction.
-          menu.trigger.current?.focus({ preventScroll: true })
-          menu.setOpen(false)
+          let root = menu
+          while (root.parent) root = root.parent
+          root.trigger.current?.focus({ preventScroll: true })
+          menu.closeTree()
           return
         }
         if (event.altKey || event.ctrlKey || event.metaKey || event.nativeEvent.isComposing) return
@@ -206,7 +296,19 @@ export function MenuContent({ ref, className, onKeyDown, ...props }: MenuContent
     />
   )
 }
-export function MenuItem({
+export function MenuItem(props: MenuItemProps) {
+  return (
+    <MenuItemRoot
+      {...props}
+      itemRole="menuitem"
+      checkedValue={undefined}
+    />
+  )
+}
+function MenuItemRoot({
+  itemRole = 'menuitem',
+  checkedValue,
+  closeOnSelect = true,
   disabled = false,
   textValue,
   onSelect,
@@ -216,14 +318,20 @@ export function MenuItem({
   className,
   motion,
   ...props
-}: MenuItemProps) {
+}: MenuItemProps & {
+  itemRole?: 'menuitem' | 'menuitemcheckbox' | 'menuitemradio'
+  checkedValue?: boolean | 'mixed'
+}) {
   const menu = useMenuContext()
   return (
-    <PopoverClose
+    <PopoverCloseRoot
+      requestClose={menu.closeTree}
+      closeOnClick={closeOnSelect}
       {...props}
       disabled={undefined}
       aria-disabled={disabled || undefined}
-      role="menuitem"
+      role={itemRole}
+      aria-checked={checkedValue ?? props['aria-checked']}
       tabIndex={-1}
       motion={disabled ? 'off' : motion}
       data-slot={joinIds('menu-item', props['data-slot'])}
@@ -243,6 +351,334 @@ export function MenuItem({
       }}
       onPointerMove={composeAction(onPointerMove, event => {
         if (event.pointerType !== 'touch') event.currentTarget.focus({ preventScroll: true })
+      })}
+    />
+  )
+}
+
+export type MenuGroupProps = Omit<ComponentProps<'div'>, 'style' | 'role'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
+export type MenuLabelProps = Omit<ComponentProps<'div'>, 'style' | 'role' | 'tabIndex'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
+export type MenuSeparatorProps = SeparatorProps
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- Menu sections are ARIA groups, not native form fieldsets. */
+export function MenuGroup({ className, ...props }: MenuGroupProps) {
+  useMenuContext()
+  return (
+    <div
+      {...props}
+      role="group"
+      data-slot={joinIds('menu-group', props['data-slot'])}
+      className={cn('grid gap-0', className)}
+    />
+  )
+}
+/* oxlint-enable jsx-a11y/prefer-tag-over-role */
+export function MenuLabel({ className, ...props }: MenuLabelProps) {
+  useMenuContext()
+  return (
+    <div
+      {...props}
+      role="presentation"
+      tabIndex={undefined}
+      data-slot={joinIds('menu-label', props['data-slot'])}
+      className={cn(
+        'px-[var(--rad-menu-item-padding,0.625rem)] py-2 [color:var(--rad-color-muted-foreground)] text-[length:var(--rad-typography-roles-ui-label-size,0.8125rem)] font-[number:var(--rad-typography-roles-ui-label-weight,600)]',
+        className
+      )}
+    />
+  )
+}
+export function MenuSeparator(props: MenuSeparatorProps) {
+  useMenuContext()
+  return (
+    <Separator
+      {...props}
+      data-slot={joinIds('menu-separator', props['data-slot'])}
+    />
+  )
+}
+type CheckableProps = DistributiveOmit<
+  MenuItemProps,
+  'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed' | 'aria-checked' | 'type'
+> & { parts?: { indicator?: PartStyle } }
+export type MenuCheckboxItemProps = CheckableProps &
+  (
+    | { checked: boolean; defaultChecked?: never }
+    | { checked?: undefined; defaultChecked?: boolean }
+  ) & { onCheckedChange?: (checked: boolean) => void; indeterminate?: boolean }
+const plainText = (children: ReactNode) =>
+  typeof children === 'string' || typeof children === 'number' ? String(children) : undefined
+function CheckMark({ children, part }: { children?: ReactNode; part?: PartStyle }) {
+  return (
+    <span
+      aria-hidden="true"
+      data-slot="menu-item-indicator"
+      className={cn('inline-flex w-4 shrink-0 items-center justify-center', part?.className)}
+      style={part?.style}
+    >
+      {children}
+    </span>
+  )
+}
+export function MenuCheckboxItem({
+  checked,
+  defaultChecked,
+  onCheckedChange,
+  indeterminate = false,
+  parts,
+  children,
+  textValue,
+  onSelect,
+  closeOnSelect = false,
+  ...props
+}: MenuCheckboxItemProps) {
+  const state = useControllableState({
+    name: 'MenuCheckboxItem',
+    value: checked,
+    defaultValue: defaultChecked,
+    initialValue: false,
+    onChange: onCheckedChange
+  })
+  return (
+    <MenuItemRoot
+      {...props}
+      type="button"
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
+      aria-pressed={undefined}
+      itemRole="menuitemcheckbox"
+      checkedValue={indeterminate ? 'mixed' : state.value}
+      closeOnSelect={closeOnSelect}
+      textValue={textValue ?? plainText(children)}
+      data-slot={joinIds('menu-checkbox-item', props['data-slot'])}
+      onSelect={event => {
+        onSelect?.(event)
+        if (!event.defaultPrevented) state.request(indeterminate || !state.value)
+      }}
+    >
+      <CheckMark part={parts?.indicator}>
+        {indeterminate ? '−' : state.value ? '✓' : null}
+      </CheckMark>
+      {children}
+    </MenuItemRoot>
+  )
+}
+export type MenuRadioGroupProps = Omit<MenuGroupProps, 'defaultValue'> &
+  ValueOwner<string | null> & { onValueChange?: (value: string | null) => void }
+type RadioContextValue = { value: string | null; request: (value: string) => void }
+const RadioContext = createContext<RadioContextValue | null>(null)
+export function MenuRadioGroup({
+  value,
+  defaultValue,
+  onValueChange,
+  ...props
+}: MenuRadioGroupProps) {
+  const state = useControllableState<string | null>({
+    name: 'MenuRadioGroup',
+    value,
+    defaultValue,
+    initialValue: null,
+    onChange: onValueChange
+  })
+  return (
+    <RadioContext.Provider value={{ value: state.value, request: state.request }}>
+      <MenuGroup
+        {...props}
+        data-slot={joinIds('menu-radio-group', props['data-slot'])}
+      />
+    </RadioContext.Provider>
+  )
+}
+export type MenuRadioItemProps = DistributiveOmit<CheckableProps, 'value'> & { value: string }
+export function MenuRadioItem({
+  value,
+  children,
+  textValue,
+  parts,
+  onSelect,
+  closeOnSelect = false,
+  ...props
+}: MenuRadioItemProps) {
+  const radio = useContext(RadioContext)
+  if (!radio) throw new Error('MenuRadioItem must render inside MenuRadioGroup.')
+  if (typeof value !== 'string') throw new TypeError('MenuRadioItem needs a string value.')
+  const checked = radio.value === value
+  return (
+    <MenuItemRoot
+      {...props}
+      type="button"
+      value={value}
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
+      aria-pressed={undefined}
+      itemRole="menuitemradio"
+      checkedValue={checked}
+      closeOnSelect={closeOnSelect}
+      textValue={textValue ?? plainText(children)}
+      data-slot={joinIds('menu-radio-item', props['data-slot'])}
+      onSelect={event => {
+        onSelect?.(event)
+        if (!event.defaultPrevented) radio.request(value)
+      }}
+    >
+      <CheckMark part={parts?.indicator}>{checked ? '●' : null}</CheckMark>
+      {children}
+    </MenuItemRoot>
+  )
+}
+export type MenuSubProps = MenuProps
+export type MenuSubTriggerProps = DistributiveOmit<
+  MenuItemProps,
+  'closeOnSelect' | 'id' | 'aria-haspopup' | 'aria-expanded' | 'aria-controls' | 'type'
+> & { parts?: { indicator?: PartStyle } }
+export type MenuSubContentProps = MenuContentProps
+export function MenuSub(props: MenuSubProps) {
+  const parent = useMenuContext()
+  return (
+    <MenuRoot
+      {...props}
+      parent={parent}
+      family={parent.family}
+      focusIntent={undefined}
+    />
+  )
+}
+function openMenu(menu: Context, edge: Intent) {
+  menu.setIntent(edge)
+  if (menu.open && menu.content.current) {
+    if (edge !== 'none') {
+      const options = items(menu.content.current)
+      focusItem(menu.content.current, edge === 'last' ? options.at(-1) : options[0])
+    }
+  } else menu.setOpen(true)
+}
+export function MenuSubTrigger({
+  ref,
+  children,
+  textValue,
+  parts,
+  className,
+  onSelect,
+  onKeyDown,
+  onPointerMove,
+  disabled,
+  pending,
+  ...props
+}: MenuSubTriggerProps) {
+  const menu = useMenuContext(),
+    popover = usePopoverContext(),
+    host = useComposedRefs(menu.trigger, ref),
+    anchor = useComposedRefs<HTMLButtonElement>(popover.setTrigger, host)
+  if (!menu.parent) throw new Error('MenuSubTrigger must render inside MenuSub.')
+  return (
+    <MenuContext.Provider value={menu.parent}>
+      <MenuItemRoot
+        {...props}
+        textValue={textValue ?? plainText(children)}
+        disabled={disabled}
+        pending={pending}
+        ref={anchor}
+        type="button"
+        id={menu.triggerId}
+        aria-haspopup="menu"
+        aria-controls={menu.contentId}
+        aria-expanded={menu.open}
+        data-slot={joinIds('menu-sub-trigger', props['data-slot'])}
+        closeOnSelect={false}
+        className={cn(
+          'aria-expanded:bg-[var(--rad-menu-item-focus-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))] aria-expanded:[color:var(--rad-menu-item-focus-color,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground)))]',
+          className
+        )}
+        onSelect={event => {
+          onSelect?.(event)
+          if (!event.defaultPrevented) openMenu(menu, 'first')
+        }}
+        onKeyDown={composeAction(onKeyDown, event => {
+          const rtl =
+            event.currentTarget.ownerDocument.defaultView!.getComputedStyle(event.currentTarget)
+              .direction === 'rtl'
+          if (
+            event.key !== (rtl ? 'ArrowLeft' : 'ArrowRight') ||
+            event.altKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.nativeEvent.isComposing ||
+            disabled ||
+            pending ||
+            event.currentTarget.matches(':disabled')
+          )
+            return
+          event.preventDefault()
+          openMenu(menu, 'first')
+        })}
+        onPointerMove={composeAction(onPointerMove, event => {
+          if (
+            event.pointerType !== 'touch' &&
+            !disabled &&
+            !pending &&
+            !event.currentTarget.matches(':disabled')
+          )
+            openMenu(menu, 'none')
+        })}
+      >
+        <span className="min-w-0 flex-1">{children}</span>
+        <CheckMark part={parts?.indicator}>
+          <span className="inline-block rtl:rotate-180">›</span>
+        </CheckMark>
+      </MenuItemRoot>
+    </MenuContext.Provider>
+  )
+}
+export function MenuSubContent({ side, onKeyDown, ...props }: MenuSubContentProps) {
+  const menu = useMenuContext(),
+    [inlineSide, setInlineSide] = useState<'right' | 'left'>('right')
+  if (!menu.parent) throw new Error('MenuSubContent must render inside MenuSub.')
+  useLayoutEffect(() => {
+    const trigger = menu.trigger.current
+    if (!trigger) return
+    const view = trigger.ownerDocument.defaultView!,
+      update = () =>
+        setInlineSide(view.getComputedStyle(trigger).direction === 'rtl' ? 'left' : 'right'),
+      observer = new view.MutationObserver(update)
+    update()
+    for (let node: HTMLElement | null = trigger; node; node = node.parentElement)
+      observer.observe(node, { attributes: true, attributeFilter: ['dir', 'class', 'style'] })
+    view.addEventListener('resize', update)
+    return () => {
+      observer.disconnect()
+      view.removeEventListener('resize', update)
+    }
+  }, [menu.trigger])
+  return (
+    <MenuContent
+      {...props}
+      side={side ?? inlineSide}
+      sideOffset={props.sideOffset ?? 4}
+      data-slot={joinIds('menu-sub-content', props['data-slot'])}
+      onKeyDown={composeAction(onKeyDown, event => {
+        const rtl =
+          event.currentTarget.ownerDocument.defaultView!.getComputedStyle(event.currentTarget)
+            .direction === 'rtl'
+        if (
+          event.key !== (rtl ? 'ArrowRight' : 'ArrowLeft') ||
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.nativeEvent.isComposing ||
+          (event.target as HTMLElement).closest('[role="menu"]') !== event.currentTarget
+        )
+          return
+        event.preventDefault()
+        event.stopPropagation()
+        menu.setOpen(false)
+        menu.trigger.current?.focus({ preventScroll: true })
       })}
     />
   )

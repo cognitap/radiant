@@ -1,4 +1,26 @@
 export {
+  MenuGroup,
+  MenuLabel,
+  MenuSeparator,
+  MenuCheckboxItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSub,
+  MenuSubTrigger,
+  MenuSubContent
+} from './Menu.js'
+export type {
+  MenuGroupProps,
+  MenuLabelProps,
+  MenuSeparatorProps,
+  MenuCheckboxItemProps,
+  MenuRadioGroupProps,
+  MenuRadioItemProps,
+  MenuSubProps,
+  MenuSubTriggerProps,
+  MenuSubContentProps
+} from './Menu.js'
+export {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
