@@ -1,12 +1,42 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import {
-  CheckboxPermissionsExample,
-  CheckboxStatePlayground
-} from '../.storybook/examples/CheckboxExamples.js'
+import { CheckboxPermissionsExample } from '../.storybook/examples/CheckboxExamples.js'
 import { themes } from './examples/index.js'
-import { MotionProvider } from './motion/react.js'
 import { Button, Checkbox, Field, type ThemeStyle } from './index.js'
+
+const channels = ['Email', 'SMS', 'Push']
+
+function SelectAll() {
+  const [selected, setSelected] = useState(['Email'])
+  const all = selected.length === channels.length
+  return (
+    <div style={{ display: 'grid', gap: '0.75rem' }}>
+      <Checkbox
+        label="All channels"
+        checked={all}
+        indeterminate={selected.length > 0 && !all}
+        onChange={event => setSelected(event.target.checked ? channels : [])}
+      />
+      <div style={{ display: 'grid', gap: '0.75rem', paddingInlineStart: '1.75rem' }}>
+        {channels.map(channel => (
+          <Checkbox
+            key={channel}
+            label={channel}
+            checked={selected.includes(channel)}
+            onChange={event =>
+              setSelected(values =>
+                event.target.checked
+                  ? [...values, channel]
+                  : values.filter(value => value !== channel)
+              )
+            }
+          />
+        ))}
+      </div>
+      <output>{selected.length > 0 ? selected.join(', ') : 'None selected'}</output>
+    </div>
+  )
+}
 
 function NativeForm() {
   const [summary, setSummary] = useState('No changes saved.')
@@ -67,7 +97,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native checkbox: choose defaultChecked or checked/onChange and keep one owner per mount. indeterminate is a visual DOM state, not a third submitted value. controlSize selects shared indicator/label metrics. className/style/native props/ref target the input (data-slot="checkbox"). parts.wrapper, parts.label and parts.indicator style the surrounding label or control span, label text and decorative marks. Field may supply the name and protected required/error relationships instead.'
+          'A native checkbox: choose defaultChecked or checked/onChange and keep one owner per mount. indeterminate is a visual DOM state, not a third submitted value. controlSize selects shared indicator/label metrics. className/style/native props/ref target the input (data-slot="checkbox"). parts.wrapper, parts.label and parts.indicator style the surrounding label or control span, label text and decorative marks. Field may supply the name and protected required/error relationships instead. There is no readOnly prop; native checkboxes ignore it.'
       }
     }
   }
@@ -115,7 +145,38 @@ export const States: Story = {
   )
 }
 
-export const Composition: Story = {
+export const WithField: Story = {
+  render: () => (
+    <Field
+      label="Accept the terms"
+      description="You can withdraw consent at any time."
+      required
+      error="Accept the terms to continue."
+    >
+      <Checkbox
+        name="terms"
+        value="accepted"
+      />
+    </Field>
+  )
+}
+
+export const ControlledStory: Story = {
+  name: 'Controlled',
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        story:
+          'A select-all parent derives checked and indeterminate from its children. The mixed state needs a controlled owner because it is not a submitted value.'
+      }
+    }
+  },
+  render: () => <SelectAll />
+}
+
+export const FormSubmission: Story = {
+  parameters: { controls: { disable: true } },
   render: () => <NativeForm />
 }
 
@@ -184,11 +245,18 @@ export const Permissions: Story = {
   )
 }
 
-export const IndicatorPlayground: Story = {
+export const SharedControlSizes: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
-    <MotionProvider>
-      <CheckboxStatePlayground />
-    </MotionProvider>
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <Checkbox
+          key={controlSize}
+          label={`${controlSize} size`}
+          controlSize={controlSize}
+          defaultChecked
+        />
+      ))}
+    </div>
   )
 }

@@ -643,6 +643,9 @@ createElement(Checkbox, checkboxProps)
 // @ts-expect-error Checkbox type is fixed.
 const invalidCheckbox: CheckboxProps = { type: 'radio' }
 createElement(Checkbox, invalidCheckbox)
+// @ts-expect-error Native checkbox inputs do not implement readOnly.
+const readonlyCheckbox: CheckboxProps = { readOnly: true }
+createElement(Checkbox, readonlyCheckbox)
 
 const radioGroupProps: RadioGroupProps = {
   label: 'Plan',
@@ -724,6 +727,10 @@ void [
 // @ts-expect-error Radio type is fixed.
 const invalidRadio: RadioProps = { type: 'checkbox', value: 'pro' }
 createElement(Radio, invalidRadio)
+// @ts-expect-error Native radio inputs do not implement readOnly.
+const readonlyRadio: RadioProps = { value: 'pro', readOnly: true }
+createElement(Radio, readonlyRadio)
+createElement(RadioGroup, { label: 'Plan' }, createElement(Radio, { label: 'Pro', value: 'pro' }))
 
 const dialogProps: DialogProps = {
   open: true,

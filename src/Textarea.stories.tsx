@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Field, Textarea } from './index.js'
 import {
+  TextareaAutoGrowExample,
   TextareaDraftExample,
   TextareaSizeComparison
 } from '../.storybook/examples/TextareaExamples.js'
@@ -24,7 +25,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native textarea with value/onChange or defaultValue and one owner per mount. Field supplies label, help, error, disabled and required relationships. rows and cols retain native meanings; controlSize sets shared typography and padding. Vertical resizing is enabled by default. className, style and ref target the textarea; use resize-none, resize or native styles to change resizing. Textarea overrides fall back to shared tokens independently of Input.'
+          'A native textarea with value/onChange or defaultValue and one owner per mount. Field supplies label, help, error, disabled and required relationships. rows and cols retain native meanings; controlSize sets shared typography and padding. Vertical resizing is enabled by default; add field-sizing-content to grow with content. className, style and ref target the textarea; use resize-none, resize or native styles to change resizing. Textarea overrides fall back to shared tokens independently of Input.'
       }
     }
   }
@@ -47,6 +48,14 @@ export const WithField: Story = {
       />
     </Field>
   )
+}
+export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <TextareaDraftExample />
+}
+export const AutoGrow: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <TextareaAutoGrowExample />
 }
 export const States: Story = {
   render: args => {
@@ -85,6 +94,10 @@ export const States: Story = {
     )
   }
 }
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <TextareaSizeComparison />
+}
 export const Customisation: Story = {
   render: args => (
     <Textarea
@@ -94,12 +107,4 @@ export const Customisation: Story = {
       style={{ '--rad-textarea-radius': '1.25rem', '--rad-textarea-padding-block': '1rem' }}
     />
   )
-}
-export const SharedControlSizes: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <TextareaSizeComparison />
-}
-export const WorkspaceIntroduction: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <TextareaDraftExample />
 }

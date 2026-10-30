@@ -174,9 +174,15 @@ export function Field(props: FieldProps) {
   const generatedId = useId()
   const controlId = rest.controlId ?? generatedId
   const labelId = `${generatedId}-label`
-  const invalid = hasContent(error)
+  const hasError = hasContent(error)
+  const invalid =
+    hasError ||
+    (layout === 'control' &&
+      ariaInvalid != null &&
+      ariaInvalid !== false &&
+      ariaInvalid !== 'false')
   const descriptionId = hasContent(description) ? `${generatedId}-description` : undefined
-  const errorId = invalid ? `${generatedId}-error` : undefined
+  const errorId = hasError ? `${generatedId}-error` : undefined
   const describedBy = joinIds(descriptionId, errorId)
   const controlProps = definedProps({
     id: controlId,
@@ -184,7 +190,7 @@ export function Field(props: FieldProps) {
     disabled: disabled || undefined,
     'aria-invalid': invalid || undefined,
     'aria-required': required || undefined,
-    'aria-describedby': describedBy
+    'aria-describedby': joinIds(describedBy, ariaDescribedBy)
   })
   const state: FieldState = {
     layout,
@@ -215,9 +221,8 @@ export function Field(props: FieldProps) {
     </span>
   )
   const rootProps = {
-    'aria-describedby':
-      layout === 'group' ? joinIds(describedBy, ariaDescribedBy) : ariaDescribedBy,
-    'aria-invalid': layout === 'group' && invalid ? true : ariaInvalid,
+    'aria-describedby': layout === 'group' ? joinIds(describedBy, ariaDescribedBy) : undefined,
+    'aria-invalid': layout === 'group' ? (invalid ? true : ariaInvalid) : undefined,
     className: cn(fieldVariants({ layout }), className),
     'data-disabled': disabled ? '' : undefined,
     'data-invalid': invalid ? '' : undefined,
