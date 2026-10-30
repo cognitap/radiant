@@ -73,12 +73,26 @@ export function InputGroup({
 }
 
 export type InputGroupInputProps = InputProps
-export function InputGroupInput({ className, controlSize, ...props }: InputGroupInputProps) {
+export function InputGroupInput(props: InputGroupInputProps) {
+  return (
+    <InputGroupInputRoot
+      {...props}
+      family={undefined}
+    />
+  )
+}
+/** Private composition seam retaining the real grouped Input host and identities. */
+export function InputGroupInputRoot({
+  family,
+  className,
+  controlSize,
+  ...props
+}: InputGroupInputProps & { family?: 'password-input' }) {
   const size = useInputGroup()
   return (
     <InputRoot
       {...props}
-      family="input-group-input"
+      family={family ?? 'input-group-input'}
       controlSize={controlSize ?? size}
       className={cn(
         'flex-1 rounded-none px-0 [border-width:0] [box-shadow:none] bg-transparent disabled:[background:transparent] focus-visible:[outline-width:0]',

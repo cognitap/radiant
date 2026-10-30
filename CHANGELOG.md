@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add PasswordInput.
+
 ## 0.0.48
 
 - Add Meter.
