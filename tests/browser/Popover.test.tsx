@@ -287,6 +287,24 @@ test('the delivery-time example hydrates, saves local form data and restores its
   expect(shown(p.panel)).toBe(false)
   expect(document.activeElement).toBe(p.trigger)
 })
+
+test('PopoverTrigger ignores toggle props and stays a disclosure', async () => {
+  const onPressedChange = vi.fn()
+  const { host } = await mount(
+    <Fixture
+      trigger={
+        { defaultPressed: true, 'aria-pressed': 'true', onPressedChange } as PopoverTriggerProps
+      }
+    />
+  )
+  const p = parts(host)
+  expect(p.trigger.hasAttribute('aria-pressed')).toBe(false)
+  await click(p.trigger)
+  expect(p.trigger.getAttribute('aria-expanded')).toBe('true')
+  expect(p.trigger.hasAttribute('aria-pressed')).toBe(false)
+  expect(shown(p.panel)).toBe(true)
+  expect(onPressedChange).not.toHaveBeenCalled()
+})
 const click = (node: HTMLElement) => act(async () => userEvent.click(node))
 const key = (keys: string) => act(async () => userEvent.keyboard(keys))
 const shown = (node: HTMLElement) => node.matches(':popover-open')

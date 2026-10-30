@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { PopoverExample, DeliveryTimePopover } from '../.storybook/examples/PopoverExamples.js'
+import {
+  PopoverExample,
+  DeliveryTimePopover,
+  PinnablePopover
+} from '../.storybook/examples/PopoverExamples.js'
 import {
   Popover,
   PopoverTrigger,
@@ -16,10 +20,11 @@ import {
 const meta = {
   title: 'Components/Popover',
   component: PopoverExample,
-  args: { side: 'bottom', align: 'start', sideOffset: 8 },
+  args: { side: 'bottom', align: 'start', sideOffset: 8, collisionPadding: 8, motion: 'inherit' },
   argTypes: {
     side: { control: 'inline-radio', options: ['top', 'right', 'bottom', 'left'] },
-    align: { control: 'inline-radio', options: ['start', 'center', 'end'] }
+    align: { control: 'inline-radio', options: ['start', 'center', 'end'] },
+    motion: { control: 'inline-radio', options: ['inherit', 'off'] }
   },
   parameters: {
     docs: {
@@ -41,25 +46,19 @@ export const Default: Story = {
     />
   )
 }
-export const Customisation: Story = {
-  args: {
-    side: 'right',
-    align: 'center',
-    className: 'font-medium',
-    style: {
-      '--rad-popover-width': '18rem',
-      '--rad-popover-radius': '1.5rem',
-      '--rad-popover-padding': '1rem'
-    }
-  },
+export const EditingAValue: Story = { render: () => <DeliveryTimePopover /> }
+export const Controlled: Story = { render: () => <PinnablePopover /> }
+export const Placement: Story = {
+  args: { side: 'top', align: 'center', sideOffset: 12 },
   render: (args, { viewMode }) => (
-    <PopoverExample
-      {...args}
-      defaultOpen={viewMode !== 'docs'}
-    />
+    <div className="grid min-h-80 place-items-center">
+      <PopoverExample
+        {...args}
+        defaultOpen={viewMode !== 'docs'}
+      />
+    </div>
   )
 }
-export const InteractiveContent: Story = { render: () => <DeliveryTimePopover /> }
 export const Nested: Story = {
   render: (_, { viewMode }) => (
     <Popover defaultOpen={viewMode !== 'docs'}>
@@ -95,5 +94,21 @@ export const InsideDialog: Story = {
         <DialogClose>Done</DialogClose>
       </DialogContent>
     </Dialog>
+  )
+}
+export const Customisation: Story = {
+  args: {
+    className: 'font-medium',
+    style: {
+      '--rad-popover-width': '18rem',
+      '--rad-popover-radius': '1.5rem',
+      '--rad-popover-padding': '1rem'
+    }
+  },
+  render: (args, { viewMode }) => (
+    <PopoverExample
+      {...args}
+      defaultOpen={viewMode !== 'docs'}
+    />
   )
 }

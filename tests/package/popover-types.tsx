@@ -71,6 +71,21 @@ const id: PopoverContentProps = { id: 'other' }
 const wrongRef: PopoverContentProps = { ref: createRef<HTMLDialogElement>() }
 // @ts-expect-error Button render must return one element.
 const invalidRender: PopoverTriggerProps = { render: () => 'text' }
+// @ts-expect-error A disclosure trigger is not a toggle.
+const toggle: PopoverTriggerProps = { defaultPressed: true }
+// @ts-expect-error A disclosure trigger owns aria-expanded, not aria-pressed.
+const ariaPressed: PopoverTriggerProps = { 'aria-pressed': true }
 // @ts-expect-error Popover overrides are closed.
 defineTheme({ id: 'bad', name: 'Bad', components: { popover: { arrowSize: '1rem' } } })
-void [mixed, styled, modal, invalidSide, nativePolicy, id, wrongRef, invalidRender]
+void [
+  mixed,
+  styled,
+  modal,
+  invalidSide,
+  nativePolicy,
+  id,
+  wrongRef,
+  invalidRender,
+  toggle,
+  ariaPressed
+]
