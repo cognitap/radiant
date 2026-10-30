@@ -6,10 +6,22 @@ import { userEvent, commands } from 'vitest/browser'
 import '../../.storybook/styles.css'
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
 const mounted: { host: HTMLDivElement; root: Root }[] = []
-export async function mount(tree: ReactNode, hydrate = false) {
+export async function mount(
+  tree: ReactNode,
+  hydrate = false,
+  beforeHydrate?: (host: HTMLDivElement) => void | Promise<void>
+) {
   const host = document.createElement('div')
   document.body.append(host)
-  if (hydrate) host.innerHTML = renderToString(tree)
+  if (hydrate) {
+    host.innerHTML = renderToString(tree)
+    try {
+      await beforeHydrate?.(host)
+    } catch (error) {
+      host.remove()
+      throw error
+    }
+  }
   const errors: unknown[] = []
   let root!: Root
   await act(async () => {

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Avatar.
+
 ## 0.0.24
 
 - Add Badge.
@@ -80,7 +82,7 @@
 
 - Align Card root minimum-width styling with its compound parts in narrow layouts.
 
-- Let Accordion roots shrink inside narrow grid and flex layouts, matching their Collapsible items.
+- Let Accordion roots shrink in narrow grid/flex layouts like Collapsible.
 
 - Keep disclosure resize observation and inert cleanup current, preserve the native pre-hydration fallback, and honor motion off for height and markers.
 
@@ -90,7 +92,7 @@
 
 - Release MotionLink springs on lost pointer capture or removed destinations while preserving native anchor navigation.
 
-- Keep Button presses tied to their active input, cancel unavailable motion cleanly, and honor theme motion off for CSS lift and shift.
+- Keep Button presses tied to active input; cancel unavailable motion and honor theme-off lift and shift.
 
 ## 0.0.6
 

@@ -464,6 +464,17 @@ export const componentRegistry = {
     paddingBlock: 'css',
     fontSize: 'css'
   },
+  avatar: {
+    size: 'css',
+    sizeSmall: 'css',
+    sizeLarge: 'css',
+    radius: 'css',
+    background: 'css',
+    color: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    fontSize: 'css'
+  },
   radioGroup: { gap: 'css' }
 } as const
 
