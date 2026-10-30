@@ -4,9 +4,11 @@
 
 ## Unreleased
 
+- Add ButtonGroup.
+
 ## 0.0.42
 
-- Fix OTPField selection collapse.
+- Fix OTPField selection.
 
 ## 0.0.41
 
@@ -239,7 +241,7 @@
 
 ## 0.0.2
 
-- Documentation and tooling cleanup. No API change.
+- Tooling/documentation cleanup; no API change.
 
 ## 0.0.1
 

@@ -2,6 +2,7 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  buttonGroup: { radius: 'css' },
   otpField: { gap: 'css', slotSize: 'css' },
   tag: { gap: 'css' },
   multiSelect: { gap: 'css' },
