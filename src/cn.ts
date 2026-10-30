@@ -35,6 +35,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-kbd-font-size)',
         'text-(--rad-table-font-size)',
         'text-(--rad-breadcrumb-font-size)',
         'text-(--rad-avatar-font-size)',
@@ -91,6 +92,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-kbd-gap)',
         'gap-(--rad-otp-field-gap)',
         'gap-(--rad-tag-gap)',
         'gap-(--rad-multi-select-gap)',
@@ -111,11 +113,13 @@ export const cn: CnFunction = createCn({
       ],
       'min-h': ['min-h-(--rad-textarea-min-height)', 'min-h-(--rad-tabs-trigger-height)'],
       py: [
+        'py-(--rad-kbd-padding-block)',
         'py-(--rad-table-padding-block)',
         'py-(--rad-textarea-padding-block)',
         'py-(--rad-badge-padding-block)'
       ],
       px: [
+        'px-(--rad-kbd-padding-inline)',
         'px-(--rad-table-padding-inline)',
         'px-(--rad-badge-padding-inline)',
         'px-(--rad-combobox-padding)',
@@ -139,6 +143,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-kbd-radius)',
         'rounded-(--rad-button-group-radius)',
         'rounded-(--rad-menubar-radius)',
         'rounded-(--rad-toolbar-radius)',
@@ -204,6 +209,8 @@ export const cn: CnFunction = createCn({
         'border-(--rad-switch-border-style)'
       ],
       shadow: [
+        'shadow-(--_rad-kbd-shadow)',
+        'shadow-(--rad-kbd-shadow)',
         'shadow-(--rad-toggle-group-indicator-shadow)',
         'shadow-(--rad-toast-shadow)',
         'shadow-(--rad-alert-shadow)',
