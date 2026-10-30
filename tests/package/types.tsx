@@ -1076,3 +1076,5 @@ import './slider-types.js'
 import './tabs-types.js'
 
 import './combobox-types.js'
+
+import './aspect-ratio-types.js'
