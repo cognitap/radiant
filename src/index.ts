@@ -594,3 +594,22 @@ export {
   type NavLinkGroupTriggerProps,
   type NavLinkGroupContentProps
 } from './NavLink.js'
+export {
+  Autocomplete,
+  AutocompleteInput,
+  AutocompleteTrigger,
+  AutocompleteClear,
+  AutocompletePortal,
+  AutocompleteContent,
+  AutocompleteItem,
+  AutocompleteStatus,
+  type AutocompleteProps,
+  type AutocompleteOption,
+  type AutocompleteInputProps,
+  type AutocompleteTriggerProps,
+  type AutocompleteClearProps,
+  type AutocompletePortalProps,
+  type AutocompleteContentProps,
+  type AutocompleteItemProps,
+  type AutocompleteStatusProps
+} from './Autocomplete.js'

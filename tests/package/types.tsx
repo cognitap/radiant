@@ -1105,3 +1105,4 @@ import './meter-types.js'
 
 import './password-input-types.js'
 import './nav-link-types.js'
+import './autocomplete-types.js'

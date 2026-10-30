@@ -21,6 +21,7 @@ import { useArrayFormBridge } from './react/useArrayFormBridge.js'
 import { useField, useFieldControl } from './Field.js'
 import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
 import { controlMetrics } from './controlStyles.js'
 import {
   comboboxInputClass,
@@ -92,6 +93,7 @@ export type ComboboxMultipleState = Omit<ComboboxState, 'value' | 'setValue'> & 
 type Context = Omit<ComboboxState, 'value' | 'setValue'> & {
   value: Selection
   multiple: boolean
+  textInput?: { name?: string; form?: string }
   readOnly: boolean
   setValue(value: Selection): void
   selected: readonly ComboboxOption[]
@@ -132,6 +134,23 @@ function useComboboxContext() {
   if (!context) throw new Error('Combobox parts must render inside Combobox.')
   return context
 }
+/** Private text-mode seam; public families keep their own value contract. */
+export function useAutocompleteParts() {
+  const box = useContext(ComboboxContext)
+  if (!box?.textInput) throw new Error('Autocomplete parts must render inside Autocomplete.')
+}
+function componentSlot(multiple: boolean, textMode: boolean, name: string) {
+  return (
+    joinIds(
+      name,
+      multiple
+        ? name.replaceAll('combobox-', 'multi-select-')
+        : textMode
+          ? name.replaceAll('combobox-', 'autocomplete-')
+          : undefined
+    ) ?? name
+  )
+}
 const textOf = (item?: ComboboxOption) =>
   item?.textValue ?? (typeof item?.label === 'string' ? item.label : '')
 const localFilter = (item: ComboboxOption, query: string) =>
@@ -139,8 +158,18 @@ const localFilter = (item: ComboboxOption, query: string) =>
 
 /** Editable search and committed selection have independent owners; results never select themselves. */
 export function Combobox(props: ComboboxProps) {
+  return (
+    <ComboboxRoot
+      {...props}
+      textInput={undefined}
+    />
+  )
+}
+/** Private composition entry. Text mode edits the actual input instead of a selection carrier. */
+export function ComboboxRoot(props: ComboboxProps & { textInput?: { reset: () => void } }) {
   const {
     items,
+    textInput,
     value,
     defaultValue,
     selectedItem,
@@ -165,6 +194,8 @@ export function Combobox(props: ComboboxProps) {
     controlSize = 'medium',
     children
   } = props
+  const textMode = !!textInput
+  if (textMode && multiple) throw new TypeError('Autocomplete is a single text input.')
   const [initialMultiple] = useState(multiple)
   if (multiple !== initialMultiple)
     throw new TypeError('Combobox cannot change multiple mode. Remount with a new key.')
@@ -247,15 +278,17 @@ export function Combobox(props: ComboboxProps) {
   const enabled = visible.filter(item => !item.disabled)
   const activeValue = enabled.some(item => item.value === active) ? active : null
   if (active !== null && activeValue === null) highlight(null)
-  const text = multiple
+  const text = textMode
     ? search.value
-    : isOpen && (searching || search.value !== '')
+    : multiple
       ? search.value
-      : selected
-        ? textOf(selected)
-        : typeof selection.value === 'string'
-          ? selection.value
-          : ''
+      : isOpen && (searching || search.value !== '')
+        ? search.value
+        : selected
+          ? textOf(selected)
+          : typeof selection.value === 'string'
+            ? selection.value
+            : ''
   const setOpen = (next: boolean) => {
     if (next && unavailable()) return
     expansion.request(next)
@@ -265,7 +298,7 @@ export function Combobox(props: ComboboxProps) {
     expansion.request(false)
     highlight(null)
     setSearching(false)
-    search.request('')
+    if (!textMode) search.request('')
   }
   const setQuery = (next: string) => {
     if (unavailable()) return
@@ -296,6 +329,23 @@ export function Combobox(props: ComboboxProps) {
   }
   const commit = (next: string | null) => {
     if (unavailable() || (next !== null && !enabled.some(item => item.value === next))) return
+    if (textMode) {
+      const completion = next ?? ''
+      if (input && input.value !== completion) {
+        const view = input.ownerDocument.defaultView
+        if (view) {
+          const setter = Object.getOwnPropertyDescriptor(
+            view.HTMLInputElement.prototype,
+            'value'
+          )!.set!
+          setter.call(input, completion)
+          input.dispatchEvent(new view.Event('input', { bubbles: true }))
+        }
+      }
+      dismiss()
+      input?.focus({ preventScroll: true })
+      return
+    }
     const item = enabled.find(item => item.value === next)
     if (item) setRetained(previous => new Map(previous).set(item.value, item))
     if (multiple) {
@@ -311,12 +361,12 @@ export function Combobox(props: ComboboxProps) {
     input?.focus({ preventScroll: true })
   }
   const nativeValue = typeof selection.value === 'string' ? selection.value : ''
-  const latest = useRef({ selection, search, nativeValue, expansion })
+  const latest = useRef({ selection, search, nativeValue, expansion, textReset: textInput?.reset })
   useLayoutEffect(() => {
-    latest.current = { selection, search, nativeValue, expansion }
+    latest.current = { selection, search, nativeValue, expansion, textReset: textInput?.reset }
   })
   useLayoutEffect(() => {
-    if (multiple) return
+    if (multiple || textMode) return
     const node = bridge.current
     if (!node) return
     const changedByUser = pending.current && Object.is(pending.current.value, selection.value)
@@ -338,7 +388,7 @@ export function Combobox(props: ComboboxProps) {
     }
   })
   useEffect(() => {
-    if (multiple) return
+    if (multiple || textMode) return
     const node = bridge.current
     const owner = node?.form
     if (!node || !owner) return
@@ -361,7 +411,29 @@ export function Combobox(props: ComboboxProps) {
       owner.removeEventListener('reset', reset)
       win.clearTimeout(timer)
     }
-  }, [input, form, multiple])
+  }, [input, form, multiple, textMode])
+  useEffect(() => {
+    if (!textMode || !input) return
+    const view = input.ownerDocument.defaultView
+    if (!view) return
+    const roots = new Set([input.ownerDocument, input.getRootNode()])
+    let timer: number | undefined
+    const reset = (event: Event) => {
+      if (event.target !== input.form) return
+      view.clearTimeout(timer)
+      timer = view.setTimeout(() => {
+        if (event.defaultPrevented || !input.isConnected) return
+        latest.current.textReset?.()
+        highlight(null)
+        latest.current.expansion.request(false)
+      }, 0)
+    }
+    for (const root of roots) root.addEventListener('reset', reset, true)
+    return () => {
+      for (const root of roots) root.removeEventListener('reset', reset, true)
+      view.clearTimeout(timer)
+    }
+  }, [input, textMode])
   useLayoutEffect(() => {
     if (!isOpen || activeValue === null) return
     const option = content.current?.ownerDocument.getElementById(
@@ -385,6 +457,7 @@ export function Combobox(props: ComboboxProps) {
   })
   const context: Context = {
     multiple,
+    textInput: textMode ? { name, form } : undefined,
     readOnly,
     selected: selectedEntries,
     remove(value) {
@@ -442,7 +515,7 @@ export function Combobox(props: ComboboxProps) {
           {multiple && <ComboboxTags />}
           <div
             className="relative w-full min-w-0"
-            data-slot={multiple ? 'combobox-control multi-select-control' : 'combobox-control'}
+            data-slot={componentSlot(multiple, textMode, 'combobox-control')}
           >
             <ComboboxInput />
             <ComboboxTrigger className="absolute inset-y-0 end-0 w-12" />
@@ -452,7 +525,7 @@ export function Combobox(props: ComboboxProps) {
           </ComboboxPortal>
         </>
       )}
-      {multiple ? (
+      {textMode ? null : multiple ? (
         <>
           <input
             ref={arrayBridgeRef}
@@ -550,7 +623,9 @@ export function ComboboxInput({
       ref={inputRef}
       type="text"
       role="combobox"
-      required={false}
+      name={box.textInput?.name}
+      form={box.textInput?.form}
+      required={box.textInput ? control.required : false}
       readOnly={box.readOnly || props.readOnly}
       autoComplete={props.autoComplete ?? 'off'}
       value={box.text}
@@ -559,7 +634,7 @@ export function ComboboxInput({
         controlMetrics({ controlSize: box.controlSize }),
         className
       )}
-      data-slot={box.multiple ? 'combobox-input multi-select-input' : 'combobox-input'}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-input')}
       data-control-size={box.controlSize}
       aria-autocomplete="list"
       aria-expanded={box.open}
@@ -602,7 +677,13 @@ export function ComboboxInput({
           box.remove(box.value.at(-1)!)
           return
         }
-        if (!box.multiple && event.key === 'Escape' && !box.open && box.value !== null) {
+        if (
+          !box.textInput &&
+          !box.multiple &&
+          event.key === 'Escape' &&
+          !box.open &&
+          box.value !== null
+        ) {
           event.preventDefault()
           box.commit(null)
           return
@@ -610,6 +691,10 @@ export function ComboboxInput({
         if (event.key === 'Escape' && box.open) {
           event.preventDefault()
           event.stopPropagation()
+          box.dismiss()
+          return
+        }
+        if (box.textInput && event.key === 'Enter' && box.open && box.active === null) {
           box.dismiss()
           return
         }
@@ -692,12 +777,10 @@ export function ComboboxTrigger({
         return render ? render(native) : <button {...native} />
       }}
       tabIndex={-1}
-      aria-label={props['aria-label'] ?? 'Show options'}
+      aria-label={props['aria-label'] ?? (box.textInput ? 'Show suggestions' : 'Show options')}
       aria-controls={box.open ? box.listId : undefined}
       aria-expanded={box.open}
-      data-slot={
-        box.multiple ? 'button combobox-trigger multi-select-trigger' : 'button combobox-trigger'
-      }
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'button combobox-trigger')}
       onPointerDown={event => {
         onPointerDown?.(event)
         if (!event.defaultPrevented) event.preventDefault()
@@ -739,7 +822,12 @@ export function ComboboxClear({
   ...props
 }: ComboboxClearProps) {
   const box = useComboboxContext()
-  if (box.value === null || (Array.isArray(box.value) && !box.value.length)) return null
+  if (
+    box.textInput
+      ? box.query === ''
+      : box.value === null || (Array.isArray(box.value) && !box.value.length)
+  )
+    return null
   return (
     <Button
       variant="ghost"
@@ -755,10 +843,8 @@ export function ComboboxClear({
         return render ? render(native) : <button {...native} />
       }}
       tabIndex={box.multiple ? 0 : -1}
-      aria-label={props['aria-label'] ?? 'Clear selection'}
-      data-slot={
-        box.multiple ? 'button combobox-clear multi-select-clear' : 'button combobox-clear'
-      }
+      aria-label={props['aria-label'] ?? (box.textInput ? 'Clear text' : 'Clear selection')}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'button combobox-clear')}
       onPointerDown={event => {
         onPointerDown?.(event)
         if (!event.defaultPrevented) event.preventDefault()
@@ -821,7 +907,7 @@ export function ComboboxContent({
       {...props}
       ref={transitionRef}
       popover="manual"
-      data-slot={box.multiple ? 'combobox-content multi-select-content' : 'combobox-content'}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-content')}
       data-motion={motion}
       data-state={box.open ? 'open' : 'closed'}
       className={cn(
@@ -840,7 +926,7 @@ export function ComboboxContent({
         aria-label={props['aria-label'] ?? box.input?.getAttribute('aria-label') ?? 'Suggestions'}
         aria-labelledby={props['aria-label'] ? undefined : box.input?.labels?.[0]?.id}
         aria-busy={box.loading || undefined}
-        data-slot={box.multiple ? 'combobox-listbox multi-select-listbox' : 'combobox-listbox'}
+        data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-listbox')}
         className="max-h-[calc(var(--_rad-combobox-max-height,100dvh)-0.5rem)] overflow-y-auto overscroll-contain"
       >
         {children ??
@@ -880,7 +966,7 @@ export function ComboboxItem({
       onKeyDown={props.onKeyDown}
       aria-selected={box.multiple ? isItemOpen(box.value, value) : box.active === value}
       aria-disabled={item.disabled || undefined}
-      data-slot={box.multiple ? 'combobox-item multi-select-item' : 'combobox-item'}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-item')}
       data-value={value}
       data-highlighted={box.active === value ? '' : undefined}
       data-selected={isItemOpen(box.value, value) ? '' : undefined}
@@ -925,7 +1011,7 @@ export function ComboboxStatus({ children, className, ...props }: ComboboxStatus
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      data-slot={box.multiple ? 'combobox-status multi-select-status' : 'combobox-status'}
+      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-status')}
       className={cn('px-3 py-2 empty:hidden', className)}
     >
       {box.open ? (children ?? box.status) : null}
