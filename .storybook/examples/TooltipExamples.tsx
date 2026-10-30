@@ -8,7 +8,6 @@ import {
   type TooltipProps,
   type TooltipContentProps
 } from '../../src/index.js'
-import { MotionProvider } from '../../src/motion/react.js'
 
 export type TooltipExampleProps = Pick<TooltipProps, 'openDelay' | 'closeDelay'> &
   Pick<
@@ -23,18 +22,16 @@ export function TooltipExample({
   ...content
 }: TooltipExampleProps) {
   return (
-    <MotionProvider>
-      <Tooltip
-        defaultOpen={defaultOpen}
-        openDelay={openDelay}
-        closeDelay={closeDelay}
-      >
-        <TooltipTrigger variant="outline">Export report</TooltipTrigger>
-        <TooltipPortal>
-          <TooltipContent {...content}>Download the report as a CSV file.</TooltipContent>
-        </TooltipPortal>
-      </Tooltip>
-    </MotionProvider>
+    <Tooltip
+      defaultOpen={defaultOpen}
+      openDelay={openDelay}
+      closeDelay={closeDelay}
+    >
+      <TooltipTrigger variant="outline">Export report</TooltipTrigger>
+      <TooltipPortal>
+        <TooltipContent {...content}>Download the report as a CSV file.</TooltipContent>
+      </TooltipPortal>
+    </Tooltip>
   )
 }
 

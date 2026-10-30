@@ -15,8 +15,7 @@ const meta = {
     side: 'top',
     align: 'center',
     sideOffset: 8,
-    collisionPadding: 8,
-    motion: 'inherit'
+    collisionPadding: 8
   },
   argTypes: {
     openDelay: { control: { type: 'number', min: 0 } },
@@ -24,8 +23,7 @@ const meta = {
     side: { control: 'inline-radio', options: ['top', 'right', 'bottom', 'left'] },
     align: { control: 'inline-radio', options: ['start', 'center', 'end'] },
     sideOffset: { control: { type: 'number', min: 0 } },
-    collisionPadding: { control: { type: 'number', min: 0 } },
-    motion: { control: 'inline-radio', options: ['inherit', 'off'] }
+    collisionPadding: { control: { type: 'number', min: 0 } }
   },
   render: (args, { viewMode }) => (
     <TooltipExample
