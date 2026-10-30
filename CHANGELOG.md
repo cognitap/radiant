@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Kbd.
+
 ## 0.0.43
 
 - Add ButtonGroup.
