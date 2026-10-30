@@ -1,3 +1,4 @@
+import './fieldset-types.js'
 import './table-types.js'
 import './pagination-types.js'
 import './breadcrumb-types.js'

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Fieldset.
+
 ## 0.0.28
 
 - Add Table.
