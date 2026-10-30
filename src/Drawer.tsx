@@ -63,6 +63,8 @@ export type DrawerHandleProps = Omit<
   | 'aria-label'
   | 'aria-labelledby'
   | 'aria-pressed'
+  | 'type'
+  | 'motion'
 > & {
   'aria-label': string
 }
