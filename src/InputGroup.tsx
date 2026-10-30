@@ -42,12 +42,10 @@ export function InputGroup({
           if (!view || !(event.target instanceof view.Element)) return
           const addon = event.target.closest('[data-slot~="input-group-addon"]')
           if (!addon || addon.closest('[data-slot~="input-group"]') !== event.currentTarget) return
-          if (
-            event.target.closest(
-              'button,a[href],input,textarea,select,summary,label,iframe,audio[controls],video[controls],[tabindex],[contenteditable]:not([contenteditable="false"])'
-            )
+          const interactive = event.target.closest(
+            'button,a[href],input,textarea,select,summary,label,iframe,audio[controls],video[controls],[tabindex],[contenteditable]:not([contenteditable="false"])'
           )
-            return
+          if (interactive && addon.contains(interactive)) return
           const control = event.currentTarget.querySelector<HTMLInputElement | HTMLTextAreaElement>(
             ':scope > [data-slot~="input-group-input"],:scope > [data-slot~="input-group-textarea"]'
           )
