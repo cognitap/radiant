@@ -8,12 +8,13 @@ const layers = new WeakMap<Document, HTMLElement[]>()
 
 export function usePopoverSurface<Node extends HTMLElement>(
   nodeRef: RefObject<Node | null>,
-  trigger: HTMLButtonElement | null,
+  trigger: HTMLElement | null,
   open: boolean,
   close: (restore: boolean) => void,
   restoreFocus: RefObject<boolean>,
   options: {
     initialFocusRef?: RefObject<HTMLElement | null>
+    onFocusOutside?: () => void
     side: PopoverSide
     align: PopoverAlign
     sideOffset: number
@@ -136,7 +137,11 @@ export function usePopoverSurface<Node extends HTMLElement>(
         return
       if (event.type === 'focusin' && pointerDismissed) return
       if (event.type === 'pointerdown') pointerDismissed = !inside(event.target)
-      if (!inside(event.target)) latest.current.close(false)
+      if (!inside(event.target)) {
+        if (event.type === 'focusin' && latest.current.onFocusOutside)
+          latest.current.onFocusOutside()
+        else latest.current.close(false)
+      }
     }
     const escape = (event: KeyboardEvent) => {
       if (
@@ -171,6 +176,15 @@ export function usePopoverSurface<Node extends HTMLElement>(
     observer.observe(trigger)
     observer.observe(node)
     mutations.observe(node, { childList: true, subtree: true, characterData: true })
+    // Inline anchors do not report text-size changes through ResizeObserver.
+    mutations.observe(trigger, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'dir']
+    })
+
     node.addEventListener('toggle', toggle)
     doc.addEventListener('pointerdown', outside, true)
     doc.addEventListener('pointerup', pointerEnd, true)
