@@ -39,6 +39,8 @@ Where things go:
 - Component props and behavior: that component's page on the docs site
   (cognitap/radiant-docs), not this repo.
 - Design decisions and cross-family rules: `docs/architecture.md`.
+- Prop names, state attributes, story names and page headings every family
+  shares: `docs/conventions.md`. Follow it when adding or tidying a family.
 - Themes and tokens: `docs/theming.md`. Motion: `docs/motion.md`.
 - Setup and commands: `CONTRIBUTING.md` and `docs/testing.md`.
 - `README.md` stays a short introduction.

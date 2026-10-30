@@ -116,3 +116,20 @@ export function TextareaSizeComparison() {
     </div>
   )
 }
+
+export function TextareaAutoGrowExample() {
+  return (
+    <div style={{ maxWidth: '32rem', minWidth: 0 }}>
+      <Field
+        label="Reply"
+        description="Grows with each line, then scrolls past ten lines."
+      >
+        <Textarea
+          name="reply"
+          placeholder="Write a reply…"
+          className="field-sizing-content resize-none max-h-[calc(10lh+1rem)]"
+        />
+      </Field>
+    </div>
+  )
+}

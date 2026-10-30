@@ -195,7 +195,7 @@ may refuse it. No-op requests and prop syncs fire no callback.
 | Accordion single                         | `value` / `defaultValue`                           | `onValueChange(string \| null)`                             | `null`                 |
 | Accordion multiple                       | `value` / `defaultValue`                           | `onValueChange(string[])`                                   | `[]`                   |
 
-RadioGroup owns its options' `name` and selection. Use one of `onValueChange`
+RadioGroup owns its options' `name`, generating one when none is given, and selection. Use one of `onValueChange`
 or `onChange` to write state, not both. `''` is a valid option value, and `null`
 clears the group.
 

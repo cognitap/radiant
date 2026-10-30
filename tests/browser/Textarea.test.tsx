@@ -4,7 +4,10 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import { Field, Input, Textarea, ThemeScope, defineTheme } from '../../src/index.js'
-import { TextareaDraftExample } from '../../.storybook/examples/TextareaExamples.js'
+import {
+  TextareaAutoGrowExample,
+  TextareaDraftExample
+} from '../../.storybook/examples/TextareaExamples.js'
 import '../../.storybook/styles.css'
 
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
@@ -397,4 +400,22 @@ test('workspace example validates, submits multiline values and resets both valu
   )
   expect(notes.value).toBe('Share a first draft on Friday.')
   expect(host.querySelector('[role=alert]')).toBe(null)
+})
+
+test('auto-grow example starts at one line, grows with content and scrolls past its cap', async () => {
+  const { host } = await mount(<TextareaAutoGrowExample />)
+  const textarea = host.querySelector('textarea')!
+  const line = parseFloat(getComputedStyle(textarea).lineHeight)
+  const empty = textarea.getBoundingClientRect().height
+  expect(empty).toBeCloseTo(parseFloat(getComputedStyle(textarea).minHeight), 0)
+  await act(async () => {
+    await userEvent.fill(textarea, 'One\nTwo\nThree\nFour')
+  })
+  expect(textarea.getBoundingClientRect().height - empty).toBeCloseTo(3 * line, 0)
+  expect(textarea.scrollHeight).toBe(textarea.clientHeight)
+  await act(async () => {
+    await userEvent.fill(textarea, Array.from({ length: 30 }, (_, i) => `Line ${i}`).join('\n'))
+  })
+  expect(textarea.getBoundingClientRect().height).toBeLessThan(empty + 10 * line)
+  expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight)
 })

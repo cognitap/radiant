@@ -10,8 +10,10 @@ const glob = pattern =>
       .replaceAll('**', '.+')
       .replace(/(?<!\.)\*/g, '[^/]*')}$`
   )
-const budgetFor = file =>
-  Object.entries(budgets).find(([pattern]) => glob(pattern).test(file))?.[1] ?? budget
+const budgetFor = file => {
+  const match = Object.entries(budgets).find(([pattern]) => glob(pattern).test(file))
+  return match ? match[1] : budget
+}
 const words = text =>
   text
     .replace(/^```[\s\S]*?^```/gm, '')

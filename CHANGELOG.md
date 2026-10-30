@@ -6,6 +6,13 @@
 
 - Add Command.
 
+## 0.0.52
+
+- Field passes `aria-invalid` and `aria-describedby` from its root to the control it labels.
+- RadioGroup `name` is optional. Without it, a generated name keeps grouping, arrow keys and form submission working.
+- **Breaking:** Checkbox no longer accepts `readOnly`, which a native checkbox ignores. Before: `<Checkbox readOnly />` still toggled and submitted. After: a type error; use `disabled` or show the value as text.
+- **Breaking:** Radio no longer accepts `readOnly`, for the same reason. Before: `<Radio readOnly />` still checked on click. After: a type error.
+
 ## 0.0.51
 
 - Add Autocomplete.
