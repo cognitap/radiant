@@ -1100,3 +1100,4 @@ import './button-group-types.js'
 
 import './kbd-types.js'
 import './input-group-types.js'
+import './native-select-types.js'

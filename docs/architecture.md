@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's forty-eight families fit together and why. Props are on the
+How Radiant's forty-nine families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -121,6 +121,7 @@ host, never a wrapper:
 | Field                                                                      | `div` in control layout; `fieldset` in group layout |
 | Input / Checkbox / Switch / Slider / Radio                                 | Native `input`                                      |
 | Textarea                                                                   | Native `textarea`                                   |
+| NativeSelect                                                               | Native select                                       |
 | Select / SelectPortal / Combobox / ComboboxPortal                          | None; state / portal                                |
 | Popover, HoverCard, Tooltip, Menu, ContextMenu, MenuSub / their Portals    | None; state / portal                                |
 | Menubar / MenubarMenu / MenubarPortal                                      | div / None / None                                   |
@@ -175,7 +176,7 @@ may refuse it. No-op requests and prop syncs fire no callback.
 
 | Family                                   | State                                              | Callback                                                    | Empty                  |
 | ---------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------- | ---------------------- |
-| Input, Textarea                          | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | `''`                   |
+| Input, Textarea, NativeSelect            | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | `''`                   |
 | ToggleGroup single / multiple            | `value` / `defaultValue`                           | `onValueChange(string \| null)` / `onValueChange(string[])` | `null` / `[]`          |
 | Button toggle                            | `pressed` / `defaultPressed`                       | `onPressedChange(boolean)`                                  | `false`                |
 | Checkbox, Switch, standalone Radio       | `checked` / `defaultChecked`                       | Native `onChange`, `onBlur`                                 | `false`                |

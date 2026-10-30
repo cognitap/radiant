@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add NativeSelect.
+
 ## 0.0.46
 
 - Fix InputGroup addon focus.
@@ -215,7 +217,7 @@
   | `headingSize`, `headingWeight`     | `roles['ui-title']`           |
   | `labelWeight`                      | `roles['ui-label'].weight`    |
 
-  The old `family` and `letterSpacing` applied to all four roles, so set them on each role.
+  Set values from `family` and `letterSpacing` on all four roles.
 
 ## 0.0.4
 

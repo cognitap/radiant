@@ -540,6 +540,8 @@ export type { ComboboxMultipleProps, ComboboxMultipleState, ComboboxTagsProps } 
 export { OTPField } from './OTPField.js'
 export { ButtonGroup } from './ButtonGroup.js'
 export { Kbd, KbdGroup } from './Kbd.js'
+export { NativeSelect } from './NativeSelect.js'
+export type { NativeSelectProps } from './NativeSelect.js'
 export type { KbdProps, KbdGroupProps } from './Kbd.js'
 export { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon } from './InputGroup.js'
 export type {

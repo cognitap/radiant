@@ -18,6 +18,7 @@ export const cn: CnFunction = createCn({
       bottom: ['bottom-(--rad-toast-inset)'],
       z: ['z-(--rad-toast-z-index)'],
       'font-family': [
+        'font-(--rad-native-select-font-family)',
         ...roleClasses('font', 'family'),
         'font-(--rad-combobox-font-family)',
         'font-(--rad-select-font-family)',
@@ -25,6 +26,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-family)'
       ],
       'font-weight': [
+        'font-(--rad-native-select-font-weight)',
         'font-(--rad-toast-title-weight)',
         'font-(--rad-alert-title-weight)',
         'font-(--rad-tooltip-font-weight)',
@@ -35,6 +37,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-native-select-font-size)',
         'text-(--rad-kbd-font-size)',
         'text-(--rad-table-font-size)',
         'text-(--rad-breadcrumb-font-size)',
@@ -54,6 +57,7 @@ export const cn: CnFunction = createCn({
         'text-(--rad-tabs-font-size)'
       ],
       h: [
+        'h-(--rad-native-select-height)',
         'h-(--rad-drawer-size)',
         'h-(--rad-scroll-area-size)',
         'h-(--rad-skeleton-height)',
@@ -112,7 +116,11 @@ export const cn: CnFunction = createCn({
         'gap-(--rad-tabs-gap)',
         'gap-(--rad-tabs-list-gap)'
       ],
-      'min-h': ['min-h-(--rad-textarea-min-height)', 'min-h-(--rad-tabs-trigger-height)'],
+      'min-h': [
+        'min-h-(--rad-native-select-height)',
+        'min-h-(--rad-textarea-min-height)',
+        'min-h-(--rad-tabs-trigger-height)'
+      ],
       py: [
         'py-(--rad-kbd-padding-block)',
         'py-(--rad-table-padding-block)',
@@ -120,6 +128,7 @@ export const cn: CnFunction = createCn({
         'py-(--rad-badge-padding-block)'
       ],
       px: [
+        'px-(--rad-native-select-padding)',
         'px-(--rad-input-group-padding-inline)',
         'px-(--rad-kbd-padding-inline)',
         'px-(--rad-table-padding-inline)',
@@ -145,6 +154,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-native-select-radius)',
         'rounded-(--rad-input-group-radius)',
         'rounded-(--rad-kbd-radius)',
         'rounded-(--rad-button-group-radius)',
@@ -181,6 +191,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-native-select-border-width)',
         'border-(--rad-input-group-border-width)',
         'border-(--rad-table-border-width)',
         'border-(--rad-avatar-border-width)',
@@ -199,6 +210,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-tabs-trigger-border-width)'
       ],
       'border-style': [
+        'border-(--rad-native-select-border-style)',
         'border-(--rad-badge-border-style)',
         'border-(--rad-separator-style)',
         'border-(--rad-progress-border-style)',
@@ -213,6 +225,8 @@ export const cn: CnFunction = createCn({
         'border-(--rad-switch-border-style)'
       ],
       shadow: [
+        'shadow-(--_rad-native-select-shadow)',
+        'shadow-(--rad-native-select-shadow)',
         'shadow-(--_rad-kbd-shadow)',
         'shadow-(--rad-kbd-shadow)',
         'shadow-(--rad-toggle-group-indicator-shadow)',
@@ -229,6 +243,7 @@ export const cn: CnFunction = createCn({
         'shadow-(--rad-slider-thumb-shadow)'
       ],
       'corner-shape': [
+        '[corner-shape:var(--rad-native-select-corner-shape)]',
         '[corner-shape:var(--rad-popover-corner-shape)]',
         '[corner-shape:var(--rad-combobox-corner-shape)]',
         '[corner-shape:var(--rad-select-corner-shape)]',
@@ -238,6 +253,7 @@ export const cn: CnFunction = createCn({
         '[corner-shape:var(--rad-tabs-corner-shape)]'
       ],
       'outline-w': [
+        'outline-(--rad-native-select-focus-width)',
         'outline-(--rad-input-group-focus-width)',
         'outline-(--rad-popover-focus-width)',
         'outline-(--rad-textarea-focus-width)',
@@ -246,6 +262,7 @@ export const cn: CnFunction = createCn({
         'outline-(--rad-tabs-focus-width)'
       ],
       'outline-offset': [
+        'outline-offset-(--rad-native-select-focus-offset)',
         'outline-offset-(--rad-input-group-focus-offset)',
         'outline-offset-(--rad-popover-focus-offset)',
         'outline-offset-(--rad-textarea-focus-offset)',
