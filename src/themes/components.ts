@@ -484,6 +484,7 @@ export const componentRegistry = {
     currentColor: 'css',
     separatorColor: 'css'
   },
+  pagination: { gap: 'css', radius: 'css', itemMinWidth: 'css' },
   radioGroup: { gap: 'css' }
 } as const
 
