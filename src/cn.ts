@@ -34,6 +34,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-avatar-font-size)',
         'text-(--rad-badge-font-size)',
         'text-(--rad-toast-title-size)',
         'text-(--rad-toast-description-size)',
@@ -68,6 +69,9 @@ export const cn: CnFunction = createCn({
       ],
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: [
+        'size-(--rad-avatar-size)',
+        'size-(--rad-avatar-size-small)',
+        'size-(--rad-avatar-size-large)',
         'size-(--rad-spinner-size)',
         'size-(--rad-spinner-size-small)',
         'size-(--rad-spinner-size-large)',
@@ -104,6 +108,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-avatar-radius)',
         'rounded-(--rad-badge-radius)',
         'rounded-(--rad-skeleton-radius)',
         'rounded-(--rad-progress-radius)',
@@ -129,6 +134,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-avatar-border-width)',
         'border-(--rad-badge-border-width)',
         'border-(--rad-progress-border-width)',
         'border-(--rad-toast-border-width)',
