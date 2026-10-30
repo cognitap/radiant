@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's forty-seven families fit together and why. Props are on the
+How Radiant's forty-eight families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -31,6 +31,7 @@ MultiSelect composes Combobox multiple mode. TagsInput commits free text; both
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 Tag composes Badge and Button for removal.
 OTPField keeps one native Input for editing, autofill and forms; its character slots are decorative.
+InputGroup shares a boundary around real Input or Textarea controls and their addons.
 
 Import rules:
 

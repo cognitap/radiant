@@ -541,6 +541,13 @@ export { OTPField } from './OTPField.js'
 export { ButtonGroup } from './ButtonGroup.js'
 export { Kbd, KbdGroup } from './Kbd.js'
 export type { KbdProps, KbdGroupProps } from './Kbd.js'
+export { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon } from './InputGroup.js'
+export type {
+  InputGroupProps,
+  InputGroupInputProps,
+  InputGroupTextareaProps,
+  InputGroupAddonProps
+} from './InputGroup.js'
 export type { ButtonGroupProps } from './ButtonGroup.js'
 export type { OTPFieldProps, OTPFieldMode } from './OTPField.js'
 export {

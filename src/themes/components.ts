@@ -2,6 +2,19 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  inputGroup: {
+    background: 'css',
+    color: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    radius: 'css',
+    gap: 'css',
+    paddingInline: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    invalidBorder: 'css'
+  },
   kbd: {
     background: 'css',
     color: 'css',
