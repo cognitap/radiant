@@ -88,6 +88,7 @@ export const cn: CnFunction = createCn({
         'w-(--rad-slider-length)'
       ],
       'min-w': ['min-w-(--rad-pagination-item-min-width)'],
+      'max-h': ['max-h-(--rad-command-results-max-height)'],
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: [
         'size-(--rad-avatar-size)',

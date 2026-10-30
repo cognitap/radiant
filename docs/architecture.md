@@ -1,10 +1,10 @@
 # Architecture
 
-How Radiant's fifty-three families fit together and why. Props are on the
+How Radiant's fifty-four families fit together. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
-The families are Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -27,6 +27,7 @@ Select, Combobox and Popover use the local top layer, preserving theme and modal
 Combobox keeps DOM focus on its native input and submits the committed key through
 native form controls. Search text never becomes a selection. Autocomplete reuses the listbox but submits its native text, including off-list values. Applications own async
 requests, cancellation and selected labels; results never trigger selection.
+Command combines Dialog with an inline Combobox listbox for explicit actions; applications register shortcuts.
 MultiSelect composes Combobox multiple mode. TagsInput commits free text; both
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 Tag composes Badge and Button for removal.
@@ -109,45 +110,45 @@ stays stable. Token names, CSS variables, scopes and presets are in
 Root `className`, `style`, native props and `ref` always reach the documented
 host, never a wrapper:
 
-| Family or part                                                                        | Host                                                |
-| ------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| AspectRatio                                                                           | `div`                                               |
-| Toolbar                                                                               | `div`                                               |
-| ToggleGroup / ToggleGroupItem                                                         | `div` / Button's `button`                           |
-| ScrollArea                                                                            | Native `div` scroll viewport                        |
-| Skeleton                                                                              | `span`                                              |
-| Meter                                                                                 | Native meter                                        |
-| Progress / Spinner                                                                    | `progress` / `svg`                                  |
-| Button / Link / NavLink                                                               | `button` / `a`, including through `render`          |
-| Field                                                                                 | `div` in control layout; `fieldset` in group layout |
-| Input / PasswordInput / Checkbox / Switch / Slider / Radio                            | Native `input`                                      |
-| Textarea                                                                              | Native `textarea`                                   |
-| NativeSelect                                                                          | Native select                                       |
-| Select / SelectPortal / Combobox / ComboboxPortal / Autocomplete / AutocompletePortal | None; state / portal                                |
-| Popover, HoverCard, Tooltip, Menu, ContextMenu, MenuSub / their Portals               | None; state / portal                                |
-| Menubar / MenubarMenu / MenubarPortal                                                 | div / None / None                                   |
-| ContextMenuTrigger / ContextMenuContent                                               | Named native div / Menu content div                 |
-| HoverCardTrigger / HoverCardContent                                                   | Link's `a` / Popover's `div`                        |
-| MenuTrigger / MenuItem / MenuCheckboxItem / MenuRadioItem / MenuSubTrigger            | Button's button                                     |
-| MenuContent / MenuSubContent / MenuGroup / MenuLabel / MenuRadioGroup                 | div                                                 |
-| MenuSeparator                                                                         | Separator's hr                                      |
-| PopoverTrigger / PopoverClose / PopoverContent                                        | Button's `button` / Button's `button` / `div`       |
-| SelectTrigger / SelectContent / SelectViewport / SelectItem                           | Button's `button` / `div` / `div` / `div`           |
-| ComboboxInput / AutocompleteInput                                                     | Native `input`                                      |
-| ComboboxContent / ComboboxItem / AutocompleteContent / AutocompleteItem               | `div`                                               |
-| ComboboxTrigger / ComboboxClear / AutocompleteTrigger / AutocompleteClear             | Button's `button`                                   |
-| Tabs / TabsList / TabsContent                                                         | `div`                                               |
-| TabsTrigger                                                                           | Button's `button`                                   |
-| RadioGroup                                                                            | Field's `fieldset`                                  |
-| Dialog / AlertDialog / Drawer                                                         | None; state owners                                  |
-| Dialog actions / AlertDialog actions                                                  | Button's `button`                                   |
-| Dialog, AlertDialog and Drawer Content / Title / Description                          | `dialog` / `h2` / `p`                               |
-| Collapsible / NavLinkGroup                                                            | `details`                                           |
-| CollapsibleTrigger / NavLinkGroupTrigger                                              | `summary`                                           |
-| CollapsibleContent / NavLinkGroupContent                                              | `div`                                               |
-| Accordion / AccordionItem / AccordionTrigger / AccordionContent                       | `div` / `details` / `summary` / `div`               |
-| Card / CardHeader / CardContent / CardFooter                                          | `div`                                               |
-| CardTitle and AlertTitle / CardDescription and AlertDescription                       | Heading chosen by `level` / `p`                     |
+| Family or part                                                                                      | Host                                                |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| AspectRatio                                                                                         | `div`                                               |
+| Toolbar                                                                                             | `div`                                               |
+| ToggleGroup / ToggleGroupItem                                                                       | `div` / Button's `button`                           |
+| ScrollArea                                                                                          | Native `div` scroll viewport                        |
+| Skeleton                                                                                            | `span`                                              |
+| Meter                                                                                               | Native meter                                        |
+| Progress / Spinner                                                                                  | `progress` / `svg`                                  |
+| Button / Link / NavLink                                                                             | `button` / `a`, including through `render`          |
+| Field                                                                                               | `div` in control layout; `fieldset` in group layout |
+| Input / PasswordInput / Checkbox / Switch / Slider / Radio                                          | Native `input`                                      |
+| Textarea                                                                                            | Native `textarea`                                   |
+| NativeSelect                                                                                        | Native select                                       |
+| Select / SelectPortal / Combobox / ComboboxPortal / Autocomplete / AutocompletePortal               | None; state / portal                                |
+| Popover, HoverCard, Tooltip, Menu, ContextMenu, MenuSub / their Portals                             | None; state / portal                                |
+| Menubar / MenubarMenu / MenubarPortal                                                               | div / None / None                                   |
+| ContextMenuTrigger / ContextMenuContent                                                             | Named native div / Menu content div                 |
+| HoverCardTrigger / HoverCardContent                                                                 | Link's `a` / Popover's `div`                        |
+| MenuTrigger / MenuItem / MenuCheckboxItem / MenuRadioItem / MenuSubTrigger                          | Button's button                                     |
+| MenuContent / MenuSubContent / MenuGroup / MenuLabel / MenuRadioGroup                               | div                                                 |
+| MenuSeparator                                                                                       | Separator's hr                                      |
+| PopoverTrigger / PopoverClose / PopoverContent                                                      | Button's `button` / Button's `button` / `div`       |
+| SelectTrigger / SelectContent / SelectViewport / SelectItem                                         | Button's `button` / `div` / `div` / `div`           |
+| ComboboxInput / AutocompleteInput / CommandInput                                                    | Native `input`                                      |
+| ComboboxContent / ComboboxItem / AutocompleteContent / AutocompleteItem / CommandList / CommandItem | `div`                                               |
+| ComboboxTrigger / ComboboxClear / AutocompleteTrigger / AutocompleteClear                           | Button's `button`                                   |
+| Tabs / TabsList / TabsContent                                                                       | `div`                                               |
+| TabsTrigger                                                                                         | Button's `button`                                   |
+| RadioGroup                                                                                          | Field's `fieldset`                                  |
+| Dialog / AlertDialog / Drawer / Command                                                             | None; state owners                                  |
+| Dialog actions / AlertDialog actions / Command actions                                              | Button's `button`                                   |
+| Dialog, AlertDialog, Drawer and Command Content / Title / Description                               | `dialog` / `h2` / `p`                               |
+| Collapsible / NavLinkGroup                                                                          | `details`                                           |
+| CollapsibleTrigger / NavLinkGroupTrigger                                                            | `summary`                                           |
+| CollapsibleContent / NavLinkGroupContent                                                            | `div`                                               |
+| Accordion / AccordionItem / AccordionTrigger / AccordionContent                                     | `div` / `details` / `summary` / `div`               |
+| Card / CardHeader / CardContent / CardFooter                                                        | `div`                                               |
+| CardTitle and AlertTitle / CardDescription and AlertDescription                                     | Heading chosen by `level` / `p`                     |
 
 MultiSelect parts retain Combobox hosts and add `multi-select-*`. TagsInput props/ref
 reach Input; wrapper, tag, removal and message styles use named parts. Tag props/ref

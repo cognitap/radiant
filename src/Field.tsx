@@ -109,6 +109,11 @@ export type FieldProps = FieldControl | FieldGroup
 
 const FieldContext = createContext<FieldState | null>(null)
 
+/** Private boundary for non-form composites nested inside a Field. */
+export function WithoutField({ children }: { children?: ReactNode }) {
+  return <FieldContext.Provider value={null}>{children}</FieldContext.Provider>
+}
+
 /** Nearest Field metadata, or null. Groups have no single target: controlProps is null. */
 export function useField(): FieldState | null {
   return useContext(FieldContext)

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Command.
+
 ## 0.0.51
 
 - Add Autocomplete.
@@ -235,7 +237,7 @@
   | `headingSize`, `headingWeight`     | `roles['ui-title']`           |
   | `labelWeight`                      | `roles['ui-label'].weight`    |
 
-  Set values from `family` and `letterSpacing` on all four roles.
+  Apply `family` and `letterSpacing` to all four roles.
 
 ## 0.0.4
 

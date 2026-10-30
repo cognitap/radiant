@@ -2,6 +2,7 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  command: { resultsMaxHeight: 'css' },
   navLink: {
     fontFamily: 'css',
     fontSize: 'css',
