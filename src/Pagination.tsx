@@ -5,6 +5,7 @@ import {
   type ComposedLinkProps,
   type ComposedLinkRenderProps
 } from './composedLink.js'
+import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
@@ -19,7 +20,7 @@ export type PaginationLinkRenderProps = ComposedLinkRenderProps
 export type PaginationLinkProps = Omit<ComposedLinkProps, 'aria-current'> & { current?: boolean }
 export type PaginationPreviousProps = Omit<PaginationLinkProps, 'current'>
 export type PaginationNextProps = PaginationPreviousProps
-export type PaginationButtonProps = Omit<ButtonProps, 'aria-current' | 'role'> & {
+export type PaginationButtonProps = DistributiveOmit<ButtonProps, 'aria-current' | 'role'> & {
   current?: boolean
 }
 export type PaginationUnavailableProps = Omit<Part<'span'>, 'aria-disabled' | 'tabIndex'>

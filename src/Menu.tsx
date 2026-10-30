@@ -22,6 +22,7 @@ import {
   type PopoverContentProps
 } from './Popover.js'
 import type { ButtonProps, ButtonRenderProps } from './Button.js'
+import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
@@ -32,12 +33,12 @@ export type MenuProps = PopoverProps
 export type MenuState = PopoverState
 export type MenuRenderProps = ButtonRenderProps
 export type MenuPortalProps = { children?: ReactNode }
-export type MenuTriggerProps = Omit<ButtonProps, 'id' | 'aria-haspopup'>
+export type MenuTriggerProps = DistributiveOmit<ButtonProps, 'id' | 'aria-haspopup'>
 export type MenuContentProps = Omit<
   PopoverContentProps,
   'role' | 'aria-labelledby' | 'aria-orientation' | 'tabIndex' | 'initialFocusRef'
 >
-export type MenuItemProps = Omit<
+export type MenuItemProps = DistributiveOmit<
   ButtonProps,
   'role' | 'tabIndex' | 'aria-disabled' | 'onSelect'
 > & {

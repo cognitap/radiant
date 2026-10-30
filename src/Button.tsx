@@ -10,6 +10,7 @@ import { Spinner } from './Spinner.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { composeAction } from './internal/events.js'
+import { useControllableState } from './react/useControllableState.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type { ButtonVariant } from './presentation.js'
@@ -22,26 +23,42 @@ export type ButtonRenderProps = Omit<ComponentProps<'button'>, 'style'> & {
   'data-control-size': ControlSize
 }
 
-export type ButtonProps = Omit<ComponentProps<'button'>, 'style'> & {
-  style?: ThemeStyle
-  /** Additional composed identities; the button token is always retained. */
-  'data-slot'?: string
-  /** Forward resolved presentation, children, native attributes and ref to one button host. */
-  render?: (props: ButtonRenderProps) => ReactElement
-  /** Visual treatment; native submission behavior stays on type. */
-  variant?: ButtonVariant
-  /** Semantic action palette, independent of treatment. */
-  tone?: Tone
-  /** Shared action dimensions; defaults to medium. */
-  controlSize?: ControlSize
-  /** Square action; supply an accessible name for icon-only children. */
-  iconOnly?: boolean
-  fullWidth?: boolean
-  /** Block activation and show progress while preserving focus and the label. */
-  pending?: boolean
-  /** Requires MotionProvider. Off also suppresses legacy spatial transitions. */
-  motion?: 'inherit' | 'off'
-}
+type PressedOwner =
+  | ((
+      | { pressed: boolean; defaultPressed?: never }
+      | { pressed?: undefined; defaultPressed?: boolean }
+    ) & {
+      onPressedChange?: (pressed: boolean) => void
+      'aria-pressed'?: never
+    })
+  | {
+      pressed?: undefined
+      defaultPressed?: undefined
+      onPressedChange?: undefined
+      'aria-pressed'?: ComponentProps<'button'>['aria-pressed']
+    }
+
+export type ButtonProps = Omit<ComponentProps<'button'>, 'style' | 'aria-pressed'> &
+  PressedOwner & {
+    style?: ThemeStyle
+    /** Additional composed identities; the button token is always retained. */
+    'data-slot'?: string
+    /** Forward resolved presentation, children, native attributes and ref to one button host. */
+    render?: (props: ButtonRenderProps) => ReactElement
+    /** Visual treatment; native submission behavior stays on type. */
+    variant?: ButtonVariant
+    /** Semantic action palette, independent of treatment. */
+    tone?: Tone
+    /** Shared action dimensions; defaults to medium. */
+    controlSize?: ControlSize
+    /** Square action; supply an accessible name for icon-only children. */
+    iconOnly?: boolean
+    fullWidth?: boolean
+    /** Block activation and show progress while preserving focus and the label. */
+    pending?: boolean
+    /** Requires MotionProvider. Off also suppresses legacy spatial transitions. */
+    motion?: 'inherit' | 'off'
+  }
 
 export function Button({
   render,
@@ -55,10 +72,23 @@ export function Button({
   fullWidth,
   className,
   pending = false,
+  pressed,
+  defaultPressed,
+  onPressedChange,
   onClick,
   children,
   ...props
 }: ButtonProps) {
+  const toggle =
+    pressed !== undefined || defaultPressed !== undefined || onPressedChange !== undefined
+  const { value: isPressed, request: requestPressed } = useControllableState({
+    name: 'Button pressed',
+    value: pressed,
+    defaultValue: defaultPressed,
+    initialValue: false,
+    onChange: onPressedChange
+  })
+  if (typeof isPressed !== 'boolean') throw new TypeError('Button pressed state must be boolean.')
   const callerOwnsScale = callerOwnsPress(props.style, className)
   const press = usePressHost(ref, motion === 'off' || callerOwnsScale)
   const motionOff = motion === 'off' || press.off
@@ -100,19 +130,21 @@ export function Button({
     },
     type,
     'aria-busy': pending || props['aria-busy'],
+    'aria-pressed': toggle ? isPressed : props['aria-pressed'],
     'data-slot': joinIds('button', props['data-slot']) ?? 'button',
     'data-variant': variant,
     'data-tone': tone,
     'data-control-size': controlSize,
     className: cn(
       actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }),
+      'aria-pressed:inset-ring-2 aria-pressed:inset-ring-current forced-colors:aria-pressed:underline forced-colors:aria-pressed:decoration-double',
       spatial && springPressClass,
       motionOff && !callerOwnsScale && offPressClass,
       className
     ),
     onClick: composeAction(
       onClick,
-      undefined,
+      toggle ? () => requestPressed(current => !current) : undefined,
       event => pending || event.currentTarget.matches(':disabled')
     ),
     children: (
