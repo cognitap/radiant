@@ -1,3 +1,4 @@
+import './toggle-group-types.js'
 import './button-pressed-types.js'
 import './checkbox-group-types.js'
 import './fieldset-types.js'
