@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.36
+
 - Add ContextMenu.
 - Add Menu groups, labels and separators.
 - Add checkable Menu items.
