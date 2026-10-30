@@ -418,3 +418,32 @@ test('long messages scroll within the viewport and keep their dismissal action r
   )
   expect(toast.scrollTop).toBeGreaterThan(0)
 })
+test('Action and Close ignore toggle state and dismiss on the first click', async () => {
+  const pressedChange = vi.fn()
+  const toggle = JSON.parse('{"pressed":false,"defaultPressed":true}')
+  const { host } = await mount(
+    <ToastProvider>
+      <ToastViewport style={viewportStyle}>
+        <Toast defaultOpen>
+          <ToastTitle>Saved</ToastTitle>
+          <ToastAction
+            {...toggle}
+            onPressedChange={pressedChange}
+            altText="Undo is available from Notifications."
+          >
+            Undo
+          </ToastAction>
+          <ToastClose {...toggle}>Dismiss</ToastClose>
+        </Toast>
+      </ToastViewport>
+    </ToastProvider>
+  )
+  const toast = roots(host)[0]
+  expect(toast.getAttribute('data-tone')).toBe('neutral')
+  const [action, close] = toast.querySelectorAll('button')
+  expect(action.hasAttribute('aria-pressed')).toBe(false)
+  expect(close.hasAttribute('aria-pressed')).toBe(false)
+  await click(action)
+  expect(pressedChange).not.toHaveBeenCalled()
+  expect(toast.hidden).toBe(true)
+})

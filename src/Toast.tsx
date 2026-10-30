@@ -23,9 +23,11 @@ import {
 import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
+import type { DistributiveOmit } from './internal/types.js'
 import { composeAction } from './internal/events.js'
 import { validateToastDuration } from './internal/toast.js'
 import { useControllableState } from './react/useControllableState.js'
+import type { StateOwner } from './react/useNativeOwner.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useToastTimer } from './react/useToastTimer.js'
 import { useTransitionHost } from './motion/host.js'
@@ -37,7 +39,7 @@ export type ToastProps = Omit<
   AlertProps,
   'hidden' | 'inert' | 'aria-hidden' | 'tabIndex' | 'announce' | 'onSelect'
 > &
-  ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
+  StateOwner<'open', boolean> & {
     onOpenChange?: (open: boolean) => void
     duration?: number
     announce?: ToastAnnouncement
@@ -47,8 +49,18 @@ export type ToastProps = Omit<
 export type ToastState = { open: boolean; visible: boolean; setOpen: (open: boolean) => void }
 export type ToastTitleProps = AlertTitleProps
 export type ToastDescriptionProps = AlertDescriptionProps
-export type ToastActionProps = ButtonProps & { altText: string }
-export type ToastCloseProps = ButtonProps
+type ToastButtonProps = DistributiveOmit<
+  ButtonProps,
+  'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed'
+>
+export type ToastActionProps = ToastButtonProps & { altText: string }
+export type ToastCloseProps = ToastButtonProps
+const notToggle = {
+  pressed: undefined,
+  defaultPressed: undefined,
+  onPressedChange: undefined,
+  'aria-pressed': undefined
+} as const
 export type ToastRenderProps = ButtonRenderProps
 export type ToastViewportProps = Omit<
   ComponentProps<'section'>,
@@ -318,6 +330,7 @@ export function ToastAction({ altText, onClick, ...props }: ToastActionProps) {
   return (
     <Button
       {...props}
+      {...notToggle}
       data-slot={joinIds('toast-action', props['data-slot'])}
       data-toast-announcement={altText}
       onClick={composeAction(onClick, () => toast.setOpen(false))}
@@ -329,6 +342,7 @@ export function ToastClose({ onClick, ...props }: ToastCloseProps) {
   return (
     <Button
       {...props}
+      {...notToggle}
       data-slot={joinIds('toast-close', props['data-slot'])}
       onClick={composeAction(onClick, () => toast.setOpen(false))}
     />
