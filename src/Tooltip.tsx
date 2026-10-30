@@ -18,15 +18,13 @@ import { composeAction } from './internal/events.js'
 import type { PopoverSide, PopoverAlign } from './internal/popover.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
+import type { StateOwner } from './react/useNativeOwner.js'
 import { useHoverSurface } from './react/useHoverSurface.js'
 import { usePopoverSurface } from './react/usePopoverSurface.js'
 import { useTransitionHost } from './motion/host.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
-export type TooltipProps = (
-  | { open: boolean; defaultOpen?: never }
-  | { open?: undefined; defaultOpen?: boolean }
-) & {
+export type TooltipProps = StateOwner<'open', boolean> & {
   onOpenChange?: (open: boolean) => void
   openDelay?: number
   closeDelay?: number

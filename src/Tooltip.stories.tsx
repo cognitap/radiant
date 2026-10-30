@@ -1,8 +1,38 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipPortal } from './index.js'
+import {
+  TooltipControlledExample,
+  TooltipExample,
+  TooltipIconButtonExample,
+  TooltipOpenDelayExample
+} from '../.storybook/examples/TooltipExamples.js'
+
 const meta = {
   title: 'Components/Tooltip',
-  component: Tooltip,
+  component: TooltipExample,
+  args: {
+    openDelay: 500,
+    closeDelay: 150,
+    side: 'top',
+    align: 'center',
+    sideOffset: 8,
+    collisionPadding: 8,
+    motion: 'inherit'
+  },
+  argTypes: {
+    openDelay: { control: { type: 'number', min: 0 } },
+    closeDelay: { control: { type: 'number', min: 0 } },
+    side: { control: 'inline-radio', options: ['top', 'right', 'bottom', 'left'] },
+    align: { control: 'inline-radio', options: ['start', 'center', 'end'] },
+    sideOffset: { control: { type: 'number', min: 0 } },
+    collisionPadding: { control: { type: 'number', min: 0 } },
+    motion: { control: 'inline-radio', options: ['inherit', 'off'] }
+  },
+  render: (args, { viewMode }) => (
+    <TooltipExample
+      {...args}
+      defaultOpen={viewMode !== 'docs'}
+    />
+  ),
   parameters: {
     docs: {
       description: {
@@ -11,52 +41,24 @@ const meta = {
       }
     }
   }
-} satisfies Meta<typeof Tooltip>
+} satisfies Meta<typeof TooltipExample>
 export default meta
 type Story = StoryObj<typeof meta>
-export const Default: Story = {
-  render: (_, { viewMode }) => (
-    <Tooltip defaultOpen={viewMode !== 'docs'}>
-      <TooltipTrigger variant="outline">Export report</TooltipTrigger>
-      <TooltipPortal>
-        <TooltipContent>Download the report as a CSV file.</TooltipContent>
-      </TooltipPortal>
-    </Tooltip>
-  )
-}
+
+const fixed = { parameters: { controls: { disable: true } } }
+
+export const Default: Story = {}
+export const IconButton: Story = { ...fixed, render: () => <TooltipIconButtonExample /> }
+export const OpenDelay: Story = { ...fixed, render: () => <TooltipOpenDelayExample /> }
+export const Controlled: Story = { ...fixed, render: () => <TooltipControlledExample /> }
 export const Customisation: Story = {
-  render: (_, { viewMode }) => (
-    <Tooltip defaultOpen={viewMode !== 'docs'}>
-      <TooltipTrigger
-        tone="neutral"
-        variant="outline"
-      >
-        Archive project
-      </TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="start"
-        style={{
-          '--rad-tooltip-max-width': '14rem',
-          '--rad-tooltip-padding': '1rem',
-          '--rad-tooltip-radius': '1rem'
-        }}
-      >
-        Keep the project without showing it in your active list.
-      </TooltipContent>
-    </Tooltip>
-  )
-}
-export const HoverAndFocus: Story = {
-  render: () => (
-    <Tooltip openDelay={300}>
-      <TooltipTrigger
-        iconOnly
-        aria-label="Report details"
-      >
-        ?
-      </TooltipTrigger>
-      <TooltipContent>Reports include completed work only.</TooltipContent>
-    </Tooltip>
-  )
+  args: {
+    side: 'right',
+    align: 'start',
+    style: {
+      '--rad-tooltip-max-width': '14rem',
+      '--rad-tooltip-padding': '1rem',
+      '--rad-tooltip-radius': '1rem'
+    }
+  }
 }
