@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.48
+
 - Add Meter.
 
 ## 0.0.47
