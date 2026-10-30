@@ -13,6 +13,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
   close: (restore: boolean) => void,
   restoreFocus: RefObject<boolean>,
   options: {
+    anchorPoint?: { x: number; y: number }
     initialFocusRef?: RefObject<HTMLElement | null>
     onFocusOutside?: () => void
     side: PopoverSide
@@ -28,7 +29,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
   useLayoutEffect(() => {
     latest.current = { ...options, open, close }
   })
-  const { side, align, sideOffset, collisionPadding } = options
+  const { side, align, sideOffset, collisionPadding, anchorPoint } = options
 
   useLayoutEffect(() => {
     const node = nodeRef.current
@@ -66,7 +67,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
     const shouldRestore = () => restoreFocus.current
     const place = () => {
       if (!node.isConnected || !node.matches(':popover-open')) return
-      const { side, align, sideOffset, collisionPadding } = latest.current
+      const { side, align, sideOffset, collisionPadding, anchorPoint } = latest.current
       const viewport = win.visualViewport
       const view = {
         top: viewport?.offsetTop ?? 0,
@@ -84,7 +85,16 @@ export function usePopoverSurface<Node extends HTMLElement>(
       )
       const css = win.getComputedStyle(node)
       const next = positionPopover({
-        anchor: trigger.getBoundingClientRect(),
+        anchor: anchorPoint
+          ? {
+              top: anchorPoint.y,
+              bottom: anchorPoint.y,
+              left: anchorPoint.x,
+              right: anchorPoint.x,
+              width: 0,
+              height: 0
+            }
+          : trigger.getBoundingClientRect(),
         width: node.offsetWidth,
         height:
           node.scrollHeight + parseFloat(css.borderTopWidth) + parseFloat(css.borderBottomWidth),
@@ -217,5 +227,8 @@ export function usePopoverSurface<Node extends HTMLElement>(
       reposition.current = () => {}
     }
   }, [nodeRef, trigger, open, generation, restoreFocus])
-  useLayoutEffect(() => reposition.current(), [side, align, sideOffset, collisionPadding])
+  useLayoutEffect(
+    () => reposition.current(),
+    [side, align, sideOffset, collisionPadding, anchorPoint?.x, anchorPoint?.y]
+  )
 }

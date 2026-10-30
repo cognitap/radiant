@@ -4,6 +4,7 @@ import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 import tailwindcss from '@tailwindcss/vite'
 import { observeLinkDownload, observeLinkPopup } from './tests/browser/navigationCommands.js'
+import { contextTouch } from './tests/browser/contextCommands.js'
 import { touchButton, dragHandle } from './tests/browser/touchCommands.js'
 import { dragSlider } from './tests/browser/sliderCommands.js'
 import { scrollViewport } from './tests/browser/scrollCommands.js'
@@ -57,6 +58,7 @@ export default defineConfig({
               observeLinkDownload,
               observeLinkPopup,
               emulatePreferences,
+              contextTouch,
               touchButton,
               dragHandle,
               resizeTextarea,

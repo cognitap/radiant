@@ -14,7 +14,7 @@ import {
   type RefObject
 } from 'react'
 import {
-  Popover,
+  PopoverRoot,
   PopoverTrigger,
   PopoverContent,
   PopoverCloseRoot,
@@ -63,7 +63,8 @@ type Context = MenuState & {
   focusIntent?: Intent
   closeTree(): void
   triggerId: string
-  trigger: RefObject<HTMLButtonElement | null>
+  trigger: RefObject<HTMLElement | null>
+  setTrigger: (node: HTMLElement | null) => void
   content: RefObject<HTMLDivElement | null>
   intent: RefObject<Intent>
   setIntent: (edge: Intent) => void
@@ -71,6 +72,10 @@ type Context = MenuState & {
 const MenuContext = createContext<Context | null>(null)
 export function useMenu(): MenuState | null {
   return useContext(MenuContext)
+}
+/** Private family guard for composed menus. */
+export function useMenuFamily() {
+  return useContext(MenuContext)?.family
 }
 /** Private composition seam; not exported from the package. */
 export function useMenuContext() {
@@ -82,6 +87,7 @@ export function Menu(props: MenuProps) {
   return (
     <MenuRoot
       {...props}
+      anchorPoint={undefined}
       family="menu"
       parent={undefined}
       focusIntent={undefined}
@@ -93,11 +99,20 @@ export function MenuRoot({
   children,
   parent,
   family = 'menu',
+  anchorPoint,
   focusIntent,
   ...props
-}: MenuProps & { parent?: Context; family?: MenuFamily; focusIntent?: Intent }) {
+}: MenuProps & {
+  parent?: Context
+  family?: MenuFamily
+  focusIntent?: Intent
+  anchorPoint?: { x: number; y: number }
+}) {
   return (
-    <Popover {...props}>
+    <PopoverRoot
+      {...props}
+      anchorPoint={anchorPoint}
+    >
       <MenuOwner
         parent={parent}
         family={family}
@@ -105,7 +120,7 @@ export function MenuRoot({
       >
         {children}
       </MenuOwner>
-    </Popover>
+    </PopoverRoot>
   )
 }
 function MenuOwner({
@@ -121,7 +136,10 @@ function MenuOwner({
 }) {
   const state = usePopover()!
   const triggerId = useId()
-  const trigger = useRef<HTMLButtonElement>(null)
+  const trigger = useRef<HTMLElement>(null)
+  const setTrigger = useCallback((node: HTMLElement | null) => {
+    trigger.current = node
+  }, [])
   const content = useRef<HTMLDivElement>(null)
   const intent = useRef<Intent>('first')
   return (
@@ -131,6 +149,7 @@ function MenuOwner({
           ...state,
           triggerId,
           trigger,
+          setTrigger,
           content,
           intent,
           parent,
@@ -164,7 +183,7 @@ function focusItem(node: HTMLElement, item?: HTMLButtonElement) {
 }
 export function MenuTrigger({ ref, onKeyDown, onClick, ...props }: MenuTriggerProps) {
   const menu = useMenuContext()
-  const host = useComposedRefs(menu.trigger, ref)
+  const host = useComposedRefs<HTMLButtonElement>(menu.setTrigger, ref)
   return (
     <PopoverTrigger
       {...props}
@@ -544,6 +563,7 @@ export function MenuSub(props: MenuSubProps) {
   return (
     <MenuRoot
       {...props}
+      anchorPoint={undefined}
       parent={parent}
       family={parent.family}
       focusIntent={undefined}
@@ -574,7 +594,7 @@ export function MenuSubTrigger({
 }: MenuSubTriggerProps) {
   const menu = useMenuContext(),
     popover = usePopoverContext(),
-    host = useComposedRefs(menu.trigger, ref),
+    host = useComposedRefs<HTMLButtonElement>(menu.setTrigger, ref),
     anchor = useComposedRefs<HTMLButtonElement>(popover.setTrigger, host)
   if (!menu.parent) throw new Error('MenuSubTrigger must render inside MenuSub.')
   return (

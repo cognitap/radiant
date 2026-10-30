@@ -4,10 +4,11 @@
 
 ## Unreleased
 
+- Add ContextMenu.
 - Add Menu groups, labels and separators.
 - Add checkable Menu items.
 - Add Menu submenus.
-- Allow MenuItem closeOnSelect.
+- Add MenuItem.closeOnSelect.
 
 ## 0.0.35
 

@@ -1,11 +1,11 @@
 # Architecture
 
-How Radiant's thirty-eight families fit together and why. Props are on the
+How Radiant's thirty-nine families fit together and why. Props are on the
 [docs site](https://github.com/cognitap/radiant-docs); themes are in [theming](theming.md); springs are in
 [motion](motion.md).
 
 The families are Button, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, Textarea, Select, Combobox, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
-Dialog, AlertDialog, Popover, HoverCard, Tooltip, Menu, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
+Dialog, AlertDialog, Popover, HoverCard, Tooltip, Menu, ContextMenu, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in one package,
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
@@ -113,7 +113,8 @@ host, never a wrapper:
 | Input / Checkbox / Switch / Slider / Radio                                 | Native `input`                                      |
 | Textarea                                                                   | Native `textarea`                                   |
 | Select / SelectPortal / Combobox / ComboboxPortal                          | None; state / portal                                |
-| Popover, HoverCard, Tooltip, Menu, MenuSub / their Portals                 | None; state / portal                                |
+| Popover, HoverCard, Tooltip, Menu, ContextMenu, MenuSub / their Portals    | None; state / portal                                |
+| ContextMenuTrigger / ContextMenuContent                                    | Named native div / Menu content div                 |
 | HoverCardTrigger / HoverCardContent                                        | Link's `a` / Popover's `div`                        |
 | MenuTrigger / MenuItem / MenuCheckboxItem / MenuRadioItem / MenuSubTrigger | Button's button                                     |
 | MenuContent / MenuSubContent / MenuGroup / MenuLabel / MenuRadioGroup      | div                                                 |

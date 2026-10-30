@@ -1085,3 +1085,5 @@ import './combobox-types.js'
 import './aspect-ratio-types.js'
 
 import './scroll-area-types.js'
+
+import './context-menu-types.js'

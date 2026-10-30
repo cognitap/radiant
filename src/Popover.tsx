@@ -32,6 +32,7 @@ export type PopoverProps = (
 }
 export type PopoverState = { open: boolean; setOpen: (open: boolean) => void; contentId: string }
 type Context = PopoverState & {
+  anchorPoint?: { x: number; y: number }
   trigger: HTMLElement | null
   setTrigger: (node: HTMLElement | null) => void
   content: RefObject<HTMLDivElement | null>
@@ -48,7 +49,22 @@ export function usePopoverContext() {
   if (!value) throw new Error('Popover parts must render inside Popover.')
   return value
 }
-export function Popover({ open, defaultOpen, onOpenChange, children }: PopoverProps) {
+export function Popover(props: PopoverProps) {
+  return (
+    <PopoverRoot
+      {...props}
+      anchorPoint={undefined}
+    />
+  )
+}
+/** Private pointer anchor for composed context menus; the real source retains focus ownership. */
+export function PopoverRoot({
+  open,
+  defaultOpen,
+  onOpenChange,
+  children,
+  anchorPoint
+}: PopoverProps & { anchorPoint?: { x: number; y: number } }) {
   const state = useControllableState({
     name: 'Popover',
     value: open,
@@ -74,6 +90,7 @@ export function Popover({ open, defaultOpen, onOpenChange, children }: PopoverPr
         open: state.value,
         setOpen,
         contentId,
+        anchorPoint,
         trigger,
         setTrigger,
         content,
@@ -207,7 +224,15 @@ export function PopoverContentRoot({
     popover.open,
     popover.close,
     popover.restoreFocus,
-    { side, align, sideOffset, collisionPadding, initialFocusRef, onFocusOutside }
+    {
+      side,
+      align,
+      sideOffset,
+      collisionPadding,
+      initialFocusRef,
+      onFocusOutside,
+      anchorPoint: popover.anchorPoint
+    }
   )
   return (
     <div
