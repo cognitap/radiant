@@ -24,8 +24,6 @@ const meta = {
 } satisfies Meta<typeof Combobox>
 export default meta
 type Story = StoryObj<typeof meta>
-export const TeamGathering: Story = { render: () => <ComboboxTravelExample /> }
-export const AsyncResults: Story = { render: () => <ComboboxAsyncExample /> }
 export const Default: Story = {
   render: () => (
     <Field
@@ -36,6 +34,8 @@ export const Default: Story = {
     </Field>
   )
 }
+export const TeamGathering: Story = { render: () => <ComboboxTravelExample /> }
+export const AsyncResults: Story = { render: () => <ComboboxAsyncExample /> }
 export const Open: Story = {
   render: () => (
     <Field
