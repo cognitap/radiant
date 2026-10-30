@@ -10,7 +10,8 @@ import {
   type MenuItemProps,
   type MenuContentProps,
   type MenuState,
-  type MenuRenderProps
+  type MenuRenderProps,
+  type MenuTriggerProps
 } from '@cognitap/radiant'
 h(
   Menu,
@@ -48,3 +49,6 @@ const role: MenuContentProps = { role: 'listbox' }
 // @ts-expect-error Menu owns item roles.
 const item: MenuItemProps = { role: 'link' }
 void [mixed, role, item]
+
+// @ts-expect-error A trigger that opens a menu is not a toggle.
+export const pressedMenuTrigger: MenuTriggerProps = { defaultPressed: true }

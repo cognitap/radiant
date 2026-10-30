@@ -16,17 +16,16 @@ import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
 import type { PopoverSide, PopoverAlign } from './internal/popover.js'
+import type { DistributiveOmit } from './internal/types.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
+import type { StateOwner } from './react/useNativeOwner.js'
 import { usePopoverSurface } from './react/usePopoverSurface.js'
 import { useTransitionHost } from './motion/host.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type { PopoverSide, PopoverAlign } from './internal/popover.js'
-export type PopoverProps = (
-  | { open: boolean; defaultOpen?: never }
-  | { open?: undefined; defaultOpen?: boolean }
-) & {
+export type PopoverProps = StateOwner<'open', boolean> & {
   onOpenChange?: (open: boolean) => void
   children?: ReactNode
 }
@@ -103,7 +102,10 @@ export function PopoverRoot({
   )
 }
 
-export type PopoverTriggerProps = ButtonProps
+export type PopoverTriggerProps = DistributiveOmit<
+  ButtonProps,
+  'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed'
+>
 export type PopoverCloseProps = ButtonProps
 export type PopoverRenderProps = ButtonRenderProps
 export type PopoverPortalProps = { children?: ReactNode }
@@ -126,6 +128,10 @@ export function PopoverTrigger({ ref, onClick, ...props }: PopoverTriggerProps) 
     <Button
       {...props}
       ref={hostRef}
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
+      aria-pressed={undefined}
       popoverTarget={undefined}
       popoverTargetAction={undefined}
       aria-controls={popover.contentId}

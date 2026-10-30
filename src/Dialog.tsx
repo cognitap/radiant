@@ -11,6 +11,8 @@ import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
+import type { StateOwner } from './react/useNativeOwner.js'
+import type { DistributiveOmit } from './internal/types.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 const colorMotionClass =
@@ -63,10 +65,7 @@ const dialogDescriptionVariants = cva([
   'forced-colors:text-[CanvasText]'
 ])
 
-export type DialogProps = (
-  | { open: boolean; defaultOpen?: never }
-  | { open?: undefined; defaultOpen?: boolean }
-) & {
+export type DialogProps = StateOwner<'open', boolean> & {
   /** A change request. The controlled owner may decline it; prop syncs do not notify. */
   onOpenChange?: (open: boolean) => void
   /** `true` calls `showModal()`. `false` calls `show()` and leaves the rest of the page active. */
@@ -92,8 +91,16 @@ export type DialogState = {
 
 export type DialogRenderProps = ButtonRenderProps
 
-/** Button props/render/ref contract, with protected dialog relationships. */
-export type DialogTriggerProps = ButtonProps
+type WithoutPressed = {
+  pressed?: never
+  defaultPressed?: never
+  onPressedChange?: never
+  'aria-pressed'?: never
+}
+
+/** Button props/render/ref contract, with protected dialog relationships and no toggle state. */
+export type DialogTriggerProps = DistributiveOmit<ButtonProps, keyof WithoutPressed> &
+  WithoutPressed
 
 export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open' | 'style'> & {
   style?: ThemeStyle
@@ -189,6 +196,10 @@ function DialogAction({ action, ...props }: DialogTriggerProps & { action: 'open
   const slot = action === 'open' ? 'button dialog-trigger' : 'button dialog-close'
   const buttonProps: ButtonProps = {
     ...props,
+    pressed: undefined,
+    defaultPressed: undefined,
+    onPressedChange: undefined,
+    'aria-pressed': undefined,
     ...(action === 'open'
       ? {
           'aria-haspopup': 'dialog',

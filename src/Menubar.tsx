@@ -323,10 +323,6 @@ export function MenubarTrigger({
       role="menuitem"
       tabIndex={-1}
       aria-disabled={disabled || undefined}
-      pressed={undefined}
-      defaultPressed={undefined}
-      onPressedChange={undefined}
-      aria-pressed={undefined}
       variant={variant}
       tone={tone}
       data-value={value}

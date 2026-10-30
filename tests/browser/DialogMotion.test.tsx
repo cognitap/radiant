@@ -313,6 +313,34 @@ test('a controlled owner can refuse native Escape dismissal without duplicate re
   expect(document.querySelector('[data-rad-motion-exit]')).toBeNull()
 })
 
+test('trigger and close ignore toggle state from untyped callers', async () => {
+  const toggle = { defaultPressed: true, 'aria-pressed': true } as object
+  const pressedChanges = vi.fn()
+  const { host } = await mount(
+    <Dialog>
+      <DialogTrigger
+        {...toggle}
+        {...({ onPressedChange: pressedChanges } as object)}
+      >
+        Open
+      </DialogTrigger>
+      <DialogContent>
+        <DialogTitle>Panel</DialogTitle>
+        <DialogClose {...toggle}>Close</DialogClose>
+      </DialogContent>
+    </Dialog>
+  )
+  const trigger = host.querySelector<HTMLButtonElement>('[data-slot~="dialog-trigger"]')!
+  const close = host.querySelector<HTMLButtonElement>('[data-slot~="dialog-close"]')!
+  expect(trigger.hasAttribute('aria-pressed')).toBe(false)
+  expect(close.hasAttribute('aria-pressed')).toBe(false)
+  await act(async () => trigger.click())
+  await until(() => host.querySelector('dialog')!.open)
+  expect(trigger.hasAttribute('aria-pressed')).toBe(false)
+  expect(trigger.getAttribute('aria-expanded')).toBe('true')
+  expect(pressedChanges).not.toHaveBeenCalled()
+})
+
 test('a dialog keeps owned and external description ids together', async () => {
   const { host } = await mount(
     <Dialog>

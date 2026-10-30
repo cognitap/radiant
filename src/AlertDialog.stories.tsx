@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { DeleteProjectExample } from '../.storybook/examples/AlertDialogExamples.js'
+import {
+  AsyncActionExample,
+  ControlledExample,
+  DeleteProjectExample
+} from '../.storybook/examples/AlertDialogExamples.js'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,6 +58,7 @@ export const Customisation: Story = {
     >
       <AlertDialogTrigger variant="outline">Review session</AlertDialogTrigger>
       <AlertDialogContent
+        motion="off"
         style={{ '--rad-dialog-width': '24rem', '--rad-dialog-radius': '1.5rem' }}
       >
         <AlertDialogTitle style={{ '--rad-dialog-title-size': '1.25rem' }}>
@@ -77,28 +82,12 @@ export const Customisation: Story = {
   )
 }
 
-export const ConsequentialAction: Story = { render: () => <DeleteProjectExample /> }
+export const ConfirmingDeletion: Story = { render: () => <DeleteProjectExample /> }
 
-export const PendingDecision: Story = {
-  render: (_, { viewMode }) => (
-    <AlertDialog
-      open={viewMode !== 'docs'}
-      onOpenChange={() => {}}
-      closeOnEscape={false}
-    >
-      <AlertDialogContent>
-        <AlertDialogTitle>Deleting project</AlertDialogTitle>
-        <AlertDialogDescription>
-          Wait for confirmation before leaving this decision.
-        </AlertDialogDescription>
-        <AlertDialogCancel disabled>Keep project</AlertDialogCancel>
-        <AlertDialogAction
-          pending
-          tone="danger"
-        >
-          Delete permanently
-        </AlertDialogAction>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
+export const AsyncAction: Story = {
+  render: (_, { viewMode }) => <AsyncActionExample defaultOpen={viewMode !== 'docs'} />
+}
+
+export const Controlled: Story = {
+  render: (_, { viewMode }) => <ControlledExample defaultOpen={viewMode !== 'docs'} />
 }

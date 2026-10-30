@@ -8,13 +8,17 @@ import {
   Field,
   Input,
   Button,
+  Checkbox,
   type PopoverContentProps
 } from '../../src/index.js'
 
 export function PopoverExample({
   defaultOpen = false,
   ...content
-}: Pick<PopoverContentProps, 'side' | 'align' | 'sideOffset' | 'style' | 'className'> & {
+}: Pick<
+  PopoverContentProps,
+  'side' | 'align' | 'sideOffset' | 'collisionPadding' | 'motion' | 'style' | 'className'
+> & {
   defaultOpen?: boolean
 }) {
   return (
@@ -91,6 +95,53 @@ export function DeliveryTimePopover() {
                 <Button type="submit">Save time</Button>
               </div>
             </form>
+          </PopoverContent>
+        </PopoverPortal>
+      </Popover>
+    </div>
+  )
+}
+
+export function PinnablePopover() {
+  const [open, setOpen] = useState(false)
+  const [pinned, setPinned] = useState(false)
+  return (
+    <div className="grid gap-4">
+      <output className="m-0">Price breakdown is {open ? 'open' : 'closed'}.</output>
+      <Popover
+        open={open}
+        onOpenChange={next => {
+          if (next || !pinned) setOpen(next)
+        }}
+      >
+        <PopoverTrigger
+          variant="outline"
+          tone="neutral"
+        >
+          Price breakdown
+        </PopoverTrigger>
+        <PopoverPortal>
+          <PopoverContent
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+            role="dialog"
+            aria-label="Price breakdown"
+          >
+            <p className="m-0">Subtotal 42.00, delivery 4.50, total 46.50.</p>
+            <Checkbox
+              label="Keep open while I compare"
+              checked={pinned}
+              onChange={event => setPinned(event.currentTarget.checked)}
+            />
+            <Button
+              variant="outline"
+              tone="neutral"
+              onClick={() => {
+                setPinned(false)
+                setOpen(false)
+              }}
+            >
+              Done
+            </Button>
           </PopoverContent>
         </PopoverPortal>
       </Popover>

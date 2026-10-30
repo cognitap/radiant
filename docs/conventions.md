@@ -41,7 +41,8 @@ build on is in [architecture](architecture.md).
 - Parts are separate named exports. There is no `as` or `asChild`.
 - Button and anchor hosts take `render(props)`. A family whose parts take
   `render` exports a `<Family>RenderProps` type.
-- A trigger that opens something does not accept `pressed`.
+- A trigger that opens something, and the actions inside it, do not accept
+  `pressed`. A tooltip trigger opens nothing, so it keeps it.
 
 ## State attributes
 
@@ -57,6 +58,8 @@ build on is in [architecture](architecture.md).
 - A visible name is `label: ReactNode`. A name for an element Radiant renders
   inside the component is a string ending in `Label`, such as `removeLabel`.
   Native names keep their meaning, such as Avatar's `alt`.
+  Announcement text that replaces an element's content, rather than naming
+  it, is `altText`, such as ToastAction's.
 
 ## Stories
 

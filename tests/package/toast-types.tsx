@@ -10,7 +10,8 @@ import {
   useToast,
   type ToastProps,
   type ToastState,
-  type ToastActionProps
+  type ToastActionProps,
+  type ToastCloseProps
 } from '@cognitap/radiant'
 h(
   ToastProvider,
@@ -47,4 +48,8 @@ const mixed: ToastProps = { open: true, defaultOpen: false }
 const hidden: ToastProps = { hidden: false }
 // @ts-expect-error Reachable actions need announcement context.
 const action: ToastActionProps = { children: 'Undo' }
-void [mixed, hidden, action]
+// @ts-expect-error An action is not a toggle.
+const pressedAction: ToastActionProps = { altText: 'Undo this save.', pressed: true }
+// @ts-expect-error Close is not a toggle.
+const pressedClose: ToastCloseProps = { defaultPressed: true }
+void [mixed, hidden, action, pressedAction, pressedClose]
