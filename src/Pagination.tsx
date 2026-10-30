@@ -89,7 +89,7 @@ export function PaginationPrevious({ children = 'Previous', ...props }: Paginati
   return (
     <PaginationLink
       {...props}
-      rel={props.rel ?? 'prev'}
+      rel={props.rel ?? (props.external ? 'prev noopener noreferrer' : 'prev')}
       data-slot={joinIds('pagination-previous', props['data-slot'])}
     >
       {children}
@@ -100,7 +100,7 @@ export function PaginationNext({ children = 'Next', ...props }: PaginationNextPr
   return (
     <PaginationLink
       {...props}
-      rel={props.rel ?? 'next'}
+      rel={props.rel ?? (props.external ? 'next noopener noreferrer' : 'next')}
       data-slot={joinIds('pagination-next', props['data-slot'])}
     >
       {children}

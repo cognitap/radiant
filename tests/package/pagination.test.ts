@@ -78,3 +78,16 @@ test('Pagination preserves native URLs, current-page semantics and explicit unav
     /anchor/
   )
 })
+
+test('Pagination directions preserve Link external defaults while explicit rel wins', () => {
+  for (const [Part, relation] of [
+    [PaginationPrevious, 'prev'],
+    [PaginationNext, 'next']
+  ] as const) {
+    const html = renderToStaticMarkup(h(Part, { href: 'https://example.com/page', external: true }))
+    assert.match(html, /target="_blank"/)
+    assert.ok(html.includes(`rel="${relation} noopener noreferrer"`))
+    const custom = renderToStaticMarkup(h(Part, { href: '/page', external: true, rel: 'author' }))
+    assert.match(custom, /rel="author"/)
+  }
+})

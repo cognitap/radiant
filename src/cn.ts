@@ -9,6 +9,7 @@ const roleClasses = (prefix: string, leaf: string) =>
 export const cn: CnFunction = createCn({
   extend: {
     classGroups: {
+      'border-w-b': ['border-b-(--rad-table-border-width)'],
       'border-w-t': ['border-t-(--rad-separator-thickness)'],
       'border-w-s': ['border-s-(--rad-separator-thickness)'],
       my: ['my-(--rad-separator-spacing)'],
@@ -34,6 +35,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-table-font-size)',
         'text-(--rad-breadcrumb-font-size)',
         'text-(--rad-avatar-font-size)',
         'text-(--rad-badge-font-size)',
@@ -91,8 +93,13 @@ export const cn: CnFunction = createCn({
         'gap-(--rad-tabs-list-gap)'
       ],
       'min-h': ['min-h-(--rad-textarea-min-height)', 'min-h-(--rad-tabs-trigger-height)'],
-      py: ['py-(--rad-textarea-padding-block)', 'py-(--rad-badge-padding-block)'],
+      py: [
+        'py-(--rad-table-padding-block)',
+        'py-(--rad-textarea-padding-block)',
+        'py-(--rad-badge-padding-block)'
+      ],
       px: [
+        'px-(--rad-table-padding-inline)',
         'px-(--rad-badge-padding-inline)',
         'px-(--rad-combobox-padding)',
         'px-(--rad-select-padding)',
@@ -112,6 +119,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-table-radius)',
         'rounded-(--rad-pagination-radius)',
         'rounded-(--rad-avatar-radius)',
         'rounded-(--rad-badge-radius)',
@@ -139,6 +147,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-table-border-width)',
         'border-(--rad-avatar-border-width)',
         'border-(--rad-badge-border-width)',
         'border-(--rad-progress-border-width)',
