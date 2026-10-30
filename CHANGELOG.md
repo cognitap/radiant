@@ -4,6 +4,15 @@
 
 ## Unreleased
 
+- Add the `Orientation` type, used by Slider and Tabs.
+- Select accepts `aria-invalid` on the root and forwards it to the trigger. `SelectTrigger`'s own `aria-invalid` still works and wins.
+- Select accepts `readOnly`. The trigger stays focusable and sets `aria-readonly`, but opens nothing and the value doesn't change. The value still submits, and a read-only Select is not checked for `required`.
+- Add the `SelectRenderProps` and `TabsRenderProps` types for `SelectTrigger` and `TabsTrigger` `render`.
+- **Breaking:** SelectItem marks selection with a boolean `data-selected`. Before: `data-state="checked"` / `data-state="unchecked"`. After: `data-selected` present or absent. `aria-selected` is unchanged.
+- **Breaking:** SelectTrigger no longer accepts toggle props. Before: `<SelectTrigger defaultPressed />` type-checked and made the trigger a toggle. After: `pressed`, `defaultPressed`, `onPressedChange` and `aria-pressed` are rejected by the types and ignored at runtime.
+- **Breaking:** TabsTrigger marks the selected tab with a boolean `data-selected`. Before: `data-state="active"` / `data-state="inactive"`. After: `data-selected` on the selected tab only. `aria-selected` is unchanged.
+- **Breaking:** TabsContent no longer sets `data-state`. Before: `[data-state=active]` matched the visible panel. After: target `[role=tabpanel]:not([hidden])`.
+
 ## 0.0.53
 
 - Add Command.

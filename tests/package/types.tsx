@@ -49,6 +49,7 @@ import {
   Field,
   Select,
   SelectTrigger,
+  type SelectRenderProps,
   SelectValue,
   SelectPortal,
   SelectContent,
@@ -484,6 +485,9 @@ void [mixed, mixedOpen, multiple, unnamed]
 export const disabledPart = <SelectTrigger disabled />
 // @ts-expect-error A trigger that opens a listbox is not a toggle.
 export const pressedTrigger = <SelectTrigger defaultPressed />
+export const renderedSelectTrigger = (
+  <SelectTrigger render={(props: SelectRenderProps) => <button {...props} />} />
+)
 
 const props: ButtonProps = {
   type: 'submit',

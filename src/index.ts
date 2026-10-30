@@ -102,6 +102,7 @@ export type {
   TabsListProps,
   TabsTriggerProps,
   TabsContentProps,
+  TabsRenderProps,
   TabsState
 } from './Tabs.js'
 export {
@@ -123,6 +124,7 @@ export type {
   SelectOption,
   SelectState,
   SelectTriggerProps,
+  SelectRenderProps,
   SelectValueProps,
   SelectIconProps,
   SelectContentProps,

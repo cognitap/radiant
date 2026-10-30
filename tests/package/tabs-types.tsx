@@ -8,7 +8,9 @@ import {
   defineTheme,
   type TabsProps,
   type TabsTriggerProps,
-  type TabsContentProps
+  type TabsContentProps,
+  type TabsRenderProps,
+  type Orientation
 } from '@cognitap/radiant'
 
 const root: TabsProps = {
@@ -93,3 +95,14 @@ const hidden: TabsContentProps = { value: 'one', hidden: false }
 // @ts-expect-error Panel names come from their associated trigger.
 const label: TabsContentProps = { value: 'one', 'aria-labelledby': 'other' }
 void [mixed, missing, numeric, mode, multiple, triggerId, submit, selected, variant, hidden, label]
+
+const orientation: Orientation = 'vertical'
+export const renderedTrigger = (
+  <TabsTrigger
+    value="general"
+    render={(props: TabsRenderProps) => <button {...props} />}
+  >
+    General
+  </TabsTrigger>
+)
+createElement(Tabs, { defaultValue: 'general', orientation })
