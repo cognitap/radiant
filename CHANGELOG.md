@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.42
+
 - Fix OTPField selection collapse.
 
 ## 0.0.41
