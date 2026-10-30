@@ -60,6 +60,17 @@ const meta = {
 } satisfies Meta<Options>
 export default meta
 type Story = StoryObj<typeof meta>
+async function settledPreview(canvasElement: HTMLElement) {
+  await waitFor(
+    () => {
+      const content = canvasElement.querySelector<HTMLElement>('[data-slot~="hover-card-content"]')
+      expect(content).not.toBeNull()
+      expect(content!.matches(':popover-open')).toBe(true)
+      expect(Number(getComputedStyle(content!).opacity)).toBe(1)
+    },
+    { timeout: 3000 }
+  )
+}
 function Contributor({ openDelay, closeDelay, defaultOpen, dir, ...surface }: Options) {
   const id = useId()
   return (
@@ -187,6 +198,7 @@ export const ReviewingProjectProgress: Story = {
       'aria-expanded',
       'true'
     )
+    await settledPreview(canvasElement)
   }
 }
 function RouterAnchor(props: HoverCardRenderProps) {
@@ -315,5 +327,10 @@ export const ExploringRelatedReading: Story = {
     <MotionProvider>
       <Related {...args} />
     </MotionProvider>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('link', { name: 'Designing focus flows' })
+    if (trigger.getAttribute('aria-expanded') !== 'true') trigger.focus()
+    await settledPreview(canvasElement)
+  }
 }
