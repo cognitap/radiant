@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.47
+
 - Add NativeSelect.
 
 ## 0.0.46
