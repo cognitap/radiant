@@ -1,8 +1,8 @@
 # Architecture
 
-Radiant's sixty-one families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+Radiant's sixty-two families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are Form, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Carousel, Form, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -44,8 +44,7 @@ Import rules:
    RadioGroup uses Field, Dialog actions use Button). The graph stays acyclic.
 4. Nothing touches `window`, `document` or the DOM at import time. Effects use
    the owning document and clean up on unmount.
-5. Server markup matches the first client render. For example, a native dialog
-   opens in an effect, not during render.
+5. Server markup matches the first client render; dialogs open in effects.
 
 Extract shared policy only when it repeats.
 
@@ -111,6 +110,7 @@ host, never a wrapper:
 
 | Family or part                                                                                      | Host                                                |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Carousel / CarouselViewport / Carousel controls                                                     | section / native scroll div / Button button         |
 | Form / FormField / FormError                                                                        | form / Field host / Alert div                       |
 | AppShell / AppShellHeader / AppShellMain / Sidebar                                                  | div / header / main / nav                           |
 | AppShellSkipLink / SidebarTrigger / SidebarLabel / SidebarContent                                   | Link's a / Button's button / span / div             |
@@ -216,6 +216,7 @@ distinct; activation commits, Escape dismisses and restores trigger focus.
 Native reset silently restores uncontrolled selection. Controlled resets stay
 with the owner. User selections emit form change; prop syncs do not.
 
+Carousel uses native scroll snap and Button controls; opt-in autoplay pauses for interaction, visibility and reduced motion.
 Form coordinates native validation and asynchronous submission without storing values. FormField composes Field; FormError composes Alert.
 
 ## Replacement and events

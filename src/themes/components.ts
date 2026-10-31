@@ -163,6 +163,7 @@ export const componentRegistry = {
     gap: 'css'
   },
   form: { gap: 'css' },
+  carousel: { gap: 'css', slideGap: 'css', radius: 'css' },
   buttonGroup: { radius: 'css' },
   otpField: { gap: 'css', slotSize: 'css' },
   tag: { gap: 'css' },

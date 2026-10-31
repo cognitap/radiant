@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Carousel with native scroll snap, direction-aware controls, drag navigation and opt-in autoplay that pauses for interaction and reduced motion.
+
 ## 0.0.68
 
 - Add Form with native validation, Field error mapping, asynchronous submission and optional form-library integration.
