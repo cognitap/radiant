@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Keep visually hidden and other absolutely positioned content inside AppShellMain and Sidebar, so it scrolls with them instead of making the page taller.
+
 ## 0.0.72
 
 - Draw the selected tab and the active NavLink with `control.selected`, and the Tabs list with `control.track`. Tab triggers take the action voice and corners concentric with the list, and Tabs content takes the surface radius and corner shape.

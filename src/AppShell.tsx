@@ -270,7 +270,7 @@ export function AppShellMain({ className, ...props }: AppShellMainProps) {
           tabIndex={-1}
           data-slot={joinIds('app-shell-main', props['data-slot'])}
           className={cn(
-            'box-border size-full min-h-0 min-w-0 overflow-auto p-[var(--rad-app-shell-main-padding,var(--rad-surface-padding,1.5rem))] focus-visible:[outline-style:var(--rad-focus-style,solid)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-[-2px]',
+            'relative box-border size-full min-h-0 min-w-0 overflow-auto p-[var(--rad-app-shell-main-padding,var(--rad-surface-padding,1.5rem))] focus-visible:[outline-style:var(--rad-focus-style,solid)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-[-2px]',
             className
           )}
         />
@@ -374,7 +374,7 @@ export function Sidebar({
       data-collapsed={collapsed || undefined}
       data-state={shell.mobile ? (shell.open ? 'open' : 'closed') : collapsed ? 'closed' : 'open'}
       className={cn(
-        'box-border flex size-full min-h-0 min-w-0 flex-col overflow-auto gap-[var(--rad-sidebar-gap,1rem)] p-[var(--rad-sidebar-padding,0.5rem)] border-e-[length:var(--rad-sidebar-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-sidebar-border-color,var(--rad-color-border))] bg-[var(--rad-sidebar-background,var(--rad-color-surface))] text-[var(--rad-sidebar-color,var(--rad-color-foreground))]',
+        'relative box-border flex size-full min-h-0 min-w-0 flex-col overflow-auto gap-[var(--rad-sidebar-gap,1rem)] p-[var(--rad-sidebar-padding,0.5rem)] border-e-[length:var(--rad-sidebar-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-sidebar-border-color,var(--rad-color-border))] bg-[var(--rad-sidebar-background,var(--rad-color-surface))] text-[var(--rad-sidebar-color,var(--rad-color-foreground))]',
         className
       )}
     >

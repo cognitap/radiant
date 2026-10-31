@@ -193,6 +193,31 @@ test('collapse observation does not steal focus from an outside application cont
   )
   expect(outside).toHaveFocus()
 })
+test('visually hidden content scrolls with Main and Sidebar instead of escaping their scroll boxes', async () => {
+  const hidden = (label: string) => (
+    <>
+      <div style={{ height: '2000px', flexShrink: 0 }} />
+      <span className="sr-only">{label}</span>
+    </>
+  )
+  const { host } = await mount(
+    <AppShell style={{ height: '400px', width: '600px' }}>
+      <AppShellHeader>Workspace</AppShellHeader>
+      <Sidebar label="Projects">{hidden('Sidebar status')}</Sidebar>
+      <AppShellMain>{hidden('Main status')}</AppShellMain>
+    </AppShell>
+  )
+  for (const [box, label] of [
+    [main(host), 'Main status'],
+    [nav(host), 'Sidebar status']
+  ] as const) {
+    const text = [...box.querySelectorAll('span')].find(node => node.textContent === label)!
+    const before = text.getBoundingClientRect().top
+    await act(async () => box.scrollTo({ top: 1000 }))
+    expect(box.scrollTop).toBe(1000)
+    expect(text.getBoundingClientRect().top).toBeCloseTo(before - 1000, 0)
+  }
+})
 test('the actual skip Link moves native focus to Main without adding Main to ordinary Tab order', async () => {
   const original = location.href,
     { host } = await mount(<Sample />)
