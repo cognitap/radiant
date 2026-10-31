@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.61
+
 - **Breaking:** Pagination page links and buttons default to `controlSize="medium"`, matching Button and Link. Before: `<PaginationLink href="?page=2">` rendered small. After: it renders medium. Pass `controlSize="small"` to keep the old size.
 - Breadcrumb, Pagination and TableContainer check their names with the shared rule. A blank `aria-label` beside a nonempty `aria-labelledby` no longer throws, TableContainer accepts both, and the error reads "<Name> requires aria-label or aria-labelledby."
 
