@@ -252,3 +252,55 @@ test('hooks return null outside a form and unmount aborts its own request', asyn
   await outside.render(null)
   expect(signal.aborted).toBe(true)
 })
+
+test('native validation and server errors support field names that match object prototype properties', async () => {
+  const submit = vi.fn(() => ({
+    fields: Object.fromEntries([
+      ['constructor', 'Already used.'],
+      ['__proto__', 'Reserved.']
+    ])
+  }))
+  const { host } = await mount(
+    <Form
+      aria-label="Dynamic fields"
+      onSubmitValues={submit}
+    >
+      <FormField
+        name="constructor"
+        label="Constructor"
+        required
+      >
+        <Input name="constructor" />
+      </FormField>
+      <FormField
+        name="__proto__"
+        label="Prototype"
+        required
+      >
+        <Input name="__proto__" />
+      </FormField>
+      <FormField
+        name="toString"
+        label="Description"
+      >
+        <Input name="toString" />
+      </FormField>
+      <FormError />
+      <Button type="submit">Save</Button>
+    </Form>
+  )
+  await click(button(host))
+  await vi.waitFor(() =>
+    expect(input(host, 'constructor').getAttribute('aria-invalid')).toBe('true')
+  )
+  expect(submit).not.toHaveBeenCalled()
+  expect(input(host, 'toString').hasAttribute('aria-invalid')).toBe(false)
+  await act(async () => {
+    await userEvent.fill(input(host, 'constructor'), 'Example')
+    await userEvent.fill(input(host, '__proto__'), 'Value')
+  })
+  await click(button(host))
+  await vi.waitFor(() => expect(host.textContent).toContain('Already used.'))
+  expect(host.textContent).toContain('Reserved.')
+  expect(submit).toHaveBeenCalledTimes(1)
+})

@@ -49,6 +49,10 @@ function requiredForm() {
   if (!state) throw new Error('Form parts must be inside Form.')
   return state
 }
+function namedError(errors: FormErrors, name: string) {
+  const fields = errors.fields
+  return fields && Object.hasOwn(fields, name) ? fields[name] : undefined
+}
 function hasErrors(errors: FormErrors) {
   return Boolean(errors.form || Object.values(errors.fields ?? {}).some(Boolean))
 }
@@ -112,7 +116,7 @@ export function Form({
           !control.disabled &&
           control.type !== 'hidden' &&
           Boolean(
-            next.fields?.[control.name] ||
+            namedError(next, control.name) ||
             (control.willValidate && !control.validity.valid) ||
             control.getAttribute('aria-invalid') === 'true'
           )
@@ -131,7 +135,7 @@ export function Form({
   function edited(name: string) {
     revision.current++
     const old = errors
-    if (old.form || old.fields?.[name]) {
+    if (old.form || namedError(old, name)) {
       const fields = { ...old.fields }
       delete fields[name]
       setErrors({ fields })
@@ -178,7 +182,7 @@ export function Form({
           const form = event.currentTarget
           const submitter = (event.nativeEvent as SubmitEvent).submitter
           const data = new FormData(form, submitter)
-          const nativeErrors: Record<string, string> = {}
+          const nativeErrors: Record<string, string> = Object.create(null)
           let unnamedError: string | undefined
           if (!(submitter as HTMLButtonElement | null)?.formNoValidate) {
             for (const control of controls(form)) {
@@ -234,7 +238,7 @@ export function FormField({ name, error, ...props }: FormFieldProps) {
   return (
     <Field
       {...props}
-      error={error ?? errors.fields?.[name]}
+      error={error ?? namedError(errors, name)}
       data-slot={joinIds('form-field', props['data-slot'])}
     />
   )
