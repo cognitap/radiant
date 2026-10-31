@@ -16,7 +16,7 @@ const tones = {
 
 // Actions embedded in a field or chip keep its voice and stay flat, whatever the theme gives Button.
 export const inlineActionClass =
-  '[--rad-button-shadow:none] [--rad-button-shadow-pressed:none] [--rad-button-ghost-shadow:none] [--rad-button-ghost-shadow-pressed:none] [--rad-button-border-color:transparent] [--rad-button-backdrop:none] [--rad-button-radius-pressed:var(--_btn-radius)] [--rad-button-corner-shape-pressed:var(--_btn-corner)] [--rad-button-text-transform:none] [--rad-button-letter-spacing:normal] [--rad-button-font-family:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)]'
+  '[--rad-button-shadow:none] [--rad-button-shadow-pressed:none] [--rad-button-highlight:0] [--rad-button-sheen:0] [--rad-button-ghost-shadow:none] [--rad-button-ghost-shadow-pressed:none] [--rad-button-border-color:transparent] [--rad-button-backdrop:none] [--rad-button-radius-pressed:var(--_btn-radius)] [--rad-button-corner-shape-pressed:var(--_btn-corner)] [--rad-button-text-transform:none] [--rad-button-letter-spacing:normal] [--rad-button-font-family:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)]'
 
 export const actionTone = cva('', {
   variants: { tone: tones },

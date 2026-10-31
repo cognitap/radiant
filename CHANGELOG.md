@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+- Draw the selected tab and the active NavLink with `control.selected`, and the Tabs list with `control.track`. Tab triggers take the action voice and corners concentric with the list, and Tabs content takes the surface radius and corner shape.
+- Take the NavLink active weight from `typography.headingWeight` and the current breadcrumb's font from the label role.
+- Give Badge, Tag, Kbd and Avatar the control radius, corner shape, border width and border style. Badge, Tag and Avatar take the action voice and Kbd its text transform. Avatar stays round unless the control radius is `0px`.
+- Wrap TagsInput's tags and text input in one field well that reads `control.field`.
+- Stop chart points inheriting Button's pressed shape and shadow, and take the chart caption weight from the title role.
+- Keep inline actions free of the theme's button highlight and sheen.
+- Give Neon and Ticket avatars the control radius.
 - Draw Popover, HoverCard, Menu, ContextMenu, Menubar, Select, Combobox, Command, Tooltip, Dialog, AlertDialog, Drawer and the NavigationMenu viewport with the overlay role: `surface.overlayBackground`, `surface.overlayShadow` and `surface.backdropFilter`. Tooltips keep their own background.
 - Highlight rows in menus, listboxes and Command with `control.item`, and give them corners concentric with their panel.
 - Mark the chosen Select and Combobox option and the open Menubar menu with `control.selected` when a theme sets it.

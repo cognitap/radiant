@@ -129,6 +129,8 @@ export const neonDefinition: ThemeDefinition = {
     },
     state: { disabledOpacity: 0.45 }
   },
+  // A bevel corner at the avatar's 50% cap would cut the photo to a diamond.
+  components: { avatar: { radius: 'var(--rad-control-radius)' } },
   modes: {
     dark: {
       tokens: {

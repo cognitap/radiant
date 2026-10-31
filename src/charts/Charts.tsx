@@ -72,6 +72,8 @@ const colors = [
 const color = (index: number) => colors[index % colors.length]!
 const dashes = ['', '8 4', '2 4', '10 3 2 3', '4 3', '12 6']
 const format = (value: number) => String(value)
+const pointClass =
+  'box-border inline-flex size-6 cursor-pointer select-none items-center justify-center rounded-full border-0 bg-transparent p-0 [color:inherit] hover:bg-[color-mix(in_oklch,currentColor_8%,transparent)] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus,oklch(0.55_0.13_255))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] focus-visible:[outline-style:var(--rad-focus-style,solid)] forced-colors:text-[CanvasText] forced-colors:focus-visible:outline-[Highlight]'
 export type ChartDataTableProps = Omit<TableProps, 'children'> &
   Pick<ChartProps, 'data' | 'series' | 'formatValue' | 'categoryLabel'> & { label: string }
 export function ChartDataTable({
@@ -176,7 +178,10 @@ function Chart({
     >
       <figcaption
         id={captionId}
-        className={cn('font-semibold', parts?.caption?.className)}
+        className={cn(
+          'font-[family-name:var(--rad-typography-roles-ui-title-family,system-ui,sans-serif)] font-[number:var(--rad-typography-roles-ui-title-weight,600)]',
+          parts?.caption?.className
+        )}
         style={parts?.caption?.style}
       >
         {label}
@@ -314,13 +319,15 @@ function Chart({
                       aria-label={text}
                       data-slot="chart-point"
                       tabIndex={Math.min(focused, ordered.length - 1) === index ? 0 : -1}
-                      variant="ghost"
-                      tone="neutral"
-                      className={cn(
-                        'size-6 min-h-0 rounded-full border-0 bg-transparent bg-none p-0 shadow-none',
-                        parts?.point?.className
-                      )}
+                      motion="off"
                       style={parts?.point?.style}
+                      // A point is an inspection target, not an action, so none of Button's look applies.
+                      render={native => (
+                        <button
+                          {...native}
+                          className={cn(pointClass, parts?.point?.className)}
+                        />
+                      )}
                       onClick={event => event.preventDefault()}
                       onFocus={() => setFocused(index)}
                       onKeyDown={event => {

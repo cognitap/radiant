@@ -43,9 +43,9 @@ export function Badge({ tone = 'neutral', decorative = false, className, ...prop
       className={cn(
         actionTone({ tone }),
         'box-border inline-flex max-w-full min-w-0 items-center gap-1 align-middle [overflow-wrap:anywhere] whitespace-normal text-start antialiased',
-        'rounded-[var(--rad-badge-radius,var(--rad-control-radius,0.5rem))] px-[var(--rad-badge-padding-inline,0.5rem)] py-[var(--rad-badge-padding-block,0.125rem)]',
-        'bg-[var(--rad-badge-background,var(--_action-soft))] [color:var(--rad-badge-color,var(--_action-ink))] [border-color:var(--rad-badge-border-color,var(--_action-edge))] [border-width:var(--rad-badge-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-badge-border-style,var(--rad-surface-border-style,solid))]',
-        'font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] text-[length:var(--rad-badge-font-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] font-[number:var(--rad-typography-roles-ui-label-weight,600)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,0em)]',
+        'rounded-[var(--rad-badge-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)] px-[var(--rad-badge-padding-inline,0.5rem)] py-[var(--rad-badge-padding-block,0.125rem)]',
+        'bg-[var(--rad-badge-background,var(--_action-soft))] [color:var(--rad-badge-color,var(--_action-ink))] [border-color:var(--rad-badge-border-color,var(--_action-edge))] [border-width:var(--rad-badge-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-badge-border-style,var(--rad-control-border-style,solid))]',
+        'font-[family-name:var(--rad-control-action-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] text-[length:var(--rad-badge-font-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] font-[number:var(--rad-control-action-font-weight,var(--rad-typography-roles-ui-label-weight,600))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)] tracking-[var(--rad-control-action-letter-spacing,var(--rad-typography-roles-ui-label-letter-spacing,0em))] [text-transform:var(--rad-control-action-text-transform,none)]',
         'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
         className
       )}
