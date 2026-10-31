@@ -20,13 +20,13 @@ export type TagsInputProps = DistributiveOmit<
   'value' | 'defaultValue' | 'type' | 'children'
 > &
   ValueOwner<string[]> & {
-    onValueChange?: (values: string[]) => void
+    onValueChange?: (value: string[]) => void
     /** Single-character separators; line breaks in pasted text also separate tags. */
     separators?: readonly string[]
     /** True accepts; false or an error message rejects. Values are trimmed before validation. */
     validate?: (value: string) => boolean | string
     maxCount?: number
-    parts?: { wrapper?: PartStyle; tag?: PartStyle; remove?: PartStyle; message?: PartStyle }
+    parts?: { wrapper?: PartStyle; tag?: PartStyle; remove?: PartStyle; error?: PartStyle }
   }
 const defaultSeparators = [','] as const
 
@@ -257,14 +257,14 @@ export function TagsInput({
       />
       <span
         id={message}
-        data-slot="tags-input-message"
+        data-slot="tags-input-error"
         aria-live="polite"
         aria-atomic="true"
         className={cn(
           'w-full empty:hidden text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] [color:var(--rad-color-invalid,oklch(0.56_0.19_25))]',
-          parts?.message?.className
+          parts?.error?.className
         )}
-        style={parts?.message?.style}
+        style={parts?.error?.style}
       >
         {feedback}
       </span>

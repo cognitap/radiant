@@ -7,6 +7,7 @@ import {
   PrepareParticipantInvitation,
   FindStudyDataset,
   CompletionInput,
+  ControlledTopic,
   topicSuggestions,
   type AutocompleteTaskOptions
 } from '../.storybook/examples/AutocompleteExamples.js'
@@ -44,29 +45,88 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {
+  render: () => (
+    <Field
+      label="Topic"
+      className="w-80 max-w-full"
+    >
+      <Autocomplete items={topicSuggestions} />
+    </Field>
+  )
+}
+export const WithField: Story = {
   render: options => (
-    <MotionProvider>
-      <div
-        dir={options.dir}
-        style={{ width: '100%', maxWidth: '26rem', minWidth: 0 }}
+    <div
+      dir={options.dir}
+      style={{ width: '100%', maxWidth: '26rem', minWidth: 0 }}
+    >
+      <Field
+        label="Topic"
+        description="Choose a suggestion or enter any topic."
+        disabled={options.disabled}
+        required={options.required}
+        error={options.invalid ? 'Review the topic.' : undefined}
       >
+        <Autocomplete
+          items={topicSuggestions}
+          name="topic"
+          controlSize={options.controlSize}
+          readOnly={options.readOnly}
+        >
+          <CompletionInput options={options} />
+        </Autocomplete>
+      </Field>
+    </div>
+  )
+}
+export const Controlled: Story = { render: () => <ControlledTopic /> }
+export const SharedControlSizes: Story = {
+  render: () => (
+    <div className="grid w-80 max-w-full gap-5">
+      {(['small', 'medium', 'large'] as const).map(size => (
         <Field
-          label="Topic"
-          description="Choose a suggestion or enter any topic."
-          disabled={options.disabled}
-          required={options.required}
-          error={options.invalid ? 'Review the topic.' : undefined}
+          label={`${size} topic`}
+          key={size}
         >
           <Autocomplete
             items={topicSuggestions}
-            controlSize={options.controlSize}
-            readOnly={options.readOnly}
-          >
-            <CompletionInput options={options} />
-          </Autocomplete>
+            controlSize={size}
+          />
         </Field>
-      </div>
-    </MotionProvider>
+      ))}
+    </div>
+  )
+}
+export const States: Story = {
+  render: () => (
+    <div className="grid w-80 max-w-full gap-5">
+      <Field
+        label="Disabled topic"
+        disabled
+        description="An administrator manages this topic."
+      >
+        <Autocomplete
+          items={topicSuggestions}
+          defaultValue="Reading speed"
+        />
+      </Field>
+      <Field
+        label="Invalid topic"
+        error="Write a topic."
+      >
+        <Autocomplete items={topicSuggestions} />
+      </Field>
+      <Field
+        label="Read-only topic"
+        description="Focusable and submitted with the form, but not editable."
+      >
+        <Autocomplete
+          items={topicSuggestions}
+          defaultValue="Keyboard workflows"
+          readOnly
+        />
+      </Field>
+    </div>
   )
 }
 export const PlanningAResearchTopic: Story = {

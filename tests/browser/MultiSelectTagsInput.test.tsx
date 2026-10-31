@@ -284,7 +284,7 @@ test('required multiple selection validates the array and redirects native inval
 test('single and multiple state hooks stay type/mode scoped while custom composition uses the same owner', async () => {
   function Read() {
     expect(useCombobox()).toBe(null)
-    const multiple = useCombobox({ multiple: true }),
+    const multiple = useCombobox({ type: 'multiple' }),
       alias = useMultiSelect()
     expect(multiple?.value).toEqual(alias?.value)
     return <Button onClick={() => alias?.setValue(['b'])}>Choose Beta</Button>
@@ -292,7 +292,7 @@ test('single and multiple state hooks stay type/mode scoped while custom composi
   const { host } = await mount(
     <Field label="Projects">
       <Combobox
-        multiple
+        type="multiple"
         items={items}
       >
         <ComboboxTags />
@@ -489,13 +489,17 @@ test('TagsInput disabled/read-only native hosts and callback ref cleanup preserv
       parts={{
         wrapper: { style: { gap: 9 } },
         tag: { style: { maxWidth: 180 } },
-        remove: { style: { borderRadius: 3 } }
+        remove: { style: { borderRadius: 3 } },
+        error: { style: { fontWeight: 700 } }
       }}
     />
   )
   expect(text(host).readOnly).toBe(true)
   expect(button(host, 'Remove alpha').disabled).toBe(true)
   expect(host.querySelector<HTMLElement>('[data-slot="tags-input-control"]')!.style.gap).toBe('9px')
+  expect(host.querySelector<HTMLElement>('[data-slot="tags-input-error"]')!.style.fontWeight).toBe(
+    '700'
+  )
   await keys('{Backspace}')
   expect(change).not.toHaveBeenCalled()
   await render(<span>Removed</span>)

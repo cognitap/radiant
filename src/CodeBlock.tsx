@@ -14,7 +14,7 @@ import { ScrollArea, type ScrollAreaProps } from './ScrollArea.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { composeAction } from './internal/events.js'
-import type { DistributiveOmit } from './internal/types.js'
+import type { DistributiveOmit, WithoutToggle } from './internal/types.js'
 import type { PartStyle } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
@@ -37,14 +37,9 @@ export type CodeBlockHeaderProps = Native<'div'>
 export type CodeBlockViewportProps = ScrollAreaProps
 export type CodeBlockContentProps = Native<'pre'>
 export type CodeBlockRenderProps = ButtonRenderProps
-type NotToggle = {
-  pressed?: never
-  defaultPressed?: never
-  onPressedChange?: never
-  'aria-pressed'?: never
+export type CodeBlockCopyProps = WithoutToggle<DistributiveOmit<ButtonProps, 'type'>> & {
   type?: never
 }
-export type CodeBlockCopyProps = DistributiveOmit<ButtonProps, keyof NotToggle> & NotToggle
 type Context = {
   code: string
   language?: string

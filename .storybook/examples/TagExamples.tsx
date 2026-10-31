@@ -77,9 +77,8 @@ export function ReviewRecipients(options: TagOptions) {
             key={recipient}
             {...options}
             removeLabel={`Remove ${recipient}`}
-            onRemove={event => {
+            onRemove={() => {
               if (keep && recipient === 'ana@example.com') {
-                event.preventDefault()
                 setMessage('The project lead must receive this report.')
                 return
               }

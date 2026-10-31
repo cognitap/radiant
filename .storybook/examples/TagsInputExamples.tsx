@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Checkbox, Field, TagsInput, type TagsInputProps } from '../../src/index.js'
+import { Button, Checkbox, Field, Input, TagsInput, type TagsInputProps } from '../../src/index.js'
 export type TagsTaskOptions = Pick<
   TagsInputProps,
   | 'controlSize'
@@ -134,6 +134,37 @@ export function ProtectReleaseLabels({
         />
       </Field>
       <output aria-live="polite">{message}</output>
+    </div>
+  )
+}
+export function TagsInputSizeComparison() {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 14rem), 1fr))',
+        gap: '1.5rem'
+      }}
+    >
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'grid', gap: '1rem', alignContent: 'start', minWidth: 0 }}
+        >
+          <Field label={`${controlSize} project`}>
+            <Input
+              defaultValue="Reader study"
+              controlSize={controlSize}
+            />
+          </Field>
+          <Field label={`${controlSize} topics`}>
+            <TagsInput
+              defaultValue={['research']}
+              controlSize={controlSize}
+            />
+          </Field>
+        </div>
+      ))}
     </div>
   )
 }

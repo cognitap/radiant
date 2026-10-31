@@ -17,12 +17,14 @@ import {
   defineTheme,
   type ComboboxProps,
   type MultiSelectProps,
+  type MultiSelectTriggerProps,
+  type MultiSelectClearProps,
   type TagsInputProps,
   type TagProps
 } from '@cognitap/radiant'
 export const multiple = (
   <Combobox
-    multiple
+    type="multiple"
     items={[{ value: 'a', label: 'Alpha' }]}
     value={['a']}
     selectedItems={[{ value: 'remote', label: 'Remote' }]}
@@ -65,7 +67,7 @@ export const entry = (
       wrapper: { style: { gap: 8 } },
       tag: { className: 'custom' },
       remove: { style: { borderRadius: 4 } },
-      message: { className: 'message' }
+      error: { className: 'error' }
     }}
   />
 )
@@ -85,7 +87,7 @@ function Hooks() {
   const single = useCombobox()
   const scalar: string | null | undefined = single?.value
   single?.setValue(null)
-  const multiple = useCombobox({ multiple: true })
+  const multiple = useCombobox({ type: 'multiple' })
   const values: string[] | undefined = multiple?.value
   multiple?.setValue([])
   useMultiSelect()?.setValue(['a'])
@@ -99,19 +101,31 @@ defineTheme({
   components: { tag: { gap: '4px' }, multiSelect: { gap: '8px' }, tagsInput: { gap: '6px' } }
 })
 // @ts-expect-error multiple selection requires an array
-const scalarMultiple: ComboboxProps = { multiple: true, items: [], value: 'a' }
+const scalarMultiple: ComboboxProps = { type: 'multiple', items: [], value: 'a' }
 // @ts-expect-error arrays need explicit multiple mode
 const arraySingle: ComboboxProps = { items: [], value: ['a'] }
 // @ts-expect-error exactly one multiple selection owner
 const mixed: MultiSelectProps = { items: [], value: [], defaultValue: [] }
-// @ts-expect-error the facade cannot disable multiple mode
-const singleFacade: MultiSelectProps = { items: [], multiple: false }
+// @ts-expect-error the facade cannot choose single selection
+const singleFacade: MultiSelectProps = { items: [], type: 'single' }
+// @ts-expect-error multiple mode is type="multiple", not a boolean
+const legacyMultiple: ComboboxProps = { items: [], multiple: true, value: [] }
+// @ts-expect-error load-failure text is errorText; error is a validation message
+const legacyError: MultiSelectProps = { items: [], error: 'Unavailable' }
+// @ts-expect-error a trigger that opens results does not own pressed state
+const pressedTrigger: MultiSelectTriggerProps = { pressed: true }
+// @ts-expect-error clearing is an action, not a toggle
+const pressedClear: MultiSelectClearProps = { 'aria-pressed': true }
+const statusText: MultiSelectProps = { items: [], errorText: 'Unavailable', 'aria-invalid': true }
+void [legacyMultiple, legacyError, pressedTrigger, pressedClear, statusText]
 // @ts-expect-error tags use array state
 const textValue: TagsInputProps = { value: 'design' }
 // @ts-expect-error exactly one TagsInput owner
 const mixedEntry: TagsInputProps = { value: [], defaultValue: [] }
 // @ts-expect-error Input type belongs to free text editing
 const numericEntry: TagsInputProps = { type: 'number' }
+// @ts-expect-error validation feedback is styled through parts.error
+const messagePart: TagsInputProps = { parts: { message: {} } }
 // @ts-expect-error Tag removal must have an explicit accessible label
 const unnamed: TagProps = { children: 'Design', onRemove: () => {} }
 const decorative: TagProps = {
@@ -129,5 +143,6 @@ void singleFacade
 void textValue
 void mixedEntry
 void numericEntry
+void messagePart
 void unnamed
 void decorative

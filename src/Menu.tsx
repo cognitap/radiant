@@ -26,7 +26,7 @@ import {
   type PopoverContentProps
 } from './Popover.js'
 import type { ButtonProps, ButtonRenderProps } from './Button.js'
-import type { DistributiveOmit } from './internal/types.js'
+import type { DistributiveOmit, WithoutToggle } from './internal/types.js'
 import { Separator, type SeparatorProps } from './Separator.js'
 import { useControllableState } from './react/useControllableState.js'
 import type { ValueOwner } from './react/useNativeOwner.js'
@@ -42,10 +42,7 @@ export type MenuProps = PopoverProps
 export type MenuState = PopoverState
 export type MenuRenderProps = ButtonRenderProps
 export type MenuPortalProps = { children?: ReactNode }
-export type MenuTriggerProps = DistributiveOmit<
-  ButtonProps,
-  'id' | 'aria-haspopup' | 'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed'
->
+export type MenuTriggerProps = WithoutToggle<DistributiveOmit<ButtonProps, 'id' | 'aria-haspopup'>>
 export type MenuContentProps = Omit<
   PopoverContentProps,
   'role' | 'aria-labelledby' | 'aria-orientation' | 'tabIndex' | 'initialFocusRef'
