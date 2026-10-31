@@ -33,7 +33,7 @@ test('PasswordInput keeps one native autofill host and a named pressed Button in
   assert.match(html, /data-slot="input-group password-input-wrapper"/)
   assert.match(html, /data-slot="button password-input-toggle"/)
   assert.match(html, /type="button"/)
-  assert.match(html, /aria-pressed="false"/)
+  assert.doesNotMatch(html, / aria-pressed=/)
   assert.match(html, /aria-controls="current"/)
   assert.match(html, /Show password/)
   assert.doesNotMatch(html, /aria-expanded|aria-live|type="hidden"/)
