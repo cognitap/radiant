@@ -5,15 +5,15 @@ import { joinIds } from './internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { CompositeFocusContext, useRovingFocus } from './react/useRovingFocus.js'
+import type { Orientation } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
-export type ToolbarOrientation = 'horizontal' | 'vertical'
 export type ToolbarProps = Omit<
   ComponentProps<'div'>,
   'role' | 'aria-orientation' | 'tabIndex' | 'style' | 'contentEditable' | 'dangerouslySetInnerHTML'
 > &
   AccessibleName & {
-    orientation?: ToolbarOrientation
+    orientation?: Orientation
     loop?: boolean
     style?: ThemeStyle
     'data-slot'?: string

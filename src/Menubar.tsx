@@ -81,13 +81,7 @@ export type MenubarState = {
 export type MenubarMenuProps = { value: string; children?: ReactNode }
 export type MenubarTriggerProps = DistributiveOmit<
   MenuTriggerProps,
-  | 'role'
-  | 'tabIndex'
-  | 'aria-disabled'
-  | 'pressed'
-  | 'defaultPressed'
-  | 'onPressedChange'
-  | 'aria-pressed'
+  'role' | 'tabIndex' | 'aria-disabled'
 >
 export type MenubarContentProps = MenuContentProps
 export type MenubarPortalProps = MenuPortalProps

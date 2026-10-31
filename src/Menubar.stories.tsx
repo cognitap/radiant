@@ -66,11 +66,7 @@ const meta = {
     disabled: { control: 'boolean' },
     pending: { control: 'boolean' }
   },
-  render: args => (
-    <MotionProvider>
-      <DocumentCommands {...args} />
-    </MotionProvider>
-  )
+  render: args => <DocumentCommands {...args} />
 } satisfies Meta<Options>
 export default meta
 type Story = StoryObj<typeof meta>
@@ -217,6 +213,71 @@ export const Default: Story = {
       trigger = canvas.getByRole('menuitem', { name })
     if (trigger.getAttribute('aria-expanded') !== 'true') await userEvent.click(trigger)
     await ready(canvasElement, name)
+  }
+}
+function ControlledBar({
+  dir,
+  loop,
+  initialOpen: _initialOpen,
+  disabled: _disabled,
+  pending: _pending,
+  ...surface
+}: Options) {
+  const [value, setValue] = useState<string | null>(null),
+    [zoom, setZoom] = useState(100)
+  return (
+    <div
+      style={layout}
+      dir={dir}
+    >
+      <Menubar
+        aria-label="Viewer commands"
+        value={value}
+        onValueChange={setValue}
+        loop={loop}
+      >
+        <MenubarMenu value="view">
+          <MenubarTrigger>View</MenubarTrigger>
+          <MenubarPortal>
+            <MenubarContent {...surface}>
+              <MenubarItem onSelect={() => setZoom(current => current + 25)}>Zoom in</MenubarItem>
+              <MenubarItem onSelect={() => setZoom(current => Math.max(25, current - 25))}>
+                Zoom out
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarPortal>
+        </MenubarMenu>
+        <MenubarMenu value="help">
+          <MenubarTrigger>Help</MenubarTrigger>
+          <MenubarPortal>
+            <MenubarContent {...surface}>
+              <MenubarItem onSelect={() => setZoom(100)}>Reset zoom</MenubarItem>
+            </MenubarContent>
+          </MenubarPortal>
+        </MenubarMenu>
+      </Menubar>
+      <Button
+        variant="ghost"
+        onClick={() => setValue('help')}
+      >
+        Open Help menu
+      </Button>
+      <output aria-live="polite">
+        Open menu: {value ?? 'none'}. Zoom {zoom}%.
+      </output>
+    </div>
+  )
+}
+export const Controlled: Story = {
+  render: args => <ControlledBar {...args} />,
+  play: async ({ canvasElement, userEvent }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'View' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Open menu: view.')
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'Zoom in' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Open menu: none. Zoom 125%.')
+    await userEvent.click(canvas.getByRole('button', { name: 'Open Help menu' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Open menu: help.')
   }
 }
 function PlanningBoard({ dir, loop, initialOpen, disabled, pending, ...surface }: Options) {

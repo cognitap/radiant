@@ -11,7 +11,9 @@ import {
   type MenuContentProps,
   type MenuState,
   type MenuRenderProps,
-  type MenuTriggerProps
+  type MenuTriggerProps,
+  type MenuSubTriggerProps,
+  type MenuCheckboxItemProps
 } from '@cognitap/radiant'
 h(
   Menu,
@@ -52,3 +54,9 @@ void [mixed, role, item]
 
 // @ts-expect-error A trigger that opens a menu is not a toggle.
 export const pressedMenuTrigger: MenuTriggerProps = { defaultPressed: true }
+// @ts-expect-error A menu action is not a toggle.
+export const pressedMenuItem: MenuItemProps = { pressed: true }
+// @ts-expect-error A submenu opener is not a toggle.
+export const pressedSubTrigger: MenuSubTriggerProps = { onPressedChange: () => {} }
+// @ts-expect-error A checkbox item has one checked owner.
+export const twoCheckedOwners: MenuCheckboxItemProps = { checked: true, defaultChecked: false }

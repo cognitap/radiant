@@ -431,12 +431,12 @@ export type {
   ToggleGroupItemProps,
   ToggleGroupState,
   ToggleGroupValue,
-  ToggleGroupOrientation,
-  ToggleGroupAppearance
+  ToggleGroupVariant,
+  ToggleGroupRenderProps
 } from './ToggleGroup.js'
 
 export { Toolbar } from './Toolbar.js'
-export type { ToolbarProps, ToolbarOrientation } from './Toolbar.js'
+export type { ToolbarProps } from './Toolbar.js'
 
 export {
   ContextMenu,
@@ -470,7 +470,8 @@ export type {
   ContextMenuSubProps,
   ContextMenuSubTriggerProps,
   ContextMenuSubContentProps,
-  ContextMenuState
+  ContextMenuState,
+  ContextMenuRenderProps
 } from './ContextMenu.js'
 
 export {

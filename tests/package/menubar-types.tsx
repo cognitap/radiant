@@ -19,7 +19,8 @@ import {
   type MenubarProps,
   type MenubarMenuProps,
   type MenubarTriggerProps,
-  type MenubarRenderProps
+  type MenubarRenderProps,
+  type MenubarItemProps
 } from '@cognitap/radiant'
 const div = createRef<HTMLDivElement>(),
   button = createRef<HTMLButtonElement>(),
@@ -116,4 +117,6 @@ export function State() {
   state?.setValue(null)
   return state?.value
 }
-void [both, unnamed, wrongRole, numeric, open, pressed, wrongRef]
+// @ts-expect-error A menubar action is not a toggle.
+const pressedItem: MenubarItemProps = { 'aria-pressed': true }
+void [both, unnamed, wrongRole, numeric, open, pressed, wrongRef, pressedItem]
