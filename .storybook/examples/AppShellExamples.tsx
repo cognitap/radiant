@@ -77,7 +77,7 @@ export function AppShellPreview({
       } else {
         const style = doc.createElement('style')
         style.textContent = (source.textContent ?? '').replace(
-          /url\(\s*(['"]?)([^'"\)]+)\1\s*\)/g,
+          /url\(\s*(['"]?)([^'")]+)\1\s*\)/g,
           (whole, _quote, url: string) => {
             if (/^(data:|blob:|#)/.test(url)) return whole
             try {
