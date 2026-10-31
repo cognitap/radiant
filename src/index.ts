@@ -670,3 +670,5 @@ export {
   type CodeBlockCopyProps,
   type CodeBlockRenderProps
 } from './CodeBlock.js'
+
+export { NumberField, type NumberFieldProps, type NumberFieldFormatOptions } from './NumberField.js'

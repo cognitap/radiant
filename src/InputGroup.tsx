@@ -87,7 +87,7 @@ export function InputGroupInputRoot({
   className,
   controlSize,
   ...props
-}: InputGroupInputProps & { family?: 'password-input' }) {
+}: InputGroupInputProps & { family?: 'password-input' | 'number-field' }) {
   const size = useInputGroup()
   return (
     <InputRoot

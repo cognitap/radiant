@@ -73,7 +73,7 @@ export function InputRoot({
   'aria-required': ariaRequired,
   ...props
 }: InputProps & {
-  family?: 'tags-input' | 'otp-field' | 'input-group-input' | 'password-input'
+  family?: 'tags-input' | 'otp-field' | 'input-group-input' | 'password-input' | 'number-field'
   nativeRequired?: false
 }) {
   const ownsValue = !['checkbox', 'radio', 'file'].includes(type)
@@ -97,8 +97,8 @@ export function InputRoot({
       className={cn(inputVariants(), controlMetrics({ controlSize }), className)}
       data-control-size={controlSize}
       data-slot={
-        family === 'password-input'
-          ? 'input input-group-input password-input'
+        family === 'password-input' || family === 'number-field'
+          ? 'input input-group-input ' + family
           : family
             ? `input ${family}`
             : 'input'

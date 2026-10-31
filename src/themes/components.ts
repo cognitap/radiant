@@ -63,6 +63,7 @@ export const componentRegistry = {
     focusWidth: 'css',
     focusOffset: 'css'
   },
+  numberField: { gap: 'css' },
   passwordInput: { gap: 'css' },
   meter: {
     height: 'css',
