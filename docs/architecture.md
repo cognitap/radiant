@@ -1,14 +1,14 @@
 # Architecture
 
-How Radiant's fifty-nine families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+Radiant's sixty families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
 
-Each piece of behavior has one owner:
+Behavior owners:
 
 | Responsibility                                         | Owner                                           |
 | ------------------------------------------------------ | ----------------------------------------------- |
@@ -18,7 +18,7 @@ Each piece of behavior has one owner:
 | Appearance                                             | Shared tokens and component overrides           |
 | Content, validation, routing, fetching and persistence | The consumer                                    |
 
-Why: the browser already gets keyboard, focus and form behavior right.
+Browsers own keyboard, focus and form semantics.
 Radiant has no headless-library dependency. Select owns its themed listbox and
 item focus, while a visually hidden native select supplies form semantics.
 Select, Combobox and Popover use the local top layer, preserving theme and modal ancestry.
@@ -30,6 +30,7 @@ MultiSelect composes Combobox with `type="multiple"`. TagsInput commits free tex
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 NumberField edits localized text and submits one raw numeric form value.
 Resizable composes Separator for adjacent panel sizing; applications persist layouts.
+AppShell places native landmarks around one Sidebar subtree, reusing Drawer for mobile navigation and optional spring layout.
 NavigationMenu composes Button and Link with one shared spring viewport, preserving navigation semantics.
 Tag composes Badge and Button for removal.
 OTPField keeps one native Input for editing, autofill and forms; its character slots are decorative.
@@ -46,7 +47,7 @@ Import rules:
 5. Server markup matches the first client render. For example, a native dialog
    opens in an effect, not during render.
 
-Extract a shared module only when a policy really repeats.
+Extract shared policy only when it repeats.
 
 ## Composition
 
@@ -112,6 +113,8 @@ host, never a wrapper:
 
 | Family or part                                                                                      | Host                                                |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| AppShell / AppShellHeader / AppShellMain / Sidebar                                                  | div / header / main / nav                           |
+| AppShellSkipLink / SidebarTrigger / SidebarLabel / SidebarContent                                   | Link's a / Button's button / span / div             |
 | AspectRatio                                                                                         | `div`                                               |
 | Toolbar                                                                                             | `div`                                               |
 | ToggleGroup / ToggleGroupItem                                                                       | `div` / Button's `button`                           |
@@ -240,7 +243,7 @@ Restyling or replacing a host is fine as long as these keep working:
 - Decorative indicators stay hidden from assistive technology.
 - Reduced-motion and forced-colors modes still work.
 
-Passing the type check alone does not prove any of this. See
+Types cannot prove these behaviors. See
 [accessibility](accessibility.md) for what to check by hand.
 
 ## Examples and type fixtures
