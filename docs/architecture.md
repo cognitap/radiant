@@ -1,8 +1,8 @@
 # Architecture
 
-How Radiant's fifty-nine families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+Radiant's sixty families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Form, NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -18,7 +18,7 @@ Each piece of behavior has one owner:
 | Appearance                                             | Shared tokens and component overrides           |
 | Content, validation, routing, fetching and persistence | The consumer                                    |
 
-Why: the browser already gets keyboard, focus and form behavior right.
+Browsers own keyboard, focus and form semantics.
 Radiant has no headless-library dependency. Select owns its themed listbox and
 item focus, while a visually hidden native select supplies form semantics.
 Select, Combobox and Popover use the local top layer, preserving theme and modal ancestry.
@@ -46,7 +46,7 @@ Import rules:
 5. Server markup matches the first client render. For example, a native dialog
    opens in an effect, not during render.
 
-Extract a shared module only when a policy really repeats.
+Extract shared policy only when it repeats.
 
 ## Composition
 
@@ -112,6 +112,7 @@ host, never a wrapper:
 
 | Family or part                                                                                      | Host                                                |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Form / FormField / FormError                                                                        | form / Field host / Alert div                       |
 | AspectRatio                                                                                         | `div`                                               |
 | Toolbar                                                                                             | `div`                                               |
 | ToggleGroup / ToggleGroupItem                                                                       | `div` / Button's `button`                           |
@@ -214,6 +215,8 @@ distinct; activation commits, Escape dismisses and restores trigger focus.
 Native reset silently restores uncontrolled selection. Controlled resets stay
 with the owner. User selections emit form change; prop syncs do not.
 
+Form coordinates native validation, custom rules and asynchronous submission without storing values. FormField composes Field; FormError composes Alert.
+
 ## Replacement and events
 
 Button, Link and the Dialog actions accept `render(resolvedProps)`. Forward all
@@ -240,7 +243,7 @@ Restyling or replacing a host is fine as long as these keep working:
 - Decorative indicators stay hidden from assistive technology.
 - Reduced-motion and forced-colors modes still work.
 
-Passing the type check alone does not prove any of this. See
+Types cannot prove these behaviors. See
 [accessibility](accessibility.md) for what to check by hand.
 
 ## Examples and type fixtures

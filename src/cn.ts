@@ -113,6 +113,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-form-gap)',
         'gap-(--rad-navigation-menu-gap)',
         'gap-(--rad-code-block-header-gap)',
         'gap-(--rad-empty-state-gap)',
