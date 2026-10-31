@@ -2,6 +2,7 @@
 
 /* oxlint-disable jsx-a11y/prefer-tag-over-role -- Locale currency and percent editing requires a native text input with spinbutton semantics. */
 
+import { inlineActionClass } from './actionStyles.js'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { InputProps } from './Input.js'
 import { InputGroup, InputGroupAddon, InputGroupInputRoot } from './InputGroup.js'
@@ -281,6 +282,7 @@ export function NumberField({
             disabled={control.disabled || readOnly || (sign === 1 ? atMaximum : atMinimum)}
             data-slot={sign === 1 ? 'number-field-increment' : 'number-field-decrement'}
             className={cn(
+              inlineActionClass,
               actionClass,
               (sign === 1 ? parts?.increment : parts?.decrement)?.className
             )}

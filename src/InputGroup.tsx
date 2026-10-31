@@ -58,8 +58,8 @@ export function InputGroup({
           controlBorderClass,
           controlMetrics({ controlSize }),
           'box-border flex w-full min-w-0 items-center gap-[var(--rad-input-group-gap,0.5rem)] px-[var(--rad-input-group-padding-inline,0.75rem)]',
-          'rounded-[var(--rad-input-group-radius,var(--rad-control-radius,0.5rem))] [border-width:var(--rad-input-group-border-width,var(--rad-control-border-width,1px))] border-solid [border-color:var(--rad-input-group-border-color,var(--_rad-control-border))]',
-          'bg-[var(--rad-input-group-background,var(--rad-color-surface,oklch(1_0_0)))] [color:var(--rad-input-group-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
+          'rounded-[var(--rad-input-group-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)] [border-width:var(--rad-input-group-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-control-border-style,solid)] [box-shadow:var(--rad-control-field-shadow,none)] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)] [border-color:var(--rad-input-group-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
+          'bg-[var(--rad-input-group-background,var(--rad-control-field-background,var(--rad-color-surface,oklch(1_0_0))))] [color:var(--rad-input-group-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
           'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--_rad-control-font-size)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
           'focus-within:outline-solid focus-within:[outline-width:var(--rad-input-group-focus-width,var(--rad-focus-width,2px))] focus-within:[outline-offset:var(--rad-input-group-focus-offset,var(--rad-focus-offset,2px))] focus-within:[outline-color:var(--rad-input-group-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
           'has-[>[data-invalid]]:[border-color:var(--rad-input-group-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
@@ -95,7 +95,7 @@ export function InputGroupInputRoot({
       family={family ?? 'input-group-input'}
       controlSize={controlSize ?? size}
       className={cn(
-        'flex-1 rounded-none px-0 [border-width:0] [box-shadow:none] bg-transparent disabled:[background:transparent] focus-visible:[outline-width:0]',
+        'flex-1 rounded-none px-0 [border-width:0] [box-shadow:none] [backdrop-filter:none] bg-transparent disabled:[background:transparent] focus-visible:[outline-width:0]',
         'h-[calc(var(--rad-input-height,var(--_rad-control-height))_-_2*var(--rad-input-group-border-width,var(--rad-control-border-width,1px)))]',
         className
       )}
@@ -112,7 +112,7 @@ export function InputGroupTextarea({ className, controlSize, ...props }: InputGr
       family="input-group-textarea"
       controlSize={controlSize ?? size}
       className={cn(
-        'flex-1 rounded-none px-0 [border-width:0] [box-shadow:none] bg-transparent disabled:[background:transparent] focus-visible:[outline-width:0]',
+        'flex-1 rounded-none px-0 [border-width:0] [box-shadow:none] [backdrop-filter:none] bg-transparent disabled:[background:transparent] focus-visible:[outline-width:0]',
         className
       )}
     />

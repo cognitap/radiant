@@ -1,5 +1,6 @@
 'use client'
 
+import { inlineActionClass } from './actionStyles.js'
 import { useEffect, useRef, useState } from 'react'
 import type { InputProps } from './Input.js'
 import { InputGroup, InputGroupAddon, InputGroupInputRoot } from './InputGroup.js'
@@ -104,6 +105,7 @@ export function PasswordInput({
           aria-controls={control.id}
           data-slot="password-input-toggle"
           className={cn(
+            inlineActionClass,
             'h-[calc(var(--_rad-control-height)_-_2*var(--rad-input-group-border-width,var(--rad-control-border-width,1px)))] min-h-0 shrink-0 px-2',
             parts?.toggle?.className
           )}

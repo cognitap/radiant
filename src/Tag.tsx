@@ -1,5 +1,6 @@
 'use client'
 
+import { inlineActionClass } from './actionStyles.js'
 import type { MouseEvent, ReactNode } from 'react'
 import { Badge, type BadgeProps } from './Badge.js'
 import { Button } from './Button.js'
@@ -48,7 +49,7 @@ export function Tag({
         disabled={disabled}
         pending={pending}
         data-slot="tag-remove"
-        className={cn('size-6 min-h-0 shrink-0 p-0', parts?.remove?.className)}
+        className={cn(inlineActionClass, 'size-6 min-h-0 shrink-0 p-0', parts?.remove?.className)}
         style={parts?.remove?.style}
         onClick={onRemove}
       >
