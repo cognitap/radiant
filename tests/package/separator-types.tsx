@@ -1,8 +1,9 @@
 import { createElement as h, createRef } from 'react'
-import { Separator, type SeparatorProps } from '@cognitap/radiant'
+import { Separator, type Orientation, type SeparatorProps } from '@cognitap/radiant'
+const vertical: Orientation = 'vertical'
 h(Separator, {
   ref: createRef<HTMLHRElement>(),
-  orientation: 'vertical',
+  orientation: vertical,
   decorative: true,
   style: { height: '3rem', '--rad-separator-thickness': '2px' }
 })
