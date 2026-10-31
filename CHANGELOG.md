@@ -11,6 +11,7 @@
 - PasswordInput's reveal button no longer sets `aria-pressed`; its Show and Hide label alone says what it does.
 - ButtonGroup keeps a caller's `data-slot` tokens after `button-group` instead of dropping them.
 - DrawerHandle accepts `aria-labelledby` as its accessible name, as well as `aria-label`.
+- **Breaking:** CommandTrigger's props are DialogTrigger's, so toggle props are rejected the same way. Before: an object holding `pressed: true` could be typed as `CommandTriggerProps`. After: a type error. Runtime is unchanged; the trigger already ignored them.
 
 ## 0.0.65
 
