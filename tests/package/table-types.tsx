@@ -24,7 +24,6 @@ h(TableHeader, { scope: 'row', ref: createRef<HTMLTableCellElement>() }, 'Jordan
 h(TableContainer, { 'aria-labelledby': 'members-heading' })
 // @ts-expect-error Scroll regions require a name.
 h(TableContainer, {})
-// @ts-expect-error Choose one naming source.
 h(TableContainer, { 'aria-label': 'A', 'aria-labelledby': 'B' })
 // @ts-expect-error Table retains native table semantics.
 h(Table, { role: 'grid' })

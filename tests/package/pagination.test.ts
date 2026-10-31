@@ -69,7 +69,14 @@ test('Pagination preserves native URLs, current-page semantics and explicit unav
     renderToStaticMarkup(h(Pagination, { 'aria-labelledby': 'pages' })),
     /aria-label=/
   )
-  assert.throws(() => renderToStaticMarkup(h(Pagination, { 'aria-label': ' ' })), /navigation name/)
+  assert.match(
+    renderToStaticMarkup(h(Pagination, { 'aria-labelledby': ' ' })),
+    /aria-label="Pagination"/
+  )
+  assert.throws(
+    () => renderToStaticMarkup(h(Pagination, { 'aria-label': ' ' })),
+    /Pagination requires aria-label or aria-labelledby/
+  )
   assert.throws(
     () =>
       renderToStaticMarkup(

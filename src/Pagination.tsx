@@ -8,6 +8,7 @@ import {
 import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
+import { requireAccessibleName } from './internal/accessibleName.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 type Part<Host extends 'nav' | 'ol' | 'li' | 'span'> = Omit<
   ComponentProps<Host>,
@@ -28,16 +29,15 @@ export type PaginationEllipsisProps = Omit<Part<'span'>, 'aria-hidden' | 'tabInd
 const itemClass =
   'min-w-[var(--rad-pagination-item-min-width,2rem)] rounded-[var(--rad-pagination-radius,var(--rad-control-radius,0.5rem))]'
 export function Pagination({ className, ...props }: PaginationProps) {
-  const labelledBy = props['aria-labelledby']?.trim(),
-    label = props['aria-label']
-  if (label !== undefined && !label.trim())
-    throw new TypeError('Pagination needs a nonempty navigation name.')
+  const labelledBy = props['aria-labelledby']?.trim() || undefined
+  const label = props['aria-label'] ?? (labelledBy ? undefined : 'Pagination')
+  requireAccessibleName('Pagination', { 'aria-label': label, 'aria-labelledby': labelledBy })
   const nativeProps = { ...props, role: undefined }
   return (
     <nav
       {...nativeProps}
-      aria-label={label ?? (labelledBy ? undefined : 'Pagination')}
-      aria-labelledby={labelledBy || undefined}
+      aria-label={label}
+      aria-labelledby={labelledBy}
       data-slot={joinIds('pagination', props['data-slot'])}
       className={cn('min-w-0 max-w-full', className)}
     />
@@ -70,7 +70,6 @@ export function PaginationLink({
   current = false,
   variant = current ? 'solid' : 'ghost',
   tone = current ? 'accent' : 'neutral',
-  controlSize = 'small',
   className,
   ...props
 }: PaginationLinkProps) {
@@ -80,7 +79,6 @@ export function PaginationLink({
       identity="pagination-link"
       variant={variant}
       tone={tone}
-      controlSize={controlSize}
       aria-current={current ? 'page' : undefined}
       className={cn(itemClass, className)}
     />
@@ -112,7 +110,6 @@ export function PaginationButton({
   current = false,
   variant = current ? 'solid' : 'ghost',
   tone = current ? 'accent' : 'neutral',
-  controlSize = 'small',
   className,
   ...props
 }: PaginationButtonProps) {
@@ -121,7 +118,6 @@ export function PaginationButton({
       {...props}
       variant={variant}
       tone={tone}
-      controlSize={controlSize}
       aria-current={current ? 'page' : undefined}
       data-slot={joinIds('pagination-button', props['data-slot'])}
       className={cn(itemClass, className)}

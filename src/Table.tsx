@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react'
 import { cn } from './cn.js'
+import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 type Part<
@@ -17,10 +18,7 @@ export type TableContainerProps = Omit<
   Part<'section'>,
   'aria-label' | 'aria-labelledby' | 'tabIndex'
 > &
-  (
-    | { 'aria-label': string; 'aria-labelledby'?: never }
-    | { 'aria-label'?: never; 'aria-labelledby': string }
-  )
+  AccessibleName
 const cellClass =
   'px-[var(--rad-table-padding-inline,var(--rad-control-small-padding-inline,0.75rem))] py-[var(--rad-table-padding-block,0.625rem)] text-start align-top [overflow-wrap:anywhere]'
 export function Table({ className, ...props }: TableProps) {
@@ -120,17 +118,12 @@ export function TableCell({ className, ...props }: TableCellProps) {
 }
 /** An optional named keyboard scroll surface; Table itself remains the native table. */
 export function TableContainer({ className, ...props }: TableContainerProps) {
-  const label = props['aria-label']?.trim(),
-    labelledBy = props['aria-labelledby']?.trim()
-  if ((!label && !labelledBy) || (label && labelledBy))
-    throw new TypeError('TableContainer needs exactly one nonempty accessible name.')
+  requireAccessibleName('TableContainer', props)
   // Keyboard focus enables native scrolling of this named overflow surface.
   const nativeProps = { ...props, role: undefined, tabIndex: 0 }
   return (
     <section
       {...nativeProps}
-      aria-label={label || undefined}
-      aria-labelledby={labelledBy || undefined}
       data-slot={joinIds('table-container', props['data-slot'])}
       className={cn(
         'min-w-0 max-w-full overflow-auto rounded-[var(--rad-table-radius,var(--rad-surface-radius,0.75rem))] border-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] border-solid border-[var(--rad-table-border-color,var(--rad-color-border))] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus)] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] focus-visible:[outline-style:var(--rad-focus-style,solid)] forced-colors:border-[CanvasText]',

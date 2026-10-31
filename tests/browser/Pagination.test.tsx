@@ -2,6 +2,7 @@ import { act, createRef, StrictMode, useState } from 'react'
 import { expect, test } from 'vitest'
 import { commands } from 'vitest/browser'
 import {
+  Button,
   Pagination,
   PaginationList,
   PaginationItem,
@@ -174,4 +175,32 @@ test('themes, caller overrides and forced colors keep current links visible in a
   await commands.emulatePreferences({ forcedColors: 'active', reducedMotion: 'reduce' })
   expect(getComputedStyle(host.querySelector('a')!).animationName).toBe('none')
   expect(host.querySelector('[aria-current="page"]')).not.toBeNull()
+})
+
+test('page links and buttons default to the medium control size shared with Button', async () => {
+  const { host } = await mount(
+    <>
+      <Button>Reference</Button>
+      <Pagination>
+        <PaginationList>
+          <PaginationItem>
+            <PaginationLink
+              href="#1"
+              aria-label="Page 1"
+            >
+              1
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationButton aria-label="Page 2">2</PaginationButton>
+          </PaginationItem>
+        </PaginationList>
+      </Pagination>
+    </>
+  )
+  const [reference, link, button] = host.querySelectorAll<HTMLElement>('a, button')
+  for (const page of [link!, button!]) {
+    expect(page.dataset.controlSize).toBe('medium')
+    expect(page.getBoundingClientRect().height).toBe(reference!.getBoundingClientRect().height)
+  }
 })

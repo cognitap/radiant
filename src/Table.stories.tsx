@@ -1,18 +1,13 @@
-import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { Table } from './index.js'
 import {
-  Table,
-  TableCaption,
-  TableHead,
-  TableBody,
-  TableFoot,
-  TableRow,
-  TableHeader,
-  TableCell,
-  TableContainer,
-  Link,
-  Button
-} from './index.js'
+  InvoiceTotals,
+  MemberActions,
+  NoMatchingInvoices,
+  TeamTable,
+  WideSignups,
+  type TableTaskOptions
+} from '../.storybook/examples/TableExamples.js'
 const meta = {
   title: 'Components/Table',
   component: Table,
@@ -20,68 +15,30 @@ const meta = {
     docs: {
       description: {
         component:
-          'Native table parts with captions, column and row headers, native ids/headers and an optional named keyboard scroll region. Cell links and buttons keep their normal semantics. Applications own content, complex header associations, naming, sorting, filtering and virtualization; no grid behavior is added.'
+          'Native table parts: Table, TableCaption, TableHead, TableBody, TableFoot, TableRow, TableHeader and TableCell. TableCaption names the table. TableHeader defaults to scope="col"; pass scope="row" for row headers. Wrap a wide table in TableContainer, a named, keyboard-scrollable region. Links and buttons inside cells keep their own semantics. Applications own sorting, filtering, selection and virtualization; no grid behavior is added.'
       }
     }
+  },
+  argTypes: {
+    className: { control: 'text' },
+    style: { control: 'object' }
   }
-} satisfies Meta<typeof Table>
+} satisfies Meta<TableTaskOptions>
 export default meta
 type Story = StoryObj<typeof meta>
-function Members({ wide = false, custom = false }: { wide?: boolean; custom?: boolean }) {
-  const [selected, setSelected] = useState('None')
-  return (
-    <div style={{ width: '32rem', maxWidth: '100%' }}>
-      <TableContainer aria-label="Scrollable team members">
-        <Table
-          style={{
-            minWidth: wide ? '42rem' : undefined,
-            ...(custom
-              ? {
-                  '--rad-table-padding-inline': '1.25rem',
-                  '--rad-table-padding-block': '1rem',
-                  '--rad-table-font-size': '1rem'
-                }
-              : {})
-          }}
-        >
-          <TableCaption>Team members</TableCaption>
-          <TableHead>
-            <TableRow>
-              <TableHeader>Name</TableHeader>
-              <TableHeader>Profile</TableHeader>
-              <TableHeader>Action</TableHeader>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {['Jordan Rivera', 'Sam Lee'].map(name => (
-              <TableRow key={name}>
-                <TableHeader scope="row">{name}</TableHeader>
-                <TableCell>
-                  <Link href="#profile">View {name.split(' ')[0]}</Link>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    controlSize="small"
-                    variant="outline"
-                    onClick={() => setSelected(name)}
-                  >
-                    Select {name.split(' ')[0]}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-          <TableFoot>
-            <TableRow>
-              <TableCell colSpan={3}>2 members</TableCell>
-            </TableRow>
-          </TableFoot>
-        </Table>
-      </TableContainer>
-      <output>Selected: {selected}</output>
-    </div>
-  )
+export const Default: Story = { render: options => <TeamTable {...options} /> }
+export const AligningNumbers: Story = { render: options => <InvoiceTotals {...options} /> }
+export const ActionsInCells: Story = { render: options => <MemberActions {...options} /> }
+export const ScrollingWideTables: Story = { render: options => <WideSignups {...options} /> }
+export const EmptyTable: Story = { render: options => <NoMatchingInvoices {...options} /> }
+export const Customisation: Story = {
+  args: {
+    style: {
+      '--rad-table-padding-inline': '1.25rem',
+      '--rad-table-padding-block': '1rem',
+      '--rad-table-font-size': '1rem',
+      '--rad-table-header-background': 'transparent'
+    }
+  },
+  render: options => <InvoiceTotals {...options} />
 }
-export const Default: Story = { render: () => <Members /> }
-export const Overflow: Story = { render: () => <Members wide /> }
-export const Customisation: Story = { render: () => <Members custom /> }
