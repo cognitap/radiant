@@ -141,6 +141,12 @@ export interface SharedTokens {
     cornerShape: string
     borderWidth: string
     borderStyle: string
+    action: ActionTokens
+    field: FieldTokens
+    indicator: IndicatorTokens
+    track: TrackTokens
+    selected: SelectedTokens
+    item: ItemTokens
   }
   surface: {
     canvas: string
@@ -152,7 +158,9 @@ export interface SharedTokens {
     gap: string
     shadow: string
     overlayShadow: string
+    overlayBackground: string
     backdrop: string
+    backdropFilter: string
   }
   focus: { width: string; offset: string; style: string }
   motion: {
@@ -162,6 +170,10 @@ export interface SharedTokens {
     releaseEase: string
     colorDuration: string
     disclosureDuration: string
+    pressScale: number
+    pressShiftX: string
+    pressShiftY: string
+    hoverLift: string
   }
   spacing: {
     labelGap: string
@@ -171,6 +183,57 @@ export interface SharedTokens {
     footerGap: string
   }
   state: { disabledOpacity: number }
+}
+
+/** Everything pressable: Button, its composed parts and the pressables that are not Buttons. */
+interface ActionTokens {
+  fontFamily: string
+  fontWeight: string | number
+  textTransform: string
+  letterSpacing: string
+  borderColor: string
+  shadow: string
+  shadowPressed: string
+  highlight: number
+  sheen: number
+  radiusPressed: string
+  cornerShapePressed: string
+}
+
+/** Wells you type or pick into: Input, Textarea, select triggers, OTP slots. */
+interface FieldTokens {
+  background: string
+  borderColor: string
+  shadow: string
+  backdropFilter: string
+}
+
+/** Checkbox and Radio boxes, Switch tracks, and the thumbs of Switch and Slider. */
+interface IndicatorTokens {
+  shadow: string
+  checkedShadow: string
+  thumbShadow: string
+}
+
+/** Progress, Meter and Slider rails, Skeleton and scrollbar thumbs. */
+interface TrackTokens {
+  background: string
+  borderWidth: string
+  shadow: string
+}
+
+/** The chosen member of a set: Tabs, ToggleGroup, Pagination, NavLink. */
+interface SelectedTokens {
+  background: string
+  foreground: string
+  borderColor: string
+  shadow: string
+}
+
+/** Rows inside a container: menu, listbox and command items. */
+interface ItemTokens {
+  highlightBackground: string
+  highlightForeground: string
 }
 
 interface ControlMetrics {
@@ -239,7 +302,35 @@ const light: SharedTokens = {
     radius: '0.5rem',
     cornerShape: 'round',
     borderWidth: '1px',
-    borderStyle: 'solid'
+    borderStyle: 'solid',
+    action: {
+      fontFamily: 'var(--rad-typography-roles-ui-label-family)',
+      fontWeight: 'var(--rad-typography-roles-ui-label-weight)',
+      textTransform: 'none',
+      letterSpacing: 'var(--rad-typography-roles-ui-label-letter-spacing)',
+      borderColor: 'initial',
+      shadow: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+      shadowPressed: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+      highlight: 0,
+      sheen: 0,
+      radiusPressed: 'initial',
+      cornerShapePressed: 'initial'
+    },
+    field: {
+      background: 'var(--rad-color-surface)',
+      borderColor: 'initial',
+      shadow: 'none',
+      backdropFilter: 'none'
+    },
+    indicator: { shadow: 'none', checkedShadow: 'none', thumbShadow: '0 1px 2px rgb(0 0 0 / 0.2)' },
+    track: { background: 'var(--rad-color-neutral)', borderWidth: '0px', shadow: 'none' },
+    selected: {
+      background: 'initial',
+      foreground: 'initial',
+      borderColor: 'initial',
+      shadow: 'initial'
+    },
+    item: { highlightBackground: 'initial', highlightForeground: 'initial' }
   },
   surface: {
     canvas: 'oklch(1 0 0)',
@@ -251,7 +342,9 @@ const light: SharedTokens = {
     gap: '1rem',
     shadow: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
     overlayShadow: '0 24px 64px -16px rgb(0 0 0 / 0.3)',
-    backdrop: 'rgb(0 0 0 / 0.45)'
+    overlayBackground: 'var(--rad-color-surface)',
+    backdrop: 'rgb(0 0 0 / 0.45)',
+    backdropFilter: 'none'
   },
   focus: { width: '2px', offset: '2px', style: 'solid' },
   motion: {
@@ -260,7 +353,11 @@ const light: SharedTokens = {
     releaseDuration: '160ms',
     releaseEase: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
     colorDuration: '150ms',
-    disclosureDuration: '150ms'
+    disclosureDuration: '150ms',
+    pressScale: 0.97,
+    pressShiftX: '0px',
+    pressShiftY: '0px',
+    hoverLift: '0px'
   },
   spacing: {
     labelGap: '0.5rem',

@@ -86,8 +86,9 @@ function useOwner() {
 }
 const rootClass =
   'relative isolate inline-flex w-fit max-w-full flex-wrap gap-[var(--rad-toggle-group-gap,0.25rem)]'
+// Segments and the indicator sit inside the track, so their corners are concentric with it.
 const segmentedClass =
-  'rounded-[var(--rad-toggle-group-radius,var(--rad-control-radius,0.5rem))] bg-[var(--rad-toggle-group-background,var(--rad-color-neutral,oklch(0.955_0.004_286)))] p-[var(--rad-toggle-group-padding,0.25rem)]'
+  '[--_rad-segment-radius:max(0px,calc(var(--rad-toggle-group-radius,var(--rad-control-radius,0.5rem))-var(--rad-toggle-group-padding,0.25rem)))] [--rad-button-radius:var(--_rad-segment-radius)] [--rad-button-radius-pressed:var(--_rad-segment-radius)] rounded-[var(--rad-toggle-group-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)] bg-[var(--rad-toggle-group-background,var(--rad-control-track-background,var(--rad-color-neutral,oklch(0.955_0.004_286))))] [border:var(--rad-control-track-border-width,0px)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))] [box-shadow:var(--rad-control-track-shadow,none)] p-[var(--rad-toggle-group-padding,0.25rem)]'
 
 export function ToggleGroup(allProps: ToggleGroupProps) {
   const {
@@ -250,7 +251,7 @@ export function ToggleGroupItem({
       className={cn(
         'relative z-10',
         group.variant === 'segmented' &&
-          'bg-transparent hover:bg-transparent active:bg-transparent disabled:bg-transparent aria-busy:bg-transparent [background-image:none] shadow-none inset-shadow-none [border-color:transparent]',
+          'bg-transparent hover:bg-transparent active:bg-transparent disabled:bg-transparent aria-busy:bg-transparent [background-image:none] shadow-none active:shadow-none inset-shadow-none aria-pressed:inset-ring-0 [border-color:transparent]',
         className
       )}
     />
@@ -347,7 +348,7 @@ function Indicator({
       <span
         data-slot="toggle-group-indicator"
         className={cn(
-          'block size-full rounded-[var(--rad-toggle-group-indicator-radius,var(--rad-control-radius,0.5rem))] bg-[var(--rad-toggle-group-indicator-color,var(--rad-color-surface,white))] [box-shadow:var(--rad-toggle-group-indicator-shadow,var(--rad-surface-shadow,0_1px_3px_#0002))] forced-colors:bg-[Canvas] forced-colors:[outline:1px_solid_Highlight]',
+          'box-border block size-full rounded-[var(--rad-toggle-group-indicator-radius,var(--_rad-segment-radius,0.25rem))] [corner-shape:var(--rad-control-corner-shape,round)] bg-[var(--rad-toggle-group-indicator-color,var(--rad-control-selected-background,var(--rad-color-surface,white)))] [border:var(--rad-control-border-width,1px)_solid_var(--rad-control-selected-border-color,transparent)] [box-shadow:var(--rad-toggle-group-indicator-shadow,var(--rad-control-selected-shadow,var(--rad-surface-shadow,0_1px_3px_#0002)))] forced-colors:bg-[Canvas] forced-colors:[outline:1px_solid_Highlight]',
           part?.className
         )}
         style={part?.style}

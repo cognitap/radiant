@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+- Add role tokens so a theme styles every family that plays a role at once: `control.action`, `control.field`, `control.indicator`, `control.track`, `control.selected`, `control.item`, `surface.overlayBackground`, `surface.backdropFilter` and the `motion` press keys. Button, ButtonGroup, ToggleGroup and Pagination read them.
+- Draw pressed toggles, the current page and the segmented ToggleGroup indicator with `control.selected`. Segments and the indicator now use corners concentric with their track.
+- Keep ButtonGroup's inner corners square while a segment is pressed.
+- Rewrite the example themes so each shows a distinct design language, and add Neon and Editorial. Breaking: `expressive` is removed from `@cognitap/radiant/examples`; start from `soft` or `jelly` instead.
+
 ## 0.0.70
 
 - Add an optional charts entry with SVG line, bar, area and pie charts, palette-derived colors, native data tables and keyboard-reachable tooltips.

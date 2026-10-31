@@ -1,6 +1,9 @@
 import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, spring } from './preset-values.js'
 
+// Soft UI: borderless filled wells, diffuse shadows and raised white pills on a tinted track.
+const ink = (alpha: number) => `rgb(30 50 110 / ${alpha})`
+
 export const softDefinition: ThemeDefinition = {
   id: 'soft-squircle',
   name: 'Soft squircle',
@@ -56,19 +59,51 @@ export const softDefinition: ThemeDefinition = {
       radius: '1rem',
       cornerShape: 'squircle',
       borderWidth: '1px',
-      borderStyle: 'solid'
+      borderStyle: 'solid',
+      action: {
+        fontWeight: 800,
+        shadow: `0 1px 2px ${ink(0.12)}, 0 4px 12px -6px ${ink(0.3)}`,
+        shadowPressed: `0 1px 1px ${ink(0.12)}`,
+        highlight: 0.22,
+        sheen: 0.08,
+        radiusPressed: '0.625rem'
+      },
+      field: {
+        background: 'var(--rad-color-neutral)',
+        borderColor: 'transparent',
+        shadow: 'none',
+        backdropFilter: 'none'
+      },
+      indicator: {
+        shadow: `inset 0 1px 2px ${ink(0.12)}`,
+        checkedShadow: `0 2px 6px -2px ${ink(0.45)}`,
+        thumbShadow: `0 2px 6px ${ink(0.3)}, 0 0 0 0.5px ${ink(0.08)}`
+      },
+      track: { background: 'var(--rad-color-neutral)', borderWidth: '0px', shadow: 'none' },
+      selected: {
+        background: 'var(--rad-color-surface)',
+        foreground: 'var(--rad-color-foreground)',
+        borderColor: 'transparent',
+        shadow: `0 2px 8px -2px ${ink(0.28)}, 0 0 0 0.5px ${ink(0.08)}`
+      },
+      item: {
+        highlightBackground: 'var(--rad-color-neutral)',
+        highlightForeground: 'var(--rad-color-neutral-foreground)'
+      }
     },
     surface: {
       canvas: '#f3f6ff',
-      radius: '1rem',
+      radius: '1.5rem',
       cornerShape: 'squircle',
-      borderWidth: '1px',
+      borderWidth: '0px',
       borderStyle: 'solid',
       padding: '1.5rem',
       gap: '1rem',
-      shadow: '0 1px 3px rgb(0 0 0 / 0.08)',
-      overlayShadow: '0 20px 60px rgb(0 0 0 / 0.22)',
-      backdrop: 'rgb(15 12 25 / 0.45)'
+      shadow: `0 1px 2px ${ink(0.06)}, 0 12px 32px -16px ${ink(0.3)}`,
+      overlayShadow: `0 1px 3px ${ink(0.08)}, 0 24px 64px -20px ${ink(0.45)}`,
+      overlayBackground: 'var(--rad-color-surface)',
+      backdrop: 'rgb(16 24 42 / 0.35)',
+      backdropFilter: 'none'
     },
     focus: {
       width: '2px',
@@ -81,22 +116,12 @@ export const softDefinition: ThemeDefinition = {
       releaseDuration: '520ms',
       releaseEase: spring,
       colorDuration: '150ms',
-      disclosureDuration: '180ms'
+      disclosureDuration: '240ms',
+      pressScale: 0.96
     },
     state: { disabledOpacity: 0.5 }
   },
-  components: {
-    button: {
-      radiusPressed: '0.375rem',
-      fontWeight: 800,
-      shadow: '0 1px 1px rgb(0 0 0 / 0.12)',
-      shadowPressed: '0 1px 1px rgb(0 0 0 / 0.12)',
-      sheen: 0.08,
-      glow: '55%',
-      highlight: 0.22,
-      pressScale: 0.96
-    }
-  },
+  components: { button: { glow: '55%' } },
   modes: {
     dark: {
       tokens: {
@@ -121,9 +146,9 @@ export const softDefinition: ThemeDefinition = {
         },
         surface: {
           canvas: '#10182a',
-          shadow: '0 1px 4px rgb(0 0 0 / 0.4)',
-          overlayShadow: '0 20px 60px rgb(0 0 0 / 0.65)',
-          backdrop: 'rgb(0 0 0 / 0.65)'
+          shadow: '0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.7)',
+          overlayShadow: '0 1px 3px rgb(0 0 0 / 0.4), 0 24px 64px -20px rgb(0 0 0 / 0.8)',
+          backdrop: 'rgb(0 0 0 / 0.6)'
         }
       }
     }

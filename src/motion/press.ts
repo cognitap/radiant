@@ -78,8 +78,11 @@ export function bindPressMotion(
         if (event.button !== 0 || event.isPrimary === false || pressed) return
         pressed = { pointerId: event.pointerId }
       }
+      const styles = view.getComputedStyle(node)
       const scale = Number(
-        view.getComputedStyle(node).getPropertyValue('--rad-button-press-scale').trim() || '.97'
+        styles.getPropertyValue('--rad-button-press-scale').trim() ||
+          styles.getPropertyValue('--rad-motion-press-scale').trim() ||
+          '.97'
       )
       spring.to(Number.isFinite(scale) && scale >= 0.5 && scale <= 1 ? scale : 0.97)
     },

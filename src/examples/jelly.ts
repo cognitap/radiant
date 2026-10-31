@@ -1,6 +1,10 @@
 import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, spring } from './preset-values.js'
 
+// Clay: every raised part has a darker bottom lip and a soft drop; every well is pressed in.
+const shade = 'rgb(0 0 0 / 0.14)'
+const well = 'rgb(101 52 88 / 0.16)'
+
 export const jellyDefinition: ThemeDefinition = {
   id: 'jelly',
   name: 'Jelly',
@@ -56,19 +60,55 @@ export const jellyDefinition: ThemeDefinition = {
       radius: '1.5rem',
       cornerShape: 'squircle',
       borderWidth: '1px',
-      borderStyle: 'solid'
+      borderStyle: 'solid',
+      action: {
+        fontWeight: 700,
+        shadow: `inset 0 -4px 0 0 ${shade}, 0 12px 24px -10px rgb(0 0 0 / 0.3)`,
+        shadowPressed: `inset 0 -2px 0 0 ${shade}, 0 6px 12px -6px rgb(0 0 0 / 0.3)`,
+        highlight: 0.35,
+        sheen: 0.12,
+        radiusPressed: '1.25rem'
+      },
+      field: {
+        background: 'color-mix(in oklab, var(--rad-color-neutral) 55%, var(--rad-color-surface))',
+        borderColor: 'transparent',
+        shadow: `inset 0 3px 6px ${well}, inset 0 -1px 0 rgb(255 255 255 / 0.7)`,
+        backdropFilter: 'none'
+      },
+      indicator: {
+        shadow: `inset 0 2px 4px ${well}`,
+        checkedShadow: `inset 0 -3px 0 ${shade}, 0 4px 8px -4px rgb(0 0 0 / 0.3)`,
+        thumbShadow: `inset 0 -3px 0 ${shade}, 0 4px 10px -4px rgb(0 0 0 / 0.35)`
+      },
+      track: {
+        background: 'var(--rad-color-neutral)',
+        borderWidth: '0px',
+        shadow: `inset 0 2px 4px ${well}`
+      },
+      selected: {
+        background: 'var(--rad-color-accent)',
+        foreground: 'var(--rad-color-accent-foreground)',
+        borderColor: 'transparent',
+        shadow: `inset 0 -3px 0 ${shade}, 0 8px 16px -8px rgb(0 0 0 / 0.35)`
+      },
+      item: {
+        highlightBackground: 'var(--rad-color-neutral)',
+        highlightForeground: 'var(--rad-color-neutral-foreground)'
+      }
     },
     surface: {
       canvas: '#f5f0ff',
-      radius: '1.5rem',
+      radius: '2rem',
       cornerShape: 'squircle',
-      borderWidth: '1px',
+      borderWidth: '0px',
       borderStyle: 'solid',
       padding: '1.5rem',
       gap: '1rem',
-      shadow: '0 1px 3px rgb(0 0 0 / 0.08)',
-      overlayShadow: '0 20px 60px rgb(0 0 0 / 0.22)',
-      backdrop: 'rgb(15 12 25 / 0.45)'
+      shadow: `inset 0 -6px 0 ${well}, 0 18px 36px -18px rgb(101 52 88 / 0.45)`,
+      overlayShadow: `inset 0 -6px 0 ${well}, 0 24px 60px -16px rgb(101 52 88 / 0.5)`,
+      overlayBackground: 'var(--rad-color-surface)',
+      backdrop: 'rgb(26 17 30 / 0.45)',
+      backdropFilter: 'none'
     },
     focus: {
       width: '4px',
@@ -81,20 +121,10 @@ export const jellyDefinition: ThemeDefinition = {
       releaseDuration: '700ms',
       releaseEase: spring,
       colorDuration: '150ms',
-      disclosureDuration: '180ms'
+      disclosureDuration: '220ms',
+      pressScale: 0.9
     },
     state: { disabledOpacity: 0.5 }
-  },
-  components: {
-    button: {
-      radiusPressed: '1.25rem',
-      fontWeight: 700,
-      shadow: 'inset 0 -4px 0 0 rgb(0 0 0 / 0.14), 0 12px 24px -10px rgb(0 0 0 / 0.3)',
-      shadowPressed: 'inset 0 -2px 0 0 rgb(0 0 0 / 0.14), 0 6px 12px -6px rgb(0 0 0 / 0.3)',
-      sheen: 0.12,
-      highlight: 0.35,
-      pressScale: 0.9
-    }
   },
   modes: {
     dark: {
@@ -120,8 +150,8 @@ export const jellyDefinition: ThemeDefinition = {
         },
         surface: {
           canvas: '#1a111e',
-          shadow: '0 1px 4px rgb(0 0 0 / 0.4)',
-          overlayShadow: '0 20px 60px rgb(0 0 0 / 0.65)',
+          shadow: 'inset 0 -6px 0 rgb(0 0 0 / 0.25), 0 18px 36px -18px rgb(0 0 0 / 0.7)',
+          overlayShadow: 'inset 0 -6px 0 rgb(0 0 0 / 0.25), 0 24px 60px -16px rgb(0 0 0 / 0.8)',
           backdrop: 'rgb(0 0 0 / 0.65)'
         }
       }

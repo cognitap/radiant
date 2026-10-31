@@ -135,7 +135,7 @@ export function Button({
     'data-control-size': controlSize,
     className: cn(
       actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }),
-      'aria-pressed:inset-ring-2 aria-pressed:inset-ring-current forced-colors:aria-pressed:underline forced-colors:aria-pressed:decoration-double',
+      'aria-pressed:inset-ring-2 aria-pressed:inset-ring-[color:var(--rad-control-selected-border-color,currentColor)] forced-colors:aria-pressed:underline forced-colors:aria-pressed:decoration-double',
       spatial && springPressClass,
       motionOff && !callerOwnsScale && offPressClass,
       className

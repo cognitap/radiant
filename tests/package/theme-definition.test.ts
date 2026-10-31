@@ -3,9 +3,10 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { defineTheme, defaultTheme } from '@cognitap/radiant'
 import {
-  expressive,
+  editorial,
   glass,
   jelly,
+  neon,
   radiant,
   sharp,
   soft,
@@ -77,7 +78,7 @@ test('a fresh named default resets every component slot to fallback semantics', 
   assert.deepEqual(fresh.modes, defaultTheme.modes)
   for (const mode of ['light', 'dark']) {
     const resets = Object.entries(fresh.modes[mode]).filter(([, value]) => value === 'initial')
-    assert.equal(resets.length, 626)
+    assert.equal(resets.length, 636)
     for (const variable of [
       '--rad-button-font-family',
       '--rad-button-text-transform',
@@ -101,9 +102,29 @@ test('a fresh named default resets every component slot to fallback semantics', 
 test('the preset registry has stable identities and readonly theme values', () => {
   assert.deepEqual(
     themes.map(theme => theme.id),
-    ['radiant', 'default', 'soft-squircle', 'expressive', 'glass', 'sharp-3d', 'jelly', 'ticket']
+    [
+      'radiant',
+      'default',
+      'soft-squircle',
+      'sharp-3d',
+      'glass',
+      'jelly',
+      'ticket',
+      'neon',
+      'editorial'
+    ]
   )
-  assert.deepEqual(themes, [radiant, defaultTheme, soft, expressive, glass, sharp, jelly, ticket])
+  assert.deepEqual(themes, [
+    radiant,
+    defaultTheme,
+    soft,
+    sharp,
+    glass,
+    jelly,
+    ticket,
+    neon,
+    editorial
+  ])
   assert.ok(Object.isFrozen(themes))
   assert.throws(() => themes.push(defaultTheme), TypeError)
   for (const theme of themes) {
@@ -128,11 +149,12 @@ test('the core entry ships only the baseline theme', async () => {
     'themes',
     'radiant',
     'soft',
-    'expressive',
     'glass',
     'sharp',
     'jelly',
-    'ticket'
+    'ticket',
+    'neon',
+    'editorial'
   ])
     assert.equal(core[name], undefined, `${name} belongs to @cognitap/radiant/examples`)
 })
@@ -166,8 +188,13 @@ test('every preset materialises complete light and dark tokens without legacy va
   assert.match(glass.modes.light['--rad-surface-canvas'], /gradient\(/)
   assert.match(glass.modes.dark['--rad-surface-canvas'], /gradient\(/)
   assert.equal(sharp.modes.light['--rad-typography-family'], 'system-ui, sans-serif')
-  assert.match(sharp.modes.light['--rad-button-font-family'], /Archivo Black/)
-  assert.equal(ticket.modes.light['--rad-button-text-transform'], 'uppercase')
+  assert.match(sharp.modes.light['--rad-control-action-font-family'], /Archivo Black/)
+  assert.equal(ticket.modes.light['--rad-control-action-text-transform'], 'uppercase')
+  assert.equal(
+    editorial.modes.light['--rad-control-selected-shadow'],
+    'inset 0 -2px 0 0 var(--rad-color-accent)'
+  )
+  assert.equal(neon.modes.dark['--rad-control-corner-shape'], 'bevel')
   assert.equal(ticket.modes.light['--rad-typography-body-weight'], 400)
 })
 
@@ -230,6 +257,8 @@ test('theme authoring validates unknown keys, identities, modes and value kinds 
     { ...valid, tokens: { typography: { bodyWeight: Number.NaN } } },
     { ...valid, components: { button: { pressScale: Number.POSITIVE_INFINITY } } },
     { ...valid, components: { button: { sheen: 1.1 } } },
+    { ...valid, tokens: { control: { action: { highlight: 2 } } } },
+    { ...valid, tokens: { motion: { pressScale: '0.9' } } },
     { ...valid, components: { input: null } },
     { ...valid, modes: { dark: null } },
     null
@@ -238,7 +267,12 @@ test('theme authoring validates unknown keys, identities, modes and value kinds 
   assert.doesNotThrow(() =>
     defineTheme({
       ...valid,
-      tokens: { color: { accent: 'var(--brand-accent)' }, typography: { bodyWeight: '450' } },
+      tokens: {
+        color: { accent: 'var(--brand-accent)' },
+        typography: { bodyWeight: '450' },
+        control: { action: { highlight: 0.4, fontWeight: 700 }, selected: { shadow: 'none' } },
+        motion: { pressScale: 0.94 }
+      },
       components: { radioGroup: { gap: '1rem' }, button: { pressScale: 0.95, sheen: 0 } }
     })
   )

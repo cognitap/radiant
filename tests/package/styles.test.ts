@@ -50,7 +50,7 @@ test('the customization entry generates library and application utilities once w
     css,
     /--(?:color-primary|color-background|radius-control|ease-spring|ease-snap|ease-settle)\s*:/
   )
-  for (const selector of [/\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
+  for (const selector of [/\.bg-\\\(--_btn-fill\\\)(?=\s*[{,])/g, /\.px-8(?=\s*[{,])/g]) {
     assert.equal(css.match(selector)?.length, 1, `Expected one generated ${selector}`)
   }
   assert.doesNotMatch(css, /@(import|theme|source|tailwind)\b/)

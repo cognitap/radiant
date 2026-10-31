@@ -19,7 +19,7 @@ export type ToolbarProps = Omit<
     'data-slot'?: string
   }
 const toolbarClass =
-  'inline-flex w-fit max-w-full flex-wrap gap-[var(--rad-toolbar-gap,0.25rem)] p-[var(--rad-toolbar-padding,0px)] rounded-[var(--rad-toolbar-radius,var(--rad-control-radius,0.5rem))] bg-[var(--rad-toolbar-background,transparent)]'
+  'inline-flex w-fit max-w-full flex-wrap gap-[var(--rad-toolbar-gap,0.25rem)] p-[var(--rad-toolbar-padding,0px)] rounded-[var(--rad-toolbar-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)] bg-[var(--rad-toolbar-background,transparent)]'
 /** One native composite; child actions retain their own activation and state. */
 export function Toolbar({
   ref,

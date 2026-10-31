@@ -100,7 +100,7 @@ export const Comparison: Story = {
           if (!button.matches(':hover, :active')) {
             await expect(styles.backgroundColor).toBe(normalize('color', background).color)
           }
-          if (theme.id === 'sharp-3d') {
+          if (theme.id === 'sharp-3d' && variant !== 'ghost neutral') {
             const border = normalize('color', styles.getPropertyValue('--rad-color-border')).color
             await expect(styles.borderTopColor).toBe(border)
             await expect(styles.boxShadow).toContain('4px 4px 0px')

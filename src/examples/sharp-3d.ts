@@ -1,6 +1,9 @@
 import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, settle } from './preset-values.js'
 
+// Neo-brutalism: square ink outlines and one hard offset shadow for everything that is raised.
+const offset = (size: number) => `${size}px ${size}px 0 0 var(--rad-color-border)`
+
 export const sharpDefinition: ThemeDefinition = {
   id: 'sharp-3d',
   name: 'Sharp 3D',
@@ -56,7 +59,37 @@ export const sharpDefinition: ThemeDefinition = {
       radius: '0px',
       cornerShape: 'round',
       borderWidth: '2px',
-      borderStyle: 'solid'
+      borderStyle: 'solid',
+      action: {
+        fontFamily: "'Archivo Black', system-ui, sans-serif",
+        fontWeight: 400,
+        textTransform: 'uppercase',
+        letterSpacing: '0.02em',
+        borderColor: 'var(--rad-color-border)',
+        shadow: offset(4),
+        shadowPressed: offset(1),
+        highlight: 0,
+        sheen: 0,
+        radiusPressed: '0px'
+      },
+      field: {
+        background: 'var(--rad-color-surface)',
+        borderColor: 'var(--rad-color-border)',
+        shadow: offset(4),
+        backdropFilter: 'none'
+      },
+      indicator: { shadow: offset(2), checkedShadow: offset(2), thumbShadow: offset(2) },
+      track: { background: 'var(--rad-color-surface)', borderWidth: '2px', shadow: offset(2) },
+      selected: {
+        background: 'var(--rad-color-accent)',
+        foreground: 'var(--rad-color-accent-foreground)',
+        borderColor: 'var(--rad-color-border)',
+        shadow: offset(2)
+      },
+      item: {
+        highlightBackground: 'var(--rad-color-accent)',
+        highlightForeground: 'var(--rad-color-accent-foreground)'
+      }
     },
     surface: {
       canvas: '#f4f1ea',
@@ -66,13 +99,15 @@ export const sharpDefinition: ThemeDefinition = {
       borderStyle: 'solid',
       padding: '1.5rem',
       gap: '1rem',
-      shadow: '4px 4px 0 var(--rad-color-border)',
-      overlayShadow: '0 20px 60px rgb(0 0 0 / 0.22)',
-      backdrop: 'rgb(15 12 25 / 0.45)'
+      shadow: offset(6),
+      overlayShadow: offset(8),
+      overlayBackground: 'var(--rad-color-surface)',
+      backdrop: 'rgb(244 241 234 / 0.7)',
+      backdropFilter: 'none'
     },
     focus: {
       width: '2px',
-      offset: '0px',
+      offset: '3px',
       style: 'solid'
     },
     motion: {
@@ -81,29 +116,12 @@ export const sharpDefinition: ThemeDefinition = {
       releaseDuration: '120ms',
       releaseEase: settle,
       colorDuration: '150ms',
-      disclosureDuration: '180ms'
+      disclosureDuration: '180ms',
+      pressScale: 1,
+      pressShiftX: '3px',
+      pressShiftY: '3px'
     },
     state: { disabledOpacity: 0.5 }
-  },
-  components: {
-    button: {
-      borderColor: 'var(--rad-color-border)',
-      radiusPressed: '0px',
-      textTransform: 'uppercase',
-      fontWeight: 400,
-      letterSpacing: '0.02em',
-      shadow: '4px 4px 0 0 var(--rad-color-border)',
-      shadowPressed: '1px 1px 0 0 var(--rad-color-border)',
-      ghostShadow: '4px 4px 0 0 var(--rad-color-border)',
-      ghostShadowPressed: '1px 1px 0 0 var(--rad-color-border)',
-      sheen: 0,
-      highlight: 0,
-      glow: '0%',
-      pressScale: 1,
-      pressShift: '3px',
-      pressShiftX: '3px',
-      fontFamily: "'Archivo Black', system-ui, sans-serif"
-    }
   },
   modes: {
     light: {
@@ -132,9 +150,7 @@ export const sharpDefinition: ThemeDefinition = {
         },
         surface: {
           canvas: '#171419',
-          shadow: '4px 4px 0 var(--rad-color-border)',
-          overlayShadow: '0 20px 60px rgb(0 0 0 / 0.65)',
-          backdrop: 'rgb(0 0 0 / 0.65)'
+          backdrop: 'rgb(23 20 25 / 0.75)'
         }
       }
     }
