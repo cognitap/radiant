@@ -70,6 +70,6 @@ test('Table retains native caption, header relationships and ordinary interactiv
   assert.doesNotMatch(named, /aria-label=/)
   assert.throws(
     () => renderToStaticMarkup(h(TableContainer, { 'aria-label': ' ' })),
-    /accessible name/
+    /TableContainer requires aria-label or aria-labelledby/
   )
 })

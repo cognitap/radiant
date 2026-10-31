@@ -1,5 +1,6 @@
 import { createRef, StrictMode, useState } from 'react'
 import { expect, test } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { commands } from 'vitest/browser'
 import {
   Table,
@@ -137,4 +138,29 @@ test('named native overflow surface scrolls by keyboard and caller themes preser
   await commands.emulatePreferences({ forcedColors: 'active', reducedMotion: 'reduce' })
   expect(getComputedStyle(wideHost.querySelector('table')!).display).toBe('table')
   expect(wideRegion.tabIndex).toBe(0)
+})
+test('TableContainer takes its name like every other named host', async () => {
+  const { host } = await mount(
+    <>
+      <h2 id="members-heading">Members</h2>
+      <TableContainer
+        aria-label="Scrollable members"
+        aria-labelledby="members-heading"
+      >
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell>Jordan</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  )
+  const region = host.querySelector('section')!
+  expect(region.getAttribute('aria-labelledby')).toBe('members-heading')
+  expect(region.getAttribute('aria-label')).toBe('Scrollable members')
+  expect(() => renderToStaticMarkup(<TableContainer aria-label=" " />)).toThrow(
+    'TableContainer requires aria-label or aria-labelledby.'
+  )
 })
