@@ -39,8 +39,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Chromium and system dependencies
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install headless Chromium
+        run: pnpm exec playwright install --only-shell chromium
 
       - name: Check library, package, Storybook and Radiant light and dark
         run: pnpm check
