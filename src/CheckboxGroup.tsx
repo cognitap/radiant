@@ -222,14 +222,7 @@ export function CheckboxGroup({
       )}
       parts={{
         ...fieldParts,
-        // A rendered legend sits outside the fieldset grid, so the gap needs a margin.
-        label: {
-          ...fieldParts.label,
-          className: cn(
-            'max-w-full mb-[var(--rad-fieldset-gap,var(--rad-spacing-group-gap,0.75rem))]',
-            fieldParts.label?.className
-          )
-        }
+        label: { ...fieldParts.label, className: cn('max-w-full', fieldParts.label?.className) }
       }}
       data-control-size={controlSize}
     >
