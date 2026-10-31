@@ -9,6 +9,7 @@ import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
+import type { StateOwner } from './react/useNativeOwner.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -67,7 +68,7 @@ const collapsibleContentVariants = cva([
 ])
 
 export type CollapsibleProps = Omit<ComponentProps<'details'>, 'open' | 'onToggle' | 'style'> &
-  ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
+  StateOwner<'open', boolean> & {
     style?: ThemeStyle
     /** Height/marker presentation only. Native disclosure state never waits for motion. */
     motion?: 'inherit' | 'off'

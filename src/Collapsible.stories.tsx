@@ -5,15 +5,7 @@ import {
   CollapsibleHeightExample
 } from '../.storybook/examples/CollapsibleExamples.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import {
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Field,
-  Input,
-  type ThemeStyle
-} from './index.js'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger, type ThemeStyle } from './index.js'
 import { themes } from './examples/index.js'
 
 function ExclusiveGroup() {
@@ -56,40 +48,6 @@ function NestedSections() {
   )
 }
 
-function InsideForm() {
-  const [summary, setSummary] = useState('No save yet')
-  return (
-    <form
-      onSubmit={event => {
-        event.preventDefault()
-        const note = new FormData(event.currentTarget).get('note')
-        setSummary(typeof note === 'string' && note !== '' ? note : 'Empty')
-      }}
-      style={{
-        display: 'grid',
-        justifyItems: 'start',
-        gap: '0.75rem',
-        width: 'min(24rem, calc(100vw - 2rem))',
-        maxWidth: '100%'
-      }}
-    >
-      <Collapsible defaultOpen>
-        <CollapsibleTrigger>Note</CollapsibleTrigger>
-        <CollapsibleContent>
-          <Field label="Note">
-            <Input
-              defaultValue="Pack the blue set"
-              name="note"
-            />
-          </Field>
-        </CollapsibleContent>
-      </Collapsible>
-      <Button type="submit">Save</Button>
-      <p style={{ margin: 0 }}>{summary}</p>
-    </form>
-  )
-}
-
 function HeldOpen() {
   const [open, setOpen] = useState(false)
   return (
@@ -110,7 +68,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native `<details>` root with CollapsibleTrigger as `<summary>` and CollapsibleContent as its panel. Root className/style/ref target details; part props target their host elements. Slots are collapsible, collapsible-trigger and collapsible-content. open/onOpenChange control state; defaultOpen initializes it, and name uses native exclusive grouping.'
+          'A native `<details>` root with CollapsibleTrigger as `<summary>` and CollapsibleContent as its panel. Root className/style/ref target details; part props target their host elements. Slots are collapsible, collapsible-trigger and collapsible-content. open/onOpenChange control state; defaultOpen initializes it, name uses native exclusive grouping, and motion="off" turns off height and marker motion.'
       }
     }
   }
@@ -130,16 +88,44 @@ export const Default: Story = {
   )
 }
 
-export const States: Story = {
+export const OpenByDefault: Story = {
   render: () => (
     <Collapsible defaultOpen>
-      <CollapsibleContent>The content can sit before the summary.</CollapsibleContent>
-      <CollapsibleTrigger>Already open</CollapsibleTrigger>
+      <CollapsibleTrigger>Shipping</CollapsibleTrigger>
+      <CollapsibleContent>Ships in two days.</CollapsibleContent>
     </Collapsible>
   )
 }
 
-export const Composition: Story = { render: () => <InsideForm /> }
+export const Controlled: Story = {
+  render: () => <HeldOpen />
+}
+
+export const InsideAForm: Story = {
+  render: (_, { globals }) => (
+    <CollapsibleSettingsExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  )
+}
+
+export const Exclusive: Story = {
+  render: () => <ExclusiveGroup />
+}
+
+export const Nested: Story = {
+  render: () => <NestedSections />
+}
+
+export const Motion: Story = {
+  render: (_, { globals }) => (
+    <CollapsibleHeightExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  )
+}
 
 export const Customisation: Story = {
   render: () => {
@@ -154,34 +140,4 @@ export const Customisation: Story = {
       </Collapsible>
     )
   }
-}
-
-export const Exclusive: Story = {
-  render: () => <ExclusiveGroup />
-}
-
-export const Nested: Story = {
-  render: () => <NestedSections />
-}
-
-export const Controlled: Story = {
-  render: () => <HeldOpen />
-}
-
-export const AdvancedSettings: Story = {
-  render: (_, { globals }) => (
-    <CollapsibleSettingsExample
-      theme={themes.find(theme => theme.id === globals.theme)}
-      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
-    />
-  )
-}
-
-export const HeightPlayground: Story = {
-  render: (_, { globals }) => (
-    <CollapsibleHeightExample
-      theme={themes.find(theme => theme.id === globals.theme)}
-      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
-    />
-  )
 }

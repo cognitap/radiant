@@ -52,21 +52,36 @@ function ShippingSections({ multiple = false }: { multiple?: boolean }) {
   return <Accordion defaultValue="shipping">{sections}</Accordion>
 }
 
-function DisabledSection() {
+function DisabledSections() {
   return (
-    <Accordion defaultValue="shipping">
-      <AccordionItem value="shipping">
-        <AccordionTrigger>Shipping</AccordionTrigger>
-        <AccordionContent>Ships in two days.</AccordionContent>
-      </AccordionItem>
-      <AccordionItem
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
+      <Accordion defaultValue="shipping">
+        <AccordionItem value="shipping">
+          <AccordionTrigger>Shipping</AccordionTrigger>
+          <AccordionContent>Ships in two days.</AccordionContent>
+        </AccordionItem>
+        <AccordionItem
+          disabled
+          value="returns"
+        >
+          <AccordionTrigger>Returns</AccordionTrigger>
+          <AccordionContent>Returns are free for 30 days.</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      <Accordion
+        defaultValue="billing"
         disabled
-        value="returns"
       >
-        <AccordionTrigger>Returns</AccordionTrigger>
-        <AccordionContent>Returns are free for 30 days.</AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        <AccordionItem value="billing">
+          <AccordionTrigger>Billing</AccordionTrigger>
+          <AccordionContent>Invoices are locked while the order ships.</AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="address">
+          <AccordionTrigger>Address</AccordionTrigger>
+          <AccordionContent>The delivery address is locked.</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   )
 }
 
@@ -143,7 +158,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Accordion renders a div with single or multiple value/defaultValue and onValueChange. AccordionItem builds on Collapsible; triggers remain summaries, with heading level 3 by default. Root className/style/ref target the accordion div (data-slot="accordion"). Item/trigger/content expose accordion-item, accordion-trigger and accordion-content alongside the underlying Collapsible identities. Use token selectors ([data-slot~=...]); styles and refs target the actual details/summary/div hosts. disabled suppresses item activation.'
+          'Accordion renders a div with single or multiple value/defaultValue and onValueChange. AccordionItem builds on Collapsible; triggers remain summaries, with heading level 3 by default. Root className/style/ref target the accordion div (data-slot="accordion"). Item/trigger/content expose accordion-item, accordion-trigger and accordion-content alongside the underlying Collapsible identities. Use token selectors ([data-slot~=...]); styles and refs target the actual details/summary/div hosts. Single mode lets the open item close again, leaving the value null. disabled on the root or an item suppresses activation.'
       }
     }
   }
@@ -156,9 +171,39 @@ export const Default: Story = {
   render: () => <ShippingSections />
 }
 
-export const States: Story = { render: () => <DisabledSection /> }
+export const Multiple: Story = {
+  render: () => <ShippingSections multiple />
+}
 
-export const Composition: Story = { render: () => <InsideForm /> }
+export const Controlled: Story = {
+  render: () => <HeldValue />
+}
+
+export const Disabled: Story = { render: () => <DisabledSections /> }
+
+export const InsideAForm: Story = { render: () => <InsideForm /> }
+
+export const Nested: Story = {
+  render: () => <NestedSection />
+}
+
+export const FieldGuide: Story = {
+  render: (_, { globals }) => (
+    <AccordionGuideExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  )
+}
+
+export const Motion: Story = {
+  render: (_, { globals }) => (
+    <AccordionSelectionExample
+      theme={themes.find(theme => theme.id === globals.theme)}
+      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
+    />
+  )
+}
 
 export const Customisation: Story = {
   render: () => {
@@ -175,34 +220,4 @@ export const Customisation: Story = {
       </Accordion>
     )
   }
-}
-
-export const Multiple: Story = {
-  render: () => <ShippingSections multiple />
-}
-
-export const Controlled: Story = {
-  render: () => <HeldValue />
-}
-
-export const Nested: Story = {
-  render: () => <NestedSection />
-}
-
-export const FieldGuide: Story = {
-  render: (_, { globals }) => (
-    <AccordionGuideExample
-      theme={themes.find(theme => theme.id === globals.theme)}
-      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
-    />
-  )
-}
-
-export const SelectionPlayground: Story = {
-  render: (_, { globals }) => (
-    <AccordionSelectionExample
-      theme={themes.find(theme => theme.id === globals.theme)}
-      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
-    />
-  )
 }

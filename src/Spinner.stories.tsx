@@ -22,7 +22,22 @@ export const Default: Story = {
     </div>
   )
 }
-export const Standalone: Story = { args: { label: 'Loading account', controlSize: 'large' } }
+export const Standalone: Story = { args: { label: 'Loading account' } }
+export const PendingAction: Story = { render: () => <Button pending>Save settings</Button> }
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <Spinner
+          key={controlSize}
+          controlSize={controlSize}
+          label={`Loading, ${controlSize}`}
+        />
+      ))}
+    </div>
+  )
+}
 export const Customisation: Story = {
   args: {
     label: 'Loading files',
@@ -36,4 +51,3 @@ export const Customisation: Story = {
   }
 }
 export const MotionOff: Story = { args: { label: 'Loading account', motion: 'off' } }
-export const PendingAction: Story = { render: () => <Button pending>Save settings</Button> }

@@ -99,3 +99,22 @@ test('narrow layouts stay bounded and unknown progress has a static non-color cu
   expect(getComputedStyle(progress).borderTopStyle).toBe('dashed')
   expect(getComputedStyle(progress).animationName).toBe('none')
 })
+test('fallback content matches Meter and prefers the value text', async () => {
+  const tree = (valueText?: string, value: number | null = 2) => (
+    <Progress
+      aria-label="Upload"
+      value={value}
+      max={5}
+      aria-valuetext={valueText}
+    />
+  )
+  const { host, render } = await mount(tree())
+  const progress = () => host.querySelector('progress')!
+  expect(progress().textContent).toBe('2 of 5')
+  await render(tree('Two files uploaded'))
+  expect(progress().textContent).toBe('Two files uploaded')
+  await render(tree('Preparing upload', null))
+  expect(progress().textContent).toBe('Preparing upload')
+  await render(tree(undefined, null))
+  expect(progress().textContent).toBe('')
+})
