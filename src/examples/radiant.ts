@@ -56,11 +56,28 @@ export const radiantDefinition: ThemeDefinition = {
       radius: '0.5rem',
       cornerShape: 'round',
       borderWidth: '1px',
-      borderStyle: 'solid'
+      borderStyle: 'solid',
+      action: {
+        fontWeight: 550,
+        shadow: '0 1px 2px 0 rgb(16 40 34 / 0.08)',
+        shadowPressed: '0 0 0 0 rgb(16 40 34 / 0)'
+      },
+      field: { shadow: '0 1px 1px 0 rgb(16 40 34 / 0.04)' },
+      indicator: { thumbShadow: '0 1px 3px rgb(16 40 34 / 0.25)' },
+      selected: {
+        background: 'var(--rad-color-surface)',
+        foreground: 'var(--rad-color-foreground)',
+        borderColor: 'transparent',
+        shadow: '0 1px 2px rgb(16 40 34 / 0.1), 0 0 0 1px rgb(16 40 34 / 0.06)'
+      },
+      item: {
+        highlightBackground: 'var(--rad-color-neutral)',
+        highlightForeground: 'var(--rad-color-neutral-foreground)'
+      }
     },
     surface: {
       canvas: '#f7faf9',
-      radius: '0.5rem',
+      radius: '0.75rem',
       cornerShape: 'round',
       borderWidth: '1px',
       borderStyle: 'solid',
@@ -84,16 +101,6 @@ export const radiantDefinition: ThemeDefinition = {
       disclosureDuration: '180ms'
     },
     state: { disabledOpacity: 0.5 }
-  },
-  components: {
-    button: {
-      fontWeight: 550,
-      shadow: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
-      shadowPressed: '0 1px 2px 0 rgb(0 0 0 / 0.06)',
-      sheen: 0,
-      highlight: 0,
-      pressScale: 0.97
-    }
   },
   modes: {
     dark: {

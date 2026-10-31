@@ -1,6 +1,9 @@
 import { defineTheme, type ThemeDefinition } from '../themes/defineTheme.js'
 import { snap, settle } from './preset-values.js'
 
+// Printed stub: inked notched controls, scooped dashed tickets, flat stamps and inverted ink for selection.
+const stamp = 'color-mix(in oklab, var(--rad-color-border) 40%, transparent)'
+
 export const ticketDefinition: ThemeDefinition = {
   id: 'ticket',
   name: 'Ticket',
@@ -53,10 +56,39 @@ export const ticketDefinition: ThemeDefinition = {
         fontSize: '0.9375rem',
         indicatorSize: '1.25rem'
       },
-      radius: '0.875rem',
-      cornerShape: 'scoop',
-      borderWidth: '1.5px',
-      borderStyle: 'dashed'
+      radius: '0.375rem',
+      cornerShape: 'notch',
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      action: {
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        shadow: `0 2px 0 0 ${stamp}`,
+        shadowPressed: 'none',
+        highlight: 0,
+        sheen: 0,
+        radiusPressed: '0.5rem',
+        cornerShapePressed: 'round'
+      },
+      field: {
+        background: 'var(--rad-color-surface)',
+        borderColor: 'var(--rad-color-foreground)',
+        shadow: 'none',
+        backdropFilter: 'none'
+      },
+      indicator: { shadow: 'none', checkedShadow: 'none', thumbShadow: 'none' },
+      track: { background: 'transparent', borderWidth: '1.5px', shadow: 'none' },
+      selected: {
+        background: 'var(--rad-color-foreground)',
+        foreground: 'var(--rad-color-surface)',
+        borderColor: 'var(--rad-color-foreground)',
+        shadow: 'none'
+      },
+      item: {
+        highlightBackground: 'var(--rad-color-foreground)',
+        highlightForeground: 'var(--rad-color-surface)'
+      }
     },
     surface: {
       canvas: '#f7ead9',
@@ -66,9 +98,11 @@ export const ticketDefinition: ThemeDefinition = {
       borderStyle: 'dashed',
       padding: '1.5rem',
       gap: '1rem',
-      shadow: '0 2px 0 color-mix(in oklab, var(--rad-color-border) 40%, transparent)',
-      overlayShadow: '0 20px 60px rgb(0 0 0 / 0.22)',
-      backdrop: 'rgb(15 12 25 / 0.45)'
+      shadow: `0 2px 0 ${stamp}`,
+      overlayShadow: `0 3px 0 ${stamp}, 0 20px 40px -20px rgb(60 30 10 / 0.35)`,
+      overlayBackground: 'var(--rad-color-surface)',
+      backdrop: 'rgb(60 40 20 / 0.4)',
+      backdropFilter: 'none'
     },
     focus: {
       width: '2px',
@@ -81,31 +115,11 @@ export const ticketDefinition: ThemeDefinition = {
       releaseDuration: '200ms',
       releaseEase: settle,
       colorDuration: '150ms',
-      disclosureDuration: '180ms'
+      disclosureDuration: '180ms',
+      pressScale: 1,
+      pressShiftY: '2px'
     },
     state: { disabledOpacity: 0.5 }
-  },
-  components: {
-    // Small indicators need a legible box rather than the full-size ticket cutout.
-    checkbox: {
-      radius: '0.125rem',
-      cornerShape: 'round',
-      borderWidth: '2px',
-      borderStyle: 'solid'
-    },
-    button: {
-      radiusPressed: '0.5rem',
-      textTransform: 'uppercase',
-      cornerShapePressed: 'round',
-      fontWeight: 600,
-      letterSpacing: '0.08em',
-      shadow: '0 2px 0 0 color-mix(in oklab, var(--rad-color-border) 40%, transparent)',
-      shadowPressed: '0 0 #0000',
-      sheen: 0,
-      highlight: 0,
-      pressScale: 1,
-      pressShift: '2px'
-    }
   },
   modes: {
     dark: {
@@ -131,8 +145,7 @@ export const ticketDefinition: ThemeDefinition = {
         },
         surface: {
           canvas: '#1d1712',
-          shadow: '0 2px 0 color-mix(in oklab, var(--rad-color-border) 40%, transparent)',
-          overlayShadow: '0 20px 60px rgb(0 0 0 / 0.65)',
+          overlayShadow: `0 3px 0 ${stamp}, 0 20px 40px -20px rgb(0 0 0 / 0.7)`,
           backdrop: 'rgb(0 0 0 / 0.65)'
         }
       }

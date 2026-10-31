@@ -856,11 +856,21 @@ test('a card groups content without becoming a control', () => {
 test('themes are shared presets selected by stable identity with resolved modes', () => {
   assert.deepEqual(
     themes.map(theme => theme.name),
-    ['Radiant', 'Default', 'Soft squircle', 'Expressive', 'Glass', 'Sharp 3D', 'Jelly', 'Ticket']
+    [
+      'Radiant',
+      'Default',
+      'Soft squircle',
+      'Sharp 3D',
+      'Glass',
+      'Jelly',
+      'Ticket',
+      'Neon',
+      'Editorial'
+    ]
   )
   const ticket = themes.find(theme => theme.id === 'ticket')
   assert.equal(ticket?.modes.light['--rad-color-accent'], '#a43e19')
-  assert.equal(ticket?.modes.light['--rad-control-corner-shape'], 'scoop')
+  assert.equal(ticket?.modes.light['--rad-surface-corner-shape'], 'scoop')
   assert.notEqual(
     ticket?.modes.light['--rad-color-accent'],
     ticket?.modes.dark['--rad-color-accent']
@@ -1021,7 +1031,7 @@ test('default styles and the optional reset are compiled and self-contained', ()
   const styles = readExport('styles.css')
   assert.match(styles, /--rad-color-accent\s*:/)
   assert.doesNotMatch(styles, /--(?:color-primary|color-background|radius-control|ease-spring)\s*:/)
-  assert.match(styles, /\.bg-\\\(--_btn-bg\\\)(?=\s*[{,])/)
+  assert.match(styles, /\.bg-\\\(--_btn-fill\\\)(?=\s*[{,])/)
   assert.doesNotMatch(styles, /(?:^|[{}])\s*h1\s*,\s*h2\s*,\s*h3\b/)
   assert.match(readExport('reset.css'), /h1\s*,\s*h2\s*,\s*h3\b/)
 })

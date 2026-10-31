@@ -71,6 +71,12 @@ function validateScalar(
   throw new TypeError(`Invalid theme value at ${path}.`)
 }
 
+function tokenValueKind(key: string) {
+  if (key === 'disabledOpacity' || key === 'highlight' || key === 'sheen') return 'opacity'
+  if (key === 'pressScale') return 'number'
+  return key.endsWith('Weight') || key === 'weight' ? 'weight' : 'css'
+}
+
 function validateTokens(value: unknown, baseline: object, path: string) {
   assertRecord(value, path)
   assertKeys(value, baseline, path)
@@ -80,15 +86,7 @@ function validateTokens(value: unknown, baseline: object, path: string) {
     if (typeof defaultValue === 'object' && defaultValue !== null) {
       validateTokens(item, defaultValue, `${path}.${key}`)
     } else {
-      validateScalar(
-        item,
-        key === 'disabledOpacity'
-          ? 'opacity'
-          : key.endsWith('Weight') || key === 'weight'
-            ? 'weight'
-            : 'css',
-        `${path}.${key}`
-      )
+      validateScalar(item, tokenValueKind(key), `${path}.${key}`)
     }
   }
 }
