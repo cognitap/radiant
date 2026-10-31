@@ -294,7 +294,7 @@ test('a segmented ToggleGroup follows changes to its Toolbar ancestor native dir
     >
       <ToggleGroup
         aria-label="View"
-        appearance="segmented"
+        variant="segmented"
         defaultValue="b"
         motion="off"
       >

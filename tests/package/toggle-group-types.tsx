@@ -11,7 +11,7 @@ export const examples = (
     <ToggleGroup
       aria-label="View"
       defaultValue="list"
-      appearance="segmented"
+      variant="segmented"
       ref={createRef<HTMLDivElement>()}
       parts={{ indicator: { style: { '--rad-toggle-group-indicator-color': 'white' } } }}
       onValueChange={value => {
@@ -48,7 +48,7 @@ const multiple: Extract<ToggleGroupProps, { type: 'multiple' }> = {
   'aria-label': 'Formatting',
   type: 'multiple',
   // @ts-expect-error Multiple selection has no singular sliding indicator.
-  appearance: 'segmented'
+  variant: 'segmented'
 }
 const item: ToggleGroupItemProps = {
   value: 'a',
