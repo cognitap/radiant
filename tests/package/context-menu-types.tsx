@@ -12,7 +12,9 @@ import {
   ContextMenuSubContent,
   useContextMenu,
   type ContextMenuProps,
-  type ContextMenuTriggerProps
+  type ContextMenuTriggerProps,
+  type ContextMenuItemProps,
+  type ContextMenuRenderProps
 } from '@cognitap/radiant'
 const div = createRef<HTMLDivElement>(),
   button = createRef<HTMLButtonElement>()
@@ -65,4 +67,11 @@ export function ContextState() {
   state?.setOpen(false)
   return state?.contentId
 }
-void [twoOwners, noName, wrongRef, wrongRole]
+// @ts-expect-error A context menu action is not a toggle.
+const pressedItem: ContextMenuItemProps = { pressed: true }
+export const renderItem = (
+  <ContextMenuItem render={(props: ContextMenuRenderProps) => <button {...props} />}>
+    Rename
+  </ContextMenuItem>
+)
+void [twoOwners, noName, wrongRef, wrongRole, pressedItem]

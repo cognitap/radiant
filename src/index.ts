@@ -470,7 +470,8 @@ export type {
   ContextMenuSubProps,
   ContextMenuSubTriggerProps,
   ContextMenuSubContentProps,
-  ContextMenuState
+  ContextMenuState,
+  ContextMenuRenderProps
 } from './ContextMenu.js'
 
 export {

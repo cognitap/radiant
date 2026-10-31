@@ -57,11 +57,7 @@ const meta = {
     motion: { control: 'inline-radio', options: ['inherit', 'off'] },
     dir: { control: 'inline-radio', options: ['ltr', 'rtl'] }
   },
-  render: args => (
-    <MotionProvider>
-      <FileActions {...args} />
-    </MotionProvider>
-  )
+  render: args => <FileActions {...args} />
 } satisfies Meta<Options>
 export default meta
 type Story = StoryObj<typeof meta>
@@ -135,6 +131,67 @@ export const Default: Story = {
     await userEvent.click(canvas.getByRole('menuitem', { name: 'Duplicate' }))
     await expect(canvas.getByRole('textbox', { name: 'File name' })).toHaveValue(
       'Project brief (copy)'
+    )
+  }
+}
+function SortMenu({
+  dir,
+  initialOpen: _initialOpen,
+  disabled: _disabled,
+  pending: _pending,
+  ...surface
+}: Options) {
+  const [open, setOpen] = useState(false),
+    [order, setOrder] = useState('Newest first')
+  return (
+    <div
+      style={layout}
+      dir={dir}
+    >
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <Menu
+          open={open}
+          onOpenChange={setOpen}
+        >
+          <MenuTrigger variant="outline">Sort records</MenuTrigger>
+          <MenuPortal>
+            <MenuContent {...surface}>
+              {['Newest first', 'Oldest first', 'Name A to Z'].map(value => (
+                <MenuItem
+                  key={value}
+                  textValue={value}
+                  onSelect={() => setOrder(value)}
+                >
+                  {value === order ? `• ${value}` : value}
+                </MenuItem>
+              ))}
+            </MenuContent>
+          </MenuPortal>
+        </Menu>
+        <Button
+          variant="ghost"
+          onClick={() => setOpen(true)}
+        >
+          Open sort menu
+        </Button>
+      </div>
+      <output aria-live="polite">
+        Menu {open ? 'open' : 'closed'}. Sorted by {order.toLowerCase()}.
+      </output>
+    </div>
+  )
+}
+export const Controlled: Story = {
+  render: args => <SortMenu {...args} />,
+  play: async ({ canvasElement, userEvent }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Open sort menu' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Menu open.')
+    await userEvent.keyboard('o')
+    await expect(canvas.getByRole('menuitem', { name: 'Oldest first' })).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(canvas.getByRole('status')).toHaveTextContent(
+      'Menu closed. Sorted by oldest first.'
     )
   }
 }

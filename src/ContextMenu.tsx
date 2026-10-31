@@ -38,7 +38,8 @@ import {
   type MenuRadioItemProps,
   type MenuSubProps,
   type MenuSubTriggerProps,
-  type MenuSubContentProps
+  type MenuSubContentProps,
+  type MenuRenderProps
 } from './Menu.js'
 import { usePopoverContext } from './Popover.js'
 import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
@@ -67,6 +68,7 @@ export type ContextMenuRadioItemProps = MenuRadioItemProps
 export type ContextMenuSubProps = MenuSubProps
 export type ContextMenuSubTriggerProps = MenuSubTriggerProps
 export type ContextMenuSubContentProps = MenuSubContentProps
+export type ContextMenuRenderProps = MenuRenderProps
 const TargetContext = createContext<((point: Point) => void) | null>(null)
 export function useContextMenu(): ContextMenuState | null {
   const menu = useMenu(),

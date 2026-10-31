@@ -7,6 +7,25 @@ import {
   MenuContent,
   MenuItem,
   MenuPortal,
+  MenuSub,
+  MenuSubTrigger,
+  MenuSubContent,
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+  Menubar,
+  MenubarMenu,
+  MenubarTrigger,
+  MenubarPortal,
+  MenubarContent,
+  MenubarItem,
+  MenubarSub,
+  MenubarSubTrigger,
+  MenubarSubContent,
   Popover,
   PopoverTrigger,
   PopoverContent,
@@ -264,5 +283,75 @@ test('unmount removes the open layer and its listeners; an empty menu stays dism
   change.mockClear()
   await render(null)
   await key('{Escape}')
+  expect(change).not.toHaveBeenCalled()
+})
+test('menu, context menu and menubar actions ignore toggle props at runtime', async () => {
+  const change = vi.fn()
+  const toggle: object = {
+    pressed: true,
+    defaultPressed: true,
+    onPressedChange: change,
+    'aria-pressed': true
+  }
+  const { host } = await mount(
+    <>
+      <Menu defaultOpen>
+        <MenuTrigger>Commands</MenuTrigger>
+        <MenuPortal>
+          <MenuContent>
+            <MenuItem {...toggle}>Archive</MenuItem>
+            <MenuSub>
+              <MenuSubTrigger {...toggle}>Share</MenuSubTrigger>
+              <MenuSubContent>
+                <MenuItem>Link</MenuItem>
+              </MenuSubContent>
+            </MenuSub>
+          </MenuContent>
+        </MenuPortal>
+      </Menu>
+      <ContextMenu defaultOpen>
+        <ContextMenuTrigger aria-label="Canvas" />
+        <ContextMenuContent>
+          <ContextMenuItem {...toggle}>Paste</ContextMenuItem>
+          <ContextMenuSub>
+            <ContextMenuSubTrigger {...toggle}>Arrange</ContextMenuSubTrigger>
+            <ContextMenuSubContent>
+              <ContextMenuItem>Front</ContextMenuItem>
+            </ContextMenuSubContent>
+          </ContextMenuSub>
+        </ContextMenuContent>
+      </ContextMenu>
+      <Menubar
+        aria-label="Editor"
+        defaultValue="file"
+      >
+        <MenubarMenu value="file">
+          <MenubarTrigger>File</MenubarTrigger>
+          <MenubarPortal>
+            <MenubarContent>
+              <MenubarItem {...toggle}>Save</MenubarItem>
+              <MenubarSub>
+                <MenubarSubTrigger {...toggle}>Export</MenubarSubTrigger>
+                <MenubarSubContent>
+                  <MenubarItem>PDF</MenubarItem>
+                </MenubarSubContent>
+              </MenubarSub>
+            </MenubarContent>
+          </MenubarPortal>
+        </MenubarMenu>
+      </Menubar>
+    </>
+  )
+  const actions = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('[data-slot~=menu-item],[data-slot~=menu-sub-trigger]')
+  ).filter(node =>
+    ['Archive', 'Share', 'Paste', 'Arrange', 'Save', 'Export'].includes(
+      node.textContent!.replace('›', '').trim()
+    )
+  )
+  expect(actions).toHaveLength(6)
+  for (const action of actions) expect(action.hasAttribute('aria-pressed')).toBe(false)
+  for (const action of actions) await act(async () => action.click())
+  for (const action of actions) expect(action.hasAttribute('aria-pressed')).toBe(false)
   expect(change).not.toHaveBeenCalled()
 })
