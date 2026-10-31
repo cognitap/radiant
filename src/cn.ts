@@ -113,6 +113,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-navigation-menu-gap)',
         'gap-(--rad-code-block-header-gap)',
         'gap-(--rad-empty-state-gap)',
         'gap-(--rad-empty-state-actions-gap)',
@@ -168,6 +169,7 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-navigation-menu-padding)',
         'p-(--rad-code-block-padding)',
         'p-(--rad-code-block-header-padding)',
         'p-(--rad-empty-state-padding)',
@@ -186,6 +188,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-navigation-menu-radius)',
         'rounded-(--rad-code-block-radius)',
         'rounded-(--rad-inline-code-radius)',
         'rounded-(--rad-empty-state-radius)',
@@ -228,6 +231,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-navigation-menu-border-width)',
         'border-(--rad-code-block-border-width)',
         'border-(--rad-empty-state-border-width)',
         'border-(--rad-meter-border-width)',
@@ -266,6 +270,7 @@ export const cn: CnFunction = createCn({
         'border-(--rad-switch-border-style)'
       ],
       shadow: [
+        'shadow-(--rad-navigation-menu-shadow)',
         'shadow-(--_rad-native-select-shadow)',
         'shadow-(--rad-native-select-shadow)',
         'shadow-(--_rad-kbd-shadow)',

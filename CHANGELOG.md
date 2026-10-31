@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add NavigationMenu with native navigation links, delayed hover disclosure and a shared spring viewport.
+
 ## 0.0.62
 
 - Add Resizable with draggable and keyboard separators, bounded collapsible panels, direction support and application-owned layout persistence.

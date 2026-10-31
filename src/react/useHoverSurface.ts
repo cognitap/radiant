@@ -107,6 +107,11 @@ export function useHoverSurface({
     return () => trigger.ownerDocument.removeEventListener('pointermove', move)
   }, [trigger, content, open, closeDelay, schedule])
   return {
+    cancel: (reset = false) => {
+      clear()
+      if (reset)
+        activity.current = { focused: false, hovered: false, suppressed: false, touch: false }
+    },
     setOpen,
     enter,
     leave,
