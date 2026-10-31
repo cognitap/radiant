@@ -1,8 +1,8 @@
 # Architecture
 
-Radiant's sixty-one families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+Radiant's sixty-three families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are Charts, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Charts, Carousel, Form, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Charts uses the explicit `@cognitap/radiant/charts` entry; arbitrary deep imports are unsupported.
 
@@ -30,7 +30,7 @@ MultiSelect composes Combobox with `type="multiple"`. TagsInput commits free tex
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 NumberField edits localized text and submits one raw numeric form value.
 Resizable composes Separator for adjacent panel sizing; applications persist layouts.
-Charts isolate SVG geometry in an optional entry, composing Tooltip, Button, Table and palette modes.
+Charts use SVG through an optional entry; pure geometry stays separate from React, reusing Tooltip, Button, Table and palette modes.
 AppShell places native landmarks around one Sidebar subtree, reusing Drawer for mobile navigation and optional spring layout.
 NavigationMenu composes Button and Link with one shared spring viewport, preserving navigation semantics.
 Tag composes Badge and Button for removal.
@@ -45,8 +45,7 @@ Import rules:
    RadioGroup uses Field, Dialog actions use Button). The graph stays acyclic.
 4. Nothing touches `window`, `document` or the DOM at import time. Effects use
    the owning document and clean up on unmount.
-5. Server markup matches the first client render. For example, a native dialog
-   opens in an effect, not during render.
+5. Server markup matches the first client render; dialogs open in effects.
 
 Extract shared policy only when it repeats.
 
@@ -64,9 +63,7 @@ animates entry and snapping without delaying native close or focus.
 AlertDialog specializes Dialog's native lifecycle, surface tokens and motion for
 urgent decisions. Its modal content retains Dialog identities and adds alert-dialog tokens.
 
-Composed families reuse the real thing: DialogTrigger and DialogClose are
-Buttons, RadioGroup is a Field, and an Accordion item is a Collapsible, so
-theme, keyboard behavior and relationships travel together.
+Composition preserves theme, keyboard behavior and relationships.
 
 ## Presentation
 
@@ -113,6 +110,8 @@ host, never a wrapper:
 | Family or part                                                                                      | Host                                                |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | Charts / ChartDataTable                                                                             | figure / Table table                                |
+| Carousel / CarouselViewport / Carousel controls                                                     | section / native scroll div / Button button         |
+| Form / FormField / FormError                                                                        | form / Field host / Alert div                       |
 | AppShell / AppShellHeader / AppShellMain / Sidebar                                                  | div / header / main / nav                           |
 | AppShellSkipLink / SidebarTrigger / SidebarLabel / SidebarContent                                   | Link's a / Button's button / span / div             |
 | AspectRatio                                                                                         | `div`                                               |
@@ -217,6 +216,9 @@ distinct; activation commits, Escape dismisses and restores trigger focus.
 Native reset silently restores uncontrolled selection. Controlled resets stay
 with the owner. User selections emit form change; prop syncs do not.
 
+Carousel uses native scroll snap and Button controls; opt-in autoplay pauses for interaction, visibility and reduced motion.
+Form coordinates native validation and asynchronous submission without storing values. FormField composes Field; FormError composes Alert.
+
 ## Replacement and events
 
 Button, Link and the Dialog actions accept `render(resolvedProps)`. Forward all
@@ -243,14 +245,13 @@ Restyling or replacing a host is fine as long as these keep working:
 - Decorative indicators stay hidden from assistive technology.
 - Reduced-motion and forced-colors modes still work.
 
-Types cannot prove these behaviors. See
-[accessibility](accessibility.md) for what to check by hand.
+Verify these behaviors manually: [accessibility](accessibility.md).
 
 ## Examples and type fixtures
 
 The canonical live examples are Storybook stories:
-[Input](../src/Input.stories.tsx), [Recipes → Forms](../src/Form.stories.tsx)
-(one form, plain or in a Card or Dialog, optionally with TanStack) and
+[Input](../src/Input.stories.tsx), [Form](../src/Form.stories.tsx)
+(native validation, server recovery and optional TanStack values) and
 [Recipes → Workspace → Settings](../src/Workspace.stories.tsx) (all ten
 families). Change a contract and its example together.
 

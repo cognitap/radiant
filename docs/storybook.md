@@ -43,10 +43,12 @@ Only add the states a family really has. Card has no disabled state.
 - **Open dialogs from a trigger in Docs.** An initially open dialog takes focus
   and scrolls the Docs page.
 
-The canonical examples are **Recipes → Forms**, the native and TanStack profile
-form placed standalone, in Card or in Dialog
-(`.storybook/examples/ProfileForm.tsx`), and **Recipes → Workspace → Settings**,
-all ten families together. Reuse them rather than writing new forms.
+The canonical forms are **Components → Form**
+(`.storybook/examples/FormExamples.tsx`): workspace creation, server recovery
+and optional TanStack values. The profile placement recipe
+(`.storybook/examples/ProfileForm.tsx`) supports standalone, Card and Dialog
+surfaces. **Recipes → Workspace → Settings** combines the original ten families.
+Reuse these compositions when their tasks match.
 
 ## Verification
 

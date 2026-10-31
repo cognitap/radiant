@@ -6,6 +6,14 @@
 
 - Add an optional charts entry with SVG line, bar, area and pie charts, palette-derived colors, native data tables and keyboard-reachable tooltips.
 
+## 0.0.69
+
+- Add Carousel with native scroll snap, direction-aware controls, drag navigation and opt-in autoplay that pauses for interaction and reduced motion.
+
+## 0.0.68
+
+- Add Form with native validation, Field error mapping, asynchronous submission and optional form-library integration.
+
 ## 0.0.67
 
 - Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.

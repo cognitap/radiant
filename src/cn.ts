@@ -120,6 +120,9 @@ export const cn: CnFunction = createCn({
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
         'gap-(--rad-chart-gap)',
+        'gap-(--rad-carousel-gap)',
+        'gap-(--rad-carousel-slide-gap)',
+        'gap-(--rad-form-gap)',
         'gap-(--rad-sidebar-gap)',
         'gap-(--rad-navigation-menu-gap)',
         'gap-(--rad-code-block-header-gap)',
@@ -200,6 +203,7 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-carousel-radius)',
         'rounded-(--rad-navigation-menu-radius)',
         'rounded-(--rad-code-block-radius)',
         'rounded-(--rad-inline-code-radius)',
