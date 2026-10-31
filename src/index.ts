@@ -714,6 +714,32 @@ export type {
 } from './NavigationMenu.js'
 
 export {
+  AppShell,
+  AppShellHeader,
+  AppShellMain,
+  AppShellSkipLink,
+  Sidebar,
+  SidebarTrigger,
+  SidebarLabel,
+  SidebarContent,
+  useAppShell,
+  useSidebar
+} from './AppShell.js'
+export type {
+  AppShellProps,
+  AppShellState,
+  AppShellHeaderProps,
+  AppShellMainProps,
+  AppShellSkipLinkProps,
+  AppShellRenderProps,
+  SidebarProps,
+  SidebarTriggerProps,
+  SidebarRenderProps,
+  SidebarLabelProps,
+  SidebarContentProps
+} from './AppShell.js'
+
+export {
   Form,
   FormField,
   FormError,

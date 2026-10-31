@@ -21,6 +21,7 @@ export interface MotionHostRuntime {
   disclosure?(node: HTMLElement, profile: MotionProfile): MotionHostBinding
   dialog?(node: HTMLElement, profile: MotionProfile): MotionHostBinding
   popup?(node: HTMLElement, profile: MotionProfile): MotionHostBinding
+  layout?(node: HTMLElement, profile: MotionProfile): MotionHostBinding
   indicator?(node: HTMLElement, profile: MotionProfile): MotionHostBinding
 }
 export const MotionHostContext = createContext<MotionHostRuntime | null>(null)
@@ -104,7 +105,7 @@ export function usePressHost<Node extends HTMLElement>(
 
 /** Shared lifecycle for native presentation adapters; no engine enters the root path. */
 export function useTransitionHost<Node extends HTMLElement>(
-  kind: 'disclosure' | 'dialog' | 'popup' | 'indicator',
+  kind: 'disclosure' | 'dialog' | 'popup' | 'indicator' | 'layout',
   ref: Ref<Node> | undefined,
   disabled: boolean
 ) {
