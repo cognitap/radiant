@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Field, NativeSelect, type NativeSelectProps } from '../../src/index.js'
+import { Button, Field, Input, NativeSelect, type NativeSelectProps } from '../../src/index.js'
 export type NativeSelectTaskOptions = Pick<
   NativeSelectProps,
   'controlSize' | 'className' | 'style' | 'dir'
@@ -221,5 +221,80 @@ export function FilterParticipantCohorts({
       </ul>
       <output aria-live="polite">{message}</output>
     </form>
+  )
+}
+const phases = { draft: 'Draft', recruiting: 'Recruiting', analysis: 'Analysis' } as const
+export function ControlStudyPhase() {
+  const [phase, setPhase] = useState<string>('recruiting')
+  return (
+    <div style={{ display: 'grid', gap: '1rem', width: 'min(24rem,100%)' }}>
+      <Field
+        label="Study phase"
+        description={`Next review: ${phase === 'analysis' ? 'final report' : 'weekly sync'}`}
+      >
+        <NativeSelect
+          name="phase"
+          value={phase}
+          onChange={event => setPhase(event.target.value)}
+        >
+          {Object.entries(phases).map(([value, label]) => (
+            <option
+              key={value}
+              value={value}
+            >
+              {label}
+            </option>
+          ))}
+        </NativeSelect>
+      </Field>
+      <div>
+        <Button
+          variant="outline"
+          onClick={() => setPhase('draft')}
+        >
+          Move back to draft
+        </Button>
+      </div>
+    </div>
+  )
+}
+export function NativeSelectSizeComparison() {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 12rem), 1fr))',
+        gap: '1.5rem'
+      }}
+    >
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'grid', gap: '1rem', alignContent: 'start', minWidth: 0 }}
+        >
+          <Field label={`${controlSize} study`}>
+            <Input
+              defaultValue="Reader study"
+              controlSize={controlSize}
+            />
+          </Field>
+          <Field label={`${controlSize} phase`}>
+            <NativeSelect
+              defaultValue="recruiting"
+              controlSize={controlSize}
+            >
+              {Object.entries(phases).map(([value, label]) => (
+                <option
+                  key={value}
+                  value={value}
+                >
+                  {label}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+        </div>
+      ))}
+    </div>
   )
 }

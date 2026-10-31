@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { NavLink } from './index.js'
 import { MotionProvider } from './motion/react.js'
 import {
+  ControlSecuritySection,
+  NavLinkSizeComparison,
   BrowseStudyWorkspace,
   BrowseProjectLibrary,
   NavigateTeamSettings,
@@ -56,6 +58,21 @@ export const Default: Story = {
       </NavLink>
     </nav>
   )
+}
+export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <ControlSecuritySection />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement)
+    await userEvent.click(c.getByRole('button', { name: 'Expand security' }))
+    await expect(c.getByRole('link', { name: 'Access rules' })).toBeVisible()
+    await userEvent.click(c.getByRole('button', { name: 'Collapse security' }))
+    await waitFor(() => expect(c.getByText('Access rules')).not.toBeVisible())
+  }
+}
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <NavLinkSizeComparison />
 }
 export const BrowsingStudyWorkspace: Story = {
   argTypes: { ...routeOwned, motion: { control: false, table: { disable: true } } },

@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { Field, OTPField } from './index.js'
 import {
+  ControlSignInCode,
+  OTPFieldSizeComparison,
   VerifyEmailCode,
   ApproveWorkspaceAccess,
   ReviewRecoveryCode,
@@ -39,17 +41,46 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: ({ initialValue, ...args }) => (
+    <OTPField
+      key={JSON.stringify([args.length, args.mode, initialValue])}
+      {...args}
+      aria-label="One-time code"
+      defaultValue={initialValue}
+    />
+  )
+}
+export const WithField: Story = {
+  render: ({ initialValue, ...args }) => (
     <Field
       label="One-time code"
       description="Enter the code from your message."
+      error="Enter every digit of the code."
+      required
     >
       <OTPField
         key={JSON.stringify([args.length, args.mode, initialValue])}
         {...args}
+        name="code"
         defaultValue={initialValue}
       />
     </Field>
   )
+}
+export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <ControlSignInCode />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement),
+      input = canvas.getByRole('textbox', { name: 'Sign-in code' })
+    await userEvent.type(input, '123456')
+    await expect(canvas.getByText('Code complete.')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear code' }))
+    await expect(input).toHaveValue('')
+  }
+}
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <OTPFieldSizeComparison />
 }
 export const VerifyingEmail: Story = {
   play: async ({ canvasElement, args }) => {

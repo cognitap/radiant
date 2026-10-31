@@ -368,3 +368,56 @@ export function FindStudyReport({ initialOpen = false, ...options }: CommandTask
     </Shortcut>
   )
 }
+export function ControlProjectCommands({ initialOpen = false, ...options }: CommandTaskOptions) {
+  const [open, setOpen] = useState(initialOpen),
+    [query, setQuery] = useState(''),
+    [action, setAction] = useState<string | null>(null)
+  return (
+    <section
+      aria-label="Controlled project commands"
+      dir={options.dir}
+      style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '32rem', minWidth: 0 }}
+    >
+      <Command
+        items={projectActions.map(({ shortcut: _shortcut, ...item }) => item)}
+        open={open}
+        onOpenChange={setOpen}
+        query={query}
+        onQueryChange={setQuery}
+        onAction={value => setAction(value)}
+        controlSize={options.controlSize}
+        modal={options.modal}
+        closeOnEscape={options.closeOnEscape}
+        closeOnBackdrop={options.closeOnBackdrop}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
+          <CommandTrigger
+            disabled={options.disabled}
+            controlSize={options.controlSize}
+          >
+            Open commands
+          </CommandTrigger>
+          <Button
+            variant="outline"
+            disabled={options.disabled}
+            controlSize={options.controlSize}
+            onClick={() => {
+              setQuery('archive')
+              setOpen(true)
+            }}
+          >
+            Find archive actions
+          </Button>
+        </div>
+        <CommandSurface
+          {...options}
+          title="Project commands"
+          description="Search for a project action."
+        />
+      </Command>
+      <p style={{ margin: 0 }}>
+        {action ? `Last action: ${action}.` : `Search: ${query || 'empty'}.`}
+      </p>
+    </section>
+  )
+}
