@@ -17,7 +17,7 @@ import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { useField, useFieldControl } from './Field.js'
 import type { DistributiveOmit } from './internal/types.js'
 import { cn } from './cn.js'
-import { controlMetrics } from './controlStyles.js'
+import { controlMetrics, itemGroupLabelClass } from './controlStyles.js'
 import { matchSelectText, moveSelectFocus, positionSelect } from './internal/select.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
@@ -796,7 +796,7 @@ export function SelectGroup({ label, children, className, ...props }: SelectGrou
       <div
         id={id}
         data-slot="select-label"
-        className="px-3 py-2 text-sm font-semibold"
+        className={cn(itemGroupLabelClass, 'px-[var(--_rad-control-padding,1rem)]')}
       >
         {label}
       </div>

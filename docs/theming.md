@@ -140,17 +140,19 @@ A theme should not need component overrides to look coherent. Each part of a
 component plays one **role**, and each role reads one token group, so one
 setting restyles every family that plays it. Overrides stay for exceptions.
 
-| Role      | Token group         | Parts                                                                                                    |
-| --------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| Action    | `control.action`    | Button and the parts built on it, Link's button variants, ButtonGroup; the voice of Table column headers |
-| Field     | `control.field`     | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox                                |
-| Indicator | `control.indicator` | Checkbox and Radio boxes, the Switch track, Switch and Slider thumbs                                     |
-| Track     | `control.track`     | ToggleGroup, Progress, Meter, Skeleton, Slider and ScrollArea rails, Resizable hover                     |
-| Selected  | `control.selected`  | Pressed toggles, the segmented ToggleGroup indicator, the current page and Carousel indicator            |
-| Surface   | `surface`           | Card, Alert, Collapsible, Accordion, TableContainer, EmptyState, CodeBlock, Carousel, Sidebar, Separator |
-| Overlay   | `surface.overlay*`  | Floating panels; Toast takes `overlayShadow` and the surface shape, border and backdrop filter           |
+| Role      | Token group                                  | Parts                                                                                                              |
+| --------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Action    | `control.action`                             | Button and the parts built on it, Link's button variants, ButtonGroup; the voice of Table column headers           |
+| Field     | `control.field`                              | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox                                          |
+| Indicator | `control.indicator`                          | Checkbox and Radio boxes, the Switch track, Switch and Slider thumbs                                               |
+| Track     | `control.track`                              | ToggleGroup, Progress, Meter, Skeleton, Slider and ScrollArea rails, Resizable hover, the Menubar border           |
+| Selected  | `control.selected`                           | Pressed toggles, the ToggleGroup indicator, the current page, Carousel indicator, chosen option, open Menubar menu |
+| Surface   | `surface`                                    | Card, Alert, Collapsible, Accordion, TableContainer, EmptyState, CodeBlock, Carousel, Sidebar, Separator           |
+| Overlay   | `surface.overlay*`, `surface.backdropFilter` | Popover, HoverCard, Menu, listboxes, Tooltip, Dialog, Drawer, NavigationMenu viewport; Toast's shadow              |
+| Item      | `control.item`                               | Highlighted rows in menus, listboxes and Command                                                                   |
 
-`control.item` is reserved for list rows; families adopt it as they are tidied.
+Tooltips keep their own background and cap their radius at `0.5rem`. Drawers
+round only the edges that face the page.
 
 The rules every family follows:
 
@@ -204,10 +206,10 @@ Choosing a theme never downloads a font. Load the families yourself with weights
 400, 600 and 700, and Archivo Black 400 for Sharp 3D. Every family falls back
 to a system family.
 
-Glass uses a gradient canvas and translucent surfaces.
-`components.dialog.backdropFilter` blurs what is behind a dialog panel, and
-`components.dialog.backdrop` paints the overlay. Shapes use CSS `corner-shape`;
-browsers without it show ordinary rounded corners.
+Glass uses a gradient canvas and translucent surfaces, and
+`surface.backdropFilter` frosts every floating panel. `surface.backdrop` paints
+the overlay behind a dialog. Shapes use CSS `corner-shape`; browsers without it
+show ordinary rounded corners.
 
 ## Typography
 

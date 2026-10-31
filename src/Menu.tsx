@@ -33,6 +33,7 @@ import type { CheckedOwner, ValueOwner } from './react/useNativeOwner.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import type { PartStyle } from './presentation.js'
 import { cn } from './cn.js'
+import { itemGroupLabelClass } from './controlStyles.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
 import { matchSelectText } from './internal/select.js'
@@ -283,7 +284,8 @@ export function MenuContentRoot({
       data-slot={joinIds('menu-content', props['data-slot'])}
       className={cn(
         'w-[var(--rad-menu-width,16rem)] gap-0 p-[var(--rad-menu-padding,0.25rem)] rounded-[var(--rad-menu-radius,var(--rad-surface-radius,0.75rem))]',
-        'bg-[var(--rad-menu-background,var(--rad-color-surface,white))] [color:var(--rad-menu-color,var(--rad-color-foreground))] [border-color:var(--rad-menu-border-color,var(--rad-color-border))] [border-width:var(--rad-menu-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-menu-border-style,var(--rad-surface-border-style,solid))] [box-shadow:var(--rad-menu-shadow,var(--rad-surface-overlay-shadow,0_8px_32px_#0003))]',
+        '[--_rad-item-radius:max(0px,calc(var(--rad-menu-radius,var(--rad-surface-radius,0.75rem))-var(--rad-menu-padding,0.25rem)))] [--_rad-item-corner-shape:var(--rad-popover-corner-shape,var(--rad-surface-corner-shape,round))]',
+        'bg-[var(--rad-menu-background,var(--rad-surface-overlay-background,var(--rad-color-surface,white)))] [color:var(--rad-menu-color,var(--rad-color-foreground))] [border-color:var(--rad-menu-border-color,var(--rad-color-border))] [border-width:var(--rad-menu-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-menu-border-style,var(--rad-surface-border-style,solid))] [box-shadow:var(--rad-menu-shadow,var(--rad-surface-overlay-shadow,0_24px_64px_-16px_rgb(0_0_0/0.3)))]',
         'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
         className
       )}
@@ -331,6 +333,16 @@ export function MenuContentRoot({
     />
   )
 }
+const menuItemClass = [
+  'relative box-border flex w-full min-w-0 cursor-default select-none items-center text-start [font:inherit] [color:inherit] bg-transparent border-0 outline-none',
+  '[&>span:first-child]:min-w-0 [&>span:first-child]:flex-1',
+  'p-[var(--rad-menu-item-padding,0.625rem)] rounded-[var(--rad-menu-item-radius,var(--_rad-item-radius,var(--rad-control-radius,0.5rem)))] [corner-shape:var(--_rad-item-corner-shape,var(--rad-control-corner-shape,round))]',
+  'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none',
+  'hover:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] focus:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))]',
+  'hover:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))] focus:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))]',
+  'aria-disabled:cursor-not-allowed aria-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] forced-colors:aria-disabled:text-[GrayText] forced-colors:aria-disabled:opacity-100',
+  'forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText] forced-colors:focus-visible:outline-solid forced-colors:focus-visible:[outline-width:var(--rad-focus-width,2px)] forced-colors:focus-visible:-outline-offset-2'
+].join(' ')
 export function MenuItem(props: MenuItemProps) {
   return (
     <MenuItemRoot
@@ -351,6 +363,7 @@ function MenuItemRoot({
   onFocus,
   onPointerMove,
   className,
+  render,
   motion,
   ...props
 }: MenuItemProps & {
@@ -371,12 +384,11 @@ function MenuItemRoot({
       motion={disabled ? 'off' : motion}
       data-slot={joinIds('menu-item', props['data-slot'])}
       data-text-value={textValue}
-      className={cn(
-        'h-auto w-full justify-start [background-image:none] inset-shadow-none [border-width:0] [border-style:none] bg-transparent text-start text-inherit shadow-none p-[var(--rad-menu-item-padding,0.625rem)] rounded-[var(--rad-menu-item-radius,var(--rad-control-radius,0.5rem))]',
-        'hover:bg-[var(--rad-menu-item-focus-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))] focus:bg-[var(--rad-menu-item-focus-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))] focus:[color:var(--rad-menu-item-focus-color,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground)))]',
-        'aria-disabled:cursor-not-allowed aria-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] forced-colors:aria-disabled:text-[GrayText] forced-colors:aria-disabled:opacity-100 forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText]',
-        className
-      )}
+      // A menu row plays the item role, so it takes none of Button's action look.
+      render={resolved => {
+        const native = { ...resolved, className: cn(menuItemClass, className) }
+        return render ? render(native) : <button {...native} />
+      }}
       onClick={composeAction(onClick, onSelect, () => disabled)}
       onFocus={event => {
         onFocus?.(event)
@@ -421,10 +433,7 @@ export function MenuLabel({ className, ...props }: MenuLabelProps) {
       role="presentation"
       tabIndex={undefined}
       data-slot={joinIds('menu-label', props['data-slot'])}
-      className={cn(
-        'px-[var(--rad-menu-item-padding,0.625rem)] py-2 [color:var(--rad-color-muted-foreground)] text-[length:var(--rad-typography-roles-ui-label-size,0.8125rem)] font-[number:var(--rad-typography-roles-ui-label-weight,600)]',
-        className
-      )}
+      className={cn(itemGroupLabelClass, 'px-[var(--rad-menu-item-padding,0.625rem)]', className)}
     />
   )
 }
@@ -617,7 +626,7 @@ export function MenuSubTrigger({
         data-slot={joinIds('menu-sub-trigger', props['data-slot'])}
         closeOnSelect={false}
         className={cn(
-          'aria-expanded:bg-[var(--rad-menu-item-focus-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))] aria-expanded:[color:var(--rad-menu-item-focus-color,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground)))]',
+          'aria-expanded:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] aria-expanded:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))]',
           className
         )}
         onSelect={event => {

@@ -33,6 +33,7 @@ import { requireAccessibleName, type AccessibleName } from './internal/accessibl
 import { WithoutField } from './Field.js'
 import { Kbd, KbdGroup } from './Kbd.js'
 import { cn } from './cn.js'
+import { itemGroupLabelClass } from './controlStyles.js'
 import { useControllableState } from './react/useControllableState.js'
 import type { ControlSize } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
@@ -261,7 +262,7 @@ export function CommandList({ children, className, ...props }: CommandListProps)
             >
               <p
                 aria-hidden="true"
-                className="m-0 px-3 py-2 text-sm font-semibold"
+                className={cn(itemGroupLabelClass, 'px-[var(--_rad-control-padding,1rem)]')}
                 data-slot="command-group-label"
               >
                 {group}
