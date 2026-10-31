@@ -8,6 +8,7 @@ import type { ThemeStyle } from './themes/defineTheme.js'
 import { composeAction } from './internal/events.js'
 import { isItemOpen, nextSelection, sameSelection, type Selection } from './internal/selection.js'
 import { useControllableState } from './react/useControllableState.js'
+import type { ValueOwner } from './react/useNativeOwner.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './Collapsible.js'
 import type {
   CollapsibleContentProps,
@@ -31,10 +32,6 @@ const headingTag = {
 } as const
 
 export type AccordionHeadingLevel = keyof typeof headingTag
-
-type ValueOwner<Value> =
-  | { value: Value; defaultValue?: never }
-  | { value?: undefined; defaultValue?: Value }
 
 type AccordionBaseProps = Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'style'> & {
   style?: ThemeStyle

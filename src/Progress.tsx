@@ -58,7 +58,7 @@ export function Progress({ value, max = 100, className, ...props }: ProgressProp
         className
       )}
     >
-      {value == null ? null : `${value} / ${max}`}
+      {props['aria-valuetext'] ?? (value == null ? null : `${value} of ${max}`)}
     </progress>
   )
 }
