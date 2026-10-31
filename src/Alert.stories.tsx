@@ -1,6 +1,10 @@
-import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Alert, AlertTitle, AlertDescription, Button } from './index.js'
+import { Alert, AlertTitle, AlertDescription } from './index.js'
+import {
+  AlertTonesExample,
+  AlertActionExample,
+  AlertAnnouncementsExample
+} from '../.storybook/examples/AlertExamples.js'
 const meta = {
   title: 'Components/Alert',
   component: Alert,
@@ -16,8 +20,13 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {
-  render: () => (
-    <Alert>
+  args: { tone: 'neutral', announce: 'off' },
+  argTypes: {
+    tone: { control: 'inline-radio', options: ['neutral', 'accent', 'warning', 'danger'] },
+    announce: { control: 'inline-radio', options: ['off', 'polite', 'assertive'] }
+  },
+  render: args => (
+    <Alert {...args}>
       <AlertTitle>Scheduled maintenance</AlertTitle>
       <AlertDescription>
         Editing is available. Publishing pauses while maintenance runs.
@@ -25,24 +34,9 @@ export const Default: Story = {
     </Alert>
   )
 }
-export const StatusAndErrors: Story = {
-  render: () => (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      <Alert tone="accent">
-        <AlertTitle>Draft saved</AlertTitle>
-        <AlertDescription>Your latest changes are stored.</AlertDescription>
-      </Alert>
-      <Alert tone="warning">
-        <AlertTitle>Connection interrupted</AlertTitle>
-        <AlertDescription>Your changes remain on this device.</AlertDescription>
-      </Alert>
-      <Alert tone="danger">
-        <AlertTitle>Save failed</AlertTitle>
-        <AlertDescription>Try again when your connection returns.</AlertDescription>
-      </Alert>
-    </div>
-  )
-}
+export const Tones: Story = { render: () => <AlertTonesExample /> }
+export const WithAction: Story = { render: () => <AlertActionExample /> }
+export const Announcements: Story = { render: () => <AlertAnnouncementsExample /> }
 export const Customisation: Story = {
   render: () => (
     <Alert
@@ -57,19 +51,3 @@ export const Customisation: Story = {
     </Alert>
   )
 }
-function Feedback() {
-  const [saved, setSaved] = useState(false)
-  return (
-    <div style={{ display: 'grid', gap: '1rem' }}>
-      <Button onClick={() => setSaved(true)}>Save draft</Button>
-      <Alert
-        announce="polite"
-        tone="accent"
-        aria-label="Save result"
-      >
-        {saved && <AlertDescription>Draft saved. You can keep editing.</AlertDescription>}
-      </Alert>
-    </div>
-  )
-}
-export const DynamicFeedback: Story = { render: () => <Feedback /> }
