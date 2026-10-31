@@ -9,7 +9,8 @@ export function bindPressMotion(
   initialProfile: MotionProfile
 ): MotionHostBinding {
   let profile = initialProfile
-  const query = node.ownerDocument.defaultView!.matchMedia('(prefers-reduced-motion: reduce)')
+  const view = node.ownerDocument.defaultView!
+  const query = view.matchMedia('(prefers-reduced-motion: reduce)')
   const spring = createSpring(1, {
     ...resolveMotion(profile, 'press', query.matches),
     reducedValue: 1
@@ -43,7 +44,7 @@ export function bindPressMotion(
   }
   const changed = () => update(profile)
   query.addEventListener('change', changed)
-  const observer = new MutationObserver(() => {
+  const observer = new view.MutationObserver(() => {
     if (blocked()) reset()
   })
   observer.observe(node, {
@@ -59,7 +60,7 @@ export function bindPressMotion(
   document.addEventListener('pointercancel', release)
   document.addEventListener('keyup', release)
   const blur = () => release()
-  document.defaultView!.addEventListener('blur', blur)
+  view.addEventListener('blur', blur)
   return {
     update,
     press(event) {
@@ -78,7 +79,7 @@ export function bindPressMotion(
         pressed = { pointerId: event.pointerId }
       }
       const scale = Number(
-        getComputedStyle(node).getPropertyValue('--rad-button-press-scale').trim() || '.97'
+        view.getComputedStyle(node).getPropertyValue('--rad-button-press-scale').trim() || '.97'
       )
       spring.to(Number.isFinite(scale) && scale >= 0.5 && scale <= 1 ? scale : 0.97)
     },
@@ -89,7 +90,7 @@ export function bindPressMotion(
       document.removeEventListener('pointerup', release)
       document.removeEventListener('pointercancel', release)
       document.removeEventListener('keyup', release)
-      document.defaultView!.removeEventListener('blur', blur)
+      view.removeEventListener('blur', blur)
       spring.destroy()
       unbind()
     }

@@ -2,6 +2,7 @@ import { useRef, useState, type KeyboardEvent } from 'react'
 import {
   Button,
   Field,
+  Input,
   InputGroup,
   InputGroupInput,
   InputGroupTextarea,
@@ -213,5 +214,67 @@ export function PostStudyUpdate({
       </Button>
       <output aria-live="polite">{message}</output>
     </form>
+  )
+}
+export function ControlProjectSlug() {
+  const [slug, setSlug] = useState('reader')
+  return (
+    <div style={{ display: 'grid', gap: '1rem', width: 'min(34rem,100%)' }}>
+      <Field
+        label="Project URL"
+        description={`Shares as https://radiant.dev/${slug || '…'}`}
+      >
+        <InputGroup>
+          <InputGroupAddon aria-hidden>radiant.dev/</InputGroupAddon>
+          <InputGroupInput
+            name="slug"
+            value={slug}
+            onChange={event =>
+              setSlug(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))
+            }
+          />
+        </InputGroup>
+      </Field>
+      <div>
+        <Button
+          variant="outline"
+          onClick={() => setSlug('reader')}
+        >
+          Use suggested URL
+        </Button>
+      </div>
+    </div>
+  )
+}
+export function InputGroupSizeComparison() {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 14rem), 1fr))',
+        gap: '1.5rem'
+      }}
+    >
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'grid', gap: '1rem', alignContent: 'start', minWidth: 0 }}
+        >
+          <Field label={`${controlSize} project`}>
+            <Input
+              defaultValue="Reader study"
+              controlSize={controlSize}
+            />
+          </Field>
+          <Field label={`${controlSize} budget`}>
+            <InputGroup controlSize={controlSize}>
+              <InputGroupAddon aria-hidden>$</InputGroupAddon>
+              <InputGroupInput defaultValue="250" />
+              <InputGroupAddon aria-hidden>USD</InputGroupAddon>
+            </InputGroup>
+          </Field>
+        </div>
+      ))}
+    </div>
   )
 }

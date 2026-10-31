@@ -1,14 +1,14 @@
 # Architecture
 
-Radiant's sixty families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+Radiant's sixty-one families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are Carousel, NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Carousel, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
 ## Native first
 
-Each piece of behavior has one owner:
+Behavior owners:
 
 | Responsibility                                         | Owner                                           |
 | ------------------------------------------------------ | ----------------------------------------------- |
@@ -30,7 +30,8 @@ MultiSelect composes Combobox with `type="multiple"`. TagsInput commits free tex
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 NumberField edits localized text and submits one raw numeric form value.
 Resizable composes Separator for adjacent panel sizing; applications persist layouts.
-Carousel uses native scroll snap and Button controls. Opt-in autoplay pauses for interaction, visibility and reduced motion.
+Carousel uses native scroll snap and Button controls; opt-in autoplay pauses for interaction, visibility and reduced motion.
+AppShell places native landmarks around one Sidebar subtree, reusing Drawer for mobile navigation and optional spring layout.
 NavigationMenu composes Button and Link with one shared spring viewport, preserving navigation semantics.
 Tag composes Badge and Button for removal.
 OTPField keeps one native Input for editing, autofill and forms; its character slots are decorative.
@@ -90,9 +91,7 @@ Link is always an anchor and has no fake `disabled`.
 
 A theme is one typed `defineTheme({ id, name, tokens, components, modes })`
 definition. Values resolve as **component override → shared token → neutral
-baseline**, and never fall back through another family's override. Why: a
-change to shared tokens should reach every family, and an exception should stay
-local. A Button-only font does not become body text.
+baseline**, and never fall back through another family's override. Shared tokens reach every family; overrides stay local.
 
 The core entry ships only the neutral baseline, `defaultTheme`. Styled presets
 are examples at `@cognitap/radiant/examples`, and Storybook, the docs and the
@@ -114,6 +113,8 @@ host, never a wrapper:
 | Family or part                                                                                      | Host                                                |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | Carousel / CarouselViewport / Carousel controls                                                     | section / native scroll div / Button button         |
+| AppShell / AppShellHeader / AppShellMain / Sidebar                                                  | div / header / main / nav                           |
+| AppShellSkipLink / SidebarTrigger / SidebarLabel / SidebarContent                                   | Link's a / Button's button / span / div             |
 | AspectRatio                                                                                         | `div`                                               |
 | Toolbar                                                                                             | `div`                                               |
 | ToggleGroup / ToggleGroupItem                                                                       | `div` / Button's `button`                           |

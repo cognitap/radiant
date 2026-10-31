@@ -6,6 +6,11 @@
 
 - Add Carousel with native scroll snap, direction-aware controls, drag navigation and opt-in autoplay that pauses for interaction and reduced motion.
 
+- Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.
+- Keep Button motion cleanup safe after its owning iframe is removed.
+
+## 0.0.66
+
 - **Breaking:** CheckboxGroup builds on Field's group layout and takes `label` instead of `legend`. Before: `<CheckboxGroup legend="Channels" parts={{ legend: … }} />`. After: `<CheckboxGroup label="Channels" parts={{ label: … }} />`. Its root `data-slot` is `field checkbox-group`; match `[data-slot~="checkbox-group"]` instead of `fieldset`.
 - **Breaking:** CheckboxGroup `value` and `defaultValue` are `string[]`, matching `onValueChange`. Before: `readonly string[]` was accepted. After: pass a mutable array.
 - CheckboxGroup adds `required` and `requiredIndicator`. `required` blocks native form submission until at least one enabled option is checked.
@@ -13,6 +18,7 @@
 - PasswordInput's reveal button no longer sets `aria-pressed`; its Show and Hide label alone says what it does.
 - ButtonGroup keeps a caller's `data-slot` tokens after `button-group` instead of dropping them.
 - DrawerHandle accepts `aria-labelledby` as its accessible name, as well as `aria-label`.
+- **Breaking:** CommandTrigger's props are DialogTrigger's, so toggle props are rejected the same way. Before: an object holding `pressed: true` could be typed as `CommandTriggerProps`. After: a type error. Runtime is unchanged; the trigger already ignored them.
 
 ## 0.0.65
 

@@ -3,7 +3,9 @@ import { expect, userEvent, within } from 'storybook/test'
 import { Field, InputGroup, InputGroupAddon, InputGroupInput } from './index.js'
 import { MotionProvider } from './motion/react.js'
 import {
+  ControlProjectSlug,
   FindProjectWithAddons,
+  InputGroupSizeComparison,
   SetProjectBudget,
   PostStudyUpdate,
   type InputGroupTaskOptions
@@ -39,8 +41,25 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: ({ disabled, readOnly, invalid, modifier: _modifier, ...group }) => (
+    <InputGroup {...group}>
+      <InputGroupAddon aria-hidden>radiant.dev/</InputGroupAddon>
+      <InputGroupInput
+        aria-label="Project URL"
+        name="slug"
+        defaultValue="reader"
+        disabled={disabled}
+        readOnly={readOnly}
+        aria-invalid={invalid || undefined}
+      />
+    </InputGroup>
+  )
+}
+export const WithField: Story = {
+  render: ({ disabled, readOnly, invalid, modifier: _modifier, ...group }) => (
     <Field
       label="Project URL"
+      description="Lowercase letters, numbers and hyphens."
+      required
       disabled={disabled}
       error={invalid ? 'Use an available project URL.' : undefined}
     >
@@ -54,6 +73,23 @@ export const Default: Story = {
       </InputGroup>
     </Field>
   )
+}
+export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <ControlProjectSlug />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement),
+      input = canvas.getByRole('textbox', { name: 'Project URL' })
+    await userEvent.clear(input)
+    await userEvent.type(input, 'Field Notes')
+    await expect(input).toHaveValue('field-notes')
+    await userEvent.click(canvas.getByRole('button', { name: 'Use suggested URL' }))
+    await expect(input).toHaveValue('reader')
+  }
+}
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <InputGroupSizeComparison />
 }
 export const FindingProject: Story = {
   play: async ({ canvasElement }) => {

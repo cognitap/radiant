@@ -118,6 +118,7 @@ function Contributor({ openDelay, closeDelay, defaultOpen, dir, ...surface }: Op
   )
 }
 export const Default: Story = {
+  render: args => <Contributor {...args} />,
   play: async ({ canvasElement, userEvent }) => {
     const canvas = within(canvasElement),
       trigger = canvas.getByRole('link', { name: 'Lee Chen' })
@@ -185,7 +186,7 @@ function Project({ openDelay, closeDelay, defaultOpen, dir, ...surface }: Option
     </div>
   )
 }
-export const ReviewingProjectProgress: Story = {
+export const Controlled: Story = {
   render: args => (
     <MotionProvider>
       <Project {...args} />
