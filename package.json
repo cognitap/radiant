@@ -1,6 +1,6 @@
 {
   "name": "@cognitap/radiant",
-  "version": "0.0.68",
+  "version": "0.0.69",
   "description": "React interaction components and presentation primitives",
   "homepage": "https://radiant-docs.pages.dev",
   "bugs": {
