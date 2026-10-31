@@ -297,6 +297,34 @@ test('the native code viewport is keyboard reachable and scrolls long source in 
   expect(getComputedStyle(view).outlineOffset).toBe('-3px')
   expect(getComputedStyle(view).direction).toBe('ltr')
 })
+test('the viewport reserves a scrollbar gutter only on axes that overflow', async () => {
+  const { host } = await mount(
+    <>
+      <CodeBlock
+        code="pnpm add @cognitap/radiant"
+        style={{ width: '400px' }}
+      >
+        <CodeBlockViewport aria-label="Short" />
+      </CodeBlock>
+      <CodeBlock
+        code={'wide '.repeat(200)}
+        style={{ width: '400px' }}
+      >
+        <CodeBlockViewport aria-label="Wide" />
+      </CodeBlock>
+    </>
+  )
+  await pause(100)
+  const [short, wide] = [
+    ...host.querySelectorAll<HTMLElement>('[data-slot~="code-block-viewport"]')
+  ]
+  const content = (view: HTMLElement) =>
+    view.querySelector<HTMLElement>('[data-slot="code-block-content"]')!
+  expect(short.clientHeight).toBe(content(short).offsetHeight)
+  expect(short.scrollWidth).toBe(short.clientWidth)
+  expect(wide.scrollWidth).toBeGreaterThan(wide.clientWidth)
+  expect(wide.clientHeight).toBe(content(wide).offsetHeight + 24)
+})
 test('canonical tasks generate native configuration and filter real table records and raw CSV', async () => {
   const writes: string[] = []
   clipboard(async source => {

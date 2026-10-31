@@ -402,8 +402,8 @@ export function ScrollArea({
           orientation === 'vertical' ? 'w-full' : 'w-max'
         )}
         style={{
-          paddingInlineEnd: orientation !== 'horizontal' ? hitSize : undefined,
-          paddingBottom: orientation !== 'vertical' ? hitSize : undefined
+          paddingInlineEnd: track?.vertical ? hitSize : undefined,
+          paddingBottom: track?.horizontal ? hitSize : undefined
         }}
       >
         <div
