@@ -10,7 +10,7 @@ const variants = cva(
   [
     'box-border grid w-full min-w-0 justify-items-center break-words text-center antialiased',
     'gap-[var(--rad-empty-state-gap,0.75rem)] p-[var(--rad-empty-state-padding,var(--rad-surface-padding,1.5rem))]',
-    'rounded-[var(--rad-empty-state-radius,var(--rad-surface-radius,0.75rem))] [border-width:var(--rad-empty-state-border-width,var(--rad-surface-border-width,1px))] [border-color:var(--rad-empty-state-border-color,var(--_action-edge))]',
+    'rounded-[var(--rad-empty-state-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] [border-width:var(--rad-empty-state-border-width,var(--rad-surface-border-width,1px))] [border-color:var(--rad-empty-state-border-color,var(--_action-edge))]',
     'bg-[var(--rad-empty-state-background,var(--rad-color-surface))] [color:var(--rad-empty-state-color,var(--rad-color-foreground))]',
     'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)]',
     'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]'
@@ -20,8 +20,8 @@ const variants = cva(
       variant: {
         'first-use': '[border-style:dashed]',
         'no-results':
-          '[border-width:var(--rad-empty-state-border-width,0px)] [border-style:solid] bg-[var(--rad-empty-state-background,transparent)] p-[var(--rad-empty-state-padding,1rem)]',
-        error: '[border-style:solid]'
+          '[border-width:var(--rad-empty-state-border-width,0px)] [border-style:var(--rad-surface-border-style,solid)] bg-[var(--rad-empty-state-background,transparent)] p-[var(--rad-empty-state-padding,1rem)]',
+        error: '[border-style:var(--rad-surface-border-style,solid)]'
       }
     },
     defaultVariants: { variant: 'first-use' }

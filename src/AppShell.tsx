@@ -382,7 +382,7 @@ export function Sidebar({
         id={shell.labelId}
         data-slot="sidebar-label"
         className={cn(
-          'm-0 text-[length:var(--rad-sidebar-label-size,1rem)] font-semibold',
+          'm-0 font-[family-name:var(--rad-typography-roles-ui-title-family,system-ui,sans-serif)] text-[length:var(--rad-sidebar-label-size,1rem)] font-[number:var(--rad-typography-roles-ui-title-weight,600)] tracking-[var(--rad-typography-roles-ui-title-letter-spacing,-0.015em)]',
           collapsed || shell.mobile ? 'sr-only' : undefined,
           parts?.label?.className
         )}

@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+- Draw surfaces with the whole `surface` role. Alert, Toast, TableContainer, EmptyState, CodeBlock and the Carousel viewport take the surface corner shape. Table rows and borders, CodeBlock, EmptyState's solid variants and Separator take the surface border style. Card, Alert, Toast and Collapsible take the surface backdrop filter.
+- Give Collapsible, Accordion items and TableContainer the surface shadow, overridable with `components.collapsible.shadow` and `components.table.shadow`.
+- Tint Collapsible and Accordion triggers on hover.
+- Set Table column headers in the action voice at the small control font size.
+- Round InlineCode at half the control radius, capped at 0.375em, with the control corner shape.
+- Draw the current Carousel indicator with `control.selected`.
+- Set the Sidebar label in the UI title typography role.
 - `control.indicator.thumbShadow` now defaults to `none`, and `control.track.background` and `control.track.borderWidth` default to unset, so each family keeps its own look until a theme sets them. Before, they defaulted to a small shadow, `color.neutral` and `0px`.
 - Give Checkbox, Radio and Switch the `control.indicator` shadows, and the Switch and Slider thumbs `thumbShadow`. Checkbox and Radio boxes scale with `motion.pressScale` while pressed.
 - Draw Progress, Meter, Skeleton, the Slider rail, ScrollArea's rail and Resizable's hover with `control.track`: background, border width and shadow.

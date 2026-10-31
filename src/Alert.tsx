@@ -57,8 +57,8 @@ export function Alert({ announce = 'off', tone = 'neutral', className, ...props 
       className={cn(
         actionTone({ tone }),
         colorMotion,
-        'box-border grid w-full min-w-0 break-words text-start antialiased gap-[var(--rad-alert-gap,var(--rad-spacing-header-gap,0.375rem))] p-[var(--rad-alert-padding,var(--rad-surface-padding,1.5rem))] rounded-[var(--rad-alert-radius,var(--rad-surface-radius,0.75rem))]',
-        'bg-[var(--rad-alert-background,var(--_action-soft))] [color:var(--rad-alert-color,var(--_action-ink))] [border-color:var(--rad-alert-border-color,var(--_action-edge))] [border-width:var(--rad-alert-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-alert-border-style,var(--rad-surface-border-style,solid))] [box-shadow:var(--rad-alert-shadow,none)]',
+        'box-border grid w-full min-w-0 break-words text-start antialiased gap-[var(--rad-alert-gap,var(--rad-spacing-header-gap,0.375rem))] p-[var(--rad-alert-padding,var(--rad-surface-padding,1.5rem))] rounded-[var(--rad-alert-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)]',
+        'bg-[var(--rad-alert-background,var(--_action-soft))] [color:var(--rad-alert-color,var(--_action-ink))] [border-color:var(--rad-alert-border-color,var(--_action-edge))] [border-width:var(--rad-alert-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-alert-border-style,var(--rad-surface-border-style,solid))] [box-shadow:var(--rad-alert-shadow,none)] [backdrop-filter:var(--rad-surface-backdrop-filter,none)]',
         'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)]',
         'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:shadow-none',
         className

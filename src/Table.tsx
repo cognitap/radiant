@@ -85,7 +85,7 @@ export function TableRow({ className, ...props }: TableRowProps) {
       {...nativeProps}
       data-slot={joinIds('table-row', props['data-slot'])}
       className={cn(
-        'border-b-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] border-solid border-[var(--rad-table-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
+        'border-b-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-table-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
         className
       )}
     />
@@ -101,6 +101,7 @@ export function TableHeader({ scope = 'col', className, ...props }: TableHeaderP
       className={cn(
         cellClass,
         'bg-[var(--rad-table-header-background,var(--rad-color-neutral))] [color:var(--rad-table-header-color,var(--rad-color-foreground))] font-[number:var(--rad-typography-roles-ui-label-weight,600)] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
+        'in-[thead]:font-[family-name:var(--rad-control-action-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] in-[thead]:font-[number:var(--rad-control-action-font-weight,var(--rad-typography-roles-ui-label-weight,600))] in-[thead]:[text-transform:var(--rad-control-action-text-transform,none)] in-[thead]:tracking-[var(--rad-control-action-letter-spacing,normal)] in-[thead]:text-[length:var(--rad-control-small-font-size,0.8125rem)]',
         className
       )}
     />
@@ -126,7 +127,7 @@ export function TableContainer({ className, ...props }: TableContainerProps) {
       {...nativeProps}
       data-slot={joinIds('table-container', props['data-slot'])}
       className={cn(
-        'min-w-0 max-w-full overflow-auto rounded-[var(--rad-table-radius,var(--rad-surface-radius,0.75rem))] border-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] border-solid border-[var(--rad-table-border-color,var(--rad-color-border))] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus)] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] focus-visible:[outline-style:var(--rad-focus-style,solid)] forced-colors:border-[CanvasText]',
+        'min-w-0 max-w-full overflow-auto rounded-[var(--rad-table-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] border-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-table-border-color,var(--rad-color-border))] [box-shadow:var(--rad-table-shadow,var(--rad-surface-shadow,none))] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus)] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] focus-visible:[outline-style:var(--rad-focus-style,solid)] forced-colors:border-[CanvasText]',
         className
       )}
     />

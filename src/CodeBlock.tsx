@@ -120,8 +120,8 @@ export function CodeBlock({
         data-line-numbers={lineNumbers || undefined}
         data-copy-state={pending ? 'pending' : phase}
         className={cn(
-          'box-border min-w-0 w-full overflow-hidden rounded-[var(--rad-code-block-radius,var(--rad-surface-radius,0.75rem))]',
-          'border-[length:var(--rad-code-block-border-width,var(--rad-surface-border-width,1px))] border-solid [border-color:var(--rad-code-block-border-color,var(--rad-color-border))]',
+          'box-border min-w-0 w-full overflow-hidden rounded-[var(--rad-code-block-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)]',
+          'border-[length:var(--rad-code-block-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] [border-color:var(--rad-code-block-border-color,var(--rad-color-border))]',
           'bg-[var(--rad-code-block-background,var(--rad-color-surface))] [color:var(--rad-code-block-color,var(--rad-color-foreground))]',
           'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
           className
@@ -155,7 +155,7 @@ export function CodeBlockHeader({ className, ...props }: CodeBlockHeaderProps) {
       className={cn(
         'flex min-w-0 flex-wrap items-center justify-between gap-[var(--rad-code-block-header-gap,0.75rem)] p-[var(--rad-code-block-header-padding,0.75rem)]',
         'font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-label-size,0.875rem)]',
-        'border-b-[length:var(--rad-code-block-border-width,var(--rad-surface-border-width,1px))] border-solid [border-color:var(--rad-code-block-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
+        'border-b-[length:var(--rad-code-block-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] [border-color:var(--rad-code-block-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
         className
       )}
     />

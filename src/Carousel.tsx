@@ -343,7 +343,7 @@ export function CarouselViewport({
       tabIndex={0}
       data-slot={joinIds('carousel-viewport', props['data-slot'])}
       className={cn(
-        'flex min-w-0 overflow-x-auto overscroll-x-contain snap-x snap-mandatory [touch-action:pan-x_pan-y] gap-[var(--rad-carousel-slide-gap,0px)] rounded-[var(--rad-carousel-radius,var(--rad-surface-radius,0.75rem))] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-2',
+        'flex min-w-0 overflow-x-auto overscroll-x-contain snap-x snap-mandatory [touch-action:pan-x_pan-y] gap-[var(--rad-carousel-slide-gap,0px)] rounded-[var(--rad-carousel-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-2',
         className
       )}
       onKeyDown={event => {
