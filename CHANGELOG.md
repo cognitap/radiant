@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Form with native validation, Field error mapping, asynchronous submission and optional form-library integration.
+
 ## 0.0.67
 
 - Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.

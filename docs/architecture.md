@@ -1,8 +1,8 @@
 # Architecture
 
-Radiant's sixty families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+Radiant's sixty-one families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Form, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -90,9 +90,7 @@ Link is always an anchor and has no fake `disabled`.
 
 A theme is one typed `defineTheme({ id, name, tokens, components, modes })`
 definition. Values resolve as **component override → shared token → neutral
-baseline**, and never fall back through another family's override. Why: a
-change to shared tokens should reach every family, and an exception should stay
-local. A Button-only font does not become body text.
+baseline**, and never fall back through another family's override. Shared tokens reach every family; overrides stay local.
 
 The core entry ships only the neutral baseline, `defaultTheme`. Styled presets
 are examples at `@cognitap/radiant/examples`, and Storybook, the docs and the
@@ -113,6 +111,7 @@ host, never a wrapper:
 
 | Family or part                                                                                      | Host                                                |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Form / FormField / FormError                                                                        | form / Field host / Alert div                       |
 | AppShell / AppShellHeader / AppShellMain / Sidebar                                                  | div / header / main / nav                           |
 | AppShellSkipLink / SidebarTrigger / SidebarLabel / SidebarContent                                   | Link's a / Button's button / span / div             |
 | AspectRatio                                                                                         | `div`                                               |
@@ -217,6 +216,8 @@ distinct; activation commits, Escape dismisses and restores trigger focus.
 Native reset silently restores uncontrolled selection. Controlled resets stay
 with the owner. User selections emit form change; prop syncs do not.
 
+Form coordinates native validation and asynchronous submission without storing values. FormField composes Field; FormError composes Alert.
+
 ## Replacement and events
 
 Button, Link and the Dialog actions accept `render(resolvedProps)`. Forward all
@@ -249,8 +250,8 @@ Types cannot prove these behaviors. See
 ## Examples and type fixtures
 
 The canonical live examples are Storybook stories:
-[Input](../src/Input.stories.tsx), [Recipes → Forms](../src/Form.stories.tsx)
-(one form, plain or in a Card or Dialog, optionally with TanStack) and
+[Input](../src/Input.stories.tsx), [Form](../src/Form.stories.tsx)
+(native validation, server recovery and optional TanStack values) and
 [Recipes → Workspace → Settings](../src/Workspace.stories.tsx) (all ten
 families). Change a contract and its example together.
 
