@@ -51,8 +51,9 @@ export function Skeleton({ motion = 'inherit', className, ...props }: SkeletonPr
       data-slot={joinIds('skeleton', props['data-slot'])}
       data-motion={off ? 'off' : 'inherit'}
       className={cn(
-        'block box-border max-w-full w-[var(--rad-skeleton-width,100%)] h-[var(--rad-skeleton-height,1rem)] rounded-[var(--rad-skeleton-radius,var(--rad-surface-radius,0.75rem))] bg-[var(--rad-skeleton-color,var(--rad-color-neutral))]',
-        'border border-transparent forced-colors:[border-color:CanvasText] forced-colors:bg-[Canvas] forced-colors:animate-none',
+        'block box-border max-w-full w-[var(--rad-skeleton-width,100%)] h-[var(--rad-skeleton-height,1rem)] rounded-[var(--rad-skeleton-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] bg-[var(--rad-skeleton-color,var(--rad-control-track-background,var(--rad-color-neutral)))]',
+        '[border:var(--rad-control-track-border-width,0px)_var(--rad-control-border-style,solid)_var(--rad-color-border)] [box-shadow:var(--rad-control-track-shadow,none)]',
+        'forced-colors:[border:1px_solid_CanvasText] forced-colors:bg-[Canvas] forced-colors:animate-none',
         off ? 'animate-none' : 'animate-pulse motion-reduce:animate-none',
         '[animation-duration:var(--rad-skeleton-duration,2s)]',
         className

@@ -177,7 +177,10 @@ for (const mode of ['light', 'dark'] as const) {
       await expect.element(page.getByRole('button', { name: 'Edit profile' })).toHaveFocus()
       await commands.emulatePreferences({ reducedMotion: 'no-preference' })
       await act(async () => userEvent.keyboard('{Space>}'))
-      const scale = getComputedStyle(trigger).getPropertyValue('--rad-button-press-scale').trim()
+      const styles = getComputedStyle(trigger)
+      const scale =
+        styles.getPropertyValue('--rad-button-press-scale').trim() ||
+        styles.getPropertyValue('--rad-motion-press-scale').trim()
       await expect.poll(() => getComputedStyle(trigger).scale).toBe(scale || '0.97')
     })
 

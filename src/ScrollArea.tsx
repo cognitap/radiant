@@ -291,7 +291,7 @@ export function ScrollArea({
       data-visibility={visibility}
       data-enhanced={metrics ? '' : undefined}
       className={cn(
-        'relative box-border min-h-0 min-w-0 [scrollbar-width:thin] [scrollbar-color:var(--rad-scroll-area-thumb-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))_var(--rad-scroll-area-track-color,var(--rad-color-surface,oklch(1_0_0)))]',
+        'relative box-border min-h-0 min-w-0 [scrollbar-width:thin] [scrollbar-color:var(--rad-scroll-area-thumb-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))_var(--rad-scroll-area-track-color,var(--rad-control-track-background,var(--rad-color-surface,oklch(1_0_0))))]',
         'data-enhanced:[scrollbar-width:none] [&[data-enhanced]::-webkit-scrollbar]:hidden',
         'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus,oklch(0.55_0.13_255))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] forced-colors:focus-visible:outline-[Highlight]',
         orientation === 'vertical'
@@ -417,6 +417,9 @@ export function ScrollArea({
     </div>
   )
 }
+const barShape =
+  'rounded-[min(var(--rad-scroll-area-radius,var(--rad-control-radius,0.5rem)),calc(var(--rad-scroll-area-size,6px)/2))] [corner-shape:var(--rad-control-corner-shape,round)]'
+
 function Bar({
   owner,
   axis,
@@ -463,7 +466,9 @@ function Bar({
         data-axis={axis}
         data-state={active ? 'visible' : 'hidden'}
         className={cn(
-          'absolute rounded-[var(--rad-scroll-area-radius,var(--rad-control-radius,0.5rem))] bg-[var(--rad-scroll-area-track-color,var(--rad-color-surface,oklch(1_0_0)))] forced-colors:bg-[Canvas]',
+          'absolute box-border bg-[var(--rad-scroll-area-track-color,var(--rad-control-track-background,var(--rad-color-surface,oklch(1_0_0))))] forced-colors:bg-[Canvas]',
+          '[border:var(--rad-control-track-border-width,0px)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))] [box-shadow:var(--rad-control-track-shadow,none)]',
+          barShape,
           shape,
           parts?.scrollbar?.className
         )}
@@ -486,7 +491,8 @@ function Bar({
           data-axis={axis}
           data-dragging={dragging ? '' : undefined}
           className={cn(
-            'absolute rounded-[var(--rad-scroll-area-radius,var(--rad-control-radius,0.5rem))] bg-[var(--rad-scroll-area-thumb-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:bg-[CanvasText]',
+            'absolute bg-[var(--rad-scroll-area-thumb-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:bg-[CanvasText]',
+            barShape,
             shape,
             parts?.thumb?.className
           )}

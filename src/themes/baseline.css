@@ -204,9 +204,9 @@
   --rad-control-field-backdrop-filter: none;
   --rad-control-indicator-shadow: none;
   --rad-control-indicator-checked-shadow: none;
-  --rad-control-indicator-thumb-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
-  --rad-control-track-background: var(--rad-color-neutral);
-  --rad-control-track-border-width: 0px;
+  --rad-control-indicator-thumb-shadow: none;
+  --rad-control-track-background: initial;
+  --rad-control-track-border-width: initial;
   --rad-control-track-shadow: none;
   --rad-control-selected-background: initial;
   --rad-control-selected-foreground: initial;

@@ -322,8 +322,8 @@ const light: SharedTokens = {
       shadow: 'none',
       backdropFilter: 'none'
     },
-    indicator: { shadow: 'none', checkedShadow: 'none', thumbShadow: '0 1px 2px rgb(0 0 0 / 0.2)' },
-    track: { background: 'var(--rad-color-neutral)', borderWidth: '0px', shadow: 'none' },
+    indicator: { shadow: 'none', checkedShadow: 'none', thumbShadow: 'none' },
+    track: { background: 'initial', borderWidth: 'initial', shadow: 'none' },
     selected: {
       background: 'initial',
       foreground: 'initial',

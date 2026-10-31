@@ -14,9 +14,10 @@ import type { ControlSize, ControlParts } from './presentation.js'
 const switchVariants = cva([
   controlBorderClass,
   'peer col-start-1 row-start-1 m-0 box-border appearance-none touch-pan-y select-none cursor-default',
-  'h-[var(--rad-switch-height,calc(var(--_rad-control-indicator-size)*1.25))]',
+  '[--_rad-switch-height:var(--rad-switch-height,calc(var(--_rad-control-indicator-size)*1.25))]',
+  'h-[var(--_rad-switch-height)]',
   'w-[var(--rad-switch-width,calc(var(--_rad-control-indicator-size)*2.25))]',
-  'rounded-[var(--rad-switch-radius,var(--rad-control-radius,0.5rem))]',
+  'rounded-[min(var(--rad-switch-radius,var(--rad-control-radius,0.5rem)),calc(var(--_rad-switch-height)/2))]',
   '[corner-shape:var(--rad-switch-corner-shape,var(--rad-control-corner-shape,round))]',
   '[border-width:var(--rad-switch-border-width,var(--rad-control-border-width,1px))]',
   '[border-style:var(--rad-switch-border-style,var(--rad-control-border-style,solid))]',
@@ -24,6 +25,8 @@ const switchVariants = cva([
   'bg-[var(--rad-switch-background,var(--rad-color-surface,oklch(1_0_0)))]',
   'checked:bg-[var(--rad-switch-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
   'checked:[border-color:var(--rad-switch-checked-border,var(--rad-switch-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  '[box-shadow:var(--rad-control-indicator-shadow,none)]',
+  'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
   'data-invalid:[border-color:var(--rad-switch-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-switch-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
@@ -38,8 +41,9 @@ const switchVariants = cva([
   'forced-colors:disabled:border-[GrayText] forced-colors:disabled:bg-[Canvas]'
 ])
 
+// The thumb sits 3px inside the track: its corner is the track corner minus 3px, capped at half its own size.
 const thumbClass =
-  'block size-full shrink-0 forced-colors:[forced-color-adjust:none] rounded-[var(--rad-switch-thumb-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-switch-corner-shape,var(--rad-control-corner-shape,round))] bg-current'
+  'block size-full shrink-0 forced-colors:[forced-color-adjust:none] rounded-[var(--rad-switch-thumb-radius,max(0px,min(calc(var(--rad-switch-radius,var(--rad-control-radius,0.5rem))-3px),50%)))] [corner-shape:var(--rad-switch-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-control-indicator-thumb-shadow,none)] bg-current forced-colors:[box-shadow:none]'
 const indicatorClass =
   'pointer-events-none absolute inset-[3px] flex justify-start peer-checked:justify-end [color:var(--rad-switch-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] peer-checked:[color:var(--rad-switch-checked-thumb,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-switch-disabled-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[CanvasText] forced-colors:peer-checked:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
 
