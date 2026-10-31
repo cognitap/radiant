@@ -65,7 +65,7 @@ export const entry = (
       wrapper: { style: { gap: 8 } },
       tag: { className: 'custom' },
       remove: { style: { borderRadius: 4 } },
-      message: { className: 'message' }
+      error: { className: 'error' }
     }}
   />
 )
@@ -112,6 +112,8 @@ const textValue: TagsInputProps = { value: 'design' }
 const mixedEntry: TagsInputProps = { value: [], defaultValue: [] }
 // @ts-expect-error Input type belongs to free text editing
 const numericEntry: TagsInputProps = { type: 'number' }
+// @ts-expect-error validation feedback is styled through parts.error
+const messagePart: TagsInputProps = { parts: { message: {} } }
 // @ts-expect-error Tag removal must have an explicit accessible label
 const unnamed: TagProps = { children: 'Design', onRemove: () => {} }
 const decorative: TagProps = {
@@ -129,5 +131,6 @@ void singleFacade
 void textValue
 void mixedEntry
 void numericEntry
+void messagePart
 void unnamed
 void decorative

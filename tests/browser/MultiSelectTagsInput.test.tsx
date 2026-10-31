@@ -489,13 +489,17 @@ test('TagsInput disabled/read-only native hosts and callback ref cleanup preserv
       parts={{
         wrapper: { style: { gap: 9 } },
         tag: { style: { maxWidth: 180 } },
-        remove: { style: { borderRadius: 3 } }
+        remove: { style: { borderRadius: 3 } },
+        error: { style: { fontWeight: 700 } }
       }}
     />
   )
   expect(text(host).readOnly).toBe(true)
   expect(button(host, 'Remove alpha').disabled).toBe(true)
   expect(host.querySelector<HTMLElement>('[data-slot="tags-input-control"]')!.style.gap).toBe('9px')
+  expect(host.querySelector<HTMLElement>('[data-slot="tags-input-error"]')!.style.fontWeight).toBe(
+    '700'
+  )
   await keys('{Backspace}')
   expect(change).not.toHaveBeenCalled()
   await render(<span>Removed</span>)
