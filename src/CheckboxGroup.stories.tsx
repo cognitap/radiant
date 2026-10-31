@@ -9,12 +9,13 @@ const items: CheckboxGroupItem[] = [
 const meta = {
   title: 'Components/CheckboxGroup',
   component: CheckboxGroup,
-  args: { legend: 'Notifications', items },
+  args: { label: 'Notifications', items, controlSize: 'medium' },
+  argTypes: { controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] } },
   parameters: {
     docs: {
       description: {
         component:
-          'Native checkboxes grouped by a real Fieldset. Values are string arrays; controlled owners receive requests, while uncontrolled inputs retain native reset and pre-hydration edits. The optional parent checkbox reports mixed state and toggles available options. Set name for native repeated form entries; applications own validation and persistence. Native refs, item attributes and checkbox presentation remain customizable.'
+          'A Field fieldset of native checkboxes. Values are string arrays; controlled owners receive requests, while uncontrolled inputs retain native reset and pre-hydration edits. required blocks native form submission until at least one enabled option is checked. The optional parent checkbox reports mixed state and toggles available options. Set name for native repeated form entries. Native refs, item attributes and checkbox presentation remain customizable.'
       }
     }
   }
@@ -31,22 +32,13 @@ export const Default: Story = {
     />
   )
 }
-export const SelectingAvailableChannels: Story = {
-  render: () => (
-    <CheckboxGroup
-      legend="Available channels"
-      name="channels"
-      items={[
-        ...items,
-        { value: 'managed', label: 'Managed by your organization', disabled: true }
-      ]}
-      defaultValue={['email', 'managed']}
-      selectAll={{ label: 'Select all available' }}
-      controlSize="small"
-      style={{ width: '24rem', '--rad-checkbox-group-gap': '1rem' }}
-      parts={{ legend: { className: 'italic' } }}
-    />
-  )
+export const WithField: Story = {
+  args: {
+    label: 'Channels',
+    description: 'Choose at least one channel.',
+    error: 'Pick a channel.',
+    required: true
+  }
 }
 function Preferences() {
   const [value, setValue] = useState<string[]>(['email']),
@@ -65,14 +57,14 @@ function Preferences() {
       }}
     >
       <CheckboxGroup
-        legend="Saved preferences"
+        label="Saved preferences"
         name="channels"
         items={items}
         value={value}
         onValueChange={setValue}
         selectAll={{ label: 'All channels' }}
         disabled={locked}
-        error={value.length === 0 ? 'Choose at least one channel.' : undefined}
+        required
       />
       <Button type="submit">Save preferences</Button>
       <Button
@@ -91,4 +83,38 @@ function Preferences() {
     </form>
   )
 }
-export const SavingPreferences: Story = { render: () => <Preferences /> }
+export const Controlled: Story = { render: () => <Preferences /> }
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
+      {(['small', 'medium', 'large'] as const).map(size => (
+        <CheckboxGroup
+          key={size}
+          label={`${size} channels`}
+          items={items}
+          controlSize={size}
+          defaultValue={['email']}
+          selectAll={{ label: 'All channels' }}
+        />
+      ))}
+    </div>
+  )
+}
+export const SelectingAvailableChannels: Story = {
+  render: () => (
+    <CheckboxGroup
+      label="Available channels"
+      name="channels"
+      items={[
+        ...items,
+        { value: 'managed', label: 'Managed by your organization', disabled: true }
+      ]}
+      defaultValue={['email', 'managed']}
+      selectAll={{ label: 'Select all available' }}
+      controlSize="small"
+      style={{ width: '24rem', '--rad-checkbox-group-gap': '1rem' }}
+      parts={{ label: { className: 'italic' } }}
+    />
+  )
+}

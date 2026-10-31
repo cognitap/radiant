@@ -222,3 +222,54 @@ export function ReviewOrder({
     </div>
   )
 }
+export function ControlledFilters() {
+  const [open, setOpen] = useState(false),
+    [snapPoint, setSnapPoint] = useState(0.5)
+  return (
+    <div className="grid gap-4">
+      <p>
+        Filters are {open ? 'open' : 'closed'} at {Math.round(snapPoint * 100)}%.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          onClick={() => {
+            setSnapPoint(0.5)
+            setOpen(true)
+          }}
+        >
+          Open filters at half size
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setSnapPoint(1)
+            setOpen(true)
+          }}
+        >
+          Open filters at full size
+        </Button>
+      </div>
+      <Drawer
+        open={open}
+        onOpenChange={setOpen}
+        snapPoint={snapPoint}
+        onSnapPointChange={setSnapPoint}
+      >
+        <DrawerContent
+          side="bottom"
+          parts={{ viewport: { className: 'gap-3' } }}
+        >
+          <DrawerHandle aria-label="Resize filters" />
+          <DrawerTitle>Filters</DrawerTitle>
+          <DrawerDescription>Narrow the study list by status.</DrawerDescription>
+          <Checkbox
+            label="Show archived studies"
+            name="archived"
+          />
+          <DrawerClose variant="outline">Close filters</DrawerClose>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  )
+}

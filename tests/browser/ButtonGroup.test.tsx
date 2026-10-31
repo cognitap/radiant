@@ -175,3 +175,9 @@ test('a real MenuTrigger keeps the final corners, native menu keyboard behavior 
   await click(item)
   expect(host.querySelector('output')?.textContent).toBe('Report scheduled for tomorrow.')
 })
+test('a caller data-slot composes with the button-group identity', async () => {
+  const { host } = await mount(actions({ 'data-slot': 'record-actions' }))
+  const root = host.querySelector<HTMLDivElement>('[data-slot~="record-actions"]')
+  expect(root?.dataset.slot).toBe('button-group record-actions')
+  expect(root?.getAttribute('role')).toBe('group')
+})

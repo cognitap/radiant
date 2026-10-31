@@ -56,6 +56,6 @@ test('vertical grouping and radius tokens are typed without introducing a state 
     )
   )
   assert.match(protectedHTML, /role="group"/)
-  assert.match(protectedHTML, /data-slot="button-group"/)
+  assert.match(protectedHTML, /data-slot="button-group fake"/)
   assert.doesNotMatch(protectedHTML, /role="toolbar"|aria-orientation=/)
 })

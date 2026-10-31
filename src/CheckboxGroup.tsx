@@ -11,7 +11,7 @@ import {
   type ReactNode
 } from 'react'
 import { Checkbox, type CheckboxProps } from './Checkbox.js'
-import { Fieldset, type FieldsetProps } from './Fieldset.js'
+import { Field, type FieldProps } from './Field.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from './react/useNativeOwner.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { cn } from './cn.js'
@@ -36,16 +36,16 @@ type OptionPresentation = Omit<
 export type CheckboxGroupItem = OptionPresentation & { value: string }
 export type CheckboxGroupSelectAll = OptionPresentation
 export type CheckboxGroupProps = Omit<
-  FieldsetProps,
-  'children' | 'defaultValue' | 'value' | 'parts' | 'onChange'
+  Extract<FieldProps, { layout: 'group' }>,
+  'layout' | 'children' | 'defaultValue' | 'parts' | 'onChange' | 'role'
 > &
-  ValueOwner<readonly string[]> & {
+  ValueOwner<string[]> & {
     items: readonly CheckboxGroupItem[]
     onValueChange?: (value: string[]) => void
     controlSize?: ControlSize
     /** Toggles available options; disabled selections remain unchanged. Never submitted. */
     selectAll?: CheckboxGroupSelectAll
-    parts?: NonNullable<FieldsetProps['parts']> & { options?: PartStyle }
+    parts?: NonNullable<FieldProps['parts']> & { options?: PartStyle }
   }
 // Configuration objects may carry extra native props through structural typing.
 const nativeOption = {
@@ -83,9 +83,11 @@ export function CheckboxGroup({
   selectAll,
   controlSize = 'medium',
   parts,
+  className,
   ref,
   name,
   form,
+  required,
   ...props
 }: CheckboxGroupProps) {
   const controlled = useNativeOwner('CheckboxGroup', value, defaultValue)
@@ -134,7 +136,7 @@ export function CheckboxGroup({
     return () => node?.removeEventListener('change', nativeChange)
   }, [])
   const aggregate = summary(current, items)
-  useLayoutEffect(() => {
+  const sync = () => {
     // Native uncontrolled checkboxes own reset and edits made before hydration.
     const next = controlled ? current : read()
     if (controlled) {
@@ -151,21 +153,18 @@ export function CheckboxGroup({
       all.current.checked = state.all
       all.current.indeterminate = state.mixed
     }
-  })
-  const afterReset = useEffectEvent(() => {
-    const next = controlled ? current : read()
-    if (!controlled) adopt(next)
-    else
-      for (const item of items) {
-        const node = nodes.current.get(item.value)
-        if (node) node.checked = current.includes(item.value)
-      }
-    const state = summary(next, items)
-    if (all.current) {
-      all.current.checked = state.all
-      all.current.indeterminate = state.mixed
-    }
-  })
+    // Native checkboxes have no group requirement, so the first enabled option carries it.
+    const enabled = items
+      .map(item => nodes.current.get(item.value))
+      .filter((node): node is HTMLInputElement => !!node && !node.matches(':disabled'))
+    const missing = required && !enabled.some(node => node.checked)
+    for (const node of nodes.current.values())
+      node.setCustomValidity(
+        missing && node === enabled[0] ? 'Please select at least one option.' : ''
+      )
+  }
+  useLayoutEffect(sync)
+  const afterReset = useEffectEvent(sync)
   useEffect(() => {
     const node = root.current,
       owner = node?.form,
@@ -210,12 +209,21 @@ export function CheckboxGroup({
     }
   }
   return (
-    <Fieldset
-      {...props}
+    <Field
+      {...{ ...props, role: undefined }}
+      layout="group"
+      required={required}
       form={form}
       ref={hostRef}
       data-slot={joinIds('checkbox-group', props['data-slot'])}
-      parts={fieldParts}
+      className={cn(
+        'max-w-full [gap:var(--rad-fieldset-gap,var(--rad-spacing-group-gap,0.75rem))]',
+        className
+      )}
+      parts={{
+        ...fieldParts,
+        label: { ...fieldParts.label, className: cn('max-w-full', fieldParts.label?.className) }
+      }}
       data-control-size={controlSize}
     >
       {selectAll ? (
@@ -272,7 +280,7 @@ export function CheckboxGroup({
           />
         ))}
       </div>
-    </Fieldset>
+    </Field>
   )
 }
 function Option({

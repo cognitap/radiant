@@ -43,7 +43,7 @@ const choose = (node: HTMLSelectElement, value: string) =>
   act(async () => {
     await userEvent.selectOptions(node, value)
   })
-test('password field hydrates into one native labelled autofill input and a real pressed Button', async () => {
+test('password field hydrates into one native labelled autofill input and a real Button', async () => {
   const ref = createRef<HTMLInputElement>(),
     { host } = await mount(
       <StrictMode>
@@ -73,7 +73,7 @@ test('password field hydrates into one native labelled autofill input and a real
     host.querySelector('[data-slot="field-description"]')?.id
   )
   expect(button.type).toBe('button')
-  expect(button.getAttribute('aria-pressed')).toBe('false')
+  expect(button.hasAttribute('aria-pressed')).toBe(false)
   expect(button.getAttribute('aria-controls')).toBe(input.id)
   expect(input.dataset.slot).toBe('input input-group-input password-input')
   expect(button.dataset.slot).toBe('button password-input-toggle')
@@ -104,12 +104,12 @@ test('pointer and keyboard reveal retain native value, caret, focus and identity
   expect(input.selectionEnd).toBe(6)
   expect(document.activeElement).toBe(buttons[0])
   expect(buttons[0]?.textContent).toBe('Conceal credential')
-  expect(buttons[0]?.getAttribute('aria-pressed')).toBe('true')
+  expect(buttons[0]?.hasAttribute('aria-pressed')).toBe(false)
   await act(async () => {
     await userEvent.keyboard(' ')
   })
   expect(input.type).toBe('password')
-  expect(buttons[0]?.getAttribute('aria-pressed')).toBe('false')
+  expect(buttons[0]?.hasAttribute('aria-pressed')).toBe(false)
   expect(buttons[0]?.textContent).toBe('Reveal credential')
   expect(host.querySelector('input')).toBe(input)
   expect(change).not.toHaveBeenCalled()
@@ -122,6 +122,38 @@ test('pointer and keyboard reveal retain native value, caret, focus and identity
     await userEvent.keyboard('{Tab}')
   })
   expect(document.activeElement).toBe(buttons[1])
+})
+test('reveal action announces one state: its name says what activating it does next', async () => {
+  const { host } = await mount(
+      <Field label="Password">
+        <PasswordInput defaultValue="demo-password" />
+      </Field>
+    ),
+    input = host.querySelector('input')!,
+    toggle = host.querySelector('button')!,
+    name = () => toggle.getAttribute('aria-label') ?? toggle.textContent
+  expect(toggle.getAttribute('role')).toBeNull()
+  expect(toggle.getAttribute('aria-controls')).toBe(input.id)
+  expect([name(), toggle.hasAttribute('aria-pressed'), input.type]).toEqual([
+    'Show password',
+    false,
+    'password'
+  ])
+  await click(toggle)
+  expect([name(), toggle.hasAttribute('aria-pressed'), input.type]).toEqual([
+    'Hide password',
+    false,
+    'text'
+  ])
+  expect(document.activeElement).toBe(toggle)
+  await act(async () => {
+    await userEvent.keyboard('{Enter}')
+  })
+  expect([name(), toggle.hasAttribute('aria-pressed'), input.type]).toEqual([
+    'Show password',
+    false,
+    'password'
+  ])
 })
 test('submit hides synchronously before consumer handlers and preserves one successful native value', async () => {
   const snapshots: { type: string; value: FormDataEntryValue | null }[] = [],
@@ -152,7 +184,7 @@ test('submit hides synchronously before consumer handlers and preserves one succ
   await click(buttons[1]!)
   expect(snapshots).toEqual([{ type: 'password', value: 'demo-password' }])
   expect(input.type).toBe('password')
-  expect(buttons[0]?.getAttribute('aria-pressed')).toBe('false')
+  expect(buttons[0]?.hasAttribute('aria-pressed')).toBe(false)
   expect(new FormData(host.querySelector('form')!).getAll('password')).toEqual(['demo-password'])
   expect(change).not.toHaveBeenCalled()
 })

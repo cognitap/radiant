@@ -21,27 +21,25 @@ import {
 } from './Dialog.js'
 import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
-import { requireAccessibleName } from './internal/accessibleName.js'
+import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { joinIds } from './internal/ids.js'
 import { drawerPoints, type DrawerSide } from './internal/drawer.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useDrawerHost } from './motion/host.js'
-import type { ThemeStyle } from './themes/defineTheme.js'
+import type { PartStyle } from './presentation.js'
+import type { StateOwner } from './react/useNativeOwner.js'
 
 export type { DrawerSide } from './internal/drawer.js'
 export type DrawerProps = DialogProps &
-  (
-    | { snapPoint: number; defaultSnapPoint?: never }
-    | { snapPoint?: undefined; defaultSnapPoint?: number }
-  ) & {
+  StateOwner<'snapPoint', number> & {
     /** Distinct visible fractions of Content's maximum size, in (0, 1]. Zero is dismissal. */
     snapPoints?: readonly number[]
-    onSnapPointChange?: (point: number) => void
+    onSnapPointChange?: (snapPoint: number) => void
   }
 export type DrawerState = DialogState & {
   snapPoint: number
   snapPoints: readonly number[]
-  setSnapPoint(point: number): void
+  setSnapPoint(snapPoint: number): void
   snapControlled: boolean
 }
 export type DrawerTriggerProps = DialogTriggerProps
@@ -52,7 +50,7 @@ export type DrawerDescriptionProps = DialogDescriptionProps
 export type DrawerContentProps = DialogContentProps & {
   side?: DrawerSide
   /** The native scrolling area inside the actual dialog. */
-  parts?: { viewport?: { className?: string; style?: ThemeStyle } }
+  parts?: { viewport?: PartStyle }
 }
 export type DrawerHandleProps = Omit<
   ButtonProps,
@@ -65,9 +63,8 @@ export type DrawerHandleProps = Omit<
   | 'aria-pressed'
   | 'type'
   | 'motion'
-> & {
-  'aria-label': string
-}
+> &
+  AccessibleName
 type SnapState = Pick<DrawerState, 'snapPoint' | 'snapPoints' | 'setSnapPoint' | 'snapControlled'>
 const SnapContext = createContext<SnapState | null>(null)
 const defaults = [0.5, 1] as const
@@ -198,7 +195,7 @@ export function DrawerHandle({ className, onClick, onKeyDown, ...props }: Drawer
   const state = useDrawerContext(),
     descriptionId = useId()
   const points = state.snapPoints
-  requireAccessibleName('DrawerHandle', { 'aria-label': props['aria-label'] })
+  requireAccessibleName('DrawerHandle', props)
   const choose = (direction: -1 | 1 | 'first' | 'last') => {
     const target =
       direction === 'first'
@@ -221,7 +218,6 @@ export function DrawerHandle({ className, onClick, onKeyDown, ...props }: Drawer
         defaultPressed={undefined}
         onPressedChange={undefined}
         aria-pressed={undefined}
-        aria-labelledby={undefined}
         variant={props.variant ?? 'ghost'}
         tone={props.tone ?? 'neutral'}
         className={cn(
