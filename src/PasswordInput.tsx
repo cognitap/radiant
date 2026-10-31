@@ -99,8 +99,7 @@ export function PasswordInput({
           tone="neutral"
           motion="off"
           controlSize={controlSize}
-          pressed={shown}
-          onPressedChange={setVisible}
+          onClick={() => setVisible(current => !current)}
           disabled={control.disabled}
           aria-controls={control.id}
           data-slot="password-input-toggle"

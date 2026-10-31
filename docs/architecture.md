@@ -156,7 +156,7 @@ reach Badge’s span; its removal part styles the actual Button.
 
 Internal parts take `className` and `style` through a `parts` map. Field has
 `label`, `description`, `error` and `required`. Checkbox, Switch and Radio have
-`wrapper`, `label` and `indicator`, and RadioGroup adds `options`. These hooks
+`wrapper`, `label` and `indicator`, and RadioGroup and CheckboxGroup add `options`. These hooks
 cannot replace IDs, ARIA, handlers or refs. Caller classes merge after the
 defaults and caller `style` wins. Identity and presentation data attributes
 cannot be overridden.

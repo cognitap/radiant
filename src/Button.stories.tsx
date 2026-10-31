@@ -7,6 +7,7 @@ import {
   Button,
   Checkbox,
   Field,
+  Input,
   Textarea,
   type ButtonProps,
   type ButtonRenderProps
@@ -209,4 +210,80 @@ function Exporting(args: ButtonProps) {
 export const ExportingThroughAnAdapter: Story = {
   render: args => <Exporting {...args} />,
   args: { variant: 'outline', tone: 'neutral' }
+}
+function MuteNotifications({ controlSize, tone, disabled, pending, motion }: ButtonProps) {
+  const [muted, setMuted] = useState(false)
+  return (
+    <MotionProvider>
+      <div style={{ display: 'grid', gap: '1rem', width: 'min(26rem, calc(100vw - 2rem))' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <Button
+            variant="outline"
+            tone={tone}
+            controlSize={controlSize}
+            disabled={disabled}
+            pending={pending}
+            motion={motion}
+            pressed={muted}
+            onPressedChange={setMuted}
+          >
+            Mute notifications
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={!muted}
+            onClick={() => setMuted(false)}
+          >
+            Resume all
+          </Button>
+        </div>
+        <output aria-live="polite">
+          {muted ? 'Notifications are muted.' : 'Notifications are on.'}
+        </output>
+      </div>
+    </MotionProvider>
+  )
+}
+export const Controlled: Story = {
+  render: args => <MuteNotifications {...args} />,
+  play: async ({ canvasElement, args, userEvent }) => {
+    if (args.disabled || args.pending) return
+    const canvas = within(canvasElement),
+      mute = canvas.getByRole('button', { name: 'Mute notifications' })
+    await userEvent.click(mute)
+    await expect(mute).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(canvas.getByRole('button', { name: 'Resume all' }))
+    await expect(mute).toHaveAttribute('aria-pressed', 'false')
+    await expect(canvas.getByRole('status')).toHaveTextContent('Notifications are on.')
+  }
+}
+export const SharedControlSizes: Story = {
+  argTypes: { controlSize: { control: false, table: { disable: true } } },
+  render: ({ controlSize: _size, ...args }) => (
+    <MotionProvider>
+      <div style={{ display: 'grid', gap: '1rem', width: 'min(28rem, calc(100vw - 2rem))' }}>
+        {(['small', 'medium', 'large'] as const).map(size => (
+          <div
+            key={size}
+            style={{ display: 'flex', alignItems: 'end', gap: '0.5rem' }}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <Field label={`${size} search`}>
+                <Input
+                  type="search"
+                  controlSize={size}
+                />
+              </Field>
+            </div>
+            <Button
+              {...args}
+              controlSize={size}
+            >
+              Search
+            </Button>
+          </div>
+        ))}
+      </div>
+    </MotionProvider>
+  )
 }

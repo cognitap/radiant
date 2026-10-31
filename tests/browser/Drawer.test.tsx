@@ -404,3 +404,16 @@ test('nested Dialog, native submit/reset and state hooks retain their independen
   )
   expect(submit).toHaveBeenCalledWith('Atlas')
 })
+test('DrawerHandle takes its accessible name from aria-labelledby', async () => {
+  const { host } = await mount(
+    <Drawer defaultOpen>
+      <DrawerContent motion="off">
+        <DrawerHandle aria-labelledby="drawer-handle-name" />
+        <DrawerTitle id="drawer-handle-name">Filters</DrawerTitle>
+      </DrawerContent>
+    </Drawer>
+  )
+  const { handle } = parts(host)
+  expect(handle.getAttribute('aria-labelledby')).toBe('drawer-handle-name')
+  expect(handle.hasAttribute('aria-label')).toBe(false)
+})
