@@ -1,5 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Badge } from './index.js'
+import {
+  ReleaseStatusTable,
+  RepeatedStatus,
+  SectionCounts
+} from '../.storybook/examples/BadgeExamples.js'
 const meta = {
   title: 'Components/Badge',
   component: Badge,
@@ -7,22 +12,52 @@ const meta = {
     docs: {
       description: {
         component:
-          'Compact passive status/category text. Keep meaningful visible text so color never carries the message alone. Tone is visual, not announcement urgency. Decorative badges are hidden only when adjacent text already conveys the same meaning. Use actual Button or Link for actions; put meaningful live updates in an application-owned Alert. Native span refs and theme/caller styles remain available.'
+          'Compact passive status, count or category text. Tone defaults to neutral and is visual only, so keep meaningful visible text and never let color carry the message alone. Decorative badges are hidden only when adjacent text already says the same thing. Use Tag when people can remove the item, Kbd for keys, Button or Link for actions, and an application-owned Alert for live updates.'
       }
     }
+  },
+  args: { children: 'Draft', tone: 'neutral', decorative: false },
+  argTypes: {
+    tone: { control: 'inline-radio', options: ['neutral', 'accent', 'warning', 'danger'] },
+    decorative: { control: 'boolean' },
+    children: { control: 'text' },
+    className: { control: 'text' },
+    style: { control: 'object' }
   }
 } satisfies Meta<typeof Badge>
 export default meta
 type Story = StoryObj<typeof meta>
-export const Default: Story = { args: { children: 'Draft' } }
-export const Tones: Story = {
-  render: () => (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.75rem' }}>
-      <Badge tone="neutral">Draft</Badge>
-      <Badge tone="accent">Approved</Badge>
-      <Badge tone="warning">Needs attention</Badge>
-      <Badge tone="danger">Blocked</Badge>
-    </div>
+const taskControls = {
+  children: { control: false, table: { disable: true } },
+  tone: { control: false, table: { disable: true } },
+  decorative: { control: false, table: { disable: true } }
+} as const
+export const Default: Story = {}
+export const ShowingStatus: Story = {
+  argTypes: taskControls,
+  render: ({ className, style }) => (
+    <ReleaseStatusTable
+      className={className}
+      style={style}
+    />
+  )
+}
+export const CountingItems: Story = {
+  argTypes: taskControls,
+  render: ({ className, style }) => (
+    <SectionCounts
+      className={className}
+      style={style}
+    />
+  )
+}
+export const HidingRepeatedText: Story = {
+  argTypes: taskControls,
+  render: ({ className, style }) => (
+    <RepeatedStatus
+      className={className}
+      style={style}
+    />
   )
 }
 export const Customisation: Story = {
@@ -35,17 +70,4 @@ export const Customisation: Story = {
       '--rad-badge-font-size': '1rem'
     }
   }
-}
-export const Decorative: Story = {
-  render: () => (
-    <p>
-      Release approved.{' '}
-      <Badge
-        decorative
-        tone="accent"
-      >
-        Approved
-      </Badge>
-    </p>
-  )
 }
