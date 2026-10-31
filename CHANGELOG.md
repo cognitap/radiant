@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add NavigationMenu with native navigation links, delayed hover disclosure and a shared spring viewport.
+
 ## 0.0.63
 
 - **Breaking:** Combobox chooses one or many with `type`, defaulting to `'single'`. Before: `<Combobox multiple />`, `useCombobox({ multiple: true })`. After: `<Combobox type="multiple" />`, `useCombobox({ type: 'multiple' })`.

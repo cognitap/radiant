@@ -687,3 +687,27 @@ export {
   type ResizablePanelState,
   type ResizableItem
 } from './Resizable.js'
+
+export {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuLink,
+  NavigationMenuContent,
+  NavigationMenuViewport,
+  useNavigationMenu
+} from './NavigationMenu.js'
+export type {
+  NavigationMenuProps,
+  NavigationMenuState,
+  NavigationMenuItemConfig,
+  NavigationMenuListProps,
+  NavigationMenuItemProps,
+  NavigationMenuTriggerProps,
+  NavigationMenuLinkProps,
+  NavigationMenuContentProps,
+  NavigationMenuViewportProps,
+  NavigationMenuRenderProps,
+  NavigationMenuLinkRenderProps
+} from './NavigationMenu.js'

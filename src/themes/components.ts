@@ -63,6 +63,16 @@ export const componentRegistry = {
     focusWidth: 'css',
     focusOffset: 'css'
   },
+  navigationMenu: {
+    gap: 'css',
+    padding: 'css',
+    radius: 'css',
+    borderWidth: 'css',
+    borderColor: 'css',
+    background: 'css',
+    color: 'css',
+    shadow: 'css'
+  },
   resizable: {
     handleSize: 'css',
     handleColor: 'css',
