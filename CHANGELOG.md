@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- Keep Button motion cleanup safe after its owning iframe is removed.
+
+- Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.
+
 ## 0.0.63
 
 - **Breaking:** Combobox chooses one or many with `type`, defaulting to `'single'`. Before: `<Combobox multiple />`, `useCombobox({ multiple: true })`. After: `<Combobox type="multiple" />`, `useCombobox({ type: 'multiple' })`.

@@ -9,7 +9,9 @@ const roleClasses = (prefix: string, leaf: string) =>
 export const cn: CnFunction = createCn({
   extend: {
     classGroups: {
+      'border-w-e': ['border-e-(--rad-sidebar-border-width)'],
       'border-w-b': [
+        'border-b-(--rad-app-shell-header-border-width)',
         'border-b-(--rad-code-block-border-width)',
         'border-b-(--rad-table-border-width)'
       ],
@@ -43,6 +45,7 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-sidebar-label-size)',
         'text-(--rad-inline-code-font-size)',
         'text-(--rad-code-block-font-size)',
         'text-(--rad-empty-state-title-size)',
@@ -83,6 +86,8 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-sidebar-width)',
+        'w-(--rad-sidebar-collapsed-width)',
         'w-(--rad-resizable-handle-size)',
         'w-(--rad-otp-field-slot-size)',
         'w-(--rad-drawer-size)',
@@ -113,6 +118,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-sidebar-gap)',
         'gap-(--rad-code-block-header-gap)',
         'gap-(--rad-empty-state-gap)',
         'gap-(--rad-empty-state-actions-gap)',
@@ -140,6 +146,7 @@ export const cn: CnFunction = createCn({
         'gap-(--rad-tabs-list-gap)'
       ],
       'min-h': [
+        'min-h-(--rad-app-shell-header-min-height)',
         'min-h-(--rad-native-select-height)',
         'min-h-(--rad-textarea-min-height)',
         'min-h-(--rad-tabs-trigger-height)'
@@ -168,6 +175,9 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-app-shell-header-padding)',
+        'p-(--rad-app-shell-main-padding)',
+        'p-(--rad-sidebar-padding)',
         'p-(--rad-code-block-padding)',
         'p-(--rad-code-block-header-padding)',
         'p-(--rad-empty-state-padding)',

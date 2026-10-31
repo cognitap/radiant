@@ -63,6 +63,28 @@ export const componentRegistry = {
     focusWidth: 'css',
     focusOffset: 'css'
   },
+  appShell: {
+    background: 'css',
+    color: 'css',
+    headerBackground: 'css',
+    headerColor: 'css',
+    headerPadding: 'css',
+    headerMinHeight: 'css',
+    headerBorderColor: 'css',
+    headerBorderWidth: 'css',
+    mainPadding: 'css'
+  },
+  sidebar: {
+    width: 'css',
+    collapsedWidth: 'css',
+    background: 'css',
+    color: 'css',
+    padding: 'css',
+    gap: 'css',
+    borderColor: 'css',
+    borderWidth: 'css',
+    labelSize: 'css'
+  },
   resizable: {
     handleSize: 'css',
     handleColor: 'css',

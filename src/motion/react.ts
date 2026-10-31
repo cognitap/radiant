@@ -14,6 +14,7 @@ import { bindDisclosureMotion, bindDialogMotion } from './transitions.js'
 import { bindPressMotion } from './press.js'
 import { bindPopupMotion } from './popup.js'
 import { bindIndicatorMotion } from './indicator.js'
+import { bindLayoutMotion } from './layoutHost.js'
 import { bindDrawerMotion } from './drawer.js'
 import { MotionProfileContext } from './context.js'
 import { resolveMotion, type MotionInteraction } from './config.js'
@@ -140,7 +141,8 @@ const hostRuntime = {
   disclosure: bindDisclosureMotion,
   dialog: bindDialogMotion,
   popup: bindPopupMotion,
-  indicator: bindIndicatorMotion
+  indicator: bindIndicatorMotion,
+  layout: bindLayoutMotion
 }
 /** Opt into native Radiant spring interactions without adding a DOM wrapper. */
 export function MotionProvider({ children }: { children?: ReactNode }) {
