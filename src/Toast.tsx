@@ -23,7 +23,7 @@ import {
 import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
-import type { DistributiveOmit } from './internal/types.js'
+import type { WithoutToggle } from './internal/types.js'
 import { composeAction } from './internal/events.js'
 import { validateToastDuration } from './internal/toast.js'
 import { useControllableState } from './react/useControllableState.js'
@@ -49,10 +49,7 @@ export type ToastProps = Omit<
 export type ToastState = { open: boolean; visible: boolean; setOpen: (open: boolean) => void }
 export type ToastTitleProps = AlertTitleProps
 export type ToastDescriptionProps = AlertDescriptionProps
-type ToastButtonProps = DistributiveOmit<
-  ButtonProps,
-  'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed'
->
+type ToastButtonProps = WithoutToggle<ButtonProps>
 export type ToastActionProps = ToastButtonProps & { altText: string }
 export type ToastCloseProps = ToastButtonProps
 const notToggle = {

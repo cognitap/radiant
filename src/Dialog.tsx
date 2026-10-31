@@ -12,7 +12,7 @@ import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
 import type { StateOwner } from './react/useNativeOwner.js'
-import type { DistributiveOmit } from './internal/types.js'
+import type { WithoutToggle } from './internal/types.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 const colorMotionClass =
@@ -91,16 +91,8 @@ export type DialogState = {
 
 export type DialogRenderProps = ButtonRenderProps
 
-type WithoutPressed = {
-  pressed?: never
-  defaultPressed?: never
-  onPressedChange?: never
-  'aria-pressed'?: never
-}
-
 /** Button props/render/ref contract, with protected dialog relationships and no toggle state. */
-export type DialogTriggerProps = DistributiveOmit<ButtonProps, keyof WithoutPressed> &
-  WithoutPressed
+export type DialogTriggerProps = WithoutToggle<ButtonProps>
 
 export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open' | 'style'> & {
   style?: ThemeStyle

@@ -293,7 +293,11 @@ test('PopoverTrigger ignores toggle props and stays a disclosure', async () => {
   const { host } = await mount(
     <Fixture
       trigger={
-        { defaultPressed: true, 'aria-pressed': 'true', onPressedChange } as PopoverTriggerProps
+        {
+          defaultPressed: true,
+          'aria-pressed': 'true',
+          onPressedChange
+        } as unknown as PopoverTriggerProps
       }
     />
   )
