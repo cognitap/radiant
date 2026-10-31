@@ -30,7 +30,7 @@ MultiSelect composes Combobox with `type="multiple"`. TagsInput commits free tex
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 NumberField edits localized text and submits one raw numeric form value.
 Resizable composes Separator for adjacent panel sizing; applications persist layouts.
-Charts use SVG through an optional entry; pure geometry stays separate from React, reusing Tooltip, Button, Table and palette modes.
+Charts isolate SVG geometry in an optional entry, composing Tooltip, Button, Table and palette modes.
 AppShell places native landmarks around one Sidebar subtree, reusing Drawer for mobile navigation and optional spring layout.
 NavigationMenu composes Button and Link with one shared spring viewport, preserving navigation semantics.
 Tag composes Badge and Button for removal.
