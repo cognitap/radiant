@@ -50,41 +50,73 @@ export const Default: Story = {
     </Pagination>
   )
 }
-export const Boundaries: Story = {
+export const FirstAndLastPages: Story = {
   render: () => (
-    <Pagination aria-label="Search result pages">
-      <PaginationList>
-        <PaginationItem>
-          <PaginationUnavailable>Previous</PaginationUnavailable>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink
-            href="?page=1"
-            current
-            aria-label="Page 1"
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationEllipsis />
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink
-            href="?page=10"
-            aria-label="Page 10"
-          >
-            10
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationNext href="?page=2" />
-        </PaginationItem>
-      </PaginationList>
-    </Pagination>
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      <Pagination aria-label="Search result pages, first page">
+        <PaginationList>
+          <PaginationItem>
+            <PaginationUnavailable>Previous</PaginationUnavailable>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink
+              href="?page=1"
+              current
+              aria-label="Page 1"
+            >
+              1
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink
+              href="?page=10"
+              aria-label="Page 10"
+            >
+              10
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext href="?page=2" />
+          </PaginationItem>
+        </PaginationList>
+      </Pagination>
+      <Pagination aria-label="Search result pages, last page">
+        <PaginationList>
+          <PaginationItem>
+            <PaginationPrevious href="?page=9" />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink
+              href="?page=1"
+              aria-label="Page 1"
+            >
+              1
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink
+              href="?page=10"
+              current
+              aria-label="Page 10"
+            >
+              10
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationUnavailable>Next</PaginationUnavailable>
+          </PaginationItem>
+        </PaginationList>
+      </Pagination>
+    </div>
   )
 }
-function ActionExample() {
+function ClientSideExample() {
   const [page, setPage] = useState(1)
   return (
     <div>
@@ -123,7 +155,46 @@ function ActionExample() {
     </div>
   )
 }
-export const Actions: Story = { render: () => <ActionExample /> }
+export const ClientSidePages: Story = { render: () => <ClientSideExample /> }
+export const SharedControlSizes: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <Pagination
+          key={controlSize}
+          aria-label={`${controlSize} pages`}
+        >
+          <PaginationList>
+            <PaginationItem>
+              <PaginationPrevious
+                href="?page=1"
+                controlSize={controlSize}
+              />
+            </PaginationItem>
+            {[1, 2, 3].map(page => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href={`?page=${page}`}
+                  controlSize={controlSize}
+                  current={page === 2}
+                  aria-label={`Page ${page}`}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="?page=3"
+                controlSize={controlSize}
+              />
+            </PaginationItem>
+          </PaginationList>
+        </Pagination>
+      ))}
+    </div>
+  )
+}
 export const Customisation: Story = {
   render: () => (
     <Pagination
