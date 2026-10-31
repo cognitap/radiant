@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.59
+
 - Add CodeBlock and InlineCode with consumer-supplied highlighting, line numbers, keyboard scrolling and copy feedback.
 
 ## 0.0.58
