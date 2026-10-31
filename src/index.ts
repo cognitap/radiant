@@ -655,3 +655,18 @@ export {
   type EmptyStateActionsProps
 } from './EmptyState.js'
 export type { HeadingLevel } from './internal/headings.js'
+
+export { InlineCode, type InlineCodeProps } from './InlineCode.js'
+export {
+  CodeBlock,
+  CodeBlockHeader,
+  CodeBlockViewport,
+  CodeBlockContent,
+  CodeBlockCopy,
+  type CodeBlockProps,
+  type CodeBlockHeaderProps,
+  type CodeBlockViewportProps,
+  type CodeBlockContentProps,
+  type CodeBlockCopyProps,
+  type CodeBlockRenderProps
+} from './CodeBlock.js'

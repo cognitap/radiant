@@ -9,7 +9,10 @@ const roleClasses = (prefix: string, leaf: string) =>
 export const cn: CnFunction = createCn({
   extend: {
     classGroups: {
-      'border-w-b': ['border-b-(--rad-table-border-width)'],
+      'border-w-b': [
+        'border-b-(--rad-code-block-border-width)',
+        'border-b-(--rad-table-border-width)'
+      ],
       'border-w-t': ['border-t-(--rad-separator-thickness)'],
       'border-w-s': ['border-s-(--rad-separator-thickness)'],
       my: ['my-(--rad-separator-spacing)'],
@@ -40,6 +43,8 @@ export const cn: CnFunction = createCn({
         'font-(--rad-tabs-font-weight)'
       ],
       'font-size': [
+        'text-(--rad-inline-code-font-size)',
+        'text-(--rad-code-block-font-size)',
         'text-(--rad-empty-state-title-size)',
         'text-(--rad-empty-state-description-size)',
         'text-(--rad-nav-link-font-size)',
@@ -91,7 +96,7 @@ export const cn: CnFunction = createCn({
         'w-(--rad-slider-length)'
       ],
       'min-w': ['min-w-(--rad-pagination-item-min-width)'],
-      'max-h': ['max-h-(--rad-command-results-max-height)'],
+      'max-h': ['max-h-(--rad-code-block-max-height)', 'max-h-(--rad-command-results-max-height)'],
       'max-w': ['max-w-(--rad-tooltip-max-width)'],
       size: [
         'size-(--rad-empty-state-icon-size)',
@@ -106,6 +111,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-code-block-header-gap)',
         'gap-(--rad-empty-state-gap)',
         'gap-(--rad-empty-state-actions-gap)',
         'gap-(--rad-nav-link-gap)',
@@ -137,6 +143,7 @@ export const cn: CnFunction = createCn({
       ],
       ps: ['ps-(--rad-nav-link-indent)'],
       py: [
+        'py-(--rad-inline-code-padding-block)',
         'py-(--rad-nav-link-padding-block)',
         'py-(--rad-kbd-padding-block)',
         'py-(--rad-table-padding-block)',
@@ -144,6 +151,8 @@ export const cn: CnFunction = createCn({
         'py-(--rad-badge-padding-block)'
       ],
       px: [
+        'px-(--rad-inline-code-padding-inline)',
+        'px-(--rad-code-block-padding)',
         'px-(--rad-nav-link-padding-inline)',
         'px-(--rad-native-select-padding)',
         'px-(--rad-input-group-padding-inline)',
@@ -156,6 +165,8 @@ export const cn: CnFunction = createCn({
         'px-(--rad-tabs-trigger-padding)'
       ],
       p: [
+        'p-(--rad-code-block-padding)',
+        'p-(--rad-code-block-header-padding)',
         'p-(--rad-empty-state-padding)',
         'p-(--rad-menubar-padding)',
         'p-(--rad-toolbar-padding)',
@@ -172,6 +183,8 @@ export const cn: CnFunction = createCn({
         'p-(--rad-tabs-content-padding)'
       ],
       rounded: [
+        'rounded-(--rad-code-block-radius)',
+        'rounded-(--rad-inline-code-radius)',
         'rounded-(--rad-empty-state-radius)',
         'rounded-(--rad-nav-link-radius)',
         'rounded-(--rad-meter-radius)',
@@ -212,6 +225,7 @@ export const cn: CnFunction = createCn({
         'rounded-(--rad-tabs-content-radius)'
       ],
       'border-w': [
+        'border-(--rad-code-block-border-width)',
         'border-(--rad-empty-state-border-width)',
         'border-(--rad-meter-border-width)',
         'border-(--rad-native-select-border-width)',
@@ -314,7 +328,8 @@ export const cn: CnFunction = createCn({
         '[backdrop-filter:var(--rad-combobox-content-backdrop-filter)]',
         '[backdrop-filter:var(--rad-select-content-backdrop-filter)]'
       ],
-      leading: roleClasses('leading', 'line-height'),
+      leading: ['leading-(--rad-code-block-line-height)', ...roleClasses('leading', 'line-height')],
+      pe: ['pe-(--rad-code-block-number-gap)'],
       tracking: roleClasses('tracking', 'letter-spacing'),
       'max-inline-size': roleClasses('max-inline', 'measure'),
       mbs: [

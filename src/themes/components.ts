@@ -2,6 +2,30 @@ import { kebabCase } from './tokens.js'
 
 /** Explicit component slots; omitted slots reset to CSS fallback semantics. */
 export const componentRegistry = {
+  inlineCode: {
+    radius: 'css',
+    paddingInline: 'css',
+    paddingBlock: 'css',
+    background: 'css',
+    color: 'css',
+    fontSize: 'css'
+  },
+  codeBlock: {
+    radius: 'css',
+    borderWidth: 'css',
+    borderColor: 'css',
+    background: 'css',
+    color: 'css',
+    padding: 'css',
+    headerPadding: 'css',
+    headerGap: 'css',
+    maxHeight: 'css',
+    fontSize: 'css',
+    lineHeight: 'css',
+    numberGap: 'css',
+    numberColor: 'css',
+    statusColor: 'css'
+  },
   emptyState: {
     padding: 'css',
     gap: 'css',

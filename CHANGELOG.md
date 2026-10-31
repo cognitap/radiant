@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add CodeBlock and InlineCode with consumer-supplied highlighting, line numbers, keyboard scrolling and copy feedback.
+
 ## 0.0.58
 
 - Progress fallback text matches Meter: `aria-valuetext` when given, otherwise "value of max". Before: "value / max", ignoring `aria-valuetext`.
