@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add Resizable with draggable and keyboard separators, bounded collapsible panels, direction support and application-owned layout persistence.
+
 ## 0.0.61
 
 - **Breaking:** Pagination page links and buttons default to `controlSize="medium"`, matching Button and Link. Before: `<PaginationLink href="?page=2">` rendered small. After: it renders medium. Pass `controlSize="small"` to keep the old size.

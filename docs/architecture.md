@@ -1,8 +1,8 @@
 # Architecture
 
-How Radiant's fifty-seven families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+How Radiant's fifty-eight families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -29,6 +29,7 @@ Command combines Dialog with an inline Combobox listbox for explicit actions; ap
 MultiSelect composes Combobox multiple mode. TagsInput commits free text; both
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 NumberField edits localized text and submits one raw numeric form value.
+Resizable composes Separator for adjacent panel sizing; applications persist layouts.
 Tag composes Badge and Button for removal.
 OTPField keeps one native Input for editing, autofill and forms; its character slots are decorative.
 InputGroup shares a boundary around real Input or Textarea controls and their addons.
@@ -216,9 +217,7 @@ with the owner. User selections emit form change; prop syncs do not.
 
 Button, Link and the Dialog actions accept `render(resolvedProps)`. Forward all
 props, the ref and the children to one compatible `button` or `a`. There is no
-`as` or `asChild`. Why: one convention, and the resolved props already carry
-presentation, relationships and guards, so an adapter cannot drop them by
-accident. Field's `children(controlProps)` adapts relationships and does not
+`as` or `asChild`. Forwarding keeps the contract intact. Field's `children(controlProps)` adapts relationships and does not
 replace Field's host.
 
 For cancellable actions, disabled and pending guards run first, then the
