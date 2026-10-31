@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, waitFor } from 'storybook/test'
+import { Button, Field, MultiSelect } from './index.js'
 import { MotionProvider } from './motion/react.js'
 import {
   AssignProjectReviewers,
   FilterReleaseBoard,
   KeepLeadReviewer,
+  people,
   type MultiTaskOptions
 } from '../.storybook/examples/MultiSelectExamples.js'
 const meta = {
@@ -51,7 +53,66 @@ async function settled(canvas: HTMLElement) {
     { timeout: 4000 }
   )
 }
-export const Default: Story = {}
+export const Default: Story = {
+  render: () => (
+    <Field
+      label="Reviewers"
+      className="w-80 max-w-full"
+    >
+      <MultiSelect
+        items={people}
+        defaultValue={['ana']}
+      />
+    </Field>
+  )
+}
+export const WithField: Story = {
+  render: () => (
+    <form className="grid w-80 max-w-full gap-3">
+      <Field
+        label="Reviewers"
+        required
+        description="Choose at least one reviewer before submitting."
+      >
+        <MultiSelect
+          items={people}
+          name="reviewers"
+        />
+      </Field>
+      <Button type="submit">Submit</Button>
+    </form>
+  )
+}
+export const Controlled: Story = {
+  args: { initialOpen: true },
+  render: args => (
+    <MotionProvider>
+      <KeepLeadReviewer
+        key={JSON.stringify([args.initialOpen, args.initialValues])}
+        {...args}
+      />
+    </MotionProvider>
+  ),
+  play: async ({ canvasElement }) => settled(canvasElement)
+}
+export const SharedControlSizes: Story = {
+  render: () => (
+    <div className="grid w-80 max-w-full gap-5">
+      {(['small', 'medium', 'large'] as const).map(size => (
+        <Field
+          label={`${size} reviewers`}
+          key={size}
+        >
+          <MultiSelect
+            items={people}
+            defaultValue={['ana']}
+            controlSize={size}
+          />
+        </Field>
+      ))}
+    </div>
+  )
+}
 export const AssigningProjectReviewers: Story = {
   args: { initialOpen: true },
   play: async ({ canvasElement }) => settled(canvasElement)
@@ -68,15 +129,32 @@ export const FilteringReleaseBoard: Story = {
   ),
   play: async ({ canvasElement }) => settled(canvasElement)
 }
-export const KeepingLeadReviewer: Story = {
-  args: { initialOpen: true },
-  render: args => (
-    <MotionProvider>
-      <KeepLeadReviewer
-        key={JSON.stringify([args.initialOpen, args.initialValues])}
-        {...args}
-      />
-    </MotionProvider>
-  ),
-  play: async ({ canvasElement }) => settled(canvasElement)
+export const States: Story = {
+  render: () => (
+    <div className="grid w-80 max-w-full gap-5">
+      <Field
+        label="Disabled reviewers"
+        disabled
+        description="An administrator manages this review."
+      >
+        <MultiSelect items={people} />
+      </Field>
+      <Field
+        label="Invalid reviewers"
+        error="Choose at least one reviewer."
+      >
+        <MultiSelect items={people} />
+      </Field>
+      <Field
+        label="Read-only reviewers"
+        description="Submitted with the form, but not editable."
+      >
+        <MultiSelect
+          items={people}
+          defaultValue={['ana', 'sam']}
+          readOnly
+        />
+      </Field>
+    </div>
+  )
 }

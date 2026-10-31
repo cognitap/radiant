@@ -26,7 +26,7 @@ Combobox keeps DOM focus on its native input and submits the committed key throu
 native form controls. Search text never becomes a selection. Autocomplete reuses the listbox but submits its native text, including off-list values. Applications own async
 requests, cancellation and selected labels; results never trigger selection.
 Command combines Dialog with an inline Combobox listbox for explicit actions; applications register shortcuts.
-MultiSelect composes Combobox multiple mode. TagsInput commits free text; both
+MultiSelect composes Combobox with `type="multiple"`. TagsInput commits free text; both
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
 NumberField edits localized text and submits one raw numeric form value.
 Resizable composes Separator for adjacent panel sizing; applications persist layouts.

@@ -141,7 +141,6 @@ function CommandResults({
   items,
   onAction,
   filter,
-  errorText,
   children,
   ...props
 }: Pick<
@@ -166,7 +165,6 @@ function CommandResults({
         {...props}
         items={items}
         value={null}
-        error={errorText}
         open={dialog.open}
         filter={
           filter === null

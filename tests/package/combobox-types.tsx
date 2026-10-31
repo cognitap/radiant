@@ -10,6 +10,8 @@ import {
   defineTheme,
   type ComboboxProps,
   type ComboboxTriggerProps,
+  type ComboboxClearProps,
+  type ComboboxRenderProps,
   type ComboboxInputProps,
   type ComboboxOption
 } from '@cognitap/radiant'
@@ -85,7 +87,31 @@ const inputValue: ComboboxInputProps = { value: 'a' }
 const name: ComboboxInputProps = { name: 'query' }
 // @ts-expect-error Relationships belong to the owner.
 const active: ComboboxInputProps = { 'aria-activedescendant': 'other' }
+// @ts-expect-error Choose many with type="multiple", not a boolean.
+const legacyMultiple: ComboboxProps = { items, multiple: true, value: ['a'] }
+// @ts-expect-error Load-failure text is errorText; error is a validation message.
+const legacyError: ComboboxProps = { items, error: 'Unavailable' }
+// @ts-expect-error A trigger that opens results does not own pressed state.
+const pressedTrigger: ComboboxTriggerProps = { pressed: true }
+// @ts-expect-error Clearing is an action, not a toggle.
+const pressedClear: ComboboxClearProps = { onPressedChange: () => {} }
+// @ts-expect-error The hook selects multiple mode with type.
+const legacyHook = () => useCombobox({ multiple: true })
+const many: ComboboxProps = {
+  items,
+  type: 'multiple',
+  defaultValue: ['a'],
+  errorText: 'Unavailable',
+  'aria-invalid': true,
+  onValueChange(value) {
+    value.map(item => item.toUpperCase())
+  }
+}
+const manyHook = () => useCombobox({ type: 'multiple' })?.value.map(item => item.toUpperCase())
+const renderProps: Pick<ComboboxRenderProps, 'children'> = { children: 'Show options' }
 void [mixed, query, open, multiple, unreadable, inputValue, name, active]
+void [legacyMultiple, legacyError, pressedTrigger, pressedClear, legacyHook, many, manyHook]
+void renderProps
 
 // @ts-expect-error Adornments use Combobox presentation, not action treatments.
 const actionVariant: ComboboxTriggerProps = { variant: 'solid' }

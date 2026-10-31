@@ -6,7 +6,10 @@ import {
   AutocompletePortal,
   AutocompleteContent,
   type AutocompleteProps,
-  type AutocompleteInputProps
+  type AutocompleteInputProps,
+  type AutocompleteTriggerProps,
+  type AutocompleteClearProps,
+  type AutocompleteRenderProps
 } from '@cognitap/radiant'
 const items = [{ value: 'Budapest', label: 'Budapest' }]
 export const uncontrolled = (
@@ -41,7 +44,19 @@ export const nullable: AutocompleteProps = { items, value: null }
 // @ts-expect-error The text value is also the query.
 export const query: AutocompleteProps = { items, query: 'separate' }
 // @ts-expect-error Completion is not multiple selection.
-export const multiple: AutocompleteProps = { items, multiple: true }
+export const multiple: AutocompleteProps = { items, type: 'multiple' }
+// @ts-expect-error Load-failure text is errorText; error is a validation message.
+export const legacyError: AutocompleteProps = { items, error: 'Unavailable' }
+export const statusText: AutocompleteProps = {
+  items,
+  errorText: 'Unavailable',
+  'aria-invalid': true
+}
+// @ts-expect-error A trigger that opens suggestions does not own pressed state.
+export const pressedTrigger: AutocompleteTriggerProps = { pressed: true }
+// @ts-expect-error Clearing text is an action, not a toggle.
+export const pressedClear: AutocompleteClearProps = { defaultPressed: true }
+export const renderProps: Pick<AutocompleteRenderProps, 'children'> = { children: 'Show' }
 // @ts-expect-error Open state has one owner.
 export const bothOpen: AutocompleteProps = { items, open: true, defaultOpen: true }
 // @ts-expect-error The native form name belongs to the root.

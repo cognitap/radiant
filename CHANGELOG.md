@@ -6,6 +6,15 @@
 
 - Add NavigationMenu with native navigation links, delayed hover disclosure and a shared spring viewport.
 
+## 0.0.63
+
+- **Breaking:** Combobox chooses one or many with `type`, defaulting to `'single'`. Before: `<Combobox multiple />`, `useCombobox({ multiple: true })`. After: `<Combobox type="multiple" />`, `useCombobox({ type: 'multiple' })`.
+- **Breaking:** Combobox, Autocomplete and MultiSelect name their load-failure text `errorText`, matching `loadingText`, `emptyText` and Command. Before: `<Combobox error="Could not load" />`. After: `<Combobox errorText="Could not load" />`.
+- **Breaking:** ComboboxTrigger, ComboboxClear and the Autocomplete and MultiSelect triggers and clears no longer accept toggle props, and ignore them at runtime. Before: `<ComboboxTrigger pressed />` rendered `aria-pressed`. After: a type error, and no `aria-pressed`.
+- **Breaking:** TagsInput styles its validation message through `parts.error`, with `data-slot="tags-input-error"`. Before: `parts.message`, `[data-slot="tags-input-message"]`.
+- Combobox, Autocomplete and MultiSelect accept `aria-invalid` on the root and forward it to the input.
+- Add `ComboboxRenderProps` and `AutocompleteRenderProps` for the `render` prop on Trigger and Clear.
+
 ## 0.0.62
 
 - Add Resizable with draggable and keyboard separators, bounded collapsible panels, direction support and application-owned layout persistence.

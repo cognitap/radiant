@@ -59,3 +59,15 @@ export const pressed = (
 )
 // @ts-expect-error Navigation links require actual destinations.
 export const noDestination = <NavigationMenuLink>Guide</NavigationMenuLink>
+
+export const undefinedToggle = (
+  <NavigationMenuTrigger
+    value="learn"
+    pressed={undefined}
+    defaultPressed={undefined}
+    onPressedChange={undefined}
+    aria-pressed={undefined}
+  >
+    Learn
+  </NavigationMenuTrigger>
+)

@@ -24,7 +24,7 @@ import { ScrollArea } from './ScrollArea.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
-import type { DistributiveOmit } from './internal/types.js'
+import type { DistributiveOmit, WithoutToggle } from './internal/types.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useHoverSurface } from './react/useHoverSurface.js'
@@ -321,18 +321,18 @@ export function NavigationMenuItem(props: NavigationMenuItemProps) {
 }
 export type NavigationMenuRenderProps = ButtonRenderProps
 export type NavigationMenuLinkRenderProps = ComposedLinkRenderProps
-export type NavigationMenuTriggerProps = DistributiveOmit<
-  ButtonProps,
-  | 'value'
-  | 'pressed'
-  | 'defaultPressed'
-  | 'onPressedChange'
-  | 'aria-pressed'
-  | 'aria-expanded'
-  | 'aria-controls'
-  | 'aria-haspopup'
-  | 'id'
-  | 'role'
+export type NavigationMenuTriggerProps = WithoutToggle<
+  DistributiveOmit<
+    ButtonProps,
+    | 'value'
+    | 'aria-expanded'
+    | 'aria-controls'
+    | 'aria-haspopup'
+    | 'id'
+    | 'role'
+    | 'popoverTarget'
+    | 'popoverTargetAction'
+  >
 > & { value: string }
 export function NavigationMenuTrigger({
   value,

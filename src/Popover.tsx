@@ -16,7 +16,7 @@ import { cn } from './cn.js'
 import { composeAction } from './internal/events.js'
 import { joinIds } from './internal/ids.js'
 import type { PopoverSide, PopoverAlign } from './internal/popover.js'
-import type { DistributiveOmit } from './internal/types.js'
+import type { WithoutToggle } from './internal/types.js'
 import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import type { StateOwner } from './react/useNativeOwner.js'
@@ -102,10 +102,7 @@ export function PopoverRoot({
   )
 }
 
-export type PopoverTriggerProps = DistributiveOmit<
-  ButtonProps,
-  'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed'
->
+export type PopoverTriggerProps = WithoutToggle<ButtonProps>
 export type PopoverCloseProps = ButtonProps
 export type PopoverRenderProps = ButtonRenderProps
 export type PopoverPortalProps = { children?: ReactNode }

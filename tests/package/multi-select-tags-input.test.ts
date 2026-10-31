@@ -124,7 +124,7 @@ test('multiple and tag owners reject contradictory state, duplicate strings and 
     /controlled value or a default/
   )
   assert.throws(
-    () => renderToStaticMarkup(h(Combobox, { items, multiple: true, defaultValue: ['a', 'a'] })),
+    () => renderToStaticMarkup(h(Combobox, { items, type: 'multiple', defaultValue: ['a', 'a'] })),
     /distinct strings/
   )
   assert.throws(
@@ -138,7 +138,7 @@ test('multiple and tag owners reject contradictory state, duplicate strings and 
   assert.throws(() => renderToStaticMarkup(h(TagsInput, { maxCount: -1 })), /nonnegative integer/)
   function Outside() {
     assert.equal(useMultiSelect(), null)
-    assert.equal(useCombobox({ multiple: true }), null)
+    assert.equal(useCombobox({ type: 'multiple' }), null)
     return null
   }
   renderToStaticMarkup(h(Outside))

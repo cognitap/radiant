@@ -18,6 +18,8 @@ import {
   DialogTrigger,
   DialogContent,
   DialogTitle,
+  Autocomplete,
+  MultiSelect,
   useCombobox
 } from '../../src/index.js'
 import { MotionProvider } from '../../src/motion/react.js'
@@ -356,7 +358,7 @@ test('async replacement invalidates stale active options, ignores loading result
         name="city"
         defaultValue="oslo"
         loading={loading}
-        error={error}
+        errorText={error}
         onValueChange={change}
       />
     </Field>
@@ -672,4 +674,65 @@ test('opt-in clear action forwards its native ref/render and clears without stea
   expect(input(host).value).toBe('')
   expect(document.activeElement).toBe(input(host))
   expect(host.querySelector('[data-slot~="combobox-clear"]')).toBeNull()
+})
+
+test('trigger and clear are actions, so toggle props from untyped callers never reach the button', async () => {
+  const pressedChange = vi.fn()
+  const toggle = { pressed: true, onPressedChange: pressedChange } as object
+  const { host } = await mount(
+    <Field label="City">
+      <Combobox
+        items={items}
+        defaultValue="oslo"
+      >
+        <div className="relative">
+          <ComboboxInput />
+          <ComboboxClear {...({ 'aria-pressed': true } as object)} />
+          <ComboboxTrigger {...toggle} />
+        </div>
+        <ComboboxPortal>
+          <ComboboxContent />
+        </ComboboxPortal>
+      </Combobox>
+    </Field>
+  )
+  const trigger = host.querySelector<HTMLButtonElement>('[data-slot~="combobox-trigger"]')!
+  const clear = host.querySelector<HTMLButtonElement>('[data-slot~="combobox-clear"]')!
+  expect(trigger.hasAttribute('aria-pressed')).toBe(false)
+  expect(clear.hasAttribute('aria-pressed')).toBe(false)
+  await click(trigger)
+  expect(trigger.getAttribute('aria-expanded')).toBe('true')
+  expect(trigger.hasAttribute('aria-pressed')).toBe(false)
+  expect(pressedChange).not.toHaveBeenCalled()
+})
+
+test('root aria-invalid reaches the input of Combobox, Autocomplete and MultiSelect', async () => {
+  const { host } = await mount(
+    <>
+      <Field label="City">
+        <Combobox
+          items={items}
+          aria-invalid
+        />
+      </Field>
+      <Field label="Topic">
+        <Autocomplete
+          items={items}
+          aria-invalid
+        />
+      </Field>
+      <Field label="Cities">
+        <MultiSelect
+          items={items}
+          aria-invalid
+        />
+      </Field>
+    </>
+  )
+  const inputs = [...host.querySelectorAll<HTMLInputElement>('input[role="combobox"]')]
+  expect(inputs).toHaveLength(3)
+  for (const editor of inputs) {
+    expect(editor.getAttribute('aria-invalid')).toBe('true')
+    expect(editor.hasAttribute('data-invalid')).toBe(true)
+  }
 })

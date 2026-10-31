@@ -55,7 +55,8 @@ export type {
   ComboboxClearProps,
   ComboboxContentProps,
   ComboboxItemProps,
-  ComboboxStatusProps
+  ComboboxStatusProps,
+  ComboboxRenderProps
 } from './Combobox.js'
 export { Button } from './Button.js'
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipPortal, useTooltip } from './Tooltip.js'
@@ -613,7 +614,8 @@ export {
   type AutocompletePortalProps,
   type AutocompleteContentProps,
   type AutocompleteItemProps,
-  type AutocompleteStatusProps
+  type AutocompleteStatusProps,
+  type AutocompleteRenderProps
 } from './Autocomplete.js'
 
 export {
