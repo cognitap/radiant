@@ -4,6 +4,15 @@
 
 ## Unreleased
 
+- Draw Popover, HoverCard, Menu, ContextMenu, Menubar, Select, Combobox, Command, Tooltip, Dialog, AlertDialog, Drawer and the NavigationMenu viewport with the overlay role: `surface.overlayBackground`, `surface.overlayShadow` and `surface.backdropFilter`. Tooltips keep their own background.
+- Highlight rows in menus, listboxes and Command with `control.item`, and give them corners concentric with their panel.
+- Mark the chosen Select and Combobox option and the open Menubar menu with `control.selected` when a theme sets it.
+- Style menu items as rows. They no longer inherit Button's uppercase, pressed shape, shadow or backdrop.
+- Round Drawer's edges that face the page with the surface radius.
+- Give Tooltip the surface corner shape and a radius capped at `0.5rem`, and the Menubar the control corner shape and the track border width.
+- Fix the NavigationMenu viewport border width, which read a missing token, and use the overlay shadow.
+- Set menu, Select and Command group labels in the `ui-label` role.
+- Glass frosts every floating panel through `surface.backdropFilter`, without per-component overrides.
 - Draw surfaces with the whole `surface` role. Alert, Toast, TableContainer, EmptyState, CodeBlock and the Carousel viewport take the surface corner shape. Table rows and borders, CodeBlock, EmptyState's solid variants and Separator take the surface border style. Card, Alert, Toast and Collapsible take the surface backdrop filter.
 - Give Collapsible, Accordion items and TableContainer the surface shadow, overridable with `components.collapsible.shadow` and `components.table.shadow`.
 - Tint Collapsible and Accordion triggers on hover.

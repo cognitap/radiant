@@ -208,7 +208,7 @@ export function Menubar({
         data-slot={joinIds('menubar', props['data-slot'])}
         data-state={state.value === null ? 'closed' : 'open'}
         className={cn(
-          'inline-flex w-fit max-w-full flex-wrap items-center gap-[var(--rad-menubar-gap,0.25rem)] p-[var(--rad-menubar-padding,0.25rem)] rounded-[var(--rad-menubar-radius,var(--rad-control-radius,0.5rem))] bg-[var(--rad-menubar-background,var(--rad-color-surface))]',
+          'inline-flex w-fit max-w-full flex-wrap items-center gap-[var(--rad-menubar-gap,0.25rem)] p-[var(--rad-menubar-padding,0.25rem)] rounded-[var(--rad-menubar-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)] [border:var(--rad-control-track-border-width,0px)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))] bg-[var(--rad-menubar-background,var(--rad-color-surface))]',
           className
         )}
         onFocus={event => {
@@ -322,7 +322,8 @@ export function MenubarTrigger({
       data-value={value}
       data-slot={joinIds('menubar-trigger', props['data-slot'])}
       className={cn(
-        'aria-expanded:bg-[var(--rad-menu-item-focus-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))] aria-expanded:[color:var(--rad-menu-item-focus-color,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground)))] aria-disabled:cursor-not-allowed aria-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] forced-colors:aria-disabled:text-[GrayText] forced-colors:aria-disabled:opacity-100',
+        'aria-expanded:bg-[var(--rad-menu-item-focus-background,var(--rad-control-selected-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] aria-expanded:[color:var(--rad-menu-item-focus-color,var(--rad-control-selected-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))] aria-expanded:[--_btn-selected-edge:var(--rad-control-selected-border-color)] aria-expanded:[--_btn-selected-shadow:var(--rad-control-selected-shadow)]',
+        'aria-disabled:cursor-not-allowed aria-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] forced-colors:aria-disabled:text-[GrayText] forced-colors:aria-disabled:opacity-100',
         className
       )}
       onClick={composeAction(

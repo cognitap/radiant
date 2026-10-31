@@ -263,7 +263,7 @@ export function Toast({
         data-urgency={announce}
         className={cn(
           '[&[hidden]]:hidden pointer-events-auto max-h-[calc(100dvh-2rem)] overflow-auto overscroll-contain outline-none p-[var(--rad-toast-padding,var(--rad-surface-padding,1.5rem))] gap-[var(--rad-toast-gap,var(--rad-spacing-header-gap,0.375rem))] rounded-[var(--rad-toast-radius,var(--rad-surface-radius,0.75rem))]',
-          'bg-[var(--rad-toast-background,var(--_action-soft))] [color:var(--rad-toast-color,var(--_action-ink))] [border-color:var(--rad-toast-border-color,var(--_action-edge))] [border-width:var(--rad-toast-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-toast-border-style,var(--rad-surface-border-style,solid))] [box-shadow:var(--rad-toast-shadow,var(--rad-surface-overlay-shadow,0_8px_32px_#0003))]',
+          'bg-[var(--rad-toast-background,var(--_action-soft))] [color:var(--rad-toast-color,var(--_action-ink))] [border-color:var(--rad-toast-border-color,var(--_action-edge))] [border-width:var(--rad-toast-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-toast-border-style,var(--rad-surface-border-style,solid))] [box-shadow:var(--rad-toast-shadow,var(--rad-surface-overlay-shadow,0_24px_64px_-16px_rgb(0_0_0/0.3)))]',
           'focus-visible:outline-solid focus-visible:outline-[var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-[var(--rad-focus-offset,2px)]',
           'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:shadow-none',
           active && !off && 'opacity-[var(--_rad-popup-enter,0)] motion-reduce:opacity-100',

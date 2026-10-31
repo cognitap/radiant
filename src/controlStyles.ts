@@ -20,3 +20,6 @@ export const controlMetrics = cva('', {
   },
   defaultVariants: { controlSize: 'medium' }
 })
+/** Group headings inside menus, listboxes and command lists speak in the label role. */
+export const itemGroupLabelClass =
+  'm-0 py-2 [color:var(--rad-color-muted-foreground)] font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-label-size,0.8125rem)] font-[number:var(--rad-typography-roles-ui-label-weight,600)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)]'

@@ -136,7 +136,12 @@ export function DrawerDescription(props: DrawerDescriptionProps) {
 }
 
 const surface = [
-  'open:fixed open:m-0 open:block open:overflow-hidden open:p-0 open:gap-0 open:max-h-none open:max-w-none rounded-none',
+  'open:fixed open:m-0 open:block open:overflow-hidden open:p-0 open:gap-0 open:max-h-none open:max-w-none',
+  // Only the edges facing the page round; the attached edges stay flush with the viewport.
+  '[--_rad-drawer-radius:var(--rad-surface-radius,0.75rem)] rounded-none rounded-tl-(--_rad-drawer-radius) rounded-bl-(--_rad-drawer-radius)',
+  'data-[physical-side=left]:rounded-tl-none data-[physical-side=left]:rounded-bl-none data-[physical-side=left]:rounded-tr-(--_rad-drawer-radius) data-[physical-side=left]:rounded-br-(--_rad-drawer-radius)',
+  'data-[physical-side=top]:rounded-tl-none data-[physical-side=top]:rounded-bl-(--_rad-drawer-radius) data-[physical-side=top]:rounded-br-(--_rad-drawer-radius)',
+  'data-[physical-side=bottom]:rounded-bl-none data-[physical-side=bottom]:rounded-tr-(--_rad-drawer-radius)',
   'open:inset-auto open:top-0 open:right-0 open:h-dvh open:w-[min(var(--rad-drawer-size,24rem),100dvw)]',
   'data-[physical-side=left]:open:left-0 data-[physical-side=left]:open:right-auto',
   'data-[physical-side=top]:open:left-0 data-[physical-side=top]:open:right-auto data-[physical-side=top]:open:w-dvw data-[physical-side=top]:open:h-[min(var(--rad-drawer-size,24rem),100dvh)]',
