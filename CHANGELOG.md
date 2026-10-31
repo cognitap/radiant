@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.58
+
 - Progress fallback text matches Meter: `aria-valuetext` when given, otherwise "value of max". Before: "value / max", ignoring `aria-valuetext`.
 
 ## 0.0.57
