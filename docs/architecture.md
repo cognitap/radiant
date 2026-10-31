@@ -1,8 +1,8 @@
 # Architecture
 
-How Radiant's fifty-six families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+How Radiant's fifty-seven families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -28,6 +28,7 @@ requests, cancellation and selected labels; results never trigger selection.
 Command combines Dialog with an inline Combobox listbox for explicit actions; applications register shortcuts.
 MultiSelect composes Combobox multiple mode. TagsInput commits free text; both
 submit repeated named values. Their nameless JSON carrier emits accepted array changes.
+NumberField edits localized text and submits one raw numeric form value.
 Tag composes Badge and Button for removal.
 OTPField keeps one native Input for editing, autofill and forms; its character slots are decorative.
 InputGroup shares a boundary around real Input or Textarea controls and their addons.
@@ -92,8 +93,7 @@ local. A Button-only font does not become body text.
 
 The core entry ships only the neutral baseline, `defaultTheme`. Styled presets
 are examples at `@cognitap/radiant/examples`, and Storybook, the docs and the
-theme workshop all read that one copy. Why: a preset is a starting point to copy
-or edit, not a contract the library has to keep stable.
+theme workshop all read that one copy. Presets are starting points.
 
 `ThemeScope` is a plain `div` that applies a theme to its subtree. It does not
 touch the document or persist anything. Without `theme` or `mode` it inherits.
@@ -119,7 +119,7 @@ host, never a wrapper:
 | Progress / Spinner                                                                                  | `progress` / `svg`                                  |
 | Button / Link / NavLink                                                                             | `button` / `a`, including through `render`          |
 | Field                                                                                               | `div` in control layout; `fieldset` in group layout |
-| Input / PasswordInput / Checkbox / Switch / Slider / Radio                                          | Native `input`                                      |
+| Input / PasswordInput / NumberField / Checkbox / Switch / Slider / Radio                            | Native `input`                                      |
 | Textarea                                                                                            | Native `textarea`                                   |
 | NativeSelect                                                                                        | Native select                                       |
 | Select / SelectPortal / Combobox / ComboboxPortal / Autocomplete / AutocompletePortal               | None; state / portal                                |
@@ -204,9 +204,7 @@ add up: a child cannot re-enable or un-require what its Field set.
 
 The consumer owns validation, touched and dirty state, error text, submission
 and persistence. Native reset restores uncontrolled inputs. A controlled adapter
-resets its own values. Reset never changes pressed buttons, ToggleGroup, Dialog, Tabs or disclosure state. Why: form
-libraries differ, and Radiant should fit any of them without a hidden form
-store. TanStack Form is an optional example adapter, not a dependency.
+resets its own values. Reset never changes pressed buttons, ToggleGroup, Dialog, Tabs or disclosure state. Radiant has no form store. TanStack Form is an optional example adapter, not a dependency.
 
 Select takes one `items` registry for SSR labels, native options and typeahead.
 Rich labels supply `textValue`. The focused option and committed value are

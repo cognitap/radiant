@@ -116,6 +116,7 @@ export const cn: CnFunction = createCn({
         'gap-(--rad-empty-state-actions-gap)',
         'gap-(--rad-nav-link-gap)',
         'gap-(--rad-password-input-gap)',
+        'gap-(--rad-number-field-gap)',
         'gap-(--rad-input-group-gap)',
         'gap-(--rad-kbd-gap)',
         'gap-(--rad-otp-field-gap)',

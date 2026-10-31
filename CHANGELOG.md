@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add NumberField with locale-aware decimal, percent and currency editing, keyboard stepping, blur clamping and raw native form values.
+
 ## 0.0.59
 
 - Add CodeBlock and InlineCode with consumer-supplied highlighting, line numbers, keyboard scrolling and copy feedback.
