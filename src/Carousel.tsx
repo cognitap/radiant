@@ -329,7 +329,7 @@ export function CarouselViewport({
       ref={composed}
       id={state.viewportId}
       role="group"
-      aria-label="Slides"
+      aria-label={props['aria-label'] ?? 'Slides'}
       tabIndex={0}
       data-slot={joinIds('carousel-viewport', props['data-slot'])}
       className={cn(

@@ -80,7 +80,10 @@ test('SSR hydration retains native hosts, refs, n of m labels and actual scroll-
         ref={ref}
         style={{ width: 320, '--rad-carousel-gap': '20px' }}
       >
-        <CarouselViewport ref={scrollRef} />
+        <CarouselViewport
+          ref={scrollRef}
+          aria-label="Study slides"
+        />
         <CarouselNext>Next</CarouselNext>
       </Carousel>
     </StrictMode>,
@@ -88,6 +91,7 @@ test('SSR hydration retains native hosts, refs, n of m labels and actual scroll-
   )
   expect(ref.current?.tagName).toBe('SECTION')
   expect(scrollRef.current).toBe(viewport(host))
+  expect(scrollRef.current).toHaveAccessibleName('Study slides')
   expect(getComputedStyle(viewport(host)).scrollSnapType).toBe('x mandatory')
   expect(getComputedStyle(ref.current!).gap).toBe('20px')
   expect(host.querySelector('[data-rad-carousel-value="atlas"]')?.getAttribute('aria-label')).toBe(
