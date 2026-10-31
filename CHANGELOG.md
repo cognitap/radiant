@@ -7,6 +7,8 @@
 - Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.
 - Keep Button motion cleanup safe after its owning iframe is removed.
 
+## 0.0.66
+
 - **Breaking:** CheckboxGroup builds on Field's group layout and takes `label` instead of `legend`. Before: `<CheckboxGroup legend="Channels" parts={{ legend: … }} />`. After: `<CheckboxGroup label="Channels" parts={{ label: … }} />`. Its root `data-slot` is `field checkbox-group`; match `[data-slot~="checkbox-group"]` instead of `fieldset`.
 - **Breaking:** CheckboxGroup `value` and `defaultValue` are `string[]`, matching `onValueChange`. Before: `readonly string[]` was accepted. After: pass a mutable array.
 - CheckboxGroup adds `required` and `requiredIndicator`. `required` blocks native form submission until at least one enabled option is checked.
