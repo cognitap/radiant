@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.67
+
 - Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.
 - Keep Button motion cleanup safe after its owning iframe is removed.
 
