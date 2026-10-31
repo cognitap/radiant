@@ -712,3 +712,19 @@ export type {
   NavigationMenuRenderProps,
   NavigationMenuLinkRenderProps
 } from './NavigationMenu.js'
+
+export {
+  Carousel,
+  CarouselViewport,
+  CarouselPrevious,
+  CarouselNext,
+  CarouselIndicators,
+  CarouselAutoPlay,
+  useCarousel,
+  type CarouselProps,
+  type CarouselItem,
+  type CarouselState,
+  type CarouselViewportProps,
+  type CarouselActionProps,
+  type CarouselIndicatorsProps
+} from './Carousel.js'
