@@ -14,6 +14,10 @@ const tones = {
     '[--_action-color:var(--rad-color-danger,oklch(0.56_0.19_25))] [--_action-on-color:var(--rad-color-danger-foreground,oklch(0.99_0_0))] [--_action-ink:color-mix(in_oklab,var(--_action-color)_25%,var(--rad-color-foreground,oklch(0.21_0.006_286)))] [--_action-soft:color-mix(in_oklab,var(--_action-color)_12%,var(--rad-color-surface,white))] [--_action-edge:color-mix(in_oklab,var(--_action-ink)_45%,var(--rad-color-border,oklch(0.885_0.005_286)))] [--_action-solid-state:black]'
 }
 
+// Actions embedded in a field or chip keep its voice and stay flat, whatever the theme gives Button.
+export const inlineActionClass =
+  '[--rad-button-shadow:none] [--rad-button-shadow-pressed:none] [--rad-button-ghost-shadow:none] [--rad-button-ghost-shadow-pressed:none] [--rad-button-border-color:transparent] [--rad-button-backdrop:none] [--rad-button-radius-pressed:var(--_btn-radius)] [--rad-button-corner-shape-pressed:var(--_btn-corner)] [--rad-button-text-transform:none] [--rad-button-letter-spacing:normal] [--rad-button-font-family:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)]'
+
 export const actionTone = cva('', {
   variants: { tone: tones },
   defaultVariants: { tone: 'accent' }

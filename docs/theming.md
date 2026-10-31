@@ -140,15 +140,16 @@ A theme should not need component overrides to look coherent. Each part of a
 component plays one **role**, and each role reads one token group, so one
 setting restyles every family that plays it. Overrides stay for exceptions.
 
-| Role     | Token group        | Parts                                                                  |
-| -------- | ------------------ | ---------------------------------------------------------------------- |
-| Action   | `control.action`   | Button and the parts built on it, Link's button variants, ButtonGroup  |
-| Track    | `control.track`    | The segmented ToggleGroup track                                        |
-| Selected | `control.selected` | Pressed toggles, the segmented ToggleGroup indicator, the current page |
-| Surface  | `surface`          | Card and other containers; `overlay*` keys for floating panels         |
+| Role     | Token group        | Parts                                                                     |
+| -------- | ------------------ | ------------------------------------------------------------------------- |
+| Action   | `control.action`   | Button and the parts built on it, Link's button variants, ButtonGroup     |
+| Field    | `control.field`    | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox |
+| Track    | `control.track`    | The segmented ToggleGroup track                                           |
+| Selected | `control.selected` | Pressed toggles, the segmented ToggleGroup indicator, the current page    |
+| Surface  | `surface`          | Card and other containers; `overlay*` keys for floating panels            |
 
-`control.field`, `control.indicator` and `control.item` are reserved for wells,
-checkable indicators and list rows; families adopt them as they are tidied.
+`control.indicator` and `control.item` are reserved for checkable indicators
+and list rows; families adopt them as they are tidied.
 
 The rules every family follows:
 
@@ -162,6 +163,9 @@ The rules every family follows:
   offsets, bevels, glows or nothing.
 - **One press.** `motion.pressScale`, `pressShiftX`, `pressShiftY` and
   `hoverLift` move every pressable, and `action.radiusPressed` reshapes it.
+- **Inline actions.** Buttons inside a field or chip, such as NumberField's
+  steppers, PasswordInput's toggle and Tag's remove, stay flat and take the
+  field's voice. A Select trigger is a field, not a Button.
 - **One voice.** `action.fontFamily`, `fontWeight`, `textTransform` and
   `letterSpacing` set how actions read. Labels and values keep their roles.
 - **One selection.** `control.selected` draws the chosen member of every set.

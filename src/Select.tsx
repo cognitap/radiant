@@ -314,6 +314,7 @@ export type SelectTriggerProps = DistributiveOmit<
 export type SelectRenderProps = ButtonRenderProps
 export function SelectTrigger({
   className,
+  render,
   onClick,
   onKeyDown,
   ref,
@@ -341,11 +342,19 @@ export function SelectTrigger({
       defaultPressed={undefined}
       onPressedChange={undefined}
       controlSize={select.controlSize}
-      className={cn(
-        selectTriggerClass,
-        controlMetrics({ controlSize: select.controlSize }),
-        className
-      )}
+      motion="off"
+      // The trigger is a field, so it takes the field role in full and none of Button's look.
+      render={resolved => {
+        const native = {
+          ...resolved,
+          className: cn(
+            selectTriggerClass,
+            controlMetrics({ controlSize: select.controlSize }),
+            className
+          )
+        }
+        return render ? render(native) : <button {...native} />
+      }}
       role="combobox"
       aria-haspopup="listbox"
       aria-controls={select.contentId}
