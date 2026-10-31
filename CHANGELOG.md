@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.63
+
 - **Breaking:** Combobox chooses one or many with `type`, defaulting to `'single'`. Before: `<Combobox multiple />`, `useCombobox({ multiple: true })`. After: `<Combobox type="multiple" />`, `useCombobox({ type: 'multiple' })`.
 - **Breaking:** Combobox, Autocomplete and MultiSelect name their load-failure text `errorText`, matching `loadingText`, `emptyText` and Command. Before: `<Combobox error="Could not load" />`. After: `<Combobox errorText="Could not load" />`.
 - **Breaking:** ComboboxTrigger, ComboboxClear and the Autocomplete and MultiSelect triggers and clears no longer accept toggle props, and ignore them at runtime. Before: `<ComboboxTrigger pressed />` rendered `aria-pressed`. After: a type error, and no `aria-pressed`.
