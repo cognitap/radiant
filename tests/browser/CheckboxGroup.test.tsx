@@ -16,7 +16,7 @@ test('native checkbox edits before hydration are adopted silently, with stable h
     <StrictMode>
       <CheckboxGroup
         ref={root}
-        legend="Channels"
+        label="Channels"
         name="channels"
         items={[{ ...items[0]!, ref: option }, items[1]!]}
         defaultValue={['email']}
@@ -36,7 +36,7 @@ test('native checkbox edits before hydration are adopted silently, with stable h
   expect(parent.current!.checked).toBe(true)
   expect(parent.current!.indeterminate).toBe(false)
   expect(changes).toEqual([])
-  expect(root.current!.dataset.slot).toBe('field fieldset checkbox-group')
+  expect(root.current!.dataset.slot).toBe('field checkbox-group')
   const controlled = parent.current!.getAttribute('aria-controls')!.split(' ')
   expect(controlled).toHaveLength(2)
   expect(
@@ -51,7 +51,7 @@ test('select all skips disabled options; native form values and immediate reset 
   const { host } = await mount(
     <form>
       <CheckboxGroup
-        legend="Channels"
+        label="Channels"
         name="channels"
         items={[...items, { value: 'managed', label: 'Managed', disabled: true }]}
         defaultValue={['email', 'managed']}
@@ -102,7 +102,7 @@ test('controlled owners may refuse requests, including restoring a mixed parent 
   const tree = (value: string[]) => (
     <form>
       <CheckboxGroup
-        legend="Controlled channels"
+        label="Controlled channels"
         name="channels"
         items={items}
         value={value}
@@ -153,7 +153,7 @@ test('native external form ownership, reset cleanup and themed option layout sta
       <form id="group-form-a" />
       <form id="group-form-b" />
       <CheckboxGroup
-        legend="Notification channels"
+        label="Notification channels"
         name="channels"
         form={owner}
         items={[
@@ -195,4 +195,53 @@ test('native external form ownership, reset cleanup and themed option layout sta
   await render(null)
   expect(remove.mock.calls.some(call => call[0] === 'reset')).toBe(true)
   remove.mockRestore()
+})
+test('required blocks native submission until an enabled option is checked', async () => {
+  const submits = vi.fn((event: SubmitEvent) => event.preventDefault())
+  const tree = (props: { value?: string[]; disabled?: boolean }) => (
+    <form>
+      <CheckboxGroup
+        key={props.value ? 'controlled' : 'native'}
+        label="Channels"
+        name="channels"
+        required
+        items={[{ value: 'managed', label: 'Managed', disabled: true }, ...items]}
+        selectAll={{ label: 'All available' }}
+        {...(props.value ? { value: props.value } : { defaultValue: ['managed'] })}
+        disabled={props.disabled}
+      />
+    </form>
+  )
+  const { host, render } = await mount(tree({}))
+  const form = host.querySelector('form')!,
+    group = host.querySelector('fieldset')!,
+    managed = host.querySelector<HTMLInputElement>('[value="managed"]')!,
+    email = host.querySelector<HTMLInputElement>('[value="email"]')!,
+    sms = host.querySelector<HTMLInputElement>('[value="sms"]')!,
+    parent = host.querySelector<HTMLInputElement>('[aria-controls]')!
+  form.addEventListener('submit', submits)
+  expect(group.dataset.required).toBe('')
+  expect(group.querySelector('[data-slot="field-required"]')).not.toBeNull()
+  expect(managed.checked).toBe(true)
+  expect(email.validationMessage).not.toBe('')
+  expect(managed.validity.valid && sms.validity.valid && parent.validity.valid).toBe(true)
+  await act(async () => form.requestSubmit())
+  expect(submits).not.toHaveBeenCalled()
+  await click(sms)
+  expect(form.checkValidity()).toBe(true)
+  await act(async () => form.requestSubmit())
+  expect(submits).toHaveBeenCalledTimes(1)
+  await click(sms)
+  expect(form.checkValidity()).toBe(false)
+  await click(parent)
+  expect(form.checkValidity()).toBe(true)
+  await act(async () => form.reset())
+  await pause(10)
+  expect(form.checkValidity()).toBe(false)
+  await render(tree({ value: [] }))
+  expect(form.checkValidity()).toBe(false)
+  await render(tree({ value: ['email'] }))
+  expect(form.checkValidity()).toBe(true)
+  await render(tree({ value: [], disabled: true }))
+  expect(form.checkValidity()).toBe(true)
 })

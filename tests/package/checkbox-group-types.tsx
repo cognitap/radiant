@@ -18,7 +18,7 @@ const selectAll: CheckboxGroupSelectAll = {
   ref: createRef<HTMLInputElement>()
 }
 h(CheckboxGroup, {
-  legend: 'Notifications',
+  label: 'Notifications',
   items,
   selectAll,
   name: 'channels',
@@ -26,19 +26,25 @@ h(CheckboxGroup, {
   ref: createRef<HTMLFieldSetElement>(),
   form: 'preferences',
   style: { '--rad-checkbox-group-gap': '1rem' },
-  parts: { options: { className: 'gap-4' }, legend: { className: 'italic' } }
+  parts: { options: { className: 'gap-4' }, label: { className: 'italic' } }
 })
 h(CheckboxGroup, {
-  legend: 'Channels',
+  label: 'Channels',
   items,
   value: ['email'],
   onValueChange: values => values.push('sms')
 })
 // @ts-expect-error Choose one value owner.
-h(CheckboxGroup, { legend: 'Channels', items, value: [], defaultValue: [] })
+h(CheckboxGroup, { label: 'Channels', items, value: [], defaultValue: [] })
 // @ts-expect-error Item state belongs to the group.
 const invalid: CheckboxGroupItem = { value: 'email', label: 'Email', checked: true }
 void invalid
 // @ts-expect-error Select all is never submitted.
 const invalidAll: CheckboxGroupSelectAll = { label: 'All', name: 'all' }
 void invalidAll
+h(CheckboxGroup, { label: 'Channels', items, required: true, requiredIndicator: '(required)' })
+const frozen: readonly string[] = ['email']
+// @ts-expect-error Values are mutable string arrays.
+h(CheckboxGroup, { label: 'Channels', items, defaultValue: frozen })
+// @ts-expect-error Option groups take label; legend belongs to Fieldset.
+h(CheckboxGroup, { legend: 'Channels', items })

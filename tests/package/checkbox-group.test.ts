@@ -11,7 +11,7 @@ test('CheckboxGroup renders native named options, a mixed parent and group-owned
   ]
   const html = renderToStaticMarkup(
     h(CheckboxGroup, {
-      legend: 'Channels',
+      label: 'Channels',
       name: 'channels',
       form: 'settings',
       items,
@@ -22,7 +22,7 @@ test('CheckboxGroup renders native named options, a mixed parent and group-owned
     })
   )
   assert.match(html, /<fieldset/)
-  assert.match(html, /data-slot="field fieldset checkbox-group"/)
+  assert.match(html, /data-slot="field checkbox-group"/)
   assert.match(html, />Channels<\/legend>/)
   assert.equal((html.match(/type="checkbox"/g) || []).length, 4)
   assert.equal((html.match(/name="channels"/g) || []).length, 3)
@@ -37,7 +37,7 @@ test('CheckboxGroup renders native named options, a mixed parent and group-owned
     () =>
       renderToStaticMarkup(
         h(CheckboxGroup, {
-          legend: 'Bad',
+          label: 'Bad',
           items: [
             { value: 'x', label: 'A' },
             { value: 'x', label: 'B' }
@@ -62,7 +62,7 @@ test('CheckboxGroup protects native ownership from structurally wider option con
   const parent = { ...item, label: 'All available' }
   const html = renderToStaticMarkup(
     h(CheckboxGroup, {
-      legend: 'Channels',
+      label: 'Channels',
       name: 'channels',
       items: [item],
       selectAll: parent
