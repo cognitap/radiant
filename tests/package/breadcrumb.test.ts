@@ -49,7 +49,10 @@ test('Breadcrumb keeps ordered native hierarchy, one current page and decorative
   const named = renderToStaticMarkup(h(Breadcrumb, { 'aria-labelledby': 'location' }))
   assert.match(named, /aria-labelledby="location"/)
   assert.doesNotMatch(named, /aria-label=/)
-  assert.throws(() => renderToStaticMarkup(h(Breadcrumb, { 'aria-label': ' ' })), /navigation name/)
+  assert.throws(
+    () => renderToStaticMarkup(h(Breadcrumb, { 'aria-label': ' ' })),
+    /Breadcrumb requires aria-label or aria-labelledby/
+  )
   assert.throws(
     () =>
       renderToStaticMarkup(

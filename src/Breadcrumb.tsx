@@ -5,6 +5,7 @@ import {
   type ComposedLinkRenderProps
 } from './composedLink.js'
 import { cn } from './cn.js'
+import { requireAccessibleName } from './internal/accessibleName.js'
 import { joinIds } from './internal/ids.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 type Part<Host extends 'nav' | 'ol' | 'li' | 'span'> = Omit<
@@ -19,16 +20,17 @@ export type BreadcrumbSeparatorProps = Omit<Part<'span'>, 'aria-hidden' | 'tabIn
 export type BreadcrumbLinkRenderProps = ComposedLinkRenderProps
 export type BreadcrumbLinkProps = Omit<ComposedLinkProps, 'aria-current'> & { current?: boolean }
 export function Breadcrumb({ className, ...props }: BreadcrumbProps) {
-  const labelledBy = props['aria-labelledby']?.trim()
-  const label = props['aria-label']
-  if (label !== undefined && !label.trim())
-    throw new TypeError('Breadcrumb needs a nonempty navigation name.')
+  const labelledBy = props['aria-labelledby']?.trim() || undefined
+  const name = {
+    'aria-label': props['aria-label'] ?? (labelledBy ? undefined : 'Breadcrumb'),
+    'aria-labelledby': labelledBy
+  }
+  requireAccessibleName('Breadcrumb', name)
   const nativeProps = { ...props, role: undefined }
   return (
     <nav
       {...nativeProps}
-      aria-label={label ?? (labelledBy ? undefined : 'Breadcrumb')}
-      aria-labelledby={labelledBy || undefined}
+      {...name}
       data-slot={joinIds('breadcrumb', props['data-slot'])}
       className={cn(
         'min-w-0 max-w-full text-start [color:var(--rad-breadcrumb-color,var(--rad-color-muted-foreground))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-breadcrumb-font-size,var(--rad-typography-roles-ui-body-size,0.875rem))] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',

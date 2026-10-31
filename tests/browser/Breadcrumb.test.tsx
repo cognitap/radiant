@@ -121,3 +121,32 @@ test('long content, named themes and caller styles preserve native navigation in
   )
   expect(getComputedStyle(host.querySelector('nav')!).fontSize).toBe('21px')
 })
+test('the navigation landmark keeps a name: a default, a caller label, or a caller labelledby', async () => {
+  const { host } = await mount(
+    <>
+      <span id="breadcrumb-location">Project location</span>
+      <Breadcrumb data-case="default" />
+      <Breadcrumb
+        data-case="label"
+        aria-label="Docs trail"
+      />
+      <Breadcrumb
+        data-case="labelledby"
+        aria-labelledby=" breadcrumb-location "
+      />
+      <Breadcrumb
+        data-case="blank-label-with-labelledby"
+        aria-label=" "
+        aria-labelledby="breadcrumb-location"
+      />
+    </>
+  )
+  const nav = (name: string) => host.querySelector(`nav[data-case="${name}"]`)!
+  expect(nav('default').getAttribute('aria-label')).toBe('Breadcrumb')
+  expect(nav('label').getAttribute('aria-label')).toBe('Docs trail')
+  expect(nav('labelledby').hasAttribute('aria-label')).toBe(false)
+  expect(nav('labelledby').getAttribute('aria-labelledby')).toBe('breadcrumb-location')
+  expect(nav('blank-label-with-labelledby').getAttribute('aria-labelledby')).toBe(
+    'breadcrumb-location'
+  )
+})
