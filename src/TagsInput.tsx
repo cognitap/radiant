@@ -5,6 +5,7 @@ import { InputRoot, type InputProps } from './Input.js'
 import { Tag } from './Tag.js'
 import { useFieldControl } from './Field.js'
 import { cn } from './cn.js'
+import { controlBorderClass, controlMetrics } from './controlStyles.js'
 import { joinIds } from './internal/ids.js'
 import { sameSelection } from './internal/selection.js'
 import { splitTags, tagSeparators, validateTags } from './internal/tags.js'
@@ -29,6 +30,19 @@ export type TagsInputProps = DistributiveOmit<
     parts?: { wrapper?: PartStyle; tag?: PartStyle; remove?: PartStyle; error?: PartStyle }
   }
 const defaultSeparators = [','] as const
+// Tags and the text input share one field well, so the native input itself draws no box.
+const wellClass = [
+  controlBorderClass,
+  'box-border flex min-h-[var(--_rad-control-height)] w-full min-w-0 flex-wrap items-center gap-[var(--rad-tags-input-gap,0.5rem)] p-[0.25rem] cursor-text',
+  'bg-[var(--rad-input-background,var(--rad-control-field-background,var(--rad-color-surface,oklch(1_0_0))))] [border-width:var(--rad-input-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-input-border-style,var(--rad-control-border-style,solid))] [border-color:var(--rad-input-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
+  'rounded-[var(--rad-input-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-input-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-input-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
+  'has-[>input:focus-visible]:[outline:var(--rad-input-focus-width,var(--rad-focus-width,2px))_var(--rad-input-focus-style,var(--rad-focus-style,solid))_var(--rad-input-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] has-[>input:focus-visible]:[outline-offset:var(--rad-input-focus-offset,var(--rad-focus-offset,2px))]',
+  'has-[>input[data-invalid]]:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'has-[>input:disabled]:cursor-not-allowed has-[>input:disabled]:bg-[var(--rad-input-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
+  'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:has-[>input:focus-visible]:outline-[Highlight]'
+].join(' ')
+const innerInputClass =
+  'w-auto min-w-[8ch] flex-1 h-[calc(var(--rad-input-height,var(--_rad-control-height))-2*var(--rad-input-border-width,var(--rad-control-border-width,1px))-0.5rem)] ps-[calc(var(--rad-input-padding,var(--_rad-control-padding))-0.25rem)] pe-0 [[data-slot~=tag]~&]:ps-0 rounded-none [border-width:0] [box-shadow:none] [backdrop-filter:none] bg-transparent disabled:[background:transparent] focus-visible:[outline-width:0]'
 
 /** Native text editing and Tag removal; only committed array values are submitted. */
 export function TagsInput({
@@ -44,6 +58,7 @@ export function TagsInput({
   disabled,
   required,
   readOnly,
+  controlSize = 'medium',
   className,
   ref,
   onChange,
@@ -169,92 +184,101 @@ export function TagsInput({
   }
   return (
     <div
-      data-slot="tags-input-control"
-      className={cn(
-        'flex min-w-0 flex-wrap items-center gap-[var(--rad-tags-input-gap,0.5rem)]',
-        parts?.wrapper?.className
-      )}
-      style={parts?.wrapper?.style}
+      data-slot="tags-input-root"
+      className="grid min-w-0 gap-[var(--rad-spacing-field-gap,0.375rem)]"
     >
-      {selection.value.map(value => (
-        <Tag
-          key={value}
-          removeLabel={`Remove ${value}`}
-          disabled={!!(control.disabled || readOnly)}
-          className={parts?.tag?.className}
-          style={parts?.tag?.style}
-          parts={{ remove: parts?.remove }}
-          onRemove={() => remove(value)}
-        >
-          {value}
-        </Tag>
-      ))}
-      <InputRoot
-        {...props}
-        {...control}
-        family="tags-input"
-        nativeRequired={false}
-        type="text"
-        name={undefined}
-        form={form}
-        ref={composed}
-        readOnly={readOnly}
-        value={draft}
-        autoComplete={props.autoComplete ?? 'off'}
-        aria-invalid={feedback ? true : control['aria-invalid']}
-        aria-describedby={joinIds(control['aria-describedby'], message)}
-        className={cn('w-auto min-w-[8ch] flex-1', className)}
-        onChange={event => {
-          onChange?.(event)
-          edit(event.currentTarget.value)
-        }}
-        onCompositionStart={event => {
-          onCompositionStart?.(event)
-          composing.current = true
-        }}
-        onCompositionEnd={event => {
-          onCompositionEnd?.(event)
-          composing.current = false
-          edit(event.currentTarget.value)
-        }}
-        onPaste={event => {
-          onPaste?.(event)
-          if (event.defaultPrevented || unavailable() || composing.current) return
-          const text = event.clipboardData.getData('text')
-          if (![...text].some(character => delimiters.includes(character))) return
+      <div
+        data-slot="tags-input-control"
+        data-control-size={controlSize}
+        className={cn(wellClass, controlMetrics({ controlSize }), parts?.wrapper?.className)}
+        style={parts?.wrapper?.style}
+        onPointerDown={event => {
+          if (event.target !== event.currentTarget || event.button !== 0 || !event.isPrimary) return
           event.preventDefault()
-          const node = event.currentTarget
-          const next =
-            draft.slice(0, node.selectionStart ?? draft.length) +
-            text +
-            draft.slice(node.selectionEnd ?? draft.length)
-          draftRequest.current = null
-          setDraft(next)
-          setError('')
-          add(next, true)
+          input.current?.focus()
         }}
-        onKeyDown={event => {
-          onKeyDown?.(event)
-          if (
-            event.defaultPrevented ||
-            unavailable() ||
-            composing.current ||
-            event.nativeEvent.isComposing ||
-            event.keyCode === 229 ||
-            event.ctrlKey ||
-            event.metaKey ||
-            event.altKey
-          )
-            return
-          if (event.key === 'Enter' && draft.trim()) {
+      >
+        {selection.value.map(value => (
+          <Tag
+            key={value}
+            removeLabel={`Remove ${value}`}
+            disabled={!!(control.disabled || readOnly)}
+            className={parts?.tag?.className}
+            style={parts?.tag?.style}
+            parts={{ remove: parts?.remove }}
+            onRemove={() => remove(value)}
+          >
+            {value}
+          </Tag>
+        ))}
+        <InputRoot
+          {...props}
+          {...control}
+          family="tags-input"
+          nativeRequired={false}
+          type="text"
+          name={undefined}
+          form={form}
+          ref={composed}
+          readOnly={readOnly}
+          value={draft}
+          autoComplete={props.autoComplete ?? 'off'}
+          aria-invalid={feedback ? true : control['aria-invalid']}
+          aria-describedby={joinIds(control['aria-describedby'], message)}
+          controlSize={controlSize}
+          className={cn(innerInputClass, className)}
+          onChange={event => {
+            onChange?.(event)
+            edit(event.currentTarget.value)
+          }}
+          onCompositionStart={event => {
+            onCompositionStart?.(event)
+            composing.current = true
+          }}
+          onCompositionEnd={event => {
+            onCompositionEnd?.(event)
+            composing.current = false
+            edit(event.currentTarget.value)
+          }}
+          onPaste={event => {
+            onPaste?.(event)
+            if (event.defaultPrevented || unavailable() || composing.current) return
+            const text = event.clipboardData.getData('text')
+            if (![...text].some(character => delimiters.includes(character))) return
             event.preventDefault()
-            add(draft, true)
-          } else if (event.key === 'Backspace' && !draft && selection.value.length) {
-            event.preventDefault()
-            remove(selection.value.at(-1)!)
-          }
-        }}
-      />
+            const node = event.currentTarget
+            const next =
+              draft.slice(0, node.selectionStart ?? draft.length) +
+              text +
+              draft.slice(node.selectionEnd ?? draft.length)
+            draftRequest.current = null
+            setDraft(next)
+            setError('')
+            add(next, true)
+          }}
+          onKeyDown={event => {
+            onKeyDown?.(event)
+            if (
+              event.defaultPrevented ||
+              unavailable() ||
+              composing.current ||
+              event.nativeEvent.isComposing ||
+              event.keyCode === 229 ||
+              event.ctrlKey ||
+              event.metaKey ||
+              event.altKey
+            )
+              return
+            if (event.key === 'Enter' && draft.trim()) {
+              event.preventDefault()
+              add(draft, true)
+            } else if (event.key === 'Backspace' && !draft && selection.value.length) {
+              event.preventDefault()
+              remove(selection.value.at(-1)!)
+            }
+          }}
+        />
+      </div>
       <span
         id={message}
         data-slot="tags-input-error"

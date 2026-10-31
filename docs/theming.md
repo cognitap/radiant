@@ -140,16 +140,16 @@ A theme should not need component overrides to look coherent. Each part of a
 component plays one **role**, and each role reads one token group, so one
 setting restyles every family that plays it. Overrides stay for exceptions.
 
-| Role      | Token group                                  | Parts                                                                                                              |
-| --------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Action    | `control.action`                             | Button and the parts built on it, Link's button variants, ButtonGroup; the voice of Table column headers           |
-| Field     | `control.field`                              | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox                                          |
-| Indicator | `control.indicator`                          | Checkbox and Radio boxes, the Switch track, Switch and Slider thumbs                                               |
-| Track     | `control.track`                              | ToggleGroup, Progress, Meter, Skeleton, Slider and ScrollArea rails, Resizable hover, the Menubar border           |
-| Selected  | `control.selected`                           | Pressed toggles, the ToggleGroup indicator, the current page, Carousel indicator, chosen option, open Menubar menu |
-| Surface   | `surface`                                    | Card, Alert, Collapsible, Accordion, TableContainer, EmptyState, CodeBlock, Carousel, Sidebar, Separator           |
-| Overlay   | `surface.overlay*`, `surface.backdropFilter` | Popover, HoverCard, Menu, listboxes, Tooltip, Dialog, Drawer, NavigationMenu viewport; Toast's shadow              |
-| Item      | `control.item`                               | Highlighted rows in menus, listboxes and Command                                                                   |
+| Role      | Token group                                  | Parts                                                                                                                                 |
+| --------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Action    | `control.action`                             | Button and the parts built on it, Link's button variants, ButtonGroup; the voice of tabs, chips and Table column headers              |
+| Field     | `control.field`                              | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select, Combobox and TagsInput                                                  |
+| Indicator | `control.indicator`                          | Checkbox and Radio boxes, the Switch track, Switch and Slider thumbs                                                                  |
+| Track     | `control.track`                              | ToggleGroup and Tabs lists, Progress, Meter, Skeleton, Slider and ScrollArea rails, Resizable hover, the Menubar border               |
+| Selected  | `control.selected`                           | Pressed toggles, the ToggleGroup indicator, the selected tab, NavLink, the current page, Carousel indicator, chosen option, open menu |
+| Surface   | `surface`                                    | Card, Alert, Collapsible, Accordion, TableContainer, EmptyState, CodeBlock, Carousel, Sidebar, Separator, Tabs content                |
+| Overlay   | `surface.overlay*`, `surface.backdropFilter` | Popover, HoverCard, Menu, listboxes, Tooltip, Dialog, Drawer, NavigationMenu viewport; Toast's shadow                                 |
+| Item      | `control.item`                               | Highlighted rows in menus, listboxes and Command                                                                                      |
 
 Tooltips keep their own background and cap their radius at `0.5rem`. Drawers
 round only the edges that face the page.
@@ -169,6 +169,9 @@ The rules every family follows:
 - **Inline actions.** Buttons inside a field or chip, such as NumberField's
   steppers, PasswordInput's toggle and Tag's remove, stay flat and take the
   field's voice. A Select trigger is a field, not a Button.
+- **Chips.** Badge, Tag, Kbd and Avatar take the control radius, corner shape
+  and border, capped at half their height. Avatar stays round unless the
+  control radius is `0px`.
 - **One voice.** `action.fontFamily`, `fontWeight`, `textTransform` and
   `letterSpacing` set how actions and Table column headers read. Labels and
   values keep their roles.

@@ -121,6 +121,8 @@ export const ticketDefinition: ThemeDefinition = {
     },
     state: { disabledOpacity: 0.5 }
   },
+  // A notch corner at the avatar's 50% cap would cut the photo to a cross.
+  components: { avatar: { radius: 'var(--rad-control-radius)' } },
   modes: {
     dark: {
       tokens: {

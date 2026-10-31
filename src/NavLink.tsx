@@ -43,7 +43,7 @@ export type NavLinkGroupContentProps = CollapsibleContentProps
 
 const itemClass = [
   'box-border flex w-full min-w-0 items-center text-start no-underline hover:no-underline min-h-[var(--_rad-control-height)]',
-  'gap-[var(--rad-nav-link-gap,0.5rem)] px-[var(--rad-nav-link-padding-inline,var(--_rad-control-padding))] py-[var(--rad-nav-link-padding-block,0.375rem)] rounded-[var(--rad-nav-link-radius,var(--rad-control-radius,0.5rem))]',
+  'gap-[var(--rad-nav-link-gap,0.5rem)] px-[var(--rad-nav-link-padding-inline,var(--_rad-control-padding))] py-[var(--rad-nav-link-padding-block,0.375rem)] rounded-[var(--rad-nav-link-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)]',
   'font-[family-name:var(--rad-nav-link-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] text-[length:var(--rad-nav-link-font-size,var(--_rad-control-font-size))] font-[number:var(--rad-nav-link-font-weight,var(--rad-typography-roles-ui-label-weight,550))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]',
   '[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:bg-[var(--rad-nav-link-hover-background,var(--rad-color-neutral))]',
   'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-nav-link-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-nav-link-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-nav-link-focus-offset,var(--rad-focus-offset,2px))]',
@@ -115,8 +115,8 @@ export function NavLink({
       className={cn(
         controlMetrics({ controlSize }),
         itemClass,
-        'border-s-[3px] border-s-transparent aria-[current=page]:[border-inline-start-color:var(--rad-nav-link-indicator-color,var(--rad-color-accent))] aria-[current=page]:bg-[var(--rad-nav-link-active-background,var(--rad-color-neutral))] aria-[current=page]:[color:var(--rad-nav-link-active-color,var(--rad-color-foreground))] aria-[current=page]:font-semibold',
-        'aria-[current=page]:[&_[data-slot=nav-link-description]]:[color:inherit] aria-[current=page]:hover:bg-[var(--rad-nav-link-active-background,var(--rad-color-neutral))] aria-[current=page]:hover:[color:var(--rad-nav-link-active-color,var(--rad-color-foreground))]',
+        'border-s-[3px] border-s-transparent aria-[current=page]:[border-inline-start-color:var(--rad-nav-link-indicator-color,var(--rad-control-selected-border-color,var(--rad-color-accent)))] aria-[current=page]:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] aria-[current=page]:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))] aria-[current=page]:[box-shadow:var(--rad-control-selected-shadow,none)] aria-[current=page]:font-[number:var(--rad-typography-heading-weight,600)]',
+        'aria-[current=page]:[&_[data-slot=nav-link-description]]:[color:inherit] aria-[current=page]:hover:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] aria-[current=page]:hover:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))]',
         'forced-colors:aria-[current=page]:[border-inline-start-color:Highlight] forced-colors:aria-[current=page]:bg-[Highlight] forced-colors:aria-[current=page]:text-[HighlightText] forced-colors:aria-[current=page]:hover:bg-[Highlight] forced-colors:aria-[current=page]:hover:text-[HighlightText]',
         className
       )}

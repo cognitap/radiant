@@ -21,26 +21,27 @@ import type { ThemeStyle } from './themes/defineTheme.js'
 
 const rootClass =
   'grid min-w-0 gap-[var(--rad-tabs-gap,var(--rad-spacing-group-gap,0.75rem))] data-[orientation=vertical]:grid-cols-[max-content_minmax(0,1fr)] data-[orientation=vertical]:items-start'
+// Triggers sit inside the list's padding and track border, so their corners are concentric with it.
 const listClass =
-  'inline-flex min-w-0 max-w-full gap-[var(--rad-tabs-list-gap,0.25rem)] rounded-[var(--rad-tabs-list-radius,var(--rad-control-radius,0.5rem))] bg-[var(--rad-tabs-list-background,var(--rad-color-neutral,oklch(0.955_0.004_286)))] p-[var(--rad-tabs-list-padding,0.25rem)] data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:overflow-x-auto data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch'
+  '[--_rad-tabs-list-radius:var(--rad-tabs-list-radius,var(--rad-control-radius,0.5rem))] [--_rad-tabs-trigger-radius:max(0px,calc(var(--_rad-tabs-list-radius)-var(--rad-tabs-list-padding,0.25rem)-var(--rad-control-track-border-width,0px)))] inline-flex min-w-0 max-w-full gap-[var(--rad-tabs-list-gap,0.25rem)] rounded-[var(--_rad-tabs-list-radius)] [corner-shape:var(--rad-tabs-corner-shape,var(--rad-control-corner-shape,round))] bg-[var(--rad-tabs-list-background,var(--rad-control-track-background,var(--rad-color-neutral,oklch(0.955_0.004_286))))] [border:var(--rad-control-track-border-width,0px)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))] [box-shadow:var(--rad-control-track-shadow,none)] p-[var(--rad-tabs-list-padding,0.25rem)] data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:overflow-x-auto data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch'
 const triggerClass = [
-  'box-border inline-flex min-w-0 shrink-0 cursor-pointer select-none items-center justify-center border-solid text-center',
+  'box-border inline-flex min-w-0 shrink-0 cursor-pointer select-none items-center justify-center [border-style:var(--rad-control-border-style,solid)] text-center',
   'min-h-[var(--rad-tabs-trigger-height,var(--_rad-control-height))]',
   'px-[var(--rad-tabs-trigger-padding,var(--_rad-control-padding))]',
-  'rounded-[var(--rad-tabs-trigger-radius,var(--rad-control-radius,0.5rem))]',
+  'rounded-[var(--rad-tabs-trigger-radius,var(--_rad-tabs-trigger-radius,0.25rem))]',
   '[corner-shape:var(--rad-tabs-corner-shape,var(--rad-control-corner-shape,round))]',
   '[border-width:var(--rad-tabs-trigger-border-width,var(--rad-control-border-width,1px))]',
   '[border-color:transparent]',
-  'font-[family-name:var(--rad-tabs-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))]',
-  'font-[number:var(--rad-tabs-font-weight,var(--rad-typography-roles-ui-label-weight,550))]',
+  'font-[family-name:var(--rad-tabs-font-family,var(--rad-control-action-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)))]',
+  'font-[number:var(--rad-tabs-font-weight,var(--rad-control-action-font-weight,var(--rad-typography-roles-ui-label-weight,550)))]',
   'text-[length:var(--rad-tabs-font-size,var(--_rad-control-font-size))]',
-  'tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]',
+  'tracking-[var(--rad-control-action-letter-spacing,var(--rad-typography-roles-ui-label-letter-spacing,-0.011em))] [text-transform:var(--rad-control-action-text-transform,none)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]',
   '[color:var(--rad-tabs-trigger-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
   'bg-[var(--rad-tabs-trigger-background,transparent)]',
   'hover:bg-[var(--rad-tabs-trigger-hover-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  'data-selected:bg-[var(--rad-tabs-trigger-active-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  'data-selected:[color:var(--rad-tabs-trigger-active-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
-  'data-selected:[border-color:var(--rad-tabs-trigger-active-border,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
+  'data-selected:bg-[var(--rad-tabs-trigger-active-background,var(--rad-control-selected-background,var(--rad-color-surface,oklch(1_0_0))))]',
+  'data-selected:[color:var(--rad-tabs-trigger-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground,oklch(0.21_0.006_286))))]',
+  'data-selected:[border-color:var(--rad-tabs-trigger-active-border,var(--rad-control-selected-border-color,var(--rad-color-accent,oklch(0.21_0.006_286))))] data-selected:[box-shadow:var(--rad-control-selected-shadow,none)]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-tabs-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
   'focus-visible:[outline-width:var(--rad-tabs-focus-width,var(--rad-focus-width,2px))]',
@@ -53,7 +54,7 @@ const triggerClass = [
   'forced-colors:disabled:text-[GrayText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:opacity-100'
 ].join(' ')
 const contentClass =
-  'min-w-0 rounded-[var(--rad-tabs-content-radius,var(--rad-control-radius,0.5rem))] p-[var(--rad-tabs-content-padding,1rem)] [color:var(--rad-tabs-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-tabs-content-background,var(--rad-color-surface,oklch(1_0_0)))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-tabs-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-tabs-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-tabs-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-tabs-focus-style,var(--rad-focus-style,solid))]'
+  'min-w-0 rounded-[var(--rad-tabs-content-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] p-[var(--rad-tabs-content-padding,1rem)] [color:var(--rad-tabs-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-tabs-content-background,var(--rad-color-surface,oklch(1_0_0)))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-tabs-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-tabs-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-tabs-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-tabs-focus-style,var(--rad-focus-style,solid))]'
 
 type SelectionOwner = ValueOwner<string> & ({ value: string } | { defaultValue: string })
 

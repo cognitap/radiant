@@ -75,8 +75,8 @@ export function Avatar({
       data-slot={joinIds('avatar', props['data-slot'])}
       data-control-size={controlSize}
       className={cn(
-        'relative box-border inline-grid shrink-0 overflow-hidden align-middle rounded-[var(--rad-avatar-radius,9999px)] border-solid border-[length:var(--rad-avatar-border-width,var(--rad-surface-border-width,1px))] [border-color:var(--rad-avatar-border-color,var(--rad-color-border))]',
-        'bg-[var(--rad-avatar-background,var(--rad-color-neutral))] [color:var(--rad-avatar-color,var(--rad-color-neutral-foreground))] font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] text-[length:var(--rad-avatar-font-size,var(--rad-typography-roles-ui-label-size,0.875rem))] font-[number:var(--rad-typography-roles-ui-label-weight,600)] leading-none',
+        'relative box-border inline-grid shrink-0 overflow-hidden align-middle rounded-[var(--rad-avatar-radius,min(calc(var(--rad-control-radius,0.5rem)*9999),50%))] [corner-shape:var(--rad-control-corner-shape,round)] [border-style:var(--rad-control-border-style,solid)] border-[length:var(--rad-avatar-border-width,var(--rad-control-border-width,1px))] [border-color:var(--rad-avatar-border-color,var(--rad-color-border))]',
+        'bg-[var(--rad-avatar-background,var(--rad-color-neutral))] [color:var(--rad-avatar-color,var(--rad-color-neutral-foreground))] font-[family-name:var(--rad-control-action-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] text-[length:var(--rad-avatar-font-size,var(--rad-typography-roles-ui-label-size,0.875rem))] font-[number:var(--rad-control-action-font-weight,var(--rad-typography-roles-ui-label-weight,600))] [text-transform:var(--rad-control-action-text-transform,none)] leading-none',
         controlSize === 'small'
           ? 'size-[var(--rad-avatar-size-small,2rem)]'
           : controlSize === 'large'
