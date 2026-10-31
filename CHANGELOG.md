@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add an optional charts entry with SVG line, bar, area and pie charts, palette-derived colors, native data tables and keyboard-reachable tooltips.
+
 ## 0.0.69
 
 - Add Carousel with native scroll snap, direction-aware controls, drag navigation and opt-in autoplay that pauses for interaction and reduced motion.

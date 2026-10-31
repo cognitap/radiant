@@ -72,6 +72,7 @@ export const cn: CnFunction = createCn({
         'text-(--rad-tabs-font-size)'
       ],
       h: [
+        'h-(--rad-chart-height)',
         'h-(--rad-resizable-handle-size)',
         'h-(--rad-meter-height)',
         'h-(--rad-native-select-height)',
@@ -118,6 +119,7 @@ export const cn: CnFunction = createCn({
       ],
       mb: ['mb-(--rad-multi-select-gap)', 'mb-(--rad-fieldset-gap)'],
       gap: [
+        'gap-(--rad-chart-gap)',
         'gap-(--rad-carousel-gap)',
         'gap-(--rad-carousel-slide-gap)',
         'gap-(--rad-form-gap)',
@@ -345,7 +347,7 @@ export const cn: CnFunction = createCn({
         '[animation-duration:var(--rad-spinner-duration)]',
         '[animation-duration:var(--rad-skeleton-duration)]'
       ],
-      'stroke-w': ['stroke-(--rad-spinner-stroke-width)'],
+      'stroke-w': ['stroke-(--rad-chart-stroke-width)', 'stroke-(--rad-spinner-stroke-width)'],
       opacity: ['opacity-(--rad-spinner-track-opacity)', 'opacity-(--rad-tabs-disabled-opacity)'],
       'backdrop-filter': [
         '[backdrop-filter:var(--rad-popover-backdrop-filter)]',
