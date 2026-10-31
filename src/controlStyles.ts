@@ -4,6 +4,9 @@ import { cva } from 'class-variance-authority'
 // Keep the derivation private so every control follows the same semantic palette.
 export const controlBorderClass =
   '[--_rad-control-border:color-mix(in_oklch,var(--rad-color-border,oklch(0.885_0.005_286))_55%,var(--rad-color-foreground,oklch(0.21_0.006_286)))]'
+// Scales the box and its mark together, so it sits on the wrapper; label presses activate the input.
+export const indicatorPressClass =
+  'motion-safe:transition-[scale] motion-safe:duration-[var(--rad-motion-press-duration,80ms)] motion-safe:ease-[var(--rad-motion-press-ease,cubic-bezier(0.3,0,0,1))] motion-safe:has-[>input:active:enabled]:scale-[var(--rad-motion-press-scale,0.97)]'
 export const controlMetrics = cva('', {
   variants: {
     controlSize: {

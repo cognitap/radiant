@@ -140,16 +140,16 @@ A theme should not need component overrides to look coherent. Each part of a
 component plays one **role**, and each role reads one token group, so one
 setting restyles every family that plays it. Overrides stay for exceptions.
 
-| Role     | Token group        | Parts                                                                     |
-| -------- | ------------------ | ------------------------------------------------------------------------- |
-| Action   | `control.action`   | Button and the parts built on it, Link's button variants, ButtonGroup     |
-| Field    | `control.field`    | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox |
-| Track    | `control.track`    | The segmented ToggleGroup track                                           |
-| Selected | `control.selected` | Pressed toggles, the segmented ToggleGroup indicator, the current page    |
-| Surface  | `surface`          | Card and other containers; `overlay*` keys for floating panels            |
+| Role      | Token group         | Parts                                                                                |
+| --------- | ------------------- | ------------------------------------------------------------------------------------ |
+| Action    | `control.action`    | Button and the parts built on it, Link's button variants, ButtonGroup                |
+| Field     | `control.field`     | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox            |
+| Indicator | `control.indicator` | Checkbox and Radio boxes, the Switch track, Switch and Slider thumbs                 |
+| Track     | `control.track`     | ToggleGroup, Progress, Meter, Skeleton, Slider and ScrollArea rails, Resizable hover |
+| Selected  | `control.selected`  | Pressed toggles, the segmented ToggleGroup indicator, the current page               |
+| Surface   | `surface`           | Card and other containers; `overlay*` keys for floating panels                       |
 
-`control.indicator` and `control.item` are reserved for checkable indicators
-and list rows; families adopt them as they are tidied.
+`control.item` is reserved for list rows; families adopt it as they are tidied.
 
 The rules every family follows:
 
@@ -171,7 +171,7 @@ The rules every family follows:
 - **One selection.** `control.selected` draws the chosen member of every set.
   An underline is an inset bottom shadow on a transparent background.
 
-Unset selected and item keys leave each family its own baseline look.
+Unset selected, item and track keys leave each family its own baseline look.
 
 ## Example themes and fonts
 
@@ -429,9 +429,9 @@ CSS names are `--rad-` plus the kebab-case path. The values come from
 | `control.field.backdropFilter`      | `none`                               | Same                                 |
 | `control.indicator.shadow`          | `none`                               | Same                                 |
 | `control.indicator.checkedShadow`   | `none`                               | Same                                 |
-| `control.indicator.thumbShadow`     | `0 1px 2px rgb(0 0 0 / 0.2)`         | Same                                 |
-| `control.track.background`          | `color.neutral`                      | Same                                 |
-| `control.track.borderWidth`         | `0px`                                | Same                                 |
+| `control.indicator.thumbShadow`     | `none`                               | Same                                 |
+| `control.track.background`          | Unset: each track's own fill         | Same                                 |
+| `control.track.borderWidth`         | Unset: each track's own edge         | Same                                 |
 | `control.track.shadow`              | `none`                               | Same                                 |
 | `control.selected.background`       | Unset                                | Same                                 |
 | `control.selected.foreground`       | Unset                                | Same                                 |

@@ -5,7 +5,7 @@ import { cva } from 'class-variance-authority'
 import { cn } from './cn.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useNativeOwner, type CheckedOwner } from './react/useNativeOwner.js'
-import { controlBorderClass, controlMetrics } from './controlStyles.js'
+import { controlBorderClass, controlMetrics, indicatorPressClass } from './controlStyles.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import type { ControlSize, ControlParts } from './presentation.js'
 import { useFieldControl } from './Field.js'
@@ -24,6 +24,8 @@ const checkboxVariants = cva([
   'checked:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
   'indeterminate:bg-[var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
   'indeterminate:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  '[box-shadow:var(--rad-control-indicator-shadow,none)]',
+  'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)] indeterminate:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
   'data-invalid:[border-color:var(--rad-checkbox-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-checkbox-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
@@ -116,7 +118,11 @@ export function Checkbox({
   })
   const controlNode = (
     <span
-      className={cn('relative inline-grid w-fit shrink-0', !labelled && parts?.wrapper?.className)}
+      className={cn(
+        'relative inline-grid w-fit shrink-0',
+        indicatorPressClass,
+        !labelled && parts?.wrapper?.className
+      )}
       style={!labelled ? parts?.wrapper?.style : undefined}
       data-slot={!labelled ? 'checkbox-wrapper' : undefined}
     >

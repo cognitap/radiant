@@ -460,7 +460,8 @@ export function ResizableHandle({
       data-dragging={context.dragging === value ? '' : undefined}
       className={cn(
         'touch-none select-none m-0 bg-[var(--rad-resizable-handle-background,transparent)] [border-color:var(--rad-resizable-handle-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
-        'hover:bg-[var(--rad-resizable-handle-hover-background,var(--rad-color-neutral,oklch(0.955_0.004_286)))] data-dragging:bg-[var(--rad-resizable-handle-active-background,var(--rad-color-neutral,oklch(0.955_0.004_286)))]',
+        'hover:bg-[var(--rad-resizable-handle-hover-background,var(--rad-control-track-background,var(--rad-color-neutral,oklch(0.955_0.004_286))))] data-dragging:bg-[var(--rad-resizable-handle-active-background,var(--rad-control-track-background,var(--rad-color-neutral,oklch(0.955_0.004_286))))]',
+        'not-aria-disabled:hover:[box-shadow:var(--rad-control-track-shadow,none)] data-dragging:[box-shadow:var(--rad-control-track-shadow,none)]',
         'focus-visible:outline-solid focus-visible:outline-[color:var(--rad-resizable-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:outline-[length:var(--rad-resizable-focus-width,var(--rad-focus-width,2px))] focus-visible:outline-offset-[var(--rad-resizable-focus-offset,-2px)]',
         'aria-disabled:cursor-not-allowed aria-disabled:bg-[var(--rad-resizable-handle-background,transparent)] forced-colors:border-[CanvasText] forced-colors:focus-visible:outline-[Highlight]',
         context.state.orientation === 'horizontal'

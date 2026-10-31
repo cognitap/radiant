@@ -78,7 +78,7 @@ test('a fresh named default resets every component slot to fallback semantics', 
   assert.deepEqual(fresh.modes, defaultTheme.modes)
   for (const mode of ['light', 'dark']) {
     const resets = Object.entries(fresh.modes[mode]).filter(([, value]) => value === 'initial')
-    assert.equal(resets.length, 636)
+    assert.equal(resets.length, 638)
     for (const variable of [
       '--rad-button-font-family',
       '--rad-button-text-transform',

@@ -92,20 +92,21 @@ export function Meter({
       data-slot={joinIds('meter', props['data-slot'])}
       data-tone={tone}
       className={cn(
-        'block box-border w-full min-w-0 appearance-none overflow-hidden h-[var(--rad-meter-height,0.5rem)] rounded-[var(--rad-meter-radius,9999px)]',
-        '[border-width:var(--rad-meter-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-meter-border-style,solid)] [border-color:var(--rad-meter-border-color,var(--rad-color-border))]',
-        'bg-[var(--rad-meter-track-color,var(--rad-color-neutral))] [color:var(--_rad-meter-fill)] [accent-color:var(--_rad-meter-fill)]',
+        '[--_rad-meter-height:var(--rad-meter-height,0.5rem)]',
+        'block box-border w-full min-w-0 appearance-none overflow-hidden h-[var(--_rad-meter-height)] rounded-[min(var(--rad-meter-radius,var(--rad-control-radius,0.5rem)),calc(var(--_rad-meter-height)/2))] [corner-shape:var(--rad-control-corner-shape,round)]',
+        '[border-width:var(--rad-meter-border-width,var(--rad-control-track-border-width,var(--rad-control-border-width,1px)))] [border-style:var(--rad-meter-border-style,var(--rad-control-border-style,solid))] [border-color:var(--rad-meter-border-color,var(--rad-color-border))] [box-shadow:var(--rad-control-track-shadow,none)]',
+        'bg-[var(--rad-meter-track-color,var(--rad-control-track-background,var(--rad-color-neutral)))] [color:var(--_rad-meter-fill)] [accent-color:var(--_rad-meter-fill)]',
         tone === 'danger'
           ? '[--_rad-meter-fill:var(--rad-meter-danger-color,color-mix(in_oklch,var(--rad-color-danger)_60%,var(--rad-color-foreground)))]'
           : tone === 'warning'
             ? '[--_rad-meter-fill:var(--rad-meter-warning-color,color-mix(in_oklch,var(--rad-color-warning)_60%,var(--rad-color-foreground)))]'
             : '[--_rad-meter-fill:var(--rad-meter-indicator-color,color-mix(in_oklch,var(--rad-color-accent)_60%,var(--rad-color-foreground)))]',
         '[&::-webkit-meter-inner-element]:block [&::-webkit-meter-inner-element]:h-full [&::-webkit-meter-inner-element]:w-full',
-        '[&::-webkit-meter-bar]:h-full [&::-webkit-meter-bar]:rounded-[inherit] [&::-webkit-meter-bar]:border-0 [&::-webkit-meter-bar]:bg-none [&::-webkit-meter-bar]:bg-[var(--rad-meter-track-color,var(--rad-color-neutral))] [&::-webkit-meter-bar]:shadow-none',
-        '[&::-webkit-meter-optimum-value]:rounded-[inherit] [&::-webkit-meter-optimum-value]:bg-none [&::-webkit-meter-optimum-value]:bg-[var(--_rad-meter-fill)] [&::-webkit-meter-optimum-value]:transition-none',
-        '[&::-webkit-meter-suboptimum-value]:rounded-[inherit] [&::-webkit-meter-suboptimum-value]:bg-none [&::-webkit-meter-suboptimum-value]:bg-[var(--_rad-meter-fill)] [&::-webkit-meter-suboptimum-value]:transition-none',
-        '[&::-webkit-meter-even-less-good-value]:rounded-[inherit] [&::-webkit-meter-even-less-good-value]:bg-none [&::-webkit-meter-even-less-good-value]:bg-[var(--_rad-meter-fill)] [&::-webkit-meter-even-less-good-value]:transition-none',
-        '[&::-moz-meter-bar]:rounded-[inherit] [&::-moz-meter-bar]:border-0 [&::-moz-meter-bar]:bg-none [&::-moz-meter-bar]:bg-[var(--_rad-meter-fill)] [&::-moz-meter-bar]:transition-none',
+        '[&::-webkit-meter-bar]:h-full [&::-webkit-meter-bar]:rounded-[inherit] [&::-webkit-meter-bar]:[corner-shape:inherit] [&::-webkit-meter-bar]:border-0 [&::-webkit-meter-bar]:bg-none [&::-webkit-meter-bar]:bg-transparent [&::-webkit-meter-bar]:shadow-none',
+        '[&::-webkit-meter-optimum-value]:rounded-[inherit] [&::-webkit-meter-optimum-value]:[corner-shape:inherit] [&::-webkit-meter-optimum-value]:bg-none [&::-webkit-meter-optimum-value]:bg-[var(--_rad-meter-fill)] [&::-webkit-meter-optimum-value]:transition-none',
+        '[&::-webkit-meter-suboptimum-value]:rounded-[inherit] [&::-webkit-meter-suboptimum-value]:[corner-shape:inherit] [&::-webkit-meter-suboptimum-value]:bg-none [&::-webkit-meter-suboptimum-value]:bg-[var(--_rad-meter-fill)] [&::-webkit-meter-suboptimum-value]:transition-none',
+        '[&::-webkit-meter-even-less-good-value]:rounded-[inherit] [&::-webkit-meter-even-less-good-value]:[corner-shape:inherit] [&::-webkit-meter-even-less-good-value]:bg-none [&::-webkit-meter-even-less-good-value]:bg-[var(--_rad-meter-fill)] [&::-webkit-meter-even-less-good-value]:transition-none',
+        '[&::-moz-meter-bar]:rounded-[inherit] [&::-moz-meter-bar]:[corner-shape:inherit] [&::-moz-meter-bar]:border-0 [&::-moz-meter-bar]:bg-none [&::-moz-meter-bar]:bg-[var(--_rad-meter-fill)] [&::-moz-meter-bar]:transition-none',
         'forced-colors:[border-color:CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[Highlight] forced-colors:[&::-webkit-meter-bar]:bg-[Canvas] forced-colors:[&::-webkit-meter-optimum-value]:bg-[Highlight] forced-colors:[&::-webkit-meter-suboptimum-value]:bg-[Highlight] forced-colors:[&::-webkit-meter-even-less-good-value]:bg-[Highlight] forced-colors:[&::-moz-meter-bar]:bg-[Highlight]',
         className
       )}

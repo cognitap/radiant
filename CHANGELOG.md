@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+- `control.indicator.thumbShadow` now defaults to `none`, and `control.track.background` and `control.track.borderWidth` default to unset, so each family keeps its own look until a theme sets them. Before, they defaulted to a small shadow, `color.neutral` and `0px`.
+- Give Checkbox, Radio and Switch the `control.indicator` shadows, and the Switch and Slider thumbs `thumbShadow`. Checkbox and Radio boxes scale with `motion.pressScale` while pressed.
+- Draw Progress, Meter, Skeleton, the Slider rail, ScrollArea's rail and Resizable's hover with `control.track`: background, border width and shadow.
+- Cap Switch, Slider, Progress, Meter and ScrollArea corners at half their thickness, and give them the control corner shape. A `0px` radius gives bars. Progress and Meter no longer force a pill.
+- Make the Switch thumb corner concentric with its track.
+- Take the Progress and Meter border width and style from the control tokens instead of the surface ones. Skeleton takes the surface corner shape.
+
 ## 0.0.71
 
 - Draw Input, Textarea, NativeSelect, InputGroup, OTPField, Select and Combobox wells with `control.field`: background, border color, shadow and backdrop filter. InputGroup gains the control corner shape and border style.

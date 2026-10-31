@@ -15,7 +15,7 @@ import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from './react/useNativeOwner.js'
-import { controlBorderClass, controlMetrics } from './controlStyles.js'
+import { controlBorderClass, controlMetrics, indicatorPressClass } from './controlStyles.js'
 import { Field, useFieldControl } from './Field.js'
 import type { FieldProps } from './Field.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
@@ -26,13 +26,15 @@ const radioVariants = cva([
   'peer col-start-1 row-start-1 m-0 box-border appearance-none',
   'size-[var(--rad-radio-size,var(--_rad-control-indicator-size))]',
   'rounded-[var(--rad-radio-radius,999px)]',
-  '[corner-shape:var(--rad-radio-corner-shape,unset)]',
+  '[corner-shape:var(--rad-radio-corner-shape,round)]',
   '[border-width:var(--rad-radio-border-width,var(--rad-control-border-width,1px))]',
   '[border-style:var(--rad-radio-border-style,var(--rad-control-border-style,solid))]',
   '[border-color:var(--rad-radio-border-color,var(--_rad-control-border))]',
   'bg-[var(--rad-radio-background,var(--rad-color-surface,oklch(1_0_0)))]',
   'checked:bg-[var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
   'checked:[border-color:var(--rad-radio-checked-border,var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  '[box-shadow:var(--rad-control-indicator-shadow,none)]',
+  'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
   'data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'in-data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
@@ -49,7 +51,7 @@ const radioVariants = cva([
 ])
 
 const dotClass =
-  'pointer-events-none absolute inset-[30%] rounded-[var(--rad-radio-radius,999px)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText] forced-colors:peer-disabled:bg-[GrayText]'
+  'pointer-events-none absolute inset-[30%] rounded-[var(--rad-radio-radius,999px)] [corner-shape:var(--rad-radio-corner-shape,round)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText] forced-colors:peer-disabled:bg-[GrayText]'
 
 const rowClass =
   'inline-flex min-h-6 min-w-0 max-w-full cursor-pointer items-center gap-[var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
@@ -217,7 +219,11 @@ export function Radio({
   }, [controlled, selected])
   const controlNode = (
     <span
-      className={cn('relative inline-grid shrink-0', !labelled && parts?.wrapper?.className)}
+      className={cn(
+        'relative inline-grid shrink-0',
+        indicatorPressClass,
+        !labelled && parts?.wrapper?.className
+      )}
       style={!labelled ? parts?.wrapper?.style : undefined}
       data-slot={!labelled ? 'radio-wrapper' : undefined}
     >

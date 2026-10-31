@@ -45,15 +45,16 @@ export function Progress({ value, max = 100, className, ...props }: ProgressProp
       data-slot={joinIds('progress', props['data-slot'])}
       data-state={state}
       className={cn(
-        'block box-border w-full min-w-0 appearance-none overflow-hidden h-[var(--rad-progress-height,0.5rem)] rounded-[var(--rad-progress-radius,9999px)]',
-        '[border-width:var(--rad-progress-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-progress-border-style,solid)] [border-color:var(--rad-progress-border-color,var(--rad-color-border))]',
-        'bg-[var(--rad-progress-track-color,var(--rad-color-neutral))] [color:var(--rad-progress-indicator-color,var(--rad-color-accent))] [accent-color:var(--rad-progress-indicator-color,var(--rad-color-accent))]',
-        '[&::-webkit-progress-bar]:bg-[var(--rad-progress-track-color,var(--rad-color-neutral))] [&::-webkit-progress-bar]:rounded-[inherit]',
-        '[&::-webkit-progress-value]:bg-[var(--rad-progress-indicator-color,var(--rad-color-accent))] [&::-webkit-progress-value]:rounded-[inherit]',
-        '[&::-moz-progress-bar]:bg-[var(--rad-progress-indicator-color,var(--rad-color-accent))] [&::-moz-progress-bar]:rounded-[inherit]',
+        '[--_rad-progress-height:var(--rad-progress-height,0.5rem)] [--_rad-progress-track:var(--rad-progress-track-color,var(--rad-control-track-background,var(--rad-color-neutral)))]',
+        'block box-border w-full min-w-0 appearance-none overflow-hidden h-[var(--_rad-progress-height)] rounded-[min(var(--rad-progress-radius,var(--rad-control-radius,0.5rem)),calc(var(--_rad-progress-height)/2))] [corner-shape:var(--rad-control-corner-shape,round)]',
+        '[border-width:var(--rad-progress-border-width,var(--rad-control-track-border-width,var(--rad-control-border-width,1px)))] [border-style:var(--rad-progress-border-style,var(--rad-control-border-style,solid))] [border-color:var(--rad-progress-border-color,var(--rad-color-border))] [box-shadow:var(--rad-control-track-shadow,none)]',
+        'bg-[var(--_rad-progress-track)] [color:var(--rad-progress-indicator-color,var(--rad-color-accent))] [accent-color:var(--rad-progress-indicator-color,var(--rad-color-accent))]',
+        '[&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-bar]:rounded-[inherit] [&::-webkit-progress-bar]:[corner-shape:inherit]',
+        '[&::-webkit-progress-value]:bg-[var(--rad-progress-indicator-color,var(--rad-color-accent))] [&::-webkit-progress-value]:rounded-[inherit] [&::-webkit-progress-value]:[corner-shape:inherit]',
+        '[&::-moz-progress-bar]:bg-[var(--rad-progress-indicator-color,var(--rad-color-accent))] [&::-moz-progress-bar]:rounded-[inherit] [&::-moz-progress-bar]:[corner-shape:inherit]',
         'indeterminate:[border-style:dashed] indeterminate:[&::-webkit-progress-value]:bg-transparent',
-        'indeterminate:[&::-webkit-progress-bar]:bg-[repeating-linear-gradient(135deg,var(--rad-progress-track-color,var(--rad-color-neutral))_0_0.5rem,var(--rad-progress-indicator-color,var(--rad-color-accent))_0.5rem_1rem)]',
-        'indeterminate:[&::-moz-progress-bar]:bg-[repeating-linear-gradient(135deg,var(--rad-progress-track-color,var(--rad-color-neutral))_0_0.5rem,var(--rad-progress-indicator-color,var(--rad-color-accent))_0.5rem_1rem)]',
+        'indeterminate:[&::-webkit-progress-bar]:bg-[repeating-linear-gradient(135deg,var(--_rad-progress-track)_0_0.5rem,var(--rad-progress-indicator-color,var(--rad-color-accent))_0.5rem_1rem)]',
+        'indeterminate:[&::-moz-progress-bar]:bg-[repeating-linear-gradient(135deg,var(--_rad-progress-track)_0_0.5rem,var(--rad-progress-indicator-color,var(--rad-color-accent))_0.5rem_1rem)]',
         'forced-colors:[border-color:CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[Highlight] forced-colors:[&::-webkit-progress-bar]:bg-[Canvas] forced-colors:[&::-webkit-progress-value]:bg-[Highlight] forced-colors:[&::-moz-progress-bar]:bg-[Highlight] forced-colors:indeterminate:[&::-webkit-progress-value]:bg-transparent',
         className
       )}
