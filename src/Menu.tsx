@@ -363,10 +363,6 @@ function MenuItemRoot({
       requestClose={menu.closeTree}
       closeOnClick={closeOnSelect}
       {...props}
-      pressed={undefined}
-      defaultPressed={undefined}
-      onPressedChange={undefined}
-      aria-pressed={undefined}
       disabled={undefined}
       aria-disabled={disabled || undefined}
       role={itemRole}

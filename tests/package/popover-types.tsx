@@ -89,3 +89,6 @@ void [
   toggle,
   ariaPressed
 ]
+
+// @ts-expect-error An action inside a popover is not a toggle.
+export const pressedPopoverClose = <PopoverClose defaultPressed />
