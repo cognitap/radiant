@@ -16,10 +16,10 @@ import { requireAccessibleName, type AccessibleName } from './internal/accessibl
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
-import type { PartStyle } from './presentation.js'
+import type { Orientation, PartStyle } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
-export type ScrollAreaOrientation = 'vertical' | 'horizontal' | 'both'
+export type ScrollAreaOrientation = Orientation | 'both'
 export type ScrollAreaVisibility = 'hover' | 'scroll' | 'always'
 
 export type ScrollAreaProps = Omit<
@@ -33,7 +33,7 @@ export type ScrollAreaProps = Omit<
     parts?: { content?: PartStyle; scrollbar?: PartStyle; thumb?: PartStyle }
     'data-slot'?: string
   }
-type Axis = 'vertical' | 'horizontal'
+type Axis = Orientation
 type Metrics = {
   width: number
   height: number
