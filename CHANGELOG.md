@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.64
+
 - Add NavigationMenu with native navigation links, delayed hover disclosure and a shared spring viewport.
 
 ## 0.0.63
