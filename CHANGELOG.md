@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.60
+
 - Add NumberField with locale-aware decimal, percent and currency editing, keyboard stepping, blur clamping and raw native form values.
 
 ## 0.0.59
