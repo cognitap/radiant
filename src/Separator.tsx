@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
+import type { Orientation } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type SeparatorProps = Omit<
@@ -15,7 +16,7 @@ export type SeparatorProps = Omit<
 > & {
   /** Hide purely visual divisions from assistive technology. */
   decorative?: boolean
-  orientation?: 'horizontal' | 'vertical'
+  orientation?: Orientation
   style?: ThemeStyle
   'data-slot'?: string
 }

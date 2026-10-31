@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { CardDashboardExample } from '../.storybook/examples/CardExamples.js'
+import { CardDashboardExample, CardLinkExample } from '../.storybook/examples/CardExamples.js'
 import { ProfileExample } from '../.storybook/examples/ProfileForm.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
@@ -21,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A passive div surface with CardHeader, CardTitle, CardDescription, CardContent and CardFooter parts. Each part accepts native props, className, typed local theme styles and ref on its host; caller data-slot tokens add to the owned identity. Shared color motion respects reduced motion; data-slot values are card, card-header, card-title, card-description, card-content and card-footer. Title defaults to h2 and accepts level. Put Button/Link actions inside; Card has no disabled, pending or open state.'
+          'A passive div surface with CardHeader, CardTitle, CardDescription, CardContent and CardFooter parts. Each part takes native props, className, theme styles and ref. CardTitle renders h2 by default; level picks h1 to h6. Card has no state of its own: put Button, Link or a form inside.'
       }
     }
   }
@@ -29,6 +29,18 @@ const meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const Default: Story = {
+  render: () => (
+    <Card style={{ maxWidth: '24rem' }}>
+      <CardHeader>
+        <CardTitle>Studio note</CardTitle>
+        <CardDescription>No action on this card.</CardDescription>
+      </CardHeader>
+      <CardContent>The glaze fires overnight.</CardContent>
+    </Card>
+  )
+}
 
 function ShippingCard() {
   const id = useId()
@@ -66,16 +78,28 @@ function ShippingCard() {
   )
 }
 
-export const Default: Story = {
+export const WithActions: Story = {
   render: () => <ShippingCard />
 }
 
-export const Composition: Story = {
+export const LinkCard: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'The canonical native profile form, reused inside Card. Fields and Button actions follow the global theme; the same form can also be placed inside Dialog under Recipes → Forms.'
+          'The whole card opens one link. The link sits in CardTitle, so its name is the title alone; its ::after covers the relative Card. Keep other controls out of a link card.'
+      }
+    }
+  },
+  render: () => <CardLinkExample />
+}
+
+export const WithForm: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The shared profile form inside Card. The form owns submission; Card adds only the surface.'
       }
     }
   },
@@ -111,31 +135,9 @@ export const Customisation: Story = {
   )
 }
 
-export const Quiet: Story = {
-  render: () => (
-    <Card style={{ maxWidth: '24rem' }}>
-      <CardHeader>
-        <CardTitle>Studio note</CardTitle>
-        <CardDescription>No action on this card.</CardDescription>
-      </CardHeader>
-      <CardContent>The glaze fires overnight.</CardContent>
-    </Card>
-  )
-}
-
 export const ProjectDashboard: Story = {
   render: (_, { globals }) => (
     <CardDashboardExample
-      theme={themes.find(theme => theme.id === globals.theme)}
-      mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
-    />
-  )
-}
-
-export const StaticDashboard: Story = {
-  render: (_, { globals }) => (
-    <CardDashboardExample
-      staticMotion
       theme={themes.find(theme => theme.id === globals.theme)}
       mode={globals.mode === 'light' || globals.mode === 'dark' ? globals.mode : 'system'}
     />

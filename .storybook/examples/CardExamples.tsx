@@ -367,3 +367,35 @@ function ProjectCard({
     </article>
   )
 }
+
+export function CardLinkExample() {
+  const id = useId()
+  return (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: '24rem' }}>
+      <Card className="relative">
+        <CardHeader>
+          <CardTitle level={3}>
+            <Link
+              href={`#${id}-inbox`}
+              variant="subtle"
+              tone="neutral"
+              className="after:absolute after:inset-0"
+            >
+              Calmer inbox
+            </Link>
+          </CardTitle>
+          <CardDescription>A few thoughtful defaults. A little less noise.</CardDescription>
+        </CardHeader>
+        <CardContent>72% complete</CardContent>
+      </Card>
+      <p
+        id={`${id}-inbox`}
+        tabIndex={-1}
+        className="target:[outline:var(--rad-focus-width)_var(--rad-focus-style)_var(--rad-color-focus)] target:[outline-offset:var(--rad-focus-offset)]"
+        style={{ margin: 0 }}
+      >
+        Project opened.
+      </p>
+    </div>
+  )
+}
