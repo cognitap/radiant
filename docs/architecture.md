@@ -249,8 +249,8 @@ Types cannot prove these behaviors. See
 ## Examples and type fixtures
 
 The canonical live examples are Storybook stories:
-[Input](../src/Input.stories.tsx), [Recipes → Forms](../src/Form.stories.tsx)
-(one form, plain or in a Card or Dialog, optionally with TanStack) and
+[Input](../src/Input.stories.tsx), [Form](../src/Form.stories.tsx)
+(native validation, server recovery and optional TanStack values) and
 [Recipes → Workspace → Settings](../src/Workspace.stories.tsx) (all ten
 families). Change a contract and its example together.
 
