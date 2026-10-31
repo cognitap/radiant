@@ -533,6 +533,7 @@ export const componentRegistry = {
     borderWidth: 'css',
     borderStyle: 'css',
     borderColor: 'css',
+    shadow: 'css',
     padding: 'css',
     gap: 'css',
     contentColor: 'css',
@@ -677,6 +678,7 @@ export const componentRegistry = {
     borderColor: 'css',
     borderWidth: 'css',
     radius: 'css',
+    shadow: 'css',
     paddingInline: 'css',
     paddingBlock: 'css',
     fontSize: 'css'

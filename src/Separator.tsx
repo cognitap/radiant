@@ -59,7 +59,7 @@ export function SeparatorRoot({
       data-orientation={orientation}
       data-decorative={decorative ? '' : undefined}
       className={cn(
-        'box-border m-0 shrink-0 border-0 [border-style:var(--rad-separator-style,solid)] [border-color:var(--rad-separator-color,var(--rad-color-border))] forced-colors:[border-color:CanvasText]',
+        'box-border m-0 shrink-0 border-0 [border-style:var(--rad-separator-style,var(--rad-surface-border-style,solid))] [border-color:var(--rad-separator-color,var(--rad-color-border))] forced-colors:[border-color:CanvasText]',
         orientation === 'vertical'
           ? 'h-auto w-0 self-stretch border-s-[length:var(--rad-separator-thickness,1px)] mx-[var(--rad-separator-spacing,0)]'
           : 'h-0 w-full max-w-full border-t-[length:var(--rad-separator-thickness,1px)] my-[var(--rad-separator-spacing,0)]',

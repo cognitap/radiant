@@ -21,6 +21,7 @@ const cardVariants = cva([
   '[color:var(--rad-card-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
   'p-[var(--rad-card-padding,var(--rad-surface-padding,1.5rem))]',
   '[box-shadow:var(--rad-card-shadow,var(--rad-surface-shadow,0_1px_2px_0_rgb(0_0_0/0.06)))]',
+  '[backdrop-filter:var(--rad-surface-backdrop-filter,none)]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:shadow-none'
 ])
 

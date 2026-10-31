@@ -140,14 +140,15 @@ A theme should not need component overrides to look coherent. Each part of a
 component plays one **role**, and each role reads one token group, so one
 setting restyles every family that plays it. Overrides stay for exceptions.
 
-| Role      | Token group         | Parts                                                                                |
-| --------- | ------------------- | ------------------------------------------------------------------------------------ |
-| Action    | `control.action`    | Button and the parts built on it, Link's button variants, ButtonGroup                |
-| Field     | `control.field`     | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox            |
-| Indicator | `control.indicator` | Checkbox and Radio boxes, the Switch track, Switch and Slider thumbs                 |
-| Track     | `control.track`     | ToggleGroup, Progress, Meter, Skeleton, Slider and ScrollArea rails, Resizable hover |
-| Selected  | `control.selected`  | Pressed toggles, the segmented ToggleGroup indicator, the current page               |
-| Surface   | `surface`           | Card and other containers; `overlay*` keys for floating panels                       |
+| Role      | Token group         | Parts                                                                                                    |
+| --------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
+| Action    | `control.action`    | Button and the parts built on it, Link's button variants, ButtonGroup; the voice of Table column headers |
+| Field     | `control.field`     | Input, Textarea, NativeSelect, InputGroup, OTP slots, Select and Combobox                                |
+| Indicator | `control.indicator` | Checkbox and Radio boxes, the Switch track, Switch and Slider thumbs                                     |
+| Track     | `control.track`     | ToggleGroup, Progress, Meter, Skeleton, Slider and ScrollArea rails, Resizable hover                     |
+| Selected  | `control.selected`  | Pressed toggles, the segmented ToggleGroup indicator, the current page and Carousel indicator            |
+| Surface   | `surface`           | Card, Alert, Collapsible, Accordion, TableContainer, EmptyState, CodeBlock, Carousel, Sidebar, Separator |
+| Overlay   | `surface.overlay*`  | Floating panels; Toast takes `overlayShadow` and the surface shape, border and backdrop filter           |
 
 `control.item` is reserved for list rows; families adopt it as they are tidied.
 
@@ -167,7 +168,8 @@ The rules every family follows:
   steppers, PasswordInput's toggle and Tag's remove, stay flat and take the
   field's voice. A Select trigger is a field, not a Button.
 - **One voice.** `action.fontFamily`, `fontWeight`, `textTransform` and
-  `letterSpacing` set how actions read. Labels and values keep their roles.
+  `letterSpacing` set how actions and Table column headers read. Labels and
+  values keep their roles.
 - **One selection.** `control.selected` draws the chosen member of every set.
   An underline is an inset bottom shadow on a transparent background.
 

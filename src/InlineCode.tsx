@@ -14,7 +14,7 @@ export function InlineCode({ className, ...props }: InlineCodeProps) {
       {...props}
       data-slot={joinIds('inline-code', props['data-slot'])}
       className={cn(
-        'box-border break-words rounded-[var(--rad-inline-code-radius,0.25rem)] px-[var(--rad-inline-code-padding-inline,0.25em)] py-[var(--rad-inline-code-padding-block,0.125em)]',
+        'box-border break-words rounded-[var(--rad-inline-code-radius,min(calc(var(--rad-control-radius,0.5rem)/2),0.375em))] [corner-shape:var(--rad-control-corner-shape,round)] px-[var(--rad-inline-code-padding-inline,0.25em)] py-[var(--rad-inline-code-padding-block,0.125em)]',
         'bg-[var(--rad-inline-code-background,var(--rad-color-neutral))] [color:var(--rad-inline-code-color,var(--rad-color-foreground))]',
         'font-[family-name:var(--rad-typography-roles-code-family,ui-monospace,monospace)] text-[length:var(--rad-inline-code-font-size,0.875em)]',
         'forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
