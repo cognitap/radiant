@@ -4,6 +4,7 @@ import { expect, userEvent, within, waitFor } from 'storybook/test'
 import { Command, CommandTrigger } from './index.js'
 import { MotionProvider } from './motion/react.js'
 import {
+  ControlProjectCommands,
   ManageStudyProjects,
   NavigateWorkspace,
   FindStudyReport,
@@ -54,29 +55,27 @@ async function interact(action: () => Promise<void>) {
 }
 export const Default: Story = {
   render: options => (
-    <MotionProvider>
-      <Command
-        items={projectActions.map(({ shortcut: _shortcut, ...item }) => item)}
-        onAction={() => {}}
+    <Command
+      items={projectActions.map(({ shortcut: _shortcut, ...item }) => item)}
+      onAction={() => {}}
+      controlSize={options.controlSize}
+      modal={options.modal}
+      defaultOpen={options.initialOpen}
+      closeOnEscape={options.closeOnEscape}
+      closeOnBackdrop={options.closeOnBackdrop}
+    >
+      <CommandTrigger
+        disabled={options.disabled}
         controlSize={options.controlSize}
-        modal={options.modal}
-        defaultOpen={options.initialOpen}
-        closeOnEscape={options.closeOnEscape}
-        closeOnBackdrop={options.closeOnBackdrop}
       >
-        <CommandTrigger
-          disabled={options.disabled}
-          controlSize={options.controlSize}
-        >
-          Open commands
-        </CommandTrigger>
-        <CommandSurface
-          {...options}
-          title="Workspace commands"
-          description="Search for a workspace action."
-        />
-      </Command>
-    </MotionProvider>
+        Open commands
+      </CommandTrigger>
+      <CommandSurface
+        {...options}
+        title="Workspace commands"
+        description="Search for a workspace action."
+      />
+    </Command>
   )
 }
 export const ManagingStudyProjects: Story = {
@@ -169,10 +168,17 @@ export const SharedControlSizes: Story = {
   )
 }
 export const Controlled: Story = {
-  args: { initialOpen: true },
-  render: options => (
-    <MotionProvider>
-      <FindStudyReport {...options} />
-    </MotionProvider>
-  )
+  render: options => <ControlProjectCommands {...options} />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement)
+    await interact(async () => {
+      c.getByRole('button', { name: 'Find archive actions' }).click()
+    })
+    await expect(c.getByRole('combobox', { name: 'Search commands' })).toHaveValue('archive')
+    await expect(c.queryByRole('option', { name: /^Create study project/ })).toBeNull()
+    await interact(async () => {
+      c.getByRole('option', { name: 'Archive current project' }).click()
+    })
+    await expect(c.getByText('Last action: archive.')).toBeVisible()
+  }
 }

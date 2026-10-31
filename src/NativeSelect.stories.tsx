@@ -3,6 +3,8 @@ import { expect, userEvent, within } from 'storybook/test'
 import { Field, NativeSelect } from './index.js'
 import { MotionProvider } from './motion/react.js'
 import {
+  ControlStudyPhase,
+  NativeSelectSizeComparison,
   SaveStudyPhase,
   BrowseGroupedStudies,
   FilterParticipantCohorts,
@@ -30,15 +32,37 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {
+  render: ({ invalid, ...control }) => (
+    <NativeSelect
+      {...control}
+      aria-label="Study phase"
+      aria-invalid={invalid || undefined}
+      defaultValue=""
+    >
+      <option
+        value=""
+        disabled
+      >
+        Choose a phase
+      </option>
+      <option value="draft">Draft</option>
+      <option value="recruiting">Recruiting</option>
+      <option value="analysis">Analysis</option>
+    </NativeSelect>
+  )
+}
+export const WithField: Story = {
   render: ({ disabled, invalid, required, ...control }) => (
     <Field
       label="Study phase"
+      description="Participants see the phase on their invitation."
       required={required}
       disabled={disabled}
       error={invalid ? 'Review the study phase.' : undefined}
     >
       <NativeSelect
         {...control}
+        name="phase"
         defaultValue=""
       >
         <option
@@ -53,6 +77,22 @@ export const Default: Story = {
       </NativeSelect>
     </Field>
   )
+}
+export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <ControlStudyPhase />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement),
+      select = canvas.getByRole('combobox', { name: 'Study phase' })
+    await userEvent.selectOptions(select, 'analysis')
+    await expect(canvas.getByText('Next review: final report')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Move back to draft' }))
+    await expect(select).toHaveValue('draft')
+  }
+}
+export const SharedControlSizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <NativeSelectSizeComparison />
 }
 export const SavingStudyPhase: Story = {
   play: async ({ canvasElement }) => {
