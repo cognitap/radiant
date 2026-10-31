@@ -120,6 +120,7 @@ export const cn: CnFunction = createCn({
       gap: [
         'gap-(--rad-carousel-gap)',
         'gap-(--rad-carousel-slide-gap)',
+        'gap-(--rad-form-gap)',
         'gap-(--rad-sidebar-gap)',
         'gap-(--rad-navigation-menu-gap)',
         'gap-(--rad-code-block-header-gap)',

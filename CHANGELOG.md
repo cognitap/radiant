@@ -6,6 +6,12 @@
 
 - Add Carousel with native scroll snap, direction-aware controls, drag navigation and opt-in autoplay that pauses for interaction and reduced motion.
 
+## 0.0.68
+
+- Add Form with native validation, Field error mapping, asynchronous submission and optional form-library integration.
+
+## 0.0.67
+
 - Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.
 - Keep Button motion cleanup safe after its owning iframe is removed.
 

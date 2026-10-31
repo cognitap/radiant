@@ -740,6 +740,19 @@ export type {
 } from './AppShell.js'
 
 export {
+  Form,
+  FormField,
+  FormError,
+  useForm,
+  type FormProps,
+  type FormFieldProps,
+  type FormErrorProps,
+  type FormErrors,
+  type FormState,
+  type FormSubmitContext
+} from './Form.js'
+
+export {
   Carousel,
   CarouselViewport,
   CarouselPrevious,
