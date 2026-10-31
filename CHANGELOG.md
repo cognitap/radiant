@@ -5,9 +5,6 @@
 ## Unreleased
 
 - `control.indicator.thumbShadow` now defaults to `none`, and `control.track.background` and `control.track.borderWidth` default to unset, so each family keeps its own look until a theme sets them. Before, they defaulted to a small shadow, `color.neutral` and `0px`.
-- Draw Input, Textarea, NativeSelect, InputGroup, OTPField, Select and Combobox wells with `control.field`: background, border color, shadow and backdrop filter. InputGroup gains the control corner shape and border style.
-- Style the Select trigger as a field. It no longer inherits Button's uppercase, sheen, hover lift or pressed shape, and it does not scale on press.
-- Keep NumberField steppers, the PasswordInput toggle and Tag's remove button flat, in the field's voice, whatever the theme gives Button.
 - Give Checkbox, Radio and Switch the `control.indicator` shadows, and the Switch and Slider thumbs `thumbShadow`. Checkbox and Radio boxes scale with `motion.pressScale` while pressed.
 - Draw Progress, Meter, Skeleton, the Slider rail, ScrollArea's rail and Resizable's hover with `control.track`: background, border width and shadow.
 - Cap Switch, Slider, Progress, Meter and ScrollArea corners at half their thickness, and give them the control corner shape. A `0px` radius gives bars. Progress and Meter no longer force a pill.
