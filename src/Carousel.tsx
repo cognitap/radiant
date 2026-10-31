@@ -309,13 +309,23 @@ export function CarouselViewport({
     host = useRef<HTMLDivElement>(null),
     owned = useComposedRefs(host, state.setViewport),
     composed = useComposedRefs(owned, ref),
-    gesture = useRef<{ id: number; x: number; left: number; moved: boolean } | null>(null),
+    gesture = useRef<{
+      id: number
+      x: number
+      left: number
+      moved: boolean
+      snap?: { value: string; priority: string }
+    } | null>(null),
     suppress = useRef(false)
   function finish(node: HTMLDivElement) {
     const active = gesture.current
     if (!active) return
     gesture.current = null
-    node.style.removeProperty('scroll-snap-type')
+    if (active.snap && node.style.getPropertyValue('scroll-snap-type') === 'none') {
+      if (active.snap.value)
+        node.style.setProperty('scroll-snap-type', active.snap.value, active.snap.priority)
+      else node.style.removeProperty('scroll-snap-type')
+    }
     node.removeAttribute('data-dragging')
     if (node.hasPointerCapture(active.id)) node.releasePointerCapture(active.id)
     if (active.moved) {
@@ -388,6 +398,10 @@ export function CarouselViewport({
         if (!active.moved && Math.abs(delta) < 5) return
         if (!active.moved) {
           active.moved = true
+          active.snap = {
+            value: event.currentTarget.style.getPropertyValue('scroll-snap-type'),
+            priority: event.currentTarget.style.getPropertyPriority('scroll-snap-type')
+          }
           event.currentTarget.setPointerCapture(event.pointerId)
           event.currentTarget.style.scrollSnapType = 'none'
           event.currentTarget.setAttribute('data-dragging', '')

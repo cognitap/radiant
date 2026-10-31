@@ -132,11 +132,15 @@ test('real mouse drag and touch swipe use the native scroll viewport', async () 
   const changes = vi.fn(),
     { host } = await mount(<Sample onValueChange={changes} />)
   viewport(host).id = 'carousel-native-proof'
+  viewport(host).style.setProperty('scroll-snap-type', 'x proximity', 'important')
+  const authoredSnap = viewport(host).style.getPropertyValue('scroll-snap-type')
   await act(async () =>
     commands.dragHandle('#carousel-native-proof [data-test=drag-target]', -230, false, false)
   )
   await aligned(host, 'harbor')
   expect(changes).toHaveBeenCalledWith('harbor')
+  expect(viewport(host).style.getPropertyValue('scroll-snap-type')).toBe(authoredSnap)
+  expect(viewport(host).style.getPropertyPriority('scroll-snap-type')).toBe('important')
   await act(async () => commands.scrollViewport('#carousel-native-proof', 230, 0, true))
   await aligned(host, 'orchard')
 })
