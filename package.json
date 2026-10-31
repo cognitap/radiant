@@ -59,6 +59,10 @@
     "./motion/react": {
       "types": "./dist/library/motion/react.d.ts",
       "default": "./dist/library/motion/react.js"
+    },
+    "./charts": {
+      "types": "./dist/library/charts/index.d.ts",
+      "default": "./dist/library/charts/index.js"
     }
   },
   "publishConfig": {

@@ -140,6 +140,18 @@ export const componentRegistry = {
     shadow: 'css',
     gap: 'css'
   },
+  chart: {
+    gap: 'css',
+    height: 'css',
+    strokeWidth: 'css',
+    gridColor: 'css',
+    series1: 'css',
+    series2: 'css',
+    series3: 'css',
+    series4: 'css',
+    series5: 'css',
+    series6: 'css'
+  },
   buttonGroup: { radius: 'css' },
   otpField: { gap: 'css', slotSize: 'css' },
   tag: { gap: 'css' },

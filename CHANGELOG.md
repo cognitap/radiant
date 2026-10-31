@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add an optional charts entry with SVG line, bar, area and pie charts, palette-derived colors, native data tables and keyboard-reachable tooltips.
+
 ## 0.0.66
 
 - **Breaking:** CheckboxGroup builds on Field's group layout and takes `label` instead of `legend`. Before: `<CheckboxGroup legend="Channels" parts={{ legend: … }} />`. After: `<CheckboxGroup label="Channels" parts={{ label: … }} />`. Its root `data-slot` is `field checkbox-group`; match `[data-slot~="checkbox-group"]` instead of `fieldset`.
