@@ -63,6 +63,16 @@ export const componentRegistry = {
     focusWidth: 'css',
     focusOffset: 'css'
   },
+  resizable: {
+    handleSize: 'css',
+    handleColor: 'css',
+    handleBackground: 'css',
+    handleHoverBackground: 'css',
+    handleActiveBackground: 'css',
+    focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css'
+  },
   numberField: { gap: 'css' },
   passwordInput: { gap: 'css' },
   meter: {

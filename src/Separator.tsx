@@ -21,23 +21,40 @@ export type SeparatorProps = Omit<
   'data-slot'?: string
 }
 
-export function Separator({
+export function Separator(props: SeparatorProps) {
+  return (
+    <SeparatorRoot
+      {...props}
+      interactive={undefined}
+      tabIndex={undefined}
+    />
+  )
+}
+
+/** Private native seam for an interactive separator; the public rule stays passive. */
+export function SeparatorRoot({
+  interactive,
+  tabIndex,
   decorative = false,
   orientation = 'horizontal',
   className,
   ...props
-}: SeparatorProps) {
+}: SeparatorProps & { interactive?: boolean; tabIndex?: number }) {
   const {
     children: _children,
     dangerouslySetInnerHTML: _html,
     ...attributes
   }: ComponentProps<'hr'> = props
-  const nativeProps = { ...attributes, role: undefined, tabIndex: undefined }
+  const nativeProps = {
+    ...attributes,
+    role: interactive ? 'separator' : undefined,
+    tabIndex: interactive ? (tabIndex ?? 0) : undefined
+  }
   return (
     <hr
       {...nativeProps}
-      aria-hidden={decorative ? true : undefined}
-      aria-orientation={decorative ? undefined : orientation}
+      aria-hidden={!interactive && decorative ? true : undefined}
+      aria-orientation={!interactive && decorative ? undefined : orientation}
       data-slot={joinIds('separator', props['data-slot'])}
       data-orientation={orientation}
       data-decorative={decorative ? '' : undefined}

@@ -69,6 +69,7 @@ export const cn: CnFunction = createCn({
         'text-(--rad-tabs-font-size)'
       ],
       h: [
+        'h-(--rad-resizable-handle-size)',
         'h-(--rad-meter-height)',
         'h-(--rad-native-select-height)',
         'h-(--rad-drawer-size)',
@@ -82,6 +83,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-slider-length)'
       ],
       w: [
+        'w-(--rad-resizable-handle-size)',
         'w-(--rad-otp-field-slot-size)',
         'w-(--rad-drawer-size)',
         'w-(--rad-context-menu-width)',
@@ -292,6 +294,7 @@ export const cn: CnFunction = createCn({
         '[corner-shape:var(--rad-tabs-corner-shape)]'
       ],
       'outline-w': [
+        'outline-(--rad-resizable-focus-width)',
         'outline-(--rad-nav-link-focus-width)',
         'outline-(--rad-native-select-focus-width)',
         'outline-(--rad-input-group-focus-width)',
@@ -302,6 +305,7 @@ export const cn: CnFunction = createCn({
         'outline-(--rad-tabs-focus-width)'
       ],
       'outline-offset': [
+        'outline-offset-(--rad-resizable-focus-offset)',
         'outline-offset-(--rad-nav-link-focus-offset)',
         'outline-offset-(--rad-native-select-focus-offset)',
         'outline-offset-(--rad-input-group-focus-offset)',

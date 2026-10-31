@@ -1,3 +1,5 @@
+import { addDecimal } from './decimal.js'
+
 /** A bounded editable decimal adapter; Intl supplies display and locale symbols. */
 export type NumberFieldFormatOptions = {
   style?: 'decimal' | 'percent' | 'currency'
@@ -172,22 +174,8 @@ export function requireFiniteNumber(name: string, value: unknown, nullable = fal
 }
 export const clampNumber = (value: number, min?: number, max?: number) =>
   Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value))
-/** Add decimal coefficients before converting back to the public JavaScript number. */
+/** Add a decimal step, respecting the public finite-number range. */
 export function addNumberStep(value: number, amount: number, min?: number, max?: number) {
-  const parts = (number: number) => {
-    const [mantissa, exponent = '0'] = number.toString().split('e')
-    const fraction = mantissa!.split('.')[1]?.length ?? 0
-    return {
-      coefficient: BigInt(mantissa!.replace('.', '')),
-      exponent: Number(exponent) - fraction
-    }
-  }
-  const a = parts(value),
-    b = parts(amount),
-    exponent = Math.min(a.exponent, b.exponent)
-  const coefficient =
-    a.coefficient * 10n ** BigInt(a.exponent - exponent) +
-    b.coefficient * 10n ** BigInt(b.exponent - exponent)
-  const next = clampNumber(Number(coefficient.toString() + 'e' + exponent), min, max)
+  const next = clampNumber(addDecimal(value, amount), min, max)
   return Number.isFinite(next) ? next : value
 }

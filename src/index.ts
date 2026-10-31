@@ -672,3 +672,16 @@ export {
 } from './CodeBlock.js'
 
 export { NumberField, type NumberFieldProps, type NumberFieldFormatOptions } from './NumberField.js'
+
+export {
+  Resizable,
+  ResizablePanel,
+  ResizableHandle,
+  useResizable,
+  type ResizableProps,
+  type ResizablePanelProps,
+  type ResizableHandleProps,
+  type ResizableState,
+  type ResizablePanelState,
+  type ResizableItem
+} from './Resizable.js'
