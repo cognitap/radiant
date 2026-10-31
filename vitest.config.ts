@@ -36,6 +36,7 @@ export default defineConfig({
           test: {
             name: `storybook-${theme.id}-${mode}`,
             testTimeout: 15000,
+            isolate: false,
             browser: {
               enabled: true,
               provider: playwright(),
