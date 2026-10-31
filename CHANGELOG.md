@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Progress fallback text matches Meter: `aria-valuetext` when given, otherwise "value of max". Before: "value / max", ignoring `aria-valuetext`.
+
 ## 0.0.57
 
 - **Breaking:** DialogTrigger and DialogClose no longer accept `pressed`, `defaultPressed`, `onPressedChange` or `aria-pressed`, and ignore them at runtime. The AlertDialog, Drawer and Command trigger and close parts change with them. Before: `<DialogTrigger defaultPressed>` rendered `aria-pressed` beside `aria-expanded`. After: a type error, and no `aria-pressed`.

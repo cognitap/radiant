@@ -47,6 +47,8 @@ build on is in [architecture](architecture.md).
 ## State attributes
 
 - Disclosure uses `data-state="open"` or `"closed"`.
+  Other `data-state` values describe a task's status, such as Progress's
+  `indeterminate`, `loading` and `complete`.
 - Selection uses a boolean `data-selected`, like `data-disabled`,
   `data-invalid` and `data-highlighted`. ARIA keeps its own attribute
   (`aria-selected`, `aria-pressed`, `aria-checked`).
@@ -55,6 +57,8 @@ build on is in [architecture](architecture.md).
 
 - A host that needs an accessible name uses the `AccessibleName` type and
   `requireAccessibleName`.
+  A native labelable host (input, progress, meter) is named by a `<label>` or
+  Field instead, so it documents the requirement without that type.
 - A visible name is `label: ReactNode`. A name for an element Radiant renders
   inside the component is a string ending in `Label`, such as `removeLabel`.
   Native names keep their meaning, such as Avatar's `alt`.

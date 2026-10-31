@@ -67,11 +67,11 @@ theme, keyboard behavior and relationships travel together.
 
 Actions take three independent props:
 
-| Prop          | Values                                                                    | Default                       |
-| ------------- | ------------------------------------------------------------------------- | ----------------------------- |
-| `variant`     | `solid`, `soft`, `outline`, `ghost`; Link also accepts `inline`, `subtle` | Button `solid`; Link `inline` |
-| `tone`        | `accent`, `neutral`, `warning`, `danger`                                  | `accent`                      |
-| `controlSize` | `small`, `medium`, `large`                                                | `medium`                      |
+| Prop          | Values                                                                    | Default                              |
+| ------------- | ------------------------------------------------------------------------- | ------------------------------------ |
+| `variant`     | `solid`, `soft`, `outline`, `ghost`; Link also accepts `inline`, `subtle` | Button `solid`; Link `inline`        |
+| `tone`        | `accent`, `neutral`, `warning`, `danger`                                  | Actions `accent`; feedback `neutral` |
+| `controlSize` | `small`, `medium`, `large`                                                | `medium`                             |
 
 A variant picks the treatment and a tone picks the palette. Input, Textarea, Checkbox, Switch, Slider,
 Radio, RadioGroup, Combobox and Tabs share `controlSize` but have no variants. Native meanings
