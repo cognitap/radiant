@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.62
+
 - Add Resizable with draggable and keyboard separators, bounded collapsible panels, direction support and application-owned layout persistence.
 
 ## 0.0.61
