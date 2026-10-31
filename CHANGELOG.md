@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.
 - Keep visually hidden and other absolutely positioned content inside AppShellMain and Sidebar, so it scrolls with them instead of making the page taller.
 
 ## 0.0.72
