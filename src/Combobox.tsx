@@ -13,13 +13,13 @@ import {
 } from 'react'
 import type { ComponentProps, ReactNode, RefObject } from 'react'
 import { createPortal } from 'react-dom'
-import { Button, type ButtonProps } from './Button.js'
+import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { Tag } from './Tag.js'
 import { sameSelection, nextSelection, isItemOpen, type Selection } from './internal/selection.js'
 import { validateTags } from './internal/tags.js'
 import { useArrayFormBridge } from './react/useArrayFormBridge.js'
 import { useField, useFieldControl } from './Field.js'
-import type { DistributiveOmit } from './internal/types.js'
+import type { DistributiveOmit, WithoutToggle } from './internal/types.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { controlMetrics } from './controlStyles.js'
@@ -33,7 +33,7 @@ import { useControllableState } from './react/useControllableState.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useTransitionHost } from './motion/host.js'
 import { useComboboxPopup } from './react/useComboboxPopup.js'
-import type { ValueOwner } from './react/useNativeOwner.js'
+import type { StateOwner, ValueOwner } from './react/useNativeOwner.js'
 import type { ControlSize } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
@@ -47,7 +47,8 @@ type ComboboxCommonProps = {
   filter?: ((item: ComboboxOption, query: string) => boolean) | null
   onQueryChange?: (query: string) => void
   loading?: boolean
-  error?: ReactNode
+  /** Status text when results fail to load. */
+  errorText?: ReactNode
   loadingText?: string
   emptyText?: ReactNode
   name?: string
@@ -55,15 +56,15 @@ type ComboboxCommonProps = {
   disabled?: boolean
   readOnly?: boolean
   required?: boolean
+  'aria-invalid'?: ComponentProps<'input'>['aria-invalid']
   controlSize?: ControlSize
   children?: ReactNode
-} & ({ query: string; defaultQuery?: never } | { query?: undefined; defaultQuery?: string }) &
-  ({ open: boolean; defaultOpen?: never } | { open?: undefined; defaultOpen?: boolean }) & {
-    onOpenChange?: (open: boolean) => void
-  }
+  onOpenChange?: (open: boolean) => void
+} & StateOwner<'query', string> &
+  StateOwner<'open', boolean>
 export type ComboboxMultipleProps = ComboboxCommonProps &
   ValueOwner<string[]> & {
-    multiple: true
+    type: 'multiple'
     onValueChange?: (value: string[]) => void
     selectedItems?: readonly ComboboxOption[]
     selectedItem?: never
@@ -72,7 +73,7 @@ export type ComboboxProps =
   | ComboboxMultipleProps
   | (ComboboxCommonProps &
       ValueOwner<string | null> & {
-        multiple?: false
+        type?: 'single'
         onValueChange?: (value: string | null) => void
         selectedItem?: ComboboxOption
         selectedItems?: never
@@ -113,19 +114,19 @@ type Context = Omit<ComboboxState, 'value' | 'setValue'> & {
   required: boolean
   controlSize: ControlSize
   loading: boolean
-  error?: ReactNode
+  invalid: ComboboxProps['aria-invalid']
   status: ReactNode
   dismiss(): void
   commit(value: string | null): void
 }
 const ComboboxContext = createContext<Context | null>(null)
-export function useCombobox(options: { multiple: true }): ComboboxMultipleState | null
-export function useCombobox(options?: { multiple?: false }): ComboboxState | null
+export function useCombobox(options: { type: 'multiple' }): ComboboxMultipleState | null
+export function useCombobox(options?: { type?: 'single' }): ComboboxState | null
 export function useCombobox(options?: {
-  multiple?: boolean
+  type?: 'single' | 'multiple'
 }): ComboboxState | ComboboxMultipleState | null {
   const box = useContext(ComboboxContext)
-  if (!box || box.multiple !== !!options?.multiple) return null
+  if (!box || box.multiple !== (options?.type === 'multiple')) return null
   if (Array.isArray(box.value))
     return { ...box, value: box.value, setValue: (value: string[]) => box.setValue(value) }
   return { ...box, value: box.value, setValue: (value: string | null) => box.setValue(value) }
@@ -189,7 +190,7 @@ export function ComboboxRoot(
     defaultValue,
     selectedItem,
     selectedItems,
-    multiple = false,
+    type = 'single',
     filter = localFilter,
     query,
     defaultQuery,
@@ -198,7 +199,7 @@ export function ComboboxRoot(
     defaultOpen,
     onOpenChange,
     loading = false,
-    error,
+    errorText,
     loadingText = 'Loading results…',
     emptyText = 'No results found.',
     name,
@@ -206,14 +207,16 @@ export function ComboboxRoot(
     disabled: disabledProp,
     readOnly = false,
     required: requiredProp,
+    'aria-invalid': invalid,
     controlSize = 'medium',
     children
   } = props
+  const multiple = type === 'multiple'
   const textMode = !!textInput
   if (textMode && multiple) throw new TypeError('Autocomplete is a single text input.')
-  const [initialMultiple] = useState(multiple)
-  if (multiple !== initialMultiple)
-    throw new TypeError('Combobox cannot change multiple mode. Remount with a new key.')
+  const [initialType] = useState(type)
+  if (type !== initialType)
+    throw new TypeError('Combobox cannot change type during a mount. Remount with a new key.')
   const selectedOptions = multiple ? (selectedItems ?? []) : selectedItem ? [selectedItem] : []
   const ids = useId()
   const field = useField()
@@ -234,7 +237,7 @@ export function ComboboxRoot(
     initialValue: multiple ? [] : null,
     equal: sameSelection,
     onChange(next) {
-      if (props.multiple) {
+      if (props.type === 'multiple') {
         if (!Array.isArray(next)) throw new TypeError('Multiple Combobox value must be an array.')
         props.onValueChange?.([...next])
       } else {
@@ -245,7 +248,7 @@ export function ComboboxRoot(
     }
   })
   if (multiple !== Array.isArray(selection.value))
-    throw new TypeError('Combobox value must match its multiple mode.')
+    throw new TypeError('Combobox value must match its type.')
   if (Array.isArray(selection.value)) validateTags(selection.value)
   const values = Array.isArray(selection.value)
     ? selection.value
@@ -289,7 +292,7 @@ export function ComboboxRoot(
   const unavailable = () => disabled || readOnly || !!input?.matches(':disabled')
   const isOpen = expansion.value && !disabled
   const visible =
-    loading || error ? [] : filter ? items.filter(item => filter(item, search.value)) : items
+    loading || errorText ? [] : filter ? items.filter(item => filter(item, search.value)) : items
   const enabled = visible.filter(item => !item.disabled)
   const activeValue = isOpen && enabled.some(item => item.value === active) ? active : null
   if (active !== null && activeValue === null) highlight(null)
@@ -330,7 +333,7 @@ export function ComboboxRoot(
     selection.request(current => {
       const next = typeof update === 'function' ? update(current) : update
       if (multiple !== Array.isArray(next))
-        throw new TypeError('Combobox value must match its multiple mode.')
+        throw new TypeError('Combobox value must match its type.')
       if (Array.isArray(next)) validateTags(next)
       if (!sameSelection(current, next)) {
         if (Array.isArray(next)) arrayPending.current = next
@@ -524,8 +527,8 @@ export function ComboboxRoot(
     required,
     controlSize,
     loading,
-    error,
-    status: loading ? loadingText : error || (visible.length === 0 ? emptyText : ''),
+    invalid,
+    status: loading ? loadingText : errorText || (visible.length === 0 ? emptyText : ''),
     dismiss,
     commit
   }
@@ -634,7 +637,7 @@ export function ComboboxInput({
     disabled: box.disabled,
     required: box.required,
     'aria-describedby': props['aria-describedby'],
-    'aria-invalid': props['aria-invalid']
+    'aria-invalid': props['aria-invalid'] ?? box.invalid
   })
   const inputRef = useComposedRefs(box.setInput, ref)
   return (
@@ -771,21 +774,24 @@ export function ComboboxInput({
   )
 }
 
-export type ComboboxTriggerProps = DistributiveOmit<
-  ButtonProps,
-  | 'type'
-  | 'disabled'
-  | 'pending'
-  | 'variant'
-  | 'tone'
-  | 'controlSize'
-  | 'iconOnly'
-  | 'fullWidth'
-  | 'motion'
-  | 'tabIndex'
-  | 'aria-controls'
-  | 'aria-expanded'
+export type ComboboxTriggerProps = WithoutToggle<
+  DistributiveOmit<
+    ButtonProps,
+    | 'type'
+    | 'disabled'
+    | 'pending'
+    | 'variant'
+    | 'tone'
+    | 'controlSize'
+    | 'iconOnly'
+    | 'fullWidth'
+    | 'motion'
+    | 'tabIndex'
+    | 'aria-controls'
+    | 'aria-expanded'
+  >
 >
+export type ComboboxRenderProps = ButtonRenderProps
 export function ComboboxTrigger({
   children,
   className,
@@ -800,6 +806,10 @@ export function ComboboxTrigger({
       variant="ghost"
       tone="neutral"
       {...props}
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
+      aria-pressed={undefined}
       type="button"
       disabled={box.disabled || box.readOnly}
       pending={false}
@@ -866,6 +876,10 @@ export function ComboboxClear({
       variant="ghost"
       tone="neutral"
       {...props}
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
+      aria-pressed={undefined}
       type="button"
       disabled={box.disabled || box.readOnly}
       pending={false}

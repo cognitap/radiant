@@ -125,10 +125,60 @@ export function ComboboxAsyncExample() {
             setSelected(next === null ? undefined : result.items.find(item => item.value === next))
           }
           loading={result.loading || result.query !== query}
-          error={result.query === query ? result.error : undefined}
+          errorText={result.query === query ? result.error : undefined}
         />
       </Field>
       <p>Selected: {selected?.label ?? 'None'}</p>
     </div>
+  )
+}
+
+export function ComboboxControlledExample() {
+  const [value, setValue] = useState<string | null>('oslo')
+  return (
+    <div className="grid w-80 max-w-full gap-4">
+      <Field label="City">
+        <Combobox
+          items={cityOptions}
+          value={value}
+          onValueChange={setValue}
+        />
+      </Field>
+      <output>Selected: {value ?? 'none'}</output>
+      <Button
+        variant="ghost"
+        onClick={() => setValue(null)}
+      >
+        Clear selection
+      </Button>
+    </div>
+  )
+}
+
+export function ComboboxMultipleExample() {
+  const [feedback, setFeedback] = useState('')
+  return (
+    <form
+      className="grid w-80 max-w-full gap-4"
+      onSubmit={event => {
+        event.preventDefault()
+        const cities = new FormData(event.currentTarget).getAll('cities')
+        setFeedback(`Shortlist: ${cities.join(', ') || 'none'}.`)
+      }}
+    >
+      <Field
+        label="Shortlisted cities"
+        description="Choose every city the team would consider."
+      >
+        <Combobox
+          type="multiple"
+          items={cityOptions}
+          name="cities"
+          defaultValue={['oslo', 'rome']}
+        />
+      </Field>
+      <Button type="submit">Save shortlist</Button>
+      <output>{feedback}</output>
+    </form>
   )
 }

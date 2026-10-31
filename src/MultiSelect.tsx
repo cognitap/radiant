@@ -21,13 +21,13 @@ import {
   type ComboboxContentProps,
   type ComboboxItemProps,
   type ComboboxStatusProps,
-  type ComboboxTagsProps
+  type ComboboxTagsProps,
+  type ComboboxRenderProps
 } from './Combobox.js'
-import type { ButtonRenderProps } from './Button.js'
 import type { DistributiveOmit } from './internal/types.js'
 
-export type MultiSelectProps = DistributiveOmit<ComboboxMultipleProps, 'multiple'> & {
-  multiple?: never
+export type MultiSelectProps = DistributiveOmit<ComboboxMultipleProps, 'type'> & {
+  type?: never
 }
 export type MultiSelectState = ComboboxMultipleState
 export type MultiSelectOption = ComboboxOption
@@ -39,10 +39,10 @@ export type MultiSelectContentProps = ComboboxContentProps
 export type MultiSelectItemProps = ComboboxItemProps
 export type MultiSelectStatusProps = ComboboxStatusProps
 export type MultiSelectTagsProps = ComboboxTagsProps
-export type MultiSelectRenderProps = ButtonRenderProps
+export type MultiSelectRenderProps = ComboboxRenderProps
 
 export function useMultiSelect(): MultiSelectState | null {
-  return useCombobox({ multiple: true })
+  return useCombobox({ type: 'multiple' })
 }
 function useMultiSelectContext() {
   const state = useMultiSelect()
@@ -55,7 +55,7 @@ export function MultiSelect(props: MultiSelectProps) {
   return (
     <Combobox
       {...props}
-      multiple
+      type="multiple"
     />
   )
 }

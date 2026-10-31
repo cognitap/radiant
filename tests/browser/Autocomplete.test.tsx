@@ -232,7 +232,7 @@ test('async result, loading and error changes never replace arbitrary text or in
           items={loading ? [] : items}
           filter={null}
           loading={loading}
-          error={error}
+          errorText={error}
           defaultOpen
           defaultValue="Other destination"
           name="city"

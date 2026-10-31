@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
+  Button,
   Combobox,
   ComboboxInput,
   ComboboxPortal,
@@ -13,6 +14,8 @@ import {
 import {
   ComboboxTravelExample,
   ComboboxAsyncExample,
+  ComboboxControlledExample,
+  ComboboxMultipleExample,
   cityOptions
 } from '../.storybook/examples/ComboboxExamples.js'
 
@@ -24,17 +27,43 @@ const meta = {
 } satisfies Meta<typeof Combobox>
 export default meta
 type Story = StoryObj<typeof meta>
-export const Default: Story = {
+export const Default: Story = { render: () => <ComboboxTravelExample /> }
+export const WithField: Story = {
   render: () => (
-    <Field
-      label="City"
-      className="w-80 max-w-full"
-    >
-      <Combobox items={cityOptions} />
-    </Field>
+    <form className="grid w-80 max-w-full gap-3">
+      <Field
+        label="City"
+        required
+        description="Search for a city, then choose a result."
+      >
+        <Combobox
+          items={cityOptions}
+          name="city"
+        />
+      </Field>
+      <Button type="submit">Submit</Button>
+    </form>
   )
 }
-export const TeamGathering: Story = { render: () => <ComboboxTravelExample /> }
+export const Controlled: Story = { render: () => <ComboboxControlledExample /> }
+export const SharedControlSizes: Story = {
+  render: () => (
+    <div className="grid w-80 max-w-full gap-5">
+      {(['small', 'medium', 'large'] as const).map(size => (
+        <Field
+          label={`${size} city`}
+          key={size}
+        >
+          <Combobox
+            items={cityOptions}
+            controlSize={size}
+          />
+        </Field>
+      ))}
+    </div>
+  )
+}
+export const ChoosingSeveralCities: Story = { render: () => <ComboboxMultipleExample /> }
 export const AsyncResults: Story = { render: () => <ComboboxAsyncExample /> }
 export const Open: Story = {
   render: () => (
@@ -50,72 +79,52 @@ export const Open: Story = {
     </Field>
   )
 }
-export const Loading: Story = {
+export const States: Story = {
   render: () => (
-    <Field
-      label="City"
-      className="w-80 max-w-full"
-    >
-      <Combobox
-        items={[]}
-        loading
-        defaultOpen
-      />
-    </Field>
+    <div className="grid w-80 max-w-full gap-5">
+      <Field
+        label="Disabled city"
+        disabled
+        description="An administrator manages this destination."
+      >
+        <Combobox
+          items={cityOptions}
+          defaultValue="budapest"
+        />
+      </Field>
+      <Field
+        label="Invalid city"
+        error="Choose a destination."
+      >
+        <Combobox items={cityOptions} />
+      </Field>
+      <Field
+        label="Read-only city"
+        description="Focusable and submitted with the form, but not editable."
+      >
+        <Combobox
+          items={cityOptions}
+          defaultValue="oslo"
+          readOnly
+        />
+      </Field>
+    </div>
   )
 }
-export const Empty: Story = {
+export const InDialog: Story = {
   render: () => (
-    <Field
-      label="City"
-      className="w-80 max-w-full"
-    >
-      <Combobox
-        items={[]}
-        defaultOpen
-      />
-    </Field>
+    <Dialog>
+      <DialogTrigger>Choose a destination</DialogTrigger>
+      <DialogContent>
+        <DialogTitle>Your next gathering</DialogTitle>
+        <Field label="City">
+          <Combobox items={cityOptions} />
+        </Field>
+      </DialogContent>
+    </Dialog>
   )
 }
-export const Error: Story = {
-  render: () => (
-    <Field
-      label="City"
-      className="w-80 max-w-full"
-    >
-      <Combobox
-        items={[]}
-        error="Cities could not be loaded. Please try again."
-        defaultOpen
-      />
-    </Field>
-  )
-}
-export const Disabled: Story = {
-  render: () => (
-    <Field
-      label="City"
-      disabled
-      description="An administrator manages this destination."
-    >
-      <Combobox
-        items={cityOptions}
-        defaultValue="budapest"
-      />
-    </Field>
-  )
-}
-export const Invalid: Story = {
-  render: () => (
-    <Field
-      label="City"
-      error="Choose a destination."
-    >
-      <Combobox items={cityOptions} />
-    </Field>
-  )
-}
-export const Customized: Story = {
+export const Customisation: Story = {
   render: () => (
     <Field
       label="City"
@@ -134,35 +143,5 @@ export const Customized: Story = {
         </ComboboxPortal>
       </Combobox>
     </Field>
-  )
-}
-export const InDialog: Story = {
-  render: () => (
-    <Dialog>
-      <DialogTrigger>Choose a destination</DialogTrigger>
-      <DialogContent>
-        <DialogTitle>Your next gathering</DialogTitle>
-        <Field label="City">
-          <Combobox items={cityOptions} />
-        </Field>
-      </DialogContent>
-    </Dialog>
-  )
-}
-export const SharedControlSizes: Story = {
-  render: () => (
-    <div className="grid w-80 max-w-full gap-5">
-      {(['small', 'medium', 'large'] as const).map(size => (
-        <Field
-          label={`${size} city`}
-          key={size}
-        >
-          <Combobox
-            items={cityOptions}
-            controlSize={size}
-          />
-        </Field>
-      ))}
-    </div>
   )
 }

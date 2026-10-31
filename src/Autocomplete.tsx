@@ -11,6 +11,7 @@ import {
   ComboboxStatus,
   useAutocompleteParts,
   type ComboboxProps,
+  type ComboboxRenderProps,
   type ComboboxOption,
   type ComboboxInputProps,
   type ComboboxTriggerProps,
@@ -32,7 +33,7 @@ export type AutocompleteProps = DistributiveOmit<
   | 'query'
   | 'defaultQuery'
   | 'onQueryChange'
-  | 'multiple'
+  | 'type'
   | 'selectedItem'
   | 'selectedItems'
 > &
@@ -40,6 +41,7 @@ export type AutocompleteProps = DistributiveOmit<
 export type AutocompleteInputProps = ComboboxInputProps
 export type AutocompleteTriggerProps = ComboboxTriggerProps
 export type AutocompleteClearProps = ComboboxClearProps
+export type AutocompleteRenderProps = ComboboxRenderProps
 export type AutocompletePortalProps = ComponentProps<typeof ComboboxPortal>
 export type AutocompleteContentProps = ComboboxContentProps
 export type AutocompleteItemProps = ComboboxItemProps
@@ -72,7 +74,7 @@ export function Autocomplete({
   return (
     <ComboboxRoot
       {...props}
-      multiple={false}
+      type="single"
       value={null}
       defaultValue={undefined}
       selectedItem={undefined}

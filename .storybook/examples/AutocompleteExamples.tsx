@@ -262,7 +262,7 @@ export function FindStudyDataset({ required = true, ...options }: AutocompleteTa
           controlSize={options.controlSize}
           readOnly={options.readOnly}
           loading={loading}
-          error={loading ? undefined : result.error}
+          errorText={loading ? undefined : result.error}
           loadingText="Looking up datasets…"
           emptyText="No saved datasets match. You can still enter a new name."
         >
@@ -300,5 +300,28 @@ export function FindStudyDataset({ required = true, ...options }: AutocompleteTa
       <p>{connected ? 'Sample catalog connected.' : 'Sample catalog disconnected.'}</p>
       <output>{feedback}</output>
     </form>
+  )
+}
+export function ControlledTopic() {
+  const [topic, setTopic] = useState('Keyboard workflows')
+  return (
+    <div style={layout}>
+      <Field label="Study topic">
+        <Autocomplete
+          items={topicSuggestions}
+          value={topic}
+          onValueChange={setTopic}
+        />
+      </Field>
+      <output>Topic: {topic || 'none'}</output>
+      <div style={actions}>
+        <Button
+          variant="ghost"
+          onClick={() => setTopic('')}
+        >
+          Clear topic
+        </Button>
+      </div>
+    </div>
   )
 }

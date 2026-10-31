@@ -284,7 +284,7 @@ test('required multiple selection validates the array and redirects native inval
 test('single and multiple state hooks stay type/mode scoped while custom composition uses the same owner', async () => {
   function Read() {
     expect(useCombobox()).toBe(null)
-    const multiple = useCombobox({ multiple: true }),
+    const multiple = useCombobox({ type: 'multiple' }),
       alias = useMultiSelect()
     expect(multiple?.value).toEqual(alias?.value)
     return <Button onClick={() => alias?.setValue(['b'])}>Choose Beta</Button>
@@ -292,7 +292,7 @@ test('single and multiple state hooks stay type/mode scoped while custom composi
   const { host } = await mount(
     <Field label="Projects">
       <Combobox
-        multiple
+        type="multiple"
         items={items}
       >
         <ComboboxTags />
