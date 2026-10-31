@@ -131,6 +131,76 @@ test('single toggles hydrate native Buttons, rove without selecting, activate wi
   expect(stops(host)).toHaveLength(1)
 })
 
+test('variant chooses the segmented treatment and its indicator', async () => {
+  const { host } = await mount(
+    <>
+      <ToggleGroup
+        aria-label="View"
+        variant="segmented"
+        defaultValue="b"
+        motion="off"
+      >
+        <ToggleGroupItem value="a">Alpha</ToggleGroupItem>
+        <ToggleGroupItem value="b">Beta</ToggleGroupItem>
+      </ToggleGroup>
+      <ToggleGroup
+        aria-label="Formatting"
+        defaultValue="bold"
+      >
+        <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+      </ToggleGroup>
+    </>
+  )
+  const [segmented, buttons] = Array.from(
+    host.querySelectorAll<HTMLDivElement>('[data-slot~="toggle-group"]')
+  )
+  expect(segmented).toHaveAttribute('data-variant', 'segmented')
+  expect(segmented).not.toHaveAttribute('variant')
+  expect(buttons).toHaveAttribute('data-variant', 'buttons')
+  expect(buttons.querySelector('[data-slot="toggle-group-indicator"]')).toBeNull()
+  await until(() => aligns(host))
+  await act(async () => userEvent.click(segmented.querySelector('button')!))
+  await until(() => aligns(host))
+})
+
+test('data-selected marks pressed items beside aria-pressed in single and multiple groups', async () => {
+  const { host } = await mount(
+    <>
+      <ToggleGroup
+        aria-label="Alignment"
+        defaultValue="b"
+      >
+        <ToggleGroupItem value="a">Alpha</ToggleGroupItem>
+        <ToggleGroupItem value="b">Beta</ToggleGroupItem>
+      </ToggleGroup>
+      <ToggleGroup
+        aria-label="Formatting"
+        type="multiple"
+        defaultValue={['bold']}
+      >
+        <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+        <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
+      </ToggleGroup>
+    </>
+  )
+  const [alpha, beta, bold, italic] = Array.from(host.querySelectorAll('button'))
+  for (const item of [alpha, beta, bold, italic]) expect(item).not.toHaveAttribute('data-state')
+  expect(beta).toHaveAttribute('data-selected', '')
+  expect(beta).toHaveAttribute('aria-pressed', 'true')
+  expect(alpha).not.toHaveAttribute('data-selected')
+  expect(alpha).toHaveAttribute('aria-pressed', 'false')
+  await act(async () => userEvent.click(alpha))
+  expect(alpha).toHaveAttribute('data-selected', '')
+  expect(beta).not.toHaveAttribute('data-selected')
+  await act(async () => userEvent.click(italic))
+  expect(bold).toHaveAttribute('data-selected', '')
+  expect(italic).toHaveAttribute('data-selected', '')
+  expect(italic).toHaveAttribute('aria-pressed', 'true')
+  await act(async () => userEvent.click(bold))
+  expect(bold).not.toHaveAttribute('data-selected')
+  expect(bold).toHaveAttribute('aria-pressed', 'false')
+})
+
 test('multiple selection, controlled refusal, consumer cancellation and disabled requests have one owner', async () => {
   const changes = vi.fn(),
     clicks = vi.fn()
@@ -324,7 +394,7 @@ test('the segmented indicator follows actual layout through borders, RTL, label 
     <ToggleGroup
       ref={ref}
       aria-label="View"
-      appearance="segmented"
+      variant="segmented"
       defaultValue="b"
       dir={dir}
       motion="off"
@@ -374,7 +444,7 @@ test('indicator springs use the follow profile, react to reduced motion and them
       <MotionProvider>
         <ToggleGroup
           aria-label="View"
-          appearance="segmented"
+          variant="segmented"
           defaultValue="a"
           motion={motion}
           parts={{ indicator: { style: { transform: 'rotate(1deg)' } } }}

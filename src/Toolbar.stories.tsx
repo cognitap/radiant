@@ -41,11 +41,7 @@ const meta = {
     loop: { control: 'boolean' },
     dir: { control: 'inline-radio', options: ['ltr', 'rtl'] }
   },
-  render: args => (
-    <MotionProvider>
-      <Editor {...args} />
-    </MotionProvider>
-  )
+  render: args => <Editor {...args} />
 } satisfies Meta<typeof Toolbar>
 export default meta
 type Story = StoryObj<typeof meta>
@@ -160,7 +156,7 @@ function DocumentActions(options: Options) {
             <DialogTitle>Reading settings</DialogTitle>
             <ToggleGroup
               aria-label="Reading density"
-              appearance="segmented"
+              variant="segmented"
               defaultValue="comfortable"
               onValueChange={setDensity}
             >

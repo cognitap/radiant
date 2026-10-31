@@ -1,8 +1,8 @@
 # Architecture
 
-How Radiant's fifty-nine families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+How Radiant's sixty families fit together. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are Sidebar/AppShell, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Deep imports are unsupported.
 
@@ -31,6 +31,7 @@ submit repeated named values. Their nameless JSON carrier emits accepted array c
 NumberField edits localized text and submits one raw numeric form value.
 Resizable composes Separator for adjacent panel sizing; applications persist layouts.
 AppShell places native landmarks around one Sidebar subtree, reusing Drawer for mobile navigation and optional spring layout.
+NavigationMenu composes Button and Link with one shared spring viewport, preserving navigation semantics.
 Tag composes Badge and Button for removal.
 OTPField keeps one native Input for editing, autofill and forms; its character slots are decorative.
 InputGroup shares a boundary around real Input or Textarea controls and their addons.
@@ -112,6 +113,8 @@ host, never a wrapper:
 
 | Family or part                                                                                      | Host                                                |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| AppShell / AppShellHeader / AppShellMain / Sidebar                                                  | div / header / main / nav                           |
+| AppShellSkipLink / SidebarTrigger / SidebarLabel / SidebarContent                                   | Link's a / Button's button / span / div             |
 | AspectRatio                                                                                         | `div`                                               |
 | Toolbar                                                                                             | `div`                                               |
 | ToggleGroup / ToggleGroupItem                                                                       | `div` / Button's `button`                           |

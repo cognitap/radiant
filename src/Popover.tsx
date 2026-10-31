@@ -103,7 +103,7 @@ export function PopoverRoot({
 }
 
 export type PopoverTriggerProps = WithoutToggle<ButtonProps>
-export type PopoverCloseProps = ButtonProps
+export type PopoverCloseProps = WithoutToggle<ButtonProps>
 export type PopoverRenderProps = ButtonRenderProps
 export type PopoverPortalProps = { children?: ReactNode }
 export type PopoverContentProps = Omit<ComponentProps<'div'>, 'style' | 'popover' | 'id'> & {
@@ -158,6 +158,10 @@ export function PopoverCloseRoot({
   return (
     <Button
       {...props}
+      pressed={undefined}
+      defaultPressed={undefined}
+      onPressedChange={undefined}
+      aria-pressed={undefined}
       popoverTarget={undefined}
       popoverTargetAction={undefined}
       data-slot={joinIds('popover-close', props['data-slot'])}

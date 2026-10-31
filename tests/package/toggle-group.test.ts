@@ -21,7 +21,7 @@ test('ToggleGroup server rendering composes real pressed Buttons, isolates hosts
       {
         'aria-label': 'View',
         defaultValue: 'b',
-        appearance: 'segmented',
+        variant: 'segmented',
         onValueChange: () => calls++
       },
       options
@@ -69,7 +69,7 @@ test('ToggleGroup rejects missing names, contradictory owners and multiple segme
     { 'aria-label': 'View', value: 'a', defaultValue: 'b' },
     { 'aria-label': 'View', type: 'multiple', value: 'a' },
     { 'aria-label': 'View', type: 'multiple', value: ['a', 'a'] },
-    { 'aria-label': 'View', type: 'multiple', value: ['a'], appearance: 'segmented' }
+    { 'aria-label': 'View', type: 'multiple', value: ['a'], variant: 'segmented' }
   ]
   for (const props of invalid) {
     // @ts-expect-error JavaScript callers also receive contract validation.

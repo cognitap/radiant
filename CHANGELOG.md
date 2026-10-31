@@ -4,9 +4,19 @@
 
 ## Unreleased
 
+- Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.
 - Keep Button motion cleanup safe after its owning iframe is removed.
 
-- Add Sidebar and AppShell with native landmarks, collapsible navigation, a responsive Drawer and application-owned layout persistence.
+- **Breaking:** MenuItem, MenuSubTrigger, and the ContextMenu and Menubar item and sub-trigger parts no longer accept `pressed`, `defaultPressed`, `onPressedChange` or `aria-pressed`, and ignore them at runtime. Before: `<MenuItem pressed>Bold</MenuItem>` rendered a `menuitem` with `aria-pressed="true"`. After: a type error; use `<MenuCheckboxItem checked onCheckedChange={...}>` for a toggled command.
+- **Breaking:** PopoverClose no longer accepts toggle props, matching DialogClose. Before: `<PopoverClose pressed />` rendered `aria-pressed`. After: a type error, ignored at runtime.
+- **Breaking:** ToggleGroup chooses its treatment with `variant`. Before: `<ToggleGroup appearance="segmented">`, `data-appearance`, `ToggleGroupAppearance`, `useToggleGroup().appearance`. After: `variant`, `data-variant`, `ToggleGroupVariant`, `useToggleGroup().variant`.
+- **Breaking:** ToggleGroupItem marks selection with a boolean `data-selected`. Before: `data-state="on"` / `"off"`. After: `data-selected` on pressed items. `aria-pressed` is unchanged.
+- **Breaking:** ToggleGroup and Toolbar use the shared `Orientation` type. Before: `ToggleGroupOrientation`, `ToolbarOrientation`. After: `Orientation`, with the same values.
+- Add `ContextMenuRenderProps` and `ToggleGroupRenderProps`. MenuCheckboxItem uses the shared `CheckedOwner` type.
+
+## 0.0.64
+
+- Add NavigationMenu with native navigation links, delayed hover disclosure and a shared spring viewport.
 
 ## 0.0.63
 

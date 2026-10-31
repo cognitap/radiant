@@ -9,24 +9,20 @@ import {
   useState,
   type ComponentProps
 } from 'react'
-import { Button, type ButtonProps } from './Button.js'
+import { Button, type ButtonProps, type ButtonRenderProps } from './Button.js'
 import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { isItemOpen, nextSelection, sameSelection, type Selection } from './internal/selection.js'
 import { useComposedRefs } from './react/useComposedRefs.js'
 import { useControllableState } from './react/useControllableState.js'
+import type { ValueOwner } from './react/useNativeOwner.js'
 import { CompositeFocusContext, useRovingFocus } from './react/useRovingFocus.js'
 import { useTransitionHost } from './motion/host.js'
-import type { ControlSize } from './presentation.js'
+import type { ControlSize, Orientation, PartStyle } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
-type Owner<Value> =
-  | { value: Value; defaultValue?: never }
-  | { value?: undefined; defaultValue?: Value }
-type PartStyle = { className?: string; style?: ThemeStyle }
-export type ToggleGroupOrientation = 'horizontal' | 'vertical'
-export type ToggleGroupAppearance = 'buttons' | 'segmented'
+export type ToggleGroupVariant = 'buttons' | 'segmented'
 export type ToggleGroupValue = Selection
 type Base = Omit<
   ComponentProps<'div'>,
@@ -34,7 +30,7 @@ type Base = Omit<
 > &
   AccessibleName & {
     style?: ThemeStyle
-    orientation?: ToggleGroupOrientation
+    orientation?: Orientation
     loop?: boolean
     disabled?: boolean
     controlSize?: ControlSize
@@ -44,14 +40,14 @@ type Base = Omit<
   }
 export type ToggleGroupProps = Base &
   (
-    | (Owner<string | null> & {
+    | (ValueOwner<string | null> & {
         type?: 'single'
-        appearance?: ToggleGroupAppearance
+        variant?: ToggleGroupVariant
         onValueChange?: (value: string | null) => void
       })
-    | (Owner<string[]> & {
+    | (ValueOwner<string[]> & {
         type: 'multiple'
-        appearance?: 'buttons'
+        variant?: 'buttons'
         onValueChange?: (value: string[]) => void
       })
   )
@@ -66,15 +62,16 @@ export type ToggleGroupItemProps = Omit<
   | 'role'
   | 'tabIndex'
 > & { value: string }
+export type ToggleGroupRenderProps = ButtonRenderProps
 export type ToggleGroupState = {
   type: 'single' | 'multiple'
   value: ToggleGroupValue
   controlled: boolean
   disabled: boolean
-  orientation: ToggleGroupOrientation
+  orientation: Orientation
   loop: boolean
   controlSize: ControlSize
-  appearance: ToggleGroupAppearance
+  variant: ToggleGroupVariant
   motion: 'inherit' | 'off'
   setItemPressed: (value: string, pressed: boolean) => void
 }
@@ -99,7 +96,7 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
     value,
     defaultValue,
     onValueChange: _onValueChange,
-    appearance = 'buttons',
+    variant = 'buttons',
     orientation = 'horizontal',
     loop = true,
     disabled = false,
@@ -117,7 +114,7 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
   if (type !== initialType)
     throw new TypeError('ToggleGroup cannot change type during a mount. Remount with a new key.')
   requireAccessibleName('ToggleGroup', props)
-  if (type === 'multiple' && appearance === 'segmented')
+  if (type === 'multiple' && variant === 'segmented')
     throw new TypeError('The segmented indicator requires single selection.')
   const {
     value: current,
@@ -164,7 +161,7 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
     orientation,
     loop,
     controlSize,
-    appearance,
+    variant,
     motion,
     setItemPressed(item, pressed) {
       if (!disabled) request(current => nextSelection(current, item, pressed))
@@ -183,12 +180,12 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
         className={cn(
           rootClass,
           orientation === 'vertical' ? 'flex-col items-stretch' : 'items-center',
-          appearance === 'segmented' && segmentedClass,
+          variant === 'segmented' && segmentedClass,
           className
         )}
         data-slot={joinIds('toggle-group', props['data-slot'])}
         data-type={type}
-        data-appearance={appearance}
+        data-variant={variant}
         data-orientation={orientation}
         data-control-size={controlSize}
         data-disabled={disabled ? '' : undefined}
@@ -205,7 +202,7 @@ export function ToggleGroup(allProps: ToggleGroupProps) {
           roving.onKeyDown(event)
         }}
       >
-        {appearance === 'segmented' ? (
+        {variant === 'segmented' ? (
           <Indicator
             value={current}
             motion={motion}
@@ -243,16 +240,16 @@ export function ToggleGroupItem({
       aria-pressed={undefined}
       onPressedChange={next => group.setItemPressed(value, next)}
       controlSize={controlSize ?? group.controlSize}
-      variant={group.appearance === 'segmented' ? 'ghost' : variant}
+      variant={group.variant === 'segmented' ? 'ghost' : variant}
       tone={tone}
       motion={group.motion === 'off' ? 'off' : props.motion}
       data-slot={joinIds('toggle-group-item', props['data-slot'])}
       data-value={value}
-      data-state={pressed ? 'on' : 'off'}
+      data-selected={pressed ? '' : undefined}
       data-disabled={unavailable ? '' : undefined}
       className={cn(
         'relative z-10',
-        group.appearance === 'segmented' &&
+        group.variant === 'segmented' &&
           'bg-transparent hover:bg-transparent active:bg-transparent disabled:bg-transparent aria-busy:bg-transparent [background-image:none] shadow-none inset-shadow-none [border-color:transparent]',
         className
       )}

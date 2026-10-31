@@ -14,7 +14,7 @@ import { MotionProvider } from './motion/react.js'
 
 type Options = Pick<
   ToggleGroupProps,
-  'orientation' | 'loop' | 'disabled' | 'controlSize' | 'motion' | 'appearance'
+  'orientation' | 'loop' | 'disabled' | 'controlSize' | 'motion' | 'variant'
 >
 const meta = {
   title: 'Components/ToggleGroup',
@@ -26,11 +26,11 @@ const meta = {
     disabled: false,
     controlSize: 'medium',
     motion: 'inherit',
-    appearance: 'buttons'
+    variant: 'buttons'
   },
   argTypes: {
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
-    appearance: { control: 'inline-radio', options: ['buttons', 'segmented'] },
+    variant: { control: 'inline-radio', options: ['buttons', 'segmented'] },
     controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] },
     motion: { control: 'inline-radio', options: ['inherit', 'off'] },
     loop: { control: 'boolean' },
@@ -44,38 +44,25 @@ const meta = {
 } satisfies Meta<typeof ToggleGroup>
 export default meta
 type Story = StoryObj<typeof meta>
-function Alignment(options: Options) {
-  const [alignment, setAlignment] = useState<string | null>('left')
+const fixed = { parameters: { controls: { disable: true } } }
+function AlignmentItems() {
   return (
-    <MotionProvider>
-      <div
-        style={{
-          display: 'grid',
-          gap: '1rem',
-          width: 'min(28rem, calc(100vw - 2rem))',
-          maxWidth: '100%'
-        }}
-      >
-        <ToggleGroup
-          {...options}
-          aria-label="Text alignment"
-          value={alignment}
-          onValueChange={setAlignment}
-        >
-          <ToggleGroupItem value="left">Left</ToggleGroupItem>
-          <ToggleGroupItem value="center">Center</ToggleGroupItem>
-          <ToggleGroupItem value="right">Right</ToggleGroupItem>
-        </ToggleGroup>
-        <p
-          style={{
-            margin: 0,
-            textAlign: alignment === 'center' ? 'center' : alignment === 'right' ? 'right' : 'left'
-          }}
-        >
-          Related actions share one tab stop. Choose where this paragraph starts.
-        </p>
-      </div>
-    </MotionProvider>
+    <>
+      <ToggleGroupItem value="left">Left</ToggleGroupItem>
+      <ToggleGroupItem value="center">Center</ToggleGroupItem>
+      <ToggleGroupItem value="right">Right</ToggleGroupItem>
+    </>
+  )
+}
+function Alignment(options: Options) {
+  return (
+    <ToggleGroup
+      {...options}
+      aria-label="Text alignment"
+      defaultValue="left"
+    >
+      <AlignmentItems />
+    </ToggleGroup>
   )
 }
 export const Default: Story = {
@@ -90,7 +77,86 @@ export const Default: Story = {
     )
   }
 }
-function Formatting({ appearance: _appearance, ...options }: Options) {
+function ControlledAlignment(options: Options) {
+  const [alignment, setAlignment] = useState<string | null>('left')
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gap: '1rem',
+        width: 'min(28rem, calc(100vw - 2rem))',
+        maxWidth: '100%'
+      }}
+    >
+      <ToggleGroup
+        {...options}
+        aria-label="Text alignment"
+        value={alignment}
+        onValueChange={setAlignment}
+      >
+        <AlignmentItems />
+      </ToggleGroup>
+      <p
+        style={{
+          margin: 0,
+          textAlign: alignment === 'center' ? 'center' : alignment === 'right' ? 'right' : 'left'
+        }}
+      >
+        Related actions share one tab stop. Choose where this paragraph starts.
+      </p>
+    </div>
+  )
+}
+export const Controlled: Story = {
+  render: args => <ControlledAlignment {...args} />,
+  play: async ({ canvasElement, userEvent }) => {
+    const canvas = within(canvasElement),
+      right = canvas.getByRole('button', { name: 'Right' })
+    await userEvent.click(right)
+    await expect(right).toHaveAttribute('aria-pressed', 'true')
+    await expect(canvas.getByText(/Choose where this paragraph starts/)).toHaveStyle({
+      textAlign: 'right'
+    })
+  }
+}
+export const SharedControlSizes: Story = {
+  ...fixed,
+  render: () => (
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}
+        >
+          <ToggleGroup
+            aria-label={`Text alignment, ${controlSize}`}
+            controlSize={controlSize}
+            defaultValue="left"
+          >
+            <AlignmentItems />
+          </ToggleGroup>
+          <ToggleGroup
+            aria-label={`Record view, ${controlSize}`}
+            controlSize={controlSize}
+            variant="segmented"
+            defaultValue="list"
+          >
+            <ToggleGroupItem value="list">List</ToggleGroupItem>
+            <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+          </ToggleGroup>
+          <Button
+            controlSize={controlSize}
+            variant="outline"
+            tone="neutral"
+          >
+            Reset
+          </Button>
+        </div>
+      ))}
+    </div>
+  )
+}
+function Formatting({ variant: _variant, ...options }: Options) {
   const [styles, setStyles] = useState(['bold'])
   return (
     <MotionProvider>
@@ -144,7 +210,7 @@ export const FormattingANote: Story = {
     )
   }
 }
-function Views({ appearance: _appearance, ...options }: Options) {
+function Views({ variant: _variant, ...options }: Options) {
   const [view, setView] = useState<string | null>('list')
   return (
     <MotionProvider>
@@ -159,7 +225,7 @@ function Views({ appearance: _appearance, ...options }: Options) {
         <ToggleGroup
           {...options}
           aria-label="Record view"
-          appearance="segmented"
+          variant="segmented"
           defaultValue="list"
           onValueChange={setView}
           parts={{ indicator: { style: { '--rad-toggle-group-indicator-radius': '999px' } } }}
@@ -197,7 +263,7 @@ function Views({ appearance: _appearance, ...options }: Options) {
   )
 }
 export const SwitchingRecordViews: Story = { render: args => <Views {...args} /> }
-function Filtering({ appearance: _appearance, ...options }: Options) {
+function Filtering({ variant: _variant, ...options }: Options) {
   const [filter, setFilter] = useState<string | null>('all'),
     [allow, setAllow] = useState(false),
     [request, setRequest] = useState('No filter requested.'),

@@ -66,11 +66,7 @@ const meta = {
     dir: { control: 'inline-radio', options: ['ltr', 'rtl'] },
     initialOpen: { control: 'boolean' }
   },
-  render: args => (
-    <MotionProvider>
-      <FileActions {...args} />
-    </MotionProvider>
-  )
+  render: args => <FileActions {...args} />
 } satisfies Meta<Options>
 export default meta
 type Story = StoryObj<typeof meta>
@@ -147,6 +143,50 @@ async function open(canvasElement: HTMLElement, name: string) {
 }
 export const Default: Story = {
   play: async ({ canvasElement }) => open(canvasElement, 'Project file')
+}
+function ControlledCard({ dir, initialOpen: _initialOpen, ...surface }: Options) {
+  const [menuOpen, setMenuOpen] = useState(false),
+    [pinned, setPinned] = useState(false)
+  return (
+    <div
+      style={layout}
+      dir={dir}
+    >
+      <ContextMenu
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+      >
+        <ContextMenuTrigger
+          aria-label="Roadmap card"
+          style={targetStyle}
+        >
+          <strong>Roadmap</strong>
+          <span>{pinned ? 'Pinned to the top' : 'Not pinned'}</span>
+        </ContextMenuTrigger>
+        <ContextMenuPortal>
+          <ContextMenuContent {...surface}>
+            <ContextMenuItem onSelect={() => setPinned(value => !value)}>
+              {pinned ? 'Unpin card' : 'Pin card'}
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenuPortal>
+      </ContextMenu>
+      <output aria-live="polite">Menu {menuOpen ? 'open' : 'closed'}.</output>
+    </div>
+  )
+}
+export const Controlled: Story = {
+  render: args => <ControlledCard {...args} />,
+  play: async ({ canvasElement, userEvent }) => {
+    const canvas = within(canvasElement),
+      target = canvas.getByRole('group', { name: 'Roadmap card' }),
+      rect = target.getBoundingClientRect()
+    fireEvent.contextMenu(target, { clientX: rect.left + 24, clientY: rect.top + 24 })
+    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Menu open.'))
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'Pin card' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Menu closed.')
+    await expect(target).toHaveTextContent('Pinned to the top')
+  }
 }
 function CanvasSettings({ dir, initialOpen, ...surface }: Options) {
   const label = useId(),

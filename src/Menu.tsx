@@ -29,7 +29,7 @@ import type { ButtonProps, ButtonRenderProps } from './Button.js'
 import type { DistributiveOmit, WithoutToggle } from './internal/types.js'
 import { Separator, type SeparatorProps } from './Separator.js'
 import { useControllableState } from './react/useControllableState.js'
-import type { ValueOwner } from './react/useNativeOwner.js'
+import type { CheckedOwner, ValueOwner } from './react/useNativeOwner.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 import type { PartStyle } from './presentation.js'
 import { cn } from './cn.js'
@@ -47,9 +47,8 @@ export type MenuContentProps = Omit<
   PopoverContentProps,
   'role' | 'aria-labelledby' | 'aria-orientation' | 'tabIndex' | 'initialFocusRef'
 >
-export type MenuItemProps = DistributiveOmit<
-  ButtonProps,
-  'role' | 'tabIndex' | 'aria-disabled' | 'onSelect'
+export type MenuItemProps = WithoutToggle<
+  DistributiveOmit<ButtonProps, 'role' | 'tabIndex' | 'aria-disabled' | 'onSelect'>
 > & {
   textValue?: string
   closeOnSelect?: boolean
@@ -438,15 +437,11 @@ export function MenuSeparator(props: MenuSeparatorProps) {
     />
   )
 }
-type CheckableProps = DistributiveOmit<
-  MenuItemProps,
-  'pressed' | 'defaultPressed' | 'onPressedChange' | 'aria-pressed' | 'aria-checked' | 'type'
-> & { parts?: { indicator?: PartStyle } }
+type CheckableProps = DistributiveOmit<MenuItemProps, 'aria-checked' | 'type'> & {
+  parts?: { indicator?: PartStyle }
+}
 export type MenuCheckboxItemProps = CheckableProps &
-  (
-    | { checked: boolean; defaultChecked?: never }
-    | { checked?: undefined; defaultChecked?: boolean }
-  ) & { onCheckedChange?: (checked: boolean) => void; indeterminate?: boolean }
+  CheckedOwner & { onCheckedChange?: (checked: boolean) => void; indeterminate?: boolean }
 const plainText = (children: ReactNode) =>
   typeof children === 'string' || typeof children === 'number' ? String(children) : undefined
 function CheckMark({ children, part }: { children?: ReactNode; part?: PartStyle }) {
@@ -484,10 +479,6 @@ export function MenuCheckboxItem({
     <MenuItemRoot
       {...props}
       type="button"
-      pressed={undefined}
-      defaultPressed={undefined}
-      onPressedChange={undefined}
-      aria-pressed={undefined}
       itemRole="menuitemcheckbox"
       checkedValue={indeterminate ? 'mixed' : state.value}
       closeOnSelect={closeOnSelect}
@@ -550,10 +541,6 @@ export function MenuRadioItem({
       {...props}
       type="button"
       value={value}
-      pressed={undefined}
-      defaultPressed={undefined}
-      onPressedChange={undefined}
-      aria-pressed={undefined}
       itemRole="menuitemradio"
       checkedValue={checked}
       closeOnSelect={closeOnSelect}
