@@ -6,6 +6,15 @@
 
 - Add Form with native validation, Field error mapping, asynchronous submission and optional form-library integration.
 
+- **Breaking:** CheckboxGroup builds on Field's group layout and takes `label` instead of `legend`. Before: `<CheckboxGroup legend="Channels" parts={{ legend: … }} />`. After: `<CheckboxGroup label="Channels" parts={{ label: … }} />`. Its root `data-slot` is `field checkbox-group`; match `[data-slot~="checkbox-group"]` instead of `fieldset`.
+- **Breaking:** CheckboxGroup `value` and `defaultValue` are `string[]`, matching `onValueChange`. Before: `readonly string[]` was accepted. After: pass a mutable array.
+- CheckboxGroup adds `required` and `requiredIndicator`. `required` blocks native form submission until at least one enabled option is checked.
+- A group Field's label is spaced from its options by the group gap, so RadioGroup's label no longer sits flush against the first radio.
+- PasswordInput's reveal button no longer sets `aria-pressed`; its Show and Hide label alone says what it does.
+- ButtonGroup keeps a caller's `data-slot` tokens after `button-group` instead of dropping them.
+- DrawerHandle accepts `aria-labelledby` as its accessible name, as well as `aria-label`.
+- **Breaking:** CommandTrigger's props are DialogTrigger's, so toggle props are rejected the same way. Before: an object holding `pressed: true` could be typed as `CommandTriggerProps`. After: a type error. Runtime is unchanged; the trigger already ignored them.
+
 ## 0.0.65
 
 - **Breaking:** MenuItem, MenuSubTrigger, and the ContextMenu and Menubar item and sub-trigger parts no longer accept `pressed`, `defaultPressed`, `onPressedChange` or `aria-pressed`, and ignore them at runtime. Before: `<MenuItem pressed>Bold</MenuItem>` rendered a `menuitem` with `aria-pressed="true"`. After: a type error; use `<MenuCheckboxItem checked onCheckedChange={...}>` for a toggled command.

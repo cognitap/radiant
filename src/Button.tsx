@@ -11,6 +11,7 @@ import { cn } from './cn.js'
 import { joinIds } from './internal/ids.js'
 import { composeAction } from './internal/events.js'
 import { useControllableState } from './react/useControllableState.js'
+import type { StateOwner } from './react/useNativeOwner.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type { ButtonVariant } from './presentation.js'
@@ -24,10 +25,7 @@ export type ButtonRenderProps = Omit<ComponentProps<'button'>, 'style'> & {
 }
 
 type PressedOwner =
-  | ((
-      | { pressed: boolean; defaultPressed?: never }
-      | { pressed?: undefined; defaultPressed?: boolean }
-    ) & {
+  | (StateOwner<'pressed', boolean> & {
       onPressedChange?: (pressed: boolean) => void
       'aria-pressed'?: never
     })

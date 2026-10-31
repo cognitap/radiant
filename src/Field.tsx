@@ -239,7 +239,11 @@ export function Field(props: FieldProps) {
     <>
       {layout === 'group' ? (
         <legend
-          className={cn(labelClass, parts?.label?.className)}
+          className={cn(
+            labelClass,
+            'mb-[var(--rad-fieldset-gap,var(--rad-spacing-group-gap,0.75rem))]',
+            parts?.label?.className
+          )}
           style={parts?.label?.style}
           data-slot="field-label"
           id={labelId}

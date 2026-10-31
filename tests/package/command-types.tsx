@@ -55,4 +55,7 @@ export const rootStyle: CommandProps = { items, onAction: () => {}, className: '
 export const legacyError: CommandProps = { items, onAction: () => {}, error: 'Unavailable' }
 // @ts-expect-error A disclosure trigger does not own pressed state.
 export const pressedTrigger: CommandTriggerProps = { pressed: true }
+const pressedProps = { pressed: true, children: 'Open commands' }
+// @ts-expect-error Spread props cannot carry pressed state either.
+export const pressedSpread: CommandTriggerProps = pressedProps
 export const renderProps: Pick<CommandRenderProps, 'children'> = { children: 'Open commands' }

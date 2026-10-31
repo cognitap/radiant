@@ -1,14 +1,18 @@
 /* oxlint-disable jsx-a11y/prefer-tag-over-role -- A passive action group uses a div; fieldset would introduce form grouping. */
 import type { ComponentProps } from 'react'
 import { cn } from './cn.js'
+import { joinIds } from './internal/ids.js'
+import type { Orientation } from './presentation.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 export type ButtonGroupProps = Omit<
   ComponentProps<'div'>,
   'style' | 'role' | 'aria-orientation'
 > & {
-  orientation?: 'horizontal' | 'vertical'
+  orientation?: Orientation
   style?: ThemeStyle
+  /** Additional composed identities; the button-group token is always retained. */
+  'data-slot'?: string
 }
 
 /** Joined presentation only: each real Button keeps its native focus and activation. */
@@ -20,7 +24,7 @@ export function ButtonGroup({ orientation = 'horizontal', className, ...props }:
       {...props}
       role="group"
       aria-orientation={undefined}
-      data-slot="button-group"
+      data-slot={joinIds('button-group', props['data-slot'])}
       data-orientation={orientation}
       className={cn(
         'isolate inline-flex max-w-full items-stretch align-middle [&>button]:relative [&>button]:rounded-none [&>button:focus-visible]:z-10',

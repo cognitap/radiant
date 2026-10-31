@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import {
+  Button,
   NavLink,
   NavLinkGroup,
   NavLinkGroupTrigger,
@@ -376,6 +377,90 @@ export function NavigateTeamSettings({
         <h3>{record.label}</h3>
         <p>{record.detail}</p>
       </section>
+    </div>
+  )
+}
+export function ControlSecuritySection() {
+  const id = useId(),
+    [open, setOpen] = useState(false)
+  return (
+    <div style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '20rem' }}>
+      <Button
+        variant="outline"
+        onClick={() => setOpen(!open)}
+      >
+        {open ? 'Collapse security' : 'Expand security'}
+      </Button>
+      <nav aria-label="Team settings">
+        <NavLink
+          href={`#${id}-profile`}
+          active
+        >
+          Profile
+        </NavLink>
+        <NavLinkGroup
+          open={open}
+          onOpenChange={setOpen}
+        >
+          <NavLinkGroupTrigger>Security</NavLinkGroupTrigger>
+          <NavLinkGroupContent>
+            <NavLink href={`#${id}-access`}>Access rules</NavLink>
+            <NavLink href={`#${id}-tokens`}>API tokens</NavLink>
+          </NavLinkGroupContent>
+        </NavLinkGroup>
+      </nav>
+    </div>
+  )
+}
+export function NavLinkSizeComparison() {
+  const id = useId()
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 12rem), 1fr))',
+        gap: '1.5rem'
+      }}
+    >
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'grid', gap: '1rem', alignContent: 'start', minWidth: 0 }}
+        >
+          <nav aria-label={`${controlSize} workspace`}>
+            <NavLink
+              href={`#${id}-${controlSize}-overview`}
+              controlSize={controlSize}
+              icon={<NavigationIcon />}
+              active
+            >
+              Overview
+            </NavLink>
+            <NavLinkGroup>
+              <NavLinkGroupTrigger
+                controlSize={controlSize}
+                icon={<NavigationIcon />}
+              >
+                Security
+              </NavLinkGroupTrigger>
+              <NavLinkGroupContent>
+                <NavLink
+                  href={`#${id}-${controlSize}-access`}
+                  controlSize={controlSize}
+                >
+                  Access rules
+                </NavLink>
+              </NavLinkGroupContent>
+            </NavLinkGroup>
+          </nav>
+          <Button
+            variant="outline"
+            controlSize={controlSize}
+          >
+            Save {controlSize}
+          </Button>
+        </div>
+      ))}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Checkbox, Field, OTPField, type OTPFieldProps } from '../../src/index.js'
+import { Button, Checkbox, Field, Input, OTPField, type OTPFieldProps } from '../../src/index.js'
 export type OTPTaskOptions = Pick<
   OTPFieldProps,
   'length' | 'mode' | 'disabled' | 'readOnly' | 'controlSize' | 'className' | 'style' | 'parts'
@@ -163,5 +163,62 @@ export function ReviewRecoveryCode({
       </div>
       <output aria-live="polite">{message}</output>
     </form>
+  )
+}
+export function ControlSignInCode() {
+  const [code, setCode] = useState('')
+  return (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: '32rem' }}>
+      <Field
+        label="Sign-in code"
+        description={code.length === 6 ? 'Code complete.' : `${6 - code.length} digits left.`}
+      >
+        <OTPField
+          name="code"
+          value={code}
+          onChange={event => setCode(event.target.value)}
+        />
+      </Field>
+      <div>
+        <Button
+          variant="outline"
+          onClick={() => setCode('')}
+        >
+          Clear code
+        </Button>
+      </div>
+    </div>
+  )
+}
+export function OTPFieldSizeComparison() {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))',
+        gap: '1.5rem'
+      }}
+    >
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ display: 'grid', gap: '1rem', alignContent: 'start', minWidth: 0 }}
+        >
+          <Field label={`${controlSize} email`}>
+            <Input
+              defaultValue="ada@example.com"
+              controlSize={controlSize}
+            />
+          </Field>
+          <Field label={`${controlSize} code`}>
+            <OTPField
+              length={4}
+              defaultValue="12"
+              controlSize={controlSize}
+            />
+          </Field>
+        </div>
+      ))}
+    </div>
   )
 }

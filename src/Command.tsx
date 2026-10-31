@@ -29,7 +29,6 @@ import {
   type ComboboxItemProps
 } from './Combobox.js'
 import type { StateOwner } from './react/useNativeOwner.js'
-import type { DistributiveOmit } from './internal/types.js'
 import { requireAccessibleName, type AccessibleName } from './internal/accessibleName.js'
 import { WithoutField } from './Field.js'
 import { Kbd, KbdGroup } from './Kbd.js'
@@ -53,10 +52,7 @@ export type CommandProps = DialogProps &
     controlSize?: ControlSize
   }
 export type CommandRenderProps = DialogRenderProps
-export type CommandTriggerProps = DistributiveOmit<
-  DialogTriggerProps,
-  'pressed' | 'defaultPressed' | 'onPressedChange'
->
+export type CommandTriggerProps = DialogTriggerProps
 export type CommandCloseProps = DialogTriggerProps
 export type CommandContentProps = DialogContentProps
 export type CommandTitleProps = DialogTitleProps
@@ -187,14 +183,7 @@ function CommandResults({
 }
 export function CommandTrigger(props: CommandTriggerProps) {
   useCommandContext()
-  return (
-    <DialogTrigger
-      {...props}
-      pressed={undefined}
-      defaultPressed={undefined}
-      onPressedChange={undefined}
-    />
-  )
+  return <DialogTrigger {...props} />
 }
 export function CommandClose(props: CommandCloseProps) {
   useCommandContext()

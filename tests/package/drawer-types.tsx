@@ -16,7 +16,7 @@ export const drawerTypes = (
     open={true}
     onOpenChange={open => void open}
     snapPoint={0.5}
-    onSnapPointChange={point => void point}
+    onSnapPointChange={snapPoint => void snapPoint}
     snapPoints={[0.5, 1]}
     modal={false}
   >
@@ -43,6 +43,7 @@ const conflicting: DrawerProps = { snapPoint: 1, defaultSnapPoint: 0.5 }
 const conflictingOpen: DrawerProps = { open: true, defaultOpen: false }
 // @ts-expect-error the handle needs an accessible name
 const unnamed = <DrawerHandle />
+const labelledHandle = <DrawerHandle aria-labelledby="drawer-title" />
 const toggle = (
   <DrawerHandle
     aria-label="Resize"
@@ -63,6 +64,7 @@ function State() {
 void conflicting
 void conflictingOpen
 void unnamed
+void labelledHandle
 void toggle
 void State
 

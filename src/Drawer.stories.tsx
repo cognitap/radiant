@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, waitFor, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { MotionProvider } from './motion/react.js'
 import {
+  ControlledFilters,
   ProjectSettings,
   ReportOutline,
   ReviewOrder,
@@ -28,11 +29,7 @@ const meta = {
     motion: { control: 'inline-radio', options: ['inherit', 'off'] },
     initialSize: { control: 'inline-radio', options: [0.5, 1] }
   },
-  render: args => (
-    <MotionProvider>
-      <ProjectSettings {...args} />
-    </MotionProvider>
-  )
+  render: args => <ProjectSettings {...args} />
 } satisfies Meta<DrawerOptions>
 export default meta
 type Story = StoryObj<typeof meta>
@@ -50,8 +47,25 @@ async function settled(canvasElement: HTMLElement, point = 1) {
   )
 }
 export const Default: Story = {}
+export const Controlled: Story = {
+  render: () => <ControlledFilters />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Open filters at half size' }))
+    await settled(canvasElement, 0.5)
+    expect(canvas.getByText('Filters are open at 50%.')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Resize filters' }))
+    await settled(canvasElement, 1)
+    expect(canvas.getByText('Filters are open at 100%.')).toBeVisible()
+  }
+}
 export const EditProjectSettings: Story = {
   args: { initialOpen: true },
+  render: args => (
+    <MotionProvider>
+      <ProjectSettings {...args} />
+    </MotionProvider>
+  ),
   play: async ({ canvasElement, args }) => {
     await settled(canvasElement, args.initialSize)
     expect(within(canvasElement).getByRole('dialog', { name: 'Project settings' })).toBeVisible()
