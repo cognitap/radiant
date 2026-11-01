@@ -465,6 +465,8 @@ export const componentRegistry = {
     labelGap: 'css',
     labelColor: 'css',
     labelSize: 'css',
+    descriptionColor: 'css',
+    descriptionSize: 'css',
     disabledBorder: 'css',
     disabledBackground: 'css',
     focusColor: 'css',

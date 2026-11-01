@@ -59,6 +59,9 @@ const rowClass =
 const labelClass =
   'min-w-0 break-words font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-[number:var(--rad-typography-roles-ui-label-weight,400)] [color:var(--rad-radio-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-radio-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
 
+const descriptionClass =
+  'ms-[calc(var(--rad-radio-size,var(--_rad-control-indicator-size))+var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem)))] min-w-0 break-words [color:var(--rad-radio-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] text-[length:var(--rad-radio-description-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] forced-colors:text-[CanvasText] font-[family-name:var(--rad-typography-roles-ui-supporting-family,system-ui,sans-serif)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-supporting-letter-spacing,0em)] font-[number:var(--rad-typography-roles-ui-supporting-weight,400)]'
+
 const optionsClass =
   'grid justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
 
@@ -98,12 +101,14 @@ export type RadioProps = Omit<
   CheckedOwner & {
     /** Convenience label. Without it, provide an accessible name on the native input. */
     label?: ReactNode
+    /** Supporting text under the label, linked to the input with aria-describedby. */
+    description?: ReactNode
     /** Submitted data, independent of standalone checked/defaultChecked ownership. */
     value: string
     controlSize?: ControlSize
     style?: ThemeStyle
     /** Presentation only. Root styling, native props and ref still reach the input. */
-    parts?: ControlParts
+    parts?: ControlParts & { description?: PartStyle }
   }
 
 function hasContent(value: ReactNode) {
@@ -166,6 +171,7 @@ export function Radio({
   controlSize: controlSizeProp,
   parts,
   label,
+  description,
   value,
   name,
   id,
@@ -182,6 +188,8 @@ export function Radio({
 }: RadioProps) {
   const group = useContext(RadioGroupContext)
   const labelled = hasContent(label)
+  const described = hasContent(description)
+  const descriptionId = `${useId()}-description`
   const standaloneControlled = useNativeOwner('Radio', checked, defaultChecked, !group)
   if (
     group &&
@@ -200,7 +208,7 @@ export function Radio({
     required,
     'aria-invalid': ariaInvalid,
     'aria-required': ariaRequired,
-    'aria-describedby': ariaDescribedBy
+    'aria-describedby': joinIds(described ? descriptionId : undefined, ariaDescribedBy)
   })
   const controlled = group ? group.controlled : standaloneControlled
   const selected = group ? group.value === value : checked
@@ -222,10 +230,10 @@ export function Radio({
       className={cn(
         'relative inline-grid shrink-0',
         indicatorPressClass,
-        !labelled && parts?.wrapper?.className
+        !labelled && !described && parts?.wrapper?.className
       )}
-      style={!labelled ? parts?.wrapper?.style : undefined}
-      data-slot={!labelled ? 'radio-wrapper' : undefined}
+      style={!labelled && !described ? parts?.wrapper?.style : undefined}
+      data-slot={!labelled && !described ? 'radio-wrapper' : undefined}
     >
       <input
         {...props}
@@ -257,13 +265,11 @@ export function Radio({
     </span>
   )
 
-  if (!labelled) return controlNode
-
-  return (
+  const row = labelled ? (
     <label
-      className={cn(rowClass, parts?.wrapper?.className)}
-      style={parts?.wrapper?.style}
-      data-slot="radio-wrapper"
+      className={cn(rowClass, !described && parts?.wrapper?.className)}
+      style={!described ? parts?.wrapper?.style : undefined}
+      data-slot={!described ? 'radio-wrapper' : undefined}
     >
       {controlNode}
       <span
@@ -274,5 +280,27 @@ export function Radio({
         {label}
       </span>
     </label>
+  ) : (
+    controlNode
+  )
+
+  if (!described) return row
+
+  return (
+    <div
+      className={cn('grid min-w-0 max-w-full justify-items-start', parts?.wrapper?.className)}
+      style={parts?.wrapper?.style}
+      data-slot="radio-wrapper"
+    >
+      {row}
+      <span
+        className={cn(descriptionClass, parts?.description?.className)}
+        style={parts?.description?.style}
+        data-slot="radio-description"
+        id={descriptionId}
+      >
+        {description}
+      </span>
+    </div>
   )
 }
