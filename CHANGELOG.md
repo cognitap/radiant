@@ -11,6 +11,7 @@
 - Add `steppers={false}` to NumberField to hide the increment and decrement buttons. Arrow and Page keys still step the value.
 - Set Collapsible and Accordion trigger and content padding separately with `--rad-collapsible-trigger-padding` and `--rad-collapsible-content-padding`. Both fall back to `--rad-collapsible-padding`, so existing themes look the same.
 - Keep a closed Popover, Tooltip or Dialog hidden even when application CSS sets its `display`.
+- Pressed Buttons and ToggleGroup items mix 20% of their text color into their fill, so the pressed state stays visible when `control.selected` matches a variant's rest look, as Radiant's outline buttons did. Set `components.button.selectedLayer` to change the amount.
 
 ## 0.0.73
 

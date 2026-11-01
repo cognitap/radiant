@@ -46,6 +46,8 @@ export const actionVariants = cva(
     'active:bg-[color-mix(in_oklch,var(--_btn-fill),var(--rad-button-state-color,var(--_btn-press-state))_var(--rad-button-press-layer,8%))]',
     'disabled:bg-(--_btn-fill) aria-busy:bg-(--_btn-fill)',
     // A theme's selected role restyles pressed toggles and current pages; unset, each keeps its variant.
+    // The role is drawn against a set's track and can match a variant's rest fill, so a pressed fill also leans toward its ink.
+    'aria-pressed:[--_btn-fill:color-mix(in_oklab,var(--_btn-selected-bg,var(--_btn-bg)),var(--_btn-selected-fg,var(--_btn-fg))_var(--rad-button-selected-layer,20%))]',
     'aria-pressed:[--_btn-selected-bg:var(--rad-control-selected-background)] aria-pressed:[--_btn-selected-fg:var(--rad-control-selected-foreground)] aria-pressed:[--_btn-selected-edge:var(--rad-control-selected-border-color)] aria-pressed:[--_btn-selected-shadow:var(--rad-control-selected-shadow)]',
     'aria-[current=page]:[--_btn-selected-bg:var(--rad-control-selected-background)] aria-[current=page]:[--_btn-selected-fg:var(--rad-control-selected-foreground)] aria-[current=page]:[--_btn-selected-edge:var(--rad-control-selected-border-color)] aria-[current=page]:[--_btn-selected-shadow:var(--rad-control-selected-shadow)]',
     'aria-[current=true]:[--_btn-selected-bg:var(--rad-control-selected-background)] aria-[current=true]:[--_btn-selected-fg:var(--rad-control-selected-foreground)] aria-[current=true]:[--_btn-selected-edge:var(--rad-control-selected-border-color)] aria-[current=true]:[--_btn-selected-shadow:var(--rad-control-selected-shadow)]',

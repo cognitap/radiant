@@ -130,6 +130,9 @@ Some defaults to know:
 - Input, Textarea, Checkbox, Switch and Radio outlines mix border and foreground colors, so
   controls have more contrast than passive dividers.
 - Disabled opacity applies once, not again on a disabled child.
+- A pressed Button mixes 20% of its text color into its fill, over
+  `control.selected` when the theme sets it. `components.button.selectedLayer`
+  sets the amount.
 
 Restyling must keep components usable. See
 [what customization must keep](architecture.md#what-customization-must-keep).
