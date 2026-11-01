@@ -541,6 +541,8 @@ export const componentRegistry = {
     borderColor: 'css',
     shadow: 'css',
     padding: 'css',
+    triggerPadding: 'css',
+    contentPadding: 'css',
     gap: 'css',
     contentColor: 'css',
     contentSize: 'css',

@@ -129,14 +129,20 @@ export const Motion: Story = {
 
 export const Customisation: Story = {
   render: () => {
-    const local: ThemeStyle = { '--rad-collapsible-padding': '1.5rem' }
+    const local: ThemeStyle = {
+      '--rad-collapsible-trigger-padding': '0.75rem',
+      '--rad-collapsible-content-padding': '2rem'
+    }
     return (
       <Collapsible
         defaultOpen
         style={local}
       >
-        <CollapsibleTrigger>Roomier panel</CollapsibleTrigger>
-        <CollapsibleContent>Local padding preserves the current theme.</CollapsibleContent>
+        <CollapsibleTrigger>Compact trigger, roomier content</CollapsibleTrigger>
+        <CollapsibleContent>
+          Trigger and content padding are set separately. Without them, both follow
+          --rad-collapsible-padding.
+        </CollapsibleContent>
       </Collapsible>
     )
   }

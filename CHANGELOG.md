@@ -9,6 +9,7 @@
 - Add `onValueChange(value: number)` to Slider, beside the native `onChange`.
 - Add `thumbWidth`, `thumbHeight` and `thumbBorderStyle` slider tokens. `thumbSize` still sizes both axes when they are unset, and the border style falls back to `control.borderStyle`.
 - Add `steppers={false}` to NumberField to hide the increment and decrement buttons. Arrow and Page keys still step the value.
+- Set Collapsible and Accordion trigger and content padding separately with `--rad-collapsible-trigger-padding` and `--rad-collapsible-content-padding`. Both fall back to `--rad-collapsible-padding`, so existing themes look the same.
 
 ## 0.0.73
 
