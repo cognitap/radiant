@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add `description` to Radio, shown under the label and linked to the input with `aria-describedby`, with a `parts.description` style.
+
 ## 0.0.73
 
 - Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.
