@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add FileInput, a native file input presented with a Button choose action and the chosen file names, which works in Field and native forms.
+
 ## 0.0.73
 
 - Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.

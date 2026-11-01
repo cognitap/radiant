@@ -586,6 +586,7 @@ export type {
 } from './MultiSelect.js'
 
 export { PasswordInput, type PasswordInputProps } from './PasswordInput.js'
+export { FileInput, type FileInputProps } from './FileInput.js'
 
 export {
   NavLink,

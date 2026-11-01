@@ -1123,5 +1123,6 @@ import './native-select-types.js'
 import './meter-types.js'
 
 import './password-input-types.js'
+import './file-input-types.js'
 import './nav-link-types.js'
 import './autocomplete-types.js'

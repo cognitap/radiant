@@ -107,6 +107,7 @@ export const componentRegistry = {
   },
   numberField: { gap: 'css' },
   passwordInput: { gap: 'css' },
+  fileInput: { gap: 'css' },
   meter: {
     height: 'css',
     radius: 'css',
