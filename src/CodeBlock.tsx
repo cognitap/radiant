@@ -155,7 +155,7 @@ export function CodeBlockHeader({ className, ...props }: CodeBlockHeaderProps) {
       className={cn(
         'flex min-w-0 flex-wrap items-center justify-between gap-[var(--rad-code-block-header-gap,0.75rem)] p-[var(--rad-code-block-header-padding,0.75rem)]',
         'font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-label-size,0.875rem)]',
-        'border-b-[length:var(--rad-code-block-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] [border-color:var(--rad-code-block-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
+        'border-0 border-b-[length:var(--rad-code-block-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] [border-color:var(--rad-code-block-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
         className
       )}
     />
