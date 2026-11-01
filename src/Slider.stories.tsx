@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Single-thumb numeric adjustment using a native range input. Field supplies its label, ID, help, error and inherited disabled state. Choose defaultValue or numeric value/onChange; read event.target.valueAsNumber. Keyboard, pointer input, bounds, step and form payloads stay native. Native reset restores uncontrolled defaults; controlled values reset in the form owner. Vertical sliders increase bottom to top. aria-valuetext supplies application-owned formatting. Root className/style/ref reach the input; components.slider styles the track and thumb independently. Range always has a value, so required and readOnly do not apply.'
+          'Single-thumb numeric adjustment using a native range input. Field supplies its label, ID, help, error and inherited disabled state. Choose defaultValue or numeric value with onValueChange(value: number); native onChange still receives the event. Keyboard, pointer input, bounds, step and form payloads stay native. Native reset restores uncontrolled defaults; controlled values reset in the form owner. Vertical sliders increase bottom to top. aria-valuetext supplies application-owned formatting. Root className/style/ref reach the input; components.slider styles the track and thumb independently. Range always has a value, so required and readOnly do not apply.'
       }
     }
   }
@@ -108,9 +108,11 @@ export const Customisation: Story = {
     style: {
       '--rad-slider-track-size': '.5rem',
       '--rad-slider-track-radius': '999px',
-      '--rad-slider-thumb-size': '1.75rem',
-      '--rad-slider-thumb-radius': '999px',
+      '--rad-slider-thumb-width': '.75rem',
+      '--rad-slider-thumb-height': '1.75rem',
+      '--rad-slider-thumb-radius': '.25rem',
       '--rad-slider-thumb-border-width': '2px',
+      '--rad-slider-thumb-border-style': 'double',
       '--rad-slider-thumb-shadow': '0 2px 4px #0003'
     }
   }

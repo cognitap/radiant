@@ -10,7 +10,9 @@ import type { ControlSize, Orientation } from './presentation.js'
 
 const sliderClass = [
   controlBorderClass,
-  '[--_rad-slider-thumb-size:var(--rad-slider-thumb-size,var(--_rad-control-indicator-size))]',
+  '[--_rad-slider-thumb-width:var(--rad-slider-thumb-width,var(--rad-slider-thumb-size,var(--_rad-control-indicator-size)))]',
+  '[--_rad-slider-thumb-height:var(--rad-slider-thumb-height,var(--rad-slider-thumb-size,var(--_rad-control-indicator-size)))]',
+  '[--_rad-slider-thumb-border-style:var(--rad-slider-thumb-border-style,var(--rad-control-border-style,solid))]',
   '[--_rad-slider-track-size:var(--rad-slider-track-size,0.375rem)]',
   '[--_rad-slider-track:var(--rad-slider-track-color,var(--rad-control-track-background,var(--_rad-control-border)))]',
   '[--_rad-slider-track-border:var(--rad-control-track-border-width,0px)]',
@@ -37,12 +39,13 @@ const sliderClass = [
   '[&::-webkit-slider-runnable-track]:[box-shadow:var(--rad-control-track-shadow,none)]',
   '[&::-webkit-slider-thumb]:appearance-none',
   '[&::-webkit-slider-thumb]:box-border',
-  '[&::-webkit-slider-thumb]:size-[var(--_rad-slider-thumb-size)]',
-  '[&::-webkit-slider-thumb]:[margin-block-start:calc((var(--_rad-slider-track-size)_-_var(--_rad-slider-thumb-size))/2_-_var(--_rad-slider-track-border))]',
+  '[&::-webkit-slider-thumb]:[inline-size:var(--_rad-slider-thumb-width)]',
+  '[&::-webkit-slider-thumb]:[block-size:var(--_rad-slider-thumb-height)]',
+  '[&::-webkit-slider-thumb]:[margin-block-start:calc((var(--_rad-slider-track-size)_-_var(--_rad-slider-thumb-height))/2_-_var(--_rad-slider-track-border))]',
   '[&::-webkit-slider-thumb]:rounded-[var(--rad-slider-thumb-radius,var(--rad-control-radius,0.5rem))]',
   '[&::-webkit-slider-thumb]:[corner-shape:var(--_rad-slider-corner-shape)]',
   '[&::-webkit-slider-thumb]:[border-width:var(--rad-slider-thumb-border-width,0px)]',
-  '[&::-webkit-slider-thumb]:border-solid',
+  '[&::-webkit-slider-thumb]:[border-style:var(--_rad-slider-thumb-border-style)]',
   '[&::-webkit-slider-thumb]:[border-color:var(--rad-slider-thumb-border-color,var(--_rad-slider-thumb))]',
   '[&::-webkit-slider-thumb]:bg-[var(--_rad-slider-thumb)]',
   '[&::-webkit-slider-thumb]:[box-shadow:var(--rad-slider-thumb-shadow,var(--rad-control-indicator-thumb-shadow,none))]',
@@ -55,11 +58,12 @@ const sliderClass = [
   '[&::-moz-range-track]:[border:var(--_rad-slider-track-border)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))]',
   '[&::-moz-range-track]:[box-shadow:var(--rad-control-track-shadow,none)]',
   '[&::-moz-range-thumb]:box-border',
-  '[&::-moz-range-thumb]:size-[var(--_rad-slider-thumb-size)]',
+  '[&::-moz-range-thumb]:[inline-size:var(--_rad-slider-thumb-width)]',
+  '[&::-moz-range-thumb]:[block-size:var(--_rad-slider-thumb-height)]',
   '[&::-moz-range-thumb]:rounded-[var(--rad-slider-thumb-radius,var(--rad-control-radius,0.5rem))]',
   '[&::-moz-range-thumb]:[corner-shape:var(--_rad-slider-corner-shape)]',
   '[&::-moz-range-thumb]:[border-width:var(--rad-slider-thumb-border-width,0px)]',
-  '[&::-moz-range-thumb]:border-solid',
+  '[&::-moz-range-thumb]:[border-style:var(--_rad-slider-thumb-border-style)]',
   '[&::-moz-range-thumb]:[border-color:var(--rad-slider-thumb-border-color,var(--_rad-slider-thumb))]',
   '[&::-moz-range-thumb]:bg-[var(--_rad-slider-thumb)]',
   '[&::-moz-range-thumb]:[box-shadow:var(--rad-slider-thumb-shadow,var(--rad-control-indicator-thumb-shadow,none))]',
@@ -91,6 +95,8 @@ export type SliderProps = Omit<
   | 'style'
 > &
   ValueOwner<number> & {
+    /** Receives the new number on each change. Native onChange still fires first. */
+    onValueChange?: (value: number) => void
     orientation?: Orientation
     controlSize?: ControlSize
     /** Native input styles, including slider track/thumb theme variables. */
@@ -102,6 +108,8 @@ export function Slider({
   className,
   controlSize = 'medium',
   orientation = 'horizontal',
+  onChange,
+  onValueChange,
   id,
   disabled,
   'aria-describedby': ariaDescribedBy,
@@ -129,6 +137,10 @@ export function Slider({
     <input
       {...nativeProps}
       {...control}
+      onChange={event => {
+        onChange?.(event)
+        onValueChange?.(event.currentTarget.valueAsNumber)
+      }}
       className={cn(
         sliderClass,
         controlMetrics({ controlSize }),

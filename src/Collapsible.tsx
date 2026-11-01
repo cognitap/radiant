@@ -41,7 +41,7 @@ const collapsibleTriggerVariants = cva([
   colorMotionClass,
   'font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-label-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-label-weight,550)] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,0em)]',
   'box-border flex w-full min-w-0 cursor-pointer break-words items-center gap-[var(--rad-collapsible-gap,var(--rad-surface-gap,1rem))]',
-  'list-none p-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))]',
+  'list-none p-[var(--rad-collapsible-trigger-padding,var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem)))]',
   '[&::-webkit-details-marker]:hidden [&::marker]:content-none',
   'rounded-[max(0px,calc(var(--rad-collapsible-radius,var(--rad-surface-radius,0.75rem))-var(--rad-collapsible-border-width,var(--rad-surface-border-width,1px))))]',
   '[corner-shape:var(--rad-collapsible-corner-shape,var(--rad-surface-corner-shape,round))] [details[open]>&]:rounded-b-none',
@@ -63,7 +63,7 @@ const collapsibleMarkerVariants = cva([
 
 const collapsibleContentVariants = cva([
   colorMotionClass,
-  'min-w-0 px-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))] pb-[var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem))]',
+  'min-w-0 px-[var(--rad-collapsible-content-padding,var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem)))] pb-[var(--rad-collapsible-content-padding,var(--rad-collapsible-padding,var(--rad-surface-padding,1.5rem)))]',
   '[color:var(--rad-collapsible-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
   'text-[length:var(--rad-collapsible-content-size,var(--rad-typography-roles-ui-body-size,0.875rem))]',
   'forced-colors:text-[CanvasText]'

@@ -1,8 +1,8 @@
 # Architecture
 
-Radiant's sixty-three families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
+Radiant's sixty-four families. See [props](https://github.com/cognitap/radiant-docs), [themes](theming.md) and [motion](motion.md).
 
-The families are Charts, Carousel, Form, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
+The families are Charts, Carousel, Form, AppShell (with Sidebar), NavigationMenu, Resizable, NumberField, CodeBlock (with InlineCode), EmptyState, Command, Autocomplete, NavLink, PasswordInput, FileInput, Meter, NativeSelect, InputGroup, Kbd, Button, ButtonGroup, ToggleGroup, Toolbar, Link, Field, Fieldset, Input, OTPField, Textarea, Select, Combobox, MultiSelect, TagsInput, Checkbox, CheckboxGroup, AspectRatio, ScrollArea, Switch, Slider, RadioGroup (with Radio),
 Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, Menu, ContextMenu, Menubar, Alert, Toast, Progress, Spinner, Skeleton, Separator, Badge, Tag, Avatar, Breadcrumb, Pagination, Table, Collapsible, Accordion, Tabs and Card. All ship in
 `@cognitap/radiant`. Charts uses the explicit `@cognitap/radiant/charts` entry; arbitrary deep imports are unsupported.
 
@@ -123,7 +123,7 @@ host, never a wrapper:
 | Progress / Spinner                                                                                  | `progress` / `svg`                                  |
 | Button / Link / NavLink                                                                             | `button` / `a`, including through `render`          |
 | Field                                                                                               | `div` in control layout; `fieldset` in group layout |
-| Input / PasswordInput / NumberField / Checkbox / Switch / Slider / Radio                            | Native `input`                                      |
+| Input / PasswordInput / FileInput / NumberField / Checkbox / Switch / Slider / Radio                | Native `input`                                      |
 | Textarea                                                                                            | Native `textarea`                                   |
 | NativeSelect                                                                                        | Native select                                       |
 | Select / SelectPortal / Combobox / ComboboxPortal / Autocomplete / AutocompletePortal               | None; state / portal                                |

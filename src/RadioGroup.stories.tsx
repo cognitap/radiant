@@ -67,7 +67,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A Field fieldset of native radios. The group owns name and selection, and generates a name when none is given; pass name when a form reads the value. Choose an initial defaultValue or controlled value, with null for no selection and an empty string for a real empty-valued option. Conflicting option ownership is rejected. controlSize supplies shared option metrics. Group className/style/native props/ref reach the fieldset (data-slot="field radio-group"); parts.options styles radio-group-options. Radio props/ref reach its input; parts.wrapper, parts.label and parts.indicator style its surrounding label or control span, label text and decorative dot.'
+          'A Field fieldset of native radios. The group owns name and selection, and generates a name when none is given; pass name when a form reads the value. Choose an initial defaultValue or controlled value, with null for no selection and an empty string for a real empty-valued option. Conflicting option ownership is rejected. controlSize supplies shared option metrics. Group className/style/native props/ref reach the fieldset (data-slot="field radio-group"); parts.options styles radio-group-options. Radio props/ref reach its input; description sits under the label and is linked to the input with aria-describedby. parts.wrapper, parts.label, parts.description and parts.indicator style its wrapper, label text, description and decorative dot.'
       }
     }
   }
@@ -151,6 +151,29 @@ export const WithField: Story = {
       <Radio
         label="Pro"
         value="pro"
+      />
+    </RadioGroup>
+  )
+}
+
+export const WithDescriptions: Story = {
+  args: { defaultValue: 'pro' },
+  render: args => (
+    <RadioGroup {...args}>
+      <Radio
+        label="Free"
+        description="One project and community support."
+        value="free"
+      />
+      <Radio
+        label="Pro"
+        description="Unlimited projects and priority support."
+        value="pro"
+      />
+      <Radio
+        label="Team"
+        description="Shared workspaces, roles and audit logs."
+        value="team"
       />
     </RadioGroup>
   )

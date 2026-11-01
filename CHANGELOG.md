@@ -4,6 +4,15 @@
 
 ## Unreleased
 
+- Add FileInput, a native file input presented with a Button choose action and the chosen file names, which works in Field and native forms.
+- Add `description` to Radio, shown under the label and linked to the input with `aria-describedby`, with a `parts.description` style.
+- Add `onValueChange(value: number)` to Slider, beside the native `onChange`.
+- Add `thumbWidth`, `thumbHeight` and `thumbBorderStyle` slider tokens. `thumbSize` still sizes both axes when they are unset, and the border style falls back to `control.borderStyle`.
+- Add `steppers={false}` to NumberField to hide the increment and decrement buttons. Arrow and Page keys still step the value.
+- Set Collapsible and Accordion trigger and content padding separately with `--rad-collapsible-trigger-padding` and `--rad-collapsible-content-padding`. Both fall back to `--rad-collapsible-padding`, so existing themes look the same.
+- Keep a closed Popover, Tooltip or Dialog hidden even when application CSS sets its `display`.
+- Pressed Buttons and ToggleGroup items mix 20% of their text color into their fill, so the pressed state stays visible when `control.selected` matches a variant's rest look, as Radiant's outline buttons did. Set `components.button.selectedLayer` to change the amount.
+
 ## 0.0.73
 
 - Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.

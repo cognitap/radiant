@@ -403,3 +403,112 @@ test('listening preferences submit and reset controlled and native defaults toge
   expect(chime.valueAsNumber).toBe(30)
   expect(host.querySelector('output')!.textContent).toBe('Preferences reset')
 })
+
+test('onValueChange gets the numeric value beside native onChange, and a controlled refusal keeps the owner value', async () => {
+  const native = vi.fn(),
+    values = vi.fn()
+  function Example({ accept }: { accept: boolean }) {
+    const [value, setValue] = useState(40)
+    return (
+      <Field label="Volume">
+        <Slider
+          value={value}
+          step={5}
+          onChange={() => native()}
+          onValueChange={next => {
+            values(next)
+            if (accept) setValue(next)
+          }}
+        />
+      </Field>
+    )
+  }
+  const view = await mount(<Example accept={false} />)
+  const input = view.host.querySelector('input')!
+  await act(async () => {
+    input.focus()
+    await userEvent.keyboard('{ArrowRight}')
+  })
+  expect(values).toHaveBeenLastCalledWith(45)
+  expect(native).toHaveBeenCalledOnce()
+  expect(input.valueAsNumber).toBe(40)
+  await view.render(<Example accept />)
+  await act(async () => {
+    await userEvent.keyboard('{ArrowRight}')
+  })
+  expect(values).toHaveBeenLastCalledWith(45)
+  expect(input.valueAsNumber).toBe(45)
+})
+
+test('uncontrolled onValueChange reports each keyboard step as a number', async () => {
+  const values = vi.fn()
+  const { host } = await mount(
+    <Field label="Volume">
+      <Slider
+        defaultValue={40}
+        step={5}
+        onValueChange={values}
+      />
+    </Field>
+  )
+  await act(async () => {
+    host.querySelector('input')!.focus()
+    await userEvent.keyboard('{ArrowRight}{End}')
+  })
+  expect(values.mock.calls).toEqual([[45], [100]])
+})
+
+test('thumb width, height and border style are themeable and fall back to thumb size and the surface border style', async () => {
+  const thumb = (input: HTMLInputElement) => {
+    const style = getComputedStyle(input)
+    const read = (name: string) => style.getPropertyValue(name).trim()
+    return {
+      width: read('--_rad-slider-thumb-width'),
+      height: read('--_rad-slider-thumb-height'),
+      borderStyle: read('--_rad-slider-thumb-border-style')
+    }
+  }
+  const themed = defineTheme({
+    id: 'slider-thumb-shape',
+    name: 'Slider thumb shape',
+    components: {
+      slider: {
+        thumbSize: '20px',
+        thumbWidth: '12px',
+        thumbHeight: '30px',
+        thumbBorderWidth: '2px',
+        thumbBorderStyle: 'dashed'
+      }
+    }
+  })
+  const view = await mount(
+    <>
+      <ThemeScope theme={themed}>
+        <Field label="Shaped">
+          <Slider defaultValue={40} />
+        </Field>
+      </ThemeScope>
+      <ThemeScope
+        theme={defineTheme({
+          id: 'slider-thumb-size-only',
+          name: 'Slider thumb size',
+          components: { slider: { thumbSize: '24px', thumbBorderWidth: '2px' } }
+        })}
+      >
+        <Field label="Square">
+          <Slider
+            defaultValue={40}
+            style={{ '--rad-control-border-style': 'dotted' }}
+          />
+        </Field>
+      </ThemeScope>
+    </>
+  )
+  const [shaped, square] = view.host.querySelectorAll('input')
+  expect(thumb(shaped).width).toBe('12px')
+  expect(thumb(shaped).height).toBe('30px')
+  expect(thumb(shaped).borderStyle).toBe('dashed')
+  expect(thumb(square).width).toBe('24px')
+  expect(thumb(square).height).toBe('24px')
+  expect(thumb(square).borderStyle).toBe('dotted')
+})

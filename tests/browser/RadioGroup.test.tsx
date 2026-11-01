@@ -102,3 +102,35 @@ test('a named group submits under that name', async () => {
   await act(async () => free.click())
   expect(new FormData(form).get('plan')).toBe('free')
 })
+
+test('a radio description is announced with the input, merged with caller ids and styled by its part', async () => {
+  const host = await mount(
+    <>
+      <p id="note">Billed yearly</p>
+      <RadioGroup label="Plan">
+        <Radio
+          label="Pro"
+          description="For growing teams"
+          aria-describedby="note"
+          parts={{ description: { className: 'italic' } }}
+          value="pro"
+        />
+        <Radio
+          label="Free"
+          value="free"
+        />
+      </RadioGroup>
+    </>
+  )
+  const [pro, free] = host.querySelectorAll('input')
+  const description = host.querySelector<HTMLElement>('[data-slot=radio-description]')!
+  expect(description.textContent).toBe('For growing teams')
+  expect(pro.getAttribute('aria-describedby')).toBe(`${description.id} note`)
+  expect(pro.labels?.[0].textContent).toBe('Pro')
+  expect(getComputedStyle(description).fontStyle).toBe('italic')
+  expect(free.hasAttribute('aria-describedby')).toBe(false)
+  expect(host.querySelectorAll('[data-slot=radio-description]')).toHaveLength(1)
+
+  await act(async () => pro.labels![0].click())
+  expect(pro.checked).toBe(true)
+})
