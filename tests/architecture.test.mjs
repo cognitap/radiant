@@ -103,3 +103,38 @@ test('static rendering entries do not depend on client bindings', () => {
     } else visit(filename)
   }
 })
+
+test('one-sided borders zero the other sides without the opt-in reset', () => {
+  const oneSide = /(?:^|\s)border-[trblsexy]-(?:\d|\[length:)/
+  const allSides =
+    /(?:^|\s)(?:border|border-\d|border-\[length:[^\s]*\]|\[border-width:[^\s]*\])(?=\s|$)/
+  for (const file of readdirSync(source, { recursive: true })) {
+    if (!/\.tsx?$/.test(file) || /\.(stories|test)\.tsx?$/.test(file)) continue
+    const filename = resolve(source, file)
+    const module = ts.createSourceFile(
+      filename,
+      readFileSync(filename, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    )
+    function visit(node) {
+      if (ts.isCallExpression(node) && node.expression.getText() === 'cn') {
+        const classes = []
+        node.arguments.forEach(function collect(arg) {
+          if (ts.isStringLiteralLike(arg)) classes.push(arg.text)
+          ts.forEachChild(arg, collect)
+        })
+        const text = classes.join(' ')
+        if (oneSide.test(text)) {
+          assert.match(
+            text,
+            allSides,
+            `${file}:${module.getLineAndCharacterOfPosition(node.pos).line + 1} sets one border side without zeroing the rest`
+          )
+        }
+      }
+      ts.forEachChild(node, visit)
+    }
+    visit(module)
+  }
+})

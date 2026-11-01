@@ -240,7 +240,7 @@ export function AppShellHeader({ className, ...props }: AppShellHeaderProps) {
           role="banner"
           data-slot={joinIds('app-shell-header', props['data-slot'])}
           className={cn(
-            'box-border flex min-w-0 items-center justify-between gap-4 min-h-[var(--rad-app-shell-header-min-height,3.5rem)] p-[var(--rad-app-shell-header-padding,1rem)] border-b-[length:var(--rad-app-shell-header-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-app-shell-header-border-color,var(--rad-color-border))] bg-[var(--rad-app-shell-header-background,var(--rad-color-surface))] text-[var(--rad-app-shell-header-color,var(--rad-color-foreground))]',
+            'box-border flex min-w-0 items-center justify-between gap-4 min-h-[var(--rad-app-shell-header-min-height,3.5rem)] p-[var(--rad-app-shell-header-padding,1rem)] border-0 border-b-[length:var(--rad-app-shell-header-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-app-shell-header-border-color,var(--rad-color-border))] bg-[var(--rad-app-shell-header-background,var(--rad-color-surface))] text-[var(--rad-app-shell-header-color,var(--rad-color-foreground))]',
             className
           )}
         />
@@ -374,7 +374,7 @@ export function Sidebar({
       data-collapsed={collapsed || undefined}
       data-state={shell.mobile ? (shell.open ? 'open' : 'closed') : collapsed ? 'closed' : 'open'}
       className={cn(
-        'relative box-border flex size-full min-h-0 min-w-0 flex-col overflow-auto gap-[var(--rad-sidebar-gap,1rem)] p-[var(--rad-sidebar-padding,0.5rem)] border-e-[length:var(--rad-sidebar-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-sidebar-border-color,var(--rad-color-border))] bg-[var(--rad-sidebar-background,var(--rad-color-surface))] text-[var(--rad-sidebar-color,var(--rad-color-foreground))]',
+        'relative box-border flex size-full min-h-0 min-w-0 flex-col overflow-auto gap-[var(--rad-sidebar-gap,1rem)] p-[var(--rad-sidebar-padding,0.5rem)] border-0 border-e-[length:var(--rad-sidebar-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-sidebar-border-color,var(--rad-color-border))] bg-[var(--rad-sidebar-background,var(--rad-color-surface))] text-[var(--rad-sidebar-color,var(--rad-color-foreground))]',
         className
       )}
     >

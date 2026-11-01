@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Fix thick borders on the unbordered sides of the AppShell header, Sidebar, CodeBlock header and table rows when the optional reset is not imported.
+
 ## 0.0.74
 
 - Add FileInput, a native file input presented with a Button choose action and the chosen file names, which works in Field and native forms.

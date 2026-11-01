@@ -85,7 +85,7 @@ export function TableRow({ className, ...props }: TableRowProps) {
       {...nativeProps}
       data-slot={joinIds('table-row', props['data-slot'])}
       className={cn(
-        'border-b-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-table-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
+        'border-0 border-b-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-table-border-color,var(--rad-color-border))] forced-colors:border-[CanvasText]',
         className
       )}
     />
