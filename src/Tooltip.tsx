@@ -200,7 +200,7 @@ export function TooltipContent({
         if (event.pointerType !== 'touch') tip.leave()
       })}
       className={cn(
-        'fixed right-auto bottom-auto m-0 box-border block min-w-0 w-max overflow-auto break-words text-start antialiased [&:not(:popover-open)]:hidden',
+        'fixed right-auto bottom-auto m-0 box-border block min-w-0 w-max overflow-auto break-words text-start antialiased [&:not(:popover-open)]:hidden!',
         'left-[var(--_rad-popover-left,0px)] top-[var(--_rad-popover-top,0px)] max-w-[min(var(--rad-tooltip-max-width,20rem),var(--_rad-popover-max-width,calc(100vw-1rem)))] max-h-[var(--_rad-popover-max-height,calc(100dvh-1rem))]',
         // Tooltips hold a line or two, so the overlay radius is capped before it turns them into pills.
         'p-[var(--rad-tooltip-padding,0.625rem)] rounded-[var(--rad-tooltip-radius,min(var(--rad-surface-radius,0.75rem),0.5rem))] [corner-shape:var(--rad-surface-corner-shape,round)]',

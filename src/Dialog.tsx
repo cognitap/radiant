@@ -22,7 +22,7 @@ const dialogVariants = cva([
   colorMotionClass,
   'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
   'box-border text-start antialiased',
-  '[&:not([open])]:hidden',
+  '[&:not([open])]:hidden!',
   'open:m-auto open:grid open:overflow-auto open:overscroll-contain',
   'open:max-h-[min(40rem,calc(100dvh-2rem))]',
   'open:w-[min(calc(100%-2rem),var(--rad-dialog-width,32rem))]',
