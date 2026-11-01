@@ -49,6 +49,8 @@ export type NumberFieldProps = DistributiveOmit<
     formatOptions?: NumberFieldFormatOptions
     incrementLabel?: string
     decrementLabel?: string
+    /** Show the increment and decrement buttons. Keyboard stepping works either way. */
+    steppers?: boolean
     parts?: { wrapper?: PartStyle; increment?: PartStyle; decrement?: PartStyle }
   }
 /** One editable Input host and one raw native form value. Label with Field or a native label. */
@@ -64,6 +66,7 @@ export function NumberField({
   formatOptions,
   incrementLabel = 'Increase value',
   decrementLabel = 'Decrease value',
+  steppers = true,
   controlSize = 'medium',
   parts,
   ref,
@@ -267,38 +270,40 @@ export function NumberField({
         value={state.value === null ? '' : String(state.value)}
         data-slot="number-field-value"
       />
-      <InputGroupAddon data-slot="number-field-actions">
-        {([-1, 1] as const).map(sign => (
-          <Button
-            key={sign}
-            type="button"
-            tabIndex={-1}
-            variant="ghost"
-            tone="neutral"
-            motion="off"
-            controlSize={controlSize}
-            aria-label={sign === 1 ? incrementLabel : decrementLabel}
-            aria-controls={control.id}
-            disabled={control.disabled || readOnly || (sign === 1 ? atMaximum : atMinimum)}
-            data-slot={sign === 1 ? 'number-field-increment' : 'number-field-decrement'}
-            className={cn(
-              inlineActionClass,
-              actionClass,
-              (sign === 1 ? parts?.increment : parts?.decrement)?.className
-            )}
-            style={(sign === 1 ? parts?.increment : parts?.decrement)?.style}
-            onPointerDown={event => {
-              if (event.button === 0) {
-                event.preventDefault()
-                input.current?.focus({ preventScroll: true })
-              }
-            }}
-            onClick={() => move(sign * step)}
-          >
-            {sign === 1 ? '+' : '−'}
-          </Button>
-        ))}
-      </InputGroupAddon>
+      {steppers && (
+        <InputGroupAddon data-slot="number-field-actions">
+          {([-1, 1] as const).map(sign => (
+            <Button
+              key={sign}
+              type="button"
+              tabIndex={-1}
+              variant="ghost"
+              tone="neutral"
+              motion="off"
+              controlSize={controlSize}
+              aria-label={sign === 1 ? incrementLabel : decrementLabel}
+              aria-controls={control.id}
+              disabled={control.disabled || readOnly || (sign === 1 ? atMaximum : atMinimum)}
+              data-slot={sign === 1 ? 'number-field-increment' : 'number-field-decrement'}
+              className={cn(
+                inlineActionClass,
+                actionClass,
+                (sign === 1 ? parts?.increment : parts?.decrement)?.className
+              )}
+              style={(sign === 1 ? parts?.increment : parts?.decrement)?.style}
+              onPointerDown={event => {
+                if (event.button === 0) {
+                  event.preventDefault()
+                  input.current?.focus({ preventScroll: true })
+                }
+              }}
+              onClick={() => move(sign * step)}
+            >
+              {sign === 1 ? '+' : '−'}
+            </Button>
+          ))}
+        </InputGroupAddon>
+      )}
     </InputGroup>
   )
 }

@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- Add `onValueChange(value: number)` to Slider, beside the native `onChange`.
+- Add `thumbWidth`, `thumbHeight` and `thumbBorderStyle` slider tokens. `thumbSize` still sizes both axes when they are unset, and the border style falls back to `control.borderStyle`.
+- Add `steppers={false}` to NumberField to hide the increment and decrement buttons. Arrow and Page keys still step the value.
+
 ## 0.0.73
 
 - Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.

@@ -12,6 +12,7 @@ export type NumberFieldTaskOptions = Pick<
   | 'parts'
   | 'incrementLabel'
   | 'decrementLabel'
+  | 'steppers'
 >
 const layout = { display: 'grid', gap: '1rem', width: 'min(30rem,100%)', minWidth: 0 }
 export function PlanParticipantSessions(options: NumberFieldTaskOptions) {

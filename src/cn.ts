@@ -84,6 +84,7 @@ export const cn: CnFunction = createCn({
         'h-(--rad-select-height)',
         'h-(--rad-switch-height)',
         'h-(--rad-slider-height)',
+        'h-(--rad-slider-thumb-height)',
         'h-(--rad-slider-length)'
       ],
       w: [
@@ -101,6 +102,7 @@ export const cn: CnFunction = createCn({
         'w-(--rad-popover-width)',
         'w-(--rad-switch-width)',
         'w-(--rad-slider-height)',
+        'w-(--rad-slider-thumb-width)',
         'w-(--rad-slider-length)'
       ],
       'min-w': ['min-w-(--rad-pagination-item-min-width)'],
@@ -271,6 +273,7 @@ export const cn: CnFunction = createCn({
       ],
       'border-style': [
         'border-(--rad-meter-border-style)',
+        'border-(--rad-slider-thumb-border-style)',
         'border-(--rad-native-select-border-style)',
         'border-(--rad-badge-border-style)',
         'border-(--rad-separator-style)',
