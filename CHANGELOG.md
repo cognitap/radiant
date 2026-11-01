@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Set Collapsible and Accordion trigger and content padding separately with `--rad-collapsible-trigger-padding` and `--rad-collapsible-content-padding`. Both fall back to `--rad-collapsible-padding`, so existing themes look the same.
+
 ## 0.0.73
 
 - Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.
