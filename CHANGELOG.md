@@ -6,6 +6,9 @@
 
 - Add FileInput, a native file input presented with a Button choose action and the chosen file names, which works in Field and native forms.
 - Add `description` to Radio, shown under the label and linked to the input with `aria-describedby`, with a `parts.description` style.
+- Add `onValueChange(value: number)` to Slider, beside the native `onChange`.
+- Add `thumbWidth`, `thumbHeight` and `thumbBorderStyle` slider tokens. `thumbSize` still sizes both axes when they are unset, and the border style falls back to `control.borderStyle`.
+- Add `steppers={false}` to NumberField to hide the increment and decrement buttons. Arrow and Page keys still step the value.
 
 ## 0.0.73
 

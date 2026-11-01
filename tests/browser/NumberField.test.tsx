@@ -420,3 +420,37 @@ test('shadow-root forms reset locally and narrow RTL forced-colors controls reta
     await act(async () => outside.remove())
   }
 })
+
+test('steppers={false} removes the buttons and keeps keyboard stepping, bounds and the form value', async () => {
+  const { host } = await mount(
+    <form>
+      <Amount
+        defaultValue={5}
+        min={0}
+        max={6}
+        steppers={false}
+      />
+    </form>
+  )
+  expect(host.querySelector('[data-slot~="number-field-increment"]')).toBeNull()
+  expect(host.querySelector('[data-slot~="number-field-decrement"]')).toBeNull()
+  expect(host.querySelector('button')).toBeNull()
+  const input = editor(host)
+  await act(async () => {
+    input.focus()
+    await userEvent.keyboard('{ArrowUp}{ArrowUp}')
+  })
+  expect(input.value).toBe('6')
+  expect(raw(host)).toBe('6')
+  await act(async () => userEvent.keyboard('{PageDown}'))
+  expect(input.value).toBe('0')
+})
+
+test('steppers render by default', async () => {
+  const { host } = await mount(
+    <form>
+      <Amount defaultValue={5} />
+    </form>
+  )
+  expect(host.querySelectorAll('button')).toHaveLength(2)
+})

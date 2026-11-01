@@ -30,7 +30,8 @@ const meta = {
     largeStep: 10,
     locale: 'en-US',
     incrementLabel: 'Increase value',
-    decrementLabel: 'Decrease value'
+    decrementLabel: 'Decrease value',
+    steppers: true
   },
   argTypes: {
     controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] },
@@ -48,6 +49,7 @@ const meta = {
     formatOptions: { control: 'object' },
     incrementLabel: { control: 'text' },
     decrementLabel: { control: 'text' },
+    steppers: { control: 'boolean' },
     className: { control: 'text' },
     style: { control: 'object' },
     parts: { control: 'object' }
@@ -79,11 +81,13 @@ function task({
   readOnly,
   className,
   style,
-  parts
+  parts,
+  steppers
 }: Args): NumberFieldTaskOptions {
-  return { controlSize, dir, disabled, readOnly, className, style, parts }
+  return { controlSize, dir, disabled, readOnly, className, style, parts, steppers }
 }
 export const Default: Story = {}
+export const WithoutSteppers: Story = { args: { steppers: false } }
 export const PlanningParticipantSessions: Story = {
   render: args => <PlanParticipantSessions {...task(args)} />,
   play: async ({ canvasElement }) => {

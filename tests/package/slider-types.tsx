@@ -16,6 +16,10 @@ const props: SliderProps = {
   onChange(event) {
     const value: number = event.target.valueAsNumber
     void value
+  },
+  onValueChange(value) {
+    const next: number = value
+    void next
   }
 }
 createElement(Field, { label: 'Volume' }, createElement(Slider, props))
@@ -23,7 +27,16 @@ createElement(Slider, { defaultValue: 0.5, min: 0, max: 1, step: 0.05 })
 defineTheme({
   id: 'slider',
   name: 'Slider',
-  components: { slider: { thumbSize: '1.5rem', trackSize: '.5rem', focusWidth: '3px' } }
+  components: {
+    slider: {
+      thumbSize: '1.5rem',
+      thumbWidth: '.75rem',
+      thumbHeight: '1.5rem',
+      thumbBorderStyle: 'dashed',
+      trackSize: '.5rem',
+      focusWidth: '3px'
+    }
+  }
 })
 // @ts-expect-error A slider has one numeric value owner.
 const mixed: SliderProps = { value: 0, defaultValue: 50 }

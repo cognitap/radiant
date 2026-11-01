@@ -22,7 +22,7 @@ export function SliderControlledExample() {
           max={100}
           step={10}
           aria-valuetext={`${brightness} percent`}
-          onChange={event => setBrightness(event.target.valueAsNumber)}
+          onValueChange={setBrightness}
         />
       </Field>
       <p style={{ margin: 0 }}>Brightness: {brightness}%</p>
