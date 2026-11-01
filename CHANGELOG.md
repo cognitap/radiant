@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Keep a closed Popover, Tooltip or Dialog hidden even when application CSS sets its `display`.
+
 ## 0.0.73
 
 - Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.

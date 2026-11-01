@@ -183,7 +183,7 @@ export function PopoverPortal({ children }: PopoverPortalProps) {
 
 const surfaceClass = [
   'fixed right-auto bottom-auto m-0 box-border min-w-0 overflow-auto overscroll-contain text-start antialiased',
-  '[&:not(:popover-open)]:hidden',
+  '[&:not(:popover-open)]:hidden!',
   'left-[var(--_rad-popover-left,0px)] top-[var(--_rad-popover-top,0px)] w-[var(--rad-popover-width,20rem)] max-w-[var(--_rad-popover-max-width,calc(100vw-1rem))] max-h-[var(--_rad-popover-max-height,calc(100dvh-1rem))]',
   'grid gap-[var(--rad-popover-gap,var(--rad-surface-gap,1rem))] p-[var(--rad-popover-padding,var(--rad-surface-padding,1.5rem))]',
   'rounded-[var(--rad-popover-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-popover-corner-shape,var(--rad-surface-corner-shape,round))]',
