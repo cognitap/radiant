@@ -210,6 +210,7 @@ export const componentRegistry = {
     stateColor: 'css',
     hoverLayer: 'css',
     pressLayer: 'css',
+    selectedLayer: 'css',
     hoverLift: 'css',
     pressScale: 'number',
     pressShift: 'css',

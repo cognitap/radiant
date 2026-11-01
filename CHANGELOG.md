@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Pressed Buttons and ToggleGroup items mix 20% of their text color into their fill, so the pressed state stays visible when `control.selected` matches a variant's rest look, as Radiant's outline buttons did. Set `components.button.selectedLayer` to change the amount.
+
 ## 0.0.73
 
 - Reserve ScrollArea's scrollbar space only on an axis that overflows, so short CodeBlocks and lists lose their empty 24px gutter.
