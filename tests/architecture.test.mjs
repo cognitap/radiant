@@ -144,3 +144,13 @@ test('one-sided borders zero the other sides without the opt-in reset', () => {
     visit(module)
   }
 })
+
+test('native scroll boxes draw the themed scrollbar unless they hide it', () => {
+  const scrolls = /(?:^|\s|:)overflow-(?:[xy]-)?(?:auto|scroll)(?=\s|$)/
+  for (const file of readdirSync(resolve(source, 'components'), { recursive: true })) {
+    if (!file.endsWith('.tsx') || /\.(stories|test)\.tsx$/.test(file)) continue
+    const text = readFileSync(resolve(source, 'components', file), 'utf8')
+    if (!scrolls.test(text) || text.includes('[scrollbar-width:none]')) continue
+    assert.match(text, /\bscrollbarClass\b/, `${file} scrolls natively without scrollbarClass`)
+  }
+})

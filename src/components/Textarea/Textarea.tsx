@@ -8,12 +8,14 @@ import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize } from '../../presentation.js'
 import { useFieldControl } from '../Field/Field.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 const textareaVariants = cva([
   controlBorderClass,
   'box-border w-full min-w-0',
   'min-h-[var(--rad-textarea-min-height,var(--_rad-control-height))]',
   'resize-y overflow-auto',
+  scrollbarClass,
   'py-[var(--rad-textarea-padding-block,calc((var(--_rad-control-height)_-_1lh)/2_-_var(--rad-textarea-border-width,var(--rad-control-border-width,1px))))]',
   'px-[var(--rad-textarea-padding,var(--_rad-control-padding))]',
   'font-[family-name:var(--rad-textarea-font-family,var(--rad-typography-roles-ui-body-family,system-ui,sans-serif))] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)]',

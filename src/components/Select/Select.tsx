@@ -26,6 +26,7 @@ import type { StateOwner, ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { selectContentClass, selectItemClass, selectTriggerClass } from './selectStyles.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 export type SelectOption = { value: string; disabled?: boolean } & (
   | { label: string; textValue?: string }
@@ -689,6 +690,7 @@ export function SelectViewport({ className, ...props }: SelectViewportProps) {
       data-slot="select-viewport"
       className={cn(
         'max-h-[calc(var(--_rad-select-max-height,100dvh)-0.5rem)] overflow-y-auto overscroll-contain',
+        scrollbarClass,
         className
       )}
     />

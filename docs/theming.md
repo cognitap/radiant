@@ -157,6 +157,10 @@ setting restyles every family that plays it. Overrides stay for exceptions.
 Tooltips keep their own background and cap their radius at `0.5rem`. Drawers
 round only the edges that face the page.
 
+Native scroll boxes, such as AppShell, overlays, listboxes, TableContainer and
+Textarea, draw ScrollArea's `thumbColor` at 45% on a clear track. Forced colors
+keep system scrollbars.
+
 The rules every family follows:
 
 - **Concentric corners.** A part inset in a rounded parent uses the parent's

@@ -14,6 +14,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
 import type { WithoutToggle } from '../../internal/types.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -24,6 +25,7 @@ const dialogVariants = cva([
   'box-border text-start antialiased',
   '[&:not([open])]:hidden!',
   'open:m-auto open:grid open:overflow-auto open:overscroll-contain',
+  scrollbarClass,
   'open:max-h-[min(40rem,calc(100dvh-2rem))]',
   'open:w-[min(calc(100%-2rem),var(--rad-dialog-width,32rem))]',
   'open:gap-[var(--rad-dialog-gap,var(--rad-surface-gap,1rem))]',
