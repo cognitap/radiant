@@ -32,6 +32,7 @@ import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { useTransitionHost } from '../../motion/host.js'
 import type { ControlSize } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 export type NavigationMenuItemConfig = { value: string; disabled?: boolean }
 export type NavigationMenuProps = Omit<
@@ -629,6 +630,7 @@ export function NavigationMenuViewport({
       data-motion={motion}
       className={cn(
         'absolute top-full left-0 z-20 box-border overflow-auto [translate:var(--_rad-indicator-x,var(--_rad-indicator-target-x,0px))_var(--_rad-indicator-y,var(--_rad-indicator-target-y,0px))] w-[var(--_rad-indicator-width,var(--_rad-indicator-target-width,max-content))] h-[var(--_rad-indicator-height,var(--_rad-indicator-target-height,auto))] max-h-[min(70vh,30rem)] rounded-[var(--rad-navigation-menu-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] [border-width:var(--rad-navigation-menu-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-navigation-menu-border-color,var(--rad-color-border))] bg-[var(--rad-navigation-menu-background,var(--rad-surface-overlay-background,var(--rad-color-surface)))] text-[var(--rad-navigation-menu-color,var(--rad-color-foreground))] [box-shadow:var(--rad-navigation-menu-shadow,var(--rad-surface-overlay-shadow,0_24px_64px_-16px_rgb(0_0_0/0.3)))] [backdrop-filter:var(--rad-surface-backdrop-filter,none)] [hidden]:hidden forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:border-[CanvasText]',
+        scrollbarClass,
         className
       )}
       onPointerEnter={composeAction(onPointerEnter, event => {

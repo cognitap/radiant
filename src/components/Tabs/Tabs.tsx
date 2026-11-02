@@ -11,6 +11,7 @@ import {
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
 import { cn } from '../../cn.js'
 import { controlMetrics } from '../shared/controlStyles.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
@@ -265,7 +266,7 @@ export function TabsList({ ref, className, onFocus, onBlur, onKeyDown, ...props 
         role="tablist"
         tabIndex={undefined}
         aria-orientation={tabs.orientation}
-        className={cn(listClass, className)}
+        className={cn(listClass, scrollbarClass, className)}
         data-slot={joinIds('tabs-list', props['data-slot'])}
         data-orientation={tabs.orientation}
         onFocus={event => {

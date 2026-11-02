@@ -28,6 +28,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import { useDrawerHost } from '../../motion/host.js'
 import type { PartStyle } from '../../presentation.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 export type { DrawerSide } from '../../internal/drawer.js'
 export type DrawerProps = DialogProps &
@@ -151,6 +152,7 @@ const surface = [
 ]
 const viewport = [
   'absolute inset-y-0 left-0 grid content-start box-border min-w-0 min-h-0 overflow-auto overscroll-contain max-w-full max-h-full',
+  scrollbarClass,
   'w-[var(--_rad-drawer-visible,100%)]',
   '[[data-physical-side=left]>&]:left-auto [[data-physical-side=left]>&]:right-0',
   '[[data-physical-side=top]>&]:inset-x-0 [[data-physical-side=top]>&]:top-auto [[data-physical-side=top]>&]:bottom-0 [[data-physical-side=top]>&]:w-full [[data-physical-side=top]>&]:h-[var(--_rad-drawer-visible,100%)]',

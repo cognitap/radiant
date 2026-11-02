@@ -41,6 +41,7 @@ import { useComboboxPopup } from '../../react/useComboboxPopup.js'
 import type { StateOwner, ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 export type ComboboxOption = { value: string; disabled?: boolean } & (
   | { label: string; textValue?: string }
@@ -998,6 +999,7 @@ function ComboboxResults({
         data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-listbox', !!box.command)}
         className={cn(
           'min-h-0 overflow-y-auto overscroll-contain',
+          scrollbarClass,
           !inline && 'max-h-[calc(var(--_rad-combobox-max-height,100dvh)-0.5rem)]'
         )}
       >
