@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.76
+
 - Draw the Sidebar and AppShellMain scrollbars as a ScrollArea-colored thumb on a clear track, instead of the browser's default gutter.
 
 ## 0.0.75
