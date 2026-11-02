@@ -60,8 +60,9 @@ structure and verification workflow.
 
 Package verification installs the archive with npm, so it needs network access.
 A Husky pre-commit hook formats staged files with Oxfmt.
-[CI](.github/workflows/ci.yml) runs `pnpm check` for pull requests and pushes
-to `main`.
+[CI](.github/workflows/ci.yml) runs `pnpm check` and
+`pnpm test:browser --project=browser-platform` in parallel for pull requests and
+pushes to `main`.
 See [verification conventions](docs/testing.md) for focused browser runs,
 failure artifacts, and the evidence required by migration issues.
 

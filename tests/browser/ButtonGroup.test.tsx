@@ -136,13 +136,18 @@ test('a single Button and dynamic membership receive complete outer corners', as
       <Button>Only</Button>
     </ButtonGroup>
   )
-  const style = getComputedStyle(buttons(host)[0]!)
-  expect([
-    style.borderTopLeftRadius,
-    style.borderTopRightRadius,
-    style.borderBottomLeftRadius,
-    style.borderBottomRightRadius
-  ]).toEqual(['9px', '9px', '9px', '9px'])
+  const button = buttons(host)[0]!
+  await expect
+    .poll(() => {
+      const style = getComputedStyle(button)
+      return [
+        style.borderTopLeftRadius,
+        style.borderTopRightRadius,
+        style.borderBottomLeftRadius,
+        style.borderBottomRightRadius
+      ]
+    })
+    .toEqual(['9px', '9px', '9px', '9px'])
 })
 test('joined submit and reset actions retain native form submission and reset', async () => {
   const { host } = await mount(<EditProjectActions />)

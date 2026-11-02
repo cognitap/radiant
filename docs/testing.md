@@ -17,8 +17,9 @@ pnpm test:browser
 ```
 
 They need no running Storybook. Every story renders and fails on any axe
-violation. `pnpm check` runs Radiant light and Radiant dark. `pnpm test:browser`
-runs every preset. New stories join that matrix automatically.
+violation. `pnpm check` runs Radiant light and Radiant dark. CI runs browser
+behavior beside it. `pnpm test:browser` runs every preset. New stories join
+that matrix automatically.
 There are no retries and no rule exclusions.
 
 Focus a run on one project or test:
@@ -34,7 +35,8 @@ behavior. Motion waits poll for the settled element. Mid-flight spring values
 stay in the pure `createSpring` test.
 
 Results go to `output/browser/`: `junit.xml` and failure screenshots in
-`attachments/`. CI uploads them as **browser-results** and keeps them for 14 days.
+`attachments/`. CI keeps the Storybook run as **browser-results** and the
+behavior run as **browser-behavior** for 14 days.
 
 ## Where a test belongs
 
