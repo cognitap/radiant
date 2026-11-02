@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.77
+
 - Draw the native scrollbars of Dialog, Drawer, Popover, Tooltip, Toast, NavigationMenu, Select, Combobox, TableContainer, Textarea, Tabs lists and the Carousel viewport like AppShell's: ScrollArea's thumb color on a clear track.
 
 ## 0.0.76
