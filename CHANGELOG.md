@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.75
+
 - Fix thick borders on the unbordered sides of the AppShell header, Sidebar, CodeBlock header and table rows when the optional reset is not imported.
 
 ## 0.0.74
