@@ -218,6 +218,32 @@ test('visually hidden content scrolls with Main and Sidebar instead of escaping 
     expect(text.getBoundingClientRect().top).toBeCloseTo(before - 1000, 0)
   }
 })
+test('Main and Sidebar draw the ScrollArea thumb color on a clear track, and forced colors restore system scrollbars', async () => {
+  const { host } = await mount(
+    <AppShell
+      style={{
+        height: '400px',
+        width: '600px',
+        ['--rad-scroll-area-thumb-color' as string]: 'rgb(200, 0, 0)'
+      }}
+    >
+      <AppShellHeader>Workspace</AppShellHeader>
+      <Sidebar label="Projects">Projects</Sidebar>
+      <AppShellMain>Main</AppShellMain>
+    </AppShell>
+  )
+  const probe = host.appendChild(document.createElement('span'))
+  probe.style.color = 'color-mix(in oklch, rgb(200, 0, 0) 45%, transparent)'
+  const thumb = getComputedStyle(probe).color
+  for (const box of [main(host), nav(host)])
+    expect(getComputedStyle(box).scrollbarColor).toBe(`${thumb} rgba(0, 0, 0, 0)`)
+  await commands.emulatePreferences({ forcedColors: 'active' })
+  try {
+    expect(getComputedStyle(nav(host)).scrollbarColor).toBe('auto')
+  } finally {
+    await commands.emulatePreferences({ forcedColors: 'none' })
+  }
+})
 test('the actual skip Link moves native focus to Main without adding Main to ordinary Tab order', async () => {
   const original = location.href,
     { host } = await mount(<Sample />)

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Draw the Sidebar and AppShellMain scrollbars as a ScrollArea-colored thumb on a clear track, instead of the browser's default gutter.
+
 ## 0.0.75
 
 - Fix thick borders on the unbordered sides of the AppShell header, Sidebar, CodeBlock header and table rows when the optional reset is not imported.
