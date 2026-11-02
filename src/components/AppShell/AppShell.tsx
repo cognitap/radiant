@@ -19,6 +19,7 @@ import {
   type ComposedLinkProps,
   type ComposedLinkRenderProps
 } from '../shared/composedLink.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 import { Drawer, DrawerContent, DrawerTitle, DrawerClose, useDrawer } from '../Drawer/Drawer.js'
 import { cn } from '../../cn.js'
 import { joinIds } from '../../internal/ids.js'
@@ -271,6 +272,7 @@ export function AppShellMain({ className, ...props }: AppShellMainProps) {
           data-slot={joinIds('app-shell-main', props['data-slot'])}
           className={cn(
             'relative box-border size-full min-h-0 min-w-0 overflow-auto p-[var(--rad-app-shell-main-padding,var(--rad-surface-padding,1.5rem))] focus-visible:[outline-style:var(--rad-focus-style,solid)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-[-2px]',
+            scrollbarClass,
             className
           )}
         />
@@ -375,6 +377,7 @@ export function Sidebar({
       data-state={shell.mobile ? (shell.open ? 'open' : 'closed') : collapsed ? 'closed' : 'open'}
       className={cn(
         'relative box-border flex size-full min-h-0 min-w-0 flex-col overflow-auto gap-[var(--rad-sidebar-gap,1rem)] p-[var(--rad-sidebar-padding,0.5rem)] border-0 border-e-[length:var(--rad-sidebar-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-sidebar-border-color,var(--rad-color-border))] bg-[var(--rad-sidebar-background,var(--rad-color-surface))] text-[var(--rad-sidebar-color,var(--rad-color-foreground))]',
+        scrollbarClass,
         className
       )}
     >
