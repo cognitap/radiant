@@ -64,7 +64,7 @@ Theme off and reduced motion suppress springs and CSS lift/shift. Pending and
 disabled cancel a held press; re-enabling never replays it. Native activation,
 focus and Escape stay immediate; `preventDefault` cancels compression.
 Caller scale utilities and inline scale/scale transitions opt out. Other scale
-styles need `motion="off"`. Explore [Link](../src/Link.stories.tsx) and [Button](../src/Button.stories.tsx).
+styles need `motion="off"`. Explore [Link](../src/components/Link/Link.stories.tsx) and [Button](../src/components/Button/Button.stories.tsx).
 
 ## Hooks and functions
 

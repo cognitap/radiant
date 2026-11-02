@@ -59,6 +59,7 @@ import { themes } from '@cognitap/radiant/examples'
 const require = createRequire(import.meta.url)
 const root = new URL('../../', pathToFileURL(require.resolve('@cognitap/radiant')))
 const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'))
+const modulePath = (name: string) => (name === 'index' ? name : `components/${name}/${name}`)
 
 test('public JavaScript imports and renders on the server', () => {
   const html = renderToStaticMarkup(createElement(Button, { disabled: true }, 'Save'))
@@ -970,7 +971,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'ThemeScope'
   ]) {
     assert.match(
-      readFileSync(new URL(`dist/library/${file}.js`, root), 'utf8'),
+      readFileSync(new URL(`dist/library/${modulePath(file)}.js`, root), 'utf8'),
       /^['"]use client['"]/
     )
   }
@@ -989,7 +990,7 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'AspectRatio'
   ]) {
     assert.doesNotMatch(
-      readFileSync(new URL(`dist/library/${file}.js`, root), 'utf8'),
+      readFileSync(new URL(`dist/library/${modulePath(file)}.js`, root), 'utf8'),
       /^['"]use client['"]/
     )
   }
@@ -998,21 +999,21 @@ test('installed modules retain their declared client boundaries and CSS side eff
 
 test('exports reject implementation deep imports', async () => {
   for (const path of [
-    'src/Button.tsx',
-    'src/Field.tsx',
-    'src/Input.tsx',
-    'src/Textarea.tsx',
-    'src/Checkbox.tsx',
-    'src/Switch.tsx',
-    'src/Tabs.tsx',
-    'src/RadioGroup.tsx',
-    'src/Dialog.tsx',
-    'src/AlertDialog.tsx',
-    'src/Popover.tsx',
-    'src/Collapsible.tsx',
-    'src/Accordion.tsx',
-    'src/Card.tsx',
-    'dist/library/Button.js',
+    'src/components/Button/Button.tsx',
+    'src/components/Field/Field.tsx',
+    'src/components/Input/Input.tsx',
+    'src/components/Textarea/Textarea.tsx',
+    'src/components/Checkbox/Checkbox.tsx',
+    'src/components/Switch/Switch.tsx',
+    'src/components/Tabs/Tabs.tsx',
+    'src/components/RadioGroup/RadioGroup.tsx',
+    'src/components/Dialog/Dialog.tsx',
+    'src/components/AlertDialog/AlertDialog.tsx',
+    'src/components/Popover/Popover.tsx',
+    'src/components/Collapsible/Collapsible.tsx',
+    'src/components/Accordion/Accordion.tsx',
+    'src/components/Card/Card.tsx',
+    'dist/library/components/Button/Button.js',
     'cn',
     'package.json'
   ]) {

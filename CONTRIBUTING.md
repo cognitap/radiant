@@ -67,7 +67,7 @@ failure artifacts, and the evidence required by migration issues.
 
 Modules must stay free of import-time side effects, and client-dependent modules
 need their own `use client` directive. Add `*.stories.tsx` next to each component,
-like `src/Button.stories.tsx`. Storybook's Accessibility panel runs axe checks on
+like `src/components/Button/Button.stories.tsx`. Storybook's Accessibility panel runs axe checks on
 every story, but automated checks cover only part of WCAG, so still test keyboard,
 focus, and screen reader behavior by hand.
 

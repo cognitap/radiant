@@ -1,5 +1,5 @@
 import type { VariantProps } from 'class-variance-authority'
-import type { actionVariants } from './actionStyles.js'
+import type { actionVariants } from './components/shared/actionStyles.js'
 import type { ThemeStyle } from './themes/defineTheme.js'
 
 type ActionPresentation = VariantProps<typeof actionVariants>

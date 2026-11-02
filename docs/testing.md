@@ -24,7 +24,7 @@ There are no retries and no rule exclusions.
 Focus a run on one project or test:
 
 ```sh
-pnpm test:browser --project=storybook-glass-dark src/Checkbox.stories.tsx
+pnpm test:browser --project=storybook-glass-dark src/components/Checkbox/Checkbox.stories.tsx
 pnpm test:browser --project=browser-platform -t StrictMode
 ```
 

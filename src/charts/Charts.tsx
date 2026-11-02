@@ -16,8 +16,8 @@ import {
   type ChartSeries,
   type ChartKind
 } from '../internal/charts.js'
-import { ScrollArea } from '../ScrollArea.js'
-import { Tooltip, TooltipTrigger, TooltipContent } from '../Tooltip.js'
+import { ScrollArea } from '../components/ScrollArea/ScrollArea.js'
+import { Tooltip, TooltipTrigger, TooltipContent } from '../components/Tooltip/Tooltip.js'
 import {
   Table,
   TableCaption,
@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableCell,
   type TableProps
-} from '../Table.js'
+} from '../components/Table/Table.js'
 import type { PartStyle } from '../presentation.js'
 import type { ThemeStyle } from '../themes/defineTheme.js'
 export type { ChartDatum, ChartSeries } from '../internal/charts.js'

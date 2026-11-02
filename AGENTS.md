@@ -3,10 +3,12 @@
 Before changing public props, themes, named parts or composition examples, read
 [the architecture doc](docs/architecture.md) for the shared contract and canonical sources.
 
-Use PascalCase for component names and component filenames: `Button` in
-`Button.tsx`. Match that casing in colocated stories and tests:
-`Button.stories.tsx` and `Button.test.tsx`. Update imports and public
-exports to match the filename exactly, including case.
+Each component gets its own folder under `src/components/`, named in
+PascalCase: `Button` lives in `src/components/Button/Button.tsx`, with its
+stories beside it in `Button.stories.tsx`. A helper only one component uses
+goes in that folder; styles several components share go in
+`src/components/shared/`. Update imports and public exports to match the
+filename exactly, including case.
 
 Style components with Tailwind utilities. Keep complete class names in source
 so Tailwind can detect them. Define shared token roles in `src/themes/tokens.ts`
