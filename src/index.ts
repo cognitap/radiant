@@ -8,7 +8,7 @@ export {
   MenuSub,
   MenuSubTrigger,
   MenuSubContent
-} from './Menu.js'
+} from './components/Menu/Menu.js'
 export type {
   MenuGroupProps,
   MenuLabelProps,
@@ -19,14 +19,14 @@ export type {
   MenuSubProps,
   MenuSubTriggerProps,
   MenuSubContentProps
-} from './Menu.js'
+} from './components/Menu/Menu.js'
 export {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
   HoverCardPortal,
   useHoverCard
-} from './HoverCard.js'
+} from './components/HoverCard/HoverCard.js'
 export type {
   HoverCardProps,
   HoverCardState,
@@ -34,7 +34,7 @@ export type {
   HoverCardContentProps,
   HoverCardPortalProps,
   HoverCardRenderProps
-} from './HoverCard.js'
+} from './components/HoverCard/HoverCard.js'
 export {
   Combobox,
   ComboboxInput,
@@ -45,7 +45,7 @@ export {
   ComboboxItem,
   ComboboxStatus,
   useCombobox
-} from './Combobox.js'
+} from './components/Combobox/Combobox.js'
 export type {
   ComboboxProps,
   ComboboxOption,
@@ -57,9 +57,15 @@ export type {
   ComboboxItemProps,
   ComboboxStatusProps,
   ComboboxRenderProps
-} from './Combobox.js'
-export { Button } from './Button.js'
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipPortal, useTooltip } from './Tooltip.js'
+} from './components/Combobox/Combobox.js'
+export { Button } from './components/Button/Button.js'
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipPortal,
+  useTooltip
+} from './components/Tooltip/Tooltip.js'
 export type {
   TooltipProps,
   TooltipState,
@@ -67,7 +73,7 @@ export type {
   TooltipContentProps,
   TooltipPortalProps,
   TooltipRenderProps
-} from './Tooltip.js'
+} from './components/Tooltip/Tooltip.js'
 export {
   Popover,
   PopoverTrigger,
@@ -75,7 +81,7 @@ export {
   PopoverClose,
   PopoverPortal,
   usePopover
-} from './Popover.js'
+} from './components/Popover/Popover.js'
 export type {
   PopoverProps,
   PopoverState,
@@ -86,18 +92,23 @@ export type {
   PopoverRenderProps,
   PopoverSide,
   PopoverAlign
-} from './Popover.js'
-export { Link } from './Link.js'
-export type { LinkProps, LinkRenderProps, LinkVariant } from './Link.js'
-export { Field, useField } from './Field.js'
-export type { FieldControlProps, FieldLayout, FieldProps, FieldState } from './Field.js'
-export { Input } from './Input.js'
-export type { InputProps } from './Input.js'
-export { Textarea } from './Textarea.js'
-export type { TextareaProps } from './Textarea.js'
-export { Slider } from './Slider.js'
-export type { SliderProps } from './Slider.js'
-export { Tabs, TabsList, TabsTrigger, TabsContent, useTabs } from './Tabs.js'
+} from './components/Popover/Popover.js'
+export { Link } from './components/Link/Link.js'
+export type { LinkProps, LinkRenderProps, LinkVariant } from './components/Link/Link.js'
+export { Field, useField } from './components/Field/Field.js'
+export type {
+  FieldControlProps,
+  FieldLayout,
+  FieldProps,
+  FieldState
+} from './components/Field/Field.js'
+export { Input } from './components/Input/Input.js'
+export type { InputProps } from './components/Input/Input.js'
+export { Textarea } from './components/Textarea/Textarea.js'
+export type { TextareaProps } from './components/Textarea/Textarea.js'
+export { Slider } from './components/Slider/Slider.js'
+export type { SliderProps } from './components/Slider/Slider.js'
+export { Tabs, TabsList, TabsTrigger, TabsContent, useTabs } from './components/Tabs/Tabs.js'
 export type {
   TabsProps,
   TabsListProps,
@@ -105,7 +116,7 @@ export type {
   TabsContentProps,
   TabsRenderProps,
   TabsState
-} from './Tabs.js'
+} from './components/Tabs/Tabs.js'
 export {
   Select,
   SelectTrigger,
@@ -119,7 +130,7 @@ export {
   SelectItemIndicator,
   SelectGroup,
   useSelect
-} from './Select.js'
+} from './components/Select/Select.js'
 export type {
   SelectProps,
   SelectOption,
@@ -133,13 +144,13 @@ export type {
   SelectItemProps,
   SelectItemTextProps,
   SelectGroupProps
-} from './Select.js'
-export { Switch } from './Switch.js'
-export type { SwitchProps } from './Switch.js'
-export { Checkbox } from './Checkbox.js'
-export type { CheckboxProps } from './Checkbox.js'
-export { Radio, RadioGroup } from './RadioGroup.js'
-export type { RadioGroupProps, RadioProps } from './RadioGroup.js'
+} from './components/Select/Select.js'
+export { Switch } from './components/Switch/Switch.js'
+export type { SwitchProps } from './components/Switch/Switch.js'
+export { Checkbox } from './components/Checkbox/Checkbox.js'
+export type { CheckboxProps } from './components/Checkbox/Checkbox.js'
+export { Radio, RadioGroup } from './components/RadioGroup/RadioGroup.js'
+export type { RadioGroupProps, RadioProps } from './components/RadioGroup/RadioGroup.js'
 export {
   Dialog,
   DialogClose,
@@ -148,7 +159,7 @@ export {
   DialogTitle,
   DialogTrigger,
   useDialog
-} from './Dialog.js'
+} from './components/Dialog/Dialog.js'
 export type {
   DialogCloseProps,
   DialogContentProps,
@@ -158,7 +169,7 @@ export type {
   DialogState,
   DialogTitleProps,
   DialogTriggerProps
-} from './Dialog.js'
+} from './components/Dialog/Dialog.js'
 export {
   AlertDialog,
   AlertDialogTrigger,
@@ -168,7 +179,7 @@ export {
   AlertDialogAction,
   AlertDialogCancel,
   useAlertDialog
-} from './AlertDialog.js'
+} from './components/AlertDialog/AlertDialog.js'
 export type {
   AlertDialogProps,
   AlertDialogState,
@@ -179,26 +190,26 @@ export type {
   AlertDialogDescriptionProps,
   AlertDialogActionProps,
   AlertDialogCancelProps
-} from './AlertDialog.js'
+} from './components/AlertDialog/AlertDialog.js'
 export {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
   useCollapsible
-} from './Collapsible.js'
+} from './components/Collapsible/Collapsible.js'
 export type {
   CollapsibleContentProps,
   CollapsibleProps,
   CollapsibleState,
   CollapsibleTriggerProps
-} from './Collapsible.js'
+} from './components/Collapsible/Collapsible.js'
 export {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
   useAccordion
-} from './Accordion.js'
+} from './components/Accordion/Accordion.js'
 export type {
   AccordionContentProps,
   AccordionHeadingLevel,
@@ -207,8 +218,15 @@ export type {
   AccordionState,
   AccordionTriggerProps,
   AccordionValue
-} from './Accordion.js'
-export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './Card.js'
+} from './components/Accordion/Accordion.js'
+export {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from './components/Card/Card.js'
 export type {
   CardContentProps,
   CardDescriptionProps,
@@ -217,7 +235,7 @@ export type {
   CardHeadingLevel,
   CardProps,
   CardTitleProps
-} from './Card.js'
+} from './components/Card/Card.js'
 export { defineTheme, updateThemeAppearance, defaultTheme } from './themes/index.js'
 export type {
   SharedTokens,
@@ -231,9 +249,9 @@ export type {
   ThemeStyle,
   ThemeTokens
 } from './themes/index.js'
-export { ThemeScope } from './ThemeScope.js'
-export type { ThemeScopeProps } from './ThemeScope.js'
-export type { ButtonProps, ButtonRenderProps, ButtonVariant } from './Button.js'
+export { ThemeScope } from './components/ThemeScope/ThemeScope.js'
+export type { ThemeScopeProps } from './components/ThemeScope/ThemeScope.js'
+export type { ButtonProps, ButtonRenderProps, ButtonVariant } from './components/Button/Button.js'
 export { generateTypography, typographyPresets, typographyRoles } from './typography/index.js'
 export type * from './typography/types.js'
 export type { ControlSize, Orientation, Tone } from './presentation.js'
@@ -282,7 +300,14 @@ export type {
   SpringParameters
 } from './motion/config.js'
 
-export { Menu, MenuTrigger, MenuContent, MenuItem, MenuPortal, useMenu } from './Menu.js'
+export {
+  Menu,
+  MenuTrigger,
+  MenuContent,
+  MenuItem,
+  MenuPortal,
+  useMenu
+} from './components/Menu/Menu.js'
 export type {
   MenuProps,
   MenuState,
@@ -291,9 +316,9 @@ export type {
   MenuItemProps,
   MenuPortalProps,
   MenuRenderProps
-} from './Menu.js'
+} from './components/Menu/Menu.js'
 
-export { Alert, AlertTitle, AlertDescription } from './Alert.js'
+export { Alert, AlertTitle, AlertDescription } from './components/Alert/Alert.js'
 export type {
   AlertProps,
   AlertTitleProps,
@@ -301,7 +326,7 @@ export type {
   AlertAnnouncement,
   AlertTone,
   AlertHeadingLevel
-} from './Alert.js'
+} from './components/Alert/Alert.js'
 
 export {
   ToastProvider,
@@ -312,7 +337,7 @@ export {
   ToastAction,
   ToastClose,
   useToast
-} from './Toast.js'
+} from './components/Toast/Toast.js'
 export type {
   ToastProviderProps,
   ToastViewportProps,
@@ -324,25 +349,25 @@ export type {
   ToastActionProps,
   ToastCloseProps,
   ToastRenderProps
-} from './Toast.js'
+} from './components/Toast/Toast.js'
 
-export { Progress } from './Progress.js'
-export type { ProgressProps } from './Progress.js'
+export { Progress } from './components/Progress/Progress.js'
+export type { ProgressProps } from './components/Progress/Progress.js'
 
-export { Spinner } from './Spinner.js'
-export type { SpinnerProps } from './Spinner.js'
+export { Spinner } from './components/Spinner/Spinner.js'
+export type { SpinnerProps } from './components/Spinner/Spinner.js'
 
-export { Skeleton } from './Skeleton.js'
-export type { SkeletonProps } from './Skeleton.js'
+export { Skeleton } from './components/Skeleton/Skeleton.js'
+export type { SkeletonProps } from './components/Skeleton/Skeleton.js'
 
-export { Separator } from './Separator.js'
-export type { SeparatorProps } from './Separator.js'
+export { Separator } from './components/Separator/Separator.js'
+export type { SeparatorProps } from './components/Separator/Separator.js'
 
-export { Badge } from './Badge.js'
-export type { BadgeProps, BadgeTone } from './Badge.js'
+export { Badge } from './components/Badge/Badge.js'
+export type { BadgeProps, BadgeTone } from './components/Badge/Badge.js'
 
-export { Avatar } from './Avatar.js'
-export type { AvatarProps } from './Avatar.js'
+export { Avatar } from './components/Avatar/Avatar.js'
+export type { AvatarProps } from './components/Avatar/Avatar.js'
 
 export {
   Breadcrumb,
@@ -351,7 +376,7 @@ export {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator
-} from './Breadcrumb.js'
+} from './components/Breadcrumb/Breadcrumb.js'
 export type {
   BreadcrumbProps,
   BreadcrumbListProps,
@@ -360,7 +385,7 @@ export type {
   BreadcrumbLinkRenderProps,
   BreadcrumbPageProps,
   BreadcrumbSeparatorProps
-} from './Breadcrumb.js'
+} from './components/Breadcrumb/Breadcrumb.js'
 
 export {
   Pagination,
@@ -372,7 +397,7 @@ export {
   PaginationButton,
   PaginationUnavailable,
   PaginationEllipsis
-} from './Pagination.js'
+} from './components/Pagination/Pagination.js'
 export type {
   PaginationProps,
   PaginationListProps,
@@ -384,7 +409,7 @@ export type {
   PaginationUnavailableProps,
   PaginationEllipsisProps,
   PaginationLinkRenderProps
-} from './Pagination.js'
+} from './components/Pagination/Pagination.js'
 
 export {
   Table,
@@ -396,7 +421,7 @@ export {
   TableHeader,
   TableCell,
   TableContainer
-} from './Table.js'
+} from './components/Table/Table.js'
 export type {
   TableProps,
   TableCaptionProps,
@@ -407,25 +432,33 @@ export type {
   TableHeaderProps,
   TableCellProps,
   TableContainerProps
-} from './Table.js'
+} from './components/Table/Table.js'
 
-export { Fieldset } from './Fieldset.js'
-export type { FieldsetProps } from './Fieldset.js'
+export { Fieldset } from './components/Fieldset/Fieldset.js'
+export type { FieldsetProps } from './components/Fieldset/Fieldset.js'
 
-export { CheckboxGroup } from './CheckboxGroup.js'
+export { CheckboxGroup } from './components/CheckboxGroup/CheckboxGroup.js'
 export type {
   CheckboxGroupProps,
   CheckboxGroupItem,
   CheckboxGroupSelectAll
-} from './CheckboxGroup.js'
+} from './components/CheckboxGroup/CheckboxGroup.js'
 
-export { AspectRatio } from './AspectRatio.js'
-export type { AspectRatioProps } from './AspectRatio.js'
+export { AspectRatio } from './components/AspectRatio/AspectRatio.js'
+export type { AspectRatioProps } from './components/AspectRatio/AspectRatio.js'
 
-export { ScrollArea } from './ScrollArea.js'
-export type { ScrollAreaProps, ScrollAreaOrientation, ScrollAreaVisibility } from './ScrollArea.js'
+export { ScrollArea } from './components/ScrollArea/ScrollArea.js'
+export type {
+  ScrollAreaProps,
+  ScrollAreaOrientation,
+  ScrollAreaVisibility
+} from './components/ScrollArea/ScrollArea.js'
 
-export { ToggleGroup, ToggleGroupItem, useToggleGroup } from './ToggleGroup.js'
+export {
+  ToggleGroup,
+  ToggleGroupItem,
+  useToggleGroup
+} from './components/ToggleGroup/ToggleGroup.js'
 export type {
   ToggleGroupProps,
   ToggleGroupItemProps,
@@ -433,10 +466,10 @@ export type {
   ToggleGroupValue,
   ToggleGroupVariant,
   ToggleGroupRenderProps
-} from './ToggleGroup.js'
+} from './components/ToggleGroup/ToggleGroup.js'
 
-export { Toolbar } from './Toolbar.js'
-export type { ToolbarProps } from './Toolbar.js'
+export { Toolbar } from './components/Toolbar/Toolbar.js'
+export type { ToolbarProps } from './components/Toolbar/Toolbar.js'
 
 export {
   ContextMenu,
@@ -454,7 +487,7 @@ export {
   ContextMenuSubTrigger,
   ContextMenuSubContent,
   useContextMenu
-} from './ContextMenu.js'
+} from './components/ContextMenu/ContextMenu.js'
 export type {
   ContextMenuProps,
   ContextMenuTriggerProps,
@@ -472,7 +505,7 @@ export type {
   ContextMenuSubContentProps,
   ContextMenuState,
   ContextMenuRenderProps
-} from './ContextMenu.js'
+} from './components/ContextMenu/ContextMenu.js'
 
 export {
   Menubar,
@@ -491,7 +524,7 @@ export {
   MenubarSubTrigger,
   MenubarSubContent,
   useMenubar
-} from './Menubar.js'
+} from './components/Menubar/Menubar.js'
 export type {
   MenubarProps,
   MenubarMenuProps,
@@ -510,7 +543,7 @@ export type {
   MenubarSubContentProps,
   MenubarState,
   MenubarRenderProps
-} from './Menubar.js'
+} from './components/Menubar/Menubar.js'
 
 export {
   Drawer,
@@ -521,7 +554,7 @@ export {
   DrawerClose,
   DrawerHandle,
   useDrawer
-} from './Drawer.js'
+} from './components/Drawer/Drawer.js'
 export type {
   DrawerProps,
   DrawerTriggerProps,
@@ -533,31 +566,40 @@ export type {
   DrawerHandleProps,
   DrawerSide,
   DrawerState
-} from './Drawer.js'
+} from './components/Drawer/Drawer.js'
 
-export { Tag } from './Tag.js'
-export type { TagProps } from './Tag.js'
-export { TagsInput } from './TagsInput.js'
-export type { TagsInputProps } from './TagsInput.js'
-export { ComboboxTags } from './Combobox.js'
-export type { ComboboxMultipleProps, ComboboxMultipleState, ComboboxTagsProps } from './Combobox.js'
-export { OTPField } from './OTPField.js'
-export { ButtonGroup } from './ButtonGroup.js'
-export { Kbd, KbdGroup } from './Kbd.js'
-export { NativeSelect } from './NativeSelect.js'
-export type { NativeSelectProps } from './NativeSelect.js'
-export { Meter } from './Meter.js'
-export type { MeterProps } from './Meter.js'
-export type { KbdProps, KbdGroupProps } from './Kbd.js'
-export { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon } from './InputGroup.js'
+export { Tag } from './components/Tag/Tag.js'
+export type { TagProps } from './components/Tag/Tag.js'
+export { TagsInput } from './components/TagsInput/TagsInput.js'
+export type { TagsInputProps } from './components/TagsInput/TagsInput.js'
+export { ComboboxTags } from './components/Combobox/Combobox.js'
+export type {
+  ComboboxMultipleProps,
+  ComboboxMultipleState,
+  ComboboxTagsProps
+} from './components/Combobox/Combobox.js'
+export { OTPField } from './components/OTPField/OTPField.js'
+export { ButtonGroup } from './components/ButtonGroup/ButtonGroup.js'
+export { Kbd, KbdGroup } from './components/Kbd/Kbd.js'
+export { NativeSelect } from './components/NativeSelect/NativeSelect.js'
+export type { NativeSelectProps } from './components/NativeSelect/NativeSelect.js'
+export { Meter } from './components/Meter/Meter.js'
+export type { MeterProps } from './components/Meter/Meter.js'
+export type { KbdProps, KbdGroupProps } from './components/Kbd/Kbd.js'
+export {
+  InputGroup,
+  InputGroupInput,
+  InputGroupTextarea,
+  InputGroupAddon
+} from './components/InputGroup/InputGroup.js'
 export type {
   InputGroupProps,
   InputGroupInputProps,
   InputGroupTextareaProps,
   InputGroupAddonProps
-} from './InputGroup.js'
-export type { ButtonGroupProps } from './ButtonGroup.js'
-export type { OTPFieldProps, OTPFieldMode } from './OTPField.js'
+} from './components/InputGroup/InputGroup.js'
+export type { ButtonGroupProps } from './components/ButtonGroup/ButtonGroup.js'
+export type { OTPFieldProps, OTPFieldMode } from './components/OTPField/OTPField.js'
 export {
   MultiSelect,
   MultiSelectInput,
@@ -569,7 +611,7 @@ export {
   MultiSelectStatus,
   MultiSelectTags,
   useMultiSelect
-} from './MultiSelect.js'
+} from './components/MultiSelect/MultiSelect.js'
 export type {
   MultiSelectProps,
   MultiSelectState,
@@ -583,10 +625,10 @@ export type {
   MultiSelectStatusProps,
   MultiSelectTagsProps,
   MultiSelectRenderProps
-} from './MultiSelect.js'
+} from './components/MultiSelect/MultiSelect.js'
 
-export { PasswordInput, type PasswordInputProps } from './PasswordInput.js'
-export { FileInput, type FileInputProps } from './FileInput.js'
+export { PasswordInput, type PasswordInputProps } from './components/PasswordInput/PasswordInput.js'
+export { FileInput, type FileInputProps } from './components/FileInput/FileInput.js'
 
 export {
   NavLink,
@@ -598,7 +640,7 @@ export {
   type NavLinkGroupProps,
   type NavLinkGroupTriggerProps,
   type NavLinkGroupContentProps
-} from './NavLink.js'
+} from './components/NavLink/NavLink.js'
 export {
   Autocomplete,
   AutocompleteInput,
@@ -618,7 +660,7 @@ export {
   type AutocompleteItemProps,
   type AutocompleteStatusProps,
   type AutocompleteRenderProps
-} from './Autocomplete.js'
+} from './components/Autocomplete/Autocomplete.js'
 
 export {
   Command,
@@ -641,7 +683,7 @@ export {
   type CommandInputProps,
   type CommandListProps,
   type CommandItemProps
-} from './Command.js'
+} from './components/Command/Command.js'
 
 export {
   EmptyState,
@@ -657,10 +699,10 @@ export {
   type EmptyStateHeadingLevel,
   type EmptyStateDescriptionProps,
   type EmptyStateActionsProps
-} from './EmptyState.js'
+} from './components/EmptyState/EmptyState.js'
 export type { HeadingLevel } from './internal/headings.js'
 
-export { InlineCode, type InlineCodeProps } from './InlineCode.js'
+export { InlineCode, type InlineCodeProps } from './components/InlineCode/InlineCode.js'
 export {
   CodeBlock,
   CodeBlockHeader,
@@ -673,9 +715,13 @@ export {
   type CodeBlockContentProps,
   type CodeBlockCopyProps,
   type CodeBlockRenderProps
-} from './CodeBlock.js'
+} from './components/CodeBlock/CodeBlock.js'
 
-export { NumberField, type NumberFieldProps, type NumberFieldFormatOptions } from './NumberField.js'
+export {
+  NumberField,
+  type NumberFieldProps,
+  type NumberFieldFormatOptions
+} from './components/NumberField/NumberField.js'
 
 export {
   Resizable,
@@ -688,7 +734,7 @@ export {
   type ResizableState,
   type ResizablePanelState,
   type ResizableItem
-} from './Resizable.js'
+} from './components/Resizable/Resizable.js'
 
 export {
   NavigationMenu,
@@ -699,7 +745,7 @@ export {
   NavigationMenuContent,
   NavigationMenuViewport,
   useNavigationMenu
-} from './NavigationMenu.js'
+} from './components/NavigationMenu/NavigationMenu.js'
 export type {
   NavigationMenuProps,
   NavigationMenuState,
@@ -712,7 +758,7 @@ export type {
   NavigationMenuViewportProps,
   NavigationMenuRenderProps,
   NavigationMenuLinkRenderProps
-} from './NavigationMenu.js'
+} from './components/NavigationMenu/NavigationMenu.js'
 
 export {
   AppShell,
@@ -725,7 +771,7 @@ export {
   SidebarContent,
   useAppShell,
   useSidebar
-} from './AppShell.js'
+} from './components/AppShell/AppShell.js'
 export type {
   AppShellProps,
   AppShellState,
@@ -738,7 +784,7 @@ export type {
   SidebarRenderProps,
   SidebarLabelProps,
   SidebarContentProps
-} from './AppShell.js'
+} from './components/AppShell/AppShell.js'
 
 export {
   Form,
@@ -751,7 +797,7 @@ export {
   type FormErrors,
   type FormState,
   type FormSubmitContext
-} from './Form.js'
+} from './components/Form/Form.js'
 
 export {
   Carousel,
@@ -767,4 +813,4 @@ export {
   type CarouselViewportProps,
   type CarouselActionProps,
   type CarouselIndicatorsProps
-} from './Carousel.js'
+} from './components/Carousel/Carousel.js'

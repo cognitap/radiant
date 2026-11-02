@@ -1,5 +1,5 @@
 'use client'
-import { Link, type LinkProps } from '../Link.js'
+import { Link, type LinkProps } from '../components/Link/Link.js'
 import { cn } from '../cn.js'
 import { usePressHost } from './host.js'
 import { callerOwnsPress, springPressClass, offPressClass } from './pressPolicy.js'

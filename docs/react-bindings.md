@@ -56,7 +56,7 @@ host or calls `render`. DialogTrigger and DialogClose always compose Button and
 add only Dialog relationships, identities and open/close requests.
 `DialogRenderProps` is `ButtonRenderProps`. Link forwards its ref and handlers
 directly, and a router adapter owns interception. The shared action styles live
-in `src/actionStyles.ts`, so Link can render on the server without crossing
+in `src/components/shared/actionStyles.ts`, so Link can render on the server without crossing
 Button's client boundary.
 
 ## Effects and server rendering

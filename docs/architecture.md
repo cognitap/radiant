@@ -250,9 +250,9 @@ Verify these behaviors manually: [accessibility](accessibility.md).
 ## Examples and type fixtures
 
 The canonical live examples are Storybook stories:
-[Input](../src/Input.stories.tsx), [Form](../src/Form.stories.tsx)
+[Input](../src/components/Input/Input.stories.tsx), [Form](../src/components/Form/Form.stories.tsx)
 (native validation, server recovery and optional TanStack values) and
-[Recipes → Workspace → Settings](../src/Workspace.stories.tsx) (all ten
+[Recipes → Workspace → Settings](../src/recipes/Workspace.stories.tsx) (all ten
 families). Change a contract and its example together.
 
 `docs/contracts/*.ts(x)` are compile-only fixtures. `pnpm typecheck:contracts`
