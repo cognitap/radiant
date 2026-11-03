@@ -682,6 +682,7 @@ export function ComboboxInput({
       data-control-size={box.controlSize}
       aria-autocomplete="list"
       aria-expanded={box.open}
+      data-state={box.open ? 'open' : 'closed'}
       aria-controls={box.open ? box.listId : undefined}
       aria-activedescendant={box.open && box.active !== null ? box.optionId(box.active) : undefined}
       onChange={event => {
@@ -843,6 +844,7 @@ export function ComboboxTrigger({
       aria-label={props['aria-label'] ?? (box.textInput ? 'Show suggestions' : 'Show options')}
       aria-controls={box.open ? box.listId : undefined}
       aria-expanded={box.open}
+      data-state={box.open ? 'open' : 'closed'}
       data-slot={componentSlot(
         box.multiple,
         !!box.textInput,

@@ -203,7 +203,8 @@ function DialogAction({ action, ...props }: DialogTriggerProps & { action: 'open
       ? {
           'aria-haspopup': 'dialog',
           'aria-expanded': dialog.open,
-          'aria-controls': dialog.contentId
+          'aria-controls': dialog.contentId,
+          'data-state': dialog.open ? 'open' : 'closed'
         }
       : {}),
     'data-slot': joinIds(

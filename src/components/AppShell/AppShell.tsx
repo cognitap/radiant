@@ -481,6 +481,7 @@ export function SidebarTrigger({
       aria-expanded={shell.mobile ? shell.open : !shell.collapsed}
       aria-controls={shell.mobile ? shell.drawerId : shell.sidebarId}
       aria-haspopup={shell.mobile ? 'dialog' : undefined}
+      data-state={(shell.mobile ? shell.open : !shell.collapsed) ? 'open' : 'closed'}
       data-slot={joinIds('sidebar-trigger', props['data-slot'])}
       onClick={composeAction(onClick, () =>
         shell.mobile ? shell.setOpen(!shell.open) : shell.setCollapsed(!shell.collapsed)

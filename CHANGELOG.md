@@ -21,6 +21,7 @@
 - CarouselViewport takes the Carousel's name instead of "Slides", and a Toast without a ToastTitle needs `aria-label` or `aria-labelledby` instead of being called "Notification".
 - Add `removeLabel` to TagsInput, ComboboxTags and MultiSelectTags, a function from a tag's text to its remove button's name. It defaults to `Remove ${text}`.
 - NavigationMenuViewport takes `aria-label` and `aria-labelledby`. Closed, it takes the NavigationMenu's name instead of "Navigation sections".
+- Popover, Menu, MenuSub, Menubar, HoverCard, Dialog, AlertDialog, Drawer, Command, Combobox, Autocomplete, MultiSelect and AppShell's SidebarTrigger triggers set `data-state="open|closed"` beside `aria-expanded`, like Select and NavigationMenu triggers.
 
 ## 0.0.77
 
