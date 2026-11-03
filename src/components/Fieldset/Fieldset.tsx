@@ -9,7 +9,7 @@ export type FieldsetProps = Omit<
 > & {
   /** Names the group; nested Fields keep their individual labels. */
   legend: ReactNode
-  parts?: { legend?: PartStyle; description?: PartStyle; error?: PartStyle }
+  parts?: { label?: PartStyle; description?: PartStyle; error?: PartStyle }
 }
 /** Native grouping built on Field's existing relationships and disabled context. */
 export function Fieldset({ legend, parts, className, ...props }: FieldsetProps) {
@@ -26,10 +26,10 @@ export function Fieldset({ legend, parts, className, ...props }: FieldsetProps) 
       )}
       parts={{
         label: {
-          ...parts?.legend,
+          ...parts?.label,
           className: cn(
             'max-w-full mb-[var(--rad-fieldset-gap,var(--rad-spacing-group-gap,0.75rem))]',
-            parts?.legend?.className
+            parts?.label?.className
           )
         },
         description: parts?.description,

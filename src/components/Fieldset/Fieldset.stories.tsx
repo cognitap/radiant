@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A native fieldset and legend for related fields. Composes Field relationships and disabled context: group help and errors belong to the fieldset, while nested Fields own each control label, help and required state. Root native attributes, style, className and refs reach the fieldset. Legend, description and error part hooks retain Field identities. Applications own values, validation and submissions.'
+          'A native fieldset and legend for related fields. Composes Field relationships and disabled context: group help and errors belong to the fieldset, while nested Fields own each control label, help and required state. Root native attributes, style, className and refs reach the fieldset. Label, description and error part hooks retain Field identities; `parts.label` styles the legend. Applications own values, validation and submissions.'
       }
     }
   }
@@ -53,7 +53,7 @@ function Locked() {
         legend="Saved address"
         disabled={locked}
         description="Unlock to edit the saved destination."
-        parts={{ legend: { className: 'italic' } }}
+        parts={{ label: { className: 'italic' } }}
         style={{ '--rad-fieldset-gap': '1rem' }}
       >
         <Field label="Street">

@@ -130,7 +130,7 @@ test('group spacing and legend overrides preserve named themes, narrow layout an
     >
       <Fieldset
         legend="A delivery address with a long group title"
-        parts={{ legend: { style: { fontSize: '19px' } } }}
+        parts={{ label: { style: { fontSize: '19px' } } }}
         style={{ width: '180px' }}
       >
         <Field label="Street">

@@ -9,7 +9,7 @@ h(
     form: 'checkout',
     name: 'shipping',
     style: { '--rad-fieldset-gap': '1rem' },
-    parts: { legend: { className: 'italic' }, error: { style: { color: 'red' } } }
+    parts: { label: { className: 'italic' }, error: { style: { color: 'red' } } }
   },
   h(Field, { label: 'Street' }, h(Input, { name: 'street' }))
 )
@@ -20,4 +20,6 @@ h(Fieldset, { legend: 'Shipping', required: true })
 // @ts-expect-error The native fieldset host is fixed.
 h(Fieldset, { legend: 'Shipping', layout: 'control' })
 // @ts-expect-error Part hooks cannot replace group relationship IDs.
-h(Fieldset, { legend: 'Shipping', parts: { legend: { id: 'other' } } })
+h(Fieldset, { legend: 'Shipping', parts: { label: { id: 'other' } } })
+// @ts-expect-error The legend part is `label`, as on every group.
+h(Fieldset, { legend: 'Shipping', parts: { legend: { className: 'italic' } } })
