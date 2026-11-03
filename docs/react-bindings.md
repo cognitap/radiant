@@ -1,81 +1,40 @@
 # React bindings
 
-The private modules behind the public behavior in
-[architecture](architecture.md). They are not exports or supported import
-paths.
+Private modules in `src/internal/` and `src/react/` implement the shared behavior described in [architecture](architecture.md). They are not public exports.
 
-| Module                              | Responsibility                                                                         | Current consumers                                                                                                                                                                                                                                                                                                                      |
-| ----------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/internal/ids.ts`               | Keep owned IDs first and deduplicate external ID references                            | Field, which serves the native controls, and every other family except Autocomplete, Command and MultiSelect                                                                                                                                                                                                                           |
-| `src/internal/events.ts`            | Activation guard → consumer → uncancelled library action                               | Accordion, AppShell, Button, CodeBlock, Dialog, Drawer, HoverCard, Menu, Menubar, NavigationMenu, Popover, Tabs, Toast, Tooltip                                                                                                                                                                                                        |
-| `src/internal/selection.ts`         | Single and multiple selection membership, equality and transitions                     | Accordion, Combobox, TagsInput, ToggleGroup, `useArrayFormBridge`                                                                                                                                                                                                                                                                      |
-| `src/react/useComposedRefs.ts`      | Deliver one native host to library/caller refs, preserving callback cleanup            | AlertDialog, AppShell, Carousel, Checkbox, CheckboxGroup, Collapsible, Combobox, ContextMenu, Dialog, FileInput, Form, HoverCard, Menu, Menubar, NavigationMenu, NumberField, OTPField, PasswordInput, Popover, RadioGroup, Resizable, ScrollArea, Select, Switch, Tabs, TagsInput, Toast, ToggleGroup, Toolbar, Tooltip, motion hosts |
-| `src/react/useControllableState.ts` | Fixed state owner, initial default, accepted requests and no-op suppression            | Accordion, AppShell, Autocomplete, Button, Carousel, Collapsible, Combobox, Command, Dialog, Drawer, Form, Menu, Menubar, NavigationMenu, NumberField, Popover, Resizable, Select, Tabs, TagsInput, Toast, ToggleGroup, Tooltip                                                                                                        |
-| `src/react/useNativeOwner.ts`       | Owner prop types; diagnose mixed owners and mode changes without storing native values | Owner types: every state family. Diagnosis: Input, Textarea, NativeSelect, PasswordInput, OTPField, Slider, Checkbox, Switch, standalone Radio, RadioGroup, CheckboxGroup                                                                                                                                                              |
+| Module                              | Responsibility                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------- |
+| `src/internal/ids.ts`               | Merge IDs for `aria-labelledby` and `aria-describedby`, keeping owned IDs first       |
+| `src/internal/events.ts`            | Run disabled/pending guards, then consumer handler, then uncancelled library action   |
+| `src/internal/selection.ts`         | Single and multiple selection membership, equality, and transitions                   |
+| `src/react/useComposedRefs.ts`      | Forward one native host to library and caller refs, preserving callback ref cleanups  |
+| `src/react/useControllableState.ts` | Enforce a fixed state owner, initial default, and no-op request suppression           |
+| `src/react/useNativeOwner.ts`       | Shared controlled/uncontrolled prop types and dev checks for mixed or switched owners |
 
-Switch's private `useSwitchDrag` binding owns provisional pointer movement and
-capture cleanup. Release commits through native input activation; cancellation
-restores the owner's checked presentation without a change event.
-
-`tests/architecture.test.mjs` enforces the import rules: `internal` never imports
-React or a family, and bindings never import a family. Adding an outside helper
-dependency needs a review of ownership, maintenance and packaging first. Don't
-add a provider or state engine for plain native controls.
+`tests/architecture.test.mjs` enforces the boundary: `src/internal/` never imports React or a component family, and `src/react/` never imports a component family.
 
 ## State
 
-- A request equal to the current state does nothing.
-- An uncontrolled request updates local state and notifies once. Later requests
-  in the same event see that new value.
-- A controlled request only notifies; the value changes when the prop does.
-- Prop syncs and restorations are not requests and fire no callback.
-- Collapsible forwards every native `onToggle`, but fires `onOpenChange` only
-  when the native state differs from its owner. A refused controlled toggle
-  restores the native state without firing again.
-- Nested toggle and close events never change a parent owner.
-- Input, Textarea, Slider, Checkbox, Switch and Radio keep React and browser change, blur and reset
-  behavior. The state hook is not a reset engine.
-- RadioGroup owns the name and selection, and options cannot supply their own.
-- Field's private `useFieldControl` resolves IDs, descriptions, required, error
-  and disabled for native controls. A plain Field group does not make
-  every checkbox required.
+- A request equal to the current state is ignored.
+- An uncontrolled request updates state and calls `on*Change` once; subsequent requests in the same event read the updated value.
+- A controlled request only calls `on*Change`; the rendered value updates when the prop updates.
+- Prop changes and native restorations after a refused controlled request do not fire callbacks.
+- `Collapsible` forwards every native `onToggle`, but calls `onOpenChange` only when `<details open>` disagrees with the owner. If a controlled owner refuses the toggle, `Collapsible` restores `element.open` without re-triggering `onOpenChange`.
+- Toggle and `close` events from nested disclosures or dialogs are ignored when `event.target !== event.currentTarget`.
+- Native inputs (`Input`, `Textarea`, `Slider`, `Checkbox`, `Switch`, `Radio`) keep browser `change`, `blur`, and form `reset` behavior; `useNativeOwner` only checks ownership invariants.
 
 ## Activation and refs
 
-`composeAction` runs disabled and pending guards, then the consumer handler,
-then the library request if `defaultPrevented` is false. Use it only for
-cancellable activation, never for change, toggle or blur. When one family
-composes another, don't call the consumer handler twice.
+`composeAction` runs disabled and pending guards, calls the consumer's event handler, and runs the library action only if `event.defaultPrevented` is false. Use it for cancellable activation (`onClick`, `onKeyDown`), never for `onChange`, `onToggle`, or `onBlur`. When a component composes `Button` (such as `DialogTrigger` or `DialogClose`), attach `composeAction` once so the consumer handler runs once.
 
-`useComposedRefs` gives library and caller refs the same host. It handles object
-refs and callback refs, runs a callback's returned cleanup on detach, and stays
-stable while its inputs do.
+`useComposedRefs` supports object refs and React 19 callback ref cleanup functions, and keeps a stable identity while its inputs are unchanged.
 
-Button prepares its classes, guarded handler and children once, then renders its
-host or calls `render`. DialogTrigger and DialogClose always compose Button and
-add only Dialog relationships, identities and open/close requests.
-`DialogRenderProps` is `ButtonRenderProps`. Link forwards its ref and handlers
-directly, and a router adapter owns interception. The shared action styles live
-in `src/components/shared/actionStyles.ts`, so Link can render on the server without crossing
-Button's client boundary.
+Shared button/link class generation lives in `src/components/shared/actionStyles.ts` so `Link` and `Card` can render in React Server Components without importing client hooks.
 
-## Effects and server rendering
+## Effects and SSR
 
-- Effects act on their own host and its document, never the global `document`,
-  so iframes work.
-- Dialog opens after mount, closes on cleanup, and reopens the same host when
-  `modal` changes. A queued close cannot dismiss a dialog that has reopened.
-- Checkbox keeps its `indeterminate` property current.
-- Nothing installs listeners or timers at import time. Any new effect that does
-  must clean up on update and unmount.
-- Server markup and the first client render share IDs and relationships. A
-  server-rendered Dialog stays closed until its effect opens it.
-- Collapsible reconciles its native host once at mount. Local state adopts a
-  completed pre-hydration toggle and notifies once; controlled hosts restore
-  their owner's value silently. Accordion's root owns its item hosts. Only the
-  editable details host suppresses expected hydration attribute warnings.
-- `use client` goes only on interactive, context and hook modules. The package
-  entry, Card, static Link and pure policy stay server-safe.
-
-These rules are tested in `tests/composition-lifecycle.test.mjs`,
-`tests/architecture.test.mjs` and `tests/browser/platform.test.tsx`.
+- Effects read `element.ownerDocument` and `ownerDocument.defaultView` instead of global `document` or `window`, so components work inside iframes.
+- Nothing installs listeners or timers at module load time.
+- Server markup and the first client render produce the same DOM and IDs. `Dialog` renders closed on the server and calls `showModal()` or `show()` in an effect after mount; changing `modal` closes and reopens the same `<dialog>` host.
+- `Collapsible` reconciles `<details open>` once on mount: an uncontrolled instance adopts a pre-hydration user toggle and notifies once, while a controlled instance restores its `open` prop.
+- `"use client"` is placed only on modules that use React state, context, refs, or effects.

@@ -1,72 +1,34 @@
 # Testing
 
-## Which check to run
+## Commands
 
-| Command             | When                                                  | What it runs                                                                                                         |
-| ------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `pnpm check`        | Every change; CI runs its two halves as parallel jobs | Theme check, format, lint, types, docs policy, build, repo checks, packed package, Storybook, Radiant light and dark |
-| `pnpm test`         | Runtime changes                                       | Repo checks in `tests/*.test.mjs` and the packed package                                                             |
-| `pnpm test:browser` | Story or browser behavior changes                     | Every story in every preset, light and dark, plus `tests/browser/`                                                   |
-| `pnpm test:package` | Package export changes                                | The packed package                                                                                                   |
+| Command                | What it runs                                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`           | `check:library` and `check:storybook`                                                                                |
+| `pnpm check:library`   | Theme CSS check, `oxfmt`, `oxlint`, build, `tsc --noEmit`, `docs:check`, `tests/*.test.mjs`, and `pnpm test:package` |
+| `pnpm check:storybook` | Storybook build plus browser tests in Radiant light and dark                                                         |
+| `pnpm test`            | Build, Node tests in `tests/*.test.mjs`, and `pnpm test:package`                                                     |
+| `pnpm test:browser`    | Vitest browser suite: every story across all presets (light and dark) with axe, plus `tests/browser/*.test.tsx`      |
+| `pnpm test:package`    | Packs the tarball, installs it into a temp directory, and runs `tests/package/` against `@cognitap/radiant`          |
 
 ## Browser tests
 
-```sh
-pnpm exec playwright install chromium   # --with-deps on Linux
-pnpm test:browser
-```
+Install Playwright Chromium once (`pnpm exec playwright install chromium`), then run `pnpm test:browser`. No running Storybook server is required.
 
-They need no running Storybook. Every story renders and fails on any axe
-violation. `pnpm check` runs Radiant light and Radiant dark. CI runs browser
-behavior beside it. `pnpm test:browser` runs every preset. New stories join
-that matrix automatically.
-There are no retries and no rule exclusions.
-
-Focus a run on one project or test:
+To run a single project or file:
 
 ```sh
 pnpm test:browser --project=storybook-glass-dark src/components/Checkbox/Checkbox.stories.tsx
 pnpm test:browser --project=browser-platform -t StrictMode
 ```
 
-`tests/browser/` is where component behavior lives: keyboard, forms, motion,
-refs, StrictMode, hydration, new tabs and downloads. One file owns each
-behavior. Motion waits poll for the settled element. Mid-flight spring values
-stay in the pure `createSpring` test.
-
-Results go to `output/browser/`: `junit.xml` and failure screenshots in
-`attachments/`. CI keeps the Storybook run as **browser-results** and the
-behavior run as **browser-behavior** for 14 days.
+Failures write JUnit XML and screenshots to `output/browser/`.
 
 ## Where a test belongs
 
-- **Story:** render and axe in light and dark. Do not repeat keyboard, form, or
-  motion behavior.
-- **`tests/browser/`:** component behavior. Wrap changes in `act`, wait for the
-  outcome, and clean up every fixture.
-- **`tests/*.test.mjs`:** repo-only checks that read source or the built library.
-- **`tests/package/`:** packed exports, types, and contrast for every exported
-  theme. Import `@cognitap/radiant`, never `src` or `dist`.
+- **Component story (`src/components/<Family>/<Family>.stories.tsx`):** rendering and axe across themes and modes. Keep interaction `play` functions short; do not duplicate full keyboard or state-machine suites across every theme preset.
+- **`tests/browser/*.test.tsx`:** interactive browser behavior (keyboard navigation, form submission and reset, focus management, motion, refs, StrictMode, hydration). Wrap state updates in `act` and clean up mounted roots.
+- **`tests/*.test.mjs`:** fast Node checks over source files, pure helpers, SSR output, and architecture invariants.
+- **`tests/package/package.test.ts`:** public exports, compiled CSS, TypeScript `NodeNext` and `Bundler` resolution, and token contrast across all exported themes. Imports must use `@cognitap/radiant`, never `src/` or `dist/`.
 
-A styling change also needs a browser check against the generated CSS.
-
-## Installed-package checks
-
-```sh
-pnpm test:package
-```
-
-It packs the library, installs that tarball in a temporary directory, and runs
-`tests/package` there. The same files import `@cognitap/radiant`. `tsc` checks
-every `.tsx` file under NodeNext and Bundler. Node does not execute them.
-
-## What to put in the pull request
-
-- The scenario that failed before the change and passes after it.
-- The commands you ran, the presets and modes affected, and anything left
-  unchecked.
-- A link to the CI run, plus a screenshot when appearance changed.
-
-Axe passing does not prove contrast on gradients, screen reader behavior or
-visual quality. For manual checks, see [Storybook](storybook.md#verification)
-and [accessibility](accessibility.md).
+Manual visual, zoom, and screen-reader checks are covered in [storybook](storybook.md#verification) and [accessibility](accessibility.md).
