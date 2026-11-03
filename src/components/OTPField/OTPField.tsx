@@ -9,6 +9,7 @@ import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
 import type { DistributiveOmit } from '../../internal/types.js'
 import type { PartStyle } from '../../presentation.js'
+import { activeRingClass } from '../shared/focusStyles.js'
 
 export type OTPFieldMode = 'numeric' | 'alphanumeric'
 export type OTPFieldProps = DistributiveOmit<
@@ -246,7 +247,9 @@ export function OTPField({
           data-invalid={control['data-invalid']}
           className={cn(
             inputVariants(),
-            'pointer-events-none flex items-center justify-center px-0 group-has-[:disabled]/otp:opacity-60 data-active:outline-solid data-active:[outline-color:var(--rad-input-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] data-active:[outline-width:var(--rad-focus-width,2px)] data-active:[outline-offset:var(--rad-focus-offset,2px)]',
+            'pointer-events-none flex items-center justify-center px-0 group-has-[:disabled]/otp:opacity-60',
+            activeRingClass,
+            'data-active:[--_rad-focus-color:var(--rad-input-focus-color)] data-active:[--_rad-focus-width:var(--rad-input-focus-width)] data-active:[--_rad-focus-offset:var(--rad-input-focus-offset)] data-active:[--_rad-focus-style:var(--rad-input-focus-style)]',
             parts?.slot?.className
           )}
           style={parts?.slot?.style}

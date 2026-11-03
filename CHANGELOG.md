@@ -10,6 +10,9 @@
 - Checkboxes in an invalid CheckboxGroup show the invalid border, as radios in an invalid RadioGroup do.
 - Radios outside an invalid RadioGroup keep their normal border, even inside a Form with errors.
 - Keep a caller's `data-slot` tokens after the family's own on Link, Input, Textarea, Checkbox, Switch, Radio, Slider, FileInput, the Select, Combobox, Autocomplete, MultiSelect and Command parts, TooltipContent and the Dialog, AlertDialog and Drawer content, title and description, instead of replacing them.
+- Draw every keyboard focus ring from the family focus overrides and the `focus` tokens. Carousel, Toast, ScrollArea, CodeBlock, ContextMenu, Table, Select, Combobox, NativeSelect, NavLink, Resizable, AppShell and chart points ignored some of them, such as `focus.style`.
+- Add `focusWidth`, `focusOffset` and `focusStyle` to the `select` and `combobox` overrides, and `focusStyle` to `nativeSelect`, `inputGroup`, `navLink` and `resizable`.
+- Highlight the focused Menu, ContextMenu and Menubar item with the accent fill that Select and Combobox options use, instead of a faint tint.
 
 ## 0.0.77
 

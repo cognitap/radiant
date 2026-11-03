@@ -18,6 +18,7 @@ import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { Orientation, PartStyle } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 export type ScrollAreaOrientation = Orientation | 'both'
 export type ScrollAreaVisibility = 'hover' | 'scroll' | 'always'
@@ -293,7 +294,7 @@ export function ScrollArea({
       className={cn(
         'relative box-border min-h-0 min-w-0 [scrollbar-width:thin] [scrollbar-color:var(--rad-scroll-area-thumb-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))_var(--rad-scroll-area-track-color,var(--rad-control-track-background,var(--rad-color-surface,oklch(1_0_0))))]',
         'data-enhanced:[scrollbar-width:none] [&[data-enhanced]::-webkit-scrollbar]:hidden',
-        'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus,oklch(0.55_0.13_255))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] forced-colors:focus-visible:outline-[Highlight]',
+        focusRingClass,
         orientation === 'vertical'
           ? 'overflow-x-hidden overflow-y-auto'
           : orientation === 'horizontal'

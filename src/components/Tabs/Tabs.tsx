@@ -19,6 +19,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import type { ControlSize, Orientation } from '../../presentation.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 const rootClass =
   'grid min-w-0 gap-[var(--rad-tabs-gap,var(--rad-spacing-group-gap,0.75rem))] data-[orientation=vertical]:grid-cols-[max-content_minmax(0,1fr)] data-[orientation=vertical]:items-start'
@@ -43,19 +44,19 @@ const triggerClass = [
   'data-selected:bg-[var(--rad-tabs-trigger-active-background,var(--rad-control-selected-background,var(--rad-color-surface,oklch(1_0_0))))]',
   'data-selected:[color:var(--rad-tabs-trigger-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground,oklch(0.21_0.006_286))))]',
   'data-selected:[border-color:var(--rad-tabs-trigger-active-border,var(--rad-control-selected-border-color,var(--rad-color-accent,oklch(0.21_0.006_286))))] data-selected:[box-shadow:var(--rad-control-selected-shadow,none)]',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-tabs-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-tabs-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-tabs-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-tabs-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-tabs-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-tabs-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-tabs-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-tabs-focus-style)]',
   'disabled:cursor-not-allowed disabled:opacity-[var(--rad-tabs-disabled-opacity,var(--rad-state-disabled-opacity,0.5))]',
   'disabled:bg-[var(--rad-tabs-trigger-background,transparent)]',
   'forced-colors:border-[ButtonText] forced-colors:text-[ButtonText]',
   'forced-colors:data-selected:border-[Highlight] forced-colors:data-selected:text-[Highlight]',
   'forced-colors:disabled:text-[GrayText] forced-colors:disabled:border-[GrayText] forced-colors:disabled:opacity-100'
 ].join(' ')
-const contentClass =
-  'min-w-0 rounded-[var(--rad-tabs-content-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] p-[var(--rad-tabs-content-padding,1rem)] [color:var(--rad-tabs-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-tabs-content-background,var(--rad-color-surface,oklch(1_0_0)))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-tabs-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-tabs-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-tabs-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-tabs-focus-style,var(--rad-focus-style,solid))]'
+const contentClass = [
+  'min-w-0 rounded-[var(--rad-tabs-content-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] p-[var(--rad-tabs-content-padding,1rem)] [color:var(--rad-tabs-content-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-tabs-content-background,var(--rad-color-surface,oklch(1_0_0)))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-tabs-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-tabs-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-tabs-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-tabs-focus-style)]'
+].join(' ')
 
 type SelectionOwner = ValueOwner<string> & ({ value: string } | { defaultValue: string })
 

@@ -87,8 +87,9 @@ test('the compiled stylesheet includes focus, disabled, and forced-colors rules'
 
   assert.match(
     css,
-    /:focus-visible\s*\{[^}]*outline-color:\s*var\(--rad-button-focus-color,var\(--rad-color-focus/
+    /:focus-visible\s*\{[^}]*outline-color:\s*var\(--_rad-focus-color,var\(--rad-color-focus/
   )
+  assert.match(css, /:focus-visible\s*\{[^}]*--_rad-focus-color:\s*var\(--rad-button-focus-color\)/)
   assert.match(
     css,
     /:disabled\s*\{[^}]*opacity:\s*var\(--_rad-disabled-opacity,var\(--rad-button-disabled-opacity/

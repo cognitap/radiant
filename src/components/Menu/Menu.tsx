@@ -338,10 +338,12 @@ const menuItemClass = [
   '[&>span:first-child]:min-w-0 [&>span:first-child]:flex-1',
   'p-[var(--rad-menu-item-padding,0.625rem)] rounded-[var(--rad-menu-item-radius,var(--_rad-item-radius,var(--rad-control-radius,0.5rem)))] [corner-shape:var(--_rad-item-corner-shape,var(--rad-control-corner-shape,round))]',
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none',
-  'hover:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] focus:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))]',
-  'hover:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))] focus:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))]',
+  // Keyboard focus moves between items like listbox options, so the highlighted row is the focus cue,
+  // drawn with the same item role and strength as Select and Combobox options.
+  'hover:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,var(--rad-color-accent)))] focus:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,var(--rad-color-accent)))]',
+  'hover:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,var(--rad-color-accent-foreground)))] focus:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,var(--rad-color-accent-foreground)))]',
   'aria-disabled:cursor-not-allowed aria-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] forced-colors:aria-disabled:text-[GrayText] forced-colors:aria-disabled:opacity-100',
-  'forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText] forced-colors:focus-visible:outline-solid forced-colors:focus-visible:[outline-width:var(--rad-focus-width,2px)] forced-colors:focus-visible:-outline-offset-2'
+  'forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText] forced-colors:focus-visible:outline-[length:var(--rad-focus-width,2px)] forced-colors:focus-visible:outline-offset-[calc(0px_-_var(--rad-focus-width,2px))] forced-colors:focus-visible:[outline-style:var(--rad-focus-style,solid)]'
 ].join(' ')
 export function MenuItem(props: MenuItemProps) {
   return (
@@ -626,7 +628,7 @@ export function MenuSubTrigger({
         data-slot={joinIds('menu-sub-trigger', props['data-slot'])}
         closeOnSelect={false}
         className={cn(
-          'aria-expanded:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] aria-expanded:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))]',
+          'aria-expanded:not-focus:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] aria-expanded:not-focus:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))]',
           className
         )}
         onSelect={event => {

@@ -4,6 +4,7 @@ import { requireAccessibleName, type AccessibleName } from '../../internal/acces
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 type Part<
   Host extends 'table' | 'caption' | 'thead' | 'tbody' | 'tfoot' | 'tr' | 'th' | 'td' | 'section'
 > = Omit<ComponentProps<Host>, 'role' | 'style'> & { style?: ThemeStyle; 'data-slot'?: string }
@@ -128,7 +129,8 @@ export function TableContainer({ className, ...props }: TableContainerProps) {
       {...nativeProps}
       data-slot={joinIds('table-container', props['data-slot'])}
       className={cn(
-        'min-w-0 max-w-full overflow-auto rounded-[var(--rad-table-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] border-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-table-border-color,var(--rad-color-border))] [box-shadow:var(--rad-table-shadow,var(--rad-surface-shadow,none))] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus)] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] focus-visible:[outline-style:var(--rad-focus-style,solid)] forced-colors:border-[CanvasText]',
+        'min-w-0 max-w-full overflow-auto rounded-[var(--rad-table-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] border-[length:var(--rad-table-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-table-border-color,var(--rad-color-border))] [box-shadow:var(--rad-table-shadow,var(--rad-surface-shadow,none))] forced-colors:border-[CanvasText]',
+        focusRingClass,
         scrollbarClass,
         className
       )}

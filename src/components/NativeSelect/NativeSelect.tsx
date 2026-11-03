@@ -8,6 +8,7 @@ import { joinIds } from '../../internal/ids.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 export type NativeSelectProps = Omit<
   ComponentProps<'select'>,
@@ -62,7 +63,8 @@ export function NativeSelect({
         'border-[length:var(--rad-native-select-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-native-select-border-style,var(--rad-control-border-style,solid))] [border-color:var(--rad-native-select-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
         'rounded-[var(--rad-native-select-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-native-select-corner-shape,var(--rad-control-corner-shape,round))]',
         '[--_rad-native-select-shadow:var(--rad-native-select-shadow,var(--rad-control-field-shadow,none))] shadow-(--_rad-native-select-shadow) [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
-        'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-native-select-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-native-select-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-native-select-focus-offset,var(--rad-focus-offset,2px))]',
+        focusRingClass,
+        'focus-visible:[--_rad-focus-color:var(--rad-native-select-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-native-select-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-native-select-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-native-select-focus-style)]',
         'data-invalid:[border-color:var(--rad-native-select-invalid-border,var(--rad-color-invalid))] disabled:cursor-not-allowed disabled:bg-[var(--rad-native-select-disabled-background,var(--rad-color-disabled-background))]',
         'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:disabled:text-[GrayText]',
         className

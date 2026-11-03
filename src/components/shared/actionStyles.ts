@@ -1,4 +1,5 @@
 import { cva } from 'class-variance-authority'
+import { focusRingClass } from './focusStyles.js'
 
 // Palette and readable ink are shared by actions, text links and inline feedback. Ink is
 // mixed toward the scope foreground so pale warning/accent fills stay readable
@@ -54,7 +55,8 @@ export const actionVariants = cva(
     'not-disabled:not-aria-busy:motion-safe:active:scale-[var(--rad-button-press-scale,var(--rad-motion-press-scale,0.97))] not-disabled:not-aria-busy:motion-safe:active:translate-y-[var(--rad-button-press-shift,var(--rad-motion-press-shift-y,0px))] not-disabled:not-aria-busy:motion-safe:active:translate-x-[var(--rad-button-press-shift-x,var(--rad-motion-press-shift-x,0px))]',
     'not-disabled:not-aria-busy:active:rounded-(--_btn-radius-pressed) not-disabled:not-aria-busy:active:[corner-shape:var(--rad-button-corner-shape-pressed,var(--rad-control-action-corner-shape-pressed,var(--_btn-corner)))]',
     'not-disabled:not-aria-busy:active:[--_btn-highlight:0] not-disabled:not-aria-busy:active:[--_btn-sheen:0] not-disabled:not-aria-busy:active:shadow-[var(--rad-button-shadow-pressed,var(--_btn-shadow-pressed))]',
-    'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-button-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-button-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-button-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-button-focus-style,var(--rad-focus-style,solid))]',
+    focusRingClass,
+    'focus-visible:[--_rad-focus-color:var(--rad-button-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-button-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-button-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-button-focus-style)]',
     'in-[[data-slot~=field][data-disabled]]:[--_rad-disabled-opacity:1]',
     'disabled:cursor-not-allowed disabled:opacity-[var(--_rad-disabled-opacity,var(--rad-button-disabled-opacity,var(--rad-state-disabled-opacity,0.5)))]',
     'aria-busy:cursor-progress',

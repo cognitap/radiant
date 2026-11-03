@@ -5,13 +5,15 @@ import { actionTone, actionVariants } from '../shared/actionStyles.js'
 import { cn } from '../../cn.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 const linkVariants = cva(
   [
     '[color:var(--_link-color)] [text-underline-offset:var(--rad-link-underline-offset,0.1875rem)]',
     'transition-colors duration-[var(--rad-link-color-duration,var(--rad-motion-color-duration,150ms))]',
     'hover:[color:var(--_link-hover)]',
-    'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-link-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:[outline-width:var(--rad-link-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-link-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-link-focus-style,var(--rad-focus-style,solid))]',
+    focusRingClass,
+    'focus-visible:[--_rad-focus-color:var(--rad-link-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-link-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-link-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-link-focus-style)]',
     'motion-reduce:transition-none'
   ],
   {

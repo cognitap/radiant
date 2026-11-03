@@ -9,6 +9,7 @@ import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize } from '../../presentation.js'
 import { useFieldControl } from '../Field/Field.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 export const inputVariants = cva([
   controlBorderClass,
@@ -28,11 +29,8 @@ export const inputVariants = cva([
   '[corner-shape:var(--rad-input-corner-shape,var(--rad-control-corner-shape,round))]',
   '[box-shadow:var(--rad-input-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
   'placeholder:[color:var(--rad-input-placeholder,var(--rad-color-placeholder,oklch(0.5_0.01_286)))]',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-input-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-input-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-input-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-input-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-input-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-input-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-input-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-input-focus-style)]',
   'data-invalid:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'disabled:cursor-not-allowed',
   'disabled:[background:var(--rad-input-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',

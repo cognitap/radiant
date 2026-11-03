@@ -31,6 +31,7 @@ import {
 import type { PartStyle } from '../presentation.js'
 import type { ThemeStyle } from '../themes/defineTheme.js'
 export type { ChartDatum, ChartSeries } from '../internal/charts.js'
+import { focusRingClass } from '../components/shared/focusStyles.js'
 export type ChartProps = Omit<
   ComponentProps<'figure'>,
   'children' | 'style' | 'aria-labelledby' | 'aria-label' | 'role'
@@ -72,8 +73,10 @@ const colors = [
 const color = (index: number) => colors[index % colors.length]!
 const dashes = ['', '8 4', '2 4', '10 3 2 3', '4 3', '12 6']
 const format = (value: number) => String(value)
-const pointClass =
-  'box-border inline-flex size-6 cursor-pointer select-none items-center justify-center rounded-full border-0 bg-transparent p-0 [color:inherit] hover:bg-[color-mix(in_oklch,currentColor_8%,transparent)] focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus,oklch(0.55_0.13_255))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] focus-visible:[outline-style:var(--rad-focus-style,solid)] forced-colors:text-[CanvasText] forced-colors:focus-visible:outline-[Highlight]'
+const pointClass = [
+  'box-border inline-flex size-6 cursor-pointer select-none items-center justify-center rounded-full border-0 bg-transparent p-0 [color:inherit] hover:bg-[color-mix(in_oklch,currentColor_8%,transparent)] forced-colors:text-[CanvasText]',
+  focusRingClass
+].join(' ')
 export type ChartDataTableProps = Omit<TableProps, 'children'> &
   Pick<ChartProps, 'data' | 'series' | 'formatValue' | 'categoryLabel'> & { label: string }
 export function ChartDataTable({
