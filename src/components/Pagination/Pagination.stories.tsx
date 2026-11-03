@@ -14,6 +14,7 @@ import {
 const meta = {
   title: 'Components/Pagination',
   component: Pagination,
+  args: { 'aria-label': 'Pagination' },
   parameters: {
     docs: {
       description: {
@@ -27,7 +28,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => (
-    <Pagination>
+    <Pagination aria-label="Pagination">
       <PaginationList>
         <PaginationItem>
           <PaginationPrevious href="?page=1" />
@@ -198,6 +199,7 @@ export const SharedControlSizes: Story = {
 export const Customisation: Story = {
   render: () => (
     <Pagination
+      aria-label="Pagination"
       style={{
         width: '14rem',
         '--rad-pagination-gap': '.75rem',

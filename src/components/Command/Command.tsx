@@ -59,7 +59,7 @@ export type CommandContentProps = DialogContentProps
 export type CommandTitleProps = DialogTitleProps
 export type CommandDescriptionProps = DialogDescriptionProps
 export type CommandInputProps = Omit<ComboboxInputProps, 'aria-label' | 'aria-labelledby'> &
-  (AccessibleName | { 'aria-label'?: undefined; 'aria-labelledby'?: undefined })
+  AccessibleName
 export type CommandListProps = Omit<ComponentProps<'div'>, 'style' | 'role' | 'id'> & {
   style?: ThemeStyle
 }
@@ -210,17 +210,10 @@ export function CommandDescription(props: CommandDescriptionProps) {
 export function CommandInput({ className, ...props }: CommandInputProps) {
   useCommandContext()
   useCommandParts()
-  const name = {
-    'aria-label': props['aria-labelledby']
-      ? props['aria-label']
-      : (props['aria-label'] ?? 'Search commands'),
-    'aria-labelledby': props['aria-labelledby']
-  }
-  requireAccessibleName('CommandInput', name)
+  requireAccessibleName('CommandInput', props)
   return (
     <ComboboxInput
       {...props}
-      {...name}
       className={cn('shrink-0 pe-[var(--_rad-control-padding,1rem)]', className)}
     />
   )

@@ -99,7 +99,7 @@ const hosts: [name: string, own: string, render: (slot: string) => ReactNode][] 
     'BreadcrumbLink',
     'link breadcrumb-link',
     slot => (
-      <Breadcrumb>
+      <Breadcrumb aria-label="Breadcrumb">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
@@ -580,7 +580,11 @@ const command = (content: ReactNode, slot?: string) => (
   </Command>
 )
 hosts.push(
-  ['Command content', 'dialog-content command-content', slot => command(<CommandInput />, slot)],
+  [
+    'Command content',
+    'dialog-content command-content',
+    slot => command(<CommandInput aria-label="Search commands" />, slot)
+  ],
   [
     'CommandTitle',
     'dialog-title command-title',
@@ -603,7 +607,13 @@ hosts.push(
   [
     'CommandInput',
     'combobox-input command-input',
-    slot => command(<CommandInput data-slot={slot} />)
+    slot =>
+      command(
+        <CommandInput
+          aria-label="Search commands"
+          data-slot={slot}
+        />
+      )
   ],
   [
     'CommandList',
@@ -611,7 +621,7 @@ hosts.push(
     slot =>
       command(
         <>
-          <CommandInput />
+          <CommandInput aria-label="Search commands" />
           <CommandList data-slot={slot} />
         </>
       )
@@ -622,7 +632,7 @@ hosts.push(
     slot =>
       command(
         <>
-          <CommandInput />
+          <CommandInput aria-label="Search commands" />
           <CommandList>
             <CommandItem
               value="oslo"

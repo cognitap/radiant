@@ -49,6 +49,7 @@ type Binding = CarouselState & {
   viewportId: string
   setViewport: (node: HTMLDivElement | null) => void
   slideLabel: (index: number, count: number) => string
+  name: { 'aria-label'?: string; 'aria-labelledby'?: string }
 }
 const Context = createContext<Binding | null>(null)
 export function useCarousel(): CarouselState | null {
@@ -248,7 +249,8 @@ export function Carousel({
         items,
         viewportId,
         setViewport,
-        slideLabel
+        slideLabel,
+        name: { 'aria-label': props['aria-label'], 'aria-labelledby': props['aria-labelledby'] }
       }}
     >
       <section
@@ -341,7 +343,7 @@ export function CarouselViewport({
       ref={composed}
       id={state.viewportId}
       role="group"
-      aria-label={props['aria-label'] ?? 'Slides'}
+      {...(props['aria-label'] || props['aria-labelledby'] ? {} : state.name)}
       tabIndex={0}
       data-slot={joinIds('carousel-viewport', props['data-slot'])}
       className={cn(

@@ -59,8 +59,12 @@ function Families() {
       <Card data-testid="card" />
       <Alert data-testid="alert">Saved</Alert>
       <ToastProvider>
-        <ToastViewport style={{ position: 'relative', inset: 'auto' }}>
+        <ToastViewport
+          aria-label="Notifications"
+          style={{ position: 'relative', inset: 'auto' }}
+        >
           <Toast
+            aria-label="Sent"
             data-testid="toast"
             defaultOpen
             motion="off"

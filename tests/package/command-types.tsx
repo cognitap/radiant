@@ -32,7 +32,10 @@ export const supported = (
     >
       <CommandTitle>Commands</CommandTitle>
       <CommandDescription>Find an action</CommandDescription>
-      <CommandInput ref={createRef<HTMLInputElement>()} />
+      <CommandInput
+        aria-label="Search commands"
+        ref={createRef<HTMLInputElement>()}
+      />
       <CommandList ref={createRef<HTMLDivElement>()} />
       <CommandClose>Close</CommandClose>
     </CommandContent>
@@ -45,9 +48,11 @@ export const bothOpen: CommandProps = { items, onAction: () => {}, open: true, d
 // @ts-expect-error A command has no submitted selection.
 export const selection: CommandProps = { items, onAction: () => {}, value: 'new' }
 // @ts-expect-error Search is not a native form submission carrier.
-export const name: CommandInputProps = { name: 'command' }
+export const name: CommandInputProps = { 'aria-label': 'Search', name: 'command' }
 // @ts-expect-error The query owner lives on the root.
-export const inputValue: CommandInputProps = { value: 'other' }
+export const inputValue: CommandInputProps = { 'aria-label': 'Search', value: 'other' }
+// @ts-expect-error Search has no visible label, so it needs a name.
+export const unnamedInput: CommandInputProps = {}
 // @ts-expect-error The state root has no DOM host.
 export const rootStyle: CommandProps = { items, onAction: () => {}, className: 'custom' }
 

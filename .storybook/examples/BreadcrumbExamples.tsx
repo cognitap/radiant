@@ -54,7 +54,7 @@ export function RoutedTrail() {
   const current = trail.at(-1)!
   return (
     <div style={{ display: 'grid', gap: '1rem' }}>
-      <Breadcrumb>
+      <Breadcrumb aria-label="Breadcrumb">
         <BreadcrumbList>
           {trail.slice(0, -1).map(item => (
             <BreadcrumbItem key={item.href}>

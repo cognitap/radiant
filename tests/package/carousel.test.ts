@@ -30,6 +30,7 @@ test('Carousel server rendering labels native snap slides and composes real Butt
   )
   assert.match(html, /<section/)
   assert.match(html, /aria-roledescription="carousel"/)
+  assert.match(html, /role="group" aria-label="Studies"/)
   assert.match(html, /aria-label="Atlas, 1 of 2"/)
   assert.match(html, /aria-label="Harbor, 2 of 2"/)
   assert.match(html, /data-rad-carousel-value="harbor"/)

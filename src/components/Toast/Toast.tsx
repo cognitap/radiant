@@ -23,6 +23,7 @@ import {
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
 import { cn } from '../../cn.js'
 import { joinIds } from '../../internal/ids.js'
+import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import type { WithoutToggle } from '../../internal/types.js'
 import { composeAction } from '../../internal/events.js'
 import { validateToastDuration } from '../../internal/toast.js'
@@ -64,7 +65,8 @@ export type ToastRenderProps = ButtonRenderProps
 export type ToastViewportProps = Omit<
   ComponentProps<'section'>,
   'style' | 'role' | 'tabIndex' | 'aria-keyshortcuts'
-> & { style?: ThemeStyle; 'data-slot'?: string; hotkey?: boolean }
+> &
+  AccessibleName & { style?: ThemeStyle; 'data-slot'?: string; hotkey?: boolean }
 type Queue = {
   duration: number
   queue: string[]
@@ -189,15 +191,22 @@ export function Toast({
   if (!['off', 'polite', 'assertive'].includes(announce))
     throw new TypeError('Toast announce must be off, polite or assertive.')
   const nodeRef = useRef<HTMLDivElement>(null)
-  const [label, setLabel] = useState('Notification')
+  const [label, setLabel] = useState('')
   const focused = useRef(false)
   const returnTo = useRef<HTMLElement | null>(null)
   const update = useRef(() => {})
-  const latest = useRef({ announce, announcement })
+  const ariaLabel = props['aria-label'],
+    ariaLabelledBy = props['aria-labelledby']
+  const named = { 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledBy }
+  const latest = useRef({ announce, announcement, named })
   useLayoutEffect(() => {
-    latest.current = { announce, announcement }
+    latest.current = {
+      announce,
+      announcement,
+      named: { 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledBy }
+    }
     update.current()
-  }, [announce, announcement])
+  }, [announce, announcement, ariaLabel, ariaLabelledBy])
   useLayoutEffect(() => (state.value ? register(id) : undefined), [state.value, register, id])
   useLayoutEffect(() => {
     const node = nodeRef.current
@@ -212,7 +221,8 @@ export function Toast({
         )
       )
       const title = parts.find(part => part.dataset.slot?.split(' ').includes('toast-title'))
-      setLabel(title?.innerText || 'Notification')
+      const name = title?.innerText.trim() ?? ''
+      setLabel(name)
       const text =
         latest.current.announcement ??
         parts
@@ -220,9 +230,11 @@ export function Toast({
           .filter(Boolean)
           .join(' ')
       announceText(id, text, latest.current.announce, win)
+      return name
     }
     update.current = publish
-    publish()
+    // A toast is named by its ToastTitle unless the consumer names it.
+    if (!publish()) requireAccessibleName('Toast without a ToastTitle', latest.current.named)
     const observer = new win.MutationObserver(publish)
     observer.observe(node, { childList: true, subtree: true, characterData: true })
     return () => {
@@ -253,7 +265,9 @@ export function Toast({
         {...props}
         ref={transitionRef}
         announce="off"
-        aria-label={props['aria-label'] ?? (props['aria-labelledby'] ? undefined : label)}
+        aria-label={
+          props['aria-label'] ?? (props['aria-labelledby'] ? undefined : label || undefined)
+        }
         hidden={!visible}
         inert={!visible}
         aria-hidden={!visible || undefined}
@@ -349,6 +363,7 @@ export function ToastClose({ onClick, ...props }: ToastCloseProps) {
   )
 }
 export function ToastViewport({ hotkey = true, ref, className, ...props }: ToastViewportProps) {
+  requireAccessibleName('ToastViewport', props)
   useQueue()
   const nativeProps = { ...props, role: undefined }
   const nodeRef = useRef<HTMLElement>(null)
@@ -382,7 +397,6 @@ export function ToastViewport({ hotkey = true, ref, className, ...props }: Toast
     <section
       {...nativeProps}
       ref={host}
-      aria-label={props['aria-labelledby'] ? undefined : (props['aria-label'] ?? 'Notifications')}
       aria-keyshortcuts={hotkey ? 'F8' : undefined}
       tabIndex={-1}
       data-slot={joinIds('toast-viewport', props['data-slot'])}

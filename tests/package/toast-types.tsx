@@ -11,14 +11,15 @@ import {
   type ToastProps,
   type ToastState,
   type ToastActionProps,
-  type ToastCloseProps
+  type ToastCloseProps,
+  type ToastViewportProps
 } from '@cognitap/radiant'
 h(
   ToastProvider,
   { duration: 0 },
   h(
     ToastViewport,
-    { hotkey: false, ref: createRef<HTMLElement>() },
+    { 'aria-label': 'Notifications', hotkey: false, ref: createRef<HTMLElement>() },
     h(
       Toast,
       {
@@ -52,4 +53,6 @@ const action: ToastActionProps = { children: 'Undo' }
 const pressedAction: ToastActionProps = { altText: 'Undo this save.', pressed: true }
 // @ts-expect-error Close is not a toggle.
 const pressedClose: ToastCloseProps = { defaultPressed: true }
-void [mixed, hidden, action, pressedAction, pressedClose]
+// @ts-expect-error The notification region needs a name.
+const unnamedViewport: ToastViewportProps = {}
+void [mixed, hidden, action, pressedAction, pressedClose, unnamedViewport]

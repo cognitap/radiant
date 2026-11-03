@@ -57,11 +57,15 @@ build on is in [architecture](architecture.md).
 ## Names
 
 - A host that needs an accessible name uses the `AccessibleName` type and
-  `requireAccessibleName`.
+  `requireAccessibleName`, with no English default.
   A native labelable host (input, progress, meter) is named by a `<label>` or
-  Field instead, so it documents the requirement without that type.
+  Field instead, so it documents the requirement without that type. An input
+  with no visible label, such as CommandInput, uses the type.
+- A part takes a name the consumer already gives: CarouselViewport takes the
+  Carousel's and a Toast its ToastTitle's. Its own `aria-label` still wins.
 - A visible name is `label: ReactNode`. A name for an element Radiant renders
-  inside the component is a string ending in `Label`, such as `removeLabel`.
+  inside the component ends in `Label`: a string such as Tag's `removeLabel`,
+  or a function of each item's text, such as TagsInput's.
   Native names keep their meaning, such as Avatar's `alt`.
   Announcement text that replaces an element's content, rather than naming
   it, is `altText`, such as ToastAction's.

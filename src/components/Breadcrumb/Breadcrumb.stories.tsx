@@ -11,6 +11,7 @@ import { RoutedTrail } from '../../../.storybook/examples/BreadcrumbExamples.js'
 const meta = {
   title: 'Components/Breadcrumb',
   component: Breadcrumb,
+  args: { 'aria-label': 'Breadcrumb' },
   parameters: {
     docs: {
       description: {
@@ -24,7 +25,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => (
-    <Breadcrumb>
+    <Breadcrumb aria-label="Breadcrumb">
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink href="#home">Home</BreadcrumbLink>
@@ -80,7 +81,10 @@ export const LongTrail: Story = {
     }
   },
   render: () => (
-    <Breadcrumb style={{ maxWidth: '18rem' }}>
+    <Breadcrumb
+      aria-label="Breadcrumb"
+      style={{ maxWidth: '18rem' }}
+    >
       <BreadcrumbList>
         {trail.map(label => (
           <BreadcrumbItem key={label}>
@@ -110,7 +114,7 @@ export const WithRouter: Story = {
 }
 export const CustomSeparator: Story = {
   render: () => (
-    <Breadcrumb>
+    <Breadcrumb aria-label="Breadcrumb">
       <BreadcrumbList>
         {['Home', 'Projects'].map(label => (
           <BreadcrumbItem key={label}>
@@ -141,6 +145,7 @@ export const CustomSeparator: Story = {
 export const Customisation: Story = {
   render: () => (
     <Breadcrumb
+      aria-label="Breadcrumb"
       style={{
         '--rad-breadcrumb-gap': '.75rem',
         '--rad-breadcrumb-font-size': '1rem',

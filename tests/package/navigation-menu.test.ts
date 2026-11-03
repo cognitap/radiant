@@ -123,5 +123,16 @@ test('theme slots remain independently typed and native viewport caller classes 
     )
   )
   assert.match(styled, /w-48/)
+  assert.match(styled.match(/<[^>]*navigation-menu-viewport[^>]*>/)?.[0] ?? '', /aria-label="Test"/)
+  assert.match(
+    render(
+      h(
+        NavigationMenu,
+        { 'aria-label': 'Test', items },
+        h(NavigationMenuViewport, { 'aria-label': 'Sections' })
+      )
+    ),
+    /aria-label="Sections"/
+  )
   assert.doesNotMatch(styled, /w-\[var\(--_rad-indicator-width/)
 })
