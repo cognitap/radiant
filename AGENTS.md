@@ -1,76 +1,38 @@
 # Radiant
 
-Before changing public props, themes, named parts or composition examples, read
-[the architecture doc](docs/architecture.md) for the shared contract and canonical sources.
+Before changing public props, themes, named parts, or composition examples, read [docs/architecture.md](docs/architecture.md) for the shared contract and canonical sources.
 
-Each component gets its own folder under `src/components/`, named in
-PascalCase: `Button` lives in `src/components/Button/Button.tsx`, with its
-stories beside it in `Button.stories.tsx`. A helper only one component uses
-goes in that folder; styles several components share go in
-`src/components/shared/`. Update imports and public exports to match the
-filename exactly, including case.
+## Structure and styling
 
-Style components with Tailwind utilities. Keep complete class names in source
-so Tailwind can detect them. Define shared token roles in `src/themes/tokens.ts`
-and component overrides in `src/themes/components.ts`; `pnpm theme:generate`
-maintains the generated baseline CSS. Storybook's stylesheet imports Tailwind
-and the `src/styles.css` source entry. Ordinary consumers import the compiled
-`@cognitap/radiant/styles.css`; the reset is a separate opt-in export.
-Tailwind consumers import `@cognitap/radiant/tailwind.css` alongside their own
-Tailwind entry, generating component utilities once in the application build.
+Each component lives in `src/components/<Family>/<Family>.tsx` with its stories in `<Family>.stories.tsx`. Single-component helpers stay in that folder; styles shared across families live in `src/components/shared/`. Match imports and exports to the exact filename case.
 
-Write hover, active, and disabled utilities with those prefixes (`hover:`,
-`active:`, `disabled:`). Matching prefixes let a caller `className` replace
-them, and `disabled:` wins over `hover:` and `active:` in the cascade.
+Style components with complete Tailwind utility names in source. Shared tokens live in `src/themes/tokens.ts` and component overrides in `src/themes/components.ts`; `pnpm theme:generate` generates `src/themes/baseline.css`. Consumers import compiled `@cognitap/radiant/styles.css` (plus optional `reset.css`) or source `@cognitap/radiant/tailwind.css`.
 
-Register each new non-color token in `src/cn.ts` under its utility group.
-Color utilities already share a conflict group.
+Use `hover:`, `active:`, and `disabled:` prefixes so caller `className` utilities override them cleanly, and register new non-color tokens in `src/cn.ts` under their utility group.
+
+## Component conventions
+
+- **State:** Use `x`, `defaultX`, and `onXChange(x)` (passing the next value only) via `ControlledOrUncontrolled` from `src/react/useNativeOwner.ts`. Booleans use `open`, `checked`, or `pressed`; native inputs keep `onChange`. Selection mode is `type: 'single' | 'multiple'` (`string | null` vs. `string[]`).
+- **Forms:** Put `name`, `form`, `required`, `disabled`, and `aria-invalid` on the root and forward them to the focus/form host. Expose `readOnly` only when enforced at runtime. `error` is a validation message; status messages end in `Text` (`loadingText`, `emptyText`, `errorText`). Option groups build on `Field` and take `label` (`legend` is `Fieldset` only). Take `items` only when all options are needed up front.
+- **Props and parts:** Use `variant`, `tone`, and `controlSize` (`'small' | 'medium' | 'large'`). Every `parts` entry is a `PartStyle` (`wrapper`, `label`, `description`, `error`, `indicator`, `options`, `remove`). Sub-parts are named exports (no `as` or `asChild`). Button and anchor hosts accept `render(props)` and export `<Family>RenderProps`. Popup triggers and dialog actions omit `pressed`.
+- **Accessible names:** Hosts without visible text require `AccessibleName` and `requireAccessibleName` with no English fallback. Visible labels use `label: ReactNode`; internal control labels end in `Label` (`removeLabel`, `nextLabel`); replacement announcement text uses `altText`.
+- **Stories:** Start with `Default`, then `WithField`, `SharedControlSizes`, and `Controlled` where applicable. Never set a theme, mode, or canvas in a story; use `#fragment` links, keep radio/form names isolated, fit both Canvas and Docs widths, and never mount modal `<dialog>` elements open.
 
 ## Documentation
 
-Write for someone new to Radiant. Keep each fact in one place and link to it.
-When behavior changes, rewrite the existing text; do not append. Use short,
-plain sentences without ticket IDs, dates or disclaimers. Verification
-evidence, research and test counts go in the pull request, never the repo.
+Keep each fact in one place and rewrite existing text when behavior changes. Do not include ticket IDs, dates, disclaimers, or test counts in the repo. `pnpm docs:check` enforces the word budgets in `docs-policy.json`; cut text rather than raising budgets.
 
-`pnpm docs:check` enforces the word budgets in `docs-policy.json`. When a file
-is over budget, cut text. Never raise a budget or add a `legacy` entry.
-
-Where things go:
-
-- Component props and behavior: that component's page on the docs site
-  (cognitap/radiant-docs), not this repo.
-- Design decisions and cross-family rules: `docs/architecture.md`.
-- Prop names, state attributes, story names and page headings every family
-  shares: `docs/conventions.md`. Follow it when adding or tidying a family.
-- Themes and tokens: `docs/theming.md`. Motion: `docs/motion.md`.
-- Setup and commands: `CONTRIBUTING.md` and `docs/testing.md`.
-- `README.md` stays a short introduction.
-- `CHANGELOG.md`: one line per user-visible change under Unreleased. Give a
-  breaking change a short before and after. Leave out tests, CI and refactors.
+- Component guides (`Usage`, `Examples`, `State`, `Accessibility`, `Motion`, `Styling`, `API`): `cognitap/radiant-docs`.
+- Cross-family architecture and rules: `docs/architecture.md`.
+- Themes: `docs/theming.md`. Motion: `docs/motion.md`. Accessibility checks: `docs/accessibility.md`.
+- Setup and commands: `CONTRIBUTING.md`.
+- `CHANGELOG.md`: one line per user-visible change under `## Unreleased` (with before/after for breaking changes).
 
 ## Releases
 
-Follow [the release policy](RELEASE_POLICY.md) for versions and the workflow.
-Every release takes the same steps, in order:
+Follow [RELEASE_POLICY.md](RELEASE_POLICY.md):
 
-1. Open a pull request named `Release Radiant <version>`. Run
-   `pnpm version patch --no-git-tag-version`, move the Unreleased notes under
-   `## <version>` and leave an empty Unreleased heading above it. Run
-   `pnpm release:prepare` after committing; it needs a clean checkout.
-2. Squash-merge once CI passes.
-3. Run the **Release Radiant** workflow on `main` with `publish` selected.
-4. Confirm the release: `pnpm view @cognitap/radiant@<version> dist.integrity`
-   must match `integrity` in the workflow's `release.json` artifact. If the
-   publish step passed but the integrity step failed, npm was still catching
-   up; check again before doing anything else. Never rerun publish for a
-   version npm already has.
-5. Create the GitHub release `v<version>`, titled `Radiant <version>`, at the
-   `sourceCommit` in `release.json`. Open with "Experimental 0.x release.", list
-   the changelog lines, link the npm version page and name the source commit.
-6. Bump `@cognitap/radiant` in cognitap/radiant-docs: `package.json`, the
-   `minimumReleaseAgeExclude` entry in `pnpm-workspace.yaml` and the lockfile.
-   Rewrite its releases page for the new version.
-
-The npmjs.com package page can show the previous version for a while after
-publishing. The registry, `pnpm view` and installs are what count.
+1. Open PR `Release Radiant <version>`: run `pnpm version patch --no-git-tag-version`, move Unreleased notes under `## <version>`, commit, and run `pnpm release:prepare`.
+2. Squash-merge after CI passes, then run the **Release Radiant** workflow on `main` with `publish`.
+3. Verify `pnpm view @cognitap/radiant@<version> dist.integrity` matches `release.json` (never rerun `publish` for an existing version).
+4. Create GitHub release `v<version>` titled `Radiant <version>` at `sourceCommit`, then bump `@cognitap/radiant` and the releases page in `cognitap/radiant-docs`.
