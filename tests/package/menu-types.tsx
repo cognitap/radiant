@@ -60,3 +60,11 @@ export const pressedMenuItem: MenuItemProps = { pressed: true }
 export const pressedSubTrigger: MenuSubTriggerProps = { onPressedChange: () => {} }
 // @ts-expect-error A checkbox item has one checked owner.
 export const twoCheckedOwners: MenuCheckboxItemProps = { checked: true, defaultChecked: false }
+
+// @ts-expect-error Menu rows take none of Button's treatment.
+export const solidMenuItem: MenuItemProps = { variant: 'solid' }
+// @ts-expect-error Menu rows take none of Button's sizes.
+export const sizedMenuItem: MenuItemProps = { controlSize: 'large' }
+// @ts-expect-error Menu rows have no accent tone.
+export const accentMenuItem: MenuItemProps = { tone: 'accent' }
+export const dangerMenuItem: MenuItemProps = { tone: 'danger' }

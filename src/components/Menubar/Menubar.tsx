@@ -317,6 +317,7 @@ export function MenubarTrigger({
       role="menuitem"
       tabIndex={-1}
       aria-disabled={disabled || undefined}
+      data-disabled={disabled ? '' : undefined}
       variant={variant}
       tone={tone}
       data-value={value}

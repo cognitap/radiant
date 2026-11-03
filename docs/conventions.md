@@ -32,6 +32,7 @@ build on is in [architecture](architecture.md).
 
 - Treatment is `variant`, color is `tone` and size is `controlSize`, defaulting
   to `medium`. Actions default to the `accent` tone and feedback to `neutral`.
+  Menu rows take only `tone`: `neutral` by default, or `warning` or `danger`.
 - Orientation and side props share one exported type each.
 - Every `parts` entry is a `PartStyle`. Recurring roles keep one key: `wrapper`,
   `label`, `description`, `error`, `indicator`, `remove`.

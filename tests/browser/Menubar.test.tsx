@@ -230,6 +230,8 @@ test('disabled and pending titles remain discoverable while activation and point
   expect(document.activeElement).toBe(p.titles[1])
   expect(p.titles[1].disabled).toBe(false)
   expect(p.titles[1]).toHaveAttribute('aria-disabled', 'true')
+  expect(p.titles[1]).toHaveAttribute('data-disabled', '')
+  expect(p.titles[0]).not.toHaveAttribute('data-disabled')
   await key('{Enter}')
   expect(shown(p.panels[0])).toBe(true)
   expect(change).not.toHaveBeenCalled()
