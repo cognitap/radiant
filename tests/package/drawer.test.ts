@@ -51,7 +51,7 @@ test('Drawer keeps native Dialog and Button contracts with stable server markup'
   const dialog = html.match(/<dialog\b[^>]*>/)?.[0] ?? ''
   assert.doesNotMatch(dialog, /\sopen(?:=|\s|>)/)
   for (const slot of [
-    'dialog drawer',
+    'dialog-content drawer-content',
     'button dialog-trigger drawer-trigger',
     'button drawer-handle',
     'dialog-title drawer-title',

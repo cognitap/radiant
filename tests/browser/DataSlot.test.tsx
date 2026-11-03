@@ -558,11 +558,7 @@ for (const { prefix, render, Title, Description } of dialogFamilies) {
   const own = (part: string) => (prefix ? `dialog${part} ${prefix}${part}` : `dialog${part}`)
   const name = prefix || 'dialog'
   hosts.push(
-    [
-      `${name} content`,
-      prefix ? `dialog ${prefix}` : 'dialog',
-      slot => render(<Title>T</Title>, slot)
-    ],
+    [`${name} content`, own('-content'), slot => render(<Title>T</Title>, slot)],
     [`${name} title`, own('-title'), slot => render(<Title data-slot={slot}>T</Title>)],
     [
       `${name} description`,
@@ -584,7 +580,7 @@ const command = (content: ReactNode, slot?: string) => (
   </Command>
 )
 hosts.push(
-  ['Command content', 'dialog command', slot => command(<CommandInput />, slot)],
+  ['Command content', 'dialog-content command-content', slot => command(<CommandInput />, slot)],
   [
     'CommandTitle',
     'dialog-title command-title',

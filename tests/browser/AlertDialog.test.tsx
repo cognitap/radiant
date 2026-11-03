@@ -82,7 +82,7 @@ function Fixture({
 }
 function parts(host: HTMLElement) {
   return {
-    panel: host.querySelector<HTMLDialogElement>('[data-slot~=alert-dialog]')!,
+    panel: host.querySelector<HTMLDialogElement>('[data-slot~=alert-dialog-content]')!,
     trigger: host.querySelector<HTMLButtonElement>('[data-slot~=alert-dialog-trigger]')!,
     action: host.querySelector<HTMLButtonElement>('[data-slot~=alert-dialog-action]')!,
     cancel: host.querySelector<HTMLButtonElement>('[data-slot~=alert-dialog-cancel]')!

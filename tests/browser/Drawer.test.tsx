@@ -145,7 +145,7 @@ test('Drawer hydrates in StrictMode on its actual native dialog and restores foc
   await settled(dialog)
   expect(dialog.matches(':modal')).toBe(true)
   expect(document.activeElement).toBe(handle)
-  expect(dialog.getAttribute('data-slot')).toBe('dialog drawer')
+  expect(dialog.getAttribute('data-slot')).toBe('dialog-content drawer-content')
   expect(handle.getAttribute('data-slot')).toContain('button')
   expect(dialog.getAttribute('aria-labelledby')).toBe(host.querySelector('h2')!.id)
   await user.keyboard('{Escape}')

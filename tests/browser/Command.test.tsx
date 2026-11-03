@@ -76,7 +76,7 @@ test('hydrates a real labelled native modal, focuses input, groups real options 
   expect(input.getAttribute('name')).toBeNull()
   expect(inputRef.current).toBe(input)
   expect(ref.current).toBe(dialog)
-  expect(dialog.dataset.slot).toBe('dialog command')
+  expect(dialog.dataset.slot).toBe('dialog-content command-content')
   expect(host.querySelector('button')!.dataset.slot).toBe('button dialog-trigger command-trigger')
   await click(host.querySelector('button')!)
   expect(dialog.matches(':modal')).toBe(true)

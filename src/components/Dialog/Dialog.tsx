@@ -284,7 +284,11 @@ export function DialogContent({
       aria-describedby={joinIds(dialog.descriptionId, props['aria-describedby'])}
       aria-labelledby={props['aria-label'] ? props['aria-labelledby'] : dialog.titleId}
       className={cn(dialogVariants(), className)}
-      data-slot={joinIds('dialog', family === 'dialog' ? undefined : family, props['data-slot'])}
+      data-slot={joinIds(
+        'dialog-content',
+        family === 'dialog' ? undefined : `${family}-content`,
+        props['data-slot']
+      )}
       data-state={dialog.open ? 'open' : 'closed'}
       id={dialog.contentId}
       onCancel={event => {
