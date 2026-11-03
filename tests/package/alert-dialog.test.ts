@@ -32,7 +32,7 @@ test('installed AlertDialog renders protected alert semantics, composed identiti
   assert.match(tag, /role="alertdialog"/)
   assert.match(tag, /aria-modal="true"/)
   assert.doesNotMatch(tag, /\sopen(?:=|\s|>)/)
-  assert.match(tag, /data-slot="dialog alert-dialog"/)
+  assert.match(tag, /data-slot="dialog-content alert-dialog-content"/)
   assert.match(tag, /--rad-dialog-width:24rem/)
   const titleId = tag.match(/aria-labelledby="([^"]+)"/)?.[1]
   const descriptionId = tag.match(/aria-describedby="([^"]+)"/)?.[1]

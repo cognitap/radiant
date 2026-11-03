@@ -698,7 +698,7 @@ test('a dialog stays closed in server markup and names itself from its title', (
   const dialogTag = /<dialog\b[^>]*>/.exec(html)?.[0] ?? ''
   assert.doesNotMatch(dialogTag, /\sopen(?:=|\s|>)/)
   assert.doesNotMatch(html, /closeOnBackdrop|closeOnEscape|onOpenChange/)
-  assert.match(dialogTag, /data-slot="dialog caller-panel"/)
+  assert.match(dialogTag, /data-slot="dialog-content caller-panel"/)
   assert.match(dialogTag, /data-state="open"/)
   assert.match(dialogTag, /style="--rad-dialog-width:24rem"/)
   assert.doesNotMatch(html, /wrong-panel|wrong-state|wrong-title|wrong-description/)

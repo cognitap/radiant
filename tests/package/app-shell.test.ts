@@ -46,7 +46,7 @@ test('AppShell SSR keeps native banner/navigation/main landmarks, named real lin
   assert.match(html, /aria-controls="workspace-nav"/)
   assert.equal((html.match(/<nav\b/g) || []).length, 1)
   assert.match(html, /data-slot="button sidebar-trigger"/)
-  assert.match(html, /data-slot="dialog drawer"/)
+  assert.match(html, /data-slot="dialog-content drawer-content"/)
   assert.doesNotMatch(html, /<dialog[^>]+open=/)
   const labelled = html.match(/<nav[^>]+aria-labelledby="([^"]+)"/)?.[1]
   assert.ok(labelled && html.includes(`id="${labelled}"`))

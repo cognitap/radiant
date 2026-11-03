@@ -273,7 +273,7 @@ test('mobile uses the real modal Drawer, preserves input and node identity acros
     await pause(50)
     const dialog = node.closest('dialog')!
     expect(dialog.open).toBe(true)
-    expect(dialog.getAttribute('data-slot')).toContain('drawer')
+    expect(dialog.getAttribute('data-slot')).toContain('drawer-content')
     await act(async () => {
       input.value = 'Mobile search'
       input.dispatchEvent(new Event('input', { bubbles: true }))
