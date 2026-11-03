@@ -100,11 +100,18 @@ export type DialogContentProps = Omit<ComponentProps<'dialog'>, 'open' | 'style'
   style?: ThemeStyle
   /** Opt-in MotionProvider presentation; native close and focus never wait for an exit. */
   motion?: 'inherit' | 'off'
+  'data-slot'?: string
 }
 
-export type DialogTitleProps = Omit<ComponentProps<'h2'>, 'style'> & { style?: ThemeStyle }
+export type DialogTitleProps = Omit<ComponentProps<'h2'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 
-export type DialogDescriptionProps = Omit<ComponentProps<'p'>, 'style'> & { style?: ThemeStyle }
+export type DialogDescriptionProps = Omit<ComponentProps<'p'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 
 export type DialogCloseProps = DialogTriggerProps
 
@@ -279,7 +286,7 @@ export function DialogContent({
       aria-describedby={joinIds(dialog.descriptionId, props['aria-describedby'])}
       aria-labelledby={props['aria-label'] ? props['aria-labelledby'] : dialog.titleId}
       className={cn(dialogVariants(), className)}
-      data-slot={family === 'dialog' ? 'dialog' : `dialog ${family}`}
+      data-slot={joinIds('dialog', family === 'dialog' ? undefined : family, props['data-slot'])}
       data-state={dialog.open ? 'open' : 'closed'}
       id={dialog.contentId}
       onCancel={event => {
@@ -313,7 +320,11 @@ export function DialogTitle({ className, children, ...props }: DialogTitleProps)
     <h2
       {...props}
       className={cn(dialogTitleVariants(), className)}
-      data-slot={family === 'dialog' ? 'dialog-title' : `dialog-title ${family}-title`}
+      data-slot={joinIds(
+        'dialog-title',
+        family === 'dialog' ? undefined : `${family}-title`,
+        props['data-slot']
+      )}
       id={dialog.titleId}
     >
       {children}
@@ -328,9 +339,11 @@ export function DialogDescription({ className, ...props }: DialogDescriptionProp
     <p
       {...props}
       className={cn(dialogDescriptionVariants(), className)}
-      data-slot={
-        family === 'dialog' ? 'dialog-description' : `dialog-description ${family}-description`
-      }
+      data-slot={joinIds(
+        'dialog-description',
+        family === 'dialog' ? undefined : `${family}-description`,
+        props['data-slot']
+      )}
       id={dialog.descriptionId}
     />
   )

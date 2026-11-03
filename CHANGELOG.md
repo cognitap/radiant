@@ -9,6 +9,7 @@
 - RadioGroup passes its `form` prop to every radio, so a group placed outside its form submits its value.
 - Checkboxes in an invalid CheckboxGroup show the invalid border, as radios in an invalid RadioGroup do.
 - Radios outside an invalid RadioGroup keep their normal border, even inside a Form with errors.
+- Keep a caller's `data-slot` tokens after the family's own on Link, Input, Textarea, Checkbox, Switch, Radio, Slider, FileInput, the Select, Combobox, Autocomplete, MultiSelect and Command parts, TooltipContent and the Dialog, AlertDialog and Drawer content, title and description, instead of replacing them.
 
 ## 0.0.77
 

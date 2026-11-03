@@ -4,6 +4,7 @@ import type { ComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../Button/Button.js'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { useFieldControl } from '../Field/Field.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
@@ -17,6 +18,8 @@ export type FileInputProps = Omit<
   controlSize?: ControlSize
   /** Applied to the native input. */
   style?: ThemeStyle
+  /** Additional composed identities; the file-input token is always retained. */
+  'data-slot'?: string
   /** Visible text of the choose action; defaults to "Choose file" or "Choose files". */
   chooseLabel?: string
   /** Shown while no file is chosen; defaults to "No file chosen" or "No files chosen". */
@@ -39,6 +42,7 @@ export function FileInput({
   parts,
   ref,
   onChange,
+  'data-slot': slot,
   ...props
 }: FileInputProps) {
   const control = useFieldControl(props),
@@ -83,7 +87,7 @@ export function FileInput({
           setChosen(names(event.currentTarget))
           onChange?.(event)
         }}
-        data-slot="file-input"
+        data-slot={joinIds('file-input', slot)}
         data-control-size={controlSize}
         className={cn(
           'peer absolute inset-0 m-0 box-border size-full cursor-pointer p-0 opacity-0',

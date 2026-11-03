@@ -2,6 +2,7 @@
 
 import type { ComponentProps } from 'react'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import { useFieldControl } from '../Field/Field.js'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
@@ -101,6 +102,8 @@ export type SliderProps = Omit<
     controlSize?: ControlSize
     /** Native input styles, including slider track/thumb theme variables. */
     style?: ThemeStyle
+    /** Additional composed identities; the slider token is always retained. */
+    'data-slot'?: string
   }
 
 /** One native range input owns numeric selection, keyboard, pointer and forms. */
@@ -114,6 +117,7 @@ export function Slider({
   disabled,
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
+  'data-slot': slot,
   ...props
 }: SliderProps) {
   useNativeOwner('Slider', props.value, props.defaultValue)
@@ -149,7 +153,7 @@ export function Slider({
           : 'h-[var(--rad-slider-height,var(--_rad-control-height))] w-[var(--rad-slider-length,100%)]',
         className
       )}
-      data-slot="slider"
+      data-slot={joinIds('slider', slot)}
       data-control-size={controlSize}
       data-orientation={orientation}
       type="range"

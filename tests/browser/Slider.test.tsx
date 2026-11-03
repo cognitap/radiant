@@ -374,7 +374,7 @@ test('native bounds sanitize defaults, keyboard cancellation works, and spoofed 
   expect(input.getAttribute('aria-valuenow')).toBeNull()
   expect(input.hasAttribute('required')).toBe(false)
   expect(input.readOnly).toBe(false)
-  expect(input.dataset.slot).toBe('slider')
+  expect(input.dataset.slot).toBe('slider other')
   expect(input.dataset.orientation).toBe('horizontal')
   await act(async () => {
     input.focus()

@@ -3,6 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import type { ButtonVariant, ControlSize, Tone } from '../../presentation.js'
 import { actionTone, actionVariants } from '../shared/actionStyles.js'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 
 const linkVariants = cva(
@@ -34,7 +35,7 @@ export type LinkVariant = NonNullable<LinkVariants['variant']> | ButtonVariant
 
 export type LinkRenderProps = Omit<ComponentProps<'a'>, 'style'> & {
   style?: ThemeStyle
-  'data-slot': 'link'
+  'data-slot': string
   'data-variant': LinkVariant
   'data-tone': Tone
   'data-control-size': ControlSize
@@ -42,6 +43,8 @@ export type LinkRenderProps = Omit<ComponentProps<'a'>, 'style'> & {
 
 export type LinkProps = Omit<ComponentProps<'a'>, 'style'> & {
   style?: ThemeStyle
+  /** Additional composed identities; the link token is always retained. */
+  'data-slot'?: string
   /** Inline/subtle inherit text metrics; action treatments share Button's presentation. */
   variant?: LinkVariant
   /** Semantic palette, independent of treatment. */
@@ -65,6 +68,7 @@ export function Link({
   target,
   rel,
   children,
+  'data-slot': slot,
   ...props
 }: LinkProps) {
   const anchorProps: LinkRenderProps = {
@@ -76,7 +80,7 @@ export function Link({
       variant === 'inline' || variant === 'subtle'
         ? cn(actionTone({ tone }), linkVariants({ variant }), className)
         : cn(actionVariants({ variant, tone, controlSize }), className),
-    'data-slot': 'link',
+    'data-slot': joinIds('link', slot) ?? 'link',
     'data-variant': variant,
     'data-tone': tone,
     'data-control-size': controlSize,

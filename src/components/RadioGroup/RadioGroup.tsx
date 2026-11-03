@@ -108,6 +108,8 @@ export type RadioProps = Omit<
     value: string
     controlSize?: ControlSize
     style?: ThemeStyle
+    /** Additional composed identities; the radio token is always retained. */
+    'data-slot'?: string
     /** Presentation only. Root styling, native props and ref still reach the input. */
     parts?: ControlParts & { description?: PartStyle }
   }
@@ -188,6 +190,7 @@ export function Radio({
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
+  'data-slot': slot,
   ...props
 }: RadioProps) {
   const group = useContext(RadioGroupContext)
@@ -251,7 +254,7 @@ export function Radio({
         checked={controlled ? selected : undefined}
         className={cn(radioVariants(), controlMetrics({ controlSize }), className)}
         data-control-size={controlSize}
-        data-slot="radio"
+        data-slot={joinIds('radio', slot)}
         defaultChecked={
           controlled ? undefined : group ? group.defaultValue === value : defaultChecked
         }

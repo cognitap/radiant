@@ -285,7 +285,7 @@ test('adapted links keep resolved identity and consume presentation props', () =
     )
     const anchor = new DOMParser().parseFromString(native, 'text/html').querySelector('a')!
     expect(adapted).toBe(native)
-    expect(anchor.dataset.slot).toBe('link')
+    expect(anchor.dataset.slot).toBe('link pretend-button')
     expect(anchor.dataset.variant).toBe(variant)
     expect(anchor.dataset.tone).toBe('warning')
     expect(anchor.dataset.controlSize).toBe('large')

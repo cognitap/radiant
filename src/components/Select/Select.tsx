@@ -17,6 +17,7 @@ import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Butt
 import { useField, useFieldControl } from '../Field/Field.js'
 import type { DistributiveOmit } from '../../internal/types.js'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import { controlMetrics, itemGroupLabelClass } from '../shared/controlStyles.js'
 import { matchSelectText, moveSelectFocus, positionSelect } from '../../internal/select.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
@@ -362,7 +363,7 @@ export function SelectTrigger({
       aria-expanded={select.open}
       aria-required={select.required || undefined}
       aria-readonly={select.readOnly || undefined}
-      data-slot="button select-trigger"
+      data-slot={joinIds('select-trigger', props['data-slot'])}
       data-state={select.open ? 'open' : 'closed'}
       data-placeholder={select.value === null ? '' : undefined}
       onClick={event => {
@@ -397,6 +398,7 @@ export function SelectTrigger({
 export type SelectValueProps = Omit<ComponentProps<'span'>, 'style'> & {
   placeholder?: ReactNode
   style?: ThemeStyle
+  'data-slot'?: string
 }
 export function SelectValue({
   placeholder = 'Select an option',
@@ -409,19 +411,22 @@ export function SelectValue({
     <span
       {...props}
       className={cn('min-w-0 truncate', className)}
-      data-slot="select-value"
+      data-slot={joinIds('select-value', props['data-slot'])}
     >
       {children ?? select.items.find(item => item.value === select.value)?.label ?? placeholder}
     </span>
   )
 }
-export type SelectIconProps = Omit<ComponentProps<'span'>, 'style'> & { style?: ThemeStyle }
+export type SelectIconProps = Omit<ComponentProps<'span'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 export function SelectIcon({ children, className, ...props }: SelectIconProps) {
   return (
     <span
       {...props}
       aria-hidden="true"
-      data-slot="select-icon"
+      data-slot={joinIds('select-icon', props['data-slot'])}
       className={cn('shrink-0', className)}
     >
       {children ?? (
@@ -454,6 +459,7 @@ export type SelectContentProps = Omit<ComponentProps<'div'>, 'style' | 'popover'
   sideOffset?: number
   collisionPadding?: number
   motion?: 'inherit' | 'off'
+  'data-slot'?: string
 }
 export function SelectContent({
   children,
@@ -515,7 +521,7 @@ export function SelectContent({
       ).find(item => item.dataset.value === latest.current.value)
       const rect = trigger.getBoundingClientRect()
       const computed = win.getComputedStyle(node)
-      const viewportNode = node.querySelector<HTMLElement>('[data-slot="select-viewport"]')
+      const viewportNode = node.querySelector<HTMLElement>('[data-slot~="select-viewport"]')
       const naturalHeight = viewportNode
         ? viewportNode.scrollHeight +
           parseFloat(computed.paddingTop) +
@@ -635,7 +641,7 @@ export function SelectContent({
           'opacity-[var(--_rad-popup-enter,0)] motion-reduce:opacity-100',
         className
       )}
-      data-slot="select-content"
+      data-slot={joinIds('select-content', props['data-slot'])}
       data-state={select.open ? 'open' : 'closed'}
       data-motion={motion}
       data-position={position}
@@ -682,12 +688,15 @@ export function SelectContent({
   )
 }
 
-export type SelectViewportProps = Omit<ComponentProps<'div'>, 'style'> & { style?: ThemeStyle }
+export type SelectViewportProps = Omit<ComponentProps<'div'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 export function SelectViewport({ className, ...props }: SelectViewportProps) {
   return (
     <div
       {...props}
-      data-slot="select-viewport"
+      data-slot={joinIds('select-viewport', props['data-slot'])}
       className={cn(
         'max-h-[calc(var(--_rad-select-max-height,100dvh)-0.5rem)] overflow-y-auto overscroll-contain',
         scrollbarClass,
@@ -699,6 +708,7 @@ export function SelectViewport({ className, ...props }: SelectViewportProps) {
 export type SelectItemProps = Omit<ComponentProps<'div'>, 'style'> & {
   value: string
   style?: ThemeStyle
+  'data-slot'?: string
 }
 export function SelectItem({
   value,
@@ -720,7 +730,7 @@ export function SelectItem({
         tabIndex={-1}
         aria-selected={select.value === value}
         aria-disabled={item.disabled || undefined}
-        data-slot="select-item"
+        data-slot={joinIds('select-item', props['data-slot'])}
         data-value={value}
         data-disabled={item.disabled ? '' : undefined}
         data-selected={select.value === value ? '' : undefined}
@@ -752,14 +762,17 @@ export function SelectItem({
     </SelectItemContext.Provider>
   )
 }
-export type SelectItemTextProps = Omit<ComponentProps<'span'>, 'style'> & { style?: ThemeStyle }
+export type SelectItemTextProps = Omit<ComponentProps<'span'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
 export function SelectItemText({ children, className, ...props }: SelectItemTextProps) {
   const item = useContext(SelectItemContext)
   if (!item) throw new Error('SelectItemText must render inside SelectItem.')
   return (
     <span
       {...props}
-      data-slot="select-item-text"
+      data-slot={joinIds('select-item-text', props['data-slot'])}
       className={cn('min-w-0 flex-1', className)}
     >
       {children ?? item.label}
@@ -773,7 +786,7 @@ export function SelectItemIndicator({ children, className, ...props }: SelectIco
   return (
     <span
       {...props}
-      data-slot="select-item-indicator"
+      data-slot={joinIds('select-item-indicator', props['data-slot'])}
       aria-hidden="true"
       className={cn('shrink-0', select.value !== item.value && 'invisible', className)}
     >
@@ -784,6 +797,7 @@ export function SelectItemIndicator({ children, className, ...props }: SelectIco
 export type SelectGroupProps = Omit<ComponentProps<'div'>, 'style'> & {
   label: ReactNode
   style?: ThemeStyle
+  'data-slot'?: string
 }
 export function SelectGroup({ label, children, className, ...props }: SelectGroupProps) {
   const id = useId()
@@ -792,7 +806,7 @@ export function SelectGroup({ label, children, className, ...props }: SelectGrou
       {...props}
       role="group"
       aria-labelledby={id}
-      data-slot="select-group"
+      data-slot={joinIds('select-group', props['data-slot'])}
       className={className}
     >
       <div
