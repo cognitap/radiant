@@ -562,6 +562,7 @@ export function ComboboxRoot(
             type="text"
             className="sr-only"
             data-slot="combobox-native multi-select-native"
+            data-form-name={name}
             form={form}
             disabled={disabled}
             readOnly={readOnly}

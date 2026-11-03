@@ -194,6 +194,7 @@ export function NumberField({
         form={form}
         readOnly={readOnly}
         family="number-field"
+        data-form-name={name}
         type="text"
         role="spinbutton"
         value={text}
