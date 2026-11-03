@@ -2,12 +2,12 @@
 
 ## Which check to run
 
-| Command             | When                              | What it runs                                                                                                         |
-| ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `pnpm check`        | Every change; CI runs it          | Theme check, format, lint, types, docs policy, build, repo checks, packed package, Storybook, Radiant light and dark |
-| `pnpm test`         | Runtime changes                   | Repo checks in `tests/*.test.mjs` and the packed package                                                             |
-| `pnpm test:browser` | Story or browser behavior changes | Every story in every preset, light and dark, plus `tests/browser/`                                                   |
-| `pnpm test:package` | Package export changes            | The packed package                                                                                                   |
+| Command             | When                                                  | What it runs                                                                                                         |
+| ------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`        | Every change; CI runs its two halves as parallel jobs | Theme check, format, lint, types, docs policy, build, repo checks, packed package, Storybook, Radiant light and dark |
+| `pnpm test`         | Runtime changes                                       | Repo checks in `tests/*.test.mjs` and the packed package                                                             |
+| `pnpm test:browser` | Story or browser behavior changes                     | Every story in every preset, light and dark, plus `tests/browser/`                                                   |
+| `pnpm test:package` | Package export changes                                | The packed package                                                                                                   |
 
 ## Browser tests
 
