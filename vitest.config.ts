@@ -1,3 +1,4 @@
+import { availableParallelism } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
@@ -15,7 +16,7 @@ import { themes } from './src/examples/index.js'
 
 export default defineConfig({
   test: {
-    maxWorkers: 2,
+    maxWorkers: availableParallelism(),
     attachmentsDir: 'output/browser/attachments',
     reporters: [
       'default',
