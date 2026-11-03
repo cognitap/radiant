@@ -3,6 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useNativeOwner, type CheckedOwner } from '../../react/useNativeOwner.js'
 import { controlBorderClass, controlMetrics, indicatorPressClass } from '../shared/controlStyles.js'
@@ -64,6 +65,8 @@ export type CheckboxProps = Omit<
     controlSize?: ControlSize
     /** Input styles. Parts style the wrapper, label and decorative indicators. */
     style?: ThemeStyle
+    /** Additional composed identities; the checkbox token is always retained. */
+    'data-slot'?: string
     parts?: ControlParts
   }
 
@@ -87,6 +90,7 @@ export function Checkbox({
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
+  'data-slot': slot,
   ...props
 }: CheckboxProps) {
   const controlled = useNativeOwner('Checkbox', checked, defaultChecked)
@@ -135,7 +139,7 @@ export function Checkbox({
         ref={hostRef}
         className={cn(checkboxVariants(), controlMetrics({ controlSize }), className)}
         data-control-size={controlSize}
-        data-slot="checkbox"
+        data-slot={joinIds('checkbox', slot)}
         type="checkbox"
       />
       <svg

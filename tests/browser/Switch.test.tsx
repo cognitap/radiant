@@ -32,7 +32,7 @@ afterEach(async () => {
   }
   await commands.emulatePreferences({ reducedMotion: 'no-preference', forcedColors: 'none' })
 })
-const input = (host: HTMLElement) => host.querySelector<HTMLInputElement>('[data-slot=switch]')!
+const input = (host: HTMLElement) => host.querySelector<HTMLInputElement>('[data-slot~=switch]')!
 const thumb = (host: HTMLElement) =>
   host.querySelector<HTMLElement>('[data-slot=switch-indicator]')!
 

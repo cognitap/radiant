@@ -3,6 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import { useSwitchDrag } from '../../react/useSwitchDrag.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useNativeOwner, type CheckedOwner } from '../../react/useNativeOwner.js'
@@ -62,6 +63,8 @@ export type SwitchProps = Omit<
     controlSize?: ControlSize
     /** Native input styles. Parts style the wrapper, label and decorative thumb. */
     style?: ThemeStyle
+    /** Additional composed identities; the switch token is always retained. */
+    'data-slot'?: string
     parts?: ControlParts
   }
 
@@ -80,6 +83,7 @@ export function Switch({
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
+  'data-slot': slot,
   ...props
 }: SwitchProps) {
   const controlled = useNativeOwner('Switch', checked, defaultChecked)
@@ -132,7 +136,7 @@ export function Switch({
         ref={hostRef}
         className={cn(switchVariants(), controlMetrics({ controlSize }), className)}
         data-control-size={controlSize}
-        data-slot="switch"
+        data-slot={joinIds('switch', slot)}
         data-dragging={undefined}
         type="checkbox"
         role="switch"

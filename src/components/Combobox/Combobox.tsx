@@ -153,7 +153,13 @@ export function useCommandParts() {
   if (!box?.command) throw new Error('Command results must render inside Command.')
   return box
 }
-function componentSlot(multiple: boolean, textMode: boolean, name: string, command = false) {
+function componentSlot(
+  multiple: boolean,
+  textMode: boolean,
+  name: string,
+  command = false,
+  slot?: string
+) {
   return (
     joinIds(
       name,
@@ -162,7 +168,8 @@ function componentSlot(multiple: boolean, textMode: boolean, name: string, comma
         ? name.replaceAll('combobox-', 'multi-select-')
         : textMode
           ? name.replaceAll('combobox-', 'autocomplete-')
-          : undefined
+          : undefined,
+      slot
     ) ?? name
   )
 }
@@ -628,7 +635,7 @@ export type ComboboxInputProps = Omit<
   | 'aria-expanded'
   | 'aria-autocomplete'
   | 'aria-activedescendant'
-> & { style?: ThemeStyle }
+> & { style?: ThemeStyle; 'data-slot'?: string }
 export function ComboboxInput({
   className,
   ref,
@@ -665,7 +672,13 @@ export function ComboboxInput({
         controlMetrics({ controlSize: box.controlSize }),
         className
       )}
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-input', !!box.command)}
+      data-slot={componentSlot(
+        box.multiple,
+        !!box.textInput,
+        'combobox-input',
+        !!box.command,
+        props['data-slot']
+      )}
       data-control-size={box.controlSize}
       aria-autocomplete="list"
       aria-expanded={box.open}
@@ -830,7 +843,13 @@ export function ComboboxTrigger({
       aria-label={props['aria-label'] ?? (box.textInput ? 'Show suggestions' : 'Show options')}
       aria-controls={box.open ? box.listId : undefined}
       aria-expanded={box.open}
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'button combobox-trigger')}
+      data-slot={componentSlot(
+        box.multiple,
+        !!box.textInput,
+        'button combobox-trigger',
+        false,
+        props['data-slot']
+      )}
       onPointerDown={event => {
         onPointerDown?.(event)
         if (!event.defaultPrevented) event.preventDefault()
@@ -898,7 +917,13 @@ export function ComboboxClear({
       }}
       tabIndex={box.multiple ? 0 : -1}
       aria-label={props['aria-label'] ?? (box.textInput ? 'Clear text' : 'Clear selection')}
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'button combobox-clear')}
+      data-slot={componentSlot(
+        box.multiple,
+        !!box.textInput,
+        'button combobox-clear',
+        false,
+        props['data-slot']
+      )}
       onPointerDown={event => {
         onPointerDown?.(event)
         if (!event.defaultPrevented) event.preventDefault()
@@ -938,6 +963,7 @@ export type ComboboxContentProps = Omit<
   sideOffset?: number
   collisionPadding?: number
   motion?: 'inherit' | 'off'
+  'data-slot'?: string
 }
 export function ComboboxContent({
   children,
@@ -961,7 +987,13 @@ export function ComboboxContent({
       {...props}
       ref={transitionRef}
       popover="manual"
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-content', !!box.command)}
+      data-slot={componentSlot(
+        box.multiple,
+        !!box.textInput,
+        'combobox-content',
+        !!box.command,
+        props['data-slot']
+      )}
       data-motion={motion}
       data-state={box.open ? 'open' : 'closed'}
       className={cn(
@@ -1022,14 +1054,14 @@ export function ComboboxInlineContent({
   className,
   ref,
   ...props
-}: Omit<ComponentProps<'div'>, 'style'> & { style?: ThemeStyle }) {
+}: Omit<ComponentProps<'div'>, 'style'> & { style?: ThemeStyle; 'data-slot'?: string }) {
   const box = useCommandParts()
   const contentRef = useComposedRefs(box.content, ref)
   return (
     <div
       {...props}
       ref={contentRef}
-      data-slot="combobox-content command-list"
+      data-slot={joinIds('combobox-content', 'command-list', props['data-slot'])}
       className={cn(
         'flex min-h-0 min-w-0 flex-col overflow-hidden',
         controlMetrics({ controlSize: box.controlSize }),
@@ -1048,7 +1080,7 @@ export function ComboboxInlineContent({
 export type ComboboxItemProps = Omit<
   ComponentProps<'div'>,
   'style' | 'id' | 'role' | 'tabIndex'
-> & { value: string; style?: ThemeStyle }
+> & { value: string; style?: ThemeStyle; 'data-slot'?: string }
 export function ComboboxItem({
   value,
   children,
@@ -1070,7 +1102,13 @@ export function ComboboxItem({
       onKeyDown={props.onKeyDown}
       aria-selected={box.multiple ? isItemOpen(box.value, value) : box.active === value}
       aria-disabled={item.disabled || undefined}
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-item', !!box.command)}
+      data-slot={componentSlot(
+        box.multiple,
+        !!box.textInput,
+        'combobox-item',
+        !!box.command,
+        props['data-slot']
+      )}
       data-value={value}
       data-highlighted={box.active === value ? '' : undefined}
       data-selected={isItemOpen(box.value, value) ? '' : undefined}
@@ -1106,6 +1144,7 @@ export function ComboboxItem({
 }
 export type ComboboxStatusProps = Omit<ComponentProps<'div'>, 'style' | 'role'> & {
   style?: ThemeStyle
+  'data-slot'?: string
 }
 export function ComboboxStatus({ children, className, ...props }: ComboboxStatusProps) {
   const box = useComboboxContext()
@@ -1115,7 +1154,13 @@ export function ComboboxStatus({ children, className, ...props }: ComboboxStatus
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      data-slot={componentSlot(box.multiple, !!box.textInput, 'combobox-status', !!box.command)}
+      data-slot={componentSlot(
+        box.multiple,
+        !!box.textInput,
+        'combobox-status',
+        !!box.command,
+        props['data-slot']
+      )}
       className={cn('px-3 py-2 empty:hidden', className)}
     >
       {box.open ? (children ?? box.status) : null}
@@ -1125,6 +1170,7 @@ export function ComboboxStatus({ children, className, ...props }: ComboboxStatus
 
 export type ComboboxTagsProps = Omit<ComponentProps<'div'>, 'children' | 'style'> & {
   style?: ThemeStyle
+  'data-slot'?: string
 }
 export function ComboboxTags({ className, ...props }: ComboboxTagsProps) {
   const box = useComboboxContext()
@@ -1132,7 +1178,7 @@ export function ComboboxTags({ className, ...props }: ComboboxTagsProps) {
   return (
     <div
       {...props}
-      data-slot="combobox-tags multi-select-tags"
+      data-slot={joinIds('combobox-tags', 'multi-select-tags', props['data-slot'])}
       className={cn(
         'flex flex-wrap items-center gap-[var(--rad-multi-select-gap,0.5rem)] mb-[var(--rad-multi-select-gap,0.5rem)] empty:hidden',
         className

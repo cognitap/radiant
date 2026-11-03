@@ -3,6 +3,7 @@
 import type { ComponentProps } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
@@ -45,6 +46,8 @@ export type InputProps = Omit<ComponentProps<'input'>, 'value' | 'defaultValue' 
     controlSize?: ControlSize
     /** Applied to the native input, including caller-owned motion styles. */
     style?: ThemeStyle
+    /** Additional composed identities; the input token is always retained. */
+    'data-slot'?: string
   }
 
 /** Native editing, selection, events and ref; Field supplies owned form relationships. */
@@ -71,6 +74,7 @@ export function InputRoot({
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
+  'data-slot': slot,
   ...props
 }: InputProps & {
   family?: 'tags-input' | 'otp-field' | 'input-group-input' | 'password-input' | 'number-field'
@@ -96,13 +100,12 @@ export function InputRoot({
       required={nativeRequired === false ? false : control.required}
       className={cn(inputVariants(), controlMetrics({ controlSize }), className)}
       data-control-size={controlSize}
-      data-slot={
-        family === 'password-input' || family === 'number-field'
-          ? 'input input-group-input ' + family
-          : family
-            ? `input ${family}`
-            : 'input'
-      }
+      data-slot={joinIds(
+        'input',
+        family === 'password-input' || family === 'number-field' ? 'input-group-input' : undefined,
+        family,
+        slot
+      )}
       type={type}
     />
   )

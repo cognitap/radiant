@@ -112,6 +112,7 @@ export type TooltipContentProps = Omit<
   sideOffset?: number
   collisionPadding?: number
   motion?: 'inherit' | 'off'
+  'data-slot'?: string
 }
 export function TooltipTrigger({
   ref,
@@ -189,7 +190,7 @@ export function TooltipContent({
       role="tooltip"
       popover="manual"
       tabIndex={undefined}
-      data-slot="tooltip-content"
+      data-slot={joinIds('tooltip-content', props['data-slot'])}
       data-state={tip.open ? 'open' : 'closed'}
       data-side={side}
       data-align={align}

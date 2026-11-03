@@ -163,8 +163,8 @@ cannot replace IDs, ARIA, handlers or refs. Caller classes merge after the
 defaults and caller `style` wins. Identity and presentation data attributes
 cannot be overridden.
 
-`data-slot` is a space-separated set, so select with `~=`, as in
-`[data-slot~="button"]`. Composed parts keep their base identity:
+`data-slot` is a space-separated set, so select with `[data-slot~="button"]`.
+Every host keeps its base identity first, then appends caller tokens:
 `button dialog-trigger`, `field radio-group`, `collapsible accordion-item`.
 Why: styling written for Button still reaches a DialogTrigger.
 

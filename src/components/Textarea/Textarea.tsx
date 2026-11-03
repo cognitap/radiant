@@ -3,6 +3,7 @@
 import type { ComponentProps } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from '../../cn.js'
+import { joinIds } from '../../internal/ids.js'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
@@ -54,6 +55,8 @@ export type TextareaProps = Omit<
     controlSize?: ControlSize
     /** Applied to the native textarea, including caller-owned motion styles. */
     style?: ThemeStyle
+    /** Additional composed identities; the textarea token is always retained. */
+    'data-slot'?: string
   }
 
 /** Native editing, selection, events and ref; Field supplies owned form relationships. */
@@ -78,6 +81,7 @@ export function TextareaRoot({
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
+  'data-slot': slot,
   ...props
 }: TextareaProps & { family?: 'input-group-textarea' }) {
   useNativeOwner('Textarea', props.value, props.defaultValue)
@@ -98,7 +102,7 @@ export function TextareaRoot({
       {...control}
       className={cn(textareaVariants(), controlMetrics({ controlSize }), className)}
       data-control-size={controlSize}
-      data-slot={family ? `textarea ${family}` : 'textarea'}
+      data-slot={joinIds('textarea', family, slot)}
       rows={rows}
     />
   )
