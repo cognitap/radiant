@@ -13,6 +13,9 @@
 - Draw every keyboard focus ring from the family focus overrides and the `focus` tokens. Carousel, Toast, ScrollArea, CodeBlock, ContextMenu, Table, Select, Combobox, NativeSelect, NavLink, Resizable, AppShell and chart points ignored some of them, such as `focus.style`.
 - Add `focusWidth`, `focusOffset` and `focusStyle` to the `select` and `combobox` overrides, and `focusStyle` to `nativeSelect`, `inputGroup`, `navLink` and `resizable`.
 - Highlight the focused Menu, ContextMenu and Menubar item with the accent fill that Select and Combobox options use, instead of a faint tint.
+- Breaking: menu rows (MenuItem, MenuCheckboxItem, MenuRadioItem, MenuSubTrigger and their ContextMenu and Menubar versions) no longer accept `variant`, `controlSize`, `iconOnly` or `fullWidth`, which never changed how they looked, and no longer render `data-variant` or `data-control-size`. Before: `<MenuItem variant="solid" controlSize="small">Delete</MenuItem>`. After: `<MenuItem>Delete</MenuItem>`.
+- Breaking: menu row `tone` now colors the row and takes `neutral` (the default), `warning` or `danger`, so `data-tone` is `neutral` unless set. Before: `<MenuItem tone="danger">` rendered `data-tone="danger"` and looked like any other row; `tone="accent"` was accepted. After: `<MenuItem tone="danger">` has danger text and a solid danger highlight; use `neutral` instead of `accent`. Theme the rest colors with `menu.itemWarningColor` and `menu.itemDangerColor`.
+- Menu rows set `data-disabled` when disabled, and checked MenuCheckboxItem and MenuRadioItem rows set `data-selected`, beside their ARIA attributes. Disabled MenubarTriggers set `data-disabled` too.
 
 ## 0.0.77
 

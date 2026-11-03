@@ -314,6 +314,7 @@ export type {
   MenuTriggerProps,
   MenuContentProps,
   MenuItemProps,
+  MenuItemTone,
   MenuPortalProps,
   MenuRenderProps
 } from './components/Menu/Menu.js'

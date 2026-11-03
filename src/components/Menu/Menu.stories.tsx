@@ -559,3 +559,52 @@ export const SubmittingReportActions: Story = {
     )
   }
 }
+function ProjectActions({ initialOpen, disabled, pending, dir, ...surface }: Options) {
+  const [result, setResult] = useState('No project action requested.')
+  return (
+    <div
+      style={layout}
+      dir={dir}
+    >
+      <Menu defaultOpen={initialOpen}>
+        <MenuTrigger variant="outline">Project actions</MenuTrigger>
+        <MenuPortal>
+          <MenuContent {...surface}>
+            <MenuItem onSelect={() => setResult('Project renamed.')}>Rename</MenuItem>
+            <MenuItem
+              tone="warning"
+              disabled={disabled}
+              onSelect={() => setResult('Project unpublished.')}
+            >
+              Unpublish
+            </MenuItem>
+            <MenuSeparator />
+            <MenuItem
+              tone="danger"
+              disabled={disabled}
+              pending={pending}
+              onSelect={() => setResult('Project deleted.')}
+            >
+              Delete project
+            </MenuItem>
+          </MenuContent>
+        </MenuPortal>
+      </Menu>
+      <output aria-live="polite">{result}</output>
+    </div>
+  )
+}
+// The menu stays open so the accessibility check covers toned rows at rest and highlighted.
+export const DestructiveActions: Story = {
+  render: args => <ProjectActions {...args} />,
+  play: async ({ canvasElement, userEvent, args }) => {
+    if (args.disabled || args.pending) return
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button', { name: 'Project actions' })
+    if (trigger.getAttribute('aria-expanded') !== 'true') await userEvent.click(trigger)
+    const remove = canvas.getByRole('menuitem', { name: 'Delete project' })
+    await expect(remove).toHaveAttribute('data-tone', 'danger')
+    await userEvent.hover(remove)
+    canvas.getByRole('menuitem', { name: 'Unpublish' }).focus()
+  }
+}

@@ -106,6 +106,79 @@ test('group names, native checkable roles and typeahead retain checked state wit
   await key('{Escape}')
   expect(shown(panel)).toBe(false)
 })
+test('rows expose checked and disabled as boolean data attributes and only the presentation they honor', async () => {
+  const theme = defineTheme({
+      id: 'menu-tone-proof',
+      name: 'Menu tone proof',
+      tokens: { color: { danger: 'rgb(170, 0, 0)', dangerForeground: 'rgb(255, 250, 250)' } },
+      components: { menu: { itemDangerColor: 'rgb(120, 0, 0)' } }
+    }),
+    presentation: object = { variant: 'solid', controlSize: 'large', iconOnly: true },
+    { host } = await mount(
+      <ThemeScope theme={theme}>
+        <Menu defaultOpen>
+          <MenuTrigger>Project</MenuTrigger>
+          <MenuPortal>
+            <MenuContent>
+              <MenuItem {...presentation}>Rename</MenuItem>
+              <MenuItem tone="warning">Unpublish</MenuItem>
+              <MenuItem tone="danger">Delete</MenuItem>
+              <MenuItem disabled>Locked</MenuItem>
+              <MenuCheckboxItem defaultChecked>Pinned</MenuCheckboxItem>
+              <MenuCheckboxItem indeterminate>Some selected</MenuCheckboxItem>
+              <MenuRadioGroup
+                aria-label="Sort"
+                defaultValue="name"
+              >
+                <MenuRadioItem value="name">Name</MenuRadioItem>
+                <MenuRadioItem value="date">Date</MenuRadioItem>
+              </MenuRadioGroup>
+              <MenuSub>
+                <MenuSubTrigger disabled>Share</MenuSubTrigger>
+                <MenuSubContent>
+                  <MenuItem>Link</MenuItem>
+                </MenuSubContent>
+              </MenuSub>
+            </MenuContent>
+          </MenuPortal>
+        </Menu>
+      </ThemeScope>
+    ),
+    row = (name: string) =>
+      Array.from(host.querySelectorAll<HTMLButtonElement>('[data-slot~="menu-item"]')).find(node =>
+        node.textContent?.includes(name)
+      )!
+  for (const node of host.querySelectorAll('[data-slot~="menu-item"]')) {
+    expect(node).not.toHaveAttribute('data-variant')
+    expect(node).not.toHaveAttribute('data-control-size')
+  }
+  expect(row('Rename')).toHaveAttribute('data-tone', 'neutral')
+  expect(row('Delete')).toHaveAttribute('data-tone', 'danger')
+  expect(getComputedStyle(row('Rename')).width).toBe(getComputedStyle(row('Delete')).width)
+  const neutral = getComputedStyle(row('Rename')).color,
+    warning = getComputedStyle(row('Unpublish')).color
+  expect(warning).not.toBe(neutral)
+  expect(getComputedStyle(row('Delete')).color).toBe('rgb(120, 0, 0)')
+  await act(async () => row('Delete').focus())
+  await expect.poll(() => getComputedStyle(row('Delete')).color).toBe('rgb(255, 250, 250)')
+  await expect.poll(() => getComputedStyle(row('Delete')).backgroundColor).toBe('rgb(170, 0, 0)')
+  expect(row('Rename')).not.toHaveAttribute('data-disabled')
+  for (const name of ['Locked', 'Share']) {
+    expect(row(name)).toHaveAttribute('data-disabled', '')
+    expect(row(name)).toHaveAttribute('aria-disabled', 'true')
+  }
+  expect(row('Pinned')).toHaveAttribute('data-selected', '')
+  expect(row('Some selected')).toHaveAttribute('aria-checked', 'mixed')
+  expect(row('Some selected')).not.toHaveAttribute('data-selected')
+  expect(row('Name')).toHaveAttribute('data-selected', '')
+  expect(row('Date')).not.toHaveAttribute('data-selected')
+  await click(row('Pinned'))
+  expect(row('Pinned')).toHaveAttribute('aria-checked', 'false')
+  expect(row('Pinned')).not.toHaveAttribute('data-selected')
+  await click(row('Date'))
+  expect(row('Date')).toHaveAttribute('data-selected', '')
+  expect(row('Name')).not.toHaveAttribute('data-selected')
+})
 test('mixed and controlled checkable requests honor cancellation, pending guards and one close request', async () => {
   const checked = vi.fn(),
     close = vi.fn(),

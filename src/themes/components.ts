@@ -597,7 +597,9 @@ export const componentRegistry = {
     itemPadding: 'css',
     itemRadius: 'css',
     itemFocusBackground: 'css',
-    itemFocusColor: 'css'
+    itemFocusColor: 'css',
+    itemWarningColor: 'css',
+    itemDangerColor: 'css'
   },
   alert: {
     radius: 'css',
