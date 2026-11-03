@@ -176,7 +176,7 @@ export function CodeBlockViewport({
       orientation={orientation}
       data-slot={joinIds('code-block-viewport', props['data-slot'])}
       className={cn(
-        'max-h-[var(--rad-code-block-max-height,24rem)] focus-visible:[outline-offset:-3px]',
+        'max-h-[var(--rad-code-block-max-height,24rem)] focus-visible:[--_rad-focus-offset:calc(-1px_-_var(--_rad-focus-width,var(--rad-focus-width,2px)))]',
         className
       )}
     >

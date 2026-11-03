@@ -15,6 +15,7 @@ import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useArrayFormBridge } from '../../react/useArrayFormBridge.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { PartStyle } from '../../presentation.js'
+import { childFocusRingClass } from '../shared/focusStyles.js'
 
 export type TagsInputProps = DistributiveOmit<
   InputProps,
@@ -36,10 +37,11 @@ const wellClass = [
   'box-border flex min-h-[var(--_rad-control-height)] w-full min-w-0 flex-wrap items-center gap-[var(--rad-tags-input-gap,0.5rem)] p-[0.25rem] cursor-text',
   'bg-[var(--rad-input-background,var(--rad-control-field-background,var(--rad-color-surface,oklch(1_0_0))))] [border-width:var(--rad-input-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-input-border-style,var(--rad-control-border-style,solid))] [border-color:var(--rad-input-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
   'rounded-[var(--rad-input-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-input-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-input-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
-  'has-[>input:focus-visible]:[outline:var(--rad-input-focus-width,var(--rad-focus-width,2px))_var(--rad-input-focus-style,var(--rad-focus-style,solid))_var(--rad-input-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] has-[>input:focus-visible]:[outline-offset:var(--rad-input-focus-offset,var(--rad-focus-offset,2px))]',
+  childFocusRingClass,
+  'has-[>input:focus-visible]:[--_rad-focus-color:var(--rad-input-focus-color)] has-[>input:focus-visible]:[--_rad-focus-width:var(--rad-input-focus-width)] has-[>input:focus-visible]:[--_rad-focus-offset:var(--rad-input-focus-offset)] has-[>input:focus-visible]:[--_rad-focus-style:var(--rad-input-focus-style)]',
   'has-[>input[data-invalid]]:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'has-[>input:disabled]:cursor-not-allowed has-[>input:disabled]:bg-[var(--rad-input-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
-  'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:has-[>input:focus-visible]:outline-[Highlight]'
+  'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas]'
 ].join(' ')
 const innerInputClass =
   'w-auto min-w-[8ch] flex-1 h-[calc(var(--rad-input-height,var(--_rad-control-height))-2*var(--rad-input-border-width,var(--rad-control-border-width,1px))-0.5rem)] ps-[calc(var(--rad-input-padding,var(--_rad-control-padding))-0.25rem)] pe-0 [[data-slot~=tag]~&]:ps-0 rounded-none [border-width:0] [box-shadow:none] [backdrop-filter:none] bg-transparent disabled:[background:transparent] focus-visible:[outline-width:0]'

@@ -32,6 +32,7 @@ import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { Orientation } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 export type { ResizableItem } from '../../internal/resizable.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 type LayoutOwner = ValueOwner<number[]> & ({ value: number[] } | { defaultValue: number[] })
 export type ResizableProps = Omit<
@@ -462,8 +463,9 @@ export function ResizableHandle({
         'touch-none select-none m-0 bg-[var(--rad-resizable-handle-background,transparent)] [border-color:var(--rad-resizable-handle-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
         'hover:bg-[var(--rad-resizable-handle-hover-background,var(--rad-control-track-background,var(--rad-color-neutral,oklch(0.955_0.004_286))))] data-dragging:bg-[var(--rad-resizable-handle-active-background,var(--rad-control-track-background,var(--rad-color-neutral,oklch(0.955_0.004_286))))]',
         'not-aria-disabled:hover:[box-shadow:var(--rad-control-track-shadow,none)] data-dragging:[box-shadow:var(--rad-control-track-shadow,none)]',
-        'focus-visible:outline-solid focus-visible:outline-[color:var(--rad-resizable-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:outline-[length:var(--rad-resizable-focus-width,var(--rad-focus-width,2px))] focus-visible:outline-offset-[var(--rad-resizable-focus-offset,-2px)]',
-        'aria-disabled:cursor-not-allowed aria-disabled:bg-[var(--rad-resizable-handle-background,transparent)] forced-colors:border-[CanvasText] forced-colors:focus-visible:outline-[Highlight]',
+        'aria-disabled:cursor-not-allowed aria-disabled:bg-[var(--rad-resizable-handle-background,transparent)] forced-colors:border-[CanvasText]',
+        focusRingClass,
+        'focus-visible:[--_rad-focus-color:var(--rad-resizable-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-resizable-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-resizable-focus-offset,calc(0px_-_var(--_rad-focus-width,var(--rad-focus-width,2px))))] focus-visible:[--_rad-focus-style:var(--rad-resizable-focus-style)]',
         context.state.orientation === 'horizontal'
           ? 'h-auto w-[length:var(--rad-resizable-handle-size,0.5rem)] cursor-col-resize'
           : 'w-auto h-[length:var(--rad-resizable-handle-size,0.5rem)] cursor-row-resize',

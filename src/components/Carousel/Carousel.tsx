@@ -22,6 +22,7 @@ import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 export type CarouselItem = { value: string; label?: string; children: ReactNode }
 export type CarouselProps = Omit<ComponentProps<'section'>, 'style' | 'role'> &
@@ -344,7 +345,8 @@ export function CarouselViewport({
       tabIndex={0}
       data-slot={joinIds('carousel-viewport', props['data-slot'])}
       className={cn(
-        'flex min-w-0 overflow-x-auto overscroll-x-contain snap-x snap-mandatory [touch-action:pan-x_pan-y] gap-[var(--rad-carousel-slide-gap,0px)] rounded-[var(--rad-carousel-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-2',
+        'flex min-w-0 overflow-x-auto overscroll-x-contain snap-x snap-mandatory [touch-action:pan-x_pan-y] gap-[var(--rad-carousel-slide-gap,0px)] rounded-[var(--rad-carousel-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)]',
+        focusRingClass,
         scrollbarClass,
         className
       )}

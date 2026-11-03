@@ -8,6 +8,7 @@ import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ControlSize } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusWithinRingClass } from '../shared/focusStyles.js'
 
 const SizeContext = createContext<ControlSize | null>(null)
 function useInputGroup() {
@@ -61,10 +62,11 @@ export function InputGroup({
           'rounded-[var(--rad-input-group-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)] [border-width:var(--rad-input-group-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-control-border-style,solid)] [box-shadow:var(--rad-control-field-shadow,none)] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)] [border-color:var(--rad-input-group-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
           'bg-[var(--rad-input-group-background,var(--rad-control-field-background,var(--rad-color-surface,oklch(1_0_0))))] [color:var(--rad-input-group-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
           'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--_rad-control-font-size)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
-          'focus-within:outline-solid focus-within:[outline-width:var(--rad-input-group-focus-width,var(--rad-focus-width,2px))] focus-within:[outline-offset:var(--rad-input-group-focus-offset,var(--rad-focus-offset,2px))] focus-within:[outline-color:var(--rad-input-group-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
+          focusWithinRingClass,
+          'focus-within:[--_rad-focus-color:var(--rad-input-group-focus-color)] focus-within:[--_rad-focus-width:var(--rad-input-group-focus-width)] focus-within:[--_rad-focus-offset:var(--rad-input-group-focus-offset)] focus-within:[--_rad-focus-style:var(--rad-input-group-focus-style)]',
           'has-[>[data-invalid]]:[border-color:var(--rad-input-group-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
           'has-[>input:disabled]:cursor-not-allowed has-[>textarea:disabled]:cursor-not-allowed has-[>input:disabled]:bg-[var(--rad-color-disabled-background,oklch(0.96_0.005_286))] has-[>textarea:disabled]:bg-[var(--rad-color-disabled-background,oklch(0.96_0.005_286))]',
-          'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:focus-within:outline-[Highlight]',
+          'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
           className
         )}
       />

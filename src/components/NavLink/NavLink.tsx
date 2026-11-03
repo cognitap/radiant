@@ -18,6 +18,7 @@ import { cn } from '../../cn.js'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 type LabelParts = { icon?: PartStyle; label?: PartStyle; description?: PartStyle }
 type ContentProps = {
@@ -46,8 +47,9 @@ const itemClass = [
   'gap-[var(--rad-nav-link-gap,0.5rem)] px-[var(--rad-nav-link-padding-inline,var(--_rad-control-padding))] py-[var(--rad-nav-link-padding-block,0.375rem)] rounded-[var(--rad-nav-link-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)]',
   'font-[family-name:var(--rad-nav-link-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] text-[length:var(--rad-nav-link-font-size,var(--_rad-control-font-size))] font-[number:var(--rad-nav-link-font-weight,var(--rad-typography-roles-ui-label-weight,550))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]',
   '[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:bg-[var(--rad-nav-link-hover-background,var(--rad-color-neutral))]',
-  'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-nav-link-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-nav-link-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-nav-link-focus-offset,var(--rad-focus-offset,2px))]',
-  'forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:hover:bg-[ButtonFace] forced-colors:hover:text-[CanvasText] forced-colors:focus-visible:outline-[Highlight]'
+  'forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:hover:bg-[ButtonFace] forced-colors:hover:text-[CanvasText]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-nav-link-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-nav-link-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-nav-link-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-nav-link-focus-style)]'
 ]
 function Content({ children, icon, description, parts }: ContentProps) {
   return (

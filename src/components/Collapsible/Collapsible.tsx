@@ -10,6 +10,7 @@ import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -46,11 +47,8 @@ const collapsibleTriggerVariants = cva([
   'rounded-[max(0px,calc(var(--rad-collapsible-radius,var(--rad-surface-radius,0.75rem))-var(--rad-collapsible-border-width,var(--rad-surface-border-width,1px))))]',
   '[corner-shape:var(--rad-collapsible-corner-shape,var(--rad-surface-corner-shape,round))] [details[open]>&]:rounded-b-none',
   'hover:bg-[color-mix(in_oklch,var(--rad-color-foreground,oklch(0.21_0.006_286))_4%,transparent)]',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-collapsible-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-collapsible-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-collapsible-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-collapsible-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-collapsible-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-collapsible-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-collapsible-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-collapsible-focus-style)]',
   'forced-colors:text-[CanvasText]'
 ])
 

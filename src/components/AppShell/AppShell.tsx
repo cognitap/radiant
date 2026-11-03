@@ -31,6 +31,7 @@ import type { StateOwner } from '../../react/useNativeOwner.js'
 import { useTransitionHost } from '../../motion/host.js'
 import type { PartStyle } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusRingClass, focusRingInsetClass } from '../shared/focusStyles.js'
 
 export type AppShellProps = Omit<ComponentProps<'div'>, 'style'> &
   StateOwner<'collapsed', boolean> &
@@ -271,7 +272,9 @@ export function AppShellMain({ className, ...props }: AppShellMainProps) {
           tabIndex={-1}
           data-slot={joinIds('app-shell-main', props['data-slot'])}
           className={cn(
-            'relative box-border size-full min-h-0 min-w-0 overflow-auto p-[var(--rad-app-shell-main-padding,var(--rad-surface-padding,1.5rem))] focus-visible:[outline-style:var(--rad-focus-style,solid)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-[-2px]',
+            'relative box-border size-full min-h-0 min-w-0 overflow-auto p-[var(--rad-app-shell-main-padding,var(--rad-surface-padding,1.5rem))]',
+            focusRingClass,
+            focusRingInsetClass,
             scrollbarClass,
             className
           )}

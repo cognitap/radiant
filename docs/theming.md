@@ -184,6 +184,11 @@ The rules every family follows:
   values keep their roles.
 - **One selection.** `control.selected` draws the chosen member of every set.
   An underline is an inset bottom shadow on a transparent background.
+- **One focus ring.** Every keyboard focus ring reads the family's `focusColor`,
+  `focusWidth`, `focusOffset` and `focusStyle`, then the `focus` tokens. Scroll
+  boxes draw it inside their edge. Rows in menus, listboxes and Command show
+  focus with the item highlight instead, since focus moves between rows of one
+  widget.
 
 Unset selected, item and track keys leave each family its own baseline look.
 
