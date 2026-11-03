@@ -58,6 +58,7 @@ test('ordered navigation hydrates with native refs, keyboard links and a non-foc
     expect(linkRef.current).toBe(host.querySelector('a'))
     expect(host.querySelectorAll('ol > li').length).toBe(2)
     expect(host.querySelector('[aria-current="page"]')?.tagName).toBe('SPAN')
+    expect(host.querySelector('[data-selected=""]')?.tagName).toBe('SPAN')
     expect(
       host.querySelector('[data-slot~="breadcrumb-separator"]')!.getAttribute('aria-hidden')
     ).toBe('true')

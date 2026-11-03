@@ -46,6 +46,7 @@ test('Pagination preserves native URLs, current-page semantics and explicit unav
   assert.match(html, /<ol/)
   assert.equal((html.match(/<li /g) || []).length, 4)
   assert.equal((html.match(/aria-current="page"/g) || []).length, 1)
+  assert.equal((html.match(/data-selected=""/g) || []).length, 1)
   assert.match(html, /href="\/results\?page=1"/)
   assert.match(html, /data-slot="link pagination-link custom"/)
   assert.match(html, /rel="next"/)

@@ -54,7 +54,10 @@ test('AppShell SSR keeps native banner/navigation/main landmarks, named real lin
 test('collapsed SSR retains native descendants while hiding only expanded content and keeping labels available to assistive technology', () => {
   const html = render(sample({ defaultCollapsed: true }))
   assert.match(html, /aria-expanded="false"/)
-  assert.match(html, /hidden="" inert=""[^>]+data-slot="sidebar-content"/)
+  assert.match(html, /hidden="" inert=""[^>]+data-slot="sidebar-content" data-expanded-only=""/)
+  assert.match(html, /data-slot="app-shell" data-collapsed=""/)
+  assert.match(html, /data-slot="sidebar" data-collapsed=""/)
+  assert.doesNotMatch(html, /data-[a-z-]+="true"/)
   assert.match(html, /value="Atlas"/)
   assert.match(html, /data-slot="sidebar-item-label" class="sr-only"/)
   assert.doesNotMatch(html, /aria-pressed=/)

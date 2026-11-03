@@ -67,6 +67,8 @@ test('SSR/hydration queue one visible toast without focus theft and announce onl
   expect(toasts[0].hidden).toBe(false)
   expect(toasts[1].hidden).toBe(true)
   expect(toasts[1].inert).toBe(true)
+  expect(toasts[0].hasAttribute('data-queued')).toBe(false)
+  expect(toasts[1].getAttribute('data-queued')).toBe('')
   expect(document.activeElement).not.toBe(toasts[0])
   await pause(60)
   expect(live(host).textContent).toBe(
@@ -258,7 +260,7 @@ test('hover and focus pause the remaining timeout rather than restarting it', as
   const toast = roots(host)[0]
   const outside = host.querySelector('button')!
   await act(async () => userEvent.hover(toast))
-  expect(toast.dataset.paused).toBe('true')
+  expect(toast.dataset.paused).toBe('')
   await pause(800)
   expect(toast.hidden).toBe(false)
   await act(async () => toast.querySelector<HTMLElement>('[data-slot~=toast-action]')!.focus())
@@ -289,7 +291,7 @@ test('document visibility pauses timing and unmount cancels pending timeouts and
     const toast = roots(host)[0]
     await pause(400)
     expect(toast.hidden).toBe(false)
-    expect(toast.dataset.paused).toBe('true')
+    expect(toast.dataset.paused).toBe('')
     hidden.mockReturnValue(false)
     document.dispatchEvent(new Event('visibilitychange'))
     await pause(30)

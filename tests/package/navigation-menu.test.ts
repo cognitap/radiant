@@ -48,6 +48,7 @@ test('NavigationMenu SSR retains native navigation, list, Button, Link and Scrol
   assert.match(html, /data-slot="scroll-area navigation-menu-viewport"/)
   assert.match(html, /href="\/guide"/)
   assert.match(html, /aria-current="page"/)
+  assert.match(html, /data-selected=""/)
   assert.doesNotMatch(html, /role="(?:menu|menubar|menuitem)"/)
   const ids = [...html.matchAll(/aria-controls="([^"]+)"/g)].map(match => match[1])
   assert.equal(ids.length, 2)

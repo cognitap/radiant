@@ -114,12 +114,13 @@ export function NavLink({
       tone="neutral"
       controlSize={controlSize}
       aria-current={active ? 'page' : undefined}
+      data-selected={active ? '' : undefined}
       className={cn(
         controlMetrics({ controlSize }),
         itemClass,
-        'border-s-[3px] border-s-transparent aria-[current=page]:[border-inline-start-color:var(--rad-nav-link-indicator-color,var(--rad-control-selected-border-color,var(--rad-color-accent)))] aria-[current=page]:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] aria-[current=page]:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))] aria-[current=page]:[box-shadow:var(--rad-control-selected-shadow,none)] aria-[current=page]:font-[number:var(--rad-typography-heading-weight,600)]',
-        'aria-[current=page]:[&_[data-slot=nav-link-description]]:[color:inherit] aria-[current=page]:hover:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] aria-[current=page]:hover:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))]',
-        'forced-colors:aria-[current=page]:[border-inline-start-color:Highlight] forced-colors:aria-[current=page]:bg-[Highlight] forced-colors:aria-[current=page]:text-[HighlightText] forced-colors:aria-[current=page]:hover:bg-[Highlight] forced-colors:aria-[current=page]:hover:text-[HighlightText]',
+        'border-s-[3px] border-s-transparent data-selected:[border-inline-start-color:var(--rad-nav-link-indicator-color,var(--rad-control-selected-border-color,var(--rad-color-accent)))] data-selected:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] data-selected:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))] data-selected:[box-shadow:var(--rad-control-selected-shadow,none)] data-selected:font-[number:var(--rad-typography-heading-weight,600)]',
+        'data-selected:[&_[data-slot=nav-link-description]]:[color:inherit] data-selected:hover:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] data-selected:hover:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))]',
+        'forced-colors:data-selected:[border-inline-start-color:Highlight] forced-colors:data-selected:bg-[Highlight] forced-colors:data-selected:text-[HighlightText] forced-colors:data-selected:hover:bg-[Highlight] forced-colors:data-selected:hover:text-[HighlightText]',
         className
       )}
     >

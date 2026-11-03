@@ -109,8 +109,13 @@ test('next, previous and indicators select without moving action focus; drafts s
   await click(host.querySelector<HTMLButtonElement>('[data-slot~="carousel-previous"]')!)
   await aligned(host, 'atlas')
   expect(input.value).toBe('Saved draft')
-  await click(host.querySelector<HTMLButtonElement>('[aria-label="Show slide 3 of 3"]')!)
+  const dot = host.querySelector<HTMLButtonElement>('[aria-label="Show slide 3 of 3"]')!
+  await click(dot)
   await aligned(host, 'orchard')
+  expect(dot.getAttribute('aria-current')).toBe('true')
+  expect(dot.getAttribute('data-selected')).toBe('')
+  expect(host.querySelectorAll('[aria-current="true"]')).toHaveLength(1)
+  expect(host.querySelectorAll('[aria-current][data-selected]')).toHaveLength(1)
   expect(next(host).disabled).toBe(true)
 })
 test('viewport arrows, Home and End obey RTL and leave nested control keys native', async () => {

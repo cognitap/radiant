@@ -51,8 +51,10 @@ build on is in [architecture](architecture.md).
   Other `data-state` values describe a task's status, such as Progress's
   `indeterminate`, `loading` and `complete`.
 - Selection uses a boolean `data-selected`, like `data-disabled`,
-  `data-invalid` and `data-highlighted`. ARIA keeps its own attribute
-  (`aria-selected`, `aria-pressed`, `aria-checked`).
+  `data-invalid` and `data-highlighted`. Current pages and the current
+  Carousel indicator carry it too. ARIA keeps its own attribute
+  (`aria-selected`, `aria-pressed`, `aria-checked`, `aria-current`).
+- A boolean data attribute is `""` when true and absent when false.
 
 ## Names
 

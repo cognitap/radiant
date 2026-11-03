@@ -516,6 +516,7 @@ export function CarouselIndicators({
           tone="neutral"
           aria-label={indicatorLabel(index, state.count)}
           aria-current={state.value === item.value ? 'true' : undefined}
+          data-selected={state.value === item.value ? '' : undefined}
           aria-controls={state.viewportId}
           onClick={() => state.setValue(item.value)}
         >

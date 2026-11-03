@@ -159,7 +159,14 @@ test('controlled collapse may be refused, prop sync emits nothing, and hidden fo
         onCollapsedChange={changes}
       />
     ),
-    input = host.querySelector<HTMLInputElement>('[aria-label="Find projects"]')!
+    input = host.querySelector<HTMLInputElement>('[aria-label="Find projects"]')!,
+    shell = host.querySelector('[data-slot~="app-shell"]')!
+  expect(shell.hasAttribute('data-collapsed')).toBe(false)
+  expect(shell.hasAttribute('data-mobile')).toBe(false)
+  expect(nav(host).hasAttribute('data-collapsed')).toBe(false)
+  expect(
+    host.querySelector('[data-slot~="sidebar-content"]')!.getAttribute('data-expanded-only')
+  ).toBe('')
   await click(toggle(host))
   expect(toggle(host).getAttribute('aria-expanded')).toBe('true')
   expect(changes).toHaveBeenCalledExactlyOnceWith(true)
@@ -173,6 +180,8 @@ test('controlled collapse may be refused, prop sync emits nothing, and hidden fo
   )
   expect(toggle(host)).toHaveFocus()
   expect(changes).not.toHaveBeenCalled()
+  expect(shell.getAttribute('data-collapsed')).toBe('')
+  expect(nav(host).getAttribute('data-collapsed')).toBe('')
 })
 test('collapse observation does not steal focus from an outside application control', async () => {
   const { host, render } = await mount(
@@ -265,6 +274,7 @@ test('mobile uses the real modal Drawer, preserves input and node identity acros
       input = f.doc.querySelector<HTMLInputElement>('[aria-label="Find projects"]')!,
       button = toggle(f.doc)
     expect(button.getAttribute('aria-haspopup')).toBe('dialog')
+    expect(f.doc.querySelector('[data-slot~="app-shell"]')!.getAttribute('data-mobile')).toBe('')
     expect(node.closest('dialog')?.open).toBe(false)
     await act(async () => {
       button.focus()

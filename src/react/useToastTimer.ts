@@ -29,7 +29,7 @@ export function useToastTimer(
     let hovering = node.matches(':hover')
     const sync = () => {
       const paused = hovering || node.contains(doc.activeElement) || doc.hidden
-      node.dataset.paused = String(paused)
+      node.toggleAttribute('data-paused', paused)
       if (paused) timer.pause()
       else timer.resume()
     }
