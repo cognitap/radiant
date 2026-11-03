@@ -56,7 +56,7 @@ pnpm test:package
 
 It packs the library, installs that tarball in a temporary directory, and runs
 `tests/package` there. The same files import `@cognitap/radiant`. `tsc` checks
-`types.tsx` under NodeNext and Bundler. Node does not execute that file.
+every `.tsx` file under NodeNext and Bundler. Node does not execute them.
 
 ## What to put in the pull request
 

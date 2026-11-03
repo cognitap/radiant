@@ -1,26 +1,4 @@
-import './menu-features-types.js'
-import './hover-card-types.js'
-import './toolbar-types.js'
-import './toggle-group-types.js'
-import './button-pressed-types.js'
-import './checkbox-group-types.js'
-import './fieldset-types.js'
-import './table-types.js'
-import './pagination-types.js'
-import './breadcrumb-types.js'
-import './avatar-types.js'
-import './badge-types.js'
-import './separator-types.js'
-import './skeleton-types.js'
-import './spinner-types.js'
 import type * as Radiant from '@cognitap/radiant'
-import './alert-dialog-types.js'
-import './popover-types.js'
-import './tooltip-types.js'
-import './menu-types.js'
-import './alert-types.js'
-import './toast-types.js'
-import './progress-types.js'
 import { createElement, createRef, type ComponentProps, type Ref, useRef } from 'react'
 import {
   updateThemeDocument,
@@ -1090,39 +1068,3 @@ function LayoutBinding() {
 const bindLayout: (root: HTMLElement) => SpringLayoutController = bindSpringLayout
 void bindLayout
 void LayoutBinding
-
-import './textarea-types.js'
-
-import './switch-types.js'
-
-import './slider-types.js'
-
-import './tabs-types.js'
-
-import './combobox-types.js'
-
-import './aspect-ratio-types.js'
-
-import './scroll-area-types.js'
-
-import './context-menu-types.js'
-
-import './menubar-types.js'
-
-import './drawer-types.js'
-
-import './multi-select-tags-input-types.js'
-
-import './otp-field-types.js'
-
-import './button-group-types.js'
-
-import './kbd-types.js'
-import './input-group-types.js'
-import './native-select-types.js'
-import './meter-types.js'
-
-import './password-input-types.js'
-import './file-input-types.js'
-import './nav-link-types.js'
-import './autocomplete-types.js'

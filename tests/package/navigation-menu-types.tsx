@@ -8,7 +8,7 @@ import {
   type NavigationMenuProps,
   type NavigationMenuRenderProps,
   type NavigationMenuLinkRenderProps
-} from '../../src/index.js'
+} from '@cognitap/radiant'
 const items = [{ value: 'learn' }]
 export const native = (
   <NavigationMenu
@@ -48,10 +48,10 @@ export const mixed: NavigationMenuProps = {
 }
 // @ts-expect-error A navigation landmark must be named.
 export const unnamed = <NavigationMenu items={items} />
-// @ts-expect-error Navigation triggers disclose rather than toggle a pressed state.
 export const pressed = (
   <NavigationMenuTrigger
     value="learn"
+    // @ts-expect-error Navigation triggers disclose rather than toggle a pressed state.
     pressed
   >
     Learn

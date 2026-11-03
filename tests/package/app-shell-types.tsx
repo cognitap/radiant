@@ -11,7 +11,7 @@ import {
   type AppShellProps,
   type AppShellRenderProps,
   type SidebarRenderProps
-} from '../../src/index.js'
+} from '@cognitap/radiant'
 export const native = (
   <AppShell
     collapsed={false}
