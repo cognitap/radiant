@@ -22,6 +22,8 @@
 - Add `removeLabel` to TagsInput, ComboboxTags and MultiSelectTags, a function from a tag's text to its remove button's name. It defaults to `Remove ${text}`.
 - NavigationMenuViewport takes `aria-label` and `aria-labelledby`. Closed, it takes the NavigationMenu's name instead of "Navigation sections".
 - Popover, Menu, MenuSub, Menubar, HoverCard, Dialog, AlertDialog, Drawer, Command, Combobox, Autocomplete, MultiSelect and AppShell's SidebarTrigger triggers set `data-state="open|closed"` beside `aria-expanded`, like Select and NavigationMenu triggers.
+- NavLink, NavigationMenuLink, PaginationLink, PaginationButton, BreadcrumbLink, BreadcrumbPage and the current Carousel indicator set `data-selected` on the current item, beside `aria-current`, so `[data-selected]` selects every current or selected item.
+- Boolean data attributes are empty when set: AppShell and Sidebar `data-collapsed`, AppShell `data-mobile`, SidebarContent `data-expanded-only`, NavigationMenu `data-disabled`, CodeBlock `data-line-numbers` and Toast `data-queued` and `data-paused`. Before: `[data-collapsed="true"]`. After: `[data-collapsed]`. A running Toast had `data-paused="false"`; now it has no `data-paused`.
 
 ## 0.0.77
 

@@ -78,6 +78,7 @@ test('native page links hydrate, retain router refs and follow keyboard URLs wit
     expect(location.hash).toBe('#pagination-two')
     expect(clicks).toBe(1)
     expect(host.querySelectorAll('[aria-current="page"]').length).toBe(1)
+    expect(host.querySelectorAll('[data-selected]').length).toBe(1)
   } finally {
     history.replaceState(null, '', original)
   }
@@ -139,6 +140,7 @@ test('action mode preserves native disabled and pending guards while the applica
   expect(calls).toBe(1)
   expect(host.querySelector('output')!.textContent).toBe('2')
   expect(host.querySelector('[aria-current="page"]')).toBe(ref.current)
+  expect(host.querySelector('[data-selected=""]')).toBe(ref.current)
   expect(document.activeElement).toBe(ref.current)
   await key('{Enter}')
   expect(calls).toBe(2)

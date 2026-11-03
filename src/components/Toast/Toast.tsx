@@ -274,7 +274,7 @@ export function Toast({
         tabIndex={-1}
         data-slot={joinIds('toast', props['data-slot'])}
         data-state={visible ? 'open' : 'closed'}
-        data-queued={(state.value && !visible) || undefined}
+        data-queued={state.value && !visible ? '' : undefined}
         data-motion={motion}
         data-urgency={announce}
         className={cn(

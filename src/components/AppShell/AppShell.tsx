@@ -201,8 +201,8 @@ export function AppShell({
           {...props}
           ref={layoutRef}
           data-slot={joinIds('app-shell', props['data-slot'])}
-          data-collapsed={collapse.value || undefined}
-          data-mobile={mobile || undefined}
+          data-collapsed={collapse.value ? '' : undefined}
+          data-mobile={mobile ? '' : undefined}
           data-state={
             mobile ? (drawer.value ? 'open' : 'closed') : collapse.value ? 'closed' : 'open'
           }
@@ -376,7 +376,7 @@ export function Sidebar({
       aria-labelledby={shell.labelId}
       tabIndex={0}
       data-slot={joinIds('sidebar', props['data-slot'])}
-      data-collapsed={collapsed || undefined}
+      data-collapsed={collapsed ? '' : undefined}
       data-state={shell.mobile ? (shell.open ? 'open' : 'closed') : collapsed ? 'closed' : 'open'}
       className={cn(
         'relative box-border flex size-full min-h-0 min-w-0 flex-col overflow-auto gap-[var(--rad-sidebar-gap,1rem)] p-[var(--rad-sidebar-padding,0.5rem)] border-0 border-e-[length:var(--rad-sidebar-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-sidebar-border-color,var(--rad-color-border))] bg-[var(--rad-sidebar-background,var(--rad-color-surface))] text-[var(--rad-sidebar-color,var(--rad-color-foreground))]',
@@ -517,7 +517,7 @@ export function SidebarContent({ expandedOnly = false, className, ...props }: Si
       hidden={hidden}
       inert={hidden}
       data-slot={joinIds('sidebar-content', props['data-slot'])}
-      data-expanded-only={expandedOnly || undefined}
+      data-expanded-only={expandedOnly ? '' : undefined}
       className={cn('min-w-0 [hidden]:hidden', className)}
     />
   )

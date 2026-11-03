@@ -76,6 +76,7 @@ export function PaginationLink({
       variant={variant}
       tone={tone}
       aria-current={current ? 'page' : undefined}
+      data-selected={current ? '' : undefined}
       className={cn(itemClass, className)}
     />
   )
@@ -115,6 +116,7 @@ export function PaginationButton({
       variant={variant}
       tone={tone}
       aria-current={current ? 'page' : undefined}
+      data-selected={current ? '' : undefined}
       data-slot={joinIds('pagination-button', props['data-slot'])}
       className={cn(itemClass, className)}
     />

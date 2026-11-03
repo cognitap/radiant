@@ -257,7 +257,7 @@ export function NavigationMenu({
         {...{ role: undefined }}
         data-slot={joinIds('navigation-menu', props['data-slot'])}
         data-state={shown !== null ? 'open' : 'closed'}
-        data-disabled={disabled || undefined}
+        data-disabled={disabled ? '' : undefined}
         data-control-size={controlSize}
         className={cn('relative max-w-full', className)}
         onKeyDown={event => {
@@ -470,6 +470,7 @@ export function NavigationMenuLink({
       variant={variant}
       controlSize={controlSize ?? binding.controlSize}
       aria-current={active ? 'page' : undefined}
+      data-selected={active ? '' : undefined}
       onClick={composeAction(onClick, event => {
         if (
           event.button === 0 &&

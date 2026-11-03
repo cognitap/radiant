@@ -28,6 +28,7 @@ test('CodeBlock renders native code, an explicitly named real ScrollArea and a n
     )
   )
   assert.match(html, /data-slot="code-block custom"/)
+  assert.match(html, /data-line-numbers=""/)
   assert.match(html, /data-slot="scroll-area code-block-viewport"/)
   assert.match(html, /role="group"/)
   assert.match(html, /aria-label="Example source"/)

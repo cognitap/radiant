@@ -77,6 +77,7 @@ export function BreadcrumbLink({
       variant={variant}
       tone={tone}
       aria-current={current ? 'page' : undefined}
+      data-selected={current ? '' : undefined}
       className={cn(
         'min-w-0 [overflow-wrap:anywhere] [color:var(--rad-breadcrumb-link-color,var(--rad-color-muted-foreground))] hover:[color:var(--rad-breadcrumb-link-hover-color,var(--rad-color-foreground))]',
         className
@@ -92,6 +93,7 @@ export function BreadcrumbPage({ className, ...props }: BreadcrumbPageProps) {
     <span
       {...nativeProps}
       aria-current="page"
+      data-selected=""
       data-slot={joinIds('breadcrumb-page', props['data-slot'])}
       className={cn(
         'min-w-0 [overflow-wrap:anywhere] [color:var(--rad-breadcrumb-current-color,var(--rad-color-foreground))] font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] font-[number:var(--rad-typography-roles-ui-label-weight,600)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)]',

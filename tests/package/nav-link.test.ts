@@ -32,6 +32,7 @@ test('NavLink keeps real Link identity, native external defaults and its active-
   assert.match(html, /<a /)
   assert.match(html, /data-slot="link nav-link custom"/)
   assert.match(html, /aria-current="page"/)
+  assert.match(html, /data-selected=""/)
   assert.match(html, /href="\/study"/)
   assert.match(html, /target="_blank"/)
   assert.match(html, /rel="noopener noreferrer"/)

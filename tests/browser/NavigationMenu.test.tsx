@@ -132,6 +132,7 @@ test('SSR hydration preserves native navigation, actual hosts, names, IDs and ca
           >
             <NavigationMenuLink
               href="#guide"
+              active
               ref={link}
             >
               Guide
@@ -145,6 +146,8 @@ test('SSR hydration preserves native navigation, actual hosts, names, IDs and ca
   expect(nav.current?.tagName).toBe('NAV')
   expect(button.current?.tagName).toBe('BUTTON')
   expect(link.current?.tagName).toBe('A')
+  expect(link.current?.getAttribute('aria-current')).toBe('page')
+  expect(link.current?.getAttribute('data-selected')).toBe('')
   expect(panel.current?.tagName).toBe('DIV')
   expect(view.current?.getAttribute('data-slot')).toBe('scroll-area navigation-menu-viewport')
   expect(button.current?.getAttribute('aria-controls')).toBe(panel.current?.id)
@@ -362,6 +365,7 @@ test('consumer cancellation wins; pending keeps a native focusable trigger and d
   await act(async () => userEvent.hover(trigger(host)))
   await pause(30)
   expect(trigger(host).disabled).toBe(true)
+  expect(host.querySelector('nav')!.getAttribute('data-disabled')).toBe('')
   expect(open(host)).toBe(false)
   expect(changes).not.toHaveBeenCalled()
 })

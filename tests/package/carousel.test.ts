@@ -35,6 +35,8 @@ test('Carousel server rendering labels native snap slides and composes real Butt
   assert.match(html, /aria-label="Harbor, 2 of 2"/)
   assert.match(html, /data-rad-carousel-value="harbor"/)
   assert.match(html, /inert=""/)
+  assert.equal((html.match(/data-selected=""/g) || []).length, 2)
+  assert.match(html, /aria-current="true"[^>]*data-selected=""/)
   assert.match(html, /data-slot="button carousel-next"/)
   assert.match(html, /Play slides/)
   assert.doesNotMatch(html, / aria-pressed="/)
