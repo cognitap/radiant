@@ -32,7 +32,10 @@ const inline = { position: 'relative', inset: 'auto' } as const
 export const Default: Story = {
   render: (_, { viewMode }) => (
     <ToastProvider>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast defaultOpen={viewMode !== 'docs'}>
           <ToastTitle>Draft saved</ToastTitle>
           <ToastDescription>Your latest edits are stored.</ToastDescription>
@@ -60,6 +63,7 @@ export const Customisation: Story = {
   render: (_, { viewMode }) => (
     <ToastProvider>
       <ToastViewport
+        aria-label="Notifications"
         hotkey={false}
         style={inline}
       >

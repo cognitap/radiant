@@ -89,7 +89,7 @@ test('rich empty content stays outside the actual Combobox and Command listboxes
         {},
         h(CommandTitle, {}, 'Commands'),
         h(CommandDescription, {}, 'Search actions'),
-        h(CommandInput),
+        h(CommandInput, { 'aria-label': 'Search commands' }),
         h(CommandList)
       )
     )

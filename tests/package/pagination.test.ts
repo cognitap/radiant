@@ -17,7 +17,7 @@ test('Pagination preserves native URLs, current-page semantics and explicit unav
   const html = renderToStaticMarkup(
     h(
       Pagination,
-      {},
+      { 'aria-label': 'Results pages' },
       h(
         PaginationList,
         {},
@@ -42,7 +42,7 @@ test('Pagination preserves native URLs, current-page semantics and explicit unav
       )
     )
   )
-  assert.match(html, /<nav[^>]*aria-label="Pagination"/)
+  assert.match(html, /<nav[^>]*aria-label="Results pages"/)
   assert.match(html, /<ol/)
   assert.equal((html.match(/<li /g) || []).length, 4)
   assert.equal((html.match(/aria-current="page"/g) || []).length, 1)
@@ -69,14 +69,11 @@ test('Pagination preserves native URLs, current-page semantics and explicit unav
     renderToStaticMarkup(h(Pagination, { 'aria-labelledby': 'pages' })),
     /aria-label=/
   )
-  assert.match(
-    renderToStaticMarkup(h(Pagination, { 'aria-labelledby': ' ' })),
-    /aria-label="Pagination"/
-  )
-  assert.throws(
-    () => renderToStaticMarkup(h(Pagination, { 'aria-label': ' ' })),
-    /Pagination requires aria-label or aria-labelledby/
-  )
+  for (const name of [{}, { 'aria-label': ' ' }, { 'aria-labelledby': ' ' }])
+    assert.throws(
+      () => renderToStaticMarkup(h(Pagination, name as never)),
+      /Pagination requires aria-label or aria-labelledby/
+    )
   assert.throws(
     () =>
       renderToStaticMarkup(

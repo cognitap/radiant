@@ -24,7 +24,10 @@ test('native page links hydrate, retain router refs and follow keyboard URLs wit
     const { host } = await mount(
       <StrictMode>
         <button>Before</button>
-        <Pagination ref={nav}>
+        <Pagination
+          aria-label="Pagination"
+          ref={nav}
+        >
           <PaginationList>
             <PaginationItem>
               <PaginationUnavailable>Previous</PaginationUnavailable>
@@ -87,7 +90,7 @@ test('action mode preserves native disabled and pending guards while the applica
     return (
       <>
         <output>{page}</output>
-        <Pagination>
+        <Pagination aria-label="Pagination">
           <PaginationList>
             <PaginationItem>
               <PaginationButton disabled>Previous</PaginationButton>
@@ -151,7 +154,10 @@ test('themes, caller overrides and forced colors keep current links visible in a
       theme={theme}
       mode="dark"
     >
-      <Pagination style={{ width: '140px' }}>
+      <Pagination
+        aria-label="Pagination"
+        style={{ width: '140px' }}
+      >
         <PaginationList>
           {[1, 2, 3, 4].map(n => (
             <PaginationItem key={n}>
@@ -181,7 +187,7 @@ test('page links and buttons default to the medium control size shared with Butt
   const { host } = await mount(
     <>
       <Button>Reference</Button>
-      <Pagination>
+      <Pagination aria-label="Pagination">
         <PaginationList>
           <PaginationItem>
             <PaginationLink

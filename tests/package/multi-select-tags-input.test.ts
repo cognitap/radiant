@@ -43,6 +43,14 @@ test('multiple selection submits each original key, preserves real native famili
   assert.match(html, /data-slot="badge tag multi-select-tag"/)
   assert.match(html, /data-slot="button tag-remove"/)
   assert.match(html, /aria-label="Remove Anywhere"/)
+  const translated = renderToStaticMarkup(
+    h(
+      MultiSelect,
+      { items, defaultValue: ['a'] },
+      h(MultiSelectTags, { removeLabel: (text: string) => `Retirer ${text}` })
+    )
+  )
+  assert.match(translated, /aria-label="Retirer Alpha"/)
   const values = [
     ...html.matchAll(/<input[^>]*type="hidden"[^>]*name="projects"[^>]*value="([^"]*)"/g)
   ].map(match => match[1])
@@ -78,7 +86,8 @@ test('TagsInput server host keeps Input, Field and array form semantics with typ
           defaultValue: ['design', 'research'],
           form: 'project',
           style: { color: 'red' },
-          parts: { wrapper: { style: { gap: 8 } } }
+          parts: { wrapper: { style: { gap: 8 } } },
+          removeLabel: (text: string) => `Retirer ${text}`
         })
       )
     )
@@ -89,6 +98,7 @@ test('TagsInput server host keeps Input, Field and array form semantics with typ
   assert.doesNotMatch(input, /\srequired(?:=|\s|>)/)
   assert.doesNotMatch(input, /\sname=/)
   assert.match(html, /--rad-tags-input-gap:9px/)
+  assert.match(html, /aria-label="Retirer design"/)
   assert.match(html, /--rad-multi-select-gap:7px/)
   const values = [
     ...html.matchAll(/<input[^>]*type="hidden"[^>]*name="topic"[^>]*value="([^"]*)"/g)

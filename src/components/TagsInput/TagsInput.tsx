@@ -28,9 +28,12 @@ export type TagsInputProps = DistributiveOmit<
     /** True accepts; false or an error message rejects. Values are trimmed before validation. */
     validate?: (value: string) => boolean | string
     maxCount?: number
+    /** Names each tag's removal Button from the tag's text. */
+    removeLabel?: (text: string) => string
     parts?: { wrapper?: PartStyle; tag?: PartStyle; remove?: PartStyle; error?: PartStyle }
   }
 const defaultSeparators = [','] as const
+const defaultRemoveLabel = (text: string) => `Remove ${text}`
 // Tags and the text input share one field well, so the native input itself draws no box.
 const wellClass = [
   controlBorderClass,
@@ -54,6 +57,7 @@ export function TagsInput({
   separators = defaultSeparators,
   validate,
   maxCount,
+  removeLabel = defaultRemoveLabel,
   parts,
   name,
   form,
@@ -203,7 +207,7 @@ export function TagsInput({
         {selection.value.map(value => (
           <Tag
             key={value}
-            removeLabel={`Remove ${value}`}
+            removeLabel={removeLabel(value)}
             disabled={!!(control.disabled || readOnly)}
             className={parts?.tag?.className}
             style={parts?.tag?.style}

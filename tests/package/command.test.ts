@@ -28,7 +28,7 @@ function tree(props = {}) {
       {},
       h(CommandTitle, {}, 'Workspace'),
       h(CommandDescription, {}, 'Find an action'),
-      h(CommandInput),
+      h(CommandInput, { 'aria-label': 'Search commands' }),
       h(CommandList),
       h(CommandClose, {}, 'Close')
     )

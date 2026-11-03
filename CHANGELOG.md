@@ -17,6 +17,10 @@
 - Breaking: menu row `tone` now colors the row and takes `neutral` (the default), `warning` or `danger`, so `data-tone` is `neutral` unless set. Before: `<MenuItem tone="danger">` rendered `data-tone="danger"` and looked like any other row; `tone="accent"` was accepted. After: `<MenuItem tone="danger">` has danger text and a solid danger highlight; use `neutral` instead of `accent`. Theme the rest colors with `menu.itemWarningColor` and `menu.itemDangerColor`.
 - Menu rows set `data-disabled` when disabled, and checked MenuCheckboxItem and MenuRadioItem rows set `data-selected`, beside their ARIA attributes. Disabled MenubarTriggers set `data-disabled` too.
 - **Breaking:** Dialog, AlertDialog, Drawer and Command content carry a `<family>-content` slot, like every other overlay. Before: `data-slot="dialog"`, `"dialog alert-dialog"`, `"dialog drawer"`, `"dialog command"`. After: `"dialog-content"`, `"dialog-content alert-dialog-content"`, `"dialog-content drawer-content"`, `"dialog-content command-content"`; select `[data-slot~="drawer-content"]` instead of `[data-slot~="drawer"]`.
+- Breaking: Breadcrumb, Pagination, ToastViewport and CommandInput require `aria-label` or `aria-labelledby` and throw without one, instead of defaulting to an English name. Before: `<Pagination>`. After: `<Pagination aria-label="Pages">`.
+- CarouselViewport takes the Carousel's name instead of "Slides", and a Toast without a ToastTitle needs `aria-label` or `aria-labelledby` instead of being called "Notification".
+- Add `removeLabel` to TagsInput, ComboboxTags and MultiSelectTags, a function from a tag's text to its remove button's name. It defaults to `Remove ${text}`.
+- NavigationMenuViewport takes `aria-label` and `aria-labelledby`. Closed, it takes the NavigationMenu's name instead of "Navigation sections".
 
 ## 0.0.77
 

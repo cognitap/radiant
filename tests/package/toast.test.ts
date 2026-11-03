@@ -10,7 +10,7 @@ test('Toast server markup has empty persistent announcers and hidden queue candi
       null,
       h(
         ToastViewport,
-        JSON.parse('{"role":"dialog"}'),
+        JSON.parse('{"role":"dialog","aria-label":"Notifications"}'),
         h(
           Toast,
           { defaultOpen: true },
