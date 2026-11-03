@@ -32,7 +32,7 @@ build on is in [architecture](architecture.md).
 
 - Treatment is `variant`, color is `tone` and size is `controlSize`, defaulting
   to `medium`. Actions default to the `accent` tone and feedback to `neutral`.
-  Menu rows take only `tone`: `neutral` by default, or `warning` or `danger`.
+  Menu rows take only `tone`: `neutral`, `warning` or `danger`.
 - Orientation and side props share one exported type each.
 - Every `parts` entry is a `PartStyle`. Recurring roles keep one key: `wrapper`,
   `label`, `description`, `error`, `indicator`, `remove`.
@@ -51,8 +51,8 @@ build on is in [architecture](architecture.md).
   Other `data-state` values describe a task's status, such as Progress's
   `indeterminate`, `loading` and `complete`.
 - Selection uses a boolean `data-selected`, like `data-disabled`,
-  `data-invalid` and `data-highlighted`. Current pages and the current
-  Carousel indicator carry it too. ARIA keeps its own attribute
+  `data-invalid` and `data-highlighted`. Current pages and Carousel
+  indicators carry it too. ARIA keeps its own attribute
   (`aria-selected`, `aria-pressed`, `aria-checked`, `aria-current`).
 - A boolean data attribute is `""` when true and absent when false.
 
