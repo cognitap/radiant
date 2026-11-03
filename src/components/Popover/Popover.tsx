@@ -135,6 +135,7 @@ export function PopoverTrigger({ ref, onClick, ...props }: PopoverTriggerProps) 
       popoverTargetAction={undefined}
       aria-controls={popover.contentId}
       aria-expanded={popover.open}
+      data-state={popover.open ? 'open' : 'closed'}
       data-slot={joinIds('popover-trigger', props['data-slot'])}
       onClick={composeAction(onClick, () => popover.setOpen(!popover.open))}
     />

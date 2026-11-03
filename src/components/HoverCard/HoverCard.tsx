@@ -19,7 +19,10 @@ import { cn } from '../../cn.js'
 
 export type HoverCardProps = PopoverProps & { openDelay?: number; closeDelay?: number }
 export type HoverCardState = PopoverState
-export type HoverCardRenderProps = Omit<LinkRenderProps, 'data-slot'> & { 'data-slot': string }
+export type HoverCardRenderProps = Omit<LinkRenderProps, 'data-slot'> & {
+  'data-slot': string
+  'data-state': 'open' | 'closed'
+}
 export type HoverCardTriggerProps = Omit<
   LinkProps,
   'href' | 'render' | 'aria-controls' | 'aria-expanded'
@@ -106,6 +109,7 @@ export function HoverCardTrigger({
       render={resolved => {
         const scoped: HoverCardRenderProps = {
           ...resolved,
+          'data-state': card.open ? 'open' : 'closed',
           'data-slot':
             joinIds('link', 'hover-card-trigger', props['data-slot']) ?? 'link hover-card-trigger'
         }

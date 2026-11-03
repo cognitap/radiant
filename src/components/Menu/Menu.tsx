@@ -664,6 +664,7 @@ export function MenuSubTrigger({
         aria-haspopup="menu"
         aria-controls={menu.contentId}
         aria-expanded={menu.open}
+        data-state={menu.open ? 'open' : 'closed'}
         data-slot={joinIds('menu-sub-trigger', props['data-slot'])}
         closeOnSelect={false}
         className={cn(
