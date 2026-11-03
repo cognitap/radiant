@@ -8,7 +8,7 @@ import {
   CarouselAutoPlay,
   defineTheme,
   type CarouselItem
-} from '../../src/index.js'
+} from '@cognitap/radiant'
 const items: CarouselItem[] = [
   { value: 'atlas', children: <p>Atlas research</p> },
   { value: 'harbor', children: <p>Harbor reading</p> }
@@ -36,8 +36,8 @@ export const theme = defineTheme({
 })
 // @ts-expect-error A carousel has a name.
 export const unnamed = <Carousel items={items} />
-// @ts-expect-error Selection has one owner.
 export const mixed = (
+  // @ts-expect-error Selection has one owner.
   <Carousel
     aria-label="Research"
     items={items}

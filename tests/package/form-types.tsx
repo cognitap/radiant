@@ -8,7 +8,7 @@ import {
   defineTheme,
   useForm,
   type FormErrors
-} from '../../src/index.js'
+} from '@cognitap/radiant'
 const errors: FormErrors = { fields: { email: 'Already registered.' }, form: 'Check the address.' }
 export const form = (
   <Form
@@ -61,8 +61,8 @@ export function Hook() {
 }
 // @ts-expect-error A form needs an accessible name.
 export const unnamed = <Form />
-// @ts-expect-error Error state has one owner.
 export const contradictory = (
+  // @ts-expect-error Error state has one owner.
   <Form
     aria-label="Invalid"
     errors={errors}

@@ -269,6 +269,6 @@ The canonical live examples are Storybook stories:
 [Recipes → Workspace → Settings](../src/recipes/Workspace.stories.tsx) (all ten
 families). Change a contract and its example together.
 
-`docs/contracts/*.ts(x)` are compile-only fixtures. `pnpm typecheck:contracts`
-checks that they type-check and that contradictory props, such as `value` with
+`tests/package/*-types.tsx` are type tests. `tsc` compiles them, and
+`@ts-expect-error` lines prove that contradictory props, such as `value` with
 `defaultValue`, are rejected.

@@ -1,18 +1,17 @@
-/** Compile-only rejections: broadening these contracts makes @ts-expect-error fail. */
 import type { ComponentProps, RefObject } from 'react'
 import type {
   AccordionProps,
   ButtonProps,
   CheckboxProps,
-  DialogActionProps,
   DialogProps,
+  DialogTriggerProps,
   FieldProps,
   InputProps,
   LinkProps,
   RadioGroupProps,
   ThemeDefinition,
   ThemeScope
-} from './target.js'
+} from '@cognitap/radiant'
 
 type Accepts<Contract, Example extends Contract> = Example
 
@@ -46,7 +45,7 @@ export type NumericGroup = Accepts<RadioGroupProps, { name: 'p'; label: 'P'; val
 // @ts-expect-error Dialog has one open-state owner.
 export type MixedDialog = Accepts<DialogProps, { open: true; defaultOpen: true }>
 // @ts-expect-error Replacement must return one React element.
-export type RenderText = Accepts<DialogActionProps, { render: () => string }>
+export type RenderText = Accepts<DialogTriggerProps, { render: () => string }>
 type WrongGroupRef = { layout: 'group'; label: 'P'; ref: RefObject<HTMLInputElement | null> }
 // @ts-expect-error The group ref points at a fieldset, not an input.
 export type GroupRef = Accepts<FieldProps, WrongGroupRef>

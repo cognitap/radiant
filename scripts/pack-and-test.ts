@@ -59,7 +59,7 @@ try {
   }
   writeFileSync(
     path.join(consumer, 'tsconfig.json'),
-    `${JSON.stringify({ compilerOptions, files: ['types.tsx'] })}\n`
+    `${JSON.stringify({ compilerOptions, include: ['*.tsx'] })}\n`
   )
   run(process.execPath, ['--test'])
   const tsc = path.join(consumer, 'node_modules/typescript/bin/tsc')
