@@ -49,7 +49,7 @@ test('a consumer display class never shows a closed Popover, Tooltip or Dialog',
   )
   expect(display(host, 'popover-content')).toBe('none')
   expect(['none', 'absent']).toContain(display(document, 'tooltip-content'))
-  expect(display(host, 'dialog')).toBe('none')
+  expect(display(host, 'dialog-content')).toBe('none')
 
   const trigger = host.querySelector<HTMLButtonElement>('[data-slot~="popover-trigger"]')!
   await click(trigger)
