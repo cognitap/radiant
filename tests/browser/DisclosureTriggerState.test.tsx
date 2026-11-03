@@ -221,7 +221,7 @@ const cases: { family: string; triggers: string[]; tree: (open: boolean) => Reac
         <CommandContent motion="off">
           <CommandTitle>Commands</CommandTitle>
           <CommandDescription>Run an action.</CommandDescription>
-          <CommandInput />
+          <CommandInput aria-label="Search commands" />
           <CommandList />
           <CommandClose>Close</CommandClose>
         </CommandContent>
