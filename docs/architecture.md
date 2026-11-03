@@ -208,7 +208,7 @@ add up: a child cannot re-enable or un-require what its Field set.
 
 The consumer owns validation, touched and dirty state, error text, submission
 and persistence. Native reset restores uncontrolled inputs. A controlled adapter
-resets its own values. Reset never changes pressed buttons, ToggleGroup, Dialog, Tabs or disclosure state. Radiant has no form store. TanStack Form is an optional example adapter, not a dependency.
+resets its own values. Reset never changes pressed buttons, ToggleGroup, Dialog, Tabs or disclosure state. TanStack Form is an optional example adapter.
 
 Select takes one `items` registry for SSR labels, native options and typeahead.
 Rich labels supply `textValue`. The focused option and committed value are
@@ -218,6 +218,7 @@ with the owner. User selections emit form change; prop syncs do not.
 
 Carousel uses native scroll snap and Button controls; opt-in autoplay pauses for interaction, visibility and reduced motion.
 Form coordinates native validation and asynchronous submission without storing values. FormField composes Field; FormError composes Alert.
+A nameless validating control names its FormField with `data-form-name`.
 
 ## Replacement and events
 

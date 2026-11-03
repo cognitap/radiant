@@ -7,6 +7,9 @@ import {
   FormError,
   Input,
   Button,
+  MultiSelect,
+  NumberField,
+  TagsInput,
   useForm,
   type FormProps
 } from '../../src/index.js'
@@ -303,4 +306,63 @@ test('native validation and server errors support field names that match object 
   await vi.waitFor(() => expect(host.textContent).toContain('Already used.'))
   expect(host.textContent).toContain('Reserved.')
   expect(submit).toHaveBeenCalledTimes(1)
+})
+test('compound controls report native validation on their own FormField', async () => {
+  const submit = vi.fn()
+  const { host } = await mount(
+    <Form
+      aria-label="Compound fields"
+      onSubmitValues={submit}
+    >
+      <FormField
+        name="seats"
+        label="Seats"
+        required
+      >
+        <NumberField name="seats" />
+      </FormField>
+      <FormField
+        name="limit"
+        label="Limit"
+      >
+        <NumberField
+          name="limit"
+          defaultValue={50}
+          max={10}
+        />
+      </FormField>
+      <FormField
+        name="labels"
+        label="Labels"
+        required
+      >
+        <TagsInput name="labels" />
+      </FormField>
+      <FormField
+        name="projects"
+        label="Projects"
+        required
+      >
+        <MultiSelect
+          name="projects"
+          items={[{ value: 'a', label: 'Alpha' }]}
+        />
+      </FormField>
+      <FormError />
+      <Button type="submit">Save</Button>
+    </Form>
+  )
+  await click(button(host))
+  const fieldError = (name: string) =>
+    host.querySelector(
+      `[data-slot~="form-field"]:has([name="${name}"], [data-form-name="${name}"]) [data-slot="field-error"]`
+    )?.textContent
+  await vi.waitFor(() => {
+    for (const name of ['seats', 'limit', 'labels', 'projects'])
+      expect(fieldError(name), name).toBeTruthy()
+  })
+  expect(fieldError('limit')).toBe('Enter a valid number within the allowed range.')
+  expect(host.querySelector('[data-slot~="form-error"]')).toBeNull()
+  expect(submit).not.toHaveBeenCalled()
+  expect(new FormData(host.querySelector('form')!).getAll('limit')).toEqual(['50'])
 })

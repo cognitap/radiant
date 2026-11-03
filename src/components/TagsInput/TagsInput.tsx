@@ -297,6 +297,7 @@ export function TagsInput({
         type="text"
         className="sr-only"
         data-slot="tags-input-native"
+        data-form-name={name}
         form={form}
         disabled={control.disabled}
         readOnly={readOnly}

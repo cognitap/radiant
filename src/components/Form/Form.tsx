@@ -56,8 +56,11 @@ function namedError(errors: FormErrors, name: string) {
 function hasErrors(errors: FormErrors) {
   return Boolean(errors.form || Object.values(errors.fields ?? {}).some(Boolean))
 }
-function eventName(target: EventTarget | null) {
-  return target && 'name' in target && typeof target.name === 'string' ? target.name : ''
+/** A validating control without a name (a compound family's visible input or JSON carrier) names its field with `data-form-name`. */
+function fieldName(target: EventTarget | null) {
+  const control = target as Partial<HTMLInputElement> | null
+  if (typeof control?.name !== 'string') return ''
+  return control.name || control.getAttribute?.('data-form-name') || ''
 }
 function equalErrors(left: FormErrors, right: FormErrors) {
   const entries = (errors: FormErrors) =>
@@ -116,7 +119,7 @@ export function Form({
           !control.disabled &&
           control.type !== 'hidden' &&
           Boolean(
-            namedError(next, control.name) ||
+            namedError(next, fieldName(control)) ||
             (control.willValidate && !control.validity.valid) ||
             control.getAttribute('aria-invalid') === 'true'
           )
@@ -157,11 +160,11 @@ export function Form({
         )}
         onInput={event => {
           onInput?.(event)
-          edited(eventName(event.target))
+          edited(fieldName(event.target))
         }}
         onChange={event => {
           onChange?.(event)
-          edited(eventName(event.target))
+          edited(fieldName(event.target))
         }}
         onReset={event => {
           onReset?.(event)
@@ -187,7 +190,8 @@ export function Form({
           if (!(submitter as HTMLButtonElement | null)?.formNoValidate) {
             for (const control of controls(form)) {
               if (control.willValidate && !control.validity.valid) {
-                if (control.name) nativeErrors[control.name] ??= control.validationMessage
+                const name = fieldName(control)
+                if (name) nativeErrors[name] ??= control.validationMessage
                 else unnamedError ??= control.validationMessage
               }
             }

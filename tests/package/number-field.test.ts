@@ -27,7 +27,7 @@ test('NumberField SSR keeps a labeled actual text Input and one raw named native
   assert.match(html, /aria-valuemin="0"/)
   assert.match(html, /aria-valuemax="5000"/)
   assert.match(html, /<input[^>]+type="hidden"[^>]+name="budget"[^>]+value="1234.5"/)
-  assert.equal((html.match(/name="budget"/g) ?? []).length, 1)
+  assert.equal((html.match(/\sname="budget"/g) ?? []).length, 1)
   assert.equal((html.match(/tabindex="-1"/g) ?? []).length, 2)
   assert.equal((html.match(/type="button"/g) ?? []).length, 2)
   assert.doesNotMatch(html, / aria-pressed=/)
