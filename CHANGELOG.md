@@ -5,6 +5,10 @@
 ## Unreleased
 
 - Show required and range errors from NumberField, TagsInput and MultiSelect on their own FormField instead of FormError.
+- **Breaking:** Fieldset styles its legend through `parts.label`, like Field, RadioGroup and CheckboxGroup. Before: `<Fieldset legend="Shipping" parts={{ legend: … }} />`. After: `<Fieldset legend="Shipping" parts={{ label: … }} />`.
+- RadioGroup passes its `form` prop to every radio, so a group placed outside its form submits its value.
+- Checkboxes in an invalid CheckboxGroup show the invalid border, as radios in an invalid RadioGroup do.
+- Radios outside an invalid RadioGroup keep their normal border, even inside a Form with errors.
 
 ## 0.0.77
 

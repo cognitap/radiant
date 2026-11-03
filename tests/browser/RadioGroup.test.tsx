@@ -134,3 +134,59 @@ test('a radio description is announced with the input, merged with caller ids an
   await act(async () => pro.labels![0].click())
   expect(pro.checked).toBe(true)
 })
+
+test('a root form reaches every radio, so a group outside its form still submits', async () => {
+  const host = await mount(
+    <>
+      <form id="checkout" />
+      <RadioGroup
+        label="Plan"
+        name="plan"
+        form="checkout"
+        defaultValue="pro"
+      >
+        <Radio
+          label="Free"
+          value="free"
+        />
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+      </RadioGroup>
+    </>
+  )
+  const form = host.querySelector('form')!
+  const radios = [...host.querySelectorAll('input')]
+  expect(radios.every(radio => radio.form === form)).toBe(true)
+  expect(new FormData(form).get('plan')).toBe('pro')
+  await act(async () => radios[0]!.click())
+  expect(new FormData(form).get('plan')).toBe('free')
+})
+
+test('only an invalid group paints its radios invalid', async () => {
+  const host = await mount(
+    <div data-invalid="">
+      <RadioGroup
+        label="Invalid"
+        error="Choose a plan"
+      >
+        <Radio
+          label="Invalid"
+          value="invalid"
+        />
+      </RadioGroup>
+      <RadioGroup label="Valid">
+        <Radio
+          label="Valid"
+          value="valid"
+        />
+      </RadioGroup>
+    </div>
+  )
+  const [invalid, valid] = [...host.querySelectorAll('input')].map(
+    radio => getComputedStyle(radio).borderTopColor
+  )
+  expect(invalid).not.toBe(valid)
+  expect(host.querySelector('[value="invalid"]')!.hasAttribute('aria-invalid')).toBe(false)
+})

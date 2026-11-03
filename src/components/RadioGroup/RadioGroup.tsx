@@ -36,7 +36,7 @@ const radioVariants = cva([
   '[box-shadow:var(--rad-control-indicator-shadow,none)]',
   'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
   'data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
-  'in-data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'in-[[data-slot~=radio-group][data-invalid]]:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-radio-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
   'focus-visible:[outline-width:var(--rad-radio-focus-width,var(--rad-focus-width,2px))]',
@@ -67,6 +67,7 @@ const optionsClass =
 
 type RadioGroupContextValue = {
   name: string
+  form?: string
   value?: string | null
   defaultValue?: string | null
   controlled: boolean
@@ -118,6 +119,7 @@ function hasContent(value: ReactNode) {
 /** Native fieldset: owns option name and selection; controlled form reset belongs to the caller. */
 export function RadioGroup({
   name,
+  form,
   value,
   defaultValue,
   onValueChange,
@@ -140,10 +142,12 @@ export function RadioGroup({
       data-control-size={controlSize}
       layout="group"
       required={required}
+      form={form}
     >
       <RadioGroupContext.Provider
         value={{
           name: name ?? generatedName,
+          form,
           value,
           defaultValue: initialDefault,
           controlled,
@@ -252,6 +256,7 @@ export function Radio({
           controlled ? undefined : group ? group.defaultValue === value : defaultChecked
         }
         name={group?.name ?? name}
+        form={group?.form ?? props.form}
         required={group?.required || control.required}
         type="radio"
         value={value}

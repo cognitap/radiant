@@ -27,6 +27,7 @@ const checkboxVariants = cva([
   '[box-shadow:var(--rad-control-indicator-shadow,none)]',
   'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)] indeterminate:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
   'data-invalid:[border-color:var(--rad-checkbox-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'in-[[data-slot~=checkbox-group][data-invalid]]:[border-color:var(--rad-checkbox-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'focus-visible:outline-solid',
   'focus-visible:[outline-color:var(--rad-checkbox-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
   'focus-visible:[outline-width:var(--rad-checkbox-focus-width,var(--rad-focus-width,2px))]',

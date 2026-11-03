@@ -1,7 +1,13 @@
 import { act, createRef, StrictMode } from 'react'
 import { expect, test, vi } from 'vitest'
 import { commands } from 'vitest/browser'
-import { CheckboxGroup, ThemeScope, defineTheme, type CheckboxGroupItem } from '../../src/index.js'
+import {
+  Checkbox,
+  CheckboxGroup,
+  ThemeScope,
+  defineTheme,
+  type CheckboxGroupItem
+} from '../../src/index.js'
 import { mount, click, key, pause } from './familyHarness.js'
 const items: CheckboxGroupItem[] = [
   { value: 'email', label: 'Email' },
@@ -244,4 +250,39 @@ test('required blocks native submission until an enabled option is checked', asy
   expect(form.checkValidity()).toBe(true)
   await render(tree({ value: [], disabled: true }))
   expect(form.checkValidity()).toBe(true)
+})
+test('an invalid group paints its options like invalid radios without marking each option invalid', async () => {
+  const { host } = await mount(
+    <>
+      <CheckboxGroup
+        label="Invalid"
+        items={[{ value: 'invalid', label: 'Invalid' }]}
+        selectAll={{ label: 'All' }}
+        error="Choose a channel"
+      />
+      <CheckboxGroup
+        label="Valid"
+        items={[{ value: 'valid', label: 'Valid' }]}
+      />
+      <div data-invalid="">
+        <Checkbox
+          value="outside"
+          label="Outside a group"
+        />
+      </div>
+      <Checkbox
+        value="marked"
+        label="Marked invalid"
+        aria-invalid
+      />
+    </>
+  )
+  const border = (value: string) =>
+    getComputedStyle(host.querySelector(`[value="${value}"]`)!).borderTopColor
+  const parent = host.querySelector<HTMLInputElement>('[aria-controls]')!
+  expect(border('marked')).not.toBe(border('valid'))
+  expect(border('invalid')).toBe(border('marked'))
+  expect(getComputedStyle(parent).borderTopColor).toBe(border('marked'))
+  expect(border('outside')).toBe(border('valid'))
+  expect(host.querySelector('[value="invalid"]')!.hasAttribute('aria-invalid')).toBe(false)
 })

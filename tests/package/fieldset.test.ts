@@ -15,7 +15,7 @@ test('Fieldset composes Field with a native legend and group-owned descriptions 
         error: 'Check the address',
         'aria-describedby': 'external',
         'data-slot': 'custom',
-        parts: { legend: { className: 'italic' }, description: { style: { color: 'navy' } } }
+        parts: { label: { className: 'italic' }, description: { style: { color: 'navy' } } }
       },
       h(
         Field,
