@@ -5,9 +5,22 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { commands, page, userEvent } from 'vitest/browser'
 import {
   Button,
+  Carousel,
+  CarouselViewport,
   Checkbox,
+  ContextMenu,
+  ContextMenuTrigger,
+  Field,
   Input,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuTrigger,
+  NativeSelect,
   Radio,
+  ScrollArea,
+  Select,
+  TableContainer,
   ThemeScope,
   defaultTheme,
   defineTheme,
@@ -218,6 +231,104 @@ for (const mode of ['light', 'dark'] as const) {
     })
   }
 }
+
+test('every keyboard focus ring follows the shared focus tokens and family overrides', async () => {
+  const theme = defineTheme({
+    id: 'focus-ring',
+    name: 'Focus ring',
+    tokens: { focus: { width: '3px', offset: '1px', style: 'dashed' } },
+    components: { select: { focusWidth: '4px', focusStyle: 'dotted' } }
+  })
+  await mount(
+    <ThemeScope theme={theme}>
+      <Button>Start</Button>
+      <Input aria-label="Name" />
+      <NativeSelect aria-label="Role">
+        <option>Reader</option>
+      </NativeSelect>
+      <Field label="City">
+        <Select
+          items={[{ value: 'rome', label: 'Rome' }]}
+          defaultValue="rome"
+        />
+      </Field>
+      <ScrollArea
+        aria-label="Notes"
+        style={{ height: 40 }}
+      >
+        <p style={{ height: 200 }}>Notes</p>
+      </ScrollArea>
+      <TableContainer aria-label="Totals">
+        <table>
+          <tbody>
+            <tr>
+              <td>1</td>
+            </tr>
+          </tbody>
+        </table>
+      </TableContainer>
+      <ContextMenu>
+        <ContextMenuTrigger aria-label="Card">Card</ContextMenuTrigger>
+      </ContextMenu>
+      <Carousel
+        aria-label="Gallery"
+        items={[{ value: 'atlas', label: 'Atlas', children: <p>Atlas</p> }]}
+      >
+        <CarouselViewport />
+      </Carousel>
+    </ThemeScope>
+  )
+  await act(async () => userEvent.click(page.getByRole('button', { name: 'Start' })))
+  const rings: string[] = []
+  for (let stop = 0; stop < 10; stop++) {
+    await act(async () => userEvent.tab())
+    const focused = document.activeElement as HTMLElement
+    if (!host.contains(focused)) break
+    const style = getComputedStyle(focused),
+      select = focused.closest('[data-slot~=select-trigger]') !== null
+    expect(focused.matches(':focus-visible')).toBe(true)
+    expect(style.outlineStyle).toBe(select ? 'dotted' : 'dashed')
+    expect(style.outlineWidth).toBe(select ? '4px' : '3px')
+    expect(style.outlineOffset).toBe('1px')
+    rings.push(focused.dataset.slot ?? focused.tagName)
+  }
+  expect(rings).toEqual([
+    'input',
+    'native-select',
+    'button select-trigger',
+    'scroll-area',
+    'table-container',
+    'context-menu-trigger',
+    'carousel-viewport'
+  ])
+})
+
+test('a keyboard-focused menu item is highlighted as strongly as a listbox option', async () => {
+  await mount(
+    <ThemeScope theme={defaultTheme}>
+      <span
+        data-test="accent"
+        style={{
+          background: 'var(--rad-color-accent)',
+          color: 'var(--rad-color-accent-foreground)'
+        }}
+      />
+      <Menu>
+        <MenuTrigger>Actions</MenuTrigger>
+        <MenuContent motion="off">
+          <MenuItem>Rename</MenuItem>
+        </MenuContent>
+      </Menu>
+    </ThemeScope>
+  )
+  page.getByRole('button', { name: 'Actions' }).element().focus()
+  await act(async () => userEvent.keyboard('{ArrowDown}'))
+  const item = page.getByRole('menuitem', { name: 'Rename' }).element() as HTMLElement
+  await expect.element(item).toHaveFocus()
+  const accent = getComputedStyle(host.querySelector('[data-test=accent]')!)
+  await expect.poll(() => getComputedStyle(item).backgroundColor).toBe(accent.backgroundColor)
+  expect(getComputedStyle(item).color).toBe(accent.color)
+})
 
 test('a server-rendered scope hydrates onto one div and releases its ref', async () => {
   const brand = defineTheme({

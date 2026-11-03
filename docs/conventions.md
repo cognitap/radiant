@@ -32,6 +32,7 @@ build on is in [architecture](architecture.md).
 
 - Treatment is `variant`, color is `tone` and size is `controlSize`, defaulting
   to `medium`. Actions default to the `accent` tone and feedback to `neutral`.
+  Menu rows take only `tone`: `neutral`, `warning` or `danger`.
 - Orientation and side props share one exported type each.
 - Every `parts` entry is a `PartStyle`. Recurring roles keep one key: `wrapper`,
   `label`, `description`, `error`, `indicator`, `remove`.
@@ -50,17 +51,23 @@ build on is in [architecture](architecture.md).
   Other `data-state` values describe a task's status, such as Progress's
   `indeterminate`, `loading` and `complete`.
 - Selection uses a boolean `data-selected`, like `data-disabled`,
-  `data-invalid` and `data-highlighted`. ARIA keeps its own attribute
-  (`aria-selected`, `aria-pressed`, `aria-checked`).
+  `data-invalid` and `data-highlighted`. Current pages and Carousel
+  indicators carry it too. ARIA keeps its own attribute
+  (`aria-selected`, `aria-pressed`, `aria-checked`, `aria-current`).
+- A boolean data attribute is `""` when true and absent when false.
 
 ## Names
 
 - A host that needs an accessible name uses the `AccessibleName` type and
-  `requireAccessibleName`.
+  `requireAccessibleName`, with no English default.
   A native labelable host (input, progress, meter) is named by a `<label>` or
-  Field instead, so it documents the requirement without that type.
+  Field instead, so it documents the requirement without that type. An input
+  with no visible label, such as CommandInput, uses the type.
+- A part takes a name the consumer already gives: CarouselViewport takes the
+  Carousel's and a Toast its ToastTitle's. Its own `aria-label` still wins.
 - A visible name is `label: ReactNode`. A name for an element Radiant renders
-  inside the component is a string ending in `Label`, such as `removeLabel`.
+  inside the component ends in `Label`: a string such as Tag's `removeLabel`,
+  or a function of each item's text, such as TagsInput's.
   Native names keep their meaning, such as Avatar's `alt`.
   Announcement text that replaces an element's content, rather than naming
   it, is `altText`, such as ToastAction's.

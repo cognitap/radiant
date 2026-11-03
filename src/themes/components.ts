@@ -61,7 +61,8 @@ export const componentRegistry = {
     indent: 'css',
     focusColor: 'css',
     focusWidth: 'css',
-    focusOffset: 'css'
+    focusOffset: 'css',
+    focusStyle: 'css'
   },
   navigationMenu: {
     gap: 'css',
@@ -103,7 +104,8 @@ export const componentRegistry = {
     handleActiveBackground: 'css',
     focusColor: 'css',
     focusWidth: 'css',
-    focusOffset: 'css'
+    focusOffset: 'css',
+    focusStyle: 'css'
   },
   numberField: { gap: 'css' },
   passwordInput: { gap: 'css' },
@@ -136,6 +138,7 @@ export const componentRegistry = {
     focusColor: 'css',
     focusWidth: 'css',
     focusOffset: 'css',
+    focusStyle: 'css',
     invalidBorder: 'css',
     disabledBackground: 'css'
   },
@@ -150,6 +153,7 @@ export const componentRegistry = {
     focusColor: 'css',
     focusWidth: 'css',
     focusOffset: 'css',
+    focusStyle: 'css',
     invalidBorder: 'css'
   },
   kbd: {
@@ -373,6 +377,9 @@ export const componentRegistry = {
     cornerShape: 'css',
     shadow: 'css',
     focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css',
     contentPadding: 'css',
     contentRadius: 'css',
     contentBackground: 'css',
@@ -397,6 +404,9 @@ export const componentRegistry = {
     cornerShape: 'css',
     shadow: 'css',
     focusColor: 'css',
+    focusWidth: 'css',
+    focusOffset: 'css',
+    focusStyle: 'css',
     contentPadding: 'css',
     contentRadius: 'css',
     contentBackground: 'css',
@@ -587,7 +597,9 @@ export const componentRegistry = {
     itemPadding: 'css',
     itemRadius: 'css',
     itemFocusBackground: 'css',
-    itemFocusColor: 'css'
+    itemFocusColor: 'css',
+    itemWarningColor: 'css',
+    itemDangerColor: 'css'
   },
   alert: {
     radius: 'css',

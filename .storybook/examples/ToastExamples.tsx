@@ -17,7 +17,10 @@ export function ToastSuccessExample() {
   return (
     <ToastProvider duration={5000}>
       <Button onClick={() => setOpen(true)}>Save draft</Button>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           open={open}
           onOpenChange={setOpen}
@@ -60,7 +63,10 @@ export function ToastUndoExample({ initialOpen = false }: { initialOpen?: boolea
           </li>
         ))}
       </ul>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           open={open}
           onOpenChange={setOpen}
@@ -95,7 +101,10 @@ export function ToastErrorExample({ initialOpen = false }: { initialOpen?: boole
   return (
     <ToastProvider>
       <Button onClick={() => setOpen(true)}>Upload invoice</Button>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           open={open}
           onOpenChange={setOpen}
@@ -134,7 +143,10 @@ export function ToastControlledExample() {
         </Button>
         <output>Toast is {open ? 'open' : 'closed'}.</output>
       </div>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           open={open}
           onOpenChange={setOpen}
@@ -161,7 +173,10 @@ export function ToastQueueExample() {
       <Button onClick={() => setMessages(values => [...values, ++next.current])}>
         Export a report
       </Button>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         {messages.map(id => (
           <Toast
             key={id}

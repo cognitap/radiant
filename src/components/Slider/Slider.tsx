@@ -8,6 +8,7 @@ import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize, Orientation } from '../../presentation.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 const sliderClass = [
   controlBorderClass,
@@ -21,11 +22,8 @@ const sliderClass = [
   '[--_rad-slider-corner-shape:var(--rad-slider-corner-shape,var(--rad-control-corner-shape,round))]',
   '[--_rad-slider-thumb:var(--rad-slider-thumb-color,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
   'm-0 block min-w-0 appearance-none cursor-default bg-transparent p-0',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-slider-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-slider-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-slider-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-slider-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-slider-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-slider-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-slider-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-slider-focus-style)]',
   'data-invalid:[--_rad-slider-track:var(--rad-slider-invalid-track,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'disabled:cursor-not-allowed',
   'disabled:[--_rad-slider-track:var(--rad-slider-disabled-track,var(--rad-color-disabled-border,oklch(0.88_0.005_286)))]',
@@ -69,7 +67,6 @@ const sliderClass = [
   '[&::-moz-range-thumb]:bg-[var(--_rad-slider-thumb)]',
   '[&::-moz-range-thumb]:[box-shadow:var(--rad-slider-thumb-shadow,var(--rad-control-indicator-thumb-shadow,none))]',
   'forced-colors:appearance-auto',
-  'forced-colors:focus-visible:outline-[Highlight]',
   'forced-colors:[&::-webkit-slider-runnable-track]:[all:revert]',
   'forced-colors:[&::-webkit-slider-thumb]:[all:revert]',
   'forced-colors:[&::-moz-range-track]:[all:revert]',

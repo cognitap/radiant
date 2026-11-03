@@ -682,6 +682,7 @@ export function ComboboxInput({
       data-control-size={box.controlSize}
       aria-autocomplete="list"
       aria-expanded={box.open}
+      data-state={box.open ? 'open' : 'closed'}
       aria-controls={box.open ? box.listId : undefined}
       aria-activedescendant={box.open && box.active !== null ? box.optionId(box.active) : undefined}
       onChange={event => {
@@ -843,6 +844,7 @@ export function ComboboxTrigger({
       aria-label={props['aria-label'] ?? (box.textInput ? 'Show suggestions' : 'Show options')}
       aria-controls={box.open ? box.listId : undefined}
       aria-expanded={box.open}
+      data-state={box.open ? 'open' : 'closed'}
       data-slot={componentSlot(
         box.multiple,
         !!box.textInput,
@@ -1171,8 +1173,15 @@ export function ComboboxStatus({ children, className, ...props }: ComboboxStatus
 export type ComboboxTagsProps = Omit<ComponentProps<'div'>, 'children' | 'style'> & {
   style?: ThemeStyle
   'data-slot'?: string
+  /** Names each tag's removal Button from the option's text. */
+  removeLabel?: (text: string) => string
 }
-export function ComboboxTags({ className, ...props }: ComboboxTagsProps) {
+const defaultRemoveLabel = (text: string) => `Remove ${text}`
+export function ComboboxTags({
+  removeLabel = defaultRemoveLabel,
+  className,
+  ...props
+}: ComboboxTagsProps) {
   const box = useComboboxContext()
   if (!box.multiple) throw new Error('ComboboxTags requires a multiple Combobox.')
   return (
@@ -1188,7 +1197,7 @@ export function ComboboxTags({ className, ...props }: ComboboxTagsProps) {
         <Tag
           key={item.value}
           data-slot="multi-select-tag"
-          removeLabel={`Remove ${textOf(item)}`}
+          removeLabel={removeLabel(textOf(item))}
           disabled={box.disabled || box.readOnly}
           onRemove={() => box.remove(item.value)}
         >

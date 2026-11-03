@@ -31,6 +31,7 @@ import type { StateOwner } from '../../react/useNativeOwner.js'
 import { useTransitionHost } from '../../motion/host.js'
 import type { PartStyle } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusRingClass, focusRingInsetClass } from '../shared/focusStyles.js'
 
 export type AppShellProps = Omit<ComponentProps<'div'>, 'style'> &
   StateOwner<'collapsed', boolean> &
@@ -200,8 +201,8 @@ export function AppShell({
           {...props}
           ref={layoutRef}
           data-slot={joinIds('app-shell', props['data-slot'])}
-          data-collapsed={collapse.value || undefined}
-          data-mobile={mobile || undefined}
+          data-collapsed={collapse.value ? '' : undefined}
+          data-mobile={mobile ? '' : undefined}
           data-state={
             mobile ? (drawer.value ? 'open' : 'closed') : collapse.value ? 'closed' : 'open'
           }
@@ -271,7 +272,9 @@ export function AppShellMain({ className, ...props }: AppShellMainProps) {
           tabIndex={-1}
           data-slot={joinIds('app-shell-main', props['data-slot'])}
           className={cn(
-            'relative box-border size-full min-h-0 min-w-0 overflow-auto p-[var(--rad-app-shell-main-padding,var(--rad-surface-padding,1.5rem))] focus-visible:[outline-style:var(--rad-focus-style,solid)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-[-2px]',
+            'relative box-border size-full min-h-0 min-w-0 overflow-auto p-[var(--rad-app-shell-main-padding,var(--rad-surface-padding,1.5rem))]',
+            focusRingClass,
+            focusRingInsetClass,
             scrollbarClass,
             className
           )}
@@ -373,7 +376,7 @@ export function Sidebar({
       aria-labelledby={shell.labelId}
       tabIndex={0}
       data-slot={joinIds('sidebar', props['data-slot'])}
-      data-collapsed={collapsed || undefined}
+      data-collapsed={collapsed ? '' : undefined}
       data-state={shell.mobile ? (shell.open ? 'open' : 'closed') : collapsed ? 'closed' : 'open'}
       className={cn(
         'relative box-border flex size-full min-h-0 min-w-0 flex-col overflow-auto gap-[var(--rad-sidebar-gap,1rem)] p-[var(--rad-sidebar-padding,0.5rem)] border-0 border-e-[length:var(--rad-sidebar-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-surface-border-style,solid)] border-[var(--rad-sidebar-border-color,var(--rad-color-border))] bg-[var(--rad-sidebar-background,var(--rad-color-surface))] text-[var(--rad-sidebar-color,var(--rad-color-foreground))]',
@@ -478,6 +481,7 @@ export function SidebarTrigger({
       aria-expanded={shell.mobile ? shell.open : !shell.collapsed}
       aria-controls={shell.mobile ? shell.drawerId : shell.sidebarId}
       aria-haspopup={shell.mobile ? 'dialog' : undefined}
+      data-state={(shell.mobile ? shell.open : !shell.collapsed) ? 'open' : 'closed'}
       data-slot={joinIds('sidebar-trigger', props['data-slot'])}
       onClick={composeAction(onClick, () =>
         shell.mobile ? shell.setOpen(!shell.open) : shell.setCollapsed(!shell.collapsed)
@@ -513,7 +517,7 @@ export function SidebarContent({ expandedOnly = false, className, ...props }: Si
       hidden={hidden}
       inert={hidden}
       data-slot={joinIds('sidebar-content', props['data-slot'])}
-      data-expanded-only={expandedOnly || undefined}
+      data-expanded-only={expandedOnly ? '' : undefined}
       className={cn('min-w-0 [hidden]:hidden', className)}
     />
   )

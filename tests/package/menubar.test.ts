@@ -88,7 +88,7 @@ test('Menubar server markup preserves its named native root, real Menu parts, pr
   assert.match(html, /data-slot="menubar custom"/)
   assert.match(html, /data-state="open"/)
   assert.match(html, /aria-disabled="true"/)
-  assert.doesNotMatch(html, /role="toolbar"|tabindex="5"|aria-pressed=|disabled=""/)
+  assert.doesNotMatch(html, /role="toolbar"|tabindex="5"|aria-pressed=|\sdisabled=""/)
   const submit = html.match(/<button\b[^>]*\bname="intent"[^>]*>/)?.[0]
   assert.ok(submit)
   assert.match(submit, /type="submit"/)

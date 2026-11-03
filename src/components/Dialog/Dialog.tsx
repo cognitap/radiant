@@ -15,6 +15,7 @@ import type { StateOwner } from '../../react/useNativeOwner.js'
 import type { WithoutToggle } from '../../internal/types.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -40,11 +41,8 @@ const dialogVariants = cva([
   '[color:var(--rad-dialog-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
   '[box-shadow:var(--rad-dialog-shadow,var(--rad-surface-overlay-shadow,0_24px_64px_-16px_rgb(0_0_0/0.3)))]',
   'backdrop:[background:var(--rad-dialog-backdrop,var(--rad-surface-backdrop,rgb(0_0_0/0.45)))]',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-dialog-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-dialog-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-dialog-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-dialog-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-dialog-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-dialog-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-dialog-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-dialog-focus-style)]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
   'forced-colors:backdrop:[background:CanvasText]'
 ])
@@ -205,7 +203,8 @@ function DialogAction({ action, ...props }: DialogTriggerProps & { action: 'open
       ? {
           'aria-haspopup': 'dialog',
           'aria-expanded': dialog.open,
-          'aria-controls': dialog.contentId
+          'aria-controls': dialog.contentId,
+          'data-state': dialog.open ? 'open' : 'closed'
         }
       : {}),
     'data-slot': joinIds(
@@ -286,7 +285,11 @@ export function DialogContent({
       aria-describedby={joinIds(dialog.descriptionId, props['aria-describedby'])}
       aria-labelledby={props['aria-label'] ? props['aria-labelledby'] : dialog.titleId}
       className={cn(dialogVariants(), className)}
-      data-slot={joinIds('dialog', family === 'dialog' ? undefined : family, props['data-slot'])}
+      data-slot={joinIds(
+        'dialog-content',
+        family === 'dialog' ? undefined : `${family}-content`,
+        props['data-slot']
+      )}
       data-state={dialog.open ? 'open' : 'closed'}
       id={dialog.contentId}
       onCancel={event => {

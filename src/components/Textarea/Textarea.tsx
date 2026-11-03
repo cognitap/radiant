@@ -10,6 +10,7 @@ import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize } from '../../presentation.js'
 import { useFieldControl } from '../Field/Field.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 const textareaVariants = cva([
   controlBorderClass,
@@ -32,11 +33,8 @@ const textareaVariants = cva([
   '[corner-shape:var(--rad-textarea-corner-shape,var(--rad-control-corner-shape,round))]',
   '[box-shadow:var(--rad-textarea-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
   'placeholder:[color:var(--rad-textarea-placeholder,var(--rad-color-placeholder,oklch(0.5_0.01_286)))]',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-textarea-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-textarea-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-textarea-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-textarea-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-textarea-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-textarea-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-textarea-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-textarea-focus-style)]',
   'data-invalid:[border-color:var(--rad-textarea-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'disabled:cursor-not-allowed',
   'disabled:[background:var(--rad-textarea-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',

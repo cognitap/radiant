@@ -1,4 +1,5 @@
 import { controlBorderClass } from '../shared/controlStyles.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 export const selectTriggerClass = [
   controlBorderClass,
@@ -9,7 +10,8 @@ export const selectTriggerClass = [
   '[color:var(--rad-select-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-select-background,var(--rad-control-field-background,var(--rad-color-surface,white)))]',
   '[border-width:var(--rad-select-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-select-border-style,var(--rad-control-border-style,solid))] [border-color:var(--rad-select-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
   'rounded-[var(--rad-select-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-select-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-select-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
-  'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-select-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-select-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-select-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-select-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-select-focus-style)]',
   'data-invalid:[border-color:var(--rad-color-invalid)] disabled:cursor-not-allowed disabled:bg-[var(--rad-color-disabled-background)]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:disabled:text-[GrayText]'
 ].join(' ')

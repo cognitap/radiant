@@ -20,6 +20,7 @@ import { Field, useFieldControl } from '../Field/Field.js'
 import type { FieldProps } from '../Field/Field.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize, ControlParts, PartStyle } from '../../presentation.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 const radioVariants = cva([
   controlBorderClass,
@@ -37,11 +38,8 @@ const radioVariants = cva([
   'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
   'data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
   'in-[[data-slot~=radio-group][data-invalid]]:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
-  'focus-visible:outline-solid',
-  'focus-visible:[outline-color:var(--rad-radio-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))]',
-  'focus-visible:[outline-width:var(--rad-radio-focus-width,var(--rad-focus-width,2px))]',
-  'focus-visible:[outline-offset:var(--rad-radio-focus-offset,var(--rad-focus-offset,2px))]',
-  'focus-visible:[outline-style:var(--rad-radio-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-radio-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-radio-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-radio-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-radio-focus-style)]',
   'disabled:cursor-not-allowed',
   'disabled:[border-color:var(--rad-radio-disabled-border,var(--rad-color-disabled-border,oklch(0.88_0.005_286)))]',
   'disabled:checked:bg-[var(--rad-radio-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',

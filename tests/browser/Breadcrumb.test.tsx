@@ -1,3 +1,4 @@
+import { renderToStaticMarkup } from 'react-dom/server'
 import { createRef, StrictMode } from 'react'
 import { expect, test } from 'vitest'
 import { commands } from 'vitest/browser'
@@ -21,7 +22,10 @@ test('ordered navigation hydrates with native refs, keyboard links and a non-foc
     const { host } = await mount(
       <StrictMode>
         <button>Before</button>
-        <Breadcrumb ref={navRef}>
+        <Breadcrumb
+          aria-label="Breadcrumb"
+          ref={navRef}
+        >
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink
@@ -54,6 +58,7 @@ test('ordered navigation hydrates with native refs, keyboard links and a non-foc
     expect(linkRef.current).toBe(host.querySelector('a'))
     expect(host.querySelectorAll('ol > li').length).toBe(2)
     expect(host.querySelector('[aria-current="page"]')?.tagName).toBe('SPAN')
+    expect(host.querySelector('[data-selected=""]')?.tagName).toBe('SPAN')
     expect(
       host.querySelector('[data-slot~="breadcrumb-separator"]')!.getAttribute('aria-hidden')
     ).toBe('true')
@@ -109,6 +114,7 @@ test('long content, named themes and caller styles preserve native navigation in
   expect(getComputedStyle(host.querySelector('a')!).animationName).toBe('none')
   await render(
     <Breadcrumb
+      aria-label="Breadcrumb"
       className="text-lg"
       style={{ fontSize: '21px' }}
     >
@@ -121,18 +127,17 @@ test('long content, named themes and caller styles preserve native navigation in
   )
   expect(getComputedStyle(host.querySelector('nav')!).fontSize).toBe('21px')
 })
-test('the navigation landmark keeps a name: a default, a caller label, or a caller labelledby', async () => {
+test('the navigation landmark takes a caller label or labelledby and throws without one', async () => {
   const { host } = await mount(
     <>
       <span id="breadcrumb-location">Project location</span>
-      <Breadcrumb data-case="default" />
       <Breadcrumb
         data-case="label"
         aria-label="Docs trail"
       />
       <Breadcrumb
         data-case="labelledby"
-        aria-labelledby=" breadcrumb-location "
+        aria-labelledby="breadcrumb-location"
       />
       <Breadcrumb
         data-case="blank-label-with-labelledby"
@@ -142,11 +147,13 @@ test('the navigation landmark keeps a name: a default, a caller label, or a call
     </>
   )
   const nav = (name: string) => host.querySelector(`nav[data-case="${name}"]`)!
-  expect(nav('default').getAttribute('aria-label')).toBe('Breadcrumb')
   expect(nav('label').getAttribute('aria-label')).toBe('Docs trail')
   expect(nav('labelledby').hasAttribute('aria-label')).toBe(false)
   expect(nav('labelledby').getAttribute('aria-labelledby')).toBe('breadcrumb-location')
   expect(nav('blank-label-with-labelledby').getAttribute('aria-labelledby')).toBe(
     'breadcrumb-location'
+  )
+  expect(() => renderToStaticMarkup(<Breadcrumb aria-label=" " />)).toThrow(
+    'Breadcrumb requires aria-label or aria-labelledby.'
   )
 })

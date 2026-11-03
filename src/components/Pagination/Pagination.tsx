@@ -8,13 +8,13 @@ import {
 import type { DistributiveOmit } from '../../internal/types.js'
 import { cn } from '../../cn.js'
 import { joinIds } from '../../internal/ids.js'
-import { requireAccessibleName } from '../../internal/accessibleName.js'
+import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 type Part<Host extends 'nav' | 'ol' | 'li' | 'span'> = Omit<
   ComponentProps<Host>,
   'style' | 'role'
 > & { style?: ThemeStyle; 'data-slot'?: string }
-export type PaginationProps = Part<'nav'>
+export type PaginationProps = Part<'nav'> & AccessibleName
 export type PaginationListProps = Part<'ol'>
 export type PaginationItemProps = Part<'li'>
 export type PaginationLinkRenderProps = ComposedLinkRenderProps
@@ -29,15 +29,11 @@ export type PaginationEllipsisProps = Omit<Part<'span'>, 'aria-hidden' | 'tabInd
 const itemClass =
   'min-w-[var(--rad-pagination-item-min-width,2rem)] rounded-[var(--rad-pagination-radius,var(--rad-control-radius,0.5rem))]'
 export function Pagination({ className, ...props }: PaginationProps) {
-  const labelledBy = props['aria-labelledby']?.trim() || undefined
-  const label = props['aria-label'] ?? (labelledBy ? undefined : 'Pagination')
-  requireAccessibleName('Pagination', { 'aria-label': label, 'aria-labelledby': labelledBy })
+  requireAccessibleName('Pagination', props)
   const nativeProps = { ...props, role: undefined }
   return (
     <nav
       {...nativeProps}
-      aria-label={label}
-      aria-labelledby={labelledBy}
       data-slot={joinIds('pagination', props['data-slot'])}
       className={cn('min-w-0 max-w-full', className)}
     />
@@ -80,6 +76,7 @@ export function PaginationLink({
       variant={variant}
       tone={tone}
       aria-current={current ? 'page' : undefined}
+      data-selected={current ? '' : undefined}
       className={cn(itemClass, className)}
     />
   )
@@ -119,6 +116,7 @@ export function PaginationButton({
       variant={variant}
       tone={tone}
       aria-current={current ? 'page' : undefined}
+      data-selected={current ? '' : undefined}
       data-slot={joinIds('pagination-button', props['data-slot'])}
       className={cn(itemClass, className)}
     />

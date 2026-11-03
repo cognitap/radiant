@@ -47,6 +47,7 @@ import { joinIds } from '../../internal/ids.js'
 import { cn } from '../../cn.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 type Point = { x: number; y: number }
 export type ContextMenuProps = MenuProps
@@ -160,10 +161,7 @@ export function ContextMenuTrigger({
       data-state={menu.open ? 'open' : 'closed'}
       aria-controls={menu.contentId}
       data-slot={joinIds('context-menu-trigger', props['data-slot'])}
-      className={cn(
-        'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-color-focus,oklch(0.55_0.13_255))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)] forced-colors:focus-visible:outline-[Highlight]',
-        className
-      )}
+      className={cn(focusRingClass, className)}
       onContextMenu={event => {
         onContextMenu?.(event)
         if (event.defaultPrevented) return

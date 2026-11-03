@@ -31,14 +31,20 @@ function Palette({
   content,
   input,
   ...props
-}: CommandProps & { content?: CommandContentProps; input?: CommandInputProps }) {
+}: CommandProps & {
+  content?: CommandContentProps
+  input?: Omit<CommandInputProps, 'aria-label' | 'aria-labelledby'>
+}) {
   return (
     <Command {...props}>
       <CommandTrigger>Open commands</CommandTrigger>
       <CommandContent {...content}>
         <CommandTitle>Workspace commands</CommandTitle>
         <CommandDescription>Find and run a workspace action.</CommandDescription>
-        <CommandInput {...input} />
+        <CommandInput
+          aria-label="Search commands"
+          {...input}
+        />
         <CommandList />
         <CommandClose>Close commands</CommandClose>
       </CommandContent>
@@ -76,7 +82,7 @@ test('hydrates a real labelled native modal, focuses input, groups real options 
   expect(input.getAttribute('name')).toBeNull()
   expect(inputRef.current).toBe(input)
   expect(ref.current).toBe(dialog)
-  expect(dialog.dataset.slot).toBe('dialog command')
+  expect(dialog.dataset.slot).toBe('dialog-content command-content')
   expect(host.querySelector('button')!.dataset.slot).toBe('button dialog-trigger command-trigger')
   await click(host.querySelector('button')!)
   expect(dialog.matches(':modal')).toBe(true)
@@ -196,7 +202,7 @@ test('native cancel policy, caller cancellation and disabled pointer activation 
       <CommandContent>
         <CommandTitle>Actions</CommandTitle>
         <CommandDescription>Choose an action.</CommandDescription>
-        <CommandInput />
+        <CommandInput aria-label="Search commands" />
         <CommandList>
           <CommandItem
             value="new"

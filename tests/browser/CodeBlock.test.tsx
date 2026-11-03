@@ -136,6 +136,7 @@ test('native refs hydrate with real ScrollArea, inline code and independent them
   expect(
     getComputedStyle(root.current!.querySelector('[data-slot="code-block-header"]')!).paddingTop
   ).toBe('13px')
+  expect(root.current!.getAttribute('data-line-numbers')).toBe('')
   expect(getComputedStyle(inline.current!).paddingLeft).toBe('7px')
   expect(getComputedStyle(inline.current!).fontSize).toBe('20px')
   expect(getComputedStyle(host.querySelector('[data-testid="override"]')!).borderTopWidth).toBe(

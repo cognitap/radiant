@@ -26,6 +26,7 @@ import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 export type { PopoverSide, PopoverAlign } from '../../internal/popover.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 export type PopoverProps = StateOwner<'open', boolean> & {
   onOpenChange?: (open: boolean) => void
   children?: ReactNode
@@ -134,6 +135,7 @@ export function PopoverTrigger({ ref, onClick, ...props }: PopoverTriggerProps) 
       popoverTargetAction={undefined}
       aria-controls={popover.contentId}
       aria-expanded={popover.open}
+      data-state={popover.open ? 'open' : 'closed'}
       data-slot={joinIds('popover-trigger', props['data-slot'])}
       onClick={composeAction(onClick, () => popover.setOpen(!popover.open))}
     />
@@ -192,7 +194,8 @@ const surfaceClass = [
   '[border-width:var(--rad-popover-border-width,var(--rad-surface-border-width,1px))] [border-style:var(--rad-popover-border-style,var(--rad-surface-border-style,solid))] [border-color:var(--rad-popover-border-color,var(--rad-color-border))]',
   'bg-[var(--rad-popover-background,var(--rad-surface-overlay-background,var(--rad-color-surface,white)))] [color:var(--rad-popover-color,var(--rad-color-foreground))] [box-shadow:var(--rad-popover-shadow,var(--rad-surface-overlay-shadow,0_24px_64px_-16px_rgb(0_0_0/0.3)))] [backdrop-filter:var(--rad-popover-backdrop-filter,var(--rad-surface-backdrop-filter,none))]',
   'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)]',
-  'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-popover-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-popover-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-popover-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--rad-popover-focus-style,var(--rad-focus-style,solid))]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-popover-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-popover-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-popover-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-popover-focus-style)]',
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]'
 ].join(' ')

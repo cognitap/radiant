@@ -4,12 +4,28 @@
 
 ## Unreleased
 
+## 0.0.78
+
 - Show required and range errors from NumberField, TagsInput and MultiSelect on their own FormField instead of FormError.
 - **Breaking:** Fieldset styles its legend through `parts.label`, like Field, RadioGroup and CheckboxGroup. Before: `<Fieldset legend="Shipping" parts={{ legend: … }} />`. After: `<Fieldset legend="Shipping" parts={{ label: … }} />`.
 - RadioGroup passes its `form` prop to every radio, so a group placed outside its form submits its value.
 - Checkboxes in an invalid CheckboxGroup show the invalid border, as radios in an invalid RadioGroup do.
 - Radios outside an invalid RadioGroup keep their normal border, even inside a Form with errors.
 - Keep a caller's `data-slot` tokens after the family's own on Link, Input, Textarea, Checkbox, Switch, Radio, Slider, FileInput, the Select, Combobox, Autocomplete, MultiSelect and Command parts, TooltipContent and the Dialog, AlertDialog and Drawer content, title and description, instead of replacing them.
+- Draw every keyboard focus ring from the family focus overrides and the `focus` tokens. Carousel, Toast, ScrollArea, CodeBlock, ContextMenu, Table, Select, Combobox, NativeSelect, NavLink, Resizable, AppShell and chart points ignored some of them, such as `focus.style`.
+- Add `focusWidth`, `focusOffset` and `focusStyle` to the `select` and `combobox` overrides, and `focusStyle` to `nativeSelect`, `inputGroup`, `navLink` and `resizable`.
+- Highlight the focused Menu, ContextMenu and Menubar item with the accent fill that Select and Combobox options use, instead of a faint tint.
+- **Breaking:** menu rows (MenuItem, MenuCheckboxItem, MenuRadioItem, MenuSubTrigger and their ContextMenu and Menubar versions) no longer accept `variant`, `controlSize`, `iconOnly` or `fullWidth`, which never changed how they looked, and no longer render `data-variant` or `data-control-size`. Before: `<MenuItem variant="solid" controlSize="small">Delete</MenuItem>`. After: `<MenuItem>Delete</MenuItem>`.
+- **Breaking:** menu row `tone` now colors the row and takes `neutral` (the default), `warning` or `danger`, so `data-tone` is `neutral` unless set. Before: `<MenuItem tone="danger">` rendered `data-tone="danger"` and looked like any other row; `tone="accent"` was accepted. After: `<MenuItem tone="danger">` has danger text and a solid danger highlight; use `neutral` instead of `accent`. Theme the rest colors with `menu.itemWarningColor` and `menu.itemDangerColor`.
+- Menu rows set `data-disabled` when disabled, and checked MenuCheckboxItem and MenuRadioItem rows set `data-selected`, beside their ARIA attributes. Disabled MenubarTriggers set `data-disabled` too.
+- **Breaking:** Dialog, AlertDialog, Drawer and Command content carry a `<family>-content` slot, like every other overlay. Before: `data-slot="dialog"`, `"dialog alert-dialog"`, `"dialog drawer"`, `"dialog command"`. After: `"dialog-content"`, `"dialog-content alert-dialog-content"`, `"dialog-content drawer-content"`, `"dialog-content command-content"`; select `[data-slot~="drawer-content"]` instead of `[data-slot~="drawer"]`.
+- **Breaking:** Breadcrumb, Pagination, ToastViewport and CommandInput require `aria-label` or `aria-labelledby` and throw without one, instead of defaulting to an English name. Before: `<Pagination>`. After: `<Pagination aria-label="Pages">`.
+- CarouselViewport takes the Carousel's name instead of "Slides", and a Toast without a ToastTitle needs `aria-label` or `aria-labelledby` instead of being called "Notification".
+- Add `removeLabel` to TagsInput, ComboboxTags and MultiSelectTags, a function from a tag's text to its remove button's name. It defaults to `Remove ${text}`.
+- NavigationMenuViewport takes `aria-label` and `aria-labelledby`. Closed, it takes the NavigationMenu's name instead of "Navigation sections".
+- Popover, Menu, MenuSub, Menubar, HoverCard, Dialog, AlertDialog, Drawer, Command, Combobox, Autocomplete, MultiSelect and AppShell's SidebarTrigger triggers set `data-state="open|closed"` beside `aria-expanded`, like Select and NavigationMenu triggers.
+- NavLink, NavigationMenuLink, PaginationLink, PaginationButton, BreadcrumbLink, BreadcrumbPage and the current Carousel indicator set `data-selected` on the current item, beside `aria-current`, so `[data-selected]` selects every current or selected item.
+- Boolean data attributes are empty when set: AppShell and Sidebar `data-collapsed`, AppShell `data-mobile`, SidebarContent `data-expanded-only`, NavigationMenu `data-disabled`, CodeBlock `data-line-numbers` and Toast `data-queued` and `data-paused`. Before: `[data-collapsed="true"]`. After: `[data-collapsed]`. A running Toast had `data-paused="false"`; now it has no `data-paused`.
 
 ## 0.0.77
 
@@ -268,7 +284,7 @@
 
 ## 0.0.33
 
-- Breaking: ButtonProps union. Before: `interface` extension. After: type intersection and distributive omission.
+- **Breaking:** ButtonProps union. Before: `interface` extension. After: type intersection and distributive omission.
 - Add ToggleGroup.
 - Add Button pressed/defaultPressed/onPressedChange.
 
@@ -375,7 +391,7 @@
 
 ## 0.0.7
 
-- Breaking: example themes moved from core. Before: `import { jelly, themes } from '@cognitap/radiant'`. After: `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core; `themeDefinitions` exposes example definitions.
+- **Breaking:** example themes moved from core. Before: `import { jelly, themes } from '@cognitap/radiant'`. After: `import { jelly, themes } from '@cognitap/radiant/examples'`. `defaultTheme` stays in core; `themeDefinitions` exposes example definitions.
 
 - Reconcile pre-hydration disclosures: Collapsible adopts local changes once; controlled Collapsible/Accordion restore ownership without requests.
 

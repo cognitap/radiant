@@ -22,6 +22,7 @@ import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 export type CarouselItem = { value: string; label?: string; children: ReactNode }
 export type CarouselProps = Omit<ComponentProps<'section'>, 'style' | 'role'> &
@@ -48,6 +49,7 @@ type Binding = CarouselState & {
   viewportId: string
   setViewport: (node: HTMLDivElement | null) => void
   slideLabel: (index: number, count: number) => string
+  name: { 'aria-label'?: string; 'aria-labelledby'?: string }
 }
 const Context = createContext<Binding | null>(null)
 export function useCarousel(): CarouselState | null {
@@ -247,7 +249,8 @@ export function Carousel({
         items,
         viewportId,
         setViewport,
-        slideLabel
+        slideLabel,
+        name: { 'aria-label': props['aria-label'], 'aria-labelledby': props['aria-labelledby'] }
       }}
     >
       <section
@@ -340,11 +343,12 @@ export function CarouselViewport({
       ref={composed}
       id={state.viewportId}
       role="group"
-      aria-label={props['aria-label'] ?? 'Slides'}
+      {...(props['aria-label'] || props['aria-labelledby'] ? {} : state.name)}
       tabIndex={0}
       data-slot={joinIds('carousel-viewport', props['data-slot'])}
       className={cn(
-        'flex min-w-0 overflow-x-auto overscroll-x-contain snap-x snap-mandatory [touch-action:pan-x_pan-y] gap-[var(--rad-carousel-slide-gap,0px)] rounded-[var(--rad-carousel-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)] focus-visible:outline-[color:var(--rad-color-focus)] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-2',
+        'flex min-w-0 overflow-x-auto overscroll-x-contain snap-x snap-mandatory [touch-action:pan-x_pan-y] gap-[var(--rad-carousel-slide-gap,0px)] rounded-[var(--rad-carousel-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)]',
+        focusRingClass,
         scrollbarClass,
         className
       )}
@@ -512,6 +516,7 @@ export function CarouselIndicators({
           tone="neutral"
           aria-label={indicatorLabel(index, state.count)}
           aria-current={state.value === item.value ? 'true' : undefined}
+          data-selected={state.value === item.value ? '' : undefined}
           aria-controls={state.viewportId}
           onClick={() => state.setValue(item.value)}
         >

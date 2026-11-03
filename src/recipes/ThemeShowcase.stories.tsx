@@ -194,7 +194,7 @@ export const Default: Story = {
 
       <Panel title="Navigation">
         <TabsExample />
-        <Breadcrumb>
+        <Breadcrumb aria-label="Breadcrumb">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="#home">Home</BreadcrumbLink>
@@ -205,7 +205,7 @@ export const Default: Story = {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <Pagination>
+        <Pagination aria-label="Pagination">
           <PaginationList>
             <PaginationItem>
               <PaginationPrevious href="#page-1" />

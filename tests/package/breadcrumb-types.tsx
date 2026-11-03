@@ -35,6 +35,8 @@ h(
     h(BreadcrumbItem, {}, h(BreadcrumbPage, {}, 'Current'))
   )
 )
+// @ts-expect-error The navigation landmark needs a name.
+h(Breadcrumb, {})
 // @ts-expect-error Navigation links require destinations.
 h(BreadcrumbLink, { children: 'Projects' })
 // @ts-expect-error Use current rather than conflicting ARIA.

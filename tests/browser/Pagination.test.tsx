@@ -24,7 +24,10 @@ test('native page links hydrate, retain router refs and follow keyboard URLs wit
     const { host } = await mount(
       <StrictMode>
         <button>Before</button>
-        <Pagination ref={nav}>
+        <Pagination
+          aria-label="Pagination"
+          ref={nav}
+        >
           <PaginationList>
             <PaginationItem>
               <PaginationUnavailable>Previous</PaginationUnavailable>
@@ -75,6 +78,7 @@ test('native page links hydrate, retain router refs and follow keyboard URLs wit
     expect(location.hash).toBe('#pagination-two')
     expect(clicks).toBe(1)
     expect(host.querySelectorAll('[aria-current="page"]').length).toBe(1)
+    expect(host.querySelectorAll('[data-selected]').length).toBe(1)
   } finally {
     history.replaceState(null, '', original)
   }
@@ -87,7 +91,7 @@ test('action mode preserves native disabled and pending guards while the applica
     return (
       <>
         <output>{page}</output>
-        <Pagination>
+        <Pagination aria-label="Pagination">
           <PaginationList>
             <PaginationItem>
               <PaginationButton disabled>Previous</PaginationButton>
@@ -136,6 +140,7 @@ test('action mode preserves native disabled and pending guards while the applica
   expect(calls).toBe(1)
   expect(host.querySelector('output')!.textContent).toBe('2')
   expect(host.querySelector('[aria-current="page"]')).toBe(ref.current)
+  expect(host.querySelector('[data-selected=""]')).toBe(ref.current)
   expect(document.activeElement).toBe(ref.current)
   await key('{Enter}')
   expect(calls).toBe(2)
@@ -151,7 +156,10 @@ test('themes, caller overrides and forced colors keep current links visible in a
       theme={theme}
       mode="dark"
     >
-      <Pagination style={{ width: '140px' }}>
+      <Pagination
+        aria-label="Pagination"
+        style={{ width: '140px' }}
+      >
         <PaginationList>
           {[1, 2, 3, 4].map(n => (
             <PaginationItem key={n}>
@@ -181,7 +189,7 @@ test('page links and buttons default to the medium control size shared with Butt
   const { host } = await mount(
     <>
       <Button>Reference</Button>
-      <Pagination>
+      <Pagination aria-label="Pagination">
         <PaginationList>
           <PaginationItem>
             <PaginationLink

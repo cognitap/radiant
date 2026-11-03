@@ -48,6 +48,7 @@ test('NavigationMenu SSR retains native navigation, list, Button, Link and Scrol
   assert.match(html, /data-slot="scroll-area navigation-menu-viewport"/)
   assert.match(html, /href="\/guide"/)
   assert.match(html, /aria-current="page"/)
+  assert.match(html, /data-selected=""/)
   assert.doesNotMatch(html, /role="(?:menu|menubar|menuitem)"/)
   const ids = [...html.matchAll(/aria-controls="([^"]+)"/g)].map(match => match[1])
   assert.equal(ids.length, 2)
@@ -123,5 +124,16 @@ test('theme slots remain independently typed and native viewport caller classes 
     )
   )
   assert.match(styled, /w-48/)
+  assert.match(styled.match(/<[^>]*navigation-menu-viewport[^>]*>/)?.[0] ?? '', /aria-label="Test"/)
+  assert.match(
+    render(
+      h(
+        NavigationMenu,
+        { 'aria-label': 'Test', items },
+        h(NavigationMenuViewport, { 'aria-label': 'Sections' })
+      )
+    ),
+    /aria-label="Sections"/
+  )
   assert.doesNotMatch(styled, /w-\[var\(--_rad-indicator-width/)
 })

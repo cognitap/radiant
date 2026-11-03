@@ -117,7 +117,7 @@ export function CodeBlock({
         {...props}
         data-slot={joinIds('code-block', props['data-slot'])}
         data-language={language}
-        data-line-numbers={lineNumbers || undefined}
+        data-line-numbers={lineNumbers ? '' : undefined}
         data-copy-state={pending ? 'pending' : phase}
         className={cn(
           'box-border min-w-0 w-full overflow-hidden rounded-[var(--rad-code-block-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)]',
@@ -176,7 +176,7 @@ export function CodeBlockViewport({
       orientation={orientation}
       data-slot={joinIds('code-block-viewport', props['data-slot'])}
       className={cn(
-        'max-h-[var(--rad-code-block-max-height,24rem)] focus-visible:[outline-offset:-3px]',
+        'max-h-[var(--rad-code-block-max-height,24rem)] focus-visible:[--_rad-focus-offset:calc(-1px_-_var(--_rad-focus-width,var(--rad-focus-width,2px)))]',
         className
       )}
     >

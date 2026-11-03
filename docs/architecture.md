@@ -52,7 +52,7 @@ Extract shared policy only when it repeats.
 ## Composition
 
 Use Button for actions and Link for navigation, even when a Link looks like a
-button. Field owns label, help and error relationships. Card groups content.
+button. Card groups content.
 Dialog owns open state. Toast composes Alert and Button with a local FIFO queue and pausable timing. Collapsible owns one disclosure, and Accordion composes
 Collapsible for a set of them.
 
@@ -62,8 +62,6 @@ animates entry and snapping without delaying native close or focus.
 
 AlertDialog specializes Dialog's native lifecycle, surface tokens and motion for
 urgent decisions. Its modal content retains Dialog identities and adds alert-dialog tokens.
-
-Composition preserves theme, keyboard behavior and relationships.
 
 ## Presentation
 
@@ -92,7 +90,7 @@ baseline**, and never fall back through another family's override. Shared tokens
 
 The core entry ships only the neutral baseline, `defaultTheme`. Styled presets
 are examples at `@cognitap/radiant/examples`, and Storybook, the docs and the
-theme workshop all read that one copy. Presets are starting points.
+theme workshop all read that one copy.
 
 `ThemeScope` is a plain `div` that applies a theme to its subtree. It does not
 touch the document or persist anything. Without `theme` or `mode` it inherits.
@@ -107,54 +105,59 @@ stays stable. Token names, CSS variables, scopes and presets are in
 Root `className`, `style`, native props and `ref` always reach the documented
 host, never a wrapper:
 
-| Family or part                                                                                      | Host                                                |
-| --------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Charts / ChartDataTable                                                                             | figure / Table table                                |
-| Carousel / CarouselViewport / Carousel controls                                                     | section / native scroll div / Button button         |
-| Form / FormField / FormError                                                                        | form / Field host / Alert div                       |
-| AppShell / AppShellHeader / AppShellMain / Sidebar                                                  | div / header / main / nav                           |
-| AppShellSkipLink / SidebarTrigger / SidebarLabel / SidebarContent                                   | Link's a / Button's button / span / div             |
-| AspectRatio                                                                                         | `div`                                               |
-| Toolbar                                                                                             | `div`                                               |
-| ToggleGroup / ToggleGroupItem                                                                       | `div` / Button's `button`                           |
-| ScrollArea                                                                                          | Native `div` scroll viewport                        |
-| Skeleton                                                                                            | `span`                                              |
-| Meter                                                                                               | Native meter                                        |
-| Progress / Spinner                                                                                  | `progress` / `svg`                                  |
-| Button / Link / NavLink                                                                             | `button` / `a`, including through `render`          |
-| Field                                                                                               | `div` in control layout; `fieldset` in group layout |
-| Input / PasswordInput / FileInput / NumberField / Checkbox / Switch / Slider / Radio                | Native `input`                                      |
-| Textarea                                                                                            | Native `textarea`                                   |
-| NativeSelect                                                                                        | Native select                                       |
-| Select / SelectPortal / Combobox / ComboboxPortal / Autocomplete / AutocompletePortal               | None; state / portal                                |
-| Popover, HoverCard, Tooltip, Menu, ContextMenu, MenuSub / their Portals                             | None; state / portal                                |
-| Menubar / MenubarMenu / MenubarPortal                                                               | div / None / None                                   |
-| ContextMenuTrigger / ContextMenuContent                                                             | Named native div / Menu content div                 |
-| HoverCardTrigger / HoverCardContent                                                                 | Link's `a` / Popover's `div`                        |
-| MenuTrigger / MenuItem / MenuCheckboxItem / MenuRadioItem / MenuSubTrigger                          | Button's button                                     |
-| MenuContent / MenuSubContent / MenuGroup / MenuLabel / MenuRadioGroup                               | div                                                 |
-| MenuSeparator                                                                                       | Separator's hr                                      |
-| PopoverTrigger / PopoverClose / PopoverContent                                                      | Button's `button` / Button's `button` / `div`       |
-| SelectTrigger / SelectContent / SelectViewport / SelectItem                                         | Button's `button` / `div` / `div` / `div`           |
-| ComboboxInput / AutocompleteInput / CommandInput                                                    | Native `input`                                      |
-| ComboboxContent / ComboboxItem / AutocompleteContent / AutocompleteItem / CommandList / CommandItem | `div`                                               |
-| ComboboxTrigger / ComboboxClear / AutocompleteTrigger / AutocompleteClear                           | Button's `button`                                   |
-| Tabs / TabsList / TabsContent                                                                       | `div`                                               |
-| TabsTrigger                                                                                         | Button's `button`                                   |
-| RadioGroup                                                                                          | Field's `fieldset`                                  |
-| Dialog / AlertDialog / Drawer / Command                                                             | None; state owners                                  |
-| Dialog actions / AlertDialog actions / Command actions                                              | Button's `button`                                   |
-| Dialog, AlertDialog, Drawer and Command Content / Title / Description                               | `dialog` / `h2` / `p`                               |
-| Collapsible / NavLinkGroup                                                                          | `details`                                           |
-| CollapsibleTrigger / NavLinkGroupTrigger                                                            | `summary`                                           |
-| CollapsibleContent / NavLinkGroupContent                                                            | `div`                                               |
-| Accordion / AccordionItem / AccordionTrigger / AccordionContent                                     | `div` / `details` / `summary` / `div`               |
-| Card / CardHeader / CardContent / CardFooter                                                        | `div`                                               |
-| CardTitle and AlertTitle / CardDescription and AlertDescription                                     | Heading chosen by `level` / `p`                     |
+| Family or part                                                                                                      | Host                                                      |
+| ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Charts / ChartDataTable                                                                                             | `figure` / Table's `table`                                |
+| Carousel / CarouselViewport / CarouselIndicators                                                                    | `section` / native scroll `div` / `div`                   |
+| Form / FormField / FormError                                                                                        | `form` / Field's host / Alert's `div`                     |
+| AppShell / AppShellHeader / AppShellMain / Sidebar                                                                  | `div` / `header` / `main` / `nav`                         |
+| AppShellSkipLink / SidebarLabel / SidebarContent                                                                    | Link's `a` / `span` / `div`                               |
+| AspectRatio, Toolbar, ToggleGroup, ButtonGroup, InputGroup, InputGroupAddon, Alert, Tabs, TabsList                  | `div`                                                     |
+| Resizable, ResizablePanel, CodeBlock, CodeBlockHeader, EmptyState, EmptyStateActions, TabsContent                   | `div`                                                     |
+| Toast / ToastViewport / ToastProvider                                                                               | Alert's `div` / `section` / None                          |
+| ScrollArea / CodeBlockViewport                                                                                      | Native `div` scroll viewport / ScrollArea's `div`         |
+| CodeBlockContent / InlineCode / Kbd and KbdGroup                                                                    | `pre` / `code` / `kbd`                                    |
+| Avatar, Badge, Skeleton, EmptyStateIcon, TooltipContent                                                             | `span`                                                    |
+| Tag                                                                                                                 | Badge's `span`; its removal part styles the actual Button |
+| Separator / MenuSeparator and ResizableHandle                                                                       | `hr` / Separator's `hr`                                   |
+| Meter / Progress / Spinner                                                                                          | Native `meter` / `progress` / `svg`                       |
+| Table / TableContainer / other Table parts                                                                          | `table` / `section` / their native table element          |
+| Button / Link / NavLink                                                                                             | `button` / `a`, including through `render`                |
+| Breadcrumb, Pagination, NavigationMenu                                                                              | `nav`                                                     |
+| BreadcrumbList and PaginationList / NavigationMenuList / their Items                                                | `ol` / `ul` / `li`                                        |
+| BreadcrumbLink, PaginationLink, PaginationPrevious, PaginationNext, NavigationMenuLink                              | Link's `a`                                                |
+| BreadcrumbPage, BreadcrumbSeparator, PaginationEllipsis, PaginationUnavailable                                      | `span`                                                    |
+| NavigationMenuContent / NavigationMenuViewport                                                                      | `div`                                                     |
+| Field                                                                                                               | `div` in control layout; `fieldset` in group layout       |
+| RadioGroup, CheckboxGroup, Fieldset                                                                                 | Field's `fieldset`                                        |
+| Input, InputGroupInput, PasswordInput, FileInput, NumberField, OTPField, TagsInput, Checkbox, Switch, Slider, Radio | Native `input`                                            |
+| Textarea, InputGroupTextarea / NativeSelect                                                                         | Native `textarea` / native `select`                       |
+| Select, Combobox, Autocomplete, MultiSelect / their Portals                                                         | None; state / portal                                      |
+| Popover, HoverCard, Tooltip, Menu, ContextMenu, MenuSub / their Portals                                             | None; state / portal                                      |
+| Menubar / MenubarMenu / MenubarPortal                                                                               | `div` / None / None                                       |
+| ContextMenuTrigger / ContextMenuContent                                                                             | Named native `div` / Menu content `div`                   |
+| HoverCardTrigger / HoverCardContent                                                                                 | Link's `a` / Popover's `div`                              |
+| PopoverContent, MenuContent, MenuSubContent, MenuGroup, MenuLabel, MenuRadioGroup                                   | `div`                                                     |
+| SelectContent, SelectViewport, SelectItem                                                                           | `div`                                                     |
+| ComboboxInput / AutocompleteInput / CommandInput                                                                    | Native `input`                                            |
+| ComboboxContent / ComboboxItem / AutocompleteContent / AutocompleteItem / CommandList / CommandItem                 | `div`                                                     |
+| PopoverTrigger, PopoverClose, TooltipTrigger, SelectTrigger, TabsTrigger, ToggleGroupItem, SidebarTrigger           | Button's `button`                                         |
+| MenuTrigger, MenubarTrigger, MenuItem, MenuCheckboxItem, MenuRadioItem, MenuSubTrigger                              | Button's `button`                                         |
+| ComboboxTrigger, ComboboxClear, AutocompleteTrigger, AutocompleteClear, NavigationMenuTrigger                       | Button's `button`                                         |
+| Carousel controls, PaginationButton, CodeBlockCopy, ToastAction, ToastClose                                         | Button's `button`                                         |
+| Dialog, AlertDialog, Drawer and Command actions                                                                     | Button's `button`                                         |
+| Dialog / AlertDialog / Drawer / Command                                                                             | None; state owners                                        |
+| Dialog, AlertDialog, Drawer and Command Content / Title / Description                                               | `dialog` / `h2` / `p`                                     |
+| Collapsible / NavLinkGroup                                                                                          | `details`                                                 |
+| CollapsibleTrigger / NavLinkGroupTrigger                                                                            | `summary`                                                 |
+| CollapsibleContent / NavLinkGroupContent                                                                            | `div`                                                     |
+| Accordion / AccordionItem / AccordionTrigger / AccordionContent                                                     | `div` / `details` / `summary` / `div`                     |
+| Card / CardHeader / CardContent / CardFooter                                                                        | `div`                                                     |
+| CardTitle, AlertTitle, ToastTitle, EmptyStateTitle                                                                  | Heading chosen by `level`                                 |
+| CardDescription, AlertDescription, ToastDescription, EmptyStateDescription                                          | `p`                                                       |
 
-MultiSelect parts retain Combobox hosts and add `multi-select-*`. TagsInput props/ref
-reach Input; wrapper, tag, removal and message styles use named parts. Tag props/ref
-reach Badge’s span; its removal part styles the actual Button.
+MultiSelect parts keep Combobox hosts and add `multi-select-*` identities. TagsInput
+styles its wrapper, tags, removal buttons and error message through `parts`.
 
 Internal parts take `className` and `style` through a `parts` map. Field has
 `label`, `description`, `error` and `required`. Checkbox, Switch and Radio have
@@ -170,7 +173,7 @@ Why: styling written for Button still reaches a DialogTrigger.
 
 Style real state: native `:disabled`, `:checked` and `open`, plus `aria-busy`
 for pending. Field and RadioGroup set `data-invalid`, `data-disabled` and
-`data-required`. Disclosures and DialogContent set `data-state="open|closed"`.
+`data-required`. Disclosures, triggers and DialogContent set `data-state="open|closed"`.
 Actions set `data-variant`, `data-tone` and `data-control-size`. Switch uses
 `data-dragging` during a provisional pointer gesture; `:checked` stays committed.
 
@@ -181,21 +184,28 @@ or `open` to control it, or `default*` to set an initial value. Passing both, or
 a mount, throws; remount with a new `key` instead. A controlled callback is a request, and the consumer
 may refuse it. No-op requests and prop syncs fire no callback.
 
-| Family                                   | State                                              | Callback                                                    | Empty                  |
-| ---------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------- | ---------------------- |
-| Input, Textarea, NativeSelect            | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | `''`                   |
-| ToggleGroup single / multiple            | `value` / `defaultValue`                           | `onValueChange(string \| null)` / `onValueChange(string[])` | `null` / `[]`          |
-| Button toggle                            | `pressed` / `defaultPressed`                       | `onPressedChange(boolean)`                                  | `false`                |
-| Checkbox, Switch, standalone Radio       | `checked` / `defaultChecked`                       | Native `onChange`, `onBlur`                                 | `false`                |
-| Slider                                   | `value` / `defaultValue`                           | Native `onChange`, `onBlur`                                 | Native midpoint        |
-| RadioGroup                               | `value` / `defaultValue`                           | `onValueChange(string)` or native `onChange`                | `null`                 |
-| Select                                   | `value` / `defaultValue`                           | `onValueChange(string \| null)`                             | `null`                 |
-| Combobox                                 | `value` / `defaultValue`; `query` / `defaultQuery` | `onValueChange(string \| null)`; `onQueryChange(string)`    | `null`; `''`           |
-| Tabs                                     | `value` / `defaultValue`                           | `onValueChange(string)`                                     | Initial value required |
-| Dialog, AlertDialog, Drawer, Collapsible | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                     | `false`                |
-| Popover                                  | `open` / `defaultOpen`                             | `onOpenChange(boolean)`                                     | `false`                |
-| Accordion single                         | `value` / `defaultValue`                           | `onValueChange(string \| null)`                             | `null`                 |
-| Accordion multiple                       | `value` / `defaultValue`                           | `onValueChange(string[])`                                   | `[]`                   |
+| Family                                                                              | State                                                           | Callback                                               | Empty                  |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ | ---------------------- |
+| Input, Textarea, NativeSelect, PasswordInput, OTPField                              | `value` / `defaultValue`                                        | Native `onChange`, `onBlur`                            | `''`                   |
+| Checkbox, Switch, standalone Radio                                                  | `checked` / `defaultChecked`                                    | Native `onChange`, `onBlur`                            | `false`                |
+| Slider                                                                              | `value` / `defaultValue`                                        | `onValueChange(number)` or native `onChange`, `onBlur` | Native midpoint        |
+| RadioGroup                                                                          | `value` / `defaultValue`                                        | `onValueChange(string)` or native `onChange`           | `null`                 |
+| NumberField                                                                         | `value` / `defaultValue`                                        | `onValueChange(number \| null)`                        | `null`                 |
+| Select, MenuRadioGroup; Combobox, ToggleGroup and Accordion single                  | `value` / `defaultValue`                                        | `onValueChange(string \| null)`                        | `null`                 |
+| Menubar and NavigationMenu open item                                                | `value` / `defaultValue`                                        | `onValueChange(string \| null)`                        | `null`                 |
+| MultiSelect, Combobox, ToggleGroup and Accordion multiple, CheckboxGroup, TagsInput | `value` / `defaultValue`                                        | `onValueChange(string[])`                              | `[]`                   |
+| Autocomplete text                                                                   | `value` / `defaultValue`                                        | `onValueChange(string)`                                | `''`                   |
+| Carousel current slide                                                              | `value` / `defaultValue`                                        | `onValueChange(string \| null)`                        | First item             |
+| Tabs                                                                                | `value` / `defaultValue`                                        | `onValueChange(string)`                                | Initial value required |
+| Resizable panel sizes                                                               | `value` / `defaultValue`                                        | `onValueChange(number[])`                              | Initial value required |
+| Combobox, MultiSelect, Command search                                               | `query` / `defaultQuery`                                        | `onQueryChange(string)`                                | `''`                   |
+| Button toggle                                                                       | `pressed` / `defaultPressed`                                    | `onPressedChange(boolean)`                             | `false`                |
+| MenuCheckboxItem                                                                    | `checked` / `defaultChecked`                                    | `onCheckedChange(boolean)`                             | `false`                |
+| Dialog, AlertDialog, Drawer, Command, Collapsible, Toast, Tooltip                   | `open` / `defaultOpen`                                          | `onOpenChange(boolean)`                                | `false`                |
+| Popover, HoverCard, Menu, ContextMenu, Select, Combobox, Autocomplete, MultiSelect  | `open` / `defaultOpen`                                          | `onOpenChange(boolean)`                                | `false`                |
+| AppShell                                                                            | `collapsed` / `defaultCollapsed`; mobile `open` / `defaultOpen` | `onCollapsedChange(boolean)`; `onOpenChange(boolean)`  | `false`                |
+| Drawer                                                                              | `snapPoint` / `defaultSnapPoint`                                | `onSnapPointChange(number)`                            | Largest snap point     |
+| Form                                                                                | `errors` / `defaultErrors`                                      | `onErrorsChange(FormErrors)`                           | `{}`                   |
 
 RadioGroup owns its options' `name`, generating one when none is given, and selection. Use one of `onValueChange`
 or `onChange` to write state, not both. `''` is a valid option value, and `null`
@@ -231,8 +241,11 @@ For cancellable actions, disabled and pending guards run first, then the
 consumer handler, then the state request if `defaultPrevented` is false. Native
 change, toggle and blur are observations and cannot veto anything. Library and
 caller refs get the same host, and callback-ref cleanup functions are honored.
-`useToggleGroup`, `useField`, `useDialog`, `usePopover`, `useTooltip`, `useMenu`, `useCombobox`, `useTabs`, `useCollapsible` and `useAccordion` read and request
-state, and return `null` outside their owner. Parts that need a root throw when misplaced. Lifecycle,
+Exported hooks read and request their owner's state and return `null` outside it:
+`useAccordion`, `useAlertDialog`, `useAppShell` (alias `useSidebar`), `useCarousel`,
+`useCollapsible`, `useCombobox`, `useContextMenu`, `useDialog`, `useDrawer`, `useField`,
+`useForm`, `useHoverCard`, `useMenu`, `useMenubar`, `useMultiSelect`, `useNavigationMenu`,
+`usePopover`, `useResizable`, `useSelect`, `useTabs`, `useToast`, `useToggleGroup` and `useTooltip`. Parts that need a root throw when misplaced. Lifecycle,
 SSR and hydration details are in [React bindings](react-bindings.md).
 
 ## What customization must keep

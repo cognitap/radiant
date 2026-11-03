@@ -18,6 +18,7 @@ import { cn } from '../../cn.js'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 type LabelParts = { icon?: PartStyle; label?: PartStyle; description?: PartStyle }
 type ContentProps = {
@@ -46,8 +47,9 @@ const itemClass = [
   'gap-[var(--rad-nav-link-gap,0.5rem)] px-[var(--rad-nav-link-padding-inline,var(--_rad-control-padding))] py-[var(--rad-nav-link-padding-block,0.375rem)] rounded-[var(--rad-nav-link-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)]',
   'font-[family-name:var(--rad-nav-link-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] text-[length:var(--rad-nav-link-font-size,var(--_rad-control-font-size))] font-[number:var(--rad-nav-link-font-weight,var(--rad-typography-roles-ui-label-weight,550))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]',
   '[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:bg-[var(--rad-nav-link-hover-background,var(--rad-color-neutral))]',
-  'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-nav-link-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-nav-link-focus-width,var(--rad-focus-width,2px))] focus-visible:[outline-offset:var(--rad-nav-link-focus-offset,var(--rad-focus-offset,2px))]',
-  'forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:hover:bg-[ButtonFace] forced-colors:hover:text-[CanvasText] forced-colors:focus-visible:outline-[Highlight]'
+  'forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:hover:bg-[ButtonFace] forced-colors:hover:text-[CanvasText]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-nav-link-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-nav-link-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-nav-link-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-nav-link-focus-style)]'
 ]
 function Content({ children, icon, description, parts }: ContentProps) {
   return (
@@ -112,12 +114,13 @@ export function NavLink({
       tone="neutral"
       controlSize={controlSize}
       aria-current={active ? 'page' : undefined}
+      data-selected={active ? '' : undefined}
       className={cn(
         controlMetrics({ controlSize }),
         itemClass,
-        'border-s-[3px] border-s-transparent aria-[current=page]:[border-inline-start-color:var(--rad-nav-link-indicator-color,var(--rad-control-selected-border-color,var(--rad-color-accent)))] aria-[current=page]:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] aria-[current=page]:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))] aria-[current=page]:[box-shadow:var(--rad-control-selected-shadow,none)] aria-[current=page]:font-[number:var(--rad-typography-heading-weight,600)]',
-        'aria-[current=page]:[&_[data-slot=nav-link-description]]:[color:inherit] aria-[current=page]:hover:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] aria-[current=page]:hover:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))]',
-        'forced-colors:aria-[current=page]:[border-inline-start-color:Highlight] forced-colors:aria-[current=page]:bg-[Highlight] forced-colors:aria-[current=page]:text-[HighlightText] forced-colors:aria-[current=page]:hover:bg-[Highlight] forced-colors:aria-[current=page]:hover:text-[HighlightText]',
+        'border-s-[3px] border-s-transparent data-selected:[border-inline-start-color:var(--rad-nav-link-indicator-color,var(--rad-control-selected-border-color,var(--rad-color-accent)))] data-selected:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] data-selected:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))] data-selected:[box-shadow:var(--rad-control-selected-shadow,none)] data-selected:font-[number:var(--rad-typography-heading-weight,600)]',
+        'data-selected:[&_[data-slot=nav-link-description]]:[color:inherit] data-selected:hover:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] data-selected:hover:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))]',
+        'forced-colors:data-selected:[border-inline-start-color:Highlight] forced-colors:data-selected:bg-[Highlight] forced-colors:data-selected:text-[HighlightText] forced-colors:data-selected:hover:bg-[Highlight] forced-colors:data-selected:hover:text-[HighlightText]',
         className
       )}
     >

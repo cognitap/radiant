@@ -10,6 +10,7 @@ import {
   useState,
   type ComponentProps,
   type MouseEvent,
+  type ReactElement,
   type ReactNode,
   type RefObject
 } from 'react'
@@ -26,6 +27,7 @@ import {
   type PopoverContentProps
 } from '../Popover/Popover.js'
 import type { ButtonProps, ButtonRenderProps } from '../Button/Button.js'
+import type { Tone } from '../../presentation.js'
 import type { DistributiveOmit, WithoutToggle } from '../../internal/types.js'
 import { Separator, type SeparatorProps } from '../Separator/Separator.js'
 import { useControllableState } from '../../react/useControllableState.js'
@@ -41,7 +43,13 @@ import { useComposedRefs } from '../../react/useComposedRefs.js'
 
 export type MenuProps = PopoverProps
 export type MenuState = PopoverState
-export type MenuRenderProps = ButtonRenderProps
+/** Rows keep Button's host but none of its action presentation. */
+export type MenuRenderProps = Omit<ButtonRenderProps, 'data-variant' | 'data-control-size'> & {
+  'data-disabled'?: ''
+  'data-selected'?: ''
+}
+/** A row's text color; actions stay neutral unless they warn or destroy. */
+export type MenuItemTone = Exclude<Tone, 'accent'>
 export type MenuPortalProps = { children?: ReactNode }
 export type MenuTriggerProps = WithoutToggle<DistributiveOmit<ButtonProps, 'id' | 'aria-haspopup'>>
 export type MenuContentProps = Omit<
@@ -49,8 +57,23 @@ export type MenuContentProps = Omit<
   'role' | 'aria-labelledby' | 'aria-orientation' | 'tabIndex' | 'initialFocusRef'
 >
 export type MenuItemProps = WithoutToggle<
-  DistributiveOmit<ButtonProps, 'role' | 'tabIndex' | 'aria-disabled' | 'onSelect'>
+  DistributiveOmit<
+    ButtonProps,
+    | 'role'
+    | 'tabIndex'
+    | 'aria-disabled'
+    | 'onSelect'
+    | 'render'
+    | 'variant'
+    | 'tone'
+    | 'controlSize'
+    | 'iconOnly'
+    | 'fullWidth'
+  >
 > & {
+  render?: (props: MenuRenderProps) => ReactElement
+  /** Text color for warning and destructive rows; defaults to neutral. */
+  tone?: MenuItemTone
   textValue?: string
   closeOnSelect?: boolean
   onSelect?: (event: MouseEvent<HTMLButtonElement>) => void
@@ -333,15 +356,26 @@ export function MenuContentRoot({
     />
   )
 }
+// A toned row tints its text at rest and takes the tone's solid pair when highlighted,
+// which stays readable where a theme inverts the item highlight.
+const toneClass: Record<MenuItemTone, string | undefined> = {
+  neutral: undefined,
+  warning:
+    '[--_rad-menu-item-tone:var(--rad-menu-item-warning-color,color-mix(in_oklab,var(--rad-color-warning,oklch(0.8_0.14_78))_30%,var(--rad-color-foreground)))] [--_rad-menu-item-tone-background:var(--rad-color-warning,oklch(0.8_0.14_78))] [--_rad-menu-item-tone-foreground:var(--rad-color-warning-foreground,oklch(0.3_0.07_55))]',
+  danger:
+    '[--_rad-menu-item-tone:var(--rad-menu-item-danger-color,color-mix(in_oklab,var(--rad-color-danger,oklch(0.56_0.19_25))_65%,var(--rad-color-foreground)))] [--_rad-menu-item-tone-background:var(--rad-color-danger,oklch(0.56_0.19_25))] [--_rad-menu-item-tone-foreground:var(--rad-color-danger-foreground,oklch(0.99_0_0))]'
+}
 const menuItemClass = [
-  'relative box-border flex w-full min-w-0 cursor-default select-none items-center text-start [font:inherit] [color:inherit] bg-transparent border-0 outline-none',
+  'relative box-border flex w-full min-w-0 cursor-default select-none items-center text-start [font:inherit] [color:var(--_rad-menu-item-tone,inherit)] bg-transparent border-0 outline-none',
   '[&>span:first-child]:min-w-0 [&>span:first-child]:flex-1',
   'p-[var(--rad-menu-item-padding,0.625rem)] rounded-[var(--rad-menu-item-radius,var(--_rad-item-radius,var(--rad-control-radius,0.5rem)))] [corner-shape:var(--_rad-item-corner-shape,var(--rad-control-corner-shape,round))]',
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none',
-  'hover:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] focus:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))]',
-  'hover:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))] focus:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))]',
+  // Keyboard focus moves between items like listbox options, so the highlighted row is the focus cue,
+  // drawn with the same item role and strength as Select and Combobox options. A toned row swaps in its tone pair.
+  'hover:bg-[var(--_rad-menu-item-tone-background,var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,var(--rad-color-accent))))] focus:bg-[var(--_rad-menu-item-tone-background,var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,var(--rad-color-accent))))]',
+  'hover:[color:var(--_rad-menu-item-tone-foreground,var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,var(--rad-color-accent-foreground))))] focus:[color:var(--_rad-menu-item-tone-foreground,var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,var(--rad-color-accent-foreground))))]',
   'aria-disabled:cursor-not-allowed aria-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] forced-colors:aria-disabled:text-[GrayText] forced-colors:aria-disabled:opacity-100',
-  'forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText] forced-colors:focus-visible:outline-solid forced-colors:focus-visible:[outline-width:var(--rad-focus-width,2px)] forced-colors:focus-visible:-outline-offset-2'
+  'forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText] forced-colors:focus-visible:outline-[length:var(--rad-focus-width,2px)] forced-colors:focus-visible:outline-offset-[calc(0px_-_var(--rad-focus-width,2px))] forced-colors:focus-visible:[outline-style:var(--rad-focus-style,solid)]'
 ].join(' ')
 export function MenuItem(props: MenuItemProps) {
   return (
@@ -357,6 +391,7 @@ function MenuItemRoot({
   checkedValue,
   closeOnSelect = true,
   disabled = false,
+  tone = 'neutral',
   textValue,
   onSelect,
   onClick,
@@ -385,8 +420,14 @@ function MenuItemRoot({
       data-slot={joinIds('menu-item', props['data-slot'])}
       data-text-value={textValue}
       // A menu row plays the item role, so it takes none of Button's action look.
-      render={resolved => {
-        const native = { ...resolved, className: cn(menuItemClass, className) }
+      render={({ 'data-variant': _variant, 'data-control-size': _controlSize, ...resolved }) => {
+        const native: MenuRenderProps = {
+          ...resolved,
+          'data-tone': tone,
+          'data-disabled': disabled ? '' : undefined,
+          'data-selected': checkedValue === true ? '' : undefined,
+          className: cn(menuItemClass, toneClass[tone], className)
+        }
         return render ? render(native) : <button {...native} />
       }}
       onClick={composeAction(onClick, onSelect, () => disabled)}
@@ -623,10 +664,11 @@ export function MenuSubTrigger({
         aria-haspopup="menu"
         aria-controls={menu.contentId}
         aria-expanded={menu.open}
+        data-state={menu.open ? 'open' : 'closed'}
         data-slot={joinIds('menu-sub-trigger', props['data-slot'])}
         closeOnSelect={false}
         className={cn(
-          'aria-expanded:bg-[var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface))))] aria-expanded:[color:var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground))))]',
+          'aria-expanded:not-focus:bg-[var(--_rad-menu-item-tone-background,var(--rad-menu-item-focus-background,var(--rad-control-item-highlight-background,color-mix(in_oklab,var(--rad-color-accent)_12%,var(--rad-color-surface)))))] aria-expanded:not-focus:[color:var(--_rad-menu-item-tone-foreground,var(--rad-menu-item-focus-color,var(--rad-control-item-highlight-foreground,color-mix(in_oklab,var(--rad-color-accent)_25%,var(--rad-color-foreground)))))]',
           className
         )}
         onSelect={event => {

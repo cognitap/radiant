@@ -10,6 +10,7 @@ import { useFieldControl } from '../Field/Field.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { peerFocusRingClass } from '../shared/focusStyles.js'
 
 export type FileInputProps = Omit<
   ComponentProps<'input'>,
@@ -110,7 +111,8 @@ export function FileInput({
         data-slot="file-input-trigger"
         className={cn(
           'relative',
-          'peer-focus-visible:outline-solid peer-focus-visible:[outline-color:var(--rad-button-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] peer-focus-visible:[outline-width:var(--rad-button-focus-width,var(--rad-focus-width,2px))] peer-focus-visible:[outline-offset:var(--rad-button-focus-offset,var(--rad-focus-offset,2px))] peer-focus-visible:[outline-style:var(--rad-button-focus-style,var(--rad-focus-style,solid))]',
+          peerFocusRingClass,
+          'peer-focus-visible:[--_rad-focus-color:var(--rad-button-focus-color)] peer-focus-visible:[--_rad-focus-width:var(--rad-button-focus-width)] peer-focus-visible:[--_rad-focus-offset:var(--rad-button-focus-offset)] peer-focus-visible:[--_rad-focus-style:var(--rad-button-focus-style)]',
           'peer-data-invalid:[border-color:var(--rad-color-invalid,oklch(0.56_0.19_25))]',
           parts?.trigger?.className
         )}

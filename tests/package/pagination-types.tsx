@@ -10,7 +10,11 @@ import {
 } from '@cognitap/radiant'
 h(
   Pagination,
-  { ref: createRef<HTMLElement>(), style: { '--rad-pagination-gap': '1rem' } },
+  {
+    'aria-label': 'Results pages',
+    ref: createRef<HTMLElement>(),
+    style: { '--rad-pagination-gap': '1rem' }
+  },
   h(
     PaginationList,
     {},
@@ -36,6 +40,8 @@ h(
   { disabled: true, current: true, ref: createRef<HTMLButtonElement>() },
   'Page 2'
 )
+// @ts-expect-error The navigation landmark needs a name.
+h(Pagination, {})
 // @ts-expect-error Navigation requires a real URL.
 h(PaginationLink, { children: '2' })
 // @ts-expect-error Current page is owned by current.

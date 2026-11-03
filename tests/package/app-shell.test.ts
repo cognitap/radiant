@@ -46,7 +46,7 @@ test('AppShell SSR keeps native banner/navigation/main landmarks, named real lin
   assert.match(html, /aria-controls="workspace-nav"/)
   assert.equal((html.match(/<nav\b/g) || []).length, 1)
   assert.match(html, /data-slot="button sidebar-trigger"/)
-  assert.match(html, /data-slot="dialog drawer"/)
+  assert.match(html, /data-slot="dialog-content drawer-content"/)
   assert.doesNotMatch(html, /<dialog[^>]+open=/)
   const labelled = html.match(/<nav[^>]+aria-labelledby="([^"]+)"/)?.[1]
   assert.ok(labelled && html.includes(`id="${labelled}"`))
@@ -54,7 +54,10 @@ test('AppShell SSR keeps native banner/navigation/main landmarks, named real lin
 test('collapsed SSR retains native descendants while hiding only expanded content and keeping labels available to assistive technology', () => {
   const html = render(sample({ defaultCollapsed: true }))
   assert.match(html, /aria-expanded="false"/)
-  assert.match(html, /hidden="" inert=""[^>]+data-slot="sidebar-content"/)
+  assert.match(html, /hidden="" inert=""[^>]+data-slot="sidebar-content" data-expanded-only=""/)
+  assert.match(html, /data-slot="app-shell" data-collapsed=""/)
+  assert.match(html, /data-slot="sidebar" data-collapsed=""/)
+  assert.doesNotMatch(html, /data-[a-z-]+="true"/)
   assert.match(html, /value="Atlas"/)
   assert.match(html, /data-slot="sidebar-item-label" class="sr-only"/)
   assert.doesNotMatch(html, /aria-pressed=/)

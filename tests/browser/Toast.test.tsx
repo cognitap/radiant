@@ -1,4 +1,5 @@
 import { act, createRef, StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
 import { expect, test, vi } from 'vitest'
 import { userEvent, commands } from 'vitest/browser'
 import {
@@ -51,7 +52,10 @@ test('SSR/hydration queue one visible toast without focus theft and announce onl
     <StrictMode>
       <ToastProvider>
         <button>Work</button>
-        <ToastViewport style={viewportStyle}>
+        <ToastViewport
+          aria-label="Notifications"
+          style={viewportStyle}
+        >
           <Message defaultOpen />
           <Message defaultOpen />
         </ToastViewport>
@@ -63,6 +67,8 @@ test('SSR/hydration queue one visible toast without focus theft and announce onl
   expect(toasts[0].hidden).toBe(false)
   expect(toasts[1].hidden).toBe(true)
   expect(toasts[1].inert).toBe(true)
+  expect(toasts[0].hasAttribute('data-queued')).toBe(false)
+  expect(toasts[1].getAttribute('data-queued')).toBe('')
   expect(document.activeElement).not.toBe(toasts[0])
   await pause(60)
   expect(live(host).textContent).toBe(
@@ -76,7 +82,10 @@ test('SSR/hydration queue one visible toast without focus theft and announce onl
 test('FIFO promotion supports distinct repeated messages and clears announcers on close', async () => {
   const { host } = await mount(
     <ToastProvider>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Message defaultOpen />
         <Message defaultOpen />
       </ToastViewport>
@@ -101,7 +110,10 @@ test('F8 reaches a toast, actions stay in Tab order, Escape restores the origina
   const { host } = await mount(
     <ToastProvider>
       <Button>Work</Button>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Message defaultOpen />
       </ToastViewport>
     </ToastProvider>
@@ -129,7 +141,10 @@ test('native action guards and cancellation precede closing; native form submiss
           submit()
         }}
       >
-        <ToastViewport style={viewportStyle}>
+        <ToastViewport
+          aria-label="Notifications"
+          style={viewportStyle}
+        >
           <Toast defaultOpen>
             <ToastTitle>Saved</ToastTitle>
             <ToastAction
@@ -180,7 +195,10 @@ test('controlled owners may refuse requests; prop synchronization does not notif
   const change = vi.fn()
   const tree = (open: boolean) => (
     <ToastProvider>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Message
           open={open}
           onOpenChange={change}
@@ -202,7 +220,10 @@ test('timers begin only when promoted; default persistent feedback never expires
   const { host } = await mount(
     <ToastProvider>
       <button>Outside timer</button>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Message defaultOpen />
         <Message
           defaultOpen
@@ -225,7 +246,10 @@ test('hover and focus pause the remaining timeout rather than restarting it', as
   const { host } = await mount(
     <ToastProvider>
       <button>Outside</button>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Message
           defaultOpen
           duration={700}
@@ -236,7 +260,7 @@ test('hover and focus pause the remaining timeout rather than restarting it', as
   const toast = roots(host)[0]
   const outside = host.querySelector('button')!
   await act(async () => userEvent.hover(toast))
-  expect(toast.dataset.paused).toBe('true')
+  expect(toast.dataset.paused).toBe('')
   await pause(800)
   expect(toast.hidden).toBe(false)
   await act(async () => toast.querySelector<HTMLElement>('[data-slot~=toast-action]')!.focus())
@@ -253,7 +277,10 @@ test('document visibility pauses timing and unmount cancels pending timeouts and
   try {
     const { host, render } = await mount(
       <ToastProvider duration={300}>
-        <ToastViewport style={viewportStyle}>
+        <ToastViewport
+          aria-label="Notifications"
+          style={viewportStyle}
+        >
           <Message
             defaultOpen
             onOpenChange={change}
@@ -264,7 +291,7 @@ test('document visibility pauses timing and unmount cancels pending timeouts and
     const toast = roots(host)[0]
     await pause(400)
     expect(toast.hidden).toBe(false)
-    expect(toast.dataset.paused).toBe('true')
+    expect(toast.dataset.paused).toBe('')
     hidden.mockReturnValue(false)
     document.dispatchEvent(new Event('visibilitychange'))
     await pause(30)
@@ -279,7 +306,10 @@ test('document visibility pauses timing and unmount cancels pending timeouts and
 test('unchanged messages and action presentation do not replay announcements; urgency is deliberate', async () => {
   const tree = (pending: boolean) => (
     <ToastProvider>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Toast
           defaultOpen
           announce="assertive"
@@ -311,7 +341,10 @@ test('unchanged messages and action presentation do not replay announcements; ur
 test('F8 never leaves an unrelated modal', async () => {
   const { host } = await mount(
     <ToastProvider>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Message defaultOpen />
       </ToastViewport>
       <Dialog>
@@ -343,7 +376,10 @@ test('local styling, refs, motion off and forced colors retain the reachable not
     >
       <MotionProvider>
         <ToastProvider>
-          <ToastViewport style={viewportStyle}>
+          <ToastViewport
+            aria-label="Notifications"
+            style={viewportStyle}
+          >
             <Toast
               ref={ref}
               defaultOpen
@@ -375,7 +411,10 @@ test('Escape dismisses a focused toast inside a modal before the dialog and retu
         <DialogContent>
           <DialogTitle>Editing</DialogTitle>
           <Button>Work in dialog</Button>
-          <ToastViewport style={viewportStyle}>
+          <ToastViewport
+            aria-label="Notifications"
+            style={viewportStyle}
+          >
             <Message defaultOpen />
           </ToastViewport>
         </DialogContent>
@@ -396,7 +435,7 @@ test('Escape dismisses a focused toast inside a modal before the dialog and retu
 test('long messages scroll within the viewport and keep their dismissal action reachable', async () => {
   const { host } = await mount(
     <ToastProvider>
-      <ToastViewport>
+      <ToastViewport aria-label="Notifications">
         <Toast defaultOpen>
           <ToastTitle>Saved</ToastTitle>
           <ToastDescription>
@@ -423,7 +462,10 @@ test('Action and Close ignore toggle state and dismiss on the first click', asyn
   const toggle = JSON.parse('{"pressed":false,"defaultPressed":true}')
   const { host } = await mount(
     <ToastProvider>
-      <ToastViewport style={viewportStyle}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
         <Toast defaultOpen>
           <ToastTitle>Saved</ToastTitle>
           <ToastAction
@@ -446,4 +488,50 @@ test('Action and Close ignore toggle state and dismiss on the first click', asyn
   await click(action)
   expect(pressedChange).not.toHaveBeenCalled()
   expect(toast.hidden).toBe(true)
+})
+test('an untitled toast takes the caller name and throws without one', async () => {
+  const { host } = await mount(
+    <ToastProvider>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
+        <Toast
+          aria-label="Copied"
+          defaultOpen
+          motion="off"
+        >
+          Link copied
+        </Toast>
+      </ToastViewport>
+    </ToastProvider>
+  )
+  expect(roots(host)[0].getAttribute('aria-label')).toBe('Copied')
+  const errors: unknown[] = [],
+    node = document.createElement('div')
+  document.body.append(node)
+  const root = createRoot(node, { onUncaughtError: error => errors.push(error) })
+  try {
+    await act(async () =>
+      root.render(
+        <ToastProvider>
+          <ToastViewport aria-label="Notifications">
+            <Toast
+              defaultOpen
+              motion="off"
+            >
+              Link copied
+            </Toast>
+          </ToastViewport>
+        </ToastProvider>
+      )
+    )
+  } catch (error) {
+    errors.push(error)
+  }
+  expect(String(errors[0])).toContain(
+    'Toast without a ToastTitle requires aria-label or aria-labelledby.'
+  )
+  await act(async () => root.unmount())
+  node.remove()
 })

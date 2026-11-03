@@ -5,14 +5,14 @@ import {
   type ComposedLinkRenderProps
 } from '../shared/composedLink.js'
 import { cn } from '../../cn.js'
-import { requireAccessibleName } from '../../internal/accessibleName.js'
+import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 type Part<Host extends 'nav' | 'ol' | 'li' | 'span'> = Omit<
   ComponentProps<Host>,
   'style' | 'role'
 > & { style?: ThemeStyle; 'data-slot'?: string }
-export type BreadcrumbProps = Part<'nav'>
+export type BreadcrumbProps = Part<'nav'> & AccessibleName
 export type BreadcrumbListProps = Part<'ol'>
 export type BreadcrumbItemProps = Part<'li'>
 export type BreadcrumbPageProps = Omit<Part<'span'>, 'aria-current'>
@@ -20,17 +20,11 @@ export type BreadcrumbSeparatorProps = Omit<Part<'span'>, 'aria-hidden' | 'tabIn
 export type BreadcrumbLinkRenderProps = ComposedLinkRenderProps
 export type BreadcrumbLinkProps = Omit<ComposedLinkProps, 'aria-current'> & { current?: boolean }
 export function Breadcrumb({ className, ...props }: BreadcrumbProps) {
-  const labelledBy = props['aria-labelledby']?.trim() || undefined
-  const name = {
-    'aria-label': props['aria-label'] ?? (labelledBy ? undefined : 'Breadcrumb'),
-    'aria-labelledby': labelledBy
-  }
-  requireAccessibleName('Breadcrumb', name)
+  requireAccessibleName('Breadcrumb', props)
   const nativeProps = { ...props, role: undefined }
   return (
     <nav
       {...nativeProps}
-      {...name}
       data-slot={joinIds('breadcrumb', props['data-slot'])}
       className={cn(
         'min-w-0 max-w-full text-start [color:var(--rad-breadcrumb-color,var(--rad-color-muted-foreground))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-breadcrumb-font-size,var(--rad-typography-roles-ui-body-size,0.875rem))] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
@@ -83,6 +77,7 @@ export function BreadcrumbLink({
       variant={variant}
       tone={tone}
       aria-current={current ? 'page' : undefined}
+      data-selected={current ? '' : undefined}
       className={cn(
         'min-w-0 [overflow-wrap:anywhere] [color:var(--rad-breadcrumb-link-color,var(--rad-color-muted-foreground))] hover:[color:var(--rad-breadcrumb-link-hover-color,var(--rad-color-foreground))]',
         className
@@ -98,6 +93,7 @@ export function BreadcrumbPage({ className, ...props }: BreadcrumbPageProps) {
     <span
       {...nativeProps}
       aria-current="page"
+      data-selected=""
       data-slot={joinIds('breadcrumb-page', props['data-slot'])}
       className={cn(
         'min-w-0 [overflow-wrap:anywhere] [color:var(--rad-breadcrumb-current-color,var(--rad-color-foreground))] font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] font-[number:var(--rad-typography-roles-ui-label-weight,600)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)]',

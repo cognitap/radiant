@@ -1,4 +1,5 @@
 import { controlBorderClass } from '../shared/controlStyles.js'
+import { focusRingClass } from '../shared/focusStyles.js'
 
 export const comboboxInputClass = [
   controlBorderClass,
@@ -8,7 +9,8 @@ export const comboboxInputClass = [
   '[color:var(--rad-combobox-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] bg-[var(--rad-combobox-background,var(--rad-control-field-background,var(--rad-color-surface,white)))]',
   '[border-width:var(--rad-combobox-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-combobox-border-style,var(--rad-control-border-style,solid))] [border-color:var(--rad-combobox-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
   'rounded-[var(--rad-combobox-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-combobox-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-combobox-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
-  'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-combobox-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-combobox-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-combobox-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-combobox-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-combobox-focus-style)]',
   'data-invalid:[border-color:var(--rad-color-invalid)] placeholder:[color:var(--rad-combobox-placeholder,var(--rad-color-placeholder))] disabled:cursor-not-allowed disabled:bg-[var(--rad-color-disabled-background)]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:disabled:text-[GrayText]'
 ].join(' ')
@@ -39,6 +41,7 @@ export const comboboxItemClass = [
 export const comboboxActionClass = [
   'inline-flex shrink-0 items-center justify-center border-0 bg-transparent p-0 [font:inherit]',
   '[color:var(--rad-combobox-color,var(--rad-color-foreground))] shadow-none cursor-pointer',
-  'focus-visible:outline-solid focus-visible:[outline-color:var(--rad-combobox-focus-color,var(--rad-color-focus))] focus-visible:[outline-width:var(--rad-focus-width,2px)] focus-visible:[outline-offset:var(--rad-focus-offset,2px)]',
+  focusRingClass,
+  'focus-visible:[--_rad-focus-color:var(--rad-combobox-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-combobox-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-combobox-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-combobox-focus-style)]',
   'disabled:cursor-not-allowed forced-colors:text-[CanvasText] forced-colors:disabled:text-[GrayText]'
 ].join(' ')

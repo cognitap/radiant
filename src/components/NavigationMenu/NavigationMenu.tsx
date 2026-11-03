@@ -73,6 +73,7 @@ type Binding = NavigationMenuState & {
   cancel: () => void
   registerTrigger: (value: string, node: HTMLButtonElement | null) => void
   registerPanel: (value: string, node: HTMLDivElement | null) => void
+  name: { 'aria-label'?: string; 'aria-labelledby'?: string }
 }
 const Context = createContext<Binding | null>(null)
 export function useNavigationMenu(): NavigationMenuState | null {
@@ -243,6 +244,7 @@ export function NavigationMenu({
         requestFocus,
         registerTrigger,
         registerPanel,
+        name: { 'aria-label': props['aria-label'], 'aria-labelledby': props['aria-labelledby'] },
         ids: next => ({
           trigger: `${id}-trigger-${items.findIndex(entry => entry.value === next)}`,
           panel: `${id}-panel-${items.findIndex(entry => entry.value === next)}`
@@ -255,7 +257,7 @@ export function NavigationMenu({
         {...{ role: undefined }}
         data-slot={joinIds('navigation-menu', props['data-slot'])}
         data-state={shown !== null ? 'open' : 'closed'}
-        data-disabled={disabled || undefined}
+        data-disabled={disabled ? '' : undefined}
         data-control-size={controlSize}
         className={cn('relative max-w-full', className)}
         onKeyDown={event => {
@@ -468,6 +470,7 @@ export function NavigationMenuLink({
       variant={variant}
       controlSize={controlSize ?? binding.controlSize}
       aria-current={active ? 'page' : undefined}
+      data-selected={active ? '' : undefined}
       onClick={composeAction(onClick, event => {
         if (
           event.button === 0 &&
@@ -521,14 +524,7 @@ export function NavigationMenuContent({
 }
 export type NavigationMenuViewportProps = Omit<
   ComponentProps<'div'>,
-  | 'style'
-  | 'hidden'
-  | 'inert'
-  | 'role'
-  | 'aria-label'
-  | 'aria-labelledby'
-  | 'contentEditable'
-  | 'dangerouslySetInnerHTML'
+  'style' | 'hidden' | 'inert' | 'role' | 'contentEditable' | 'dangerouslySetInnerHTML'
 > & { style?: ThemeStyle; motion?: 'inherit' | 'off'; sideOffset?: number; 'data-slot'?: string }
 export function NavigationMenuViewport({
   ref,
@@ -617,12 +613,19 @@ export function NavigationMenuViewport({
   })
   const hover = () =>
     binding.value === null ? undefined : binding.hover.current.get(binding.value)
+  // An open viewport is named by its trigger and a closed one by the menu, unless named here.
+  const name = (
+    props['aria-label'] || props['aria-labelledby']
+      ? { 'aria-label': props['aria-label'], 'aria-labelledby': props['aria-labelledby'] }
+      : open
+        ? { 'aria-labelledby': binding.ids(binding.visible!).trigger }
+        : binding.name
+  ) as AccessibleName
   return (
     <ScrollArea
       {...props}
       ref={motionRef}
-      aria-label="Navigation sections"
-      aria-labelledby={binding.visible === null ? undefined : binding.ids(binding.visible).trigger}
+      {...name}
       hidden={!open}
       inert={!open}
       data-slot={joinIds('navigation-menu-viewport', props['data-slot'])}

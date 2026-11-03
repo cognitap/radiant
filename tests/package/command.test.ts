@@ -28,7 +28,7 @@ function tree(props = {}) {
       {},
       h(CommandTitle, {}, 'Workspace'),
       h(CommandDescription, {}, 'Find an action'),
-      h(CommandInput),
+      h(CommandInput, { 'aria-label': 'Search commands' }),
       h(CommandList),
       h(CommandClose, {}, 'Close')
     )
@@ -43,7 +43,7 @@ test('Command server markup shares native Dialog and Combobox hosts, groups and 
       tree({ defaultOpen: true, defaultQuery: 'project' })
     )
   )
-  assert.match(html, /<dialog[^>]+data-slot="dialog command"/)
+  assert.match(html, /<dialog[^>]+data-slot="dialog-content command-content"/)
   assert.doesNotMatch(html.match(/<dialog[^>]*>/)![0], /\sopen(?:=|\s|>)/)
   assert.match(html, /data-slot="combobox-input command-input"/)
   assert.match(html, /data-slot="button dialog-trigger command-trigger"/)
