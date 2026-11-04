@@ -80,7 +80,7 @@ function ManagedWorkspace() {
     >
       <Input
         name="workspace"
-        defaultValue="Cognitap"
+        defaultValue="Acme"
       />
     </Field>
   )
