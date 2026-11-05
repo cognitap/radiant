@@ -1,73 +1,80 @@
 # Architecture
 
-Radiant builds React components on native HTML. The browser handles behavior such as button activation, radio grouping, and modal focus. Radiant adds composition, state, and styling. The application supplies content and business logic.
+Radiant wraps native HTML in React components. The browser provides behavior: button activation, radio grouping, modal focus. Radiant adds composition, state, and styling. Applications provide content and logic.
 
-See the [component guides](https://github.com/cognitap/radiant-docs) for individual APIs, and [theming](theming.md), [motion](motion.md), and [accessibility](accessibility.md) for cross-family details.
+Component APIs live in the [component guides](https://github.com/cognitap/radiant-docs). Cross-family topics live in [theming](theming.md), [motion](motion.md), and [accessibility](accessibility.md).
 
 ## Package entries
 
-`@cognitap/radiant` is the main entry. Import charts from `@cognitap/radiant/charts` and theme presets from `@cognitap/radiant/examples`. The full list of supported import paths, including CSS and motion, lives in [package.json](../package.json).
+- `@cognitap/radiant`: components
+- `@cognitap/radiant/charts`: charts
+- `@cognitap/radiant/examples`: theme presets
 
-## Import and rendering rules
+[package.json](../package.json) lists every import path, including CSS and motion.
 
-- `src/internal/` holds framework-free logic such as selection rules and event guards. `src/react/` wraps it in hooks and imports only React and internal modules. Component families can build on each other as long as the dependency graph stays acyclic.
-- Keep browser APIs out of module initialization. In effects, use the host's `ownerDocument` and `defaultView` for iframe support and clean up on unmount.
-- Match server markup to the first client render. `Dialog` opens in an effect, and `Collapsible` reconciles `<details open>` on mount. Use `"use client"` for modules that need React state, context, refs, or effects. Static components can share action styles through `src/components/shared/actionStyles.ts`.
+## Module rules
 
-[Architecture tests](../tests/architecture.test.mjs) cover import boundaries and server rendering.
+- `src/internal/` is framework-free logic: selection rules, event guards. `src/react/` wraps it in hooks and imports only React and `src/internal/`. Families may depend on each other without cycles.
+- Do not read browser globals during module initialization or server rendering. In effects, use the host's `ownerDocument` and `defaultView` so iframes work, and clean up on unmount.
+- Server markup must equal the first client render. `Dialog` opens in an effect. `Collapsible` syncs `<details open>` on mount.
+- Add `"use client"` to modules that use state, context, refs, or effects. Static modules may import shared styles such as `src/components/shared/actionStyles.ts`, but nothing marked `"use client"`.
+
+[tests/architecture.test.mjs](../tests/architecture.test.mjs) enforces these rules.
 
 ## Composition
 
-Use `Button` for actions and `Link` for navigation. Reuse the family that owns the behavior.
+Each native element or behavior has one base family. Higher-level components compose that family instead of rendering raw elements or duplicating its state, keyboard, and focus logic.
 
-| Base family   | What it owns                   | Built on it                                   |
-| ------------- | ------------------------------ | --------------------------------------------- |
-| `Field`       | Label, help, and error wiring  | `RadioGroup`, `CheckboxGroup`, `Fieldset`     |
-| `Dialog`      | Modal behavior and open state  | `AlertDialog`, `Drawer`, `Command`            |
-| `Collapsible` | One native `<details>` element | `Accordion`, `NavLinkGroup`                   |
-| `Popover`     | A positioned surface           | `HoverCard`, `Menu`, `ContextMenu`, `Menubar` |
+`Button` owns `<button>` actions and `Link` owns `<a>` navigation, even when a link looks like a button. Triggers, close buttons, and action items in other families build on `Button`, and navigation items build on `Link`.
 
-Custom popups use `popover="manual"` to enter the top layer while staying in their theme and modal subtree.
+`Collapsible` owns `<details>` disclosures, `Dialog` owns modal `<dialog>` state and focus containment, and `Popover` owns anchored popups. Popups render in place with `popover="manual"`, so they enter the top layer and stay inside their theme and modal subtree.
 
 ## Hosts, parts, and styling
 
-- Root `className`, `style`, native props, and `ref` go to the documented host. State-only roots such as `Dialog` leave the DOM to named parts such as `Trigger` and `Content`. Custom selects and comboboxes also render their native form controls.
-- Use `parts` to style inner elements such as the label or indicator. Caller classes merge after defaults and caller styles take precedence. Radiant owns IDs, ARIA, events, refs, and state attributes.
-- Composed hosts keep all their slot names, such as `data-slot="button dialog-trigger"`. Use `[data-slot~="button"]` to match a single slot.
-- Style state with native selectors (`:disabled`, `:checked`, `[open]`), `aria-busy` for pending, and documented `data-state` values. Boolean attributes such as `data-selected` are present when true.
-- Actions use `variant` for appearance, `tone` for intent, and `controlSize` for scale. Controls share `controlSize` and preserve native prop meanings, such as `Input.size` for character width. Set radius through the theme.
+- Root `className`, `style`, `ref`, and native props go to the documented host element. State-only roots such as `Dialog` render no element; their named parts (`Trigger`, `Content`) do.
+- `parts` styles inner elements such as `label` or `indicator`. Caller classes merge after Radiant's, and caller inline styles win. Radiant owns IDs, ARIA, events, refs, and state attributes.
+- A composed host lists every slot: `data-slot="button dialog-trigger"`. Match one slot with `[data-slot~="button"]`.
+- Style state with native selectors (`:disabled`, `:checked`, `[open]`), `aria-busy` for pending, and documented `data-state` values. Boolean attributes such as `data-selected` are present when true and absent otherwise.
+- Actions take `variant` (appearance), `tone` (intent), and `controlSize` (scale). All controls share `controlSize`. Native props keep their native meaning: `Input.size` is a character width. Radius comes from the theme.
 
-## State and events
+## State
 
-Choose one owner for each state value for the life of a mount. Pass `x` to control it or `defaultX` to set its initial value. Passing both or switching ownership throws. Use a new `key` to remount.
+Each state value has one owner for the life of a mount. Pass `x` to control it or `defaultX` to seed it. Passing both, or switching between them, throws. Remount with a new `key` to change owner.
 
-`onXChange(next)` receives only the next value. For uncontrolled state Radiant applies the change, then calls the handler. For controlled state the handler requests a change from the application. If the application declines a controlled disclosure toggle, Radiant restores `<details open>`. No-op requests, prop syncs, and nested toggle or close events skip the callback.
+`onXChange(next)` receives the next value only.
 
-For click and keydown actions, `composeAction` runs disabled and pending guards before the caller's handler. Calling `preventDefault()` there cancels the library action. Native `change`, `toggle`, and `blur` report behavior that has already happened.
+- Uncontrolled: Radiant applies the change, then calls the handler.
+- Controlled: the handler is a request. If the application declines a disclosure toggle, Radiant restores `<details open>`.
+
+## Events
+
+For click and keydown, `composeAction` checks disabled and pending first, then calls the caller's handler, then the library action. `preventDefault()` in the caller's handler cancels the library action. Native `change`, `toggle`, and `blur` report what has already happened and cannot be cancelled.
 
 ## Forms
 
-`Field` supplies label and description IDs and passes `disabled` and `required` down. Radiant controls read its context. Plain HTML controls get the same wiring through `children(controlProps)`.
+`Field` provides label and description IDs, passes `disabled` and `required` down, and renders a `<fieldset>` for control groups. Radiant controls read it from context. Plain HTML controls receive `children(controlProps)`.
 
-Custom controls submit through native form elements.
+Custom controls submit through a native form element:
 
-| Component                  | Submitted value                                      |
-| -------------------------- | ---------------------------------------------------- |
-| `Select`                   | The selected value from a visually hidden `<select>` |
-| `Combobox`                 | The committed key from a hidden input                |
-| `Autocomplete`             | The input text, including values outside the list    |
-| `MultiSelect`, `TagsInput` | One named value per item                             |
-| `NumberField`              | A raw number, separate from the localized text       |
-| `OTPField`                 | The whole code from a single input                   |
+| Component                  | Submitted value                                   |
+| -------------------------- | ------------------------------------------------- |
+| `Select`                   | Selected value, from a visually hidden `<select>` |
+| `Combobox`                 | Committed key, from a hidden input                |
+| `Autocomplete`             | Input text, including text not in the list        |
+| `MultiSelect`, `TagsInput` | One named value per item                          |
+| `NumberField`              | Raw number, separate from the localized display   |
+| `OTPField`                 | Whole code, from one input                        |
 
-`Form` coordinates native validation and async submission. The application owns field values, validation rules, error messages, and persistence. Reset restores uncontrolled form controls, clears form errors, and aborts pending submissions. Widget state such as the active tab or open dialog is independent of form reset.
+`Form` runs native validation and async submission. The application owns values, rules, messages, and persistence. Reset restores uncontrolled controls, clears form errors, and aborts a pending submission. Widget state such as the active tab is not form state and survives reset.
 
-## What customization must keep
+## Customization limits
 
-Use `render(props)` on button and link parts to render a compatible `<button>` or `<a>`. Forward all resolved props, the ref, and the children.
+`render(props)` on button and link parts must return a `<button>` or `<a>`, or a component that forwards to one, with all props, the ref, and the children.
 
-- Keep controls operable with connected labels and descriptions, and make focus, invalid, disabled, and pending states visible.
-- Hide closed dialog and disclosure content, contain focus in modal dialogs, and keep `<summary>` a direct child of `<details>`.
-- Mark decorative indicators with `aria-hidden` and support reduced motion and forced colors.
+Custom styling and rendering must keep:
 
-Update the component's Storybook stories when a contract changes. Compile-only package checks live in [tests/package](../tests/package).
+- Connected labels and descriptions, and visible focus, invalid, disabled, and pending states.
+- Closed dialog and disclosure content hidden, focus contained in modal dialogs, and `<summary>` as a direct child of `<details>`.
+- `aria-hidden` on decorative indicators, and support for reduced motion and forced colors.
+
+When a contract changes, update the component's stories and the compile checks in [tests/package](../tests/package).
