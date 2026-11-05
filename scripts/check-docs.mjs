@@ -39,11 +39,11 @@ for (const file of files) {
       errors.push(`${file}: grew to ${count} words; legacy files may only shrink.`)
     continue
   }
-  if (banned.some(pattern => glob(pattern).test(file)))
-    errors.push(`${file}: records of how work was done go in the pull request.`)
   if (limit !== null && count > limit) errors.push(`${file}: ${count} words, budget ${limit}.`)
 }
 for (const file of tracked()) {
+  if (banned.some(pattern => glob(pattern).test(file)))
+    errors.push(`${file}: records of how work was done go in the pull request.`)
   if (/\bDEV-\d+/.test(readFileSync(file, 'utf8'))) errors.push(`${file}: remove ticket IDs.`)
 }
 for (const file of Object.keys(legacy)) {
