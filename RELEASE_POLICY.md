@@ -1,6 +1,6 @@
 # Radiant release policy
 
-Radiant releases independently of Cognitap deployments.
+Radiant releases on its own schedule, independent of the applications that consume it.
 
 ## Versions
 
