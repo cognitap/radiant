@@ -1,5 +1,8 @@
 # Radiant
 
+> [!WARNING]  
+> Radiant is under heavy development. Things _will_ change and things _will_ break. Use at your own risk.
+
 React components built on native HTML elements, with shared themes. Published
 as [`@cognitap/radiant`](https://www.npmjs.com/package/@cognitap/radiant) under
 the [MIT license](LICENSE). Radiant is experimental during 0.x.
