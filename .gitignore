@@ -3,6 +3,7 @@ node_modules/
 dist/
 coverage/
 output/
+galactica.html
 *.tsbuildinfo
 *.log
 .env

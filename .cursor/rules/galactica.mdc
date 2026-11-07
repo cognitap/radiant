@@ -1,0 +1,9 @@
+---
+description: "Use before changing a JS/TS file: every importer, including package-name imports grep misses, which tests to run, and whether the edit closes an import cycle. Also use when asked what imports or depends on a file, which tests cover it, whether files form an import cycle, or where an exported symbol is defined, and run its overview when you don't know where to start. Covers Vue, Svelte and Astro files too."
+alwaysApply: false
+metadata:
+  galactica-version: "0.2.3"
+  galactica-hash: "4b37be90763676cc881db38be5f340bb5ab2c39cf6306bcc738284ef025fd089"
+---
+
+Read `.agents/skills/galactica/SKILL.md` and follow it.
