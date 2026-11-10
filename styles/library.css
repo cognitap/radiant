@@ -1,6 +1,7 @@
 @layer theme, base, components, utilities;
-/* Inline theme values, so a host page's own --spacing cannot resize components. */
-@import 'tailwindcss/theme.css' layer(theme) theme(inline);
+/* Inline theme values, so a host page's own --spacing cannot resize components. Inlined values emit
+   no rules, so this import takes no layer; Tailwind's editor extension rejects the theme option after one. */
+@import 'tailwindcss/theme.css' theme(inline);
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 @import '../src/styles.css';
 
