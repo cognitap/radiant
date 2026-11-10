@@ -38,9 +38,9 @@ request, run `pnpm version patch --no-git-tag-version` (or `minor`, following
 the rules above), move the applicable Unreleased notes under a `## <version>`
 heading in `CHANGELOG.md` and commit both. The first release keeps `0.0.1`.
 
-From a clean checkout, `pnpm release:prepare` checks the version and notes,
-builds and packs once, runs the installed consumer check against that archive
-and dry-runs its publication. It writes `dist/release/radiant.tgz` and a
+From a clean checkout, `pnpm release:prepare` checks the version and notes and
+builds. It packs only when that build leaves tracked files unchanged, runs the
+installed consumer check against that archive, and dry-runs its publication. It writes `dist/release/radiant.tgz` and a
 `release.json` receipt recording the version, source commit and SHA-512
 integrity. Source checks are left to CI, which must pass before merging to
 `main`.
