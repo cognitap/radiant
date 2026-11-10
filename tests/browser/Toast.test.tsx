@@ -271,6 +271,36 @@ test('hover and focus pause the remaining timeout rather than restarting it', as
   await pause(800)
   expect(toast.hidden).toBe(true)
 })
+test('a touch press pauses the remaining timeout and a touch hover does not', async () => {
+  const { host } = await mount(
+    <ToastProvider>
+      <ToastViewport
+        aria-label="Notifications"
+        style={viewportStyle}
+      >
+        <Message
+          defaultOpen
+          duration={700}
+        />
+      </ToastViewport>
+    </ToastProvider>
+  )
+  const toast = roots(host)[0]
+  const pointer = (target: EventTarget, name: string) =>
+    target.dispatchEvent(
+      new PointerEvent(name, { bubbles: true, pointerType: 'touch', pointerId: 1 })
+    )
+  await act(async () => pointer(toast, 'pointerenter'))
+  expect(toast.dataset.paused).toBeUndefined()
+  await act(async () => pointer(toast, 'pointerdown'))
+  expect(toast.dataset.paused).toBe('')
+  await pause(800)
+  expect(toast.hidden).toBe(false)
+  await act(async () => pointer(toast.ownerDocument, 'pointerup'))
+  expect(toast.dataset.paused).toBeUndefined()
+  await pause(800)
+  expect(toast.hidden).toBe(true)
+})
 test('document visibility pauses timing and unmount cancels pending timeouts and announcements', async () => {
   const change = vi.fn()
   const hidden = vi.spyOn(document, 'hidden', 'get').mockReturnValue(true)
