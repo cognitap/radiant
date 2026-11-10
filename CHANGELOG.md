@@ -5,6 +5,7 @@
 ## Unreleased
 
 - Declare `react-dom` `^19.3.0` as a peer dependency next to `react`. Popover, Select, Combobox, Tooltip and AppShell import it.
+- `styles.css` no longer defines utility classes that no component uses, such as `.container`, `.collapse`, `.table`, `.hidden` and `.border`, so host elements with those class names keep their own styles. It also no longer sets or reads Tailwind's `:root` variables, such as `--spacing`, so a page's own `--spacing` leaves component sizes alone.
 
 ## 0.0.78
 

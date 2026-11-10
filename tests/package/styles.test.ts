@@ -64,6 +64,36 @@ test('the shipped stylesheets establish the full cascade layer order', () => {
   }
 })
 
+test('the standalone stylesheet keeps code words and Tailwind theme variables off the host page', () => {
+  const css = readExport('styles.css')
+  assert.doesNotMatch(
+    css,
+    /--(?:spacing|text-base|font-weight-normal|ease-out|animate-\w+|default-transition-[\w-]+)\b/
+  )
+  const used = new Set([
+    'absolute',
+    'antialiased',
+    'block',
+    'fixed',
+    'flex',
+    'grid',
+    'inline',
+    'invisible',
+    'isolate',
+    'relative',
+    'shrink',
+    'sticky',
+    'truncate',
+    'underline'
+  ])
+  const words = [...css.matchAll(/(?<=[{},])\.((?:\\!)?[a-z]+)(?=[{,])/g)].map(match => match[1])
+  assert.deepEqual(
+    [...new Set(words)].filter(word => !used.has(word)),
+    [],
+    'Exclude code words in styles/library.css, or list the classes components use here.'
+  )
+})
+
 test('the four public CSS routes compile to self-contained text', () => {
   const styles = readExport('styles.css')
   const reset = readExport('reset.css')
