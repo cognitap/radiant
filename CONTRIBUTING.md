@@ -21,12 +21,16 @@ pnpm storybook
 
 Storybook runs at [http://localhost:6006](http://localhost:6006), where the toolbar switches **Theme** and **Mode**. To inspect a story without running its `play` function, add `&embed=true` to the iframe URL.
 
-| Command             | Purpose                                                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm watch`        | Rebuild on change, except `reset.css`. Run `pnpm build` first.                                                            |
-| `pnpm test`         | Build, run `tests/*.test.mjs`, and run `pnpm test:package`.                                                               |
-| `pnpm test:package` | Pack the tarball, install it in a temporary directory, and run `tests/package/`.                                          |
-| `pnpm test:browser` | Run every story in every theme and mode with axe, plus `tests/browser/*.test.tsx`. Writes artifacts to `output/browser/`. |
+| Command                | Purpose                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm watch`           | Rebuild on change, except `reset.css`. Run `pnpm build` first.                                                            |
+| `pnpm test`            | Build, run `tests/*.test.mjs`, and run `pnpm test:package`.                                                               |
+| `pnpm test:package`    | Pack the tarball, install it in a temporary directory, and run `tests/package/`.                                          |
+| `pnpm test:browser`    | Run every story in every theme and mode with axe, plus `tests/browser/*.test.tsx`. Writes artifacts to `output/browser/`. |
+| `pnpm check:library`   | Check generated theme CSS, formatting, lint, types and docs budgets, then build and run the Node and package tests.       |
+| `pnpm check:storybook` | Build Storybook and run every story in the Radiant theme, light and dark.                                                 |
+
+CI runs three jobs: `pnpm check:library`, `pnpm check:storybook`, and `pnpm test:browser --project=browser-platform`. `pnpm check` runs the first two.
 
 Install the headless Chromium shell once before running browser tests:
 
