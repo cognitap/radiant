@@ -96,7 +96,7 @@ const pressedTrigger: ComboboxTriggerProps = { pressed: true }
 // @ts-expect-error Clearing is an action, not a toggle.
 const pressedClear: ComboboxClearProps = { onPressedChange: () => {} }
 // @ts-expect-error The hook selects multiple mode with type.
-const legacyHook = () => useCombobox({ multiple: true })
+const useLegacyHook = () => useCombobox({ multiple: true })
 const many: ComboboxProps = {
   items,
   type: 'multiple',
@@ -107,10 +107,10 @@ const many: ComboboxProps = {
     value.map(item => item.toUpperCase())
   }
 }
-const manyHook = () => useCombobox({ type: 'multiple' })?.value.map(item => item.toUpperCase())
+const useManyHook = () => useCombobox({ type: 'multiple' })?.value.map(item => item.toUpperCase())
 const renderProps: Pick<ComboboxRenderProps, 'children'> = { children: 'Show options' }
 void [mixed, query, open, multiple, unreadable, inputValue, name, active]
-void [legacyMultiple, legacyError, pressedTrigger, pressedClear, legacyHook, many, manyHook]
+void [legacyMultiple, legacyError, pressedTrigger, pressedClear, useLegacyHook, many, useManyHook]
 void renderProps
 
 // @ts-expect-error Adornments use Combobox presentation, not action treatments.
