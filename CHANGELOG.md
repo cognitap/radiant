@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Combobox, Autocomplete and MultiSelect lists hide when an ancestor dialog or popover closes, and show again when that ancestor is visible if the list stays open.
+- A timed Toast pauses while a touch is held. A touch hover does not pause it.
 - TypeScript accepts `import '@cognitap/radiant/styles.css'` and `import '@cognitap/radiant/reset.css'` without a local CSS module declaration.
 - Prose list padding and `pre` scrolling skip children marked `data-rad-not-prose` or `data-slot`, as the other prose rules already do. Inline code styling also skips code that is marked or sits inside a marked element.
 - **Breaking:** class merging no longer reads an unhinted token utility as a size, width, style or font family, which Tailwind never did. Replace `className="text-(--rad-tabs-font-size)"` with `className="text-(length:--rad-tabs-font-size)"`. This removes about 75 KB of minified JavaScript from every bundle, and `styles.css` drops the token utility classes no component uses, such as `.gap-(--rad-tabs-gap)`.
