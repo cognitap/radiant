@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- TypeScript accepts `import '@cognitap/radiant/styles.css'` and `import '@cognitap/radiant/reset.css'` without a local CSS module declaration.
+- Prose list padding and `pre` scrolling skip children marked `data-rad-not-prose` or `data-slot`, as the other prose rules already do. Inline code styling also skips code that is marked or sits inside a marked element.
 - **Breaking:** class merging no longer reads an unhinted token utility as a size, width, style or font family, which Tailwind never did. Replace `className="text-(--rad-tabs-font-size)"` with `className="text-(length:--rad-tabs-font-size)"`. This removes about 75 KB of minified JavaScript from every bundle, and `styles.css` drops the token utility classes no component uses, such as `.gap-(--rad-tabs-gap)`.
 - Declare `react-dom` `^19.3.0` as a peer dependency next to `react`. Popover, Select, Combobox, Tooltip and AppShell import it.
 - `styles.css` no longer defines utility classes that no component uses, such as `.container`, `.collapse`, `.table`, `.hidden` and `.border`, so host elements with those class names keep their own styles. It also no longer sets or reads Tailwind's `:root` variables, such as `--spacing`, so a page's own `--spacing` leaves component sizes alone.
