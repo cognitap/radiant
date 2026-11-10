@@ -37,8 +37,14 @@
       "types": "./dist/library/index.d.ts",
       "default": "./dist/library/index.js"
     },
-    "./styles.css": "./dist/library/styles.css",
-    "./reset.css": "./dist/library/reset.css",
+    "./styles.css": {
+      "types": "./src/css.d.ts",
+      "default": "./dist/library/styles.css"
+    },
+    "./reset.css": {
+      "types": "./src/css.d.ts",
+      "default": "./dist/library/reset.css"
+    },
     "./tailwind.css": "./src/styles.css",
     "./color": {
       "types": "./dist/library/color/index.d.ts",
