@@ -6,4 +6,4 @@
 @import '../src/styles.css';
 
 /* Code words the scan reads as utilities. No component uses them, and they would style host elements. */
-@source not inline('!hidden !inline !visible blur border collapse container contents filter hidden italic lowercase outline resize ring rounded shadow static table table-caption table-cell table-row transform transition uppercase visible');
+@source not inline('!hidden !inline !visible blur border collapse container contents filter hidden italic lowercase outline resize ring shadow static table table-caption table-cell table-row transform transition uppercase visible');

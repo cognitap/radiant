@@ -8,7 +8,7 @@ Each component lives in `src/components/<Family>/<Family>.tsx` with its stories 
 
 Style components with complete Tailwind utility names in source. Shared tokens live in `src/themes/tokens.ts` and component overrides in `src/themes/components.ts`; `pnpm theme:generate` generates `src/themes/baseline.css`. Consumers import compiled `@cognitap/radiant/styles.css` (plus optional `reset.css`) or source `@cognitap/radiant/tailwind.css`.
 
-Use `hover:`, `active:`, and `disabled:` prefixes so caller `className` utilities override them cleanly, and register new non-color tokens in `src/cn.ts` under their utility group.
+Use `hover:`, `active:`, and `disabled:` prefixes so caller `className` utilities override them cleanly. Give token utilities for sizes, widths, styles, and font families a type hint, such as `text-[length:var(--rad-x)]`; Tailwind reads an unhinted `text-(--rad-x)` as a color.
 
 ## Component conventions
 
