@@ -4,7 +4,8 @@
     "CHANGELOG.md": null,
     "README.md": 500,
     "docs/theming.md": 2000,
-    "docs/architecture.md": 1500
+    "docs/architecture.md": 1500,
+    ".agents/skills/modern-web-guidance/**": null
   },
   "banned": ["docs/verification/**", "docs/research/**", "docs/*-audit-*.md"],
   "legacy": {}
