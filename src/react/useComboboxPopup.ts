@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useRef, type RefObject } from 'react'
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { positionSelect } from '../internal/select.js'
 
 /** Local top-layer popup: preserve theme/modal ancestry and place before its first paint. */
@@ -12,15 +12,47 @@ export function useComboboxPopup(
   sideOffset: number,
   collisionPadding: number
 ) {
-  const latest = useRef(dismiss)
+  const latest = useRef({ dismiss, open })
   const reposition = useRef<() => void>(() => {})
+  const [generation, setGeneration] = useState(0)
   useLayoutEffect(() => {
-    latest.current = dismiss
+    latest.current = { dismiss, open }
   })
+  // A manual popup stays in the top layer after an ancestor dialog or popover closes.
   useLayoutEffect(() => {
     const node = nodeRef.current
     if (!node || !input) return
-    if (!open) {
+    const ancestors: HTMLElement[] = []
+    for (let parent = input.parentElement; parent; parent = parent.parentElement) {
+      if (parent.matches('dialog, [popover]')) ancestors.push(parent)
+    }
+    const reconcile = () => {
+      if (!latest.current.open) return
+      const visible = input.checkVisibility()
+      if (!visible && node.matches(':popover-open')) {
+        latest.current.dismiss()
+        node.hidePopover()
+        setGeneration(value => value + 1)
+      } else if (visible && !node.matches(':popover-open')) setGeneration(value => value + 1)
+    }
+    const toggle = (event: Event) => {
+      if (event.target === event.currentTarget) reconcile()
+    }
+    const view = input.ownerDocument.defaultView!
+    const observer = new view.MutationObserver(reconcile)
+    for (const ancestor of ancestors) {
+      observer.observe(ancestor, { attributes: true, attributeFilter: ['open', 'data-state'] })
+      ancestor.addEventListener('toggle', toggle)
+    }
+    return () => {
+      observer.disconnect()
+      for (const ancestor of ancestors) ancestor.removeEventListener('toggle', toggle)
+    }
+  }, [nodeRef, input])
+  useLayoutEffect(() => {
+    const node = nodeRef.current
+    if (!node || !input) return
+    if (!open || !input.checkVisibility()) {
       if (node.matches(':popover-open')) node.hidePopover()
       return
     }
@@ -103,7 +135,7 @@ export function useComboboxPopup(
         !node.contains(target) &&
         !input.parentElement?.contains(target)
       )
-        latest.current()
+        latest.current.dismiss()
     }
     const observer = new win.ResizeObserver(schedule)
     const mutations = new win.MutationObserver(schedule)
@@ -129,7 +161,7 @@ export function useComboboxPopup(
       win.visualViewport?.removeEventListener('scroll', schedule)
       if (node.matches(':popover-open')) node.hidePopover()
     }
-  }, [nodeRef, input, open, sideOffset, collisionPadding])
+  }, [nodeRef, input, open, sideOffset, collisionPadding, generation])
   // Selected tags can move an unchanged-size input without a resize event.
   useLayoutEffect(() => {
     reposition.current()
