@@ -1061,6 +1061,8 @@ test('the installed package declares shared React and needs no Tailwind', () => 
   const libraryRequire = createRequire(import.meta.resolve('@cognitap/radiant'))
   assert.equal(typeof manifest.peerDependencies?.react, 'string')
   assert.equal(libraryRequire.resolve('react'), require.resolve('react'))
+  assert.equal(typeof manifest.peerDependencies?.['react-dom'], 'string')
+  assert.equal(libraryRequire.resolve('react-dom'), require.resolve('react-dom'))
   assert.equal(manifest.peerDependenciesMeta?.tailwindcss?.optional, true)
   assert.equal(manifest.dependencies?.tailwindcss, undefined)
 })
