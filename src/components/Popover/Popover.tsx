@@ -12,7 +12,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
 import type { PopoverSide, PopoverAlign } from '../../internal/popover.js'

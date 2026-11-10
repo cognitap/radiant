@@ -1,7 +1,7 @@
 'use client'
 
 import { useContext, type ComponentProps } from 'react'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { MotionProfileContext } from '../../motion/context.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'

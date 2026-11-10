@@ -19,7 +19,7 @@ import {
   type DialogTitleProps,
   type DialogDescriptionProps
 } from '../Dialog/Dialog.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { composeAction } from '../../internal/events.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import { joinIds } from '../../internal/ids.js'

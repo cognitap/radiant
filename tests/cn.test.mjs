@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { cn } from '../dist/library/cn.js'
+import { cn } from 'cn'
 import { typographyRoles } from '../dist/library/index.js'
 
 test('hinted token utilities from a caller replace the default for the same property only', () => {

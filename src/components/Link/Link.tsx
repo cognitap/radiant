@@ -2,7 +2,7 @@ import { Fragment, isValidElement, type ComponentProps, type ReactElement } from
 import { cva, type VariantProps } from 'class-variance-authority'
 import type { ButtonVariant, ControlSize, Tone } from '../../presentation.js'
 import { actionTone, actionVariants } from '../shared/actionStyles.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { focusRingClass } from '../shared/focusStyles.js'

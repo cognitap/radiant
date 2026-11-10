@@ -2,7 +2,7 @@
 
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { composeAction } from '../../internal/events.js'

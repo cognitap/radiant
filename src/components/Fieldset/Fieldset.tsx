@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Field, type FieldProps } from '../Field/Field.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { PartStyle } from '../../presentation.js'
 export type FieldsetProps = Omit<

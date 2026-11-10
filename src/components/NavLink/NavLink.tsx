@@ -14,7 +14,7 @@ import {
   type CollapsibleTriggerProps,
   type CollapsibleContentProps
 } from '../Collapsible/Collapsible.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'

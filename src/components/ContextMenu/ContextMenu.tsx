@@ -44,7 +44,7 @@ import {
 import { usePopoverContext } from '../Popover/Popover.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import { joinIds } from '../../internal/ids.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { focusRingClass } from '../shared/focusStyles.js'

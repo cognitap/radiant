@@ -14,7 +14,7 @@ import { Checkbox, type CheckboxProps } from '../Checkbox/Checkbox.js'
 import { Field, type FieldProps } from '../Field/Field.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from '../../react/useNativeOwner.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'
 type OptionPresentation = Omit<

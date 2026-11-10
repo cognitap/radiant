@@ -13,7 +13,7 @@ import {
   type ReactNode
 } from 'react'
 import { Button, type ButtonProps } from '../Button/Button.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import type { WithoutToggle } from '../../internal/types.js'

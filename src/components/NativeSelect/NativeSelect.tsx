@@ -1,7 +1,7 @@
 'use client'
 
 import type { ComponentProps } from 'react'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { useFieldControl } from '../Field/Field.js'
 import { joinIds } from '../../internal/ids.js'

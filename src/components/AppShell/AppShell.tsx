@@ -21,7 +21,7 @@ import {
 } from '../shared/composedLink.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 import { Drawer, DrawerContent, DrawerTitle, DrawerClose, useDrawer } from '../Drawer/Drawer.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { composeAction } from '../../internal/events.js'
 import type { WithoutToggle, DistributiveOmit } from '../../internal/types.js'

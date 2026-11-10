@@ -3,7 +3,7 @@
 import type { ComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../Button/Button.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { useFieldControl } from '../Field/Field.js'

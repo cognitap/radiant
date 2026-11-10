@@ -12,7 +12,7 @@ import {
   type ComponentProps
 } from 'react'
 import { SeparatorRoot, type SeparatorProps } from '../Separator/Separator.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import {

@@ -4,7 +4,7 @@ import { createContext, useContext, useCallback, useEffect, useRef, useState } f
 import type { ComponentProps, ReactNode } from 'react'
 import { Field, type FieldProps } from '../Field/Field.js'
 import { Alert, type AlertProps } from '../Alert/Alert.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'

@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from 'react'
 import { cva } from 'class-variance-authority'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'

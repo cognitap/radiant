@@ -19,7 +19,7 @@ import {
   type ComposedLinkProps,
   type ComposedLinkRenderProps
 } from '../shared/composedLink.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { ScrollArea } from '../ScrollArea/ScrollArea.js'
 import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'

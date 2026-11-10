@@ -13,7 +13,7 @@ import {
   type PointerEvent
 } from 'react'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { Orientation, PartStyle } from '../../presentation.js'

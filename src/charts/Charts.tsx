@@ -7,7 +7,7 @@ import {
   type ComponentProps,
   type ReactNode
 } from 'react'
-import { cn } from '../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../internal/ids.js'
 import {
   chartGeometry,

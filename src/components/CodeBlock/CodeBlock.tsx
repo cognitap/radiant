@@ -11,7 +11,7 @@ import {
 } from 'react'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
 import { ScrollArea, type ScrollAreaProps } from '../ScrollArea/ScrollArea.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { composeAction } from '../../internal/events.js'
 import type { DistributiveOmit, WithoutToggle } from '../../internal/types.js'
