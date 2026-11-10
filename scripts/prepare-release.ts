@@ -7,11 +7,16 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const directory = fileURLToPath(new URL('../dist/release/', import.meta.url))
 const archive = `${directory}radiant.tgz`
-const manifest = JSON.parse(readFileSync(`${root}package.json`, 'utf8'))
+const manifest = JSON.parse(readFileSync(`${root}package.json`, 'utf8')) as {
+  name: string
+  version: string
+  private?: boolean
+}
 const changelog = readFileSync(`${root}CHANGELOG.md`, 'utf8')
 const { version } = manifest
-const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
-const run = (command, args) => execFileSync(command, args, { cwd: root, stdio: 'inherit' })
+const git = (...args: string[]) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
+const run = (command: string, args: string[]) =>
+  execFileSync(command, args, { cwd: root, stdio: 'inherit' })
 
 rmSync(directory, { recursive: true, force: true })
 

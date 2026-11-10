@@ -2,27 +2,34 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 
-const { budget, budgets, banned, legacy } = JSON.parse(readFileSync('docs-policy.json', 'utf8'))
-const glob = pattern =>
+const { budget, budgets, banned, legacy } = JSON.parse(
+  readFileSync('docs-policy.json', 'utf8')
+) as {
+  budget: number
+  budgets: Record<string, number | null>
+  banned: string[]
+  legacy: Record<string, number>
+}
+const glob = (pattern: string) =>
   new RegExp(
     `^${pattern
       .replaceAll('.', '\\.')
       .replaceAll('**', '.+')
       .replace(/(?<!\.)\*/g, '[^/]*')}$`
   )
-const budgetFor = file => {
+const budgetFor = (file: string) => {
   const match = Object.entries(budgets).find(([pattern]) => glob(pattern).test(file))
   return match ? match[1] : budget
 }
-const words = text =>
+const words = (text: string) =>
   text
     .replace(/^```[\s\S]*?^```/gm, '')
     .replace(/^\s*\|.*$/gm, '')
     .split(/\s+/)
     .filter(word => /\p{L}/u.test(word)).length
 
-const errors = []
-const tracked = (...patterns) =>
+const errors: string[] = []
+const tracked = (...patterns: string[]) =>
   execFileSync('git', ['ls-files', '-co', '--exclude-standard', ...patterns], { encoding: 'utf8' })
     .split('\n')
     .filter(file => file && existsSync(file))
