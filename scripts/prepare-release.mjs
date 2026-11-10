@@ -29,6 +29,11 @@ assert.equal(git('status', '--porcelain'), '', 'Commit all changes before prepar
 
 mkdirSync(directory, { recursive: true })
 run('pnpm', ['build'])
+assert.equal(
+  git('status', '--porcelain'),
+  '',
+  'The build changed tracked files. Commit them before preparing a release.'
+)
 run('pnpm', ['pack', '--out', archive])
 run(process.execPath, ['scripts/pack-and-test.ts', archive])
 run('pnpm', ['publish', archive, '--dry-run', '--no-git-checks', '--ignore-scripts'])
