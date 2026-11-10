@@ -44,7 +44,7 @@ const FormContext = createContext<FormState | null>(null)
 export function useForm(): FormState | null {
   return useContext(FormContext)
 }
-function requiredForm() {
+function useRequiredForm() {
   const state = useForm()
   if (!state) throw new Error('Form parts must be inside Form.')
   return state
@@ -238,7 +238,7 @@ export function Form({
 export type FormFieldProps = DistributiveOmit<FieldProps, 'name'> & { name: string }
 /** Name matches the real input's name; Field retains label and error relationships. */
 export function FormField({ name, error, ...props }: FormFieldProps) {
-  const { errors } = requiredForm()
+  const { errors } = useRequiredForm()
   return (
     <Field
       {...props}
@@ -249,7 +249,7 @@ export function FormField({ name, error, ...props }: FormFieldProps) {
 }
 export type FormErrorProps = Omit<AlertProps, 'children' | 'tabIndex'>
 export function FormError(props: FormErrorProps) {
-  const { errors } = requiredForm()
+  const { errors } = useRequiredForm()
   return errors.form ? (
     <Alert
       {...props}
