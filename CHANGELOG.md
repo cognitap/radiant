@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Declare `react-dom` `^19.3.0` as a peer dependency next to `react`. Popover, Select, Combobox, Tooltip and AppShell import it.
+
 ## 0.0.78
 
 - Show required and range errors from NumberField, TagsInput and MultiSelect on their own FormField instead of FormError.
