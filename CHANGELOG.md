@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.79
+
 - Combobox, Autocomplete and MultiSelect lists hide when an ancestor dialog or popover closes, and show again when that ancestor is visible if the list stays open.
 - A timed Toast pauses while a touch is held. A touch hover does not pause it.
 - TypeScript accepts `import '@cognitap/radiant/styles.css'` and `import '@cognitap/radiant/reset.css'` without a local CSS module declaration.
