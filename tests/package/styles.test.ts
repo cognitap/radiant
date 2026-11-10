@@ -58,6 +58,12 @@ test('the customization entry generates library and application utilities once w
   assert.match(css, /@layer\b/)
 })
 
+test('the shipped stylesheets establish the full cascade layer order', () => {
+  for (const name of ['styles.css', 'reset.css']) {
+    assert.match(readExport(name), /^@layer properties, theme, base, components, utilities;\n/)
+  }
+})
+
 test('the four public CSS routes compile to self-contained text', () => {
   const styles = readExport('styles.css')
   const reset = readExport('reset.css')
