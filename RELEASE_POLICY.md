@@ -36,7 +36,7 @@ direct removal is allowed.
 Releases use native pnpm versioning and reviewed changelog notes. In a pull
 request, run `pnpm version patch --no-git-tag-version` (or `minor`, following
 the rules above), move the applicable Unreleased notes under a `## <version>`
-heading in `CHANGELOG.md` and commit both. The first release keeps `0.0.1`.
+heading in `CHANGELOG.md` and commit both.
 
 From a clean checkout, `pnpm release:prepare` checks the version and notes and
 builds. It packs only when that build leaves tracked files unchanged, runs the
@@ -51,20 +51,9 @@ documentation and accessibility/compatibility audit.
 
 The manual **Release Radiant** workflow prepares and uploads a candidate. With
 `publish` selected on `main`, a separate job holding npm OIDC permission
-publishes that same archive and checks that npm's integrity matches the
-receipt. Preparation refuses to publish while the manifest is `private`.
-
-### First publication
-
-Confirm the npm account can publish to the `@cognitap` scope and recheck the MIT
-notice, then remove `private` in a reviewed change. Publish the first candidate
-manually, since trusted publishing needs an existing package. When the next
-release is ready, add an npm trusted publisher for repository
-`cognitap/radiant`, workflow `release.yml` and environment `npm`, enable direct
-publishing, restrict that GitHub environment to `main`, and publish through it
-within two days before the unused configuration expires. Published versions cannot be republished to test
-the setup. Later releases publish from the workflow with provenance and no
-stored token; the first authenticated local publication has no CI provenance.
+publishes that same archive through npm trusted publishing, with no stored
+token, and checks that npm's integrity matches the receipt. Preparation refuses
+to publish while the manifest is `private`.
 
 ### Failed publication and fixes
 
