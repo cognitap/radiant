@@ -17,9 +17,9 @@ Component APIs live in the [component guides](https://github.com/cognitap/radian
 - `src/internal/` is framework-free logic: selection rules, event guards. `src/react/` wraps it in hooks and imports only React and `src/internal/`. Families may depend on each other without cycles.
 - Do not read browser globals during module initialization or server rendering. In effects, use the host's `ownerDocument` and `defaultView` so iframes work, and clean up on unmount.
 - Server markup must equal the first client render. `Dialog` opens in an effect. `Collapsible` syncs `<details open>` on mount.
-- Add `"use client"` to modules that use state, context, refs, or effects. Static modules may import shared styles such as `src/components/shared/actionStyles.ts`, but nothing marked `"use client"`.
+- Add `"use client"` to modules that use state, context, refs, or effects. Other modules stay static and may render client families, as `Pagination` renders `Button`. `Card`, `Link`, themes, and examples import nothing marked `"use client"`; they share styles through modules such as `src/components/shared/actionStyles.ts`.
 
-[tests/architecture.test.mjs](../tests/architecture.test.mjs) enforces these rules.
+[tests/architecture.test.mjs](../tests/architecture.test.mjs) enforces the import, cycle, `"use client"`, and browser-global rules. [tests/browser](../tests/browser) hydrates server markup.
 
 ## Composition
 
@@ -27,7 +27,7 @@ Each native element or behavior has one base family. Higher-level components com
 
 `Button` owns `<button>` actions and `Link` owns `<a>` navigation, even when a link looks like a button. Triggers, close buttons, and action items in other families build on `Button`, and navigation items build on `Link`.
 
-`Collapsible` owns `<details>` disclosures, `Dialog` owns modal `<dialog>` state and focus containment, and `Popover` owns anchored popups. Popups render in place with `popover="manual"`, so they enter the top layer and stay inside their theme and modal subtree.
+`Collapsible` owns `<details>` disclosures, `Dialog` owns modal `<dialog>` state and focus containment, and `Popover` owns the anchored popups of `Menu`, `ContextMenu`, `Menubar`, and `HoverCard`. `Select`, `Combobox`, and `Tooltip` render their own. All of these popups render inside the trigger's container with `popover="manual"`, so they enter the top layer and stay inside their theme and modal subtree.
 
 ## Hosts, parts, and styling
 

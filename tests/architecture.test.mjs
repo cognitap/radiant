@@ -110,6 +110,80 @@ test('static rendering entries do not depend on client bindings', () => {
   }
 })
 
+function sourceModules() {
+  const modules = new Map()
+  for (const file of readdirSync(source, { recursive: true })) {
+    if (!/\.tsx?$/.test(file) || /\.(stories|test)\.tsx?$|\.d\.ts$/.test(file)) continue
+    const filename = resolve(source, file)
+    modules.set(
+      filename,
+      ts.createSourceFile(filename, readFileSync(filename, 'utf8'), ts.ScriptTarget.Latest, true)
+    )
+  }
+  return modules
+}
+
+test('modules that use state, context, refs or effects are marked "use client"', () => {
+  for (const [filename, module] of sourceModules()) {
+    const stateful = module.statements.some(statement => {
+      if (!ts.isImportDeclaration(statement) || statement.moduleSpecifier.text !== 'react')
+        return false
+      const names = statement.importClause?.namedBindings
+      return (
+        !statement.importClause?.isTypeOnly &&
+        names !== undefined &&
+        ts.isNamedImports(names) &&
+        names.elements.some(
+          name =>
+            !name.isTypeOnly &&
+            /^(?:use(?!Id$)[A-Z]|createContext$)/.test((name.propertyName ?? name.name).text)
+        )
+      )
+    })
+    if (!stateful) continue
+    const first = module.statements[0]
+    assert.ok(
+      ts.isExpressionStatement(first) &&
+        ts.isStringLiteral(first.expression) &&
+        first.expression.text === 'use client',
+      `${filename} uses client-only React APIs without "use client"`
+    )
+  }
+})
+
+test('source modules import each other without cycles', () => {
+  const modules = sourceModules()
+  const imports = new Map()
+  for (const [filename, module] of modules) {
+    const targets = []
+    for (const statement of module.statements) {
+      if (!ts.isImportDeclaration(statement) && !ts.isExportDeclaration(statement)) continue
+      const specifier = statement.moduleSpecifier
+      if (!specifier || !ts.isStringLiteral(specifier) || !specifier.text.startsWith('.')) continue
+      const base = resolve(dirname(filename), specifier.text).replace(/\.js$/, '')
+      const target = [`${base}.ts`, `${base}.tsx`].find(candidate => modules.has(candidate))
+      if (target) targets.push(target)
+    }
+    imports.set(filename, targets)
+  }
+  const done = new Set()
+  const path = []
+  function visit(filename) {
+    if (done.has(filename)) return
+    const start = path.indexOf(filename)
+    assert.equal(
+      start,
+      -1,
+      `Import cycle: ${[...path.slice(start), filename].map(file => file.slice(source.length)).join(' -> ')}`
+    )
+    path.push(filename)
+    for (const target of imports.get(filename)) visit(target)
+    path.pop()
+    done.add(filename)
+  }
+  for (const filename of modules.keys()) visit(filename)
+})
+
 test('one-sided borders zero the other sides without the opt-in reset', () => {
   const oneSide = /(?:^|\s)border-[trblsexy]-(?:\d|\[length:)/
   const allSides =
