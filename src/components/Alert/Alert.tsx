@@ -1,6 +1,6 @@
 import { headings, type HeadingLevel } from '../../internal/headings.js'
 import type { ComponentProps } from 'react'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { actionTone } from '../shared/actionStyles.js'
 import { joinIds } from '../../internal/ids.js'
 import type { Tone } from '../../presentation.js'

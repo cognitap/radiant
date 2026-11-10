@@ -18,6 +18,9 @@ import {
   DialogTrigger,
   DialogContent,
   DialogTitle,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
   Autocomplete,
   MultiSelect,
   useCombobox
@@ -521,6 +524,54 @@ test('local portal preserves theme and modal ancestry, dismisses before Dialog E
   expect(host.querySelector('dialog')?.open).toBe(true)
   expect(document.activeElement).toBe(input(host))
   expect(popup(host).matches(':popover-open')).toBe(false)
+})
+
+test('closing an ancestor Popover or Dialog hides the list even when its owner refuses close', async () => {
+  const changes = vi.fn()
+  const tree = (open: boolean) => (
+    <Popover open={open}>
+      <PopoverTrigger>Outer</PopoverTrigger>
+      <PopoverContent>
+        <Field label="City">
+          <Combobox
+            items={items}
+            open
+            onOpenChange={changes}
+          />
+        </Field>
+      </PopoverContent>
+    </Popover>
+  )
+  const { host, render } = await mount(tree(true))
+  await expect.poll(() => popup(host).matches(':popover-open')).toBe(true)
+  await render(tree(false))
+  await expect.poll(() => popup(host).matches(':popover-open')).toBe(false)
+  await render(tree(true))
+  await expect.poll(() => popup(host).matches(':popover-open')).toBe(true)
+  expect(changes).toHaveBeenCalledWith(false)
+  await render(
+    <Dialog defaultOpen>
+      <DialogContent>
+        <DialogTitle>Trip</DialogTitle>
+        <Field label="City">
+          <Combobox
+            items={items}
+            defaultOpen
+          />
+        </Field>
+      </DialogContent>
+    </Dialog>
+  )
+  await expect.poll(() => popup(host).matches(':popover-open')).toBe(true)
+  await act(async () => {
+    const dialog = host.querySelector('dialog')!
+    const closed = new Promise<void>(resolve =>
+      dialog.addEventListener('close', () => resolve(), { once: true })
+    )
+    dialog.close()
+    await closed
+  })
+  await expect.poll(() => popup(host).matches(':popover-open')).toBe(false)
 })
 
 test('caller styles, native refs and independent themes preserve selected and forced-color cues', async () => {

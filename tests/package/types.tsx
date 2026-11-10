@@ -554,7 +554,11 @@ void [disabledLink, pendingLink]
 const invalidLinkVariant: LinkProps = { variant: 'button' }
 createElement(Link, invalidLinkVariant)
 
-useField()
+function FieldReader() {
+  useField()
+  return null
+}
+void FieldReader
 
 const fieldProps: FieldProps = {
   label: 'Email',
@@ -1048,8 +1052,12 @@ function Following({ target }: { target: number | SpringSource }) {
   return <Button onClick={() => follower.stop()}>Pause</Button>
 }
 void Following
-// @ts-expect-error targets use consistent numeric units
-useSpringFollow('20%')
+function PercentFollowing() {
+  // @ts-expect-error targets use consistent numeric units
+  useSpringFollow('20%')
+  return null
+}
+void PercentFollowing
 
 function LayoutBinding() {
   const ref = useRef<HTMLDivElement>(null)

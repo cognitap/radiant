@@ -11,7 +11,7 @@ import {
 } from 'react'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import {
   isItemOpen,
@@ -330,6 +330,8 @@ function Indicator({
       attributes: true,
       attributeFilter: ['aria-pressed', 'class', 'style', 'hidden', 'dir']
     })
+    for (let parent = root.parentElement; parent; parent = parent.parentElement)
+      changes.observe(parent, { attributes: true, attributeFilter: ['dir'] })
     observe()
     measure()
     view.addEventListener('resize', schedule)

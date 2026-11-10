@@ -4,7 +4,7 @@ import { MotionProfileContext } from '../../motion/context.js'
 
 import { createContext, useContext } from 'react'
 import type { ComponentProps } from 'react'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { defaultTheme } from '../../themes/default.js'
 import { modeStyle } from '../../themes/tokens.js'
 import type { Theme, ThemeMode, ThemeStyle } from '../../themes/defineTheme.js'

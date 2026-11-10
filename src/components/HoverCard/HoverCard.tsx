@@ -15,7 +15,7 @@ import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useHoverSurface } from '../../react/useHoverSurface.js'
 import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 
 export type HoverCardProps = PopoverProps & { openDelay?: number; closeDelay?: number }
 export type HoverCardState = PopoverState

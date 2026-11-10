@@ -81,3 +81,43 @@ jobs:
           path: output/browser/
           if-no-files-found: ignore
           retention-days: 14
+
+  behavior:
+    name: Browser behavior
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned pnpm
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install headless Chromium
+        run: pnpm exec playwright install --only-shell chromium
+
+      - name: Check keyboard, forms, motion and hydration
+        run: pnpm test:browser --project=browser-platform
+
+      - name: Save behavior results and failure screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: browser-behavior
+          path: output/browser/
+          if-no-files-found: ignore
+          retention-days: 14

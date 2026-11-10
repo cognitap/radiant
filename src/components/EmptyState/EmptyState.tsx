@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { headings, type HeadingLevel } from '../../internal/headings.js'
 import { actionTone } from '../shared/actionStyles.js'

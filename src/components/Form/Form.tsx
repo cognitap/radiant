@@ -4,7 +4,7 @@ import { createContext, useContext, useCallback, useEffect, useRef, useState } f
 import type { ComponentProps, ReactNode } from 'react'
 import { Field, type FieldProps } from '../Field/Field.js'
 import { Alert, type AlertProps } from '../Alert/Alert.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
@@ -44,7 +44,7 @@ const FormContext = createContext<FormState | null>(null)
 export function useForm(): FormState | null {
   return useContext(FormContext)
 }
-function requiredForm() {
+function useRequiredForm() {
   const state = useForm()
   if (!state) throw new Error('Form parts must be inside Form.')
   return state
@@ -238,7 +238,7 @@ export function Form({
 export type FormFieldProps = DistributiveOmit<FieldProps, 'name'> & { name: string }
 /** Name matches the real input's name; Field retains label and error relationships. */
 export function FormField({ name, error, ...props }: FormFieldProps) {
-  const { errors } = requiredForm()
+  const { errors } = useRequiredForm()
   return (
     <Field
       {...props}
@@ -249,7 +249,7 @@ export function FormField({ name, error, ...props }: FormFieldProps) {
 }
 export type FormErrorProps = Omit<AlertProps, 'children' | 'tabIndex'>
 export function FormError(props: FormErrorProps) {
-  const { errors } = requiredForm()
+  const { errors } = useRequiredForm()
   return errors.form ? (
     <Alert
       {...props}

@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useNativeOwner, type CheckedOwner } from '../../react/useNativeOwner.js'

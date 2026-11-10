@@ -3,7 +3,7 @@
 import { createContext, useContext, type ComponentProps } from 'react'
 import { InputRoot, type InputProps } from '../Input/Input.js'
 import { TextareaRoot, type TextareaProps } from '../Textarea/Textarea.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ControlSize } from '../../presentation.js'

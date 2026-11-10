@@ -1,80 +1,53 @@
 # Maintaining Radiant
 
-Radiant development and merge decisions belong to the owner and trusted
-maintainers. Public source does not imply an open contribution process; discuss
-proposed contributions with a maintainer before starting work.
+The owner and maintainers decide what goes into Radiant. Discuss proposed changes with a maintainer before you start work.
 
-Report bugs and accessibility problems through
-[GitHub issues](https://github.com/cognitap/radiant/issues). Include reproduction
-steps and relevant browser, operating-system and assistive-technology versions.
+Report bugs and accessibility problems through [GitHub issues](https://github.com/cognitap/radiant/issues). Include reproduction steps and the browser, operating-system, and assistive-technology versions.
 
-The maintainers' internal planning tool remains Linear.
+Changes to `main` go through pull requests with passing CI, including for administrators. Force pushes and branch deletion are blocked on `main`.
 
-Changes to `main` go through pull requests with passing CI.
-
-Required checks apply to administrators too. Force pushes and deletion of `main`
-are blocked.
-
-Radiant's source, tooling and releases are maintained here independently of
-Cognitap.
-
-Follow [AGENTS.md](AGENTS.md) for component and styling conventions and
-[RELEASE_POLICY.md](RELEASE_POLICY.md) for compatibility and publication rules.
-
-The source is available under [MIT](LICENSE). Experimental npm releases use the
-independent release workflow and verified package archives.
+See [docs/architecture.md](docs/architecture.md) for the component contract, [docs/theming.md](docs/theming.md) for themes, and [RELEASE_POLICY.md](RELEASE_POLICY.md) for compatibility and releases. Manual visual, zoom, and screen-reader checks are in docs/accessibility.md.
 
 ## Development
 
-Use the Node.js version in `.nvmrc`. Any recent pnpm switches itself to the version
-pinned in `package.json`:
+Use the Node.js version in `.nvmrc`. Any recent pnpm switches itself to the version pinned in `package.json`:
 
 ```sh
 nvm install && nvm use
 npm install --global pnpm
 pnpm install --frozen-lockfile
-pnpm exec playwright install chromium
 pnpm storybook
 ```
 
-Storybook runs at [localhost:6006](http://localhost:6006) and needs no Cognitap
-checkout. Choose **Theme** and **Mode** in its toolbar; the selection applies
-across component stories and Docs. Defaults are Radiant and System.
-See the [Storybook guide](docs/storybook.md) for the shared story
-structure and verification workflow.
+Storybook runs at [http://localhost:6006](http://localhost:6006), where the toolbar switches **Theme** and **Mode**. To inspect a story without running its `play` function, add `&embed=true` to the iframe URL.
 
 | Command                | Purpose                                                                                                                   |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm storybook`       | Develop components in Storybook.                                                                                          |
-| `pnpm build`           | Build JavaScript, declarations, and CSS into `dist/library`.                                                              |
-| `pnpm watch`           | Rebuild on change, except `reset.css` (run `pnpm build` first).                                                           |
-| `pnpm build:storybook` | Build static Storybook into `dist/storybook`.                                                                             |
-| `pnpm lint`            | Run Oxlint, including accessibility rules.                                                                                |
-| `pnpm format`          | Format with Oxfmt (`format:check` to check only).                                                                         |
-| `pnpm typecheck`       | Check TypeScript.                                                                                                         |
-| `pnpm test`            | Run style tests and verify the packed, installed package.                                                                 |
-| `pnpm test:package`    | Verify the packed, installed package only.                                                                                |
-| `pnpm test:browser`    | Run every story in every preset, plus native browser scenarios.                                                           |
-| `pnpm check`           | Theme check, format, lint, types, docs policy, build, repo checks, packed package, Storybook, and Radiant light and dark. |
-| `pnpm release:prepare` | Pack and verify a release candidate, then dry-run publishing.                                                             |
+| `pnpm watch`           | Rebuild on change, except `reset.css`. Run `pnpm build` first.                                                            |
+| `pnpm test`            | Build, run `tests/*.test.mjs`, and run `pnpm test:package`.                                                               |
+| `pnpm test:package`    | Pack the tarball, install it in a temporary directory, and run `tests/package/`.                                          |
+| `pnpm test:browser`    | Run every story in every theme and mode with axe, plus `tests/browser/*.test.tsx`. Writes artifacts to `output/browser/`. |
+| `pnpm check:library`   | Check generated theme CSS, formatting, lint, types and docs budgets, then build and run the Node and package tests.       |
+| `pnpm check:storybook` | Build Storybook and run every story in the Radiant theme, light and dark.                                                 |
 
-Package verification installs the archive with npm, so it needs network access.
-A Husky pre-commit hook formats staged files with Oxfmt.
-[CI](.github/workflows/ci.yml) runs `pnpm check` for pull requests and pushes
-to `main`.
-See [verification conventions](docs/testing.md) for focused browser runs,
-failure artifacts, and the evidence required by migration issues.
+CI runs three jobs: `pnpm check:library`, `pnpm check:storybook`, and `pnpm test:browser --project=browser-platform`. `pnpm check` runs the first two.
 
-Modules must stay free of import-time side effects, and client-dependent modules
-need their own `use client` directive. Add `*.stories.tsx` next to each component,
-like `src/components/Button/Button.stories.tsx`. Storybook's Accessibility panel runs axe checks on
-every story, but automated checks cover only part of WCAG, so still test keyboard,
-focus, and screen reader behavior by hand.
+Install the headless Chromium shell once before running browser tests:
 
-### Live development in Cognitap
+```sh
+pnpm exec playwright install --only-shell chromium
+```
 
-With this checkout at `../radiant` and its dependencies installed, `pnpm dev` in
-Cognitap builds and watches it, points both apps at it, and starts this Storybook.
-Cognitap's installed package, manifests, and lockfile stay untouched. See
-[Cognitap's guide](https://github.com/cognitap/cognitap#live-radiant-development)
-for other checkouts and type checking.
+To run a single Vitest project, file, or test name:
+
+```sh
+pnpm test:browser --project=storybook-glass-dark src/components/Checkbox/Checkbox.stories.tsx
+pnpm test:browser --project=browser-platform -t Dialog
+```
+
+Put new tests in the matching suite:
+
+- `src/components/<Family>/<Family>.stories.tsx` renders each story and runs axe across themes and modes.
+- `tests/browser/*.test.tsx` tests interactive behavior, refs, and hydration in Chromium.
+- `tests/*.test.mjs` runs fast Node checks over source files, helpers, SSR output, and architecture rules.
+- `tests/package/package.test.ts` tests the packed package, including exports, compiled CSS, TypeScript resolution, and token contrast.

@@ -1,7 +1,7 @@
 import { headings as headingTag, type HeadingLevel } from '../../internal/headings.js'
 import type { ComponentProps } from 'react'
 import { cva } from 'class-variance-authority'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 

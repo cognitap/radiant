@@ -3,7 +3,7 @@
 import { createContext, useContext, useId } from 'react'
 import type { ComponentProps, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { PartStyle } from '../../presentation.js'

@@ -9,7 +9,7 @@ import {
   type ComponentProps
 } from 'react'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 import { composeAction } from '../../internal/events.js'

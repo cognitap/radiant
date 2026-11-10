@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { InputRoot, inputVariants, type InputProps } from '../Input/Input.js'
 import { useFieldControl } from '../Field/Field.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'

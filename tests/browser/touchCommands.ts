@@ -16,10 +16,11 @@ export async function touchButton(
       type: 'touchStart',
       touchPoints: [{ x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1 }]
     })
-    await context.page.waitForTimeout(80)
-    const pressed = await element.evaluate(
-      node => Number((node as HTMLElement).style.scale || 1) < 1
-    )
+    let pressed = false
+    for (let attempt = 0; attempt < 20 && !pressed; attempt += 1) {
+      await context.page.waitForTimeout(16)
+      pressed = await element.evaluate(node => Number((node as HTMLElement).style.scale || 1) < 1)
+    }
     await cdp.send('Input.dispatchTouchEvent', {
       type: cancel ? 'touchCancel' : 'touchEnd',
       touchPoints: []

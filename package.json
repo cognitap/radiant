@@ -1,6 +1,6 @@
 {
   "name": "@cognitap/radiant",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "description": "React interaction components and presentation primitives",
   "homepage": "https://radiant-docs.pages.dev",
   "bugs": {
@@ -37,8 +37,14 @@
       "types": "./dist/library/index.d.ts",
       "default": "./dist/library/index.js"
     },
-    "./styles.css": "./dist/library/styles.css",
-    "./reset.css": "./dist/library/reset.css",
+    "./styles.css": {
+      "types": "./src/css.d.ts",
+      "default": "./dist/library/styles.css"
+    },
+    "./reset.css": {
+      "types": "./src/css.d.ts",
+      "default": "./dist/library/reset.css"
+    },
     "./tailwind.css": "./src/styles.css",
     "./color": {
       "types": "./dist/library/color/index.d.ts",
@@ -75,7 +81,7 @@
     "storybook": "pnpm theme:generate && storybook dev --host 127.0.0.1 --port 6006 --no-open --disable-telemetry",
     "build": "rimraf dist/library && pnpm build:js && pnpm build:css",
     "build:js": "tsc -p tsconfig.build.json",
-    "build:css": "pnpm theme:generate && tailwindcss -i styles/library.css -o dist/library/styles.css --minify && tailwindcss -i styles/reset.css -o dist/library/reset.css --minify && node scripts/preserve-css-layer-order.mjs",
+    "build:css": "pnpm theme:generate && tailwindcss -i styles/library.css -o dist/library/styles.css --minify && tailwindcss -i styles/reset.css -o dist/library/reset.css --minify && node scripts/preserve-css-layer-order.ts",
     "watch": "pnpm run --parallel '/^watch:/'",
     "watch:js": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "watch:styles": "pnpm theme:generate && tailwindcss -i styles/library.css -o dist/library/styles.css --watch=always",
@@ -86,14 +92,14 @@
     "lint": "oxlint --deny-warnings",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "docs:check": "node scripts/check-docs.mjs",
+    "docs:check": "node scripts/check-docs.ts",
     "check": "pnpm check:library && pnpm check:storybook",
     "check:library": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm build && tsc --noEmit && pnpm docs:check && node --test tests/*.test.mjs && node scripts/pack-and-test.ts",
     "check:storybook": "pnpm build:storybook && pnpm test:browser --project=storybook-radiant-light --project=storybook-radiant-dark",
-    "release:prepare": "node scripts/prepare-release.mjs",
-    "theme:generate": "node scripts/generate-theme-css.mjs",
-    "theme:check": "node scripts/generate-theme-css.mjs --check",
-    "watch:theme": "node scripts/generate-theme-css.mjs --watch",
+    "release:prepare": "node scripts/prepare-release.ts",
+    "theme:generate": "node scripts/generate-theme-css.ts",
+    "theme:check": "node scripts/generate-theme-css.ts --check",
+    "watch:theme": "node scripts/generate-theme-css.ts --watch",
     "test:browser": "pnpm theme:generate && vitest run"
   },
   "dependencies": {
@@ -130,6 +136,7 @@
   },
   "peerDependencies": {
     "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3"
   },
   "peerDependenciesMeta": {

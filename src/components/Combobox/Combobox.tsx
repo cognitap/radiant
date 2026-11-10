@@ -25,7 +25,7 @@ import { validateTags } from '../../internal/tags.js'
 import { useArrayFormBridge } from '../../react/useArrayFormBridge.js'
 import { useField, useFieldControl } from '../Field/Field.js'
 import type { DistributiveOmit, WithoutToggle } from '../../internal/types.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { controlMetrics } from '../shared/controlStyles.js'
 import {

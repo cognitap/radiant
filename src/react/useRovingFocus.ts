@@ -3,6 +3,7 @@
 import {
   createContext,
   useLayoutEffect,
+  useRef,
   type KeyboardEvent,
   type FocusEvent,
   type RefObject
@@ -35,19 +36,36 @@ export function useRovingFocus<Node extends HTMLElement>({
   deferTo,
   includeAriaDisabled = false
 }: Options<Node>) {
+  const latest = useRef({
+    selector,
+    scope,
+    preferred,
+    orientation,
+    loop,
+    active,
+    deferTo,
+    includeAriaDisabled
+  })
+  const appliedTo = useRef<Node | null>(null)
+  const settleRef = useRef<(node: Node) => void>(() => {})
+  const binding = useRef<{ node: Node; cleanup: () => void } | null>(null)
   const ownsFocus = (node: Node) => {
+    const { active, deferTo } = latest.current
     if (!active) return false
     const parent = deferTo ? node.parentElement?.closest(deferTo) : null
     const surface = node.closest('[popover], dialog')
     // React context crosses portals; native focus ownership stops at a new surface.
     return !parent || !!(surface && parent.contains(surface))
   }
-  const items = (node: Node) =>
-    Array.from(node.querySelectorAll<HTMLElement>(selector)).filter(item => {
+  const items = (node: Node) => {
+    const { selector, scope } = latest.current
+    return Array.from(node.querySelectorAll<HTMLElement>(selector)).filter(item => {
       const surface = item.closest('[popover], dialog')
       return item.closest(scope) === node && (!surface || !node.contains(surface))
     })
+  }
   const enabled = (node: Node) => {
+    const { includeAriaDisabled } = latest.current
     const view = node.ownerDocument.defaultView!
     return items(node).filter(
       item =>
@@ -59,6 +77,7 @@ export function useRovingFocus<Node extends HTMLElement>({
     )
   }
   const sync = (node: Node, preferFocus = true) => {
+    const { preferred } = latest.current
     const all = items(node),
       available = enabled(node)
     const focused = node.ownerDocument.activeElement
@@ -79,12 +98,46 @@ export function useRovingFocus<Node extends HTMLElement>({
     }
   }
   useLayoutEffect(() => {
+    latest.current = {
+      selector,
+      scope,
+      preferred,
+      orientation,
+      loop,
+      active,
+      deferTo,
+      includeAriaDisabled
+    }
+    settleRef.current = (node: Node) => {
+      if (!ownsFocus(node)) {
+        if (appliedTo.current !== node) return
+        for (const item of items(node)) if (item.tabIndex !== 0) item.tabIndex = 0
+        appliedTo.current = null
+        return
+      }
+      sync(node)
+      appliedTo.current = node
+    }
+  })
+  useLayoutEffect(() => {
     const node = host.current
-    if (!node || !ownsFocus(node)) return
+    if (node) settleRef.current(node)
+  }, [host, selector, scope, preferred, active, deferTo, includeAriaDisabled])
+  useLayoutEffect(() => {
+    const node = host.current
+    if (!node || binding.current?.node === node) {
+      if (!node && binding.current) {
+        binding.current.cleanup()
+        binding.current = null
+      }
+      return
+    }
+    binding.current?.cleanup()
+    binding.current = null
     const view = node.ownerDocument.defaultView!
-    const reconcile = () => sync(node)
-    reconcile()
+    const reconcile = () => settleRef.current(node)
     const observer = new view.MutationObserver(records => {
+      const selector = latest.current.selector
       if (
         records.some(
           record =>
@@ -119,11 +172,22 @@ export function useRovingFocus<Node extends HTMLElement>({
       })
     const resize = new view.ResizeObserver(reconcile)
     resize.observe(node)
-    return () => {
-      observer.disconnect()
-      resize.disconnect()
+    binding.current = {
+      node,
+      cleanup: () => {
+        observer.disconnect()
+        resize.disconnect()
+      }
     }
+    settleRef.current(node)
   })
+  useLayoutEffect(
+    () => () => {
+      binding.current?.cleanup()
+      binding.current = null
+    },
+    []
+  )
   return {
     items: enabled,
     onFocus(event: FocusEvent<Node>) {
@@ -149,6 +213,7 @@ export function useRovingFocus<Node extends HTMLElement>({
         event.nativeEvent.isComposing
       )
         return
+      const { selector, orientation, loop } = latest.current
       const node = event.currentTarget,
         available = enabled(node),
         current = (event.target as Element).closest(selector),

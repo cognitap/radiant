@@ -1,4 +1,9 @@
 @layer theme, base, components, utilities;
-@import 'tailwindcss/theme.css' layer(theme);
+/* Inline theme values, so a host page's own --spacing cannot resize components. Inlined values emit
+   no rules, so this import takes no layer; Tailwind's editor extension rejects the theme option after one. */
+@import 'tailwindcss/theme.css' theme(inline);
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 @import '../src/styles.css';
+
+/* Code words the scan reads as utilities. No component uses them, and they would style host elements. */
+@source not inline('!hidden !inline !visible blur border collapse container contents filter hidden italic lowercase outline resize ring shadow static table table-caption table-cell table-row transform transition uppercase visible');

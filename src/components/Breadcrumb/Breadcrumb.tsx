@@ -4,7 +4,7 @@ import {
   type ComposedLinkProps,
   type ComposedLinkRenderProps
 } from '../shared/composedLink.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'

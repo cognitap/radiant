@@ -1,6 +1,6 @@
 'use client'
 import { useRef, type ComponentProps } from 'react'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'

@@ -49,7 +49,7 @@ import { requireAccessibleName, type AccessibleName } from '../../internal/acces
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { DistributiveOmit } from '../../internal/types.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { composeAction } from '../../internal/events.js'
 

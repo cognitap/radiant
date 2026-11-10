@@ -52,6 +52,13 @@ test('lost capture releases the same physical spring as Button and forwards the 
   const { host } = await mount(
     <>
       <Button style={{ '--rad-button-press-scale': '.8' }}>Action</Button>
+      <button
+        type="button"
+        data-testid="away"
+        style={{ position: 'fixed', right: 0, bottom: 0 }}
+      >
+        Away
+      </button>
       <MotionLink
         href="#destination"
         variant="solid"
@@ -71,6 +78,9 @@ test('lost capture releases the same physical spring as Button and forwards the 
   for (let i = 0; i < 5; i++) await frame()
   expect(scale(link)).toBeLessThan(0.85)
   expect(getComputedStyle(link).transitionProperty).not.toContain('scale')
+  await act(async () =>
+    userEvent.hover(host.querySelector<HTMLButtonElement>('[data-testid="away"]')!)
+  )
   for (const property of [
     'color',
     'background-color',

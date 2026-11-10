@@ -387,6 +387,40 @@ test('a surrounding composite owns nested ToggleGroup tab stops without changing
   expect(host.querySelector(':scope > button')).toHaveFocus()
 })
 
+function Yielding({ active }: { active: boolean }) {
+  const host = useRef<HTMLDivElement>(null),
+    roving = useRovingFocus({
+      host,
+      selector: 'button',
+      scope: '[data-yield]',
+      orientation: 'horizontal',
+      loop: false,
+      active
+    })
+  return (
+    <div
+      ref={host}
+      role="toolbar"
+      aria-label="Choices"
+      tabIndex={-1}
+      data-yield=""
+      onFocus={roving.onFocus}
+      onBlur={roving.onBlur}
+      onKeyDown={roving.onKeyDown}
+    >
+      <button type="button">One</button>
+      <button type="button">Two</button>
+    </div>
+  )
+}
+test('leaving roving ownership restores the browser tab order', async () => {
+  const { host, root } = await mount(<Yielding active />)
+  const buttons = () => Array.from(host.querySelectorAll('button'))
+  await expect.poll(() => buttons().map(button => button.tabIndex)).toEqual([0, -1])
+  await act(async () => root.render(strict(<Yielding active={false} />)))
+  await expect.poll(() => buttons().map(button => button.tabIndex)).toEqual([0, 0])
+})
+
 test('the segmented indicator follows actual layout through borders, RTL, label resize and caller styling without a motion provider', async () => {
   const cleanup = vi.fn(),
     ref = vi.fn((node: HTMLDivElement | null) => (node ? cleanup : undefined))

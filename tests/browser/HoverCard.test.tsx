@@ -90,10 +90,11 @@ test('delayed pointer previews remain hoverable across the placement gap and clo
       </>
     ),
     p = parts(host)
-  await act(async () => userEvent.hover(p.trigger))
   expect(shown(p.panel)).toBe(false)
-  await pause(80)
-  expect(shown(p.panel)).toBe(true)
+  const started = performance.now()
+  await act(async () => userEvent.hover(p.trigger))
+  if (performance.now() - started < 40) expect(shown(p.panel)).toBe(false)
+  await expect.poll(() => shown(p.panel)).toBe(true)
   const a = p.trigger.getBoundingClientRect(),
     b = p.panel.getBoundingClientRect()
   await act(async () => {

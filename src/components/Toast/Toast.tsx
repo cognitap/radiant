@@ -21,7 +21,7 @@ import {
   type AlertDescriptionProps
 } from '../Alert/Alert.js'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import type { WithoutToggle } from '../../internal/types.js'

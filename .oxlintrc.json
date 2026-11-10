@@ -4,5 +4,8 @@
   "categories": {
     "correctness": "error"
   },
+  "rules": {
+    "react/rules-of-hooks": "error"
+  },
   "ignorePatterns": ["dist/**", "node_modules/**"]
 }

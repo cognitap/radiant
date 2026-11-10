@@ -11,7 +11,7 @@ import {
 } from 'react'
 import type { ChangeEvent, ComponentProps, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from '../../react/useNativeOwner.js'

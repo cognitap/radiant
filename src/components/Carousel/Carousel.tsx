@@ -13,7 +13,7 @@ import {
   type ReactNode
 } from 'react'
 import { Button, type ButtonProps } from '../Button/Button.js'
-import { cn } from '../../cn.js'
+import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
 import type { WithoutToggle } from '../../internal/types.js'
@@ -55,7 +55,7 @@ const Context = createContext<Binding | null>(null)
 export function useCarousel(): CarouselState | null {
   return useContext(Context)
 }
-function binding() {
+function useBinding() {
   const value = useContext(Context)
   if (!value) throw new Error('Carousel parts must be inside Carousel.')
   return value
@@ -309,7 +309,7 @@ export function CarouselViewport({
   onClickCapture,
   ...props
 }: CarouselViewportProps) {
-  const state = binding(),
+  const state = useBinding(),
     host = useRef<HTMLDivElement>(null),
     owned = useComposedRefs(host, state.setViewport),
     composed = useComposedRefs(owned, ref),
@@ -457,7 +457,7 @@ export function CarouselViewport({
 /* oxlint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
 export type CarouselActionProps = WithoutToggle<ButtonProps>
 function Action({ direction, ...props }: CarouselActionProps & { direction: -1 | 1 }) {
-  const state = binding(),
+  const state = useBinding(),
     item = state.items[state.index + direction]
   return (
     <Button
@@ -502,7 +502,7 @@ export function CarouselIndicators({
   className,
   ...props
 }: CarouselIndicatorsProps) {
-  const state = binding()
+  const state = useBinding()
   return (
     <div
       {...props}
@@ -527,7 +527,7 @@ export function CarouselIndicators({
   )
 }
 export function CarouselAutoPlay({ onClick, ...props }: CarouselActionProps) {
-  const state = binding()
+  const state = useBinding()
   return (
     <Button
       {...props}
