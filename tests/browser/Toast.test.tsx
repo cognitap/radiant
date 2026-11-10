@@ -274,6 +274,7 @@ test('hover and focus pause the remaining timeout rather than restarting it', as
 test('a touch press pauses the remaining timeout and a touch hover does not', async () => {
   const { host } = await mount(
     <ToastProvider>
+      <button>Outside</button>
       <ToastViewport
         aria-label="Notifications"
         style={viewportStyle}
@@ -286,17 +287,29 @@ test('a touch press pauses the remaining timeout and a touch hover does not', as
     </ToastProvider>
   )
   const toast = roots(host)[0]
-  const pointer = (target: EventTarget, name: string) =>
-    target.dispatchEvent(
-      new PointerEvent(name, { bubbles: true, pointerType: 'touch', pointerId: 1 })
+  const outside = host.querySelector('button')!
+  const pointer = (name: string) =>
+    toast.dispatchEvent(
+      new PointerEvent(name, {
+        bubbles: true,
+        pointerType: 'touch',
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 1,
+        clientY: 1
+      })
     )
-  await act(async () => pointer(toast, 'pointerenter'))
+  await act(async () => outside.focus())
+  await act(async () => pointer('pointerenter'))
   expect(toast.dataset.paused).toBeUndefined()
-  await act(async () => pointer(toast, 'pointerdown'))
+  await act(async () => pointer('pointerdown'))
   expect(toast.dataset.paused).toBe('')
   await pause(800)
   expect(toast.hidden).toBe(false)
-  await act(async () => pointer(toast.ownerDocument, 'pointerup'))
+  await act(async () => {
+    pointer('pointerup')
+    outside.focus()
+  })
   expect(toast.dataset.paused).toBeUndefined()
   await pause(800)
   expect(toast.hidden).toBe(true)
