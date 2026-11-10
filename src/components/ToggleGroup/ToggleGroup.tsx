@@ -330,6 +330,8 @@ function Indicator({
       attributes: true,
       attributeFilter: ['aria-pressed', 'class', 'style', 'hidden', 'dir']
     })
+    for (let parent = root.parentElement; parent; parent = parent.parentElement)
+      changes.observe(parent, { attributes: true, attributeFilter: ['dir'] })
     observe()
     measure()
     view.addEventListener('resize', schedule)
