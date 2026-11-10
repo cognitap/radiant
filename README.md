@@ -16,7 +16,7 @@ Dialog, Collapsible, Accordion and Card.
 pnpm add --save-exact @cognitap/radiant
 ```
 
-React 19.3+ is a peer dependency. Import the stylesheet once. It needs no
+React 19.3+ and React DOM 19.3+ are peer dependencies. Import the stylesheet once. It needs no
 Tailwind and styles only Radiant components:
 
 ```tsx
