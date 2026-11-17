@@ -13,7 +13,6 @@ import {
   SidebarContent,
   NavLink,
   useAppShell,
-  useSidebar,
   ThemeScope,
   defineTheme
 } from '@cognitap/radiant'
@@ -37,13 +36,14 @@ function sample(props: Record<string, unknown> = {}) {
   )
 }
 test('AppShell SSR keeps native banner/navigation/main landmarks, named real links and one native navigation tree', () => {
-  const html = render(sample({ mainId: 'workspace-main', sidebarId: 'workspace-nav' }))
+  const html = render(sample({ mainId: 'workspace-main' }))
   assert.match(html, /<header[^>]+role="banner"/)
-  assert.match(html, /<nav[^>]+role="navigation"[^>]+id="workspace-nav"/)
+  const sidebar = html.match(/<nav[^>]+role="navigation"[^>]+id="([^"]+)"/)?.[1]
+  assert.ok(sidebar)
   assert.match(html, /<main[^>]+id="workspace-main"[^>]+role="main"[^>]+tabindex="-1"/)
   assert.match(html, /data-slot="link app-shell-skip-link"/)
   assert.match(html, /href="#workspace-main"/)
-  assert.match(html, /aria-controls="workspace-nav"/)
+  assert.ok(html.includes(`aria-controls="${sidebar}"`))
   assert.equal((html.match(/<nav\b/g) || []).length, 1)
   assert.match(html, /data-slot="button sidebar-trigger"/)
   assert.match(html, /data-slot="dialog-content drawer-content"/)
@@ -67,14 +67,14 @@ test('owners and named parts reject contradictory or invalid layouts, and hooks 
     { collapsed: true, defaultCollapsed: false },
     { open: true, defaultOpen: false },
     { collapsed: 'yes' },
-    { mainId: 'invalid id' }
+    { mainId: 'invalid id' },
+    { mainId: '' }
   ])
     assert.throws(() => render(sample(props)), TypeError)
   assert.throws(() => render(h(Sidebar, { label: 'Project' })), /inside AppShell/)
   assert.throws(() => render(h(AppShell, null, h(Sidebar, { label: ' ' }))), /labels/)
   function Outside() {
     assert.equal(useAppShell(), null)
-    assert.equal(useSidebar(), null)
     return null
   }
   render(h(Outside))

@@ -49,6 +49,7 @@ import {
   Link,
   MultiSelect,
   MultiSelectContent,
+  MultiSelectControl,
   MultiSelectInput,
   MultiSelectItem,
   MultiSelectTags,
@@ -516,6 +517,22 @@ hosts.push(
       >
         <MultiSelectTags data-slot={slot} />
         <MultiSelectInput />
+      </MultiSelect>
+    )
+  ],
+  [
+    'MultiSelectControl',
+    'combobox-control multi-select-control',
+    slot => (
+      <MultiSelect
+        aria-label="Cities"
+        items={items}
+        defaultValue={['oslo']}
+      >
+        <MultiSelectControl data-slot={slot}>
+          <MultiSelectTags />
+          <MultiSelectInput />
+        </MultiSelectControl>
       </MultiSelect>
     )
   ]

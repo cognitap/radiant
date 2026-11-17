@@ -41,21 +41,18 @@ export type AppShellProps = Omit<ComponentProps<'div'>, 'style'> &
     onCollapsedChange?: (collapsed: boolean) => void
     onOpenChange?: (open: boolean) => void
     mainId?: string
-    sidebarId?: string
     motion?: 'inherit' | 'off'
   }
 export type AppShellState = {
   collapsed: boolean
   open: boolean
   mobile: boolean
-  collapsedControlled: boolean
-  openControlled: boolean
   mainId: string
-  sidebarId: string
   setCollapsed: (collapsed: boolean) => void
   setOpen: (open: boolean) => void
 }
 type Binding = AppShellState & {
+  sidebarId: string
   root: RefObject<HTMLDivElement | null>
   drawerId: string
   labelId: string
@@ -63,9 +60,6 @@ type Binding = AppShellState & {
 }
 const Context = createContext<Binding | null>(null)
 export function useAppShell(): AppShellState | null {
-  return useContext(Context)
-}
-export function useSidebar(): AppShellState | null {
   return useContext(Context)
 }
 function useBinding() {
@@ -102,7 +96,6 @@ export function AppShell({
   defaultOpen,
   onOpenChange,
   mainId,
-  sidebarId,
   motion = 'inherit',
   ref,
   className,
@@ -125,9 +118,8 @@ export function AppShell({
     })
   if (typeof collapse.value !== 'boolean' || typeof drawer.value !== 'boolean')
     throw new TypeError('AppShell states must be boolean.')
-  for (const id of [mainId, sidebarId])
-    if (id !== undefined && (!id || /\s/.test(id)))
-      throw new TypeError('AppShell relationship IDs must be nonempty and contain no whitespace.')
+  if (mainId !== undefined && (!mainId || /\s/.test(mainId)))
+    throw new TypeError('AppShell mainId must be nonempty and contain no whitespace.')
   const root = useRef<HTMLDivElement>(null),
     host = useComposedRefs(root, ref),
     { ref: layoutRef } = useTransitionHost('layout', host, motion === 'off'),
@@ -186,12 +178,10 @@ export function AppShell({
           collapsed: collapse.value,
           open: drawer.value,
           mobile,
-          collapsedControlled: collapse.controlled,
-          openControlled: drawer.controlled,
           setCollapsed,
           setOpen,
           mainId: mainId ?? `${id}-main`,
-          sidebarId: sidebarId ?? `${id}-sidebar`,
+          sidebarId: `${id}-sidebar`,
           labelId: `${id}-sidebar-label`,
           root,
           motion

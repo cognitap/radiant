@@ -11,6 +11,7 @@ import {
   ComboboxItem,
   ComboboxStatus,
   ComboboxTags,
+  ComboboxControl,
   useCombobox,
   type ComboboxMultipleProps,
   type ComboboxMultipleState,
@@ -22,6 +23,7 @@ import {
   type ComboboxItemProps,
   type ComboboxStatusProps,
   type ComboboxTagsProps,
+  type ComboboxControlProps,
   type ComboboxRenderProps
 } from '../Combobox/Combobox.js'
 import type { DistributiveOmit } from '../../internal/types.js'
@@ -39,6 +41,7 @@ export type MultiSelectContentProps = ComboboxContentProps
 export type MultiSelectItemProps = ComboboxItemProps
 export type MultiSelectStatusProps = ComboboxStatusProps
 export type MultiSelectTagsProps = ComboboxTagsProps
+export type MultiSelectControlProps = ComboboxControlProps
 export type MultiSelectRenderProps = ComboboxRenderProps
 
 export function useMultiSelect(): MultiSelectState | null {
@@ -90,4 +93,9 @@ export function MultiSelectStatus(props: MultiSelectStatusProps) {
 export function MultiSelectTags(props: MultiSelectTagsProps) {
   useMultiSelectContext()
   return <ComboboxTags {...props} />
+}
+/** The field well around the chips, input and buttons. */
+export function MultiSelectControl(props: MultiSelectControlProps) {
+  useMultiSelectContext()
+  return <ComboboxControl {...props} />
 }

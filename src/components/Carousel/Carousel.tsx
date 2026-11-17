@@ -16,11 +16,12 @@ import { Button, type ButtonProps } from '../Button/Button.js'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { requireAccessibleName, type AccessibleName } from '../../internal/accessibleName.js'
-import type { WithoutToggle } from '../../internal/types.js'
+import type { DistributiveOmit, WithoutToggle } from '../../internal/types.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import type { ControlSize } from '../../presentation.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 import { focusRingClass } from '../shared/focusStyles.js'
 
@@ -40,11 +41,11 @@ export type CarouselState = {
   value: string | null
   index: number
   count: number
-  playing: boolean
   setValue: (value: string) => void
-  setPlaying: (playing: boolean) => void
 }
 type Binding = CarouselState & {
+  playing: boolean
+  setPlaying: (playing: boolean) => void
   items: readonly CarouselItem[]
   viewportId: string
   setViewport: (node: HTMLDivElement | null) => void
@@ -53,7 +54,15 @@ type Binding = CarouselState & {
 }
 const Context = createContext<Binding | null>(null)
 export function useCarousel(): CarouselState | null {
-  return useContext(Context)
+  const state = useContext(Context)
+  return (
+    state && {
+      value: state.value,
+      index: state.index,
+      count: state.count,
+      setValue: state.setValue
+    }
+  )
 }
 function useBinding() {
   const value = useContext(Context)
@@ -494,11 +503,13 @@ export function CarouselNext(props: CarouselActionProps) {
 }
 export type CarouselIndicatorsProps = Omit<ComponentProps<'div'>, 'children' | 'style'> & {
   style?: ThemeStyle
+  controlSize?: ControlSize
   indicatorLabel?: (index: number, count: number) => string
   'data-slot'?: string
 }
 export function CarouselIndicators({
   indicatorLabel = (index, count) => `Show slide ${index + 1} of ${count}`,
+  controlSize,
   className,
   ...props
 }: CarouselIndicatorsProps) {
@@ -514,6 +525,7 @@ export function CarouselIndicators({
           key={item.value}
           variant="ghost"
           tone="neutral"
+          controlSize={controlSize}
           aria-label={indicatorLabel(index, state.count)}
           aria-current={state.value === item.value ? 'true' : undefined}
           data-selected={state.value === item.value ? '' : undefined}
@@ -526,7 +538,21 @@ export function CarouselIndicators({
     </div>
   )
 }
-export function CarouselAutoPlay({ onClick, ...props }: CarouselActionProps) {
+export type CarouselAutoPlayProps = DistributiveOmit<
+  CarouselActionProps,
+  'children' | 'aria-label' | 'aria-labelledby'
+> & {
+  playLabel?: string
+  pauseLabel?: string
+}
+export function CarouselAutoPlay({
+  playLabel = 'Play slides',
+  pauseLabel = 'Pause slides',
+  onClick,
+  ...props
+}: CarouselAutoPlayProps) {
+  if (!playLabel.trim() || !pauseLabel.trim())
+    throw new TypeError('CarouselAutoPlay requires nonempty playLabel and pauseLabel.')
   const state = useBinding()
   return (
     <Button
@@ -535,13 +561,15 @@ export function CarouselAutoPlay({ onClick, ...props }: CarouselActionProps) {
       defaultPressed={undefined}
       onPressedChange={undefined}
       aria-pressed={undefined}
+      aria-label={undefined}
+      aria-labelledby={undefined}
       data-slot={joinIds('carousel-auto-play', props['data-slot'])}
       onClick={event => {
         onClick?.(event)
         if (!event.defaultPrevented) state.setPlaying(!state.playing)
       }}
     >
-      {props.children ?? (state.playing ? 'Pause slides' : 'Play slides')}
+      {state.playing ? pauseLabel : playLabel}
     </Button>
   )
 }

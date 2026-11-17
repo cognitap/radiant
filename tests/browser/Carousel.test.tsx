@@ -217,6 +217,7 @@ test('explicit navigation stops playback and reduced motion snaps without smooth
   await aligned(host, 'harbor')
   expect(host.querySelector('[data-slot~="carousel-auto-play"]')?.textContent).toBe('Play slides')
   expect(host.querySelector('section')?.hasAttribute('data-playing')).toBe(false)
+  await commands.emulatePreferences({ reducedMotion: 'no-preference', forcedColors: 'none' })
 })
 test('caller cancellation wins; hooks are absent outside and empty collections stay safe', async () => {
   function Outside() {
@@ -237,4 +238,57 @@ test('caller cancellation wins; hooks are absent outside and empty collections s
   )
   expect(next(host).disabled).toBe(true)
   expect(host.querySelectorAll('[data-slot~="carousel-slide"]').length).toBe(0)
+})
+test('the autoplay action names its next action and the hook exposes selection only', async () => {
+  await commands.emulatePreferences({ reducedMotion: 'no-preference' })
+  function Counter() {
+    const state = useCarousel()
+    return (
+      <button
+        type="button"
+        data-test="counter"
+        data-keys={Object.keys(state ?? {})
+          .sort()
+          .join(' ')}
+        onClick={() => state?.setValue('orchard')}
+      >
+        {state ? `${state.index + 1} / ${state.count}` : ''}
+      </button>
+    )
+  }
+  const { host } = await mount(
+    <Carousel
+      aria-label="Highlights"
+      items={items}
+      autoPlay
+      interval={60000}
+      style={{ width: 320 }}
+    >
+      <CarouselViewport />
+      <Counter />
+      <CarouselIndicators controlSize="small" />
+      <CarouselAutoPlay
+        playLabel="Resume highlights"
+        pauseLabel="Stop highlights"
+      />
+    </Carousel>
+  )
+  const action = host.querySelector<HTMLButtonElement>('[data-slot~="carousel-auto-play"]')!,
+    counter = host.querySelector<HTMLButtonElement>('[data-test="counter"]')!
+  // The pointer can rest where an earlier test clicked; hovering pauses rotation.
+  await act(async () => userEvent.unhover(host.querySelector('section')!))
+  expect(action).toHaveAccessibleName('Stop highlights')
+  expect(action.hasAttribute('aria-pressed')).toBe(false)
+  await vi.waitFor(() =>
+    expect(host.querySelector('section')?.hasAttribute('data-playing')).toBe(true)
+  )
+  await click(action)
+  expect(action).toHaveAccessibleName('Resume highlights')
+  expect(host.querySelector('section')?.hasAttribute('data-playing')).toBe(false)
+  expect(counter.dataset.keys).toBe('count index setValue value')
+  await click(counter)
+  await aligned(host, 'orchard')
+  expect(counter.textContent).toBe('3 / 3')
+  const dots = host.querySelectorAll('[data-slot~="carousel-indicators"] button')
+  expect([...dots].every(dot => dot.getAttribute('data-control-size') === 'small')).toBe(true)
 })

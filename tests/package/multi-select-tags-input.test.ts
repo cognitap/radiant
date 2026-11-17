@@ -7,6 +7,7 @@ const {
   MultiSelect,
   Combobox,
   MultiSelectTags,
+  MultiSelectControl,
   MultiSelectInput,
   TagsInput,
   Tag,
@@ -32,14 +33,22 @@ test('multiple selection submits each original key, preserves real native famili
       h(
         MultiSelect,
         { items, defaultValue: ['', 'a'], name: 'projects' },
-        h(MultiSelectTags, { ref }),
-        h(MultiSelectInput, { ref, size: 20 })
+        h(
+          MultiSelectControl,
+          { ref },
+          h(MultiSelectTags, { ref }),
+          h(MultiSelectInput, { ref, size: 20 })
+        )
       )
     )
   )
   assert.match(html, /for="projects"/)
   assert.match(html, /role="combobox"/)
   assert.match(html, /data-slot="combobox-input multi-select-input"/)
+  assert.match(
+    html,
+    /<div[^>]*data-slot="combobox-control multi-select-control"[^>]*><div[^>]*multi-select-tags/
+  )
   assert.match(html, /data-slot="badge tag multi-select-tag"/)
   assert.match(html, /data-slot="button tag-remove"/)
   assert.match(html, /aria-label="Remove Anywhere"/)

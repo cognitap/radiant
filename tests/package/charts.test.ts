@@ -23,7 +23,7 @@ test('the optional Charts entry renders labeled figures, real Tooltip Buttons an
     assert.match(html, /<figure/)
     assert.match(html, /<figcaption[^>]*>Sessions/)
     assert.match(html, /<table/)
-    assert.match(html, /<caption[^>]*>Sessions data/)
+    assert.match(html, /<caption[^>]*>Sessions</)
     assert.match(html, /aria-label="Round 1, Sessions: 12"/)
     assert.match(html, /chart-point/)
     assert.doesNotMatch(html, /NaN|Infinity/)

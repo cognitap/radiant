@@ -13,6 +13,8 @@ import {
   MultiSelectInput,
   MultiSelectClear,
   MultiSelectTags,
+  MultiSelectControl,
+  MultiSelectTrigger,
   MultiSelectContent,
   MultiSelectPortal,
   TagsInput,
@@ -21,6 +23,8 @@ import {
   Button,
   useCombobox,
   useMultiSelect,
+  ThemeScope,
+  defineTheme,
   type MultiSelectProps
 } from '../../src/index.js'
 import '../../.storybook/styles.css'
@@ -306,6 +310,69 @@ test('single and multiple state hooks stay type/mode scoped while custom composi
   )
   await click(button(host, 'Choose Beta'))
   expect(button(host, 'Remove Beta')).toBeTruthy()
+})
+test('MultiSelect draws one field well around its chips and editor', async () => {
+  const theme = defineTheme({
+    id: 'multi-select-field',
+    name: 'Field well',
+    tokens: {
+      control: {
+        radius: '3px',
+        field: {
+          background: 'rgb(1, 2, 3)',
+          borderColor: 'rgb(4, 5, 6)',
+          shadow: 'rgb(7, 8, 9) 0px 0px 0px 3px',
+          backdropFilter: 'none'
+        }
+      }
+    }
+  })
+  const { host } = await mount(
+    <ThemeScope theme={theme}>
+      <Multiple defaultValue={['a']} />
+      <Field label="Composed">
+        <MultiSelect
+          items={items}
+          defaultValue={['b']}
+        >
+          <MultiSelectControl>
+            <MultiSelectTags />
+            <MultiSelectInput />
+            <MultiSelectClear />
+            <MultiSelectTrigger />
+          </MultiSelectControl>
+          <MultiSelectPortal>
+            <MultiSelectContent />
+          </MultiSelectPortal>
+        </MultiSelect>
+      </Field>
+    </ThemeScope>
+  )
+  const wells = host.querySelectorAll<HTMLElement>('[data-slot~="multi-select-control"]')
+  expect(wells).toHaveLength(2)
+  for (const well of wells) {
+    const style = getComputedStyle(well)
+    expect(style.backgroundColor).toBe('rgb(1, 2, 3)')
+    expect(style.borderTopColor).toBe('rgb(4, 5, 6)')
+    expect(style.boxShadow).toBe('rgb(7, 8, 9) 0px 0px 0px 3px')
+    expect(style.borderTopLeftRadius).toBe('3px')
+    const input = well.querySelector<HTMLInputElement>('[data-slot~="multi-select-input"]')!
+    const tag = well.querySelector<HTMLElement>('[data-slot~="multi-select-tag"]')!
+    expect(input.parentElement).toBe(well)
+    expect(getComputedStyle(input).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(input).borderTopWidth).toBe('0px')
+    expect(getComputedStyle(input).boxShadow).toBe('none')
+    // The chip keeps its own chip role inside the well.
+    expect(getComputedStyle(tag).borderTopLeftRadius).toBe('3px')
+    expect(tag.getBoundingClientRect().top).toBeGreaterThanOrEqual(well.getBoundingClientRect().top)
+  }
+  const [well] = wells
+  await act(async () => {
+    well.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, cancelable: true, isPrimary: true })
+    )
+  })
+  expect(document.activeElement).toBe(well.querySelector('[data-slot~="multi-select-input"]'))
 })
 test('TagsInput commits Enter, desktop/mobile separators and native Backspace/removal', async () => {
   const change = vi.fn(),
@@ -639,7 +706,7 @@ test('live root read-only changes update every multiple selection affordance and
   await render(tree(true))
   expect(host.querySelector('form')!.checkValidity()).toBe(true)
 })
-test('the open popup follows the editor when committed tags add rows above it', async () => {
+test('the open popup follows the field well when committed tags wrap it onto new rows', async () => {
   const { host } = await mount(
     <div style={{ width: 190 }}>
       <Field label="Projects">
@@ -650,17 +717,19 @@ test('the open popup follows the editor when committed tags add rows above it', 
       </Field>
     </div>
   )
-  const input = combo(host),
+  const well = host.querySelector<HTMLElement>('[data-slot~="multi-select-control"]')!,
     popup = host.querySelector<HTMLElement>('[data-slot~="combobox-content"]')!
-  const before = input.getBoundingClientRect().top
+  const before = well.getBoundingClientRect().bottom
   await click(host.querySelector('[data-value="a"]')!)
-  expect(input.getBoundingClientRect().top).toBeGreaterThan(before + 20)
+  await click(host.querySelector('[data-value="b"]')!)
+  expect(well.getBoundingClientRect().bottom).toBeGreaterThan(before + 20)
   await act(async () => {
     await vi.waitFor(() =>
       expect(
-        Math.abs(popup.getBoundingClientRect().top - input.getBoundingClientRect().bottom - 4)
+        Math.abs(popup.getBoundingClientRect().top - well.getBoundingClientRect().bottom - 4)
       ).toBeLessThan(2)
     )
   })
+  expect(popup.getBoundingClientRect().width).toBeCloseTo(well.getBoundingClientRect().width, 0)
   expect(popup.matches(':popover-open')).toBe(true)
 })

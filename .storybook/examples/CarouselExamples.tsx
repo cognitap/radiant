@@ -13,6 +13,7 @@ import {
   CarouselAutoPlay,
   Field,
   Textarea,
+  useCarousel,
   type CarouselProps
 } from '../../src/index.js'
 export type CarouselTaskOptions = Pick<
@@ -39,6 +40,45 @@ const studies = [
     participants: 12
   }
 ]
+export function FeaturedStudies(options: CarouselTaskOptions) {
+  return (
+    <div className="w-full max-w-md">
+      <Carousel
+        {...options}
+        aria-label="Featured studies"
+        items={studies.map(study => ({
+          value: study.value,
+          label: study.title,
+          children: (
+            <Card>
+              <CardHeader>
+                <CardTitle>{study.title}</CardTitle>
+              </CardHeader>
+              <CardContent>{study.description}</CardContent>
+            </Card>
+          )
+        }))}
+      >
+        <CarouselViewport />
+        <div className="flex flex-wrap items-center gap-2">
+          <CarouselPrevious
+            variant="outline"
+            tone="neutral"
+          >
+            Previous
+          </CarouselPrevious>
+          <CarouselNext
+            variant="outline"
+            tone="neutral"
+          >
+            Next
+          </CarouselNext>
+          <CarouselIndicators />
+        </div>
+      </Carousel>
+    </div>
+  )
+}
 function Controls() {
   return (
     <>
@@ -217,6 +257,57 @@ export function CompareResearchRounds(options: CarouselTaskOptions) {
         <Controls />
       </Carousel>
       <output aria-label="Comparison feedback">{feedback}</output>
+    </section>
+  )
+}
+function HighlightCount() {
+  const state = useCarousel()
+  return state ? (
+    <p aria-hidden="true">
+      Highlight {state.index + 1} of {state.count}
+    </p>
+  ) : null
+}
+export function RotateStudyHighlights(options: CarouselTaskOptions) {
+  return (
+    <section
+      className="grid w-full max-w-md gap-4"
+      aria-label="Study highlights application"
+    >
+      <h2>This week's study highlights</h2>
+      <Carousel
+        {...options}
+        aria-label="Study highlights"
+        slideLabel={(index, count) => `Highlight ${index + 1} of ${count}`}
+        items={studies.map(study => ({
+          value: study.value,
+          label: study.title,
+          children: (
+            <Card>
+              <CardHeader>
+                <CardTitle>{study.title}</CardTitle>
+              </CardHeader>
+              <CardContent>{study.participants} participants joined this week.</CardContent>
+            </Card>
+          )
+        }))}
+      >
+        <CarouselViewport />
+        <div className="flex flex-wrap items-center gap-2">
+          <CarouselAutoPlay
+            controlSize="small"
+            variant="outline"
+            tone="neutral"
+            playLabel="Resume highlights"
+            pauseLabel="Stop highlights"
+          />
+          <CarouselIndicators
+            controlSize="small"
+            indicatorLabel={(index, count) => `Show highlight ${index + 1} of ${count}`}
+          />
+          <HighlightCount />
+        </div>
+      </Carousel>
     </section>
   )
 }

@@ -32,7 +32,9 @@ import {
   comboboxInputClass,
   comboboxContentClass,
   comboboxItemClass,
-  comboboxActionClass
+  comboboxActionClass,
+  comboboxWellClass,
+  comboboxWellInputClass
 } from './comboboxStyles.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
@@ -549,14 +551,21 @@ export function ComboboxRoot(
     <ComboboxContext.Provider value={context}>
       {children ?? (
         <>
-          {multiple && <ComboboxTags />}
-          <div
-            className="relative w-full min-w-0"
-            data-slot={componentSlot(multiple, textMode, 'combobox-control')}
-          >
-            <ComboboxInput />
-            <ComboboxTrigger className="absolute inset-y-0 end-0 w-12" />
-          </div>
+          {multiple ? (
+            <ComboboxControl>
+              <ComboboxTags />
+              <ComboboxInput />
+              <ComboboxTrigger />
+            </ComboboxControl>
+          ) : (
+            <div
+              className="relative w-full min-w-0"
+              data-slot={componentSlot(multiple, textMode, 'combobox-control')}
+            >
+              <ComboboxInput />
+              <ComboboxTrigger className="absolute inset-y-0 end-0 w-12" />
+            </div>
+          )}
           <ComboboxPortal>
             <ComboboxContent />
           </ComboboxPortal>
@@ -654,6 +663,7 @@ export function ComboboxInput({
     'aria-invalid': props['aria-invalid'] ?? box.invalid
   })
   const inputRef = useComposedRefs(box.setInput, ref)
+  const inWell = useContext(WellContext)
   return (
     <input
       {...props}
@@ -668,7 +678,7 @@ export function ComboboxInput({
       autoComplete={props.autoComplete ?? 'off'}
       value={box.text}
       className={cn(
-        comboboxInputClass,
+        inWell ? comboboxWellInputClass : comboboxInputClass,
         controlMetrics({ controlSize: box.controlSize }),
         className
       )}
@@ -822,6 +832,7 @@ export function ComboboxTrigger({
   ...props
 }: ComboboxTriggerProps) {
   const box = useComboboxContext()
+  const inWell = useContext(WellContext)
   return (
     <Button
       variant="ghost"
@@ -837,7 +848,10 @@ export function ComboboxTrigger({
       motion="off"
       controlSize={box.controlSize}
       render={resolved => {
-        const native = { ...resolved, className: cn(comboboxActionClass, className) }
+        const native = {
+          ...resolved,
+          className: cn(comboboxActionClass, inWell && wellActionClass, className)
+        }
         return render ? render(native) : <button {...native} />
       }}
       tabIndex={-1}
@@ -893,6 +907,7 @@ export function ComboboxClear({
   ...props
 }: ComboboxClearProps) {
   const box = useComboboxContext()
+  const inWell = useContext(WellContext)
   if (
     box.textInput
       ? box.query === ''
@@ -914,7 +929,10 @@ export function ComboboxClear({
       motion="off"
       controlSize={box.controlSize}
       render={resolved => {
-        const native = { ...resolved, className: cn(comboboxActionClass, className) }
+        const native = {
+          ...resolved,
+          className: cn(comboboxActionClass, inWell && wellActionClass, className)
+        }
         return render ? render(native) : <button {...native} />
       }}
       tabIndex={box.multiple ? 0 : -1}
@@ -1183,13 +1201,17 @@ export function ComboboxTags({
   ...props
 }: ComboboxTagsProps) {
   const box = useComboboxContext()
+  const inWell = useContext(WellContext)
   if (!box.multiple) throw new Error('ComboboxTags requires a multiple Combobox.')
   return (
     <div
       {...props}
       data-slot={joinIds('combobox-tags', 'multi-select-tags', props['data-slot'])}
       className={cn(
-        'flex flex-wrap items-center gap-[var(--rad-multi-select-gap,0.5rem)] mb-[var(--rad-multi-select-gap,0.5rem)] empty:hidden',
+        // Inside the well the chips flow inline with the editor.
+        inWell
+          ? 'contents'
+          : 'flex flex-wrap items-center gap-[var(--rad-multi-select-gap,0.5rem)] mb-[var(--rad-multi-select-gap,0.5rem)] empty:hidden',
         className
       )}
     >
@@ -1205,5 +1227,46 @@ export function ComboboxTags({
         </Tag>
       ))}
     </div>
+  )
+}
+
+const WellContext = createContext(false)
+const wellActionClass = 'self-stretch px-2'
+export type ComboboxControlProps = Omit<ComponentProps<'div'>, 'style'> & {
+  style?: ThemeStyle
+  'data-slot'?: string
+}
+/** The field well around a multiple Combobox's chips, editor and buttons. */
+export function ComboboxControl({ className, onPointerDown, ...props }: ComboboxControlProps) {
+  const box = useComboboxContext()
+  if (!box.multiple) throw new Error('ComboboxControl requires a multiple Combobox.')
+  return (
+    <WellContext.Provider value>
+      <div
+        {...props}
+        data-slot={joinIds('combobox-control', 'multi-select-control', props['data-slot'])}
+        data-control-size={box.controlSize}
+        className={cn(
+          comboboxWellClass,
+          controlMetrics({ controlSize: box.controlSize }),
+          className
+        )}
+        onPointerDown={event => {
+          onPointerDown?.(event)
+          if (
+            event.defaultPrevented ||
+            event.target !== event.currentTarget ||
+            event.button !== 0 ||
+            !event.isPrimary ||
+            !box.input ||
+            box.input.disabled
+          )
+            return
+          // A pointer convenience only: the native input remains the keyboard target.
+          event.preventDefault()
+          box.input.focus()
+        }}
+      />
+    </WellContext.Provider>
   )
 }

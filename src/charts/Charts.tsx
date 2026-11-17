@@ -42,7 +42,6 @@ export type ChartProps = Omit<
   series: readonly ChartSeries[]
   formatValue?: (value: number, series: ChartSeries) => string
   categoryLabel?: string
-  plotLabel?: string
   legendLabel?: string
   tableLabel?: string
   emptyText?: string
@@ -78,7 +77,7 @@ const pointClass = [
   focusRingClass
 ].join(' ')
 export type ChartDataTableProps = Omit<TableProps, 'children'> &
-  Pick<ChartProps, 'data' | 'series' | 'formatValue' | 'categoryLabel'> & { label: string }
+  Pick<ChartProps, 'data' | 'series' | 'formatValue' | 'categoryLabel'> & { label: ReactNode }
 export function ChartDataTable({
   data,
   series,
@@ -130,7 +129,6 @@ function Chart({
   series,
   formatValue = format,
   categoryLabel = 'Category',
-  plotLabel = 'Chart plot',
   legendLabel = 'Chart legend',
   tableLabel = 'View chart data',
   emptyText = 'No chart data to display.',
@@ -181,6 +179,7 @@ function Chart({
     >
       <figcaption
         id={captionId}
+        data-slot="chart-caption"
         className={cn(
           'font-[family-name:var(--rad-typography-roles-ui-title-family,system-ui,sans-serif)] font-[number:var(--rad-typography-roles-ui-title-weight,600)]',
           parts?.caption?.className
@@ -192,6 +191,7 @@ function Chart({
       {description && (
         <div
           id={descriptionId}
+          data-slot="chart-description"
           className={parts?.description?.className}
           style={parts?.description?.style}
         >
@@ -200,11 +200,12 @@ function Chart({
       )}
       {ordered.length ? (
         <ScrollArea
-          aria-label={plotLabel}
+          aria-labelledby={captionId}
           orientation="horizontal"
         >
           <div
             ref={root}
+            data-slot="chart-plot"
             className={cn('relative h-[var(--rad-chart-height,20rem)]', parts?.plot?.className)}
             style={{ minWidth: Math.max(480, data.length * 72), ...parts?.plot?.style }}
           >
@@ -357,6 +358,7 @@ function Chart({
                       <span aria-hidden="true">·</span>
                     </TooltipTrigger>
                     <TooltipContent
+                      data-slot="chart-tooltip"
                       className={parts?.tooltip?.className}
                       style={parts?.tooltip?.style}
                     >
@@ -369,9 +371,10 @@ function Chart({
           </div>
         </ScrollArea>
       ) : (
-        <p>{emptyText}</p>
+        <p data-slot="chart-empty">{emptyText}</p>
       )}
       <ul
+        data-slot="chart-legend"
         className={cn('m-0 flex list-none flex-wrap gap-4 p-0', parts?.legend?.className)}
         style={parts?.legend?.style}
         aria-label={legendLabel}
@@ -403,10 +406,10 @@ function Chart({
           )
         )}
       </ul>
-      <details>
+      <details data-slot="chart-disclosure">
         <summary className="cursor-pointer">{tableLabel}</summary>
         <ChartDataTable
-          label={typeof label === 'string' ? `${label} data` : 'Chart data'}
+          label={label}
           data={data}
           series={series}
           formatValue={formatValue}
