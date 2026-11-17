@@ -16,7 +16,6 @@ import {
   ThemeScope,
   defineTheme,
   useAppShell,
-  useSidebar,
   type AppShellProps
 } from '../../src/index.js'
 import { MotionProvider } from '../../src/motion/react.js'
@@ -370,7 +369,6 @@ test('themes target actual hosts and caller classes replace their default metric
 })
 test('hooks are absent outside roots, consumer cancellation wins, and read-only layout observations emit no state requests', async () => {
   function Outside() {
-    expect(useSidebar()).toBeNull()
     expect(useAppShell()).toBeNull()
     return null
   }
@@ -477,4 +475,52 @@ test('the complete application preview keeps native skip-link fragments in its o
   await pause(70)
   expect(frame.contentDocument).toBe(doc)
   expect(doc.activeElement).toBe(target)
+})
+
+test('useAppShell reads layout state and its requests reach the same owners as the trigger', async () => {
+  const collapses = vi.fn(),
+    seen: Record<string, unknown>[] = []
+  function Collapse() {
+    const shell = useAppShell()!
+    seen.push({ ...shell })
+    return (
+      <button
+        data-collapse
+        onClick={() => shell.setCollapsed(!shell.collapsed)}
+      >
+        {shell.collapsed ? 'Expand' : 'Collapse'}
+      </button>
+    )
+  }
+  const { host } = await mount(
+    <AppShell
+      mainId="workspace"
+      onCollapsedChange={collapses}
+      style={{ height: '400px', width: '600px' }}
+    >
+      <AppShellSkipLink>Skip</AppShellSkipLink>
+      <AppShellHeader>
+        <SidebarTrigger>Toggle navigation</SidebarTrigger>
+        <Collapse />
+      </AppShellHeader>
+      <Sidebar label="Projects">Atlas</Sidebar>
+      <AppShellMain>Content</AppShellMain>
+    </AppShell>
+  )
+  expect(seen.at(-1)).toMatchObject({
+    collapsed: false,
+    open: false,
+    mobile: false,
+    mainId: 'workspace'
+  })
+  expect(seen.at(-1)).not.toHaveProperty('collapsedControlled')
+  expect(main(host).id).toBe('workspace')
+  expect(host.querySelector('[data-slot~="app-shell-skip-link"]')?.getAttribute('href')).toBe(
+    '#workspace'
+  )
+  await click(host.querySelector<HTMLButtonElement>('[data-collapse]')!)
+  expect(collapses).toHaveBeenCalledExactlyOnceWith(true)
+  expect(toggle(host).getAttribute('aria-expanded')).toBe('false')
+  expect(nav(host).getAttribute('data-state')).toBe('closed')
+  expect(seen.at(-1)).toMatchObject({ collapsed: true })
 })

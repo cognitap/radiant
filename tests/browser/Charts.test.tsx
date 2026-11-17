@@ -93,7 +93,7 @@ test('data table disclosure exposes exact values, custom labels and formatted to
   expect(details.open).toBe(false)
   await click(host.querySelector('summary')!)
   expect(details.open).toBe(true)
-  expect(host.querySelector('caption')?.textContent).toBe('Research sessions data')
+  expect(host.querySelector('caption')?.textContent).toBe('Research sessions')
   expect(host.querySelector('tbody')?.textContent).toContain('12 sessions')
   expect(host.querySelector('thead')?.textContent).toContain('Research round')
   expect(points(host)[0]).toHaveAccessibleName('Round 1, Completed: 12 sessions')
@@ -183,6 +183,49 @@ test('empty, missing and all-zero data have readable alternatives without phanto
   )
   expect(zero.host.textContent).toContain('No chart data')
   expect(zero.host.querySelector('tbody')?.textContent).toContain('0')
+})
+test('the caption names the plot and table, and each part carries a chart slot', async () => {
+  const { host } = await mount(
+    <>
+      <Sample
+        parts={{
+          caption: { className: 'caption-part' },
+          description: { className: 'description-part' },
+          plot: { className: 'plot-part' },
+          legend: { className: 'legend-part' },
+          tooltip: { className: 'tooltip-part' }
+        }}
+      />
+      <BarChart
+        label={<span>Study recruitment</span>}
+        data={data}
+        series={series}
+      />
+    </>
+  )
+  const [first, second] = Array.from(host.querySelectorAll('figure'))
+  expect(first!.querySelector('[data-slot~="scroll-area"]')).toHaveAccessibleName(
+    'Research sessions'
+  )
+  expect(second!.querySelector('[data-slot~="scroll-area"]')).toHaveAccessibleName(
+    'Study recruitment'
+  )
+  expect(second!.querySelector('caption')?.textContent).toBe('Study recruitment')
+  for (const [slot, part] of [
+    ['chart-caption', 'caption-part'],
+    ['chart-description', 'description-part'],
+    ['chart-plot', 'plot-part'],
+    ['chart-legend', 'legend-part']
+  ])
+    expect(first!.querySelector(`[data-slot="${slot}"]`)?.classList.contains(part)).toBe(true)
+  const tooltip = first!.querySelector<HTMLElement>('[role="tooltip"]')
+  expect(tooltip?.dataset.slot).toBe('tooltip-content chart-tooltip')
+  expect(tooltip?.classList.contains('tooltip-part')).toBe(true)
+  expect(first!.querySelector('details')?.dataset.slot).toBe('chart-disclosure')
+  const empty = await mount(<Sample data={[]} />)
+  expect(empty.host.querySelector('[data-slot="chart-empty"]')?.textContent).toBe(
+    'No chart data to display.'
+  )
 })
 test('standalone table props and refs reach the actual Table host', async () => {
   const ref = createRef<HTMLTableElement>(),

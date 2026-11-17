@@ -2,10 +2,12 @@ import { createRef } from 'react'
 import {
   Combobox,
   ComboboxTags,
+  ComboboxControl,
   ComboboxInput,
   useCombobox,
   MultiSelect,
   MultiSelectTags,
+  MultiSelectControl,
   MultiSelectInput,
   MultiSelectPortal,
   MultiSelectContent,
@@ -30,8 +32,10 @@ export const multiple = (
     selectedItems={[{ value: 'remote', label: 'Remote' }]}
     onValueChange={values => values.map(value => value.toUpperCase())}
   >
-    <ComboboxTags />
-    <ComboboxInput />
+    <ComboboxControl>
+      <ComboboxTags />
+      <ComboboxInput />
+    </ComboboxControl>
   </Combobox>
 )
 export const facade = (
@@ -41,9 +45,11 @@ export const facade = (
     name="projects"
     readOnly
   >
-    <MultiSelectTags ref={createRef<HTMLDivElement>()} />
-    <MultiSelectInput ref={createRef<HTMLInputElement>()} />
-    <MultiSelectClear render={props => <button {...props} />} />
+    <MultiSelectControl ref={createRef<HTMLDivElement>()}>
+      <MultiSelectTags ref={createRef<HTMLDivElement>()} />
+      <MultiSelectInput ref={createRef<HTMLInputElement>()} />
+      <MultiSelectClear render={props => <button {...props} />} />
+    </MultiSelectControl>
     <MultiSelectPortal>
       <MultiSelectContent ref={createRef<HTMLDivElement>()}>
         <MultiSelectItem value="a">Alpha</MultiSelectItem>

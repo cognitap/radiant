@@ -10,8 +10,10 @@ import {
   SidebarContent,
   type AppShellProps,
   type AppShellRenderProps,
-  type SidebarRenderProps
+  type SidebarRenderProps,
+  useAppShell
 } from '@cognitap/radiant'
+import * as radiant from '@cognitap/radiant'
 export const native = (
   <AppShell
     collapsed={false}
@@ -58,3 +60,22 @@ export const undefinedToggle = (
 )
 // @ts-expect-error Main owns the skip destination; set its ID on AppShell.
 export const mainId = <AppShellMain id="other" />
+export const stableSidebar = (
+  <AppShell
+    mainId="content"
+    // @ts-expect-error SidebarTrigger owns the navigation relationship.
+    sidebarId="navigation"
+  />
+)
+export function ReadShell() {
+  const shell = useAppShell()
+  const state: { collapsed: boolean; open: boolean; mobile: boolean; mainId: string } | null = shell
+  void state
+  // @ts-expect-error The owner already knows whether it controls collapse.
+  void shell?.collapsedControlled
+  // @ts-expect-error The owner already knows whether it controls the drawer.
+  void shell?.openControlled
+  // @ts-expect-error useAppShell is the one hook.
+  void radiant.useSidebar
+  return null
+}

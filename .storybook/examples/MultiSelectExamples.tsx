@@ -4,6 +4,7 @@ import {
   Checkbox,
   Field,
   MultiSelect,
+  MultiSelectControl,
   MultiSelectTags,
   MultiSelectInput,
   MultiSelectTrigger,
@@ -42,16 +43,16 @@ function Editor({
 }: MultiTaskOptions) {
   return (
     <>
-      <MultiSelectTags />
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <MultiSelectControl>
+        <MultiSelectTags />
         <MultiSelectInput
           className={className}
           style={style}
           readOnly={readOnly}
         />
-        <MultiSelectTrigger />
         <MultiSelectClear />
-      </div>
+        <MultiSelectTrigger />
+      </MultiSelectControl>
       <MultiSelectPortal>
         <MultiSelectContent
           motion={motion}

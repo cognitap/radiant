@@ -4,6 +4,15 @@
 
 ## Unreleased
 
+- **Breaking:** AppShell drops `useSidebar`, the `sidebarId` prop and `useAppShell()`'s `collapsedControlled`, `openControlled` and `sidebarId`, which no layout needed. SidebarTrigger still points `aria-controls` at the navigation. Before: `useSidebar()?.collapsedControlled`, `<AppShell sidebarId="nav">`. After: `useAppShell()`, and read control from the `collapsed` or `open` you pass; omit `sidebarId`.
+- **Breaking:** CarouselAutoPlay takes `playLabel` and `pauseLabel` instead of `children`, so its text names the next action in both states. Before: `<CarouselAutoPlay>Pause</CarouselAutoPlay>`. After: `<CarouselAutoPlay playLabel="Play" pauseLabel="Pause" />`. It no longer accepts `aria-label` or `aria-labelledby`, so `playLabel` and `pauseLabel` are the only way to name the control. The defaults stay `Play slides` and `Pause slides`; an empty label throws. `CarouselAutoPlayProps` is exported.
+- **Breaking:** `useCarousel()` no longer returns `playing` or `setPlaying`; CarouselAutoPlay owns playback and the root sets `data-playing` while slides rotate. Before: `useCarousel()?.setPlaying(false)`. After: render `<CarouselAutoPlay />`.
+- CarouselIndicators takes `controlSize`, so its buttons match the Previous and Next buttons beside them.
+- **Breaking:** Charts no longer take `plotLabel`. The scrolling plot is named by the chart's `label`, so charts on one page no longer share the name "Chart plot". Before: `<LineChart label="Sessions" plotLabel="Sessions plot" … />`. After: `<LineChart label="Sessions" … />`.
+- **Breaking:** the chart data table's caption, and so the table's accessible name, is the chart's `label`, without an English "data" suffix or a "Chart data" fallback. Before: `getByRole('table', { name: 'Sessions data' })`. After: `getByRole('table', { name: 'Sessions' })`. `ChartDataTable` accepts any `ReactNode` as `label`.
+- Chart parts set `data-slot` (`chart-caption`, `chart-description`, `chart-plot`, `chart-legend`, `chart-disclosure`, `chart-empty`, `chart-tooltip`).
+- MultiSelect draws one field well around its chips, input and buttons that reads `control.field`, and its list anchors to that well. Compose it with the new `MultiSelectControl` (or `ComboboxControl`); the default composition uses it.
+
 ## 0.0.80
 
 - Form's render callback receives `focusInvalid` with `errors` and `pending`, as `useForm` does, so a review button needs no child component.

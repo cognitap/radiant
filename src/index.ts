@@ -573,11 +573,12 @@ export { Tag } from './components/Tag/Tag.js'
 export type { TagProps } from './components/Tag/Tag.js'
 export { TagsInput } from './components/TagsInput/TagsInput.js'
 export type { TagsInputProps } from './components/TagsInput/TagsInput.js'
-export { ComboboxTags } from './components/Combobox/Combobox.js'
+export { ComboboxTags, ComboboxControl } from './components/Combobox/Combobox.js'
 export type {
   ComboboxMultipleProps,
   ComboboxMultipleState,
-  ComboboxTagsProps
+  ComboboxTagsProps,
+  ComboboxControlProps
 } from './components/Combobox/Combobox.js'
 export { OTPField } from './components/OTPField/OTPField.js'
 export { ButtonGroup } from './components/ButtonGroup/ButtonGroup.js'
@@ -611,6 +612,7 @@ export {
   MultiSelectItem,
   MultiSelectStatus,
   MultiSelectTags,
+  MultiSelectControl,
   useMultiSelect
 } from './components/MultiSelect/MultiSelect.js'
 export type {
@@ -625,6 +627,7 @@ export type {
   MultiSelectItemProps,
   MultiSelectStatusProps,
   MultiSelectTagsProps,
+  MultiSelectControlProps,
   MultiSelectRenderProps
 } from './components/MultiSelect/MultiSelect.js'
 
@@ -769,8 +772,7 @@ export {
   SidebarTrigger,
   SidebarLabel,
   SidebarContent,
-  useAppShell,
-  useSidebar
+  useAppShell
 } from './components/AppShell/AppShell.js'
 export type {
   AppShellProps,
@@ -812,5 +814,6 @@ export {
   type CarouselState,
   type CarouselViewportProps,
   type CarouselActionProps,
+  type CarouselAutoPlayProps,
   type CarouselIndicatorsProps
 } from './components/Carousel/Carousel.js'

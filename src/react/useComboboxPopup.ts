@@ -58,12 +58,14 @@ export function useComboboxPopup(
     }
     const doc = input.ownerDocument
     const win = doc.defaultView!
+    // A multiple Combobox anchors to the field well around its chips, not to the editor alone.
+    const anchorNode = input.closest<HTMLElement>('[data-slot~="multi-select-control"]') ?? input
     const seedWidth = () => {
       const available =
         (win.visualViewport?.width ?? win.innerWidth) - 2 * Math.max(0, collisionPadding)
       node.style.setProperty(
         '--_rad-combobox-width',
-        `${Math.min(input.getBoundingClientRect().width, Math.max(0, available))}px`
+        `${Math.min(anchorNode.getBoundingClientRect().width, Math.max(0, available))}px`
       )
     }
     seedWidth()
@@ -73,7 +75,7 @@ export function useComboboxPopup(
       seedWidth()
       const viewport = win.visualViewport
       const css = win.getComputedStyle(node)
-      const anchor = input.getBoundingClientRect()
+      const anchor = anchorNode.getBoundingClientRect()
       const padding = Math.max(0, collisionPadding)
       const list = node.querySelector<HTMLElement>('[data-slot~="combobox-listbox"]')
       const status = node.querySelector<HTMLElement>('[data-slot~="combobox-status"]')
@@ -139,7 +141,7 @@ export function useComboboxPopup(
     }
     const observer = new win.ResizeObserver(schedule)
     const mutations = new win.MutationObserver(schedule)
-    observer.observe(input)
+    observer.observe(anchorNode)
     observer.observe(node)
     mutations.observe(node, { childList: true, subtree: true, characterData: true })
     doc.addEventListener('pointerdown', outside, true)

@@ -78,16 +78,16 @@ export function Save() {
 
 Each part reads one token role.
 
-| Role      | Token group                                  | Parts                                                                                                       |
-| --------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Action    | `control.action`                             | `Button` and parts built on it, button-styled `Link`, `ButtonGroup`, and the typography of tabs and headers |
-| Field     | `control.field`                              | `Input`, `Textarea`, `NativeSelect`, `InputGroup`, `OTPField` slots, `Select`, `Combobox`, `TagsInput`      |
-| Indicator | `control.indicator`                          | `Checkbox` and `Radio` boxes, `Switch` track, `Switch` and `Slider` thumbs                                  |
-| Track     | `control.track`                              | `ToggleGroup` and `Tabs` lists, `Progress`, `Meter`, `Skeleton`, `Slider` and `ScrollArea` rails, `Menubar` |
-| Selected  | `control.selected`                           | Pressed toggles, `ToggleGroup` indicator, active tab, `NavLink`, current page, chosen option, open menu     |
-| Surface   | `surface`                                    | `Card`, `Alert`, `Collapsible`, `Accordion`, `TableContainer`, `EmptyState`, `CodeBlock`, `Sidebar`         |
-| Overlay   | `surface.overlay*`, `surface.backdropFilter` | `Popover`, `HoverCard`, `Menu`, listboxes, `Tooltip`, `Dialog`, `Drawer`, `NavigationMenu` viewport         |
-| Item      | `control.item`                               | Highlighted rows in menus, listboxes, and `Command`                                                         |
+| Role      | Token group                                  | Parts                                                                                                                 |
+| --------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Action    | `control.action`                             | `Button` and parts built on it, button-styled `Link`, `ButtonGroup`, and the typography of tabs and headers           |
+| Field     | `control.field`                              | `Input`, `Textarea`, `NativeSelect`, `InputGroup`, `OTPField` slots, `Select`, `Combobox`, `MultiSelect`, `TagsInput` |
+| Indicator | `control.indicator`                          | `Checkbox` and `Radio` boxes, `Switch` track, `Switch` and `Slider` thumbs                                            |
+| Track     | `control.track`                              | `ToggleGroup` and `Tabs` lists, `Progress`, `Meter`, `Skeleton`, `Slider` and `ScrollArea` rails, `Menubar`           |
+| Selected  | `control.selected`                           | Pressed toggles, `ToggleGroup` indicator, active tab, `NavLink`, current page, chosen option, open menu               |
+| Surface   | `surface`                                    | `Card`, `Alert`, `Collapsible`, `Accordion`, `TableContainer`, `EmptyState`, `CodeBlock`, `Sidebar`                   |
+| Overlay   | `surface.overlay*`, `surface.backdropFilter` | `Popover`, `HoverCard`, `Menu`, listboxes, `Tooltip`, `Dialog`, `Drawer`, `NavigationMenu` viewport                   |
+| Item      | `control.item`                               | Highlighted rows in menus, listboxes, and `Command`                                                                   |
 
 Shared geometry:
 

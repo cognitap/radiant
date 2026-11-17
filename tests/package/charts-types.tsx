@@ -46,6 +46,11 @@ export const charts = (
       data={data}
       series={series}
     />
+    <ChartDataTable
+      label={<span>Counts</span>}
+      data={data}
+      series={series}
+    />
   </>
 )
 const palette = chartPalette(recommendColorPalette(generateColorWall({ brand: '#7c3aed' })))
@@ -79,4 +84,11 @@ export const differentName: ChartProps = {
   label: 'Sessions',
   data,
   series
+}
+export const plotName: ChartProps = {
+  label: 'Sessions',
+  data,
+  series,
+  // @ts-expect-error The caption names the plot.
+  plotLabel: 'Plot'
 }

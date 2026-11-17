@@ -80,4 +80,39 @@ test('Carousel validates keyed items, owner contradictions, timing and orphan pa
     return null
   }
   renderToStaticMarkup(h(Outside))
+  assert.throws(
+    () =>
+      renderToStaticMarkup(
+        h(Carousel, { 'aria-label': 'Studies', items }, h(CarouselAutoPlay, { playLabel: '' }))
+      ),
+    /CarouselAutoPlay requires nonempty playLabel/
+  )
+})
+test('CarouselAutoPlay states its next action and indicators take a control size', () => {
+  const html = renderToStaticMarkup(
+    h(
+      Carousel,
+      { 'aria-label': 'Studies', items, autoPlay: true },
+      h(CarouselIndicators, { controlSize: 'small' }),
+      h(CarouselAutoPlay, { playLabel: 'Resume studies', pauseLabel: 'Stop studies' })
+    )
+  )
+  assert.match(html, />Stop studies</)
+  assert.doesNotMatch(html, /Resume studies/)
+  assert.equal((html.match(/data-control-size="small"/g) || []).length, 2)
+})
+
+test('CarouselAutoPlay drops a fixed aria-label or aria-labelledby', () => {
+  const fixedName = {
+    playLabel: 'Play slides',
+    'aria-label': 'Autoplay',
+    'aria-labelledby': 'autoplay-name'
+  }
+  const html = renderToStaticMarkup(
+    h(Carousel, { 'aria-label': 'Studies', items }, h(CarouselAutoPlay, fixedName))
+  )
+  const action = html.match(/<button[^>]*carousel-auto-play[^>]*>/)?.[0] ?? ''
+  assert.match(action, /carousel-auto-play/)
+  assert.doesNotMatch(action, /aria-label=|aria-labelledby=/)
+  assert.match(html, /Play slides/)
 })
