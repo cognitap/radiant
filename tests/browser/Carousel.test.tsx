@@ -217,6 +217,7 @@ test('explicit navigation stops playback and reduced motion snaps without smooth
   await aligned(host, 'harbor')
   expect(host.querySelector('[data-slot~="carousel-auto-play"]')?.textContent).toBe('Play slides')
   expect(host.querySelector('section')?.hasAttribute('data-playing')).toBe(false)
+  await commands.emulatePreferences({ reducedMotion: 'no-preference', forcedColors: 'none' })
 })
 test('caller cancellation wins; hooks are absent outside and empty collections stay safe', async () => {
   function Outside() {
@@ -239,6 +240,7 @@ test('caller cancellation wins; hooks are absent outside and empty collections s
   expect(host.querySelectorAll('[data-slot~="carousel-slide"]').length).toBe(0)
 })
 test('the autoplay action names its next action and the hook exposes selection only', async () => {
+  await commands.emulatePreferences({ reducedMotion: 'no-preference' })
   function Counter() {
     const state = useCarousel()
     return (
@@ -273,9 +275,13 @@ test('the autoplay action names its next action and the hook exposes selection o
   )
   const action = host.querySelector<HTMLButtonElement>('[data-slot~="carousel-auto-play"]')!,
     counter = host.querySelector<HTMLButtonElement>('[data-test="counter"]')!
+  // The pointer can rest where an earlier test clicked; hovering pauses rotation.
+  await act(async () => userEvent.unhover(host.querySelector('section')!))
   expect(action).toHaveAccessibleName('Stop highlights')
   expect(action.hasAttribute('aria-pressed')).toBe(false)
-  expect(host.querySelector('section')?.hasAttribute('data-playing')).toBe(true)
+  await vi.waitFor(() =>
+    expect(host.querySelector('section')?.hasAttribute('data-playing')).toBe(true)
+  )
   await click(action)
   expect(action).toHaveAccessibleName('Resume highlights')
   expect(host.querySelector('section')?.hasAttribute('data-playing')).toBe(false)
