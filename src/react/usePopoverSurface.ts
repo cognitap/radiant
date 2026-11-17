@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { positionPopover, type PopoverAlign, type PopoverSide } from '../internal/popover.js'
+import { observeAnchorLocale, syncPopupLocale } from '../internal/popupLocale.js'
 
 // Each document owns its layers; imports never inspect a browser global.
 const layers = new WeakMap<Document, HTMLElement[]>()
@@ -20,6 +21,8 @@ export function usePopoverSurface<Node extends HTMLElement>(
     align: PopoverAlign
     sideOffset: number
     collisionPadding: number
+    lang?: string
+    dir?: string
   }
 ) {
   const latest = useRef({ ...options, open, close })
@@ -67,6 +70,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
     const shouldRestore = () => restoreFocus.current
     const place = () => {
       if (!node.isConnected || !node.matches(':popover-open')) return
+      const rtl = syncPopupLocale(trigger, node, latest.current)
       const { side, align, sideOffset, collisionPadding, anchorPoint } = latest.current
       const viewport = win.visualViewport
       const view = {
@@ -103,7 +107,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
         align,
         offset: sideOffset,
         padding: collisionPadding,
-        rtl: win.getComputedStyle(trigger).direction === 'rtl'
+        rtl
       })
       for (const key of ['left', 'top', 'maxWidth', 'maxHeight'] as const) {
         const property = key === 'maxWidth' ? 'max-width' : key === 'maxHeight' ? 'max-height' : key
@@ -114,6 +118,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
     }
     // A manual native popover keeps controlled owners authoritative and avoids auto-stack reopen loops.
     // The source preserves the browser's logical Tab order without assigning content semantics.
+    syncPopupLocale(trigger, node, latest.current)
     node.showPopover({ source: trigger })
     ancestorClosing.current = false
     reposition.current = place
@@ -186,13 +191,14 @@ export function usePopoverSurface<Node extends HTMLElement>(
     observer.observe(trigger)
     observer.observe(node)
     mutations.observe(node, { childList: true, subtree: true, characterData: true })
+    observeAnchorLocale(mutations, trigger)
     // Inline anchors do not report text-size changes through ResizeObserver.
     mutations.observe(trigger, {
       childList: true,
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['class', 'style', 'dir']
+      attributeFilter: ['class', 'style', 'dir', 'lang']
     })
 
     node.addEventListener('toggle', toggle)
@@ -229,6 +235,15 @@ export function usePopoverSurface<Node extends HTMLElement>(
   }, [nodeRef, trigger, open, generation, restoreFocus])
   useLayoutEffect(
     () => reposition.current(),
-    [side, align, sideOffset, collisionPadding, anchorPoint?.x, anchorPoint?.y]
+    [
+      side,
+      align,
+      sideOffset,
+      collisionPadding,
+      anchorPoint?.x,
+      anchorPoint?.y,
+      options.lang,
+      options.dir
+    ]
   )
 }

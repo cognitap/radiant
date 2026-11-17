@@ -1,20 +1,20 @@
+import type { createLocaleMatcher } from './localeMatcher.js'
+
 export type SelectEntry = { value: string; textValue: string; disabled?: boolean }
 
 /** Native-like text matching, including repeated-letter cycling. */
 export function matchSelectText(
   items: readonly SelectEntry[],
   text: string,
-  current: string | null
+  current: string | null,
+  matcher: ReturnType<typeof createLocaleMatcher>
 ) {
-  const search = text.toLocaleLowerCase()
-  const repeated = search.length > 1 && [...search].every(letter => letter === search[0])
-  const query = repeated ? search[0] : search
+  const query = matcher.typeaheadQuery(text)
+  const matches = matcher.match(query, 'prefix')
   const index = items.findIndex(item => item.value === current)
   const ordered = [...items.slice(index + 1), ...items.slice(0, index + 1)]
-  if (query.length > 1 && index >= 0) ordered.unshift(items[index])
-  return ordered.find(
-    item => !item.disabled && item.textValue.toLocaleLowerCase().startsWith(query)
-  )?.value
+  if (query && !matcher.isSingleKey(query) && index >= 0) ordered.unshift(items[index])
+  return ordered.find(item => !item.disabled && matches(item.textValue))?.value
 }
 
 export function moveSelectFocus(

@@ -37,6 +37,7 @@ import {
   comboboxWellInputClass
 } from './comboboxStyles.js'
 import { useControllableState } from '../../react/useControllableState.js'
+import { useLocaleMatcher } from '../../react/useLocale.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useTransitionHost } from '../../motion/host.js'
 import { useComboboxPopup } from '../../react/useComboboxPopup.js'
@@ -177,8 +178,8 @@ function componentSlot(
 }
 const textOf = (item?: ComboboxOption) =>
   item?.textValue ?? (typeof item?.label === 'string' ? item.label : '')
-const localFilter = (item: ComboboxOption, query: string) =>
-  textOf(item).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
+const completionText = (item: ComboboxOption) =>
+  [item.value, item.textValue, typeof item.label === 'string' ? item.label : ''].join(' ')
 
 /** Editable search and committed selection have independent owners; results never select themselves. */
 export function Combobox(props: ComboboxProps) {
@@ -206,7 +207,7 @@ export function ComboboxRoot(
     selectedItem,
     selectedItems,
     type = 'single',
-    filter = localFilter,
+    filter,
     query,
     defaultQuery,
     onQueryChange,
@@ -228,6 +229,7 @@ export function ComboboxRoot(
   } = props
   const multiple = type === 'multiple'
   const textMode = !!textInput
+  const matcher = useLocaleMatcher()
   if (textMode && multiple) throw new TypeError('Autocomplete is a single text input.')
   const [initialType] = useState(type)
   if (type !== initialType)
@@ -306,8 +308,11 @@ export function ComboboxRoot(
   const selected = selectedEntries[0]
   const unavailable = () => disabled || readOnly || !!input?.matches(':disabled')
   const isOpen = expansion.value && !disabled
-  const visible =
-    loading || errorText ? [] : filter ? items.filter(item => filter(item, search.value)) : items
+  const matches = matcher.match(search.value.trim(), 'substring')
+  const filterItem = filter
+    ? (item: ComboboxOption) => filter(item, search.value)
+    : (item: ComboboxOption) => matches(textMode ? completionText(item) : textOf(item))
+  const visible = loading || errorText ? [] : filter === null ? items : items.filter(filterItem)
   const enabled = visible.filter(item => !item.disabled)
   const activeValue = isOpen && enabled.some(item => item.value === active) ? active : null
   if (active !== null && activeValue === null) highlight(null)
@@ -1001,7 +1006,15 @@ export function ComboboxContent({
     active: motionActive,
     off: motionOff
   } = useTransitionHost('popup', contentRef, motion === 'off')
-  useComboboxPopup(box.content, box.input, box.open, box.dismiss, sideOffset, collisionPadding)
+  useComboboxPopup(
+    box.content,
+    box.input,
+    box.open,
+    box.dismiss,
+    sideOffset,
+    collisionPadding,
+    props
+  )
   return (
     <div
       {...props}

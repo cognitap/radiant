@@ -243,6 +243,8 @@ export function PopoverContentRoot({
       collisionPadding,
       initialFocusRef,
       onFocusOutside,
+      lang: props.lang,
+      dir: props.dir,
       anchorPoint: popover.anchorPoint
     }
   )

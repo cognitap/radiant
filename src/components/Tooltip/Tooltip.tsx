@@ -180,7 +180,9 @@ export function TooltipContent({
     side,
     align,
     sideOffset,
-    collisionPadding
+    collisionPadding,
+    lang: props.lang,
+    dir: props.dir
   })
   return (
     <span

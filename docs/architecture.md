@@ -67,6 +67,14 @@ Custom controls submit through a native form element:
 
 `Form` runs native validation and async submission. The application owns values, rules, messages, and persistence. Reset restores uncontrolled controls, clears form errors, and aborts a pending submission. Widget state such as the active tab is not form state and survives reset.
 
+## Localization
+
+Resolve the locale in the app and use the same value for `<html {...getLocaleAttributes(locale)}>` and `<LocaleProvider locale={locale} scope="document">` inside the body. The helper runs on the server. Document scope renders no wrapper. The default subtree scope renders a `div` that sets native `lang` and script-derived `dir` for an explicit locale.
+
+Omitting the locale inherits the closest provider and the native document attributes. Formatting and matching fall back to `en-US` when there is no configured locale or no supported locale match. A component's explicit `locale` overrides its formatting. Popups carry their anchor's language and direction across a portal, with explicit content attributes taking precedence.
+
+`NumberField` localizes its display and parsing. Select and Menu use locale-aware prefix search. Combobox, Autocomplete and their composed families use locale-aware substring search. Built-in matching ignores case and distinguishes accents. Caller filters and text props still apply.
+
 ## Customization limits
 
 `render(props)` on button and link parts must return a `<button>` or `<a>`, or a component that forwards to one, with all props, the ref, and the children.

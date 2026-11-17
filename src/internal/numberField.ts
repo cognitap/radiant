@@ -1,4 +1,5 @@
 import { addDecimal } from './decimal.js'
+import { supportedLocale } from './locale.js'
 
 /** A bounded editable decimal adapter; Intl supplies display and locale symbols. */
 export type NumberFieldFormatOptions = {
@@ -15,6 +16,7 @@ const clean = (text: string) =>
   text.replace(/[\u061c\u200e\u200f]/g, '').replace(/[\u00a0\u202f]/g, ' ')
 const numeric = new Set(['integer', 'group', 'decimal', 'fraction'])
 export function createNumberAdapter(locale: string, options: NumberFieldFormatOptions = {}) {
+  locale = supportedLocale(Intl.NumberFormat, locale)
   const allowed = new Set([
     'style',
     'currency',
@@ -34,14 +36,20 @@ export function createNumberAdapter(locale: string, options: NumberFieldFormatOp
       !['auto', 'always', 'exceptZero'].includes(options.signDisplay))
   )
     throw new TypeError('NumberField supports standard decimal, percent and currency formatting.')
-  const formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 20, ...options })
+  const formatter = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 20,
+    ...options,
+    localeMatcher: 'lookup'
+  })
   const resolved = formatter.resolvedOptions()
-  const decimal = new Intl.NumberFormat(locale, {
+  const decimal = new Intl.NumberFormat(resolved.locale, {
+    localeMatcher: 'lookup',
     numberingSystem: resolved.numberingSystem,
     maximumFractionDigits: 20
   })
   const digits = new Map<string, string>()
-  const digitFormatter = new Intl.NumberFormat(locale, {
+  const digitFormatter = new Intl.NumberFormat(resolved.locale, {
+    localeMatcher: 'lookup',
     numberingSystem: resolved.numberingSystem,
     useGrouping: false
   })
@@ -76,10 +84,11 @@ export function createNumberAdapter(locale: string, options: NumberFieldFormatOp
       sign: value < 0 ? -1 : 1
     }
   })
-  const plus = new Intl.NumberFormat(locale, {
+  const plus = new Intl.NumberFormat(resolved.locale, {
     maximumFractionDigits: 20,
     ...options,
-    signDisplay: 'always'
+    signDisplay: 'always',
+    localeMatcher: 'lookup'
   }).formatToParts(1)
   affixes.push({
     prefix: clean(
