@@ -10,6 +10,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentProps,
   type RefObject
 } from 'react'
@@ -34,7 +35,6 @@ import type { ControlSize } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
-export type NavigationMenuItemConfig = { value: string; disabled?: boolean }
 export type NavigationMenuProps = Omit<
   ComponentProps<'nav'>,
   'style' | 'role' | 'onChange' | 'defaultValue'
@@ -43,7 +43,6 @@ export type NavigationMenuProps = Omit<
   ValueOwner<string | null> & {
     style?: ThemeStyle
     'data-slot'?: string
-    items: readonly NavigationMenuItemConfig[]
     onValueChange?: (value: string | null) => void
     openDelay?: number
     closeDelay?: number
@@ -59,7 +58,6 @@ export type NavigationMenuState = {
 type Hover = ReturnType<typeof useHoverSurface>
 type Binding = NavigationMenuState & {
   visible: string | null
-  items: readonly NavigationMenuItemConfig[]
   controlSize: ControlSize
   openDelay: number
   closeDelay: number
@@ -71,8 +69,9 @@ type Binding = NavigationMenuState & {
   ids: (value: string) => { trigger: string; panel: string }
   requestFocus: (value: string, last: boolean) => void
   cancel: () => void
-  registerTrigger: (value: string, node: HTMLButtonElement | null) => void
-  registerPanel: (value: string, node: HTMLDivElement | null) => void
+  registerTrigger: (value: string, node: HTMLButtonElement) => () => void
+  registerPanel: (value: string, node: HTMLDivElement) => () => void
+  reportSection: (value: string, enabled: boolean | undefined) => void
   name: { 'aria-label'?: string; 'aria-labelledby'?: string }
 }
 const Context = createContext<Binding | null>(null)
@@ -84,10 +83,23 @@ function useBinding() {
   if (!value) throw new Error('NavigationMenu parts must render inside NavigationMenu.')
   return value
 }
-function item(binding: Binding, value: string) {
-  const entry = binding.items.find(entry => entry.value === value)
-  if (!entry) throw new TypeError('NavigationMenu parts require a registered value.')
-  return entry
+function checkValue(value: unknown) {
+  if (typeof value !== 'string' || !value)
+    throw new TypeError('NavigationMenu values must be nonempty strings.')
+}
+function register<Node>(nodes: Map<string, Node>, kind: string, value: string, node: Node) {
+  if (nodes.has(value) && nodes.get(value) !== node)
+    throw new TypeError(`NavigationMenu ${kind} values must be unique.`)
+  nodes.set(value, node)
+  return () => {
+    if (nodes.get(value) === node) nodes.delete(value)
+  }
+}
+const subscribeNever = () => () => {}
+function inOrder<Node extends HTMLElement>(nodes: Iterable<Node>) {
+  return Array.from(nodes).sort((a, b) =>
+    a.compareDocumentPosition(b) & a.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+  )
 }
 function focusable(panel: HTMLElement) {
   return Array.from(
@@ -101,7 +113,6 @@ function focusable(panel: HTMLElement) {
   )
 }
 export function NavigationMenu({
-  items,
   value,
   defaultValue,
   onValueChange,
@@ -117,17 +128,6 @@ export function NavigationMenu({
   ...props
 }: NavigationMenuProps) {
   requireAccessibleName('NavigationMenu', props)
-  if (
-    !Array.isArray(items) ||
-    items.some(
-      entry =>
-        typeof entry.value !== 'string' ||
-        !entry.value ||
-        (entry.disabled !== undefined && typeof entry.disabled !== 'boolean')
-    ) ||
-    new Set(items.map(entry => entry.value)).size !== items.length
-  )
-    throw new TypeError('NavigationMenu items require unique nonempty values.')
   if (![openDelay, closeDelay].every(n => Number.isFinite(n) && n >= 0))
     throw new TypeError('NavigationMenu delays must be finite and nonnegative.')
   const state = useControllableState<string | null>({
@@ -137,15 +137,16 @@ export function NavigationMenu({
     initialValue: null,
     onChange: onValueChange
   })
-  const valid = (next: string | null) => {
-    if (next !== null && !items.some(entry => entry.value === next))
-      throw new TypeError('NavigationMenu value must identify a registered panel.')
-  }
-  valid(state.value)
+  if (state.value !== null) checkValue(state.value)
+  // Mounted triggers and whether each is enabled. SSR and hydration cannot see them, so they trust the value.
+  const [sections, setSections] = useState<ReadonlyMap<string, boolean>>(() => new Map())
+  const client = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  )
   const shown =
-    !disabled && state.value !== null && !items.find(entry => entry.value === state.value)?.disabled
-      ? state.value
-      : null
+    disabled || state.value === null || (client && !sections.get(state.value)) ? null : state.value
   const root = useRef<HTMLElement>(null),
     viewport = useRef<HTMLDivElement>(null),
     triggers = useRef(new Map<string, HTMLButtonElement>()),
@@ -159,20 +160,33 @@ export function NavigationMenu({
   useLayoutEffect(() => {
     latest.current = shown
   })
-  const registerTrigger = useCallback((value: string, node: HTMLButtonElement | null) => {
-    if (node) triggers.current.set(value, node)
-    else triggers.current.delete(value)
-  }, [])
-  const registerPanel = useCallback((value: string, node: HTMLDivElement | null) => {
-    if (node) panels.current.set(value, node)
-    else panels.current.delete(value)
-  }, [])
+  const registerTrigger = useCallback(
+    (value: string, node: HTMLButtonElement) => register(triggers.current, 'trigger', value, node),
+    []
+  )
+  const registerPanel = useCallback(
+    (value: string, node: HTMLDivElement) => register(panels.current, 'content', value, node),
+    []
+  )
+  const reportSection = useCallback(
+    (value: string, enabled: boolean | undefined) =>
+      setSections(previous => {
+        if (previous && previous.get(value) === enabled) return previous
+        const next = new Map(previous)
+        if (enabled === undefined) next.delete(value)
+        else next.set(value, enabled)
+        return next
+      }),
+    []
+  )
   const host = useComposedRefs(root, ref)
   const cancel = () => hover.current.forEach(binding => binding.cancel())
+  // Requests open only a mounted, enabled trigger's panel.
   const setValue = (next: string | null) => {
-    valid(next)
+    if (next !== null) checkValue(next)
     cancel()
-    if (disabled || (next !== null && items.find(entry => entry.value === next)?.disabled)) return
+    const opener = next === null ? undefined : triggers.current.get(next)
+    if (disabled || (next !== null && (!opener || opener.disabled))) return
     state.request(next)
   }
   const requestFocus = (next: string, last: boolean) => {
@@ -231,7 +245,6 @@ export function NavigationMenu({
         controlled: state.controlled,
         disabled,
         setValue,
-        items,
         controlSize,
         openDelay,
         closeDelay,
@@ -244,10 +257,11 @@ export function NavigationMenu({
         requestFocus,
         registerTrigger,
         registerPanel,
+        reportSection,
         name: { 'aria-label': props['aria-label'], 'aria-labelledby': props['aria-labelledby'] },
         ids: next => ({
-          trigger: `${id}-trigger-${items.findIndex(entry => entry.value === next)}`,
-          panel: `${id}-panel-${items.findIndex(entry => entry.value === next)}`
+          trigger: `${id}-trigger-${encodeURIComponent(next)}`,
+          panel: `${id}-panel-${encodeURIComponent(next)}`
         })
       }}
     >
@@ -353,20 +367,29 @@ export function NavigationMenuTrigger({
   tone = 'neutral',
   ...props
 }: NavigationMenuTriggerProps) {
+  checkValue(value)
   const binding = useBinding(),
-    entry = item(binding, value),
-    registerTrigger = binding.registerTrigger,
+    { registerTrigger, reportSection } = binding,
     [node, setNode] = useState<HTMLButtonElement | null>(null),
     register = useCallback(
       (element: HTMLButtonElement | null) => {
+        if (!element) return
         setNode(element)
-        registerTrigger(value, element)
+        const unregister = registerTrigger(value, element)
+        return () => {
+          setNode(null)
+          unregister()
+        }
       },
       [registerTrigger, value, setNode]
     ),
     host = useComposedRefs(register, ref),
-    open = binding.visible === value,
-    blocked = binding.disabled || entry.disabled || disabled || props.pending
+    open = binding.visible === value && !disabled,
+    blocked = binding.disabled || disabled || props.pending
+  useLayoutEffect(() => {
+    reportSection(value, !disabled)
+    return () => reportSection(value, undefined)
+  }, [reportSection, value, disabled])
   const hover = useHoverSurface({
     trigger: node,
     content: binding.viewport,
@@ -390,7 +413,7 @@ export function NavigationMenuTrigger({
     <Button
       {...props}
       ref={host}
-      disabled={binding.disabled || entry.disabled || disabled}
+      disabled={binding.disabled || disabled}
       controlSize={controlSize ?? binding.controlSize}
       variant={variant}
       tone={tone}
@@ -432,12 +455,9 @@ export function NavigationMenuTrigger({
         }
         const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End']
         if (!keys.includes(event.key)) return
-        const nodes = binding.items
-          .map(entry => binding.triggers.current.get(entry.value))
-          .filter(
-            (button): button is HTMLButtonElement =>
-              !!button && !button.disabled && button.getAttribute('aria-busy') !== 'true'
-          )
+        const nodes = inOrder(binding.triggers.current.values()).filter(
+          button => !button.disabled && button.getAttribute('aria-busy') !== 'true'
+        )
         const current = nodes.indexOf(event.currentTarget)
         if (current < 0) return
         const rtl = node?.ownerDocument.defaultView?.getComputedStyle(node).direction === 'rtl',
@@ -494,13 +514,11 @@ export function NavigationMenuContent({
   className,
   ...props
 }: NavigationMenuContentProps) {
+  checkValue(value)
   const binding = useBinding()
   const registerPanel = binding.registerPanel
-  item(binding, value)
   const register = useCallback(
-      (node: HTMLDivElement | null) => {
-        registerPanel(value, node)
-      },
+      (node: HTMLDivElement | null) => (node ? registerPanel(value, node) : undefined),
       [registerPanel, value]
     ),
     host = useComposedRefs(register, ref),

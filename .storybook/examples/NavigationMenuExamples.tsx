@@ -20,7 +20,7 @@ export type NavigationMenuTaskOptions = Pick<
 > &
   Pick<NavigationMenuViewportProps, 'motion' | 'sideOffset'> & { instanceLabel?: string }
 type Page = { key: string; title: string; body: string; detail: string }
-type Section = { key: string; title: string; pages: Page[] }
+type Section = { key: string; title: string; pages: Page[]; unavailable?: boolean }
 const library: Section[] = [
   {
     key: 'studies',
@@ -111,6 +111,19 @@ const help: Section[] = [
         title: 'Recording and privacy',
         body: 'Use only recordings covered by consent. Restrict access to the study team and follow the project retention schedule.',
         detail: 'Review before recording'
+      }
+    ]
+  },
+  {
+    key: 'workshops',
+    title: 'Workshops',
+    unavailable: true,
+    pages: [
+      {
+        key: 'synthesis',
+        title: 'Synthesis workshop',
+        body: 'Practice grouping observations into findings with a facilitator.',
+        detail: 'Registration opens soon'
       }
     ]
   }
@@ -218,14 +231,18 @@ function SiteNavigator({
       <NavigationMenu
         {...rootOptions}
         aria-label={instanceLabel ?? label}
-        items={sections.map(section => ({ value: section.key }))}
         value={open}
         onValueChange={request}
       >
         <NavigationMenuList>
           {sections.map(section => (
             <NavigationMenuItem key={section.key}>
-              <NavigationMenuTrigger value={section.key}>{section.title}</NavigationMenuTrigger>
+              <NavigationMenuTrigger
+                value={section.key}
+                disabled={section.unavailable}
+              >
+                {section.title}
+              </NavigationMenuTrigger>
             </NavigationMenuItem>
           ))}
           <NavigationMenuItem>

@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+- Form's render callback receives `focusInvalid` with `errors` and `pending`, as `useForm` does, so a review button needs no child component.
+- **Breaking:** `useResizable()` no longer returns `controlled` or `orientation`, which no layout control needed. Before: `useResizable()?.orientation`. After: read the `orientation` you pass to `Resizable`.
+- ResizableHandle sets `data-disabled` when the group is disabled or the handle has no room to move, beside `aria-disabled`.
+- **Breaking:** NavigationMenu no longer takes `items`, and `NavigationMenuItemConfig` is removed. Triggers and contents register their own `value`, like Tabs, and a section is disabled on its trigger. Before: `<NavigationMenu items={[{ value: 'learn' }, { value: 'docs', disabled: true }]}>` … `<NavigationMenuTrigger value="docs">`. After: `<NavigationMenu>` … `<NavigationMenuTrigger value="docs" disabled>`. A `value` or request that names no mounted, enabled trigger leaves the menu closed instead of throwing, duplicate trigger or content values throw once mounted, and trigger and panel IDs end in the value instead of its index.
+
 ## 0.0.79
 
 - A segmented ToggleGroup indicator follows an ancestor `dir` change.

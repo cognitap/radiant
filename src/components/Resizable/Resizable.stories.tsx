@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import {
+  SplitPanels,
   ReviewProjectFiles,
   EditInterviewNotes,
   RestoreWorkspaceLayout,
@@ -8,7 +9,7 @@ import {
 } from '../../../.storybook/examples/ResizableExamples.js'
 const meta = {
   title: 'Components/Resizable',
-  component: ReviewProjectFiles,
+  component: SplitPanels,
   parameters: { layout: 'padded' },
   args: { orientation: 'horizontal', disabled: false, dir: 'ltr', step: 1, largeStep: 10 },
   argTypes: {
@@ -22,12 +23,22 @@ const meta = {
     handleClassName: { control: 'text' },
     handleStyle: { control: 'object' }
   },
-  render: args => <ReviewProjectFiles {...args} />
+  render: args => <SplitPanels {...args} />
 } satisfies Meta<ResizableTaskOptions>
 export default meta
 type Story = StoryObj<typeof meta>
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const handle = within(canvasElement).getByRole('separator', { name: 'Start panel' })
+    await userEvent.click(handle)
+    await userEvent.keyboard('{Shift>}{ArrowRight}{/Shift}')
+    await expect(handle).toHaveAttribute('aria-valuenow', '60')
+    await userEvent.keyboard('{Home}')
+    await expect(handle).toHaveAttribute('aria-valuenow', '20')
+  }
+}
 export const ReviewingProjectFiles: Story = {
+  render: args => <ReviewProjectFiles {...args} />,
   play: async ({ canvasElement }) => {
     const c = within(canvasElement),
       handle = c.getByRole('separator', { name: 'Project files' })
@@ -56,6 +67,10 @@ export const EditingInterviewNotes: Story = {
       c.getByRole('textbox', { name: 'Interview notes' }),
       'The participant requested larger text.'
     )
+    await userEvent.click(c.getByRole('button', { name: 'Even split' }))
+    await expect(handle).toHaveAttribute('aria-valuenow', '50')
+    await userEvent.click(c.getByRole('button', { name: 'Reset split' }))
+    await expect(handle).toHaveAttribute('aria-valuenow', '55')
     await userEvent.click(c.getByRole('button', { name: 'Prepare note snapshot' }))
     await expect(c.getByRole('group', { name: 'Note snapshot JSON' })).toHaveTextContent(
       '"wordCount": 5'

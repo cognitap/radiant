@@ -366,3 +366,33 @@ test('compound controls report native validation on their own FormField', async 
   expect(submit).not.toHaveBeenCalled()
   expect(new FormData(host.querySelector('form')!).getAll('limit')).toEqual(['50'])
 })
+test('the render callback receives focusInvalid with the errors and pending state', async () => {
+  const { host } = await mount(
+    <Form
+      aria-label="Draft"
+      defaultErrors={{ fields: { question: 'Write a question.' } }}
+    >
+      {({ errors, pending, focusInvalid }) => (
+        <>
+          <FormField
+            name="title"
+            label="Title"
+          >
+            <Input name="title" />
+          </FormField>
+          <FormField
+            name="question"
+            label="Question"
+          >
+            <Input name="question" />
+          </FormField>
+          <output>{`${Object.keys(errors.fields ?? {}).join()} ${pending}`}</output>
+          <Button onClick={focusInvalid}>Review</Button>
+        </>
+      )}
+    </Form>
+  )
+  expect(host.querySelector('output')!.textContent).toBe('question false')
+  await click(host.querySelector<HTMLButtonElement>('button')!)
+  expect(document.activeElement).toBe(input(host, 'question'))
+})

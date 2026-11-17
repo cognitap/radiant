@@ -9,11 +9,9 @@ import {
   type NavigationMenuRenderProps,
   type NavigationMenuLinkRenderProps
 } from '@cognitap/radiant'
-const items = [{ value: 'learn' }]
 export const native = (
   <NavigationMenu
     aria-label="Project"
-    items={items}
     defaultValue={null}
     ref={createRef<HTMLElement>()}
   >
@@ -42,12 +40,18 @@ export const native = (
 // @ts-expect-error Navigation has one value owner.
 export const mixed: NavigationMenuProps = {
   'aria-label': 'Project',
-  items,
   value: 'learn',
   defaultValue: 'learn'
 }
 // @ts-expect-error A navigation landmark must be named.
-export const unnamed = <NavigationMenu items={items} />
+export const unnamed = <NavigationMenu />
+export const registry = (
+  <NavigationMenu
+    aria-label="Project"
+    // @ts-expect-error Triggers and contents register their own values.
+    items={[{ value: 'learn' }]}
+  />
+)
 export const pressed = (
   <NavigationMenuTrigger
     value="learn"
