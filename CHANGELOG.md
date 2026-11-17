@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.80
+
 - Form's render callback receives `focusInvalid` with `errors` and `pending`, as `useForm` does, so a review button needs no child component.
 - **Breaking:** `useResizable()` no longer returns `controlled` or `orientation`, which no layout control needed. Before: `useResizable()?.orientation`. After: read the `orientation` you pass to `Resizable`.
 - ResizableHandle sets `data-disabled` when the group is disabled or the handle has no room to move, beside `aria-disabled`.
