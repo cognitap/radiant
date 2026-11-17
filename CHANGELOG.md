@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.81
+
 - **Breaking:** AppShell drops `useSidebar`, the `sidebarId` prop and `useAppShell()`'s `collapsedControlled`, `openControlled` and `sidebarId`, which no layout needed. SidebarTrigger still points `aria-controls` at the navigation. Before: `useSidebar()?.collapsedControlled`, `<AppShell sidebarId="nav">`. After: `useAppShell()`, and read control from the `collapsed` or `open` you pass; omit `sidebarId`.
 - **Breaking:** CarouselAutoPlay takes `playLabel` and `pauseLabel` instead of `children`, so its text names the next action in both states. Before: `<CarouselAutoPlay>Pause</CarouselAutoPlay>`. After: `<CarouselAutoPlay playLabel="Play" pauseLabel="Pause" />`. It no longer accepts `aria-label` or `aria-labelledby`, so `playLabel` and `pauseLabel` are the only way to name the control. The defaults stay `Play slides` and `Pause slides`; an empty label throws. `CarouselAutoPlayProps` is exported.
 - **Breaking:** `useCarousel()` no longer returns `playing` or `setPlaying`; CarouselAutoPlay owns playback and the root sets `data-playing` while slides rotate. Before: `useCarousel()?.setPlaying(false)`. After: render `<CarouselAutoPlay />`.
