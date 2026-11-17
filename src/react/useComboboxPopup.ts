@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { positionSelect } from '../internal/select.js'
+import { observeAnchorLocale, syncPopupLocale } from '../internal/popupLocale.js'
 
 /** Local top-layer popup: preserve theme/modal ancestry and place before its first paint. */
 export function useComboboxPopup(
@@ -10,13 +11,14 @@ export function useComboboxPopup(
   open: boolean,
   dismiss: () => void,
   sideOffset: number,
-  collisionPadding: number
+  collisionPadding: number,
+  { lang, dir }: { lang?: string; dir?: string }
 ) {
-  const latest = useRef({ dismiss, open })
+  const latest = useRef({ dismiss, open, lang, dir })
   const reposition = useRef<() => void>(() => {})
   const [generation, setGeneration] = useState(0)
   useLayoutEffect(() => {
-    latest.current = { dismiss, open }
+    latest.current = { dismiss, open, lang, dir }
   })
   // A manual popup stays in the top layer after an ancestor dialog or popover closes.
   useLayoutEffect(() => {
@@ -69,9 +71,11 @@ export function useComboboxPopup(
       )
     }
     seedWidth()
+    syncPopupLocale(input, node, latest.current)
     node.showPopover()
     const place = () => {
       if (!node.isConnected || !node.matches(':popover-open')) return
+      const rtl = syncPopupLocale(input, node, latest.current)
       seedWidth()
       const viewport = win.visualViewport
       const css = win.getComputedStyle(node)
@@ -107,7 +111,7 @@ export function useComboboxPopup(
         padding: Math.max(0, collisionPadding),
         offset: sideOffset,
         aligned: false,
-        rtl: win.getComputedStyle(input).direction === 'rtl'
+        rtl
       })
       for (const [key, value] of Object.entries({
         top: next.top,
@@ -144,6 +148,7 @@ export function useComboboxPopup(
     observer.observe(anchorNode)
     observer.observe(node)
     mutations.observe(node, { childList: true, subtree: true, characterData: true })
+    observeAnchorLocale(mutations, input)
     doc.addEventListener('pointerdown', outside, true)
     doc.addEventListener('focusin', outside)
     doc.addEventListener('scroll', schedule, true)

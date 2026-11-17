@@ -46,19 +46,8 @@ export type AutocompletePortalProps = ComponentProps<typeof ComboboxPortal>
 export type AutocompleteContentProps = ComboboxContentProps
 export type AutocompleteItemProps = ComboboxItemProps
 export type AutocompleteStatusProps = ComboboxStatusProps
-const completionFilter = (item: AutocompleteOption, query: string) =>
-  [item.value, item.textValue, typeof item.label === 'string' ? item.label : '']
-    .join(' ')
-    .toLocaleLowerCase()
-    .includes(query.trim().toLocaleLowerCase())
 /** Suggestions enhance a native text value; they never constrain it to a selection key. */
-export function Autocomplete({
-  value,
-  defaultValue,
-  onValueChange,
-  filter = completionFilter,
-  ...props
-}: AutocompleteProps) {
+export function Autocomplete({ value, defaultValue, onValueChange, ...props }: AutocompleteProps) {
   const text = useControllableState({
     name: 'Autocomplete',
     value,
@@ -83,7 +72,6 @@ export function Autocomplete({
       defaultQuery={undefined}
       onQueryChange={text.request}
       onValueChange={undefined}
-      filter={filter}
       textInput={{ reset: text.reset }}
       command={undefined}
     />

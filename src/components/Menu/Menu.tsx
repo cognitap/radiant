@@ -40,6 +40,7 @@ import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
 import { matchSelectText } from '../../internal/select.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
+import { useLocaleMatcher } from '../../react/useLocale.js'
 
 export type MenuProps = PopoverProps
 export type MenuState = PopoverState
@@ -259,6 +260,7 @@ export function MenuContentRoot({
   ...props
 }: MenuContentProps & { onFocusOutside?: () => void }) {
   const menu = useMenuContext()
+  const matcher = useLocaleMatcher()
   const nested = !!menu.parent || menu.family === 'menubar'
   const triggerId = menu.triggerId
   const capture = useCallback(
@@ -294,6 +296,9 @@ export function MenuContentRoot({
     const options = items(node)
     focusItem(node, edge === 'last' ? options.at(-1) : options[0])
   }, [menu.open, menu.content, menu.intent])
+  useLayoutEffect(() => {
+    search.current = { text: '', time: 0 }
+  }, [matcher])
   return (
     <PopoverContentRoot
       {...props}
@@ -335,7 +340,7 @@ export function MenuContentRoot({
         else if (event.key === 'ArrowDown') next = options[(index + 1) % options.length]
         else if (event.key === 'ArrowUp')
           next = options[(index - 1 + options.length) % options.length]
-        else if (event.key.length === 1 && event.key !== ' ') {
+        else if (matcher.isSingleKey(event.key) && event.key !== ' ') {
           const now = node.ownerDocument.defaultView!.performance.now()
           search.current.text =
             (now - search.current.time > 700 ? '' : search.current.text) + event.key
@@ -346,7 +351,8 @@ export function MenuContentRoot({
               textValue: item.dataset.textValue ?? item.textContent ?? ''
             })),
             search.current.text,
-            String(index)
+            String(index),
+            matcher
           )
           if (match !== undefined) next = options[Number(match)]
         } else return

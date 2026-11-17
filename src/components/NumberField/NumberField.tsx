@@ -22,6 +22,7 @@ import {
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
+import { useLocale } from '../../react/useLocale.js'
 export type { NumberFieldFormatOptions } from '../../internal/numberField.js'
 
 export type NumberFieldProps = DistributiveOmit<
@@ -62,7 +63,7 @@ export function NumberField({
   max,
   step = 1,
   largeStep = step * 10,
-  locale = 'en-US',
+  locale: localeProp,
   formatOptions,
   incrementLabel = 'Increase value',
   decrementLabel = 'Decrease value',
@@ -109,6 +110,7 @@ export function NumberField({
   const control = useFieldControl(props),
     input = useRef<HTMLInputElement>(null),
     composed = useComposedRefs(input, ref)
+  const locale = useLocale(localeProp)
   const adapter = useMemo(() => createNumberAdapter(locale, formatOptions), [locale, formatOptions])
   const [draft, setDraft] = useState<{ value: number | null; text: string; key: string } | null>(
     null

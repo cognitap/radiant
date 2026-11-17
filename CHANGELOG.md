@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- LocaleProvider supplies app and subtree locales for number editing and search. Use getLocaleAttributes in the root layout to set native language and direction before hydration.
+
 ## 0.0.81
 
 - **Breaking:** AppShell drops `useSidebar`, the `sidebarId` prop and `useAppShell()`'s `collapsedControlled`, `openControlled` and `sidebarId`, which no layout needed. SidebarTrigger still points `aria-controls` at the navigation. Before: `useSidebar()?.collapsedControlled`, `<AppShell sidebarId="nav">`. After: `useAppShell()`, and read control from the `collapsed` or `open` you pass; omit `sidebarId`.

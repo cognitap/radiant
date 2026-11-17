@@ -20,8 +20,10 @@ import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { controlMetrics, itemGroupLabelClass } from '../shared/controlStyles.js'
 import { matchSelectText, moveSelectFocus, positionSelect } from '../../internal/select.js'
+import { observeAnchorLocale, syncPopupLocale } from '../../internal/popupLocale.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useControllableState } from '../../react/useControllableState.js'
+import { useLocaleMatcher } from '../../react/useLocale.js'
 import { useTransitionHost } from '../../motion/host.js'
 import type { StateOwner, ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize } from '../../presentation.js'
@@ -75,6 +77,7 @@ type Context = SelectState & {
   commit(value: string): void
   close(restore?: boolean): void
   search(key: string, current: string | null): string | undefined
+  isSearchKey(key: string): boolean
   restoreFocus: RefObject<boolean>
 }
 const SelectContext = createContext<Context | null>(null)
@@ -108,6 +111,7 @@ export function Select({
   children
 }: SelectProps) {
   const ids = useId()
+  const matcher = useLocaleMatcher()
   const field = useField()
   const disabled = !!(disabledProp || field?.disabled)
   const required = !!(requiredProp || field?.required)
@@ -140,7 +144,7 @@ export function Select({
   const restoreFocus = useRef(true)
   const pendingUser = useRef<string | null>(null)
   const dispatching = useRef(false)
-  const searchBuffer = useRef({ text: '', at: 0 })
+  const searchBuffer = useRef({ text: '', at: 0, matcher })
   const selected = items.find(item => item.value === selection.value)
   const nativeValue = selected?.value ?? ''
   const [initialNativeValue] = useState(nativeValue)
@@ -148,7 +152,7 @@ export function Select({
   const unavailable = () => disabled || readOnly || !!trigger?.matches(':disabled')
   const setOpen = (next: boolean) => {
     if (next && unavailable()) return
-    searchBuffer.current = { text: '', at: 0 }
+    searchBuffer.current = { text: '', at: 0, matcher }
     restoreFocus.current = true
     expansion.request(next)
   }
@@ -237,11 +241,14 @@ export function Select({
     commit,
     close,
     restoreFocus,
+    isSearchKey: matcher.isSingleKey,
     search(key, current) {
       const now = Date.now()
-      const text = (now - searchBuffer.current.at < 1000 ? searchBuffer.current.text : '') + key
-      searchBuffer.current = { text, at: now }
-      return matchSelectText(entries, text, current)
+      const previous = searchBuffer.current
+      const text =
+        (previous.matcher === matcher && now - previous.at < 1000 ? previous.text : '') + key
+      searchBuffer.current = { text, at: now, matcher }
+      return matchSelectText(entries, text, current, matcher)
     }
   }
   return (
@@ -376,7 +383,7 @@ export function SelectTrigger({
         if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
           event.preventDefault()
           select.setOpen(true)
-        } else if (event.key.length === 1) {
+        } else if (select.isSearchKey(event.key)) {
           const next = select.search(event.key, select.value)
           if (next !== undefined) {
             event.preventDefault()
@@ -473,6 +480,7 @@ export function SelectContent({
   ...props
 }: SelectContentProps) {
   const select = useSelectContext()
+  const { lang, dir } = props
   const mergedRef = useComposedRefs(select.content, ref)
   const {
     ref: transitionRef,
@@ -511,9 +519,11 @@ export function SelectContent({
     }
     // Top-layer auto layout is viewport-sized. Establish the anchor width before it can paint.
     seedWidth()
+    syncPopupLocale(trigger, node, { lang, dir })
     node.showPopover()
     const place = () => {
       if (!node.isConnected || !node.matches(':popover-open')) return
+      const rtl = syncPopupLocale(trigger, node, { lang, dir })
       seedWidth()
       const viewport = win.visualViewport
       const selected = Array.from(
@@ -544,7 +554,7 @@ export function SelectContent({
         padding: Math.max(0, collisionPadding),
         offset: sideOffset,
         aligned: position === 'item-aligned',
-        rtl: win.getComputedStyle(trigger).direction === 'rtl'
+        rtl
       })
       for (const [key, value] of Object.entries({
         top: next.top,
@@ -594,6 +604,7 @@ export function SelectContent({
     const observer = new win.ResizeObserver(schedule)
     const mutations = new win.MutationObserver(schedule)
     mutations.observe(node, { childList: true, subtree: true, characterData: true })
+    observeAnchorLocale(mutations, trigger)
     observer.observe(trigger)
     observer.observe(node)
     doc.addEventListener('pointerdown', outside, true)
@@ -613,7 +624,7 @@ export function SelectContent({
       win.visualViewport?.removeEventListener('resize', place)
       win.visualViewport?.removeEventListener('scroll', place)
     }
-  }, [select.open, select.trigger, select.items, position, sideOffset, collisionPadding])
+  }, [select.open, select.trigger, select.items, position, sideOffset, collisionPadding, lang, dir])
   useLayoutEffect(() => {
     const node = select.content.current
     const trigger = select.trigger
@@ -665,7 +676,7 @@ export function SelectContent({
         if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
           event.preventDefault()
           select.focus(moveSelectFocus(select.entries, current, event.key))
-        } else if (event.key.length === 1 && event.key !== ' ') {
+        } else if (select.isSearchKey(event.key) && event.key !== ' ') {
           event.preventDefault()
           select.focus(select.search(event.key, current))
         }
