@@ -14,11 +14,10 @@ import {
   ThemeScope,
   defineTheme
 } from '@cognitap/radiant'
-const items = [{ value: 'learn' }, { value: 'about' }]
 function sample(props: Record<string, unknown> = {}) {
   return h(
     NavigationMenu,
-    { 'aria-label': 'Project', items, ...props },
+    { 'aria-label': 'Project', ...props },
     h(
       NavigationMenuList,
       null,
@@ -70,10 +69,9 @@ test('a single initial owner controls the visible SSR panel and private state ho
   render(h(Hook))
   for (const props of [
     { value: 'learn', defaultValue: 'learn' },
-    { value: 'missing' },
+    { value: '' },
     { openDelay: -1 },
     { closeDelay: Infinity },
-    { items: [{ value: 'a' }, { value: 'a' }] },
     { 'aria-label': ' ' }
   ])
     assert.throws(() => render(sample(props)))
@@ -119,7 +117,7 @@ test('theme slots remain independently typed and native viewport caller classes 
   const styled = render(
     h(
       NavigationMenu,
-      { 'aria-label': 'Test', items },
+      { 'aria-label': 'Test' },
       h(NavigationMenuViewport, { className: 'w-48 h-32 rounded-none border-0 p-0 shadow-none' })
     )
   )
@@ -129,7 +127,7 @@ test('theme slots remain independently typed and native viewport caller classes 
     render(
       h(
         NavigationMenu,
-        { 'aria-label': 'Test', items },
+        { 'aria-label': 'Test' },
         h(NavigationMenuViewport, { 'aria-label': 'Sections' })
       )
     ),

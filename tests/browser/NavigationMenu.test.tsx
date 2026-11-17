@@ -1,6 +1,7 @@
 import { act, StrictMode, createRef } from 'react'
 import { expect, test, vi } from 'vitest'
 import { createPortal } from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { userEvent, commands } from 'vitest/browser'
 import {
   NavigationMenu,
@@ -24,7 +25,6 @@ import {
 } from '../../.storybook/examples/NavigationMenuExamples.js'
 import { mount, click, key, pause } from './familyHarness.js'
 import type {} from './touchCommands.js'
-const items = [{ value: 'learn' }, { value: 'disabled', disabled: true }, { value: 'about' }]
 type Options = Omit<Partial<NavigationMenuProps>, 'value' | 'defaultValue' | 'children'> & {
   value?: string | null
   initial?: string | null
@@ -39,7 +39,6 @@ function Sample({ value, initial = null, trigger, motion, extra, ...options }: O
       <NavigationMenu
         {...options}
         {...owner}
-        items={items}
         aria-label="Test site"
         style={{ width: '500px', maxWidth: '100%', ...options.style }}
       >
@@ -54,7 +53,12 @@ function Sample({ value, initial = null, trigger, motion, extra, ...options }: O
             </NavigationMenuTrigger>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger value="disabled">Unavailable</NavigationMenuTrigger>
+            <NavigationMenuTrigger
+              value="disabled"
+              disabled
+            >
+              Unavailable
+            </NavigationMenuTrigger>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger value="about">About</NavigationMenuTrigger>
@@ -93,7 +97,7 @@ function Sample({ value, initial = null, trigger, motion, extra, ...options }: O
 }
 const trigger = (host: HTMLElement, value = 'learn') =>
   host.querySelector<HTMLButtonElement>(
-    `[data-slot~="navigation-menu-trigger"][aria-controls$="panel-${value === 'learn' ? 0 : 2}"]`
+    `[data-slot~="navigation-menu-trigger"][aria-controls$="panel-${value}"]`
   )!
 const viewport = (host: HTMLElement) =>
   host.querySelector<HTMLDivElement>('[data-slot~="navigation-menu-viewport"]')!
@@ -111,7 +115,6 @@ test('SSR hydration preserves native navigation, actual hosts, names, IDs and ca
     <StrictMode>
       <NavigationMenu
         aria-label="Project"
-        items={[{ value: 'learn' }]}
         defaultValue="learn"
         ref={nav}
       >
@@ -180,7 +183,7 @@ test('keyboard disclosure preserves normal tab stops, enters content on arrows a
 test('hover intent waits before opening, bridges the placement gap, switches one viewport and cancels pending work on dismissal', async () => {
   const { host } = await mount(
       <Sample
-        openDelay={80}
+        openDelay={200}
         closeDelay={45}
       />
     ),
@@ -189,7 +192,7 @@ test('hover intent waits before opening, bridges the placement gap, switches one
     outside = host.querySelector<HTMLButtonElement>('[data-nav-outside]')!
   await act(async () => userEvent.hover(first))
   expect(open(host)).toBe(false)
-  await pause(110)
+  await pause(230)
   expect(open(host)).toBe(true)
   const a = first.getBoundingClientRect(),
     b = viewport(host).getBoundingClientRect()
@@ -376,32 +379,150 @@ test('trusted touch toggles the disclosure once without hover activation', async
   await act(async () => commands.touchButton('[data-testid="nav-touch"]', false))
   expect(open(host)).toBe(false)
 })
-test('hook requests are bounded by the registry and return null outside the root', async () => {
+test('hook requests open only mounted, enabled triggers and return null outside the root', async () => {
   function Outside() {
     expect(useNavigationMenu()).toBeNull()
     return null
   }
+  const changes = vi.fn()
   function Actions() {
     const menu = useNavigationMenu()
-    return <button onClick={() => menu?.setValue('learn')}>Open from hook</button>
+    return (
+      <>
+        <button onClick={() => menu?.setValue('missing')}>Open missing</button>
+        <button onClick={() => menu?.setValue('later')}>Open disabled</button>
+        <button onClick={() => menu?.setValue('learn')}>Open from hook</button>
+      </>
+    )
   }
   const { host } = await mount(
     <>
       <Outside />
       <NavigationMenu
         aria-label="Hook"
-        items={items}
+        onValueChange={changes}
       >
         <Actions />
         <NavigationMenuTrigger value="learn">Learn</NavigationMenuTrigger>
+        <NavigationMenuTrigger
+          value="later"
+          disabled
+        >
+          Later
+        </NavigationMenuTrigger>
         <NavigationMenuViewport>
           <NavigationMenuContent value="learn">Material</NavigationMenuContent>
+          <NavigationMenuContent value="later">Later material</NavigationMenuContent>
         </NavigationMenuViewport>
       </NavigationMenu>
     </>
   )
-  await click(host.querySelector('button')!)
+  const [missing, disabled, learn] = host.querySelectorAll('button')
+  await click(missing!)
+  await click(disabled!)
+  expect(open(host)).toBe(false)
+  expect(changes).not.toHaveBeenCalled()
+  await click(learn!)
   expect(open(host)).toBe(true)
+  expect(changes).toHaveBeenCalledExactlyOnceWith('learn')
+})
+test('an owned value naming a disabled or missing section stays closed', async () => {
+  const closed = (host: HTMLElement) => {
+    expect(open(host)).toBe(false)
+    expect(host.querySelector('nav')?.getAttribute('data-state')).toBe('closed')
+    for (const button of host.querySelectorAll('[data-slot~="navigation-menu-trigger"]'))
+      expect(button.getAttribute('aria-expanded')).toBe('false')
+    for (const panel of host.querySelectorAll<HTMLElement>(
+      '[data-slot~="navigation-menu-content"]'
+    ))
+      expect(panel.hidden).toBe(true)
+    expect(viewport(host).getAttribute('aria-labelledby')).toBeNull()
+  }
+  for (const hydrate of [false, true])
+    for (const owner of [
+      { initial: 'disabled' },
+      { value: 'disabled' },
+      { initial: 'missing' },
+      { value: 'missing' }
+    ])
+      closed((await mount(<Sample {...owner} />, hydrate)).host)
+  const { host, render } = await mount(
+    <Sample
+      value="learn"
+      trigger={{ disabled: false }}
+    />
+  )
+  expect(open(host)).toBe(true)
+  await render(
+    <Sample
+      value="learn"
+      trigger={{ disabled: true }}
+    />
+  )
+  closed(host)
+  await render(
+    <Sample
+      value="learn"
+      trigger={{ disabled: false }}
+    />
+  )
+  expect(open(host)).toBe(true)
+})
+test('duplicate trigger or content values are rejected', async () => {
+  const triggers = (
+      <>
+        <NavigationMenuTrigger value="learn">Learn</NavigationMenuTrigger>
+        <NavigationMenuTrigger value="learn">Learn again</NavigationMenuTrigger>
+      </>
+    ),
+    contents = (
+      <NavigationMenuViewport>
+        <NavigationMenuContent value="learn">One</NavigationMenuContent>
+        <NavigationMenuContent value="learn">Two</NavigationMenuContent>
+      </NavigationMenuViewport>
+    )
+  for (const duplicate of [triggers, contents]) {
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    await expect(
+      act(async () =>
+        root.render(<NavigationMenu aria-label="Duplicate">{duplicate}</NavigationMenu>)
+      )
+    ).rejects.toThrow(/values must be unique/)
+    await act(async () => root.unmount())
+    host.remove()
+  }
+})
+test('arrow keys follow trigger document order, including triggers mounted later', async () => {
+  function Menu({ extra }: { extra: boolean }) {
+    return (
+      <NavigationMenu aria-label="Order">
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger value="first">First</NavigationMenuTrigger>
+          </NavigationMenuItem>
+          {extra && (
+            <NavigationMenuItem>
+              <NavigationMenuTrigger value="middle">Middle</NavigationMenuTrigger>
+            </NavigationMenuItem>
+          )}
+          <NavigationMenuItem>
+            <NavigationMenuTrigger value="last">Last</NavigationMenuTrigger>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
+    )
+  }
+  const { host, render } = await mount(<Menu extra={false} />)
+  await render(<Menu extra />)
+  const [first, middle, last] = host.querySelectorAll('button')
+  expect(middle?.getAttribute('aria-controls')).toMatch(/-panel-middle$/)
+  await act(async () => first!.focus())
+  await key('{ArrowRight}')
+  expect(middle).toHaveFocus()
+  await key('{ArrowRight}')
+  expect(last).toHaveFocus()
 })
 for (const [name, Example, button, link, title] of [
   ['research', NavigateResearchLibrary, 'Studies', 'Navigation study', 'Navigation study'],

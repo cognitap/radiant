@@ -71,3 +71,8 @@ export const contradictory = (
 )
 // @ts-expect-error FormField requires a matching input name.
 export const noFieldName = <FormField label="Email" />
+export const review = (
+  <Form aria-label="Review">
+    {({ focusInvalid }) => <Button onClick={focusInvalid}>Review errors</Button>}
+  </Form>
+)

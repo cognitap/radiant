@@ -750,7 +750,6 @@ export {
 export type {
   NavigationMenuProps,
   NavigationMenuState,
-  NavigationMenuItemConfig,
   NavigationMenuListProps,
   NavigationMenuItemProps,
   NavigationMenuTriggerProps,

@@ -16,42 +16,12 @@ import {
   SwitchResearchWorkspace,
   type NavigationMenuTaskOptions
 } from '../../../.storybook/examples/NavigationMenuExamples.js'
-const meta = {
-  title: 'Components/NavigationMenu',
-  component: NavigateResearchLibrary,
-  args: {
-    controlSize: 'medium',
-    disabled: false,
-    dir: 'ltr',
-    openDelay: 200,
-    closeDelay: 150
-  },
-  argTypes: {
-    controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] },
-    dir: { control: 'inline-radio', options: ['ltr', 'rtl'] },
-    motion: { control: 'inline-radio', options: ['inherit', 'off'] },
-    sideOffset: { control: 'number' },
-    className: { control: 'text' },
-    style: { control: 'object' }
-  },
-  decorators: [
-    Story => (
-      <MotionProvider>
-        <Story />
-      </MotionProvider>
-    )
-  ],
-  render: args => <NavigateResearchLibrary {...args} />
-} satisfies Meta<NavigationMenuTaskOptions>
-export default meta
-type Story = StoryObj<typeof meta>
-export const Default: Story = {
-  render: ({ motion, sideOffset, ...args }) => (
+function SiteSections({ motion, sideOffset, ...options }: NavigationMenuTaskOptions) {
+  return (
     <div style={{ width: 'min(30rem,calc(100vw - 2rem))', minHeight: '15rem' }}>
       <NavigationMenu
-        {...args}
+        {...options}
         aria-label="Example site"
-        items={[{ value: 'learn' }, { value: 'about' }]}
       >
         <NavigationMenuList>
           <NavigationMenuItem>
@@ -78,32 +48,31 @@ export const Default: Story = {
     </div>
   )
 }
-export const FindingStudyMaterials: Story = {
-  play: async ({ canvasElement }) => {
-    const c = within(canvasElement)
-    await userEvent.click(c.getByRole('button', { name: 'Studies' }))
-    await userEvent.click(c.getByRole('link', { name: 'Navigation study' }))
-    await expect(c.getByRole('heading', { name: 'Navigation study' })).toBeVisible()
-    await expect(c.getByRole('button', { name: 'Studies' })).toHaveAttribute(
-      'aria-expanded',
-      'false'
-    )
-    await waitFor(async () => {
-      await expect(c.getByRole('region', { name: 'Research library destination' })).toHaveFocus()
-    })
-  }
-}
-export const FindingHelpResources: Story = {
-  render: args => <FindHelpResources {...args} />,
-  play: async ({ canvasElement }) => {
-    const c = within(canvasElement)
-    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Guide audience' }), 'new')
-    await userEvent.click(c.getByRole('button', { name: 'Guides' }))
-    await expect(c.queryByRole('link', { name: 'Compare research rounds' })).toBeNull()
-    await userEvent.click(c.getByRole('link', { name: 'Share session results' }))
-    await expect(c.getByRole('heading', { name: 'Share session results' })).toBeVisible()
-  }
-}
+const meta = {
+  title: 'Components/NavigationMenu',
+  component: SiteSections,
+  args: {
+    controlSize: 'medium',
+    disabled: false,
+    dir: 'ltr',
+    openDelay: 200,
+    closeDelay: 150,
+    motion: 'inherit',
+    sideOffset: 8
+  },
+  argTypes: {
+    controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] },
+    dir: { control: 'inline-radio', options: ['ltr', 'rtl'] },
+    motion: { control: 'inline-radio', options: ['inherit', 'off'] },
+    sideOffset: { control: 'number' },
+    className: { control: 'text' },
+    style: { control: 'object' }
+  },
+  render: args => <SiteSections {...args} />
+} satisfies Meta<NavigationMenuTaskOptions>
+export default meta
+type Story = StoryObj<typeof meta>
+export const Default: Story = {}
 export const SharedControlSizes: Story = {
   render: args => (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
@@ -137,11 +106,35 @@ export const Controlled: Story = {
     await expect(c.getByRole('heading', { name: 'Harbor reading' })).toBeVisible()
   }
 }
-export const WithoutMotion: Story = {
+export const FindingStudyMaterials: Story = {
   render: args => (
-    <FindHelpResources
-      {...args}
-      motion="off"
-    />
-  )
+    <MotionProvider>
+      <NavigateResearchLibrary {...args} />
+    </MotionProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement)
+    await userEvent.click(c.getByRole('button', { name: 'Studies' }))
+    await userEvent.click(c.getByRole('link', { name: 'Navigation study' }))
+    await expect(c.getByRole('heading', { name: 'Navigation study' })).toBeVisible()
+    await expect(c.getByRole('button', { name: 'Studies' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    )
+    await waitFor(async () => {
+      await expect(c.getByRole('region', { name: 'Research library destination' })).toHaveFocus()
+    })
+  }
+}
+export const FindingHelpResources: Story = {
+  render: args => <FindHelpResources {...args} />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement)
+    await expect(c.getByRole('button', { name: 'Workshops' })).toBeDisabled()
+    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Guide audience' }), 'new')
+    await userEvent.click(c.getByRole('button', { name: 'Guides' }))
+    await expect(c.queryByRole('link', { name: 'Compare research rounds' })).toBeNull()
+    await userEvent.click(c.getByRole('link', { name: 'Share session results' }))
+    await expect(c.getByRole('heading', { name: 'Share session results' })).toBeVisible()
+  }
 }

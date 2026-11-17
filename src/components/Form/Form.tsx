@@ -28,7 +28,7 @@ export type FormState = {
 export type FormProps = Omit<ComponentProps<'form'>, 'children' | 'style' | 'noValidate'> &
   StateOwner<'errors', FormErrors> &
   AccessibleName & {
-    children?: ReactNode | ((state: Pick<FormState, 'errors' | 'pending'>) => ReactNode)
+    children?: ReactNode | ((state: FormState) => ReactNode)
     style?: ThemeStyle
     'data-slot'?: string
     onErrorsChange?: (errors: FormErrors) => void
@@ -230,10 +230,13 @@ export function Form({
             })
         }}
       >
-        {typeof children === 'function' ? children({ errors, pending }) : children}
+        {typeof children === 'function' ? <FormChildren render={children} /> : children}
       </form>
     </FormContext.Provider>
   )
+}
+function FormChildren({ render }: { render: (state: FormState) => ReactNode }) {
+  return render(useRequiredForm())
 }
 export type FormFieldProps = DistributiveOmit<FieldProps, 'name'> & { name: string }
 /** Name matches the real input's name; Field retains label and error relationships. */

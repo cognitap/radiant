@@ -308,6 +308,7 @@ test('disabled and cancelled events block requests, and disabling an active drag
     ),
     node = handle(host)
   expect(node.getAttribute('aria-disabled')).toBe('true')
+  expect(node.getAttribute('data-disabled')).toBe('')
   expect(node.tabIndex).toBe(-1)
   await act(async () => commands.dragHandle('#splitter', 50, false, false))
   expect(calls).toEqual([])
@@ -337,6 +338,33 @@ test('disabled and cancelled events block requests, and disabling an active drag
   await act(async () => commands.dragHandle('#splitter', 20, false, false, 0, 100))
   expect(handle(host).getAttribute('aria-disabled')).toBe('true')
   expect(host.querySelector('[data-slot="resizable"]')!.hasAttribute('data-dragging')).toBe(false)
+})
+
+test('a handle with no room to move is disabled in an enabled group', async () => {
+  const calls: number[][] = []
+  const { host } = await mount(
+      <Sample
+        items={[
+          { value: 'files', min: 50, max: 50 },
+          { value: 'preview', min: 50, max: 50 }
+        ]}
+        initial={[50, 50]}
+        onValueChange={value => calls.push(value)}
+      />
+    ),
+    node = handle(host)
+  expect(host.querySelector('[data-slot="resizable"]')!.hasAttribute('data-disabled')).toBe(false)
+  expect(node.getAttribute('aria-valuemin')).toBe('50')
+  expect(node.getAttribute('aria-valuemax')).toBe('50')
+  expect(node.getAttribute('aria-disabled')).toBe('true')
+  expect(node.getAttribute('data-disabled')).toBe('')
+  expect(node.tabIndex).toBe(-1)
+  await act(async () => node.focus())
+  await key('{ArrowRight}')
+  await key('{End}')
+  await act(async () => commands.dragHandle('#splitter', 80, false, false))
+  expect(calls).toEqual([])
+  expect(size(node)).toBe(50)
 })
 
 test('nested groups and iframe keyboard events use their own owners and documents', async () => {

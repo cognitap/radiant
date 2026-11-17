@@ -58,8 +58,6 @@ export type ResizablePanelState = {
 }
 export type ResizableState = {
   value: number[]
-  controlled: boolean
-  orientation: Orientation
   disabled: boolean
   setValue: (value: number[]) => void
   resize: (panel: string, size: number) => void
@@ -69,6 +67,7 @@ export type ResizableState = {
 }
 type Binding = {
   state: ResizableState
+  orientation: Orientation
   items: readonly ResizableItem[]
   id: string
   dragging: string | null
@@ -205,8 +204,6 @@ export function Resizable({
   }
   const state: ResizableState = {
     value: selection.value,
-    controlled: selection.controlled,
-    orientation,
     disabled,
     setValue: value => request(() => [...value]),
     resize,
@@ -231,6 +228,7 @@ export function Resizable({
   }, [])
   const binding: Binding = {
     state,
+    orientation,
     items,
     id,
     dragging,
@@ -439,8 +437,7 @@ export function ResizableHandle({
   }, [finishGesture])
   useEffect(() => () => finish(), [finish])
   useLayoutEffect(() => {
-    if (disabled || (drag.current && drag.current.orientation !== context.state.orientation))
-      finish()
+    if (disabled || (drag.current && drag.current.orientation !== context.orientation)) finish()
   })
   return (
     <SeparatorRoot
@@ -449,9 +446,10 @@ export function ResizableHandle({
       tabIndex={disabled ? -1 : 0}
       decorative={false}
       ref={composed}
-      orientation={context.state.orientation === 'horizontal' ? 'vertical' : 'horizontal'}
+      orientation={context.orientation === 'horizontal' ? 'vertical' : 'horizontal'}
       aria-controls={context.id + '-panel-' + encodeURIComponent(value)}
       aria-disabled={disabled || undefined}
+      data-disabled={disabled ? '' : undefined}
       aria-valuenow={context.state.value[index]}
       aria-valuemin={min}
       aria-valuemax={max}
@@ -466,7 +464,7 @@ export function ResizableHandle({
         'aria-disabled:cursor-not-allowed aria-disabled:bg-[var(--rad-resizable-handle-background,transparent)] forced-colors:border-[CanvasText]',
         focusRingClass,
         'focus-visible:[--_rad-focus-color:var(--rad-resizable-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-resizable-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-resizable-focus-offset,calc(0px_-_var(--_rad-focus-width,var(--rad-focus-width,2px))))] focus-visible:[--_rad-focus-style:var(--rad-resizable-focus-style)]',
-        context.state.orientation === 'horizontal'
+        context.orientation === 'horizontal'
           ? 'h-auto w-[length:var(--rad-resizable-handle-size,0.5rem)] cursor-col-resize'
           : 'w-auto h-[length:var(--rad-resizable-handle-size,0.5rem)] cursor-row-resize',
         className
@@ -485,7 +483,7 @@ export function ResizableHandle({
           context.state.resize(value, event.key === 'Home' ? min : max)
           return
         }
-        const horizontal = context.state.orientation === 'horizontal',
+        const horizontal = context.orientation === 'horizontal',
           direction = context.direction(),
           amount = event.shiftKey ? largeStep : step
         const sign = horizontal
@@ -523,11 +521,11 @@ export function ResizableHandle({
           node: event.currentTarget,
           pointer: event.pointerId,
           token,
-          start: context.state.orientation === 'horizontal' ? event.clientX : event.clientY,
+          start: context.orientation === 'horizontal' ? event.clientX : event.clientY,
           size: context.state.value[index]!,
           room,
           sum: addDecimal(context.state.value[index]!, context.state.value[index + 1]!),
-          orientation: context.state.orientation,
+          orientation: context.orientation,
           direction: context.direction(),
           cleanup: () => view?.removeEventListener('blur', finish)
         }

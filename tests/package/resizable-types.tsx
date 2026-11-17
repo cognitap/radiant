@@ -51,6 +51,10 @@ export function Controls() {
   state?.setValue([30, 70])
   const id: string | undefined = state?.getPanel('files').id
   void id
+  // @ts-expect-error The group's owner already knows whether it controls the layout.
+  void state?.controlled
+  // @ts-expect-error Orientation is the caller's own prop.
+  void state?.orientation
   return null
 }
 export const theme = defineTheme({
