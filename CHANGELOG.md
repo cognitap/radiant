@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.85
+
 - Highlight marks text matches while preserving the original text, with optional case sensitivity and diacritic folding.
 
 - Spoiler previews long content at a fixed height and uses the themed disclosure motion to expand it.
