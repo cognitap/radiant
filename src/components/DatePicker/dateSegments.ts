@@ -1,3 +1,4 @@
+import { localizedDigits } from '../../internal/localizedDigits.js'
 import { calendarFormat, civilTime, isoDate, type CalendarSystem } from '../../internal/calendar.js'
 
 export type Segment = 'day' | 'month' | 'year'
@@ -11,20 +12,10 @@ export function dateSegments(locale: string, calendar?: CalendarSystem) {
     calendar
   )({ year: 'numeric', month: '2-digit', day: '2-digit' })
   const resolved = format.resolvedOptions()
-  const numbers = new Intl.NumberFormat(resolved.locale, {
-    numberingSystem: resolved.numberingSystem,
-    useGrouping: false
-  })
-  const digits = Array.from({ length: 10 }, (_, i) => numbers.format(i))
+  const { ascii, localize } = localizedDigits(resolved.locale, resolved.numberingSystem)
   const names = new Intl.DisplayNames(resolved.locale, { type: 'dateTimeField' })
   const parts = format.formatToParts(Date.UTC(2000, 10, 22))
   const yearOffset = resolved.calendar === 'buddhist' ? 543 : 0
-  function ascii(text: string) {
-    return Array.from(text, char =>
-      digits.includes(char) ? String(digits.indexOf(char)) : char
-    ).join('')
-  }
-  const localize = (text: string) => text.replace(/[0-9]/g, digit => digits[Number(digit)])
   return {
     parts,
     names,

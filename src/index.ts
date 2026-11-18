@@ -832,3 +832,4 @@ export {
   type DateRangeValue,
   type DateRangePreset
 } from './components/DateRangePicker/DateRangePicker.js'
+export { TimeInput, type TimeInputProps } from './components/TimeInput/TimeInput.js'
