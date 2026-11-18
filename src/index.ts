@@ -835,3 +835,5 @@ export {
 export { TimeInput, type TimeInputProps } from './components/TimeInput/TimeInput.js'
 
 export { Tree, type TreeProps, type TreeItem, type TreeVirtual } from './components/Tree/Tree.js'
+
+export { TreeSelect, type TreeSelectProps } from './components/TreeSelect/TreeSelect.js'

@@ -76,7 +76,7 @@ export type TreeProps = AccessibleName &
 const rowClass =
   'box-border flex min-h-8 items-center gap-2 rounded-[var(--rad-control-radius,0.5rem)] [corner-shape:var(--rad-control-corner-shape,round)] py-1 pe-2 data-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] not-data-disabled:cursor-pointer not-data-disabled:hover:bg-[var(--rad-color-neutral)] data-selected:bg-[var(--rad-control-selected-background,var(--rad-color-neutral))] data-selected:font-semibold data-selected:[color:var(--rad-control-selected-foreground,var(--rad-color-foreground))] group-focus-visible/tree:data-active:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/tree:data-active:outline-offset-[-2px] group-focus-visible/tree:forced-colors:data-active:outline-[Highlight] forced-colors:data-selected:underline'
 
-function treeValues(value: Selection, multiple: boolean, name: string) {
+export function treeValues(value: Selection, multiple: boolean, name: string) {
   if (
     multiple
       ? !Array.isArray(value) ||
@@ -87,9 +87,35 @@ function treeValues(value: Selection, multiple: boolean, name: string) {
     throw new TypeError(`Tree ${name} must match its mode and contain unique, nonempty values.`)
 }
 
+export function useTreeCollection(items: readonly TreeItem[]) {
+  const { loads, load } = useTreeLoading(items)
+  const model = useMemo(() => buildTree(items, loads), [items, loads])
+  return { model, load }
+}
+
 export function Tree(props: TreeProps) {
+  const collection = useTreeCollection(props.items)
+  return (
+    <TreeRoot
+      {...props}
+      collection={collection}
+    />
+  )
+}
+
+/** TreeSelect shares the loaded registry so a committed item's path remains available when closed. */
+export function TreeRoot(
+  props: TreeProps & {
+    collection: ReturnType<typeof useTreeCollection>
+    onSelectionCommit?: () => void
+    revealOnFocus?: boolean
+  }
+) {
   const {
-    items,
+    items: _items,
+    collection: { model, load },
+    onSelectionCommit,
+    revealOnFocus,
     type = 'single',
     checkboxes = false,
     value,
@@ -147,8 +173,6 @@ export function Tree(props: TreeProps) {
   treeValues(selection.value, type === 'multiple', 'selection')
   treeValues(expansion.value, true, 'expansion')
 
-  const { loads, load } = useTreeLoading(items)
-  const model = useMemo(() => buildTree(items, loads), [items, loads])
   const openItems = useMemo(() => new Set(expansion.value), [expansion.value])
   const rows = useMemo(() => visibleTree(model.roots, openItems), [model, openItems])
   const byRow = useMemo(() => new Map(rows.map((node, index) => [node.value, index])), [rows])
@@ -252,6 +276,7 @@ export function Tree(props: TreeProps) {
         nextSelection(current, node.value, type === 'single' || !selected.has(node.value))
       )
     }
+    onSelectionCommit?.()
   }
 
   function activate(node: TreeNode) {
@@ -465,7 +490,10 @@ export function Tree(props: TreeProps) {
       }}
       onFocus={event => {
         onFocus?.(event)
-        if (event.target === event.currentTarget && event.currentTarget.matches(':focus-visible'))
+        if (
+          event.target === event.currentTarget &&
+          (revealOnFocus || event.currentTarget.matches(':focus-visible'))
+        )
           reveal(activeIndex)
       }}
       onBlur={event => {
