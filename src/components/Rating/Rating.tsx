@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, type ReactNode } from 'react'
+import { useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { PartStyle } from '../../presentation.js'
@@ -28,6 +28,31 @@ export type RatingProps = Omit<
   }
 
 const formatRating = (value: number, max: number) => `${value} out of ${max}`
+
+// WebKit and Chromium disagree about native horizontal radio keys in RTL.
+function navigateRtl(event: KeyboardEvent<HTMLInputElement>) {
+  if (
+    event.defaultPrevented ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.metaKey ||
+    (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
+  )
+    return
+  const input = event.currentTarget
+  if (input.ownerDocument.defaultView?.getComputedStyle(input).direction !== 'rtl') return
+  const group = input.closest('[data-slot~="rating"]')
+  const options = Array.from(
+    group?.querySelectorAll<HTMLInputElement>('[data-slot~="rating-option"]:enabled') ?? []
+  )
+  const index = options.indexOf(input)
+  if (index < 0) return
+  event.preventDefault()
+  const step = event.key === 'ArrowLeft' ? 1 : -1
+  const next = options[(index + step + options.length) % options.length]
+  next.focus()
+  next.click()
+}
 
 function RatingMark({
   filled,
@@ -150,6 +175,7 @@ export function Rating({
           data-slot="rating-option"
           value={String(mark)}
           aria-label={formatValue(mark, max)}
+          onKeyDown={navigateRtl}
           className="sr-only"
           label={
             <RatingMark
