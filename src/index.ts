@@ -883,3 +883,9 @@ export { Spoiler } from './components/Spoiler/Spoiler.js'
 export type { SpoilerProps } from './components/Spoiler/Spoiler.js'
 export { Highlight } from './components/Highlight/Highlight.js'
 export type { HighlightProps } from './components/Highlight/Highlight.js'
+export { Indicator } from './components/Indicator/Indicator.js'
+export type {
+  IndicatorProps,
+  IndicatorPosition,
+  IndicatorTargetProps
+} from './components/Indicator/Indicator.js'
