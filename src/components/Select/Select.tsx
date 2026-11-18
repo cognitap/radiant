@@ -19,16 +19,15 @@ import type { DistributiveOmit } from '../../internal/types.js'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { controlMetrics, itemGroupLabelClass } from '../shared/controlStyles.js'
-import { matchSelectText, moveSelectFocus, positionSelect } from '../../internal/select.js'
-import { observeAnchorLocale, syncPopupLocale } from '../../internal/popupLocale.js'
+import { matchSelectText, moveSelectFocus } from '../../internal/select.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import { useLocaleMatcher } from '../../react/useLocale.js'
-import { useTransitionHost } from '../../motion/host.js'
 import type { StateOwner, ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
-import { selectContentClass, selectItemClass, selectTriggerClass } from './selectStyles.js'
+import { selectItemClass, selectTriggerClass } from './selectStyles.js'
+import { SelectPopup, type SelectContentProps } from './SelectPopup.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 export type SelectOption = { value: string; disabled?: boolean } & (
@@ -460,202 +459,31 @@ export function SelectPortal({ children }: { children?: ReactNode }) {
   return select.trigger?.parentElement ? createPortal(children, select.trigger.parentElement) : null
 }
 
-export type SelectContentProps = Omit<ComponentProps<'div'>, 'style' | 'popover'> & {
-  style?: ThemeStyle
-  position?: 'item-aligned' | 'popper'
-  sideOffset?: number
-  collisionPadding?: number
-  motion?: 'inherit' | 'off'
-  'data-slot'?: string
-}
-export function SelectContent({
-  children,
-  position = 'item-aligned',
-  sideOffset = 4,
-  collisionPadding = 8,
-  motion = 'inherit',
-  className,
-  onKeyDown,
-  ref,
-  ...props
-}: SelectContentProps) {
+export type { SelectContentProps } from './SelectPopup.js'
+
+export function SelectContent({ children, onKeyDown, ...props }: SelectContentProps) {
   const select = useSelectContext()
-  const { lang, dir } = props
-  const mergedRef = useComposedRefs(select.content, ref)
-  const {
-    ref: transitionRef,
-    active: motionActive,
-    off: motionOff
-  } = useTransitionHost('popup', mergedRef, motion === 'off')
-  const latest = useRef(select)
-  useLayoutEffect(() => {
-    latest.current = select
-  })
-  const wasOpen = useRef(false)
-  useLayoutEffect(() => {
-    const state = latest.current
-    const node = state.content.current
-    const trigger = state.trigger
-    if (!node || !trigger) return
-    const doc = trigger.ownerDocument
-    const win = doc.defaultView!
-    if (!state.open) {
-      if (
-        wasOpen.current &&
-        latest.current.restoreFocus.current &&
-        node.contains(doc.activeElement)
-      )
-        trigger.focus({ preventScroll: true })
-      if (node.matches(':popover-open')) node.hidePopover()
-      wasOpen.current = false
-      return
-    }
-    const seedWidth = () => {
-      const available =
-        (win.visualViewport?.width ?? win.innerWidth) - 2 * Math.max(0, collisionPadding)
-      const width = `${Math.min(trigger.getBoundingClientRect().width, Math.max(0, available))}px`
-      if (node.style.getPropertyValue('--_rad-select-width') !== width)
-        node.style.setProperty('--_rad-select-width', width)
-    }
-    // Top-layer auto layout is viewport-sized. Establish the anchor width before it can paint.
-    seedWidth()
-    syncPopupLocale(trigger, node, { lang, dir })
-    node.showPopover()
-    const place = () => {
-      if (!node.isConnected || !node.matches(':popover-open')) return
-      const rtl = syncPopupLocale(trigger, node, { lang, dir })
-      seedWidth()
-      const viewport = win.visualViewport
-      const selected = Array.from(
-        node.querySelectorAll<HTMLElement>('[data-slot~="select-item"]')
-      ).find(item => item.dataset.value === latest.current.value)
-      const rect = trigger.getBoundingClientRect()
-      const computed = win.getComputedStyle(node)
-      const viewportNode = node.querySelector<HTMLElement>('[data-slot~="select-viewport"]')
-      const naturalHeight = viewportNode
-        ? viewportNode.scrollHeight +
-          parseFloat(computed.paddingTop) +
-          parseFloat(computed.paddingBottom)
-        : node.scrollHeight
-      const next = positionSelect({
-        trigger: rect,
-        width: node.getBoundingClientRect().width,
-        height:
-          naturalHeight +
-          parseFloat(computed.borderTopWidth) +
-          parseFloat(computed.borderBottomWidth),
-        selectedOffset: selected ? selected.offsetTop + selected.offsetHeight / 2 : 24,
-        viewport: {
-          top: viewport?.offsetTop ?? 0,
-          left: viewport?.offsetLeft ?? 0,
-          width: viewport?.width ?? win.innerWidth,
-          height: viewport?.height ?? win.innerHeight
-        },
-        padding: Math.max(0, collisionPadding),
-        offset: sideOffset,
-        aligned: position === 'item-aligned',
-        rtl
-      })
-      for (const [key, value] of Object.entries({
-        top: next.top,
-        left: next.left,
-        width: next.width,
-        'max-height': next.maxHeight
-      }))
-        if (node.style.getPropertyValue(`--_rad-select-${key}`) !== `${value}px`)
-          node.style.setProperty(`--_rad-select-${key}`, `${value}px`)
-    }
-    place()
-    const active = doc.activeElement as HTMLElement | null
-    if (
-      !wasOpen.current ||
-      active === doc.body ||
-      active?.getAttribute('aria-disabled') === 'true'
-    ) {
-      const first =
-        state.items.find(item => item.value === state.value && !item.disabled) ??
-        state.items.find(item => !item.disabled)
-      if (first) state.focus(first.value)
-      else node.focus()
-    }
-    wasOpen.current = true
-    const outside = (event: PointerEvent) => {
-      const target = event.target
-      if (!(target instanceof win.Node) || node.contains(target) || trigger.contains(target)) return
-      latest.current.close(false)
-    }
-    const focusOut = (event: FocusEvent) => {
-      const target = event.target
-      if (target === doc.body || target === doc.documentElement) return
-      if (target instanceof win.Node && !node.contains(target) && !trigger.contains(target))
-        latest.current.close(false)
-    }
-    const scroll = (event: Event) => {
-      if (!(event.target instanceof win.Node) || !node.contains(event.target)) place()
-    }
-    let frame = 0
-    const schedule = () => {
-      if (!frame)
-        frame = win.requestAnimationFrame(() => {
-          frame = 0
-          place()
-        })
-    }
-    const observer = new win.ResizeObserver(schedule)
-    const mutations = new win.MutationObserver(schedule)
-    mutations.observe(node, { childList: true, subtree: true, characterData: true })
-    observeAnchorLocale(mutations, trigger)
-    observer.observe(trigger)
-    observer.observe(node)
-    doc.addEventListener('pointerdown', outside, true)
-    doc.addEventListener('focusin', focusOut)
-    doc.addEventListener('scroll', scroll, true)
-    win.addEventListener('resize', place)
-    win.visualViewport?.addEventListener('resize', place)
-    win.visualViewport?.addEventListener('scroll', place)
-    return () => {
-      observer.disconnect()
-      mutations.disconnect()
-      win.cancelAnimationFrame(frame)
-      doc.removeEventListener('pointerdown', outside, true)
-      doc.removeEventListener('focusin', focusOut)
-      doc.removeEventListener('scroll', scroll, true)
-      win.removeEventListener('resize', place)
-      win.visualViewport?.removeEventListener('resize', place)
-      win.visualViewport?.removeEventListener('scroll', place)
-    }
-  }, [select.open, select.trigger, select.items, position, sideOffset, collisionPadding, lang, dir])
-  useLayoutEffect(() => {
-    const node = select.content.current
-    const trigger = select.trigger
-    return () => {
-      if (node?.contains(node.ownerDocument.activeElement) && trigger?.isConnected)
-        trigger.focus({ preventScroll: true })
-    }
-  }, [select.content, select.trigger])
   return (
-    <div
+    <SelectPopup
       {...props}
-      ref={transitionRef}
+      state={{
+        ...select,
+        collection: select.items,
+        focusInitial(node) {
+          const first =
+            select.items.find(item => item.value === select.value && !item.disabled) ??
+            select.items.find(item => !item.disabled)
+          if (first) select.focus(first.value)
+          else node.focus()
+        }
+      }}
+      controlSize={select.controlSize}
       id={select.contentId}
-      popover="manual"
       role="listbox"
       tabIndex={-1}
       aria-labelledby={
         props['aria-label'] ? undefined : (select.labelId ?? select.trigger?.id ?? select.triggerId)
       }
-      className={cn(
-        selectContentClass,
-        controlMetrics({ controlSize: select.controlSize }),
-        motionActive &&
-          !motionOff &&
-          'opacity-[var(--_rad-popup-enter,0)] motion-reduce:opacity-100',
-        className
-      )}
-      data-slot={joinIds('select-content', props['data-slot'])}
-      data-state={select.open ? 'open' : 'closed'}
-      data-motion={motion}
-      data-position={position}
       onKeyDown={event => {
         onKeyDown?.(event)
         if (event.defaultPrevented) return
@@ -695,7 +523,7 @@ export function SelectContent({
           ))}
         </SelectViewport>
       )}
-    </div>
+    </SelectPopup>
   )
 }
 

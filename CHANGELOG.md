@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- TreeSelect reuses Tree in Select’s popup and shows selected paths or tags with native form submission.
+
 - Tree supports keyboard navigation, single and multiple selection, mixed checkboxes, async children, and fixed-height virtualization.
 
 - Horizontal sliders in RTL follow the visual direction of the arrow keys across browsers.
