@@ -73,7 +73,7 @@ Resolve the locale in the app and use the same value for `<html {...getLocaleAtt
 
 Omitting the locale inherits the closest provider and the native document attributes. Formatting and matching fall back to `en-US` when there is no configured locale or no supported locale match. A component's explicit `locale` overrides its formatting. Popups carry their anchor's language and direction across a portal, with explicit content attributes taking precedence.
 
-`NumberField` localizes its display and parsing. Select and Menu use locale-aware prefix search. Combobox, Autocomplete and their composed families use locale-aware substring search. Built-in matching ignores case and distinguishes accents. Caller filters and text props still apply.
+`NumberField` localizes its display and parsing. `NumberFormatter` preserves server text when browser locale data differs during hydration. Select and Menu use locale-aware prefix search. Combobox, Autocomplete and their composed families use locale-aware substring search. Built-in matching ignores case and distinguishes accents. Caller filters and text props still apply.
 
 ## Customization limits
 

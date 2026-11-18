@@ -889,3 +889,5 @@ export type {
   IndicatorPosition,
   IndicatorTargetProps
 } from './components/Indicator/Indicator.js'
+export { NumberFormatter } from './components/NumberFormatter/NumberFormatter.js'
+export type { NumberFormatterProps } from './components/NumberFormatter/NumberFormatter.js'
