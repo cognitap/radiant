@@ -84,3 +84,16 @@ export function shiftMonth(time: number, offset: number) {
   const sameDay = start + (new Date(time).getUTCDate() - 1) * dayMs
   return Math.min(sameDay, monthStart(start, 1) - dayMs)
 }
+
+export function rangeHasDisabledDate(
+  start: string,
+  end: string,
+  isDateDisabled?: (iso: string) => boolean
+) {
+  if (!isDateDisabled) return false
+  const last = civilTime(end)
+  for (let day = civilTime(start); day <= last; day += dayMs) {
+    if (isDateDisabled(isoDate(day))) return true
+  }
+  return false
+}

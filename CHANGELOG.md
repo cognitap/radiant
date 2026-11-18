@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- DateRangePicker combines localized start and end fields, a range Calendar and optional presets, and submits both ISO dates in native forms.
+
 - DatePicker supports localized segmented date entry and Calendar selection, and submits an ISO date with native forms.
 
 - Calendar supports keyboard date and range selection with localized weeks, Gregorian and Buddhist calendars, and unavailable dates.
