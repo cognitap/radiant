@@ -56,7 +56,7 @@ export function Indicator({
       {...props}
       data-slot={joinIds('indicator', props['data-slot'])}
       data-position={position}
-      className={cn('relative inline-flex min-w-0 max-w-full align-middle', className)}
+      className={cn('relative inline-flex w-fit min-w-0 max-w-full align-middle', className)}
     >
       {children({ 'aria-label': `${label}, ${statusText}` })}
       <Badge

@@ -52,3 +52,7 @@ function OverlayColor() {
   )
 }
 export const Controlled: Story = { name: 'Tint a map overlay', render: () => <OverlayColor /> }
+
+export const InspectALockedBrandColor: Story = {
+  args: { label: 'Locked brand color', swatches, disabled: true }
+}

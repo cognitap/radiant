@@ -19,6 +19,8 @@ export const CopyAnOrderReference: Story = {
         value="ORD-2028"
         variant="outline"
         copiedText="Order reference copied."
+        errorText="Copy failed. Select the order reference to copy it."
+        resetDelay={4000}
       >
         Copy order reference
       </CopyButton>

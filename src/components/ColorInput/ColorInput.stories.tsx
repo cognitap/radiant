@@ -89,3 +89,7 @@ function OverlayTint() {
   )
 }
 export const Controlled: Story = { name: 'Edit an overlay tint', render: () => <OverlayTint /> }
+
+export const InspectAnInheritedAccent: Story = {
+  args: { 'aria-label': 'Inherited accent', readOnly: true, defaultValue: '#405CE0' }
+}

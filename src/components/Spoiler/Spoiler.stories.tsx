@@ -19,16 +19,15 @@ const notes = (
 export const Default: Story = { args: { children: notes } }
 
 export const ReadShippingDetails: Story = {
-  args: {
-    children: 'Dispatches in two business days.',
-    showMoreLabel: 'More shipping details',
-    showLessLabel: 'Fewer shipping details'
-  }
+  args: { children: 'Dispatches in two business days.' }
 }
 
 export const ReadInstallationNotes: Story = {
   args: {
     defaultOpen: true,
+    showMoreLabel: 'Read installation notes',
+    showLessLabel: 'Collapse installation notes',
+    motion: 'off',
     children: (
       <ol className="grid list-decimal gap-3 ps-5">
         <li>Save a copy of your workspace settings.</li>

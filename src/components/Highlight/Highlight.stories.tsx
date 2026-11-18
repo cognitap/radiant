@@ -13,3 +13,11 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 export const FindADestination: Story = { render: () => <MatchDestination /> }
 export const FindAWorkspaceCommand: Story = { render: () => <MatchCommand /> }
+
+export const FindAnExactIdentifier: Story = {
+  args: {
+    text: 'Use API_KEY in production and api_key in local fixtures.',
+    query: 'API_KEY',
+    caseSensitive: true
+  }
+}

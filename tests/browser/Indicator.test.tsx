@@ -64,3 +64,39 @@ test('the logical end corner mirrors with locale direction and offsets move the 
   await render(example('ar', 4))
   expect(center(marker)).toBeCloseTo(avatar.getBoundingClientRect().left - 4, 1)
 })
+
+test('a marker stays on its target inside a stretching grid', async () => {
+  const example = (fullWidth: boolean) => (
+    <div className="grid w-72 max-w-full">
+      <Indicator
+        label="Orders"
+        statusText="142 pending"
+        count={142}
+        className={fullWidth ? 'w-full' : undefined}
+      >
+        {target => (
+          <Button
+            {...target}
+            fullWidth={fullWidth}
+          >
+            Orders
+          </Button>
+        )}
+      </Indicator>
+    </div>
+  )
+  const { host, render } = await mount(example(false))
+  const grid = host.querySelector('div.grid')!
+  const button = host.querySelector('button')!
+  const marker = host.querySelector('[data-slot~="indicator-marker"]')!
+  const right = () => button.getBoundingClientRect().right
+  const markerCenter = () => {
+    const { left, width } = marker.getBoundingClientRect()
+    return left + width / 2
+  }
+  expect(right()).toBeLessThan(grid.getBoundingClientRect().right)
+  expect(markerCenter()).toBeCloseTo(right(), 1)
+  await render(example(true))
+  expect(right()).toBeCloseTo(grid.getBoundingClientRect().right, 1)
+  expect(markerCenter()).toBeCloseTo(right(), 1)
+})

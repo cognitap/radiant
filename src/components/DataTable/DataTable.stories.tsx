@@ -92,3 +92,7 @@ export const BrowseInvoiceHistory: Story = {
     />
   )
 }
+
+export const ReviewAnEmptyInvoiceQueue: Story = {
+  args: { caption: 'Unpaid invoices', rows: [], emptyText: 'All invoices have been paid.' }
+}

@@ -48,3 +48,12 @@ export const ReadStorageAllocation: Story = {
     />
   )
 }
+
+export const WaitForWorkspaceSync: Story = {
+  args: {
+    'aria-label': 'Workspace sync',
+    value: null,
+    label: 'Syncing',
+    motion: 'off'
+  }
+}

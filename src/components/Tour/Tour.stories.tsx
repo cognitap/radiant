@@ -44,6 +44,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 export const OnboardAGuest: Story = {
   args: {
-    steps: [steps[0], { target: '#tour-billing', title: 'Manage subscription' }, steps[1]]
+    steps: [steps[0], { target: '#tour-billing', title: 'Manage subscription' }, steps[1]],
+    formatProgress: (index, count) => `${index} of ${count} workspace tips`,
+    doneLabel: 'Start working'
   }
 }

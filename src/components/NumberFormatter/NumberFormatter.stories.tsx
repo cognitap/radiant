@@ -38,6 +38,18 @@ function InvoiceTotal() {
 }
 
 export const ReadAnInvoice: Story = { render: () => <InvoiceTotal /> }
+
+export const ReadExactEventCount: Story = {
+  render: () => (
+    <p>
+      Events processed{' '}
+      <NumberFormatter
+        value={9_007_199_254_740_993n}
+        locale="fr-FR"
+      />
+    </p>
+  )
+}
 export const ReviewDeliveryPerformance: Story = {
   render: () => (
     <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2">
