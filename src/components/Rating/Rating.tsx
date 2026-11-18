@@ -193,7 +193,7 @@ export function Rating({
                 item?.className
               )
             },
-            indicator: { className: 'hidden' }
+            indicator: { className: '[&[aria-hidden]]:hidden' }
           }}
         />
       ))}
