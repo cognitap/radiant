@@ -16,7 +16,14 @@ const encoded = (n: number) =>
   n <= 0.0031308 ? 12.92 * n : 1.055 * Math.max(0, n) ** (1 / 2.4) - 0.055
 
 export function measureHex(hex: string): OklchColor {
-  const [r, g, b] = [1, 3, 5].map(i => linear(parseInt(hex.slice(i, i + 2), 16) / 255))
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+  return { value: hex, ...rgbToOklch(r, g, b) }
+}
+
+export function rgbToOklch(red: number, green: number, blue: number): Omit<OklchColor, 'value'> {
+  const r = linear(red)
+  const g = linear(green)
+  const b = linear(blue)
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
   const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
@@ -24,7 +31,7 @@ export function measureHex(hex: string): OklchColor {
   const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s
   const bAxis = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
   const C = Math.hypot(a, bAxis)
-  return { value: hex, L, C, h: C < 1e-6 ? 0 : wrapHue((Math.atan2(bAxis, a) * 180) / Math.PI) }
+  return { L, C, h: C < 1e-6 ? 0 : wrapHue((Math.atan2(bAxis, a) * 180) / Math.PI) }
 }
 
 function linearRgb(L: number, C: number, h: number): Triple {

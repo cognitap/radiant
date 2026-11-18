@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- ColorPicker edits OKLCH, hex, and RGB colors with keyboard controls, swatches, and optional browser sampling.
+
 - Rating provides a native radio-group rating input and a read-only display with accessible score text.
 
 - DataTable adds sortable columns, row selection, sticky headers, and windowed rows to semantic tables.
