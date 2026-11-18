@@ -229,8 +229,9 @@ export function usePopoverSurface<Node extends HTMLElement>(
       win.visualViewport?.removeEventListener('scroll', schedule)
       stack.splice(stack.indexOf(node), 1)
       if (!stack.length) layers.delete(doc)
-      if (shouldRestore() && node.contains(doc.activeElement) && trigger.isConnected)
-        focusTarget().focus({ preventScroll: true })
+      const returnTarget = focusTarget()
+      if (shouldRestore() && node.contains(doc.activeElement) && returnTarget.isConnected)
+        returnTarget.focus({ preventScroll: true })
       if (node.matches(':popover-open')) node.hidePopover()
       reposition.current = () => {}
     }
