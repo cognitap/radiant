@@ -44,13 +44,12 @@ export type RangeSliderProps = Omit<
 
 const thumbClass = [
   'pointer-events-none absolute inset-0 w-full',
-  '[&::-webkit-slider-runnable-track]:border-0 [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:shadow-none',
-  '[&::-moz-range-track]:border-0 [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:shadow-none',
   '[&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto',
   'focus-visible:z-10 focus-visible:outline-none',
   'focus-visible:[&::-webkit-slider-thumb]:outline-2 focus-visible:[&::-webkit-slider-thumb]:outline-offset-2 focus-visible:[&::-webkit-slider-thumb]:outline-[var(--rad-color-focus)]',
   'focus-visible:[&::-moz-range-thumb]:outline-2 focus-visible:[&::-moz-range-thumb]:outline-offset-2 focus-visible:[&::-moz-range-thumb]:outline-[var(--rad-color-focus)]',
-  'forced-colors:focus-visible:outline-2 forced-colors:focus-visible:outline-[Highlight]'
+  'forced-colors:[&::-webkit-slider-thumb]:bg-[ButtonText] forced-colors:[&::-moz-range-thumb]:bg-[ButtonText]',
+  'forced-colors:focus-visible:[&::-webkit-slider-thumb]:outline-[Highlight] forced-colors:focus-visible:[&::-moz-range-thumb]:outline-[Highlight]'
 ].join(' ')
 
 function equalRange(left: RangeSliderValue, right: RangeSliderValue) {
@@ -139,6 +138,7 @@ export function RangeSlider({
   function seek(event: PointerEvent<HTMLFieldSetElement>) {
     if (
       control.disabled ||
+      lowerRef.current?.matches(':disabled') ||
       event.target !== event.currentTarget ||
       event.button !== 0 ||
       !event.isPrimary
@@ -177,8 +177,14 @@ export function RangeSlider({
       aria-labelledby={groupLabel}
       aria-describedby={control['aria-describedby']}
       data-slot={joinIds('range-slider', slot)}
+      data-disabled={control.disabled ? '' : undefined}
+      data-invalid={control['data-invalid']}
       className={cn(
         'relative m-0 border-0 p-0 h-[var(--rad-slider-height,var(--_rad-control-height))] w-[var(--rad-slider-length,100%)] min-w-0',
+        '[--_rad-range-track:var(--rad-slider-track-color,var(--rad-control-track-background,var(--rad-color-border)))]',
+        '[--_rad-range-fill:var(--rad-slider-thumb-color,var(--rad-color-accent))]',
+        'data-invalid:[--_rad-range-track:var(--rad-slider-invalid-track,var(--rad-color-invalid))]',
+        'data-disabled:[--_rad-range-track:var(--rad-slider-disabled-track,var(--rad-color-disabled-border))] data-disabled:[--_rad-range-fill:var(--rad-slider-disabled-thumb,var(--rad-color-muted-foreground))]',
         controlMetrics({ controlSize }),
         className
       )}
@@ -188,7 +194,10 @@ export function RangeSlider({
         aria-hidden="true"
         data-slot="range-slider-track"
         className={cn(
-          'pointer-events-none absolute inset-y-0 my-auto h-[var(--rad-slider-track-size,0.375rem)] [inset-inline:calc(var(--rad-slider-thumb-width,var(--rad-slider-thumb-size,var(--_rad-control-indicator-size)))/2)] rounded-full bg-[var(--rad-slider-track-color,var(--rad-control-track-background,var(--rad-color-border)))] forced-colors:bg-[CanvasText]',
+          'pointer-events-none absolute inset-y-0 my-auto box-border h-[var(--rad-slider-track-size,0.375rem)] [inset-inline:calc(var(--rad-slider-thumb-width,var(--rad-slider-thumb-size,var(--_rad-control-indicator-size)))/2)]',
+          'rounded-[min(var(--rad-slider-track-radius,var(--rad-control-radius,0.5rem)),calc(var(--rad-slider-track-size,0.375rem)/2))] [corner-shape:var(--rad-slider-corner-shape,var(--rad-control-corner-shape,round))]',
+          'bg-[var(--_rad-range-track)] [border:var(--rad-control-track-border-width,0px)_var(--rad-control-border-style,solid)_var(--rad-color-border)] [box-shadow:var(--rad-control-track-shadow,none)]',
+          'forced-colors:[forced-color-adjust:none] forced-colors:bg-[CanvasText]',
           parts?.track?.className
         )}
         style={parts?.track?.style}
@@ -196,7 +205,7 @@ export function RangeSlider({
         <span
           data-slot="range-slider-range"
           className={cn(
-            'absolute inset-y-0 rounded-[inherit] bg-[var(--rad-slider-thumb-color,var(--rad-color-accent))] forced-colors:bg-[Highlight]',
+            'absolute inset-y-0 rounded-[inherit] bg-[var(--_rad-range-fill)] forced-colors:bg-[Highlight]',
             parts?.range?.className
           )}
           style={{
@@ -213,6 +222,7 @@ export function RangeSlider({
           id={control.id ?? generatedId}
           aria-label={lowerLabel}
           value={lower}
+          showTrack={false}
           effectiveBounds={[min, upper]}
           onValueChange={next => request(0, next)}
           data-slot="range-slider-thumb range-slider-lower"
@@ -223,6 +233,7 @@ export function RangeSlider({
           ref={upperRef}
           aria-label={upperLabel}
           value={upper}
+          showTrack={false}
           effectiveBounds={[lower, snap(max)]}
           onValueChange={next => request(1, next)}
           data-slot="range-slider-thumb range-slider-upper"
