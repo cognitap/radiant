@@ -28,6 +28,10 @@ test('localized digits and AM/PM submit an ISO wall-clock time alongside an inde
           <TimeInput
             name="time"
             ref={input}
+            style={{
+              '--rad-time-input-period-color': '#123456',
+              '--rad-time-input-period-indicator-color': '#654321'
+            }}
           />
         </Field>
       </LocaleProvider>
@@ -44,6 +48,8 @@ test('localized digits and AM/PM submit an ISO wall-clock time alongside an inde
   const periodButtons = host.querySelectorAll<HTMLButtonElement>('[data-slot~="time-input"] button')
   expect(periodButtons).toHaveLength(1)
   const period = periodButtons[0]
+  expect(getComputedStyle(period).color).toBe('rgb(18, 52, 86)')
+  expect(getComputedStyle(period).textDecorationColor).toBe('rgb(101, 67, 33)')
   expect(document.activeElement).toBe(period)
   expect(period.textContent).toBe('ص')
   await click(period)
