@@ -868,3 +868,10 @@ export {
 export type { ColorFormat } from './color/colorValue.js'
 
 export { ColorInput, type ColorInputProps } from './components/ColorInput/ColorInput.js'
+
+export {
+  Dropzone,
+  type DropzoneProps,
+  type DropzoneSelection,
+  type DropzoneRejection
+} from './components/Dropzone/Dropzone.js'

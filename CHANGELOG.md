@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Dropzone adds drag-and-drop file selection, native browsing, and file type, size, and count checks.
+
 ## 0.0.84
 
 - ColorInput combines editable color text, a swatch preview, and ColorPicker with native validation and submission.
