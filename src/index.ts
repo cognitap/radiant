@@ -841,3 +841,10 @@ export { TreeSelect, type TreeSelectProps } from './components/TreeSelect/TreeSe
 export { Cascader, type CascaderProps } from './components/Cascader/Cascader.js'
 
 export { Stepper, type StepperProps, type StepperStep } from './components/Stepper/Stepper.js'
+
+export {
+  Timeline,
+  TimelineItem,
+  type TimelineProps,
+  type TimelineItemProps
+} from './components/Timeline/Timeline.js'
