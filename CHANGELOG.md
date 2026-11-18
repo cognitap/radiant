@@ -6,6 +6,8 @@
 
 ## 0.0.88
 
+- Rating hides its decorative radio markers when using the standalone stylesheet.
+
 - RingProgress shows native progress or meter readings with themed circular arcs, segments, and spring motion.
 
 - NumberFormatter displays localized numbers, currencies, percentages, and units in inline text.
