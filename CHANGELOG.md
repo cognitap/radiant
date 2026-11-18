@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.88
+
 - RingProgress shows native progress or meter readings with themed circular arcs, segments, and spring motion.
 
 - NumberFormatter displays localized numbers, currencies, percentages, and units in inline text.
