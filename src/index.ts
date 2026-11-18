@@ -829,6 +829,7 @@ export {
 } from './components/Carousel/Carousel.js'
 
 export { Calendar, type CalendarProps, type CalendarRange } from './components/Calendar/Calendar.js'
+export { ListBox, type ListBoxProps, type ListBoxOption } from './components/ListBox/ListBox.js'
 export { DatePicker, type DatePickerProps } from './components/DatePicker/DatePicker.js'
 
 export {
