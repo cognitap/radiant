@@ -23,16 +23,29 @@ test('date fields can be entered end first, reject a reversed range, and submit 
         <Field
           layout="group"
           label="Booking"
+          description="Enter the itinerary dates."
+          error="Review the dates."
         >
+          <p id="booking-policy">Check-out is at noon.</p>
           <DateRangePicker
             {...labels}
             onValueChange={changes}
+            aria-describedby="booking-policy"
           />
         </Field>
       </LocaleProvider>
     </form>,
     true
   )
+  const description = host.querySelector('[data-slot~="field-description"]')!
+  const error = host.querySelector('[data-slot~="field-error"]')!
+  for (const endpoint of ['start', 'end']) {
+    const day = segment(host, endpoint, 'day')
+    expect(day.getAttribute('aria-describedby')).toBe(
+      `${description.id} ${error.id} booking-policy`
+    )
+    expect(day.getAttribute('aria-invalid')).toBe('true')
+  }
   const form = host.querySelector('form')!
   expect(form.checkValidity()).toBe(true)
   await click(segment(host, 'end', 'day'))
@@ -76,6 +89,34 @@ test('one calendar handles both endpoints, stays open between picks, and restore
   await click(trigger)
   await key('{Escape}')
   expect(submitted(host)).toEqual({ from: '2028-02-29', to: '2028-03-01' })
+})
+
+test('opens on the suggested date for an empty range and completes a typed end in the calendar', async () => {
+  const { host } = await mount(
+    <form>
+      <DateRangePicker
+        {...labels}
+        locale="en-US"
+        today="2028-02-29"
+        defaultFocusedDate="2028-03-10"
+      />
+    </form>
+  )
+  const trigger = host.querySelector<HTMLButtonElement>('[aria-haspopup="dialog"]')!
+  await click(trigger)
+  expect(document.activeElement?.getAttribute('data-date')).toBe('2028-03-10')
+  expect(submitted(host)).toEqual({ from: '', to: '' })
+  await key('{Escape}')
+
+  await click(segment(host, 'end', 'month'))
+  await key('04052028')
+  expect(submitted(host)).toEqual({ from: '', to: '2028-04-05' })
+  await click(trigger)
+  expect(document.activeElement?.getAttribute('data-date')).toBe('2028-04-05')
+  expect(document.activeElement?.closest('td')?.getAttribute('aria-selected')).toBe('true')
+  await key('{ArrowLeft}{Enter}')
+  expect(submitted(host)).toEqual({ from: '2028-04-04', to: '2028-04-05' })
+  expect(host.querySelector(':popover-open')).toBeNull()
 })
 
 test('presets and typing honor unavailable interior dates, bounds and native reset', async () => {

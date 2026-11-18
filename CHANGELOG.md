@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- DateRangePicker accepts `defaultFocusedDate` for an empty range and can complete a range in the calendar after an end date is typed first.
+- DateRangePicker connects both fields to shared descriptions and errors from a surrounding Field group.
+
 - DatePicker accepts `defaultFocusedDate` to open an empty field on the desired calendar date while keeping today and the selected value independent.
 
 ## 0.0.82
