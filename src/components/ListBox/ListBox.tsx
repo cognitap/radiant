@@ -252,7 +252,6 @@ export function ListBox(props: ListBoxProps) {
             id={optionId(idx)}
             // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- The corresponding native option lives in the form bridge.
             role="option"
-            aria-label={item.textValue}
             aria-selected={selected(item.value)}
             aria-disabled={item.disabled || undefined}
             data-list-box-option={idx}
