@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- InlineEdit supports single-line editing with explicit save, cancel, and validation.
+
 - DateField offers localized segmented date entry and submits an ISO civil date.
 
 - ListBox provides an always-visible single or multiple chooser for rich options and native forms.

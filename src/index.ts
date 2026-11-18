@@ -104,6 +104,7 @@ export type {
 } from './components/Field/Field.js'
 export { Input } from './components/Input/Input.js'
 export type { InputProps } from './components/Input/Input.js'
+export { InlineEdit, type InlineEditProps } from './components/InlineEdit/InlineEdit.js'
 export { Textarea } from './components/Textarea/Textarea.js'
 export type { TextareaProps } from './components/Textarea/Textarea.js'
 export { Slider } from './components/Slider/Slider.js'
