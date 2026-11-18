@@ -21,6 +21,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize } from '../../presentation.js'
+import type { ThemeStyle } from '../../themes/defineTheme.js'
 import {
   isoTime,
   secondsOf,
@@ -57,6 +58,8 @@ export type TimeInputProps = ValueOwner<string | null> &
     /** Whole seconds, counted from min or midnight. Defaults to one minute, or one second with seconds shown. */
     step?: number
     controlSize?: ControlSize
+    /** Styles and theme variables for the shared field wrapper. */
+    style?: ThemeStyle
   }
 
 const units = { hour: 3600, minute: 60, second: 1 }
@@ -76,6 +79,7 @@ export function TimeInput({
   name,
   form,
   className,
+  style,
   readOnly,
   ...props
 }: TimeInputProps) {
@@ -180,6 +184,7 @@ export function TimeInput({
       aria-labelledby={labelledBy}
       aria-label={label}
       className={cn('w-fit max-w-full gap-0', className)}
+      style={style}
     >
       <WithoutField>
         {format.parts.map(({ type: part, value: literal }, index) => {

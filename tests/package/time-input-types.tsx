@@ -6,6 +6,7 @@ export const localTime = (
     hourCycle="h12"
     showSeconds
     step={5}
+    style={{ '--rad-time-input-period-indicator-color': 'var(--rad-color-accent)' }}
     onValueChange={iso => iso?.toUpperCase()}
   />
 )
