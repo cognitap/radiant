@@ -16,6 +16,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
   options: {
     anchorPoint?: { x: number; y: number }
     initialFocusRef?: RefObject<HTMLElement | null>
+    returnFocusRef?: RefObject<HTMLElement | null>
     onFocusOutside?: () => void
     side: PopoverSide
     align: PopoverAlign
@@ -68,6 +69,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
     const doc = node.ownerDocument
     const win = doc.defaultView!
     const shouldRestore = () => restoreFocus.current
+    const focusTarget = () => latest.current.returnFocusRef?.current ?? trigger
     const place = () => {
       if (!node.isConnected || !node.matches(':popover-open')) return
       const rtl = syncPopupLocale(trigger, node, latest.current)
@@ -228,7 +230,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
       stack.splice(stack.indexOf(node), 1)
       if (!stack.length) layers.delete(doc)
       if (shouldRestore() && node.contains(doc.activeElement) && trigger.isConnected)
-        trigger.focus({ preventScroll: true })
+        focusTarget().focus({ preventScroll: true })
       if (node.matches(':popover-open')) node.hidePopover()
       reposition.current = () => {}
     }

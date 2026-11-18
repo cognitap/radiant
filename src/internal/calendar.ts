@@ -31,15 +31,20 @@ function regionalWeekStart(locale: string) {
   return region === 'MV' ? 5 : 1
 }
 
-export function calendarLabels(requested: string, calendar?: CalendarSystem) {
+export function calendarFormat(requested: string, calendar?: CalendarSystem) {
   const locale = supportedLocale(Intl.DateTimeFormat, requested)
   const preferred = new Intl.DateTimeFormat(locale).resolvedOptions().calendar
   const options = {
     calendar: calendar ?? (preferred === 'buddhist' ? 'buddhist' : 'gregory'),
     timeZone: 'UTC'
   }
-  const dateFormat = (fields: Intl.DateTimeFormatOptions) =>
+  return (fields: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat(locale, { ...options, ...fields })
+}
+
+export function calendarLabels(requested: string, calendar?: CalendarSystem) {
+  const locale = supportedLocale(Intl.DateTimeFormat, requested)
+  const dateFormat = calendarFormat(locale, calendar)
   return {
     weekStart: regionalWeekStart(locale),
     month: dateFormat({ month: 'long', year: 'numeric' }),
