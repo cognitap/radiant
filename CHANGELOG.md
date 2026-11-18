@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- NumberFormatter displays localized numbers, currencies, percentages, and units in inline text.
+
 - Indicator pins a dot or capped count to a logical corner and supplies a status-aware name for the target.
 
 ## 0.0.87

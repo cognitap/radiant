@@ -254,9 +254,16 @@ test('real Button press/release/re-press retains momentum and CSS does not tween
   expect(ref.current).toBe(button)
   pointer(button, 'pointerdown')
   await until(() => scale(button) < 0.86)
+  const pressed = scale(button)
   pointer(button, 'pointerup')
-  await until(() => scale(button) > 0.87 && scale(button) < 0.95)
-  const before = scale(button)
+  // Observe the release on animation frames so a CI timer cannot skip the moving interval.
+  let before = pressed
+  for (let i = 0; i < 30 && before <= pressed + 0.01; i++) {
+    await frame()
+    before = scale(button)
+  }
+  expect(before).toBeGreaterThan(pressed + 0.01)
+  expect(before).toBeLessThan(1)
   pointer(button, 'pointerdown')
   const samples: number[] = []
   for (let i = 0; i < 3; i++) {
