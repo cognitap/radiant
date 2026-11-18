@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- DateField offers localized segmented date entry and submits an ISO civil date.
+
 - ListBox provides an always-visible single or multiple chooser for rich options and native forms.
 
 - RangeSlider sets lower and upper numeric bounds on one track with two native form controls.

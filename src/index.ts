@@ -831,6 +831,7 @@ export {
 export { Calendar, type CalendarProps, type CalendarRange } from './components/Calendar/Calendar.js'
 export { ListBox, type ListBoxProps, type ListBoxOption } from './components/ListBox/ListBox.js'
 export { DatePicker, type DatePickerProps } from './components/DatePicker/DatePicker.js'
+export { DateField, type DateFieldProps } from './components/DateField/DateField.js'
 
 export {
   DateRangePicker,

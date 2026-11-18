@@ -18,7 +18,7 @@ import { useLocale } from '../../react/useLocale.js'
 import { dateSegments, type Segment, type Segments } from './dateSegments.js'
 import type { CalendarProps } from '../Calendar/Calendar.js'
 
-type EditorProps = Pick<
+export type DateEditorControlProps = Pick<
   ComponentProps<'input'>,
   | 'id'
   | 'ref'
@@ -33,15 +33,19 @@ type EditorProps = Pick<
   | 'aria-invalid'
   | 'className'
 > &
-  Pick<CalendarProps, 'controlSize' | 'locale' | 'calendar' | 'min' | 'max' | 'isDateDisabled'> & {
-    value: string | null
-    onValueChange: (date: string | null) => void
-    onFormReset?: () => void
-    revision: number
-    slot: string
-    children?: ReactNode
-  }
+  Pick<CalendarProps, 'controlSize' | 'locale' | 'calendar' | 'min' | 'max' | 'isDateDisabled'>
+
+type EditorProps = DateEditorControlProps & {
+  componentName?: 'DatePicker' | 'DateField'
+  value: string | null
+  onValueChange: (date: string | null) => void
+  onFormReset?: () => void
+  revision: number
+  slot: string
+  children?: ReactNode
+}
 export function DateEditor({
+  componentName = 'DatePicker',
   value,
   onValueChange,
   onFormReset,
@@ -65,10 +69,11 @@ export function DateEditor({
   const control = useFieldControl(props)
   const labelledBy = props['aria-labelledby'] ?? field?.labelId
   const label = props['aria-label']
-  requireAccessibleName('DatePicker', { 'aria-label': label, 'aria-labelledby': labelledBy })
+  requireAccessibleName(componentName, { 'aria-label': label, 'aria-labelledby': labelledBy })
   if (min !== undefined) civilTime(min)
   if (max !== undefined) civilTime(max)
-  if (min && max && min > max) throw new RangeError('DatePicker min must be on or before max.')
+  if (min && max && min > max)
+    throw new RangeError(componentName + ' min must be on or before max.')
 
   const language = useLocale(locale)
   const format = useMemo(() => dateSegments(language, calendar), [language, calendar])
