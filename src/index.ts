@@ -824,3 +824,4 @@ export {
 } from './components/Carousel/Carousel.js'
 
 export { Calendar, type CalendarProps, type CalendarRange } from './components/Calendar/Calendar.js'
+export { DatePicker, type DatePickerProps } from './components/DatePicker/DatePicker.js'

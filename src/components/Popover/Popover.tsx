@@ -211,6 +211,7 @@ export function PopoverContent(props: PopoverContentProps) {
 /** Private focus-leave timing seam; native pointer/Escape dismissal stays shared. */
 export function PopoverContentRoot({
   onFocusOutside,
+  returnFocusRef,
   ref,
   className,
   side = 'bottom',
@@ -220,7 +221,10 @@ export function PopoverContentRoot({
   initialFocusRef,
   motion = 'inherit',
   ...props
-}: PopoverContentProps & { onFocusOutside?: () => void }) {
+}: PopoverContentProps & {
+  onFocusOutside?: () => void
+  returnFocusRef?: RefObject<HTMLElement | null>
+}) {
   const popover = usePopoverContext()
   if (![sideOffset, collisionPadding].every(value => Number.isFinite(value) && value >= 0))
     throw new TypeError('Popover offsets and padding must be finite, nonnegative numbers.')
@@ -242,6 +246,7 @@ export function PopoverContentRoot({
       sideOffset,
       collisionPadding,
       initialFocusRef,
+      returnFocusRef,
       onFocusOutside,
       lang: props.lang,
       dir: props.dir,

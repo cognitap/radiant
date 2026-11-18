@@ -52,11 +52,22 @@ export type CalendarProps = Omit<
 const clamp = (time: number, min: number, max: number) => Math.min(max, Math.max(min, time))
 
 export function Calendar(props: CalendarProps) {
+  return (
+    <CalendarRoot
+      {...props}
+      onDaySelect={undefined}
+    />
+  )
+}
+
+/** Composed pickers finish on activation even when the selected date is unchanged. */
+export function CalendarRoot(props: CalendarProps & { onDaySelect?: (date: string) => void }) {
   const {
     type,
     value,
     defaultValue,
     onValueChange,
+    onDaySelect,
     locale,
     calendar,
     firstDayOfWeek,
@@ -212,6 +223,7 @@ export function Calendar(props: CalendarProps) {
             if (!unavailable) {
               setCursor(time)
               pick(date)
+              onDaySelect?.(date)
             }
           }}
         >

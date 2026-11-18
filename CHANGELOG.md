@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- DatePicker supports localized segmented date entry and Calendar selection, and submits an ISO date with native forms.
+
 - Calendar supports keyboard date and range selection with localized weeks, Gregorian and Buddhist calendars, and unavailable dates.
 
 - LocaleProvider supplies app and subtree locales for number editing and search. Use getLocaleAttributes in the root layout to set native language and direction before hydration.
