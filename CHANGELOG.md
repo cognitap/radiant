@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- DatePicker accepts `defaultFocusedDate` to open an empty field on the desired calendar date while keeping today and the selected value independent.
+
 ## 0.0.82
 
 - Calendar accepts `defaultFocusedDate` to open on a date independently of the selection and today marker.

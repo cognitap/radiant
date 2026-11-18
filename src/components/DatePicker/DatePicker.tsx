@@ -39,6 +39,8 @@ export type DatePickerProps = ValueOwner<string | null> &
   > & {
     onValueChange?: (iso: string | null) => void
     calendarLabel?: string
+    /** Initial calendar focus when the field is empty. Defaults to today. */
+    defaultFocusedDate?: CalendarProps['defaultFocusedDate']
     className?: string
   }
 
@@ -51,6 +53,7 @@ export function DatePicker({
   previousMonthLabel,
   nextMonthLabel,
   today,
+  defaultFocusedDate,
   ref,
   ...props
 }: DatePickerProps) {
@@ -101,6 +104,7 @@ export function DatePicker({
           isDateDisabled={props.isDateDisabled}
           controlSize={props.controlSize}
           today={today}
+          defaultFocusedDate={owner.value === null ? defaultFocusedDate : undefined}
           firstDayOfWeek={firstDayOfWeek}
           previousMonthLabel={previousMonthLabel}
           nextMonthLabel={nextMonthLabel}
