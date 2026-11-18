@@ -859,3 +859,10 @@ export {
 } from './components/DataTable/DataTable.js'
 
 export { Rating, type RatingProps } from './components/Rating/Rating.js'
+
+export {
+  ColorPicker,
+  type ColorPickerProps,
+  type ColorPickerSwatch
+} from './components/ColorPicker/ColorPicker.js'
+export type { ColorFormat } from './color/colorValue.js'
