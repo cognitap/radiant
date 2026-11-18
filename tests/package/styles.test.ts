@@ -30,8 +30,9 @@ function readExport(name: string) {
   return readFileSync(require.resolve(`@cognitap/radiant/${name}`), 'utf8')
 }
 
-test('Dropzone and Spoiler hide internal controls with the standalone stylesheet', () => {
+test('the standalone stylesheet supports Dropzone sizing and hides internal controls', () => {
   const dropzone = renderToStaticMarkup(createElement(Dropzone))
+  assert.match(dropzone, /^<div[^>]*\bbox-border\b/)
   assert.match(dropzone, /<button[^>]*\[&amp;\[aria-hidden\]\]:hidden/)
   assert.match(
     dropzone,
@@ -41,6 +42,7 @@ test('Dropzone and Spoiler hide internal controls with the standalone stylesheet
   const spoiler = renderToStaticMarkup(createElement(Spoiler, {}, 'Short copy'))
   assert.match(spoiler, /<summary[^>]*\bhidden=""[^>]*\[&amp;\[hidden\]\]:hidden/)
   const css = readExport('styles.css')
+  assert.match(css, /\.box-border\s*\{\s*box-sizing:\s*border-box/)
   assert.match(css, /\[aria-hidden\]\s*\{\s*display:\s*none/)
   assert.match(css, /\[hidden\]\s*\{\s*display:\s*none/)
 })
