@@ -833,3 +833,5 @@ export {
   type DateRangePreset
 } from './components/DateRangePicker/DateRangePicker.js'
 export { TimeInput, type TimeInputProps } from './components/TimeInput/TimeInput.js'
+
+export { Tree, type TreeProps, type TreeItem, type TreeVirtual } from './components/Tree/Tree.js'
