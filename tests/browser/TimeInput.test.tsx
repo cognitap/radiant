@@ -41,19 +41,19 @@ test('localized digits and AM/PM submit an ISO wall-clock time alongside an inde
   await fill(hour, '١٢')
   await fill(segment(host, 'minute'), '٠٥')
   expect(data(host)).toBe('00:05')
-  const am = host.querySelector<HTMLButtonElement>('button[data-value="am"]')!
-  const pm = host.querySelector<HTMLButtonElement>('button[data-value="pm"]')!
-  expect(document.activeElement).toBe(am)
-  expect(pm.textContent).toContain('م')
-  await click(pm)
-  expect(pm.getAttribute('aria-pressed')).toBe('true')
-  await click(pm)
-  expect(pm.getAttribute('aria-pressed')).toBe('true')
+  const periodButtons = host.querySelectorAll<HTMLButtonElement>('[data-slot~="time-input"] button')
+  expect(periodButtons).toHaveLength(1)
+  const period = periodButtons[0]
+  expect(document.activeElement).toBe(period)
+  expect(period.textContent).toBe('ص')
+  await click(period)
+  expect(period.textContent).toBe('م')
+  expect(data(host)).toBe('12:05')
   await key('{ArrowUp}')
-  expect(document.activeElement).toBe(am)
+  expect(period.textContent).toBe('ص')
   expect(data(host)).toBe('00:05')
-  await key('{ArrowLeft} ')
-  expect(document.activeElement).toBe(pm)
+  await key(' ')
+  expect(document.activeElement).toBe(period)
   expect(Object.fromEntries(new FormData(host.querySelector('form')!))).toEqual({
     date: '2028-03-01',
     time: '12:05'

@@ -11,7 +11,9 @@ import {
 import { cn } from 'cn'
 import { useField, useFieldControl, WithoutField } from '../Field/Field.js'
 import { InputGroup, InputGroupInput } from '../InputGroup/InputGroup.js'
-import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup.js'
+import { inlineActionClass } from '../shared/actionStyles.js'
+import { focusRingInsetClass } from '../shared/focusStyles.js'
+import { Button } from '../Button/Button.js'
 import { requireAccessibleName } from '../../internal/accessibleName.js'
 import { useFormReset } from '../../react/useFormReset.js'
 import { useLocale } from '../../react/useLocale.js'
@@ -134,6 +136,9 @@ export function TimeInput({
     setDraft({ owner: iso, format, parts: updated })
     owner.request(iso)
   }
+  function togglePeriod() {
+    edit({ ...parts, dayPeriod: parts.dayPeriod === 'am' ? 'pm' : 'am' })
+  }
   function editNumber(part: ClockPart, input: HTMLInputElement) {
     const text = format.ascii(input.value)
     if (!/^\d{0,2}$/.test(text)) return
@@ -180,43 +185,38 @@ export function TimeInput({
         {format.parts.map(({ type: part, value: literal }, index) => {
           if (part === 'dayPeriod')
             return (
-              <ToggleGroup
+              <Button
                 key={part}
-                type="single"
-                variant="segmented"
+                type="button"
+                variant="ghost"
+                tone="neutral"
+                motion="off"
                 data-slot="time-input-period"
-                aria-label={format.names.of('dayPeriod') ?? 'AM/PM'}
+                data-segment={part}
+                aria-label={[format.names.of(part), format[parts.dayPeriod]]
+                  .filter(Boolean)
+                  .join(' ')}
                 aria-describedby={control['aria-describedby']}
                 controlSize={controlSize}
                 disabled={control.disabled || readOnly}
-                value={parts.dayPeriod}
-                onValueChange={next => {
-                  if (next === 'am' || next === 'pm') edit({ ...parts, dayPeriod: next })
-                }}
+                onClick={togglePeriod}
                 onKeyDown={event => {
                   if (event.altKey || event.metaKey || event.ctrlKey || event.defaultPrevented)
                     return
-                  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
-                  event.preventDefault()
-                  const next = parts.dayPeriod === 'am' ? 'pm' : 'am'
-                  event.currentTarget
-                    .querySelector<HTMLButtonElement>(`button[data-value="${next}"]`)
-                    ?.focus()
-                  edit({ ...parts, dayPeriod: next })
+                  if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                    event.preventDefault()
+                    togglePeriod()
+                  }
                 }}
-                className="mx-1 inline-grid shrink-0 grid-cols-2 gap-0 [--rad-toggle-group-padding:2px]"
+                className={cn(
+                  inlineActionClass,
+                  focusRingInsetClass,
+                  'min-h-[max(1.5rem,calc(var(--_rad-control-height)-0.75rem))] min-w-6 [--rad-button-border-width:0px] px-1 leading-none',
+                  'text-[color:var(--rad-time-input-period-color,var(--rad-color-foreground))] underline decoration-dotted decoration-[color:var(--rad-time-input-period-indicator-color,var(--rad-color-muted-foreground))] underline-offset-4 enabled:hover:decoration-solid disabled:no-underline'
+                )}
               >
-                {(['am', 'pm'] as const).map(period => (
-                  <ToggleGroupItem
-                    key={period}
-                    value={period}
-                    data-segment={parts.dayPeriod === period ? part : undefined}
-                    className="min-h-[max(1.5rem,calc(var(--_rad-control-height)-0.875rem))] px-2 leading-none aria-pressed:font-semibold"
-                  >
-                    {format[period]}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                {format[parts.dayPeriod]}
+              </Button>
             )
           if (part !== 'hour' && part !== 'minute' && part !== 'second')
             return (
