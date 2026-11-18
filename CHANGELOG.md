@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- RingProgress shows native progress or meter readings with themed circular arcs, segments, and spring motion.
+
 - NumberFormatter displays localized numbers, currencies, percentages, and units in inline text.
 
 - Indicator pins a dot or capped count to a logical corner and supplies a status-aware name for the target.

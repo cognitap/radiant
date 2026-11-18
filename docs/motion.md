@@ -53,13 +53,14 @@ export function AccountActions() {
 
 Examples:
 
-| Component                                | Motion                                                                            |
-| ---------------------------------------- | --------------------------------------------------------------------------------- |
-| `Button`, `DialogTrigger`, `DialogClose` | Compress on press to `--rad-button-press-scale` (default `0.97`, range `0.5`–`1`) |
-| `MotionLink`                             | Press scale on button-styled links. `Link` stays server-renderable                |
-| `Collapsible`, `Accordion`               | Animate height. Closed content is inert immediately                               |
-| `Dialog`                                 | Springs open. The `<dialog>` closes immediately. An inert clone finishes the exit |
-| `Select`                                 | Fade the popup in. Close immediately                                              |
+| Component                                | Motion                                                                                |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| `Button`, `DialogTrigger`, `DialogClose` | Compress on press to `--rad-button-press-scale` (default `0.97`, range `0.5`–`1`)     |
+| `MotionLink`                             | Press scale on button-styled links. `Link` stays server-renderable                    |
+| `Collapsible`, `Accordion`               | Animate height. Closed content is inert immediately                                   |
+| `Dialog`                                 | Springs open. The `<dialog>` closes immediately. An inert clone finishes the exit     |
+| `Select`                                 | Fade the popup in. Close immediately                                                  |
+| `RingProgress`                           | Follow changes to circular arc endpoints while the native reading updates immediately |
 
 The exit clone is skipped when the dialog has more than 500 descendants, or when it contains a nested dialog, media, a canvas, an embed, or a custom element. The clone stops after 2 seconds.
 
