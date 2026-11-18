@@ -1,5 +1,6 @@
 'use client'
 
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- Native form reset must leave the React-managed status children in place. */
 import { useId, useRef, useState, type DragEvent } from 'react'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
@@ -207,7 +208,8 @@ export function Dropzone({
           {description}
         </span>
       )}
-      <output
+      <div
+        role="status"
         data-slot="dropzone-status"
         className={cn('grid gap-1 text-xs [overflow-wrap:anywhere]', parts?.status?.className)}
         style={parts?.status?.style}
@@ -224,7 +226,7 @@ export function Dropzone({
           </span>
         ))}
         {!selection && emptyText}
-      </output>
+      </div>
     </div>
   )
 }

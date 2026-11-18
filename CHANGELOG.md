@@ -6,6 +6,8 @@
 
 ## 0.0.86
 
+- Dropzone clears its feedback on native form reset in WebKit.
+
 - The compiled stylesheet hides Dropzone's duplicate file controls and Spoiler's summary when all content fits.
 
 ## 0.0.85
