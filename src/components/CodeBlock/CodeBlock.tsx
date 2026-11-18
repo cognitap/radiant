@@ -1,14 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ComponentProps
-} from 'react'
+import { createContext, useContext, useId, type ComponentProps } from 'react'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
 import { ScrollArea, type ScrollAreaProps } from '../ScrollArea/ScrollArea.js'
 import { cn } from 'cn'
@@ -16,10 +8,9 @@ import { joinIds } from '../../internal/ids.js'
 import { composeAction } from '../../internal/events.js'
 import type { DistributiveOmit, WithoutToggle } from '../../internal/types.js'
 import type { PartStyle } from '../../presentation.js'
+import { useClipboardCopy } from '../../react/useClipboardCopy.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 
-type Phase = 'idle' | 'pending' | 'success' | 'error'
-type Feedback = { source: string; phase: Phase }
 type Native<Host extends 'div' | 'pre'> = Omit<ComponentProps<Host>, 'style'> & {
   style?: ThemeStyle
   'data-slot'?: string
@@ -68,41 +59,8 @@ export function CodeBlock({
   ...props
 }: CodeBlockProps) {
   if (typeof code !== 'string') throw new TypeError('CodeBlock code must be a string.')
-  const [feedback, setFeedback] = useState<Feedback>({ source: code, phase: 'idle' })
-  const [pending, setPending] = useState(false)
-  const busy = useRef(false),
-    mounted = useRef(true),
-    operation = useRef(0)
   const statusId = useId()
-  // Forget feedback for replaced source without cancelling an already requested browser write.
-  if (feedback.source !== code) setFeedback({ source: code, phase: 'idle' })
-  useEffect(() => {
-    mounted.current = true
-    return () => {
-      mounted.current = false
-      operation.current += 1
-    }
-  }, [])
-  const copy = async (win: Window | null) => {
-    if (busy.current) return
-    const source = code,
-      request = ++operation.current
-    busy.current = true
-    setPending(true)
-    setFeedback({ source, phase: 'pending' })
-    let phase: Phase = 'success'
-    try {
-      if (!win?.navigator.clipboard?.writeText) throw new Error('Clipboard writing is unavailable.')
-      await win.navigator.clipboard.writeText(source)
-    } catch {
-      phase = 'error'
-    }
-    if (!mounted.current || request !== operation.current) return
-    busy.current = false
-    setPending(false)
-    setFeedback(current => (current.source === source ? { source, phase } : current))
-  }
-  const phase = feedback.source === code ? feedback.phase : 'idle'
+  const { copy, pending, phase } = useClipboardCopy(code)
   const message =
     phase === 'pending'
       ? loadingText
