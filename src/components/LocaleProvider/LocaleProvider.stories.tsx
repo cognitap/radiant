@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { LocaleProvider } from './LocaleProvider.js'
+import { getLocaleAttributes } from '../../internal/locale.js'
 import { NumberField } from '../NumberField/NumberField.js'
+import { NumberFormatter } from '../NumberFormatter/NumberFormatter.js'
 import { Field } from '../Field/Field.js'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../Tabs/Tabs.js'
 
@@ -20,7 +22,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-export const NestedScopes: Story = {
+export const CompareRegionalAmounts: Story = {
   render: () => (
     <LocaleProvider locale="ar-EG">
       <Field label="المبلغ">
@@ -31,16 +33,48 @@ export const NestedScopes: Story = {
         />
       </Field>
       <LocaleProvider locale="fr-FR">
-        <Field label="Montant">
-          <NumberField
-            defaultValue={1234.5}
-            incrementLabel="Augmenter"
-            decrementLabel="Diminuer"
-          />
-        </Field>
+        <LocaleProvider>
+          <Field label="Montant">
+            <NumberField
+              defaultValue={1234.5}
+              incrementLabel="Augmenter"
+              decrementLabel="Diminuer"
+            />
+          </Field>
+        </LocaleProvider>
       </LocaleProvider>
     </LocaleProvider>
   )
+}
+
+export const PublishAPriceList: Story = {
+  render: () => {
+    const locale = 'de-DE'
+    const options = { style: 'currency', currency: 'EUR' } as const
+    return (
+      <ul {...getLocaleAttributes(locale)}>
+        <LocaleProvider
+          locale={locale}
+          scope="document"
+        >
+          <li>
+            Monatsabo:{' '}
+            <NumberFormatter
+              value={14.9}
+              options={options}
+            />
+          </li>
+          <li>
+            Jahresabo:{' '}
+            <NumberFormatter
+              value={149}
+              options={options}
+            />
+          </li>
+        </LocaleProvider>
+      </ul>
+    )
+  }
 }
 
 export const ReadABilingualReport: Story = {
