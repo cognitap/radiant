@@ -80,6 +80,21 @@ function Multiple(props: Partial<MultiSelectProps>) {
     </Field>
   )
 }
+function CanonicalMultiple(props: Partial<MultiSelectProps>) {
+  return (
+    <Field label="Projects">
+      <Combobox
+        items={items}
+        {...props}
+        type="multiple"
+      />
+    </Field>
+  )
+}
+const entryPoints = [
+  ['MultiSelect', Multiple],
+  ['Combobox multiple', CanonicalMultiple]
+] as const
 const combo = (host: HTMLElement) =>
   host.querySelector<HTMLInputElement>('[data-slot~="combobox-input"]')!
 const text = (host: HTMLElement) =>
@@ -137,50 +152,56 @@ test('multiple Combobox hydrates named native input, actual Tags and a multisele
   expect(host.querySelector('[role="listbox"]')?.getAttribute('aria-multiselectable')).toBe('true')
   expect(host.querySelector('[data-value="a"]')?.getAttribute('aria-selected')).toBe('true')
 })
-test('multiple local selection toggles independently of focus and keeps native input focus', async () => {
-  const change = vi.fn(),
-    { host } = await mount(<Multiple onValueChange={change} />)
-  await fill(combo(host), 'Al')
-  await keys('{ArrowDown}{Enter}')
-  expect(change).toHaveBeenLastCalledWith(['a'])
-  expect(combo(host).value).toBe('')
-  expect(combo(host).getAttribute('aria-expanded')).toBe('true')
-  expect(document.activeElement).toBe(combo(host))
-  await fill(combo(host), 'Be')
-  await keys('{ArrowDown}{Enter}')
-  expect(change).toHaveBeenLastCalledWith(['a', 'b'])
-  await click(button(host, 'Remove Alpha'))
-  expect(change).toHaveBeenLastCalledWith(['b'])
-  expect(document.activeElement).toBe(combo(host))
-  await keys('{Backspace}')
-  expect(change).toHaveBeenLastCalledWith([])
-  await keys('{Escape}{Escape}')
-  expect(change).toHaveBeenCalledTimes(4)
-})
-test('arrays submit original repeated strings and emit native changes when the first key is unchanged', async () => {
-  const changes: string[][] = []
-  const { host } = await mount(
-    <form
-      onChange={event =>
-        changes.push(new FormData(event.currentTarget).getAll('projects').map(String))
-      }
-    >
-      <Multiple
-        name="projects"
-        defaultValue={['a']}
-      />
-    </form>
-  )
-  await fill(combo(host), 'Be')
-  const before = changes.length
-  await keys('{ArrowDown}{Enter}')
-  expect(new FormData(host.querySelector('form')!).getAll('projects')).toEqual(['a', 'b'])
-  expect(changes.slice(before)).toEqual([['a', 'b']])
-  await click(button(host, 'Remove Beta'))
-  expect(changes.at(-1)).toEqual(['a'])
-  await reset(host.querySelector('form')!)
-  expect(new FormData(host.querySelector('form')!).getAll('projects')).toEqual(['a'])
-})
+test.each(entryPoints)(
+  '%s selection toggles independently of focus and keeps native input focus',
+  async (_name, Control) => {
+    const change = vi.fn(),
+      { host } = await mount(<Control onValueChange={change} />)
+    await fill(combo(host), 'Al')
+    await keys('{ArrowDown}{Enter}')
+    expect(change).toHaveBeenLastCalledWith(['a'])
+    expect(combo(host).value).toBe('')
+    expect(combo(host).getAttribute('aria-expanded')).toBe('true')
+    expect(document.activeElement).toBe(combo(host))
+    await fill(combo(host), 'Be')
+    await keys('{ArrowDown}{Enter}')
+    expect(change).toHaveBeenLastCalledWith(['a', 'b'])
+    await click(button(host, 'Remove Alpha'))
+    expect(change).toHaveBeenLastCalledWith(['b'])
+    expect(document.activeElement).toBe(combo(host))
+    await keys('{Backspace}')
+    expect(change).toHaveBeenLastCalledWith([])
+    await keys('{Escape}{Escape}')
+    expect(change).toHaveBeenCalledTimes(4)
+  }
+)
+test.each(entryPoints)(
+  '%s arrays submit original repeated strings and emit native changes when the first key is unchanged',
+  async (_name, Control) => {
+    const changes: string[][] = []
+    const { host } = await mount(
+      <form
+        onChange={event =>
+          changes.push(new FormData(event.currentTarget).getAll('projects').map(String))
+        }
+      >
+        <Control
+          name="projects"
+          defaultValue={['a']}
+        />
+      </form>
+    )
+    await fill(combo(host), 'Be')
+    const before = changes.length
+    await keys('{ArrowDown}{Enter}')
+    expect(new FormData(host.querySelector('form')!).getAll('projects')).toEqual(['a', 'b'])
+    expect(changes.slice(before)).toEqual([['a', 'b']])
+    await click(button(host, 'Remove Beta'))
+    expect(changes.at(-1)).toEqual(['a'])
+    await reset(host.querySelector('form')!)
+    expect(new FormData(host.querySelector('form')!).getAll('projects')).toEqual(['a'])
+  }
+)
 test('multiple controlled refusal, prop synchronization and query state never manufacture selection events', async () => {
   const request = vi.fn(),
     events = vi.fn()
