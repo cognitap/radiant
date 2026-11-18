@@ -1,6 +1,8 @@
+import { act } from 'react'
 import { commands } from 'vitest/browser'
 import { expect, test, vi } from 'vitest'
-import { Field, RangeSlider } from '../../src/index.js'
+import { Field, RangeSlider, ThemeScope } from '../../src/index.js'
+import { sharp } from '../../src/examples/index.js'
 import { click, key, mount } from './familyHarness.js'
 
 test('keeps two named native values ordered through hydration, key navigation, form reset and equal thumbs', async () => {
@@ -63,10 +65,10 @@ test('native mouse and touch drags target the selected thumbs and RTL arrows mov
   lower.focus()
   await key('{ArrowLeft}')
   expect(lower.valueAsNumber).toBe(26)
-  await commands.dragSlider('[data-slot~="range-slider-lower"]', 0.4)
+  await act(async () => commands.dragSlider('[data-slot~="range-slider-lower"]', 0.4))
   expect(lower.valueAsNumber).toBeGreaterThan(30)
   expect(upper.valueAsNumber).toBe(75)
-  await commands.dragSlider('[data-slot~="range-slider-upper"]', 0.9, true)
+  await act(async () => commands.dragSlider('[data-slot~="range-slider-upper"]', 0.9, true))
   expect(upper.valueAsNumber).toBeGreaterThan(82)
 })
 
@@ -92,4 +94,33 @@ test('a controlled owner can decline requests and disabled values stay out of fo
   expect(new FormData(host.querySelector('form')!).getAll('price')).toEqual(['20', '60'])
   await render(tree(true))
   expect(new FormData(host.querySelector('form')!).getAll('price')).toEqual([])
+})
+
+test('Sharp 3D paints one themed track while both slider inputs own pointer and keyboard actions', async () => {
+  const { host } = await mount(
+    <ThemeScope theme={sharp}>
+      <RangeSlider
+        aria-label="Price"
+        lowerLabel="Minimum"
+        upperLabel="Maximum"
+        defaultValue={[25, 75]}
+      />
+    </ThemeScope>
+  )
+  const track = host.querySelector('[data-slot=range-slider-track]')!
+  const fill = track.querySelector<HTMLElement>('[data-slot=range-slider-range]')!
+  expect(getComputedStyle(track).boxShadow).not.toBe('none')
+  expect(parseFloat(getComputedStyle(track).borderBlockStartWidth)).toBeGreaterThan(0)
+  expect(fill.style.insetInlineStart).toBe('25%')
+  expect(fill.style.insetInlineEnd).toBe('25%')
+  const thumbs = [...host.querySelectorAll<HTMLInputElement>('input[type=range]')]
+  for (const thumb of thumbs) {
+    expect(getComputedStyle(thumb).getPropertyValue('--_rad-slider-track-border').trim()).toBe(
+      '0px'
+    )
+    expect(thumb.className).not.toMatch(/slider-runnable-track\]:\[box-shadow:/)
+  }
+  thumbs[0].focus()
+  await key('{ArrowRight}')
+  expect(fill.style.insetInlineStart).toBe('26%')
 })

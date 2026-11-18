@@ -35,9 +35,6 @@ const sliderClass = [
   '[&::-webkit-slider-runnable-track]:box-border',
   '[&::-webkit-slider-runnable-track]:rounded-[var(--_rad-slider-track-radius)]',
   '[&::-webkit-slider-runnable-track]:[corner-shape:var(--_rad-slider-corner-shape)]',
-  '[&::-webkit-slider-runnable-track]:bg-[var(--_rad-slider-track)]',
-  '[&::-webkit-slider-runnable-track]:[border:var(--_rad-slider-track-border)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))]',
-  '[&::-webkit-slider-runnable-track]:[box-shadow:var(--rad-control-track-shadow,none)]',
   '[&::-webkit-slider-thumb]:appearance-none',
   '[&::-webkit-slider-thumb]:box-border',
   '[&::-webkit-slider-thumb]:[inline-size:var(--_rad-slider-thumb-width)]',
@@ -55,9 +52,6 @@ const sliderClass = [
   '[&::-moz-range-track]:box-border',
   '[&::-moz-range-track]:rounded-[var(--_rad-slider-track-radius)]',
   '[&::-moz-range-track]:[corner-shape:var(--_rad-slider-corner-shape)]',
-  '[&::-moz-range-track]:bg-[var(--_rad-slider-track)]',
-  '[&::-moz-range-track]:[border:var(--_rad-slider-track-border)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))]',
-  '[&::-moz-range-track]:[box-shadow:var(--rad-control-track-shadow,none)]',
   '[&::-moz-range-thumb]:box-border',
   '[&::-moz-range-thumb]:[inline-size:var(--_rad-slider-thumb-width)]',
   '[&::-moz-range-thumb]:[block-size:var(--_rad-slider-thumb-height)]',
@@ -67,7 +61,16 @@ const sliderClass = [
   '[&::-moz-range-thumb]:[border-style:var(--_rad-slider-thumb-border-style)]',
   '[&::-moz-range-thumb]:[border-color:var(--rad-slider-thumb-border-color,var(--_rad-slider-thumb))]',
   '[&::-moz-range-thumb]:bg-[var(--_rad-slider-thumb)]',
-  '[&::-moz-range-thumb]:[box-shadow:var(--rad-slider-thumb-shadow,var(--rad-control-indicator-thumb-shadow,none))]',
+  '[&::-moz-range-thumb]:[box-shadow:var(--rad-slider-thumb-shadow,var(--rad-control-indicator-thumb-shadow,none))]'
+].join(' ')
+
+const nativeTrackClass = [
+  '[&::-webkit-slider-runnable-track]:bg-[var(--_rad-slider-track)]',
+  '[&::-webkit-slider-runnable-track]:[border:var(--_rad-slider-track-border)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))]',
+  '[&::-webkit-slider-runnable-track]:[box-shadow:var(--rad-control-track-shadow,none)]',
+  '[&::-moz-range-track]:bg-[var(--_rad-slider-track)]',
+  '[&::-moz-range-track]:[border:var(--_rad-slider-track-border)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))]',
+  '[&::-moz-range-track]:[box-shadow:var(--rad-control-track-shadow,none)]',
   'forced-colors:appearance-auto',
   'forced-colors:[&::-webkit-slider-runnable-track]:[all:revert]',
   'forced-colors:[&::-webkit-slider-thumb]:[all:revert]',
@@ -156,6 +159,7 @@ export function Slider(props: SliderProps) {
     <SliderControl
       {...props}
       effectiveBounds={undefined}
+      showTrack
     />
   )
 }
@@ -174,8 +178,9 @@ export function SliderControl({
   'aria-invalid': ariaInvalid,
   'data-slot': slot,
   effectiveBounds,
+  showTrack,
   ...props
-}: SliderProps & { effectiveBounds?: readonly [number, number] }) {
+}: SliderProps & { effectiveBounds?: readonly [number, number]; showTrack: boolean }) {
   useNativeOwner('Slider', props.value, props.defaultValue)
   for (const value of [props.value, props.defaultValue]) {
     if (value !== undefined && !Number.isFinite(value))
@@ -204,6 +209,7 @@ export function SliderControl({
       }}
       className={cn(
         sliderClass,
+        showTrack ? nativeTrackClass : '[--_rad-slider-track-border:0px]',
         controlMetrics({ controlSize }),
         orientation === 'vertical'
           ? 'h-[var(--rad-slider-length,12rem)] w-[var(--rad-slider-height,var(--_rad-control-height))] [writing-mode:vertical-lr] [direction:rtl]'
