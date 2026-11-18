@@ -857,3 +857,5 @@ export {
   type DataTableSort,
   type DataTableVirtual
 } from './components/DataTable/DataTable.js'
+
+export { Rating, type RatingProps } from './components/Rating/Rating.js'

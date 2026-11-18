@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Rating provides a native radio-group rating input and a read-only display with accessible score text.
+
 - DataTable adds sortable columns, row selection, sticky headers, and windowed rows to semantic tables.
 
 - Timeline presents dated events with native timestamps, themed indicators, and an active event.
