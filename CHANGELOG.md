@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Indicator pins a dot or capped count to a logical corner and supplies a status-aware name for the target.
+
 ## 0.0.87
 
 - Dropzone includes its padding and borders in its width when using the standalone stylesheet.
