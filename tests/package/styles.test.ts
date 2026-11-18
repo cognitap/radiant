@@ -42,7 +42,7 @@ test('the standalone stylesheet supports Dropzone sizing and hides internal cont
   const spoiler = renderToStaticMarkup(createElement(Spoiler, {}, 'Short copy'))
   assert.match(spoiler, /<summary[^>]*\bhidden=""[^>]*\[&amp;\[hidden\]\]:hidden/)
   const rating = renderToStaticMarkup(createElement(Rating, { label: 'Service' }))
-  assert.match(rating, /<span[^>]*data-slot="radio-indicator"[^>]*\[&amp;\[aria-hidden\]\]:hidden/)
+  assert.match(rating, /<span[^>]*\[&amp;\[aria-hidden\]\]:hidden[^>]*data-slot="radio-indicator"/)
   const css = readExport('styles.css')
   assert.match(css, /\.box-border\s*\{\s*box-sizing:\s*border-box/)
   assert.match(css, /\[aria-hidden\]\s*\{\s*display:\s*none/)
