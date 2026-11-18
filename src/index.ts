@@ -848,3 +848,12 @@ export {
   type TimelineProps,
   type TimelineItemProps
 } from './components/Timeline/Timeline.js'
+
+export {
+  DataTable,
+  type DataTableColumn,
+  type DataTableProps,
+  type DataTableSelection,
+  type DataTableSort,
+  type DataTableVirtual
+} from './components/DataTable/DataTable.js'
