@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactNode } from 'react'
 import { cn } from 'cn'
+import type { CalendarProps } from '../Calendar/Calendar.js'
 import type { DatePickerProps } from '../DatePicker/DatePicker.js'
 import { DateEditor } from '../DatePicker/DateEditor.js'
 import { DateCalendarPopup, DateCalendarTrigger } from '../DatePicker/DateCalendar.js'
@@ -11,6 +12,7 @@ import { Field, useField, useFieldControl } from '../Field/Field.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { civilTime, rangeHasDisabledDate } from '../../internal/calendar.js'
+import { joinIds } from '../../internal/ids.js'
 
 /** Either endpoint can be typed first. Values use ISO civil dates. */
 export type DateRangeValue = { start: string | null; end: string | null }
@@ -41,6 +43,8 @@ export type DateRangePickerProps = ValueOwner<DateRangeValue> &
     endLabel: ReactNode
     startName?: string
     endName?: string
+    /** ISO date to focus when opening the calendar for an empty range. */
+    defaultFocusedDate?: CalendarProps['defaultFocusedDate']
     onValueChange?: (range: DateRangeValue) => void
     presets?: readonly DateRangePreset[]
   }
@@ -59,6 +63,7 @@ export function DateRangePicker({
   calendarLabel = 'Choose date range',
   firstDayOfWeek,
   today,
+  defaultFocusedDate,
   previousMonthLabel,
   nextMonthLabel,
   className,
@@ -88,10 +93,12 @@ export function DateRangePicker({
   const editorProps = {
     ...props,
     disabled: control.disabled,
-    'aria-invalid': control['aria-invalid'],
-    'aria-describedby': control['aria-describedby'] ?? field?.describedBy,
+    'aria-invalid': field?.invalid || control['aria-invalid'],
+    'aria-describedby': joinIds(field?.describedBy, control['aria-describedby']),
     revision
   }
+  // Calendar accepts either selection order. A lone end is its first picked day.
+  const calendarValue = start ? { start, end } : end ? { start: end, end: null } : null
   function unavailable(from: string, to: string) {
     return (
       from > to ||
@@ -189,7 +196,8 @@ export function DateRangePicker({
             controlSize={props.controlSize}
             previousMonthLabel={previousMonthLabel}
             nextMonthLabel={nextMonthLabel}
-            value={start ? { start, end } : null}
+            defaultFocusedDate={calendarValue ? undefined : defaultFocusedDate}
+            value={calendarValue}
             onValueChange={range => {
               if (range) selectRange(range)
             }}

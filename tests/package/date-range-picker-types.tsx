@@ -12,6 +12,7 @@ export const picker = (
     endLabel="End"
     startName="from"
     endName="to"
+    defaultFocusedDate="2028-03-01"
     value={range}
     presets={[preset]}
     onValueChange={next => next.end?.toUpperCase()}
