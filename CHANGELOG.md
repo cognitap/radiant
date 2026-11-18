@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Timeline presents dated events with native timestamps, themed indicators, and an active event.
+
 - Stepper shows current, completed, upcoming, and error states in horizontal or vertical flows with linear or free navigation.
 
 - Cascader picks a path through linked listboxes with per-level loading and direction-aware keyboard navigation.
