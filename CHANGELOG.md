@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.82
+
 - Calendar accepts `defaultFocusedDate` to open on a date independently of the selection and today marker.
 
 - TimeInput supports localized segmented wall-clock entry, a single inline AM/PM button, optional seconds, arrow stepping and ISO time submission with native forms.
