@@ -62,6 +62,12 @@ export function buildTree(items: readonly TreeItem[], loads: ReadonlyMap<string,
   return { roots: visit(items, null), byValue }
 }
 
+export function treePath(node: TreeNode | undefined): TreeNode[] {
+  const path: TreeNode[] = []
+  for (let current = node; current; current = current.parent ?? undefined) path.push(current)
+  return path.reverse()
+}
+
 export function visibleTree(roots: TreeNode[], expanded: ReadonlySet<string>) {
   const rows: TreeNode[] = []
   function visit(nodes: TreeNode[]) {

@@ -20,7 +20,7 @@ import { SelectPopup } from '../Select/SelectPopup.js'
 import { selectTriggerClass } from '../Select/selectStyles.js'
 import { controlMetrics } from '../shared/controlStyles.js'
 import { TreeRoot, treeValues, useTreeCollection, type TreeProps } from '../Tree/Tree.js'
-import type { TreeNode } from '../Tree/treeModel.js'
+import { treePath } from '../Tree/treeModel.js'
 
 type Choice<Value> = ValueOwner<Value> & { onValueChange?: (value: Value) => void }
 
@@ -51,13 +51,6 @@ export type TreeSelectProps = Pick<
     | ({ type?: 'single'; checkboxes?: never } & Choice<string | null>)
     | ({ type: 'multiple'; checkboxes?: boolean } & Choice<string[]>)
   )
-
-function pathTo(node: TreeNode | undefined, fallback: string) {
-  const labels: string[] = []
-  for (let current = node; current; current = current.parent ?? undefined)
-    labels.unshift(current.item.label)
-  return labels.length ? labels.join(' / ') : fallback
-}
 
 export function TreeSelect(props: TreeSelectProps) {
   const {
@@ -104,7 +97,10 @@ export function TreeSelect(props: TreeSelectProps) {
       : [selection.value]
   const paths = values.map(value => ({
     value,
-    path: pathTo(collection.model.byValue.get(value), value)
+    path:
+      treePath(collection.model.byValue.get(value))
+        .map(node => node.textValue)
+        .join(' / ') || value
   }))
   const submitted = paths.filter(item => !collection.model.byValue.get(item.value)?.disabled)
   const control = useFieldControl(attributes)

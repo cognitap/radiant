@@ -837,3 +837,5 @@ export { TimeInput, type TimeInputProps } from './components/TimeInput/TimeInput
 export { Tree, type TreeProps, type TreeItem, type TreeVirtual } from './components/Tree/Tree.js'
 
 export { TreeSelect, type TreeSelectProps } from './components/TreeSelect/TreeSelect.js'
+
+export { Cascader, type CascaderProps } from './components/Cascader/Cascader.js'
