@@ -13,6 +13,14 @@ test('normalizes hex, modern and legacy RGB, and OKLCH with alpha', () => {
   assert.equal(formatColor(parseColor('oklch(62% 0.15 -30deg)'), 'oklch'), 'oklch(62% 0.15 330)')
 })
 
+test('saturated sRGB primaries survive direct and OKLCH round trips', () => {
+  for (const hex of ['#0000FF80', '#FF0000', '#00FF00', '#00FFFF', '#FF00FF']) {
+    const parsed = parseColor(hex)
+    assert.equal(formatColor(parsed, 'hex'), hex)
+    assert.equal(formatColor(parseColor(formatColor(parsed, 'oklch')), 'hex'), hex)
+  }
+})
+
 test('malformed colors and CSS expressions are declined', () => {
   for (const value of [
     '#12345',

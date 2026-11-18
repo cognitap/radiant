@@ -32,7 +32,7 @@ export function ColorArea({
     const mapper = srgbMapper()
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const hex = mapper.map(1 - y / (height - 1), (x / (width - 1)) * maxChroma, hue).value
+        const hex = mapper.toHex(1 - y / (height - 1), (x / (width - 1)) * maxChroma, hue)
         const offset = (y * width + x) * 4
         pixels.data[offset] = parseInt(hex.slice(1, 3), 16)
         pixels.data[offset + 1] = parseInt(hex.slice(3, 5), 16)

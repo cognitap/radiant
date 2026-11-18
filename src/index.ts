@@ -866,3 +866,5 @@ export {
   type ColorPickerSwatch
 } from './components/ColorPicker/ColorPicker.js'
 export type { ColorFormat } from './color/colorValue.js'
+
+export { ColorInput, type ColorInputProps } from './components/ColorInput/ColorInput.js'
