@@ -75,6 +75,31 @@ test('Calendar opens on the current day, Escape and selecting a day both restore
   expect(segment(host, 'day').value).toBe('01')
 })
 
+test('an empty DatePicker can focus a booking date and then reopen on its selection', async () => {
+  const { host } = await mount(
+    <form>
+      <DatePicker
+        aria-label="Inspection date"
+        name="inspection"
+        today="2028-03-01"
+        defaultFocusedDate="2028-03-31"
+      />
+    </form>,
+    true
+  )
+  const form = host.querySelector('form')!
+  const trigger = host.querySelector<HTMLButtonElement>('[data-slot~="date-picker-trigger"]')!
+  await click(trigger)
+  expect(document.activeElement?.getAttribute('data-date')).toBe('2028-03-31')
+  expect(host.querySelector('[aria-current="date"]')?.getAttribute('data-date')).toBe('2028-03-01')
+  expect(host.querySelector('[aria-selected="true"]')).toBeNull()
+  expect(new FormData(form).get('inspection')).toBe('')
+  await key('{ArrowRight}{Enter}')
+  expect(new FormData(form).get('inspection')).toBe('2028-04-01')
+  await click(trigger)
+  expect(document.activeElement?.getAttribute('data-date')).toBe('2028-04-01')
+})
+
 test('Buddhist years and Thai digits edit an ISO value, with bounds and date restrictions enforced', async () => {
   const { host } = await mount(
     <form>

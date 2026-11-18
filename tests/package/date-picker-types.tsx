@@ -4,6 +4,7 @@ export const formDate = (
     <DatePicker
       name="start"
       defaultValue={null}
+      defaultFocusedDate="2028-03-01"
       calendar="buddhist"
       onValueChange={iso => iso?.toUpperCase()}
     />
