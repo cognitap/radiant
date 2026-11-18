@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- RangeSlider sets lower and upper numeric bounds on one track with two native form controls.
+
 ## 0.0.89
 
 - Indicator keeps its marker next to the target in a stretching grid.

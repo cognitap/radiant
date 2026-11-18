@@ -151,7 +151,17 @@ function stepRtl(event: KeyboardEvent<HTMLInputElement>) {
 }
 
 /** One native range input owns numeric selection, pointer input and forms. */
-export function Slider({
+export function Slider(props: SliderProps) {
+  return (
+    <SliderControl
+      {...props}
+      effectiveBounds={undefined}
+    />
+  )
+}
+
+/** Private host shared with RangeSlider, which has dependent accessible bounds. */
+export function SliderControl({
   className,
   controlSize = 'medium',
   orientation = 'horizontal',
@@ -163,8 +173,9 @@ export function Slider({
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'data-slot': slot,
+  effectiveBounds,
   ...props
-}: SliderProps) {
+}: SliderProps & { effectiveBounds?: readonly [number, number] }) {
   useNativeOwner('Slider', props.value, props.defaultValue)
   for (const value of [props.value, props.defaultValue]) {
     if (value !== undefined && !Number.isFinite(value))
@@ -208,8 +219,8 @@ export function Slider({
       aria-required={undefined}
       aria-orientation={orientation}
       aria-valuenow={undefined}
-      aria-valuemin={undefined}
-      aria-valuemax={undefined}
+      aria-valuemin={effectiveBounds?.[0]}
+      aria-valuemax={effectiveBounds?.[1]}
     />
   )
 }

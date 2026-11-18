@@ -108,6 +108,11 @@ export { Textarea } from './components/Textarea/Textarea.js'
 export type { TextareaProps } from './components/Textarea/Textarea.js'
 export { Slider } from './components/Slider/Slider.js'
 export type { SliderProps } from './components/Slider/Slider.js'
+export {
+  RangeSlider,
+  type RangeSliderProps,
+  type RangeSliderValue
+} from './components/RangeSlider/RangeSlider.js'
 export { Tabs, TabsList, TabsTrigger, TabsContent, useTabs } from './components/Tabs/Tabs.js'
 export type {
   TabsProps,
