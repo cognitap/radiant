@@ -70,7 +70,8 @@ export function Spoiler({
     >
       <CollapsibleTrigger
         data-slot="spoiler-trigger"
-        className={cn('row-start-2 py-2', parts?.trigger?.className, !overflows && 'hidden')}
+        hidden={!overflows}
+        className={cn('row-start-2 py-2 [&[hidden]]:hidden', parts?.trigger?.className)}
         style={parts?.trigger?.style}
       >
         {clipped ? showMoreLabel : showLessLabel}

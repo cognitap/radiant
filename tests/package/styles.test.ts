@@ -5,6 +5,9 @@ import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { Dropzone, Spoiler } from '@cognitap/radiant'
 
 const require = createRequire(import.meta.url)
 
@@ -26,6 +29,21 @@ function packageRoot() {
 function readExport(name: string) {
   return readFileSync(require.resolve(`@cognitap/radiant/${name}`), 'utf8')
 }
+
+test('Dropzone and Spoiler hide internal controls with the standalone stylesheet', () => {
+  const dropzone = renderToStaticMarkup(createElement(Dropzone))
+  assert.match(dropzone, /<button[^>]*\[&amp;\[aria-hidden\]\]:hidden/)
+  assert.match(
+    dropzone,
+    /<span[^>]*data-slot="file-input-files"[^>]*\[&amp;\[aria-hidden\]\]:hidden/
+  )
+
+  const spoiler = renderToStaticMarkup(createElement(Spoiler, {}, 'Short copy'))
+  assert.match(spoiler, /<summary[^>]*\bhidden=""[^>]*\[&amp;\[hidden\]\]:hidden/)
+  const css = readExport('styles.css')
+  assert.match(css, /\[aria-hidden\]\s*\{\s*display:\s*none/)
+  assert.match(css, /\[hidden\]\s*\{\s*display:\s*none/)
+})
 
 function tailwind(input: string) {
   const manifestURL = new URL(import.meta.resolve('@tailwindcss/cli/package.json'))

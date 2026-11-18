@@ -182,8 +182,8 @@ export function Dropzone({
         className="disabled:cursor-not-allowed"
         parts={{
           wrapper: { className: 'absolute inset-0 z-10' },
-          trigger: { className: 'hidden' },
-          files: { className: 'hidden' }
+          trigger: { className: '[&[aria-hidden]]:hidden' },
+          files: { className: '[&[aria-hidden]]:hidden' }
         }}
       />
       <span
