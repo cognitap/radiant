@@ -71,7 +71,7 @@ Custom controls submit through a native form element:
 
 Resolve the locale in the app and use the same value for `<html {...getLocaleAttributes(locale)}>` and `<LocaleProvider locale={locale} scope="document">` inside the body. The helper runs on the server. Document scope renders no wrapper. The default subtree scope renders a `div` that sets native `lang` and script-derived `dir` for an explicit locale.
 
-Omitting the locale inherits the closest provider and the native document attributes. Formatting and matching fall back to `en-US` when there is no configured locale or no supported locale match. A component's explicit `locale` overrides its formatting. Popups carry their anchor's language and direction across a portal, with explicit content attributes taking precedence.
+Omitting the locale inherits formatting and matching from the closest provider. Native markup still supplies language and direction. Formatting and matching fall back to `en-US` when there is no configured locale or no supported locale match. A component's explicit `locale` overrides its formatting. Popups carry their anchor's language and direction across a portal, with explicit content attributes taking precedence.
 
 `NumberField` localizes its display and parsing. `NumberFormatter` preserves server text when browser locale data differs during hydration. Select and Menu use locale-aware prefix search. Combobox, Autocomplete and their composed families use locale-aware substring search. Built-in matching ignores case and distinguishes accents. Caller filters and text props still apply.
 
