@@ -825,3 +825,10 @@ export {
 
 export { Calendar, type CalendarProps, type CalendarRange } from './components/Calendar/Calendar.js'
 export { DatePicker, type DatePickerProps } from './components/DatePicker/DatePicker.js'
+
+export {
+  DateRangePicker,
+  type DateRangePickerProps,
+  type DateRangeValue,
+  type DateRangePreset
+} from './components/DateRangePicker/DateRangePicker.js'

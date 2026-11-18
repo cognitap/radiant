@@ -12,6 +12,7 @@ import {
 import { cn } from 'cn'
 import {
   calendarLabels,
+  rangeHasDisabledDate,
   civilTime,
   dayMs,
   isoDate,
@@ -172,12 +173,8 @@ export function CalendarRoot(props: CalendarProps & { onDaySelect?: (date: strin
       return selection.request({ start: date, end: null })
     const [from, to] = start < date ? [start, date] : [date, start]
     // A new endpoint beyond an unavailable day begins a fresh range.
-    if (isDateDisabled) {
-      const last = civilTime(to)
-      for (let day = civilTime(from); day <= last; day += dayMs) {
-        if (isDateDisabled(isoDate(day))) return selection.request({ start: date, end: null })
-      }
-    }
+    if (rangeHasDisabledDate(from, to, isDateDisabled))
+      return selection.request({ start: date, end: null })
     selection.request({ start: from, end: to })
   }
 
