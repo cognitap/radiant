@@ -822,3 +822,5 @@ export {
   type CarouselAutoPlayProps,
   type CarouselIndicatorsProps
 } from './components/Carousel/Carousel.js'
+
+export { Calendar, type CalendarProps, type CalendarRange } from './components/Calendar/Calendar.js'
