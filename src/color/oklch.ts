@@ -48,6 +48,20 @@ function linearRgb(L: number, C: number, h: number): Triple {
   ]
 }
 
+function encodeLinearRgb(rgb: Triple): string {
+  return (
+    '#' +
+    rgb
+      .map(channel =>
+        Math.round(clamp(encoded(channel)) * 255)
+          .toString(16)
+          .padStart(2, '0')
+      )
+      .join('')
+      .toUpperCase()
+  )
+}
+
 /** Per-generation caches: bounded by this wall, without history-dependent global state. */
 export function srgbMapper() {
   const chromas = new Map<string, number>(),
@@ -86,17 +100,15 @@ export function srgbMapper() {
   }
   function map(L: number, C: number, h: number): OklchColor {
     const rgb = linearRgb(clamp(L), Math.min(C, maxChroma(L, h)), h)
-    const value =
-      '#' +
-      rgb
-        .map(n =>
-          Math.round(clamp(encoded(n)) * 255)
-            .toString(16)
-            .padStart(2, '0')
-        )
-        .join('')
-        .toUpperCase()
-    return measureHex(value)
+    return measureHex(encodeLinearRgb(rgb))
   }
-  return { maxChroma, cuspLightness, map }
+  function toHex(L: number, C: number, h: number): string {
+    const rgb = linearRgb(clamp(L), C, h)
+    // Preserve existing sRGB colors, including the blue corner outside the first chroma boundary.
+    // The tolerance is below half of one encoded channel step and absorbs OKLCH rounding.
+    return rgb.every(channel => channel >= -0.0001 && channel <= 1.0001)
+      ? encodeLinearRgb(rgb)
+      : map(L, C, h).value
+  }
+  return { maxChroma, cuspLightness, map, toHex }
 }

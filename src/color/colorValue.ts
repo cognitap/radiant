@@ -72,7 +72,7 @@ export function formatColor(color: ColorChannels, format: ColorFormat): string {
     const tail = color.alpha === 1 ? '' : ' / ' + formatNumber(color.alpha, 4)
     return `oklch(${formatNumber(color.L * 100, 4)}% ${formatNumber(color.C, 5)} ${formatNumber(wrapHue(color.h), 3)}${tail})`
   }
-  const hex = srgbMapper().map(color.L, color.C, color.h).value
+  const hex = srgbMapper().toHex(color.L, color.C, color.h)
   if (format === 'hex') {
     const suffix =
       color.alpha === 1
