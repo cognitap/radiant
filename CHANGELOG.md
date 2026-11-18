@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- CopyButton copies text with a temporary confirmation and visible retry guidance when the clipboard is unavailable.
+
 - Tour anchors non-modal onboarding steps to page controls and moves focus as participants navigate.
 
 - Dropzone adds drag-and-drop file selection, native browsing, and file type, size, and count checks.

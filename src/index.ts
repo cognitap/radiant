@@ -877,3 +877,5 @@ export {
 } from './components/Dropzone/Dropzone.js'
 export { Tour, TourTrigger } from './components/Tour/Tour.js'
 export type { TourProps, TourStep, TourTriggerProps } from './components/Tour/Tour.js'
+export { CopyButton } from './components/CopyButton/CopyButton.js'
+export type { CopyButtonProps, CopyButtonRenderProps } from './components/CopyButton/CopyButton.js'
