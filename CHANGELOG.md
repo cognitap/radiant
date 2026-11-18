@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+## 0.0.86
+
+- The compiled stylesheet hides Dropzone's duplicate file controls and Spoiler's summary when all content fits.
+
 ## 0.0.85
 
 - Highlight marks text matches while preserving the original text, with optional case sensitivity and diacritic folding.
