@@ -4,7 +4,7 @@
 
 ## Unreleased
 
-- TimeInput supports localized segmented wall-clock entry, optional seconds, arrow stepping and ISO time submission with native forms.
+- TimeInput supports localized segmented wall-clock entry, an inline AM/PM toggle, optional seconds, arrow stepping and ISO time submission with native forms.
 
 - DateRangePicker combines localized start and end fields, a range Calendar and optional presets, and submits both ISO dates in native forms.
 

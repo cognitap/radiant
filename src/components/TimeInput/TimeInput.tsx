@@ -11,7 +11,7 @@ import {
 import { cn } from 'cn'
 import { useField, useFieldControl, WithoutField } from '../Field/Field.js'
 import { InputGroup, InputGroupInput } from '../InputGroup/InputGroup.js'
-import { NativeSelect } from '../NativeSelect/NativeSelect.js'
+import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup.js'
 import { requireAccessibleName } from '../../internal/accessibleName.js'
 import { useFormReset } from '../../react/useFormReset.js'
 import { useLocale } from '../../react/useLocale.js'
@@ -57,7 +57,7 @@ export type TimeInputProps = ValueOwner<string | null> &
     controlSize?: ControlSize
   }
 
-const units = { hour: 3600, minute: 60, second: 1, dayPeriod: 43200 }
+const units = { hour: 3600, minute: 60, second: 1 }
 
 export function TimeInput({
   value,
@@ -145,7 +145,7 @@ export function TimeInput({
       segments[segments.indexOf(input) + 1]?.focus()
     }
   }
-  function advance(event: KeyboardEvent, part: keyof TimeParts) {
+  function advance(event: KeyboardEvent, part: ClockPart) {
     if (readOnly || control.disabled || event.altKey || event.metaKey || event.ctrlKey) return
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
     event.preventDefault()
@@ -180,24 +180,43 @@ export function TimeInput({
         {format.parts.map(({ type: part, value: literal }, index) => {
           if (part === 'dayPeriod')
             return (
-              <NativeSelect
+              <ToggleGroup
                 key={part}
-                data-segment={part}
-                aria-label={format.names.of('dayPeriod')}
-                controlSize={controlSize}
-                form={form}
-                disabled={control.disabled || readOnly}
+                type="single"
+                variant="segmented"
+                data-slot="time-input-period"
+                aria-label={format.names.of('dayPeriod') ?? 'AM/PM'}
                 aria-describedby={control['aria-describedby']}
-                className="h-auto w-auto rounded-none border-0 bg-transparent px-1 shadow-none"
+                controlSize={controlSize}
+                disabled={control.disabled || readOnly}
                 value={parts.dayPeriod}
-                onChange={event =>
-                  edit({ ...parts, dayPeriod: event.currentTarget.value === 'pm' ? 'pm' : 'am' })
-                }
-                onKeyDown={event => advance(event, part)}
+                onValueChange={next => {
+                  if (next === 'am' || next === 'pm') edit({ ...parts, dayPeriod: next })
+                }}
+                onKeyDown={event => {
+                  if (event.altKey || event.metaKey || event.ctrlKey || event.defaultPrevented)
+                    return
+                  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+                  event.preventDefault()
+                  const next = parts.dayPeriod === 'am' ? 'pm' : 'am'
+                  event.currentTarget
+                    .querySelector<HTMLButtonElement>(`button[data-value="${next}"]`)
+                    ?.focus()
+                  edit({ ...parts, dayPeriod: next })
+                }}
+                className="mx-1 inline-grid shrink-0 grid-cols-2 gap-0 [--rad-toggle-group-padding:2px]"
               >
-                <option value="am">{format.am}</option>
-                <option value="pm">{format.pm}</option>
-              </NativeSelect>
+                {(['am', 'pm'] as const).map(period => (
+                  <ToggleGroupItem
+                    key={period}
+                    value={period}
+                    data-segment={parts.dayPeriod === period ? part : undefined}
+                    className="min-h-[max(1.5rem,calc(var(--_rad-control-height)-0.875rem))] px-2 leading-none aria-pressed:font-semibold"
+                  >
+                    {format[period]}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             )
           if (part !== 'hour' && part !== 'minute' && part !== 'second')
             return (

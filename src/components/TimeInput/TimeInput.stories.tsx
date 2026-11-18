@@ -65,12 +65,12 @@ function Appointment() {
       <Field
         label="Appointment time"
         required
-        description="Appointments start every 15 minutes, from 09:00 to 17:00."
+        description="Appointments start every 15 minutes, from 09:00 to 22:00."
       >
         <TimeInput
           name="time"
           min="09:00"
-          max="17:00"
+          max="22:00"
           step={900}
           value={value}
           onValueChange={setValue}

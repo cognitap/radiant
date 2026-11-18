@@ -41,7 +41,19 @@ test('localized digits and AM/PM submit an ISO wall-clock time alongside an inde
   await fill(hour, '١٢')
   await fill(segment(host, 'minute'), '٠٥')
   expect(data(host)).toBe('00:05')
-  await act(async () => userEvent.selectOptions(host.querySelector('select')!, 'pm'))
+  const am = host.querySelector<HTMLButtonElement>('button[data-value="am"]')!
+  const pm = host.querySelector<HTMLButtonElement>('button[data-value="pm"]')!
+  expect(document.activeElement).toBe(am)
+  expect(pm.textContent).toContain('م')
+  await click(pm)
+  expect(pm.getAttribute('aria-pressed')).toBe('true')
+  await click(pm)
+  expect(pm.getAttribute('aria-pressed')).toBe('true')
+  await key('{ArrowUp}')
+  expect(document.activeElement).toBe(am)
+  expect(data(host)).toBe('00:05')
+  await key('{ArrowLeft} ')
+  expect(document.activeElement).toBe(pm)
   expect(Object.fromEntries(new FormData(host.querySelector('form')!))).toEqual({
     date: '2028-03-01',
     time: '12:05'
@@ -146,5 +158,5 @@ test('controlled owners can decline changes and locale or cycle overrides reform
   expect(data(host)).toBe('00:30')
   await render(tree('h24'))
   expect(segment(host, 'hour').value).toBe('24')
-  expect(host.querySelector('select')).toBeNull()
+  expect(host.querySelector('[data-slot~="time-input-period"]')).toBeNull()
 })
