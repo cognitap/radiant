@@ -28,11 +28,12 @@ const collapsibleVariants = cva([
   '[color:var(--rad-collapsible-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
   '[box-shadow:var(--rad-collapsible-shadow,var(--rad-surface-shadow,none))] [backdrop-filter:var(--rad-surface-backdrop-filter,none)]',
   '[&::details-content]:overflow-hidden',
+  '[--_rad-disclosure-preview:0px]',
   '[&::details-content]:[interpolate-size:allow-keywords]',
   '[&::details-content]:transition-[height]',
   '[&::details-content]:duration-[var(--rad-collapsible-duration,var(--rad-motion-disclosure-duration,150ms))]',
   '[&::details-content]:ease-out',
-  '[&:not([open])::details-content]:h-0',
+  '[&:not([open])::details-content]:h-[var(--_rad-disclosure-preview,0px)]',
   'open:[&::details-content]:h-auto',
   'motion-reduce:[&::details-content]:transition-none',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]'
@@ -108,7 +109,12 @@ function useCollapsibleContext() {
   return collapsible
 }
 
-export function Collapsible({
+export function Collapsible(props: CollapsibleProps) {
+  return <CollapsibleRoot {...props} />
+}
+
+/** Private collapsed preview seam for Spoiler. */
+export function CollapsibleRoot({
   open,
   defaultOpen,
   motion = 'inherit',
@@ -117,8 +123,10 @@ export function Collapsible({
   onToggle,
   className,
   children,
+  previewHeight,
+  style,
   ...props
-}: CollapsibleProps) {
+}: CollapsibleProps & { previewHeight?: number }) {
   const node = useRef<HTMLDetailsElement>(null)
   const nativeRef = useComposedRefs(node, ref)
   const transition = useTransitionHost<HTMLDetailsElement>(
@@ -160,11 +168,21 @@ export function Collapsible({
           collapsibleVariants(),
           transition.active &&
             transition.ready &&
-            '[&::details-content]:[content-visibility:visible] [&::details-content]:transition-none [&:not([open])::details-content]:h-[var(--_rad-spring-details-height,0px)] open:[&::details-content]:h-[var(--_rad-spring-details-height,auto)]',
+            '[&::details-content]:[content-visibility:visible] [&::details-content]:transition-none [&:not([open])::details-content]:h-[var(--_rad-spring-details-height,var(--_rad-disclosure-preview,0px))] open:[&::details-content]:h-[var(--_rad-spring-details-height,auto)]',
+          previewHeight !== undefined && '[&::details-content]:[content-visibility:visible]',
           motionOff && '[&::details-content]:transition-none [&>summary>svg]:transition-none',
           className
         )}
         data-slot={joinIds('collapsible', props['data-slot'])}
+        data-rad-disclosure-preview={previewHeight}
+        style={
+          previewHeight === undefined
+            ? style
+            : {
+                ...style,
+                '--_rad-disclosure-preview': `${previewHeight}px`
+              }
+        }
         data-state={isOpen ? 'open' : 'closed'}
         open={isOpen}
         onToggle={event => {

@@ -13,9 +13,10 @@ export function bindDisclosureMotion(host: HTMLElement, initial: MotionProfile):
     )
   const measure = () =>
     contents().reduce((sum, child) => sum + child.getBoundingClientRect().height, 0)
+  const preview = () => Number(node.getAttribute('data-rad-disclosure-preview') ?? 0)
   const previous = node.style.getPropertyValue('--_rad-spring-details-height')
   const spring = createSpring(
-    node.open ? measure() : 0,
+    node.open ? measure() : preview(),
     resolveMotion(profile, 'disclosure', query.matches)
   )
   const saved = new Map<HTMLElement, { inert: boolean; hidden: string | null }>()
@@ -44,7 +45,7 @@ export function bindDisclosureMotion(host: HTMLElement, initial: MotionProfile):
         child.setAttribute('aria-hidden', 'true')
       } else restore(child)
     }
-    spring.to(node.open ? measure() : 0)
+    spring.to(node.open ? measure() : preview())
   }
   function restore(child: HTMLElement) {
     const prior = saved.get(child)
@@ -55,7 +56,11 @@ export function bindDisclosureMotion(host: HTMLElement, initial: MotionProfile):
     saved.delete(child)
   }
   const observer = new MutationObserver(sync)
-  observer.observe(node, { attributes: true, attributeFilter: ['open'], childList: true })
+  observer.observe(node, {
+    attributes: true,
+    attributeFilter: ['open', 'data-rad-disclosure-preview'],
+    childList: true
+  })
   const resize = new ResizeObserver(sync)
   function update(next: MotionProfile) {
     profile = next
