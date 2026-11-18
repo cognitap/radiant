@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
 
 /** Native reset can be cancelled and the form owner can live outside the subtree. */
 export function useFormReset(
-  inputRef: RefObject<HTMLInputElement | HTMLSelectElement | null>,
+  inputRef: RefObject<HTMLInputElement | HTMLSelectElement | HTMLFieldSetElement | null>,
   onReset: () => void
 ) {
   const latest = useRef(onReset)
