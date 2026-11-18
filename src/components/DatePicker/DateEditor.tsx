@@ -1,6 +1,5 @@
 'use client'
 import {
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -14,6 +13,7 @@ import { InputGroup, InputGroupInput } from '../InputGroup/InputGroup.js'
 import { requireAccessibleName } from '../../internal/accessibleName.js'
 import { civilTime } from '../../internal/calendar.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
+import { useFormReset } from '../../react/useFormReset.js'
 import { useLocale } from '../../react/useLocale.js'
 import { dateSegments, type Segment, type Segments } from './dateSegments.js'
 import type { CalendarProps } from '../Calendar/Calendar.js'
@@ -102,32 +102,10 @@ export function DateEditor({
     input?.setCustomValidity(invalid ? 'Enter a valid, available date.' : '')
     return () => input?.setCustomValidity('')
   }, [invalid, format])
-  const resetOwner = useRef(onFormReset)
-  useLayoutEffect(() => {
-    resetOwner.current = onFormReset
+  useFormReset(firstInput, () => {
+    onFormReset?.()
+    setDraft(null)
   })
-  useEffect(() => {
-    const input = firstInput.current
-    if (!input) return
-    const view = input.ownerDocument.defaultView
-    if (!view) return
-    const root = input.getRootNode()
-    let timer: number | undefined
-    const reset = (event: Event) => {
-      if (event.target !== input.form) return
-      view.clearTimeout(timer)
-      timer = view.setTimeout(() => {
-        if (event.defaultPrevented || !input.isConnected) return
-        resetOwner.current?.()
-        setDraft(null)
-      })
-    }
-    root.addEventListener('reset', reset, true)
-    return () => {
-      root.removeEventListener('reset', reset, true)
-      view.clearTimeout(timer)
-    }
-  }, [format])
 
   function edit(segment: Segment, input: HTMLInputElement) {
     const text = format.ascii(input.value)

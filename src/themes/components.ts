@@ -156,6 +156,7 @@ export const componentRegistry = {
     focusStyle: 'css',
     invalidBorder: 'css'
   },
+  timeInput: { periodColor: 'css', periodIndicatorColor: 'css' },
   kbd: {
     background: 'css',
     color: 'css',
