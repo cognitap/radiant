@@ -20,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Single-thumb numeric adjustment using a native range input. Field supplies its label, ID, help, error and inherited disabled state. Choose defaultValue or numeric value with onValueChange(value: number); native onChange still receives the event. Keyboard, pointer input, bounds, step and form payloads stay native. Native reset restores uncontrolled defaults; controlled values reset in the form owner. Vertical sliders increase bottom to top. aria-valuetext supplies application-owned formatting. Root className/style/ref reach the input; components.slider styles the track and thumb independently. Range always has a value, so required and readOnly do not apply.'
+          'Single-thumb numeric adjustment using a native range input. Field supplies its label, ID, help, error and inherited disabled state. Choose defaultValue or numeric value with onValueChange(value: number); native onChange still receives the event. Pointer input, bounds, step and form payloads use the range input. Horizontal arrow keys follow visual direction in RTL. Native reset restores uncontrolled defaults; controlled values reset in the form owner. Vertical sliders increase bottom to top. aria-valuetext supplies application-owned formatting. Root className/style/ref reach the input; components.slider styles the track and thumb independently. Range always has a value, so required and readOnly do not apply.'
       }
     }
   }

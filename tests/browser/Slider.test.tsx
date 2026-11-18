@@ -404,40 +404,74 @@ test('listening preferences submit and reset controlled and native defaults toge
   expect(host.querySelector('output')!.textContent).toBe('Preferences reset')
 })
 
-test('onValueChange gets the numeric value beside native onChange, and a controlled refusal keeps the owner value', async () => {
-  const native = vi.fn(),
-    values = vi.fn()
-  function Example({ accept }: { accept: boolean }) {
-    const [value, setValue] = useState(40)
-    return (
-      <Field label="Volume">
-        <Slider
-          value={value}
-          step={5}
-          onChange={() => native()}
-          onValueChange={next => {
-            values(next)
-            if (accept) setValue(next)
-          }}
-        />
-      </Field>
-    )
+test.each(['ltr', 'rtl'] as const)(
+  '%s: onValueChange gets the numeric value beside onChange, and a controlled refusal keeps the owner value',
+  async dir => {
+    const native = vi.fn(),
+      values = vi.fn()
+    function Example({ accept }: { accept: boolean }) {
+      const [value, setValue] = useState(40)
+      return (
+        <Field label="Volume">
+          <Slider
+            dir={dir}
+            value={value}
+            step={5}
+            onChange={() => native()}
+            onValueChange={next => {
+              values(next)
+              if (accept) setValue(next)
+            }}
+          />
+        </Field>
+      )
+    }
+    const view = await mount(<Example accept={false} />)
+    const input = view.host.querySelector('input')!
+    await act(async () => {
+      input.focus()
+      await userEvent.keyboard(dir === 'rtl' ? '{ArrowLeft}' : '{ArrowRight}')
+    })
+    expect(values).toHaveBeenLastCalledWith(45)
+    expect(native).toHaveBeenCalledOnce()
+    expect(input.valueAsNumber).toBe(40)
+    await view.render(<Example accept />)
+    await act(async () => {
+      await userEvent.keyboard(dir === 'rtl' ? '{ArrowLeft}' : '{ArrowRight}')
+    })
+    expect(values).toHaveBeenLastCalledWith(45)
+    expect(input.valueAsNumber).toBe(45)
   }
-  const view = await mount(<Example accept={false} />)
-  const input = view.host.querySelector('input')!
+)
+
+test('RTL continuous steps preserve submission and allow the caller to cancel keys', async () => {
+  const values = vi.fn()
+  const { host } = await mount(
+    <form dir="rtl">
+      <Slider
+        aria-label="Gain"
+        name="gain"
+        min={-3}
+        max={7}
+        step="any"
+        defaultValue={3.5}
+        onValueChange={values}
+        onKeyDown={event => {
+          if (event.key === 'ArrowRight') event.preventDefault()
+        }}
+      />
+    </form>
+  )
+  const input = host.querySelector('input')!
   await act(async () => {
     input.focus()
-    await userEvent.keyboard('{ArrowRight}')
+    await userEvent.keyboard('{ArrowLeft}{ArrowRight}')
   })
-  expect(values).toHaveBeenLastCalledWith(45)
-  expect(native).toHaveBeenCalledOnce()
-  expect(input.valueAsNumber).toBe(40)
-  await view.render(<Example accept />)
-  await act(async () => {
-    await userEvent.keyboard('{ArrowRight}')
-  })
-  expect(values).toHaveBeenLastCalledWith(45)
-  expect(input.valueAsNumber).toBe(45)
+  expect(values).toHaveBeenCalledExactlyOnceWith(3.6)
+  expect(new FormData(host.querySelector('form')!).get('gain')).toBe('3.6')
+  await act(async () => userEvent.keyboard('{End}{ArrowLeft}'))
+  expect(values).toHaveBeenCalledTimes(2)
+  expect(input.valueAsNumber).toBe(7)
 })
 
 test('uncontrolled onValueChange reports each keyboard step as a number', async () => {
