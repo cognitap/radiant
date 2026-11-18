@@ -839,3 +839,5 @@ export { Tree, type TreeProps, type TreeItem, type TreeVirtual } from './compone
 export { TreeSelect, type TreeSelectProps } from './components/TreeSelect/TreeSelect.js'
 
 export { Cascader, type CascaderProps } from './components/Cascader/Cascader.js'
+
+export { Stepper, type StepperProps, type StepperStep } from './components/Stepper/Stepper.js'
