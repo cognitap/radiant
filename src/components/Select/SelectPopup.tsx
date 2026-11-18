@@ -37,13 +37,18 @@ export function SelectPopup({
   controlSize,
   children,
   position = 'item-aligned',
+  width = 'trigger',
   sideOffset = 4,
   collisionPadding = 8,
   motion = 'inherit',
   className,
   ref,
   ...props
-}: SelectContentProps & { state: SelectPopupState; controlSize: ControlSize }) {
+}: SelectContentProps & {
+  state: SelectPopupState
+  controlSize: ControlSize
+  width?: 'trigger' | 'content'
+}) {
   const { lang, dir } = props
   const mergedRef = useComposedRefs(select.content, ref)
   const {
@@ -75,11 +80,20 @@ export function SelectPopup({
       return
     }
     const seedWidth = () => {
-      const available =
+      const available = Math.max(
+        0,
         (win.visualViewport?.width ?? win.innerWidth) - 2 * Math.max(0, collisionPadding)
-      const width = `${Math.min(trigger.getBoundingClientRect().width, Math.max(0, available))}px`
-      if (node.style.getPropertyValue('--_rad-select-width') !== width)
-        node.style.setProperty('--_rad-select-width', width)
+      )
+      const anchor = `${Math.min(trigger.getBoundingClientRect().width, available)}px`
+      const widthProperty =
+        width === 'content' ? '--_rad-select-anchor-width' : '--_rad-select-width'
+      if (node.style.getPropertyValue(widthProperty) !== anchor)
+        node.style.setProperty(widthProperty, anchor)
+      if (width === 'content') {
+        const limit = `${available}px`
+        if (node.style.getPropertyValue('--_rad-select-available-width') !== limit)
+          node.style.setProperty('--_rad-select-available-width', limit)
+      }
     }
     // Top-layer auto layout is viewport-sized. Establish the anchor width before it can paint.
     seedWidth()
@@ -192,6 +206,7 @@ export function SelectPopup({
     select.trigger,
     select.collection,
     position,
+    width,
     sideOffset,
     collisionPadding,
     lang,
@@ -213,6 +228,8 @@ export function SelectPopup({
       className={cn(
         selectContentClass,
         controlMetrics({ controlSize }),
+        width === 'content' &&
+          'w-max min-w-[var(--_rad-select-anchor-width,0px)] max-w-[var(--_rad-select-available-width,100vw)]',
         motionActive &&
           !motionOff &&
           'opacity-[var(--_rad-popup-enter,0)] motion-reduce:opacity-100',
