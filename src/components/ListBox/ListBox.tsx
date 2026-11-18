@@ -22,6 +22,7 @@ import { useField, useFieldControl } from '../Field/Field.js'
 import type { SelectOption } from '../Select/Select.js'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { focusRingClass } from '../shared/focusStyles.js'
+import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
 export type ListBoxOption = SelectOption
 
@@ -57,6 +58,7 @@ export type ListBoxProps = Omit<
 const listClass = [
   'group/list-box grid min-w-0 gap-1 overflow-auto p-1',
   controlBorderClass,
+  scrollbarClass,
   'bg-[var(--rad-control-field-background,var(--rad-color-surface,white))] text-[var(--rad-color-foreground)]',
   'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--_rad-control-font-size)]',
   'data-invalid:[border-color:var(--rad-color-invalid)] data-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)]',
