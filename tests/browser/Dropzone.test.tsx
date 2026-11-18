@@ -50,6 +50,7 @@ test('mixed drops retain accepted files for native submission and reset the stat
   ])
   await act(async () => form.reset())
   await expect.poll(() => target.getAttribute('data-state')).toBe('idle')
+  expect(host.querySelector('[role="status"]')).toBeEmptyDOMElement()
 })
 
 test('the native chooser accepts files and uses the visible prompt as its name', async () => {
@@ -64,5 +65,5 @@ test('the native chooser accepts files and uses the visible prompt as its name',
   const file = new File(['Report'], 'report.txt', { type: 'text/plain' })
   await act(async () => userEvent.upload(input, [file]))
   expect(host.querySelector('[data-slot="dropzone"]')).toHaveAttribute('data-state', 'accepted')
-  expect(host.querySelector('output')).toHaveTextContent('report.txt')
+  expect(host.querySelector('[role="status"]')).toHaveTextContent('report.txt')
 })
