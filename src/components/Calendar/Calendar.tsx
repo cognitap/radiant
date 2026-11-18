@@ -42,6 +42,8 @@ export type CalendarProps = Omit<
     firstDayOfWeek?: Weekday
     /** Pass the same civil date on the server and client. Defaults to today's UTC date. */
     today?: string
+    /** Initial grid tab stop, without selecting a date or moving DOM focus. Defaults to the selection start or today. */
+    defaultFocusedDate?: string
     min?: string
     max?: string
     isDateDisabled?: (date: string) => boolean
@@ -73,6 +75,7 @@ export function CalendarRoot(props: CalendarProps & { onDaySelect?: (date: strin
     calendar,
     firstDayOfWeek,
     today: suppliedToday,
+    defaultFocusedDate,
     min = '0001-01-01',
     max = '9999-12-31',
     isDateDisabled,
@@ -106,7 +109,7 @@ export function CalendarRoot(props: CalendarProps & { onDaySelect?: (date: strin
   const selected = selection.value
   const start = typeof selected === 'string' ? selected : selected?.start
   const end = typeof selected === 'string' ? selected : selected?.end
-  const [cursor, setCursor] = useState(() => civilTime(start ?? today))
+  const [cursor, setCursor] = useState(() => civilTime(defaultFocusedDate ?? start ?? today))
   const active = clamp(cursor, lower, upper)
   const first = monthStart(active)
   const next = monthStart(first, 1)

@@ -1,3 +1,4 @@
+import { act } from 'react'
 import { expect, test, vi } from 'vitest'
 import { Calendar, LocaleProvider } from '../../src/index.js'
 import { mount, click, key } from './familyHarness.js'
@@ -81,4 +82,29 @@ test('controlled selections remain owned by the caller and RTL arrows use the ho
   expect(focused()).toBe('2026-11-19')
   expect(request).toHaveBeenCalledWith('2026-11-19')
   expect(day(host, '2026-11-18').parentElement?.getAttribute('aria-selected')).toBe('true')
+})
+
+test('the initial focus date opens a month without selecting or moving focus and respects booking bounds', async () => {
+  const change = vi.fn()
+  const tree = (date: string) => (
+    <Calendar
+      aria-label="Appointment"
+      today="2026-11-18"
+      min="2026-12-02"
+      max="2027-01-15"
+      defaultFocusedDate={date}
+      onValueChange={change}
+    />
+  )
+  const { host, render } = await mount(tree('2027-02-01'), true)
+  const target = day(host, '2027-01-15')
+  expect(target.tabIndex).toBe(0)
+  expect(document.activeElement).not.toBe(target)
+  expect(host.querySelector('[aria-selected="true"], [aria-current="date"]')).toBeNull()
+  expect(change).not.toHaveBeenCalled()
+  await render(tree('2026-12-02'))
+  expect(target.isConnected).toBe(true)
+  await act(() => target.focus())
+  await key('{ArrowLeft}{Enter}')
+  expect(change).toHaveBeenCalledWith('2027-01-14')
 })

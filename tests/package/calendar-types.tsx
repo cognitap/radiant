@@ -2,6 +2,7 @@ import { Calendar, type CalendarProps, type CalendarRange } from '@cognitap/radi
 export const single = (
   <Calendar
     aria-label="Day"
+    defaultFocusedDate="2028-03-01"
     value="2028-02-29"
     onValueChange={date => date?.toUpperCase()}
   />
