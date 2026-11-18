@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.84
+
 - ColorInput combines editable color text, a swatch preview, and ColorPicker with native validation and submission.
 
 - ColorPicker edits OKLCH, hex, and RGB colors with keyboard controls, swatches, and optional browser sampling.
