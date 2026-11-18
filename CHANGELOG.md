@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.83
+
 - TimeInput accepts a `style` prop for per-instance styling, including the inline AM/PM text and underline colors.
 
 - DateRangePicker accepts `defaultFocusedDate` for an empty range and can complete a range in the calendar after an end date is typed first.
