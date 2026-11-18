@@ -875,3 +875,5 @@ export {
   type DropzoneSelection,
   type DropzoneRejection
 } from './components/Dropzone/Dropzone.js'
+export { Tour, TourTrigger } from './components/Tour/Tour.js'
+export type { TourProps, TourStep, TourTriggerProps } from './components/Tour/Tour.js'

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Tour anchors non-modal onboarding steps to page controls and moves focus as participants navigate.
+
 - Dropzone adds drag-and-drop file selection, native browsing, and file type, size, and count checks.
 
 ## 0.0.84
