@@ -891,3 +891,8 @@ export type {
 } from './components/Indicator/Indicator.js'
 export { NumberFormatter } from './components/NumberFormatter/NumberFormatter.js'
 export type { NumberFormatterProps } from './components/NumberFormatter/NumberFormatter.js'
+export { RingProgress } from './components/RingProgress/RingProgress.js'
+export type {
+  RingProgressProps,
+  RingProgressSegment
+} from './components/RingProgress/RingProgress.js'
