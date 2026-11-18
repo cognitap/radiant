@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+## 0.0.87
+
+- Dropzone includes its padding and borders in its width when using the standalone stylesheet.
+
 ## 0.0.86
 
 - Dropzone clears its feedback on native form reset in WebKit.

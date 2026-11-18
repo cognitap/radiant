@@ -135,7 +135,7 @@ export function Dropzone({
       data-state={state}
       data-disabled={disabled ? '' : undefined}
       className={cn(
-        'relative grid min-w-0 w-full gap-1 rounded-[var(--rad-control-radius,0.5rem)] [corner-shape:var(--rad-control-corner-shape,round)] border-2 border-dashed border-[var(--rad-color-border)] bg-[var(--rad-color-surface)] px-4 py-5 text-center [color:var(--rad-color-foreground)]',
+        'relative box-border grid min-w-0 w-full gap-1 rounded-[var(--rad-control-radius,0.5rem)] [corner-shape:var(--rad-control-corner-shape,round)] border-2 border-dashed border-[var(--rad-color-border)] bg-[var(--rad-color-surface)] px-4 py-5 text-center [color:var(--rad-color-foreground)]',
         'has-[input:enabled]:hover:bg-[var(--rad-color-neutral)] data-[state=drag-over]:border-[var(--rad-color-accent)] data-[state=drag-over]:bg-[var(--rad-color-neutral)] data-[state=rejected]:border-[var(--rad-color-invalid)] data-disabled:opacity-60 forced-colors:border-[CanvasText] forced-colors:data-[state=drag-over]:border-[Highlight]',
         focusWithinRingClass,
         className
