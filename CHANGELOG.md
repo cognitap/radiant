@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Indicator keeps its marker next to the target in a stretching grid.
+
 ## 0.0.88
 
 - Rating hides its decorative radio markers when using the standalone stylesheet.

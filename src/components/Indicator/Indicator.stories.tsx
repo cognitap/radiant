@@ -63,3 +63,27 @@ function InboxCounter() {
 }
 
 export const ReadUnreadMessages: Story = { render: () => <InboxCounter /> }
+
+export const FlagOrdersInAGrid: Story = {
+  render: () => (
+    <div className="grid w-72 max-w-full gap-3">
+      <Indicator
+        label="Orders"
+        statusText="142 orders to review"
+        count={142}
+        maxCount={9}
+        tone="warning"
+      >
+        {target => (
+          <Button
+            {...target}
+            variant="outline"
+          >
+            Orders
+          </Button>
+        )}
+      </Indicator>
+      <p>Review orders before the next shipping cutoff.</p>
+    </div>
+  )
+}

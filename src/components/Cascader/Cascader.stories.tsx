@@ -195,7 +195,9 @@ export const FindAnArchivedDocument: Story = {
     'aria-label': 'Document folder',
     items: archives,
     columnLabels: ['Team', 'Collection', 'Folder'],
-    placeholder: 'Choose a folder'
+    placeholder: 'Choose a folder',
+    loadingText: 'Fetching folders…',
+    emptyText: 'There are no folders in this collection.'
   }
 }
 

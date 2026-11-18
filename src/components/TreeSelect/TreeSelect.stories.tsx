@@ -141,5 +141,10 @@ const archive: readonly TreeItem[] = [
 
 export const SearchAnArchive: Story = {
   name: 'Browse an archive',
-  args: { 'aria-label': 'Archived team', items: archive }
+  args: {
+    'aria-label': 'Archived team',
+    items: archive,
+    loadingText: 'Fetching archived departments…',
+    virtual: { height: 220, rowHeight: 36 }
+  }
 }

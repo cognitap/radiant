@@ -44,12 +44,14 @@ export const Default: Story = {}
 
 function FilePreview() {
   const [value, setValue] = useState<string | null>('notes')
+  const [expanded, setExpanded] = useState(['research'])
   return (
     <div className="grid w-full max-w-lg gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <Tree
         aria-label="Project files"
         items={files}
-        defaultExpanded={['research']}
+        expanded={expanded}
+        onExpandedChange={setExpanded}
         value={value}
         onValueChange={setValue}
       />
@@ -92,7 +94,12 @@ const archives: readonly TreeItem[] = [
   }
 ]
 export const BrowseAnArchive: Story = {
-  args: { 'aria-label': 'Archive', items: archives, defaultExpanded: [] }
+  args: {
+    'aria-label': 'Archive',
+    items: archives,
+    defaultExpanded: [],
+    loadingText: 'Fetching archived projects…'
+  }
 }
 
 const auditRecords = Array.from({ length: 750 }, (_, index) => ({
