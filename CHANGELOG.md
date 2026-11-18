@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Spoiler previews long content at a fixed height and uses the themed disclosure motion to expand it.
+
 - CopyButton copies text with a temporary confirmation and visible retry guidance when the clipboard is unavailable.
 
 - Tour anchors non-modal onboarding steps to page controls and moves focus as participants navigate.
