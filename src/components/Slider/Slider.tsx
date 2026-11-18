@@ -1,8 +1,10 @@
 'use client'
 
-import type { ComponentProps } from 'react'
+import type { ComponentProps, KeyboardEvent } from 'react'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
+import { composeAction } from '../../internal/events.js'
+import { addDecimal } from '../../internal/decimal.js'
 import { useFieldControl } from '../Field/Field.js'
 import { controlBorderClass, controlMetrics } from '../shared/controlStyles.js'
 import { useNativeOwner, type ValueOwner } from '../../react/useNativeOwner.js'
@@ -103,12 +105,58 @@ export type SliderProps = Omit<
     'data-slot'?: string
   }
 
-/** One native range input owns numeric selection, keyboard, pointer and forms. */
+function rangeBound(attribute: string, fallback: number) {
+  const value = Number(attribute)
+  return /^-?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$/.test(attribute) &&
+    Number.isFinite(value)
+    ? value
+    : fallback
+}
+
+/** Horizontal RTL keys move the thumb in the pressed direction across browsers. */
+function stepRtl(event: KeyboardEvent<HTMLInputElement>) {
+  const input = event.currentTarget
+  if (
+    (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.nativeEvent.isComposing ||
+    input.matches(':disabled')
+  )
+    return
+  const view = input.ownerDocument.defaultView!
+  if (view.getComputedStyle(input).direction !== 'rtl') return
+
+  event.preventDefault()
+  const previous = input.value
+  const direction = event.key === 'ArrowLeft' ? 1 : -1
+  if (input.step.toLowerCase() === 'any') {
+    // Continuous ranges have no step for stepUp. Move one percent of the interval.
+    const min = rangeBound(input.min, 0)
+    const max = Math.max(min, rangeBound(input.max, 100))
+    const span = max - min
+    const step = Number.isFinite(span) ? span / 100 : max / 100 - min / 100
+    input.valueAsNumber = Math.max(
+      min,
+      Math.min(max, addDecimal(input.valueAsNumber, step * direction))
+    )
+  } else {
+    input.stepUp(direction)
+  }
+  if (input.value !== previous) {
+    input.dispatchEvent(new view.Event('input', { bubbles: true, composed: true }))
+    input.dispatchEvent(new view.Event('change', { bubbles: true }))
+  }
+}
+
+/** One native range input owns numeric selection, pointer input and forms. */
 export function Slider({
   className,
   controlSize = 'medium',
   orientation = 'horizontal',
   onChange,
+  onKeyDown,
   onValueChange,
   id,
   disabled,
@@ -138,6 +186,7 @@ export function Slider({
     <input
       {...nativeProps}
       {...control}
+      onKeyDown={orientation === 'horizontal' ? composeAction(onKeyDown, stepRtl) : onKeyDown}
       onChange={event => {
         onChange?.(event)
         onValueChange?.(event.currentTarget.valueAsNumber)

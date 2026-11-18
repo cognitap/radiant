@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- Horizontal sliders in RTL follow the visual direction of the arrow keys across browsers.
+
+- LocaleProvider’s bilingual report story shows keyboard navigation in French tabs nested in a Hebrew report.
+
 ## 0.0.83
 
 - TimeInput accepts a `style` prop for per-instance styling, including the inline AM/PM text and underline colors.
