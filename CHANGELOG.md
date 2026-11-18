@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Tree supports keyboard navigation, single and multiple selection, mixed checkboxes, async children, and fixed-height virtualization.
+
 - Horizontal sliders in RTL follow the visual direction of the arrow keys across browsers.
 
 - LocaleProvider’s bilingual report story shows keyboard navigation in French tabs nested in a Hebrew report.
