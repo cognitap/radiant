@@ -149,7 +149,9 @@ export function TimeInput({
     edit({ ...parts, [part]: text })
     if (text.length === 2) {
       const segments = Array.from(
-        input.parentElement?.querySelectorAll<HTMLElement>('[data-segment]') ?? []
+        input
+          .closest('[data-slot~="time-input"]')
+          ?.querySelectorAll<HTMLElement>('[data-segment]') ?? []
       )
       segments[segments.indexOf(input) + 1]?.focus()
     }
@@ -175,6 +177,84 @@ export function TimeInput({
     owner.request(isoTime(next, withSeconds))
   }
 
+  const isClock = (type: string) => type === 'hour' || type === 'minute' || type === 'second'
+  const firstClock = format.parts.findIndex(({ type }) => isClock(type))
+  const lastClock = format.parts.reduce(
+    (last, part, index) => (isClock(part.type) ? index : last),
+    -1
+  )
+  const renderPart = ({ type: part, value: literal }: Intl.DateTimeFormatPart, index: number) => {
+    if (part === 'dayPeriod')
+      return (
+        <Button
+          key={part}
+          type="button"
+          variant="ghost"
+          tone="neutral"
+          motion="off"
+          data-slot="time-input-period"
+          data-segment={part}
+          aria-label={[format.names.of(part), format[parts.dayPeriod]].filter(Boolean).join(' ')}
+          aria-describedby={control['aria-describedby']}
+          controlSize={controlSize}
+          disabled={control.disabled || readOnly}
+          onClick={togglePeriod}
+          onKeyDown={event => {
+            if (event.altKey || event.metaKey || event.ctrlKey || event.defaultPrevented) return
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+              event.preventDefault()
+              togglePeriod()
+            }
+          }}
+          className={cn(
+            inlineActionClass,
+            focusRingInsetClass,
+            'min-h-[max(1.5rem,calc(var(--_rad-control-height)-0.75rem))] min-w-6 [--rad-button-border-width:0px] px-1 leading-none',
+            'text-[color:var(--rad-time-input-period-color,var(--rad-color-foreground))] underline decoration-dotted decoration-[color:var(--rad-time-input-period-indicator-color,var(--rad-color-muted-foreground))] underline-offset-4 enabled:hover:decoration-solid disabled:no-underline'
+          )}
+        >
+          {format[parts.dayPeriod]}
+        </Button>
+      )
+    if (part !== 'hour' && part !== 'minute' && part !== 'second')
+      return (
+        <span
+          key={index}
+          aria-hidden="true"
+        >
+          {literal}
+        </span>
+      )
+    return (
+      <InputGroupInput
+        key={part}
+        data-segment={part}
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- Localized digits need text entry with per-segment spinbutton semantics.
+        role="spinbutton"
+        aria-valuemin={part === 'hour' ? format.hourMin : 0}
+        aria-valuemax={part === 'hour' ? format.hourMax : 59}
+        aria-valuenow={parts[part] ? Number(parts[part]) : undefined}
+        ref={part === 'hour' ? editorRef : undefined}
+        id={part === 'hour' ? control.id : undefined}
+        form={form}
+        disabled={control.disabled}
+        readOnly={readOnly}
+        required={control.required}
+        aria-label={format.names.of(part)}
+        aria-describedby={control['aria-describedby']}
+        aria-invalid={invalid || control['aria-invalid'] || undefined}
+        placeholder="––"
+        autoComplete="off"
+        inputMode="numeric"
+        className="w-[2.7ch] flex-none text-center tabular-nums focus-visible:underline"
+        value={format.localize(parts[part])}
+        onFocus={event => event.currentTarget.select()}
+        onChange={event => editNumber(part, event.currentTarget)}
+        onKeyDown={event => advance(event, part)}
+      />
+    )
+  }
+
   return (
     <InputGroup
       data-slot="time-input"
@@ -187,80 +267,25 @@ export function TimeInput({
       style={style}
     >
       <WithoutField>
-        {format.parts.map(({ type: part, value: literal }, index) => {
-          if (part === 'dayPeriod')
-            return (
-              <Button
-                key={part}
-                type="button"
-                variant="ghost"
-                tone="neutral"
-                motion="off"
-                data-slot="time-input-period"
-                data-segment={part}
-                aria-label={[format.names.of(part), format[parts.dayPeriod]]
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-describedby={control['aria-describedby']}
-                controlSize={controlSize}
-                disabled={control.disabled || readOnly}
-                onClick={togglePeriod}
-                onKeyDown={event => {
-                  if (event.altKey || event.metaKey || event.ctrlKey || event.defaultPrevented)
-                    return
-                  if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-                    event.preventDefault()
-                    togglePeriod()
-                  }
-                }}
-                className={cn(
-                  inlineActionClass,
-                  focusRingInsetClass,
-                  'min-h-[max(1.5rem,calc(var(--_rad-control-height)-0.75rem))] min-w-6 [--rad-button-border-width:0px] px-1 leading-none',
-                  'text-[color:var(--rad-time-input-period-color,var(--rad-color-foreground))] underline decoration-dotted decoration-[color:var(--rad-time-input-period-indicator-color,var(--rad-color-muted-foreground))] underline-offset-4 enabled:hover:decoration-solid disabled:no-underline'
-                )}
-              >
-                {format[parts.dayPeriod]}
-              </Button>
-            )
-          if (part !== 'hour' && part !== 'minute' && part !== 'second')
-            return (
-              <span
-                key={index}
-                aria-hidden="true"
-              >
-                {literal}
-              </span>
-            )
-          return (
-            <InputGroupInput
-              key={part}
-              data-segment={part}
-              // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- Localized digits need text entry with per-segment spinbutton semantics.
-              role="spinbutton"
-              aria-valuemin={part === 'hour' ? format.hourMin : 0}
-              aria-valuemax={part === 'hour' ? format.hourMax : 59}
-              aria-valuenow={parts[part] ? Number(parts[part]) : undefined}
-              ref={part === 'hour' ? editorRef : undefined}
-              id={part === 'hour' ? control.id : undefined}
-              form={form}
-              disabled={control.disabled}
-              readOnly={readOnly}
-              required={control.required}
-              aria-label={format.names.of(part)}
-              aria-describedby={control['aria-describedby']}
-              aria-invalid={invalid || control['aria-invalid'] || undefined}
-              placeholder="––"
-              autoComplete="off"
-              inputMode="numeric"
-              className="w-[2.7ch] flex-none text-center tabular-nums focus-visible:underline"
-              value={format.localize(parts[part])}
-              onFocus={event => event.currentTarget.select()}
-              onChange={event => editNumber(part, event.currentTarget)}
-              onKeyDown={event => advance(event, part)}
-            />
-          )
-        })}
+        {firstClock >= 0 ? (
+          <>
+            {format.parts.slice(0, firstClock).map((part, index) => renderPart(part, index))}
+            <span
+              dir="ltr"
+              data-slot="time-input-clock"
+              className="inline-flex items-center"
+            >
+              {format.parts
+                .slice(firstClock, lastClock + 1)
+                .map((part, offset) => renderPart(part, firstClock + offset))}
+            </span>
+            {format.parts
+              .slice(lastClock + 1)
+              .map((part, offset) => renderPart(part, lastClock + 1 + offset))}
+          </>
+        ) : (
+          format.parts.map(renderPart)
+        )}
       </WithoutField>
       <input
         type="hidden"

@@ -111,6 +111,7 @@ export function Switch({
   })
   const controlNode = (
     <span
+      dir={!labelled ? props.dir : undefined}
       className={cn('relative inline-grid w-fit shrink-0', !labelled && parts?.wrapper?.className)}
       style={!labelled ? parts?.wrapper?.style : undefined}
       data-slot={!labelled ? 'switch-wrapper' : undefined}
@@ -163,6 +164,7 @@ export function Switch({
   if (!labelled) return controlNode
   return (
     <label
+      dir={props.dir}
       className={cn(rowClass, parts?.wrapper?.className)}
       style={parts?.wrapper?.style}
       data-slot="switch-wrapper"

@@ -182,7 +182,8 @@ export function ScrollArea({
       })
     }
     const resize = new win.ResizeObserver(schedule),
-      mutation = new win.MutationObserver(schedule)
+      mutation = new win.MutationObserver(schedule),
+      direction = new win.MutationObserver(schedule)
     resize.observe(node)
     resize.observe(body)
     mutation.observe(body, {
@@ -191,6 +192,8 @@ export function ScrollArea({
       characterData: true,
       attributes: true
     })
+    for (let ancestor: HTMLElement | null = node; ancestor; ancestor = ancestor.parentElement)
+      direction.observe(ancestor, { attributes: true, attributeFilter: ['dir', 'class', 'style'] })
     body.addEventListener('load', schedule, true)
     body.addEventListener('loadedmetadata', schedule, true)
     node.ownerDocument.fonts?.addEventListener('loadingdone', schedule)
@@ -198,6 +201,7 @@ export function ScrollArea({
     return () => {
       resize.disconnect()
       mutation.disconnect()
+      direction.disconnect()
       body.removeEventListener('load', schedule, true)
       body.removeEventListener('loadedmetadata', schedule, true)
       node.ownerDocument.fonts?.removeEventListener('loadingdone', schedule)

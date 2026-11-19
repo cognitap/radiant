@@ -2,7 +2,23 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { getLocaleAttributes, LocaleProvider, NumberField } from '@cognitap/radiant'
+import {
+  Checkbox,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  getLocaleAttributes,
+  LocaleProvider,
+  NumberField,
+  Radio,
+  Switch,
+  TagsInput,
+  TimeInput,
+  Toast,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport
+} from '@cognitap/radiant'
 
 test('locale attributes preserve script and region and exclude formatting extensions', () => {
   assert.deepEqual(getLocaleAttributes(), {})
@@ -40,4 +56,44 @@ test('document scope is wrapper-free and numbers use the closest configured loca
   assert.match(markup, /aria-label="Outer amount"[^>]*value="١٫٥"/)
   assert.match(markup, /aria-label="Inner amount"[^>]*value="1,5"/)
   assert.match(markup, /aria-label="Override"[^>]*value="1\.5"/)
+})
+
+test('RTL SSR emits logical direction overrides, LTR clock runs and mirrored disclosure markers', () => {
+  const markup = renderToStaticMarkup(
+    h(
+      LocaleProvider,
+      { locale: 'ar-EG' },
+      h(TimeInput, { 'aria-label': 'الوقت', defaultValue: '14:05' }),
+      h(
+        Collapsible,
+        null,
+        h(CollapsibleTrigger, null, 'تفاصيل'),
+        h(CollapsibleContent, null, 'المحتوى')
+      ),
+      h(
+        ToastProvider,
+        null,
+        h(
+          ToastViewport,
+          { 'aria-label': 'إشعارات' },
+          h(Toast, { defaultOpen: true }, h(ToastTitle, null, 'تم الحفظ'))
+        )
+      ),
+      h(
+        LocaleProvider,
+        { locale: 'fr-FR' },
+        h(Switch, { dir: 'rtl', label: 'التنبيهات' }),
+        h(Checkbox, { dir: 'rtl', label: 'موافقة' }),
+        h(Radio, { dir: 'rtl', value: 'a', label: 'خيار' }),
+        h(TagsInput, { dir: 'rtl', 'aria-label': 'وسوم', defaultValue: ['أول'] })
+      )
+    )
+  )
+  assert.match(markup, /<span dir="ltr" data-slot="time-input-clock"/)
+  assert.match(markup, /rtl:rotate-180/)
+  assert.match(markup, /end-\[var\(--rad-toast-inset,1rem\)\]/)
+  assert.match(markup, /<label dir="rtl"[^>]*data-slot="switch-wrapper"/)
+  assert.match(markup, /<label dir="rtl"[^>]*data-slot="checkbox-wrapper"/)
+  assert.match(markup, /<label dir="rtl"[^>]*data-slot="radio-wrapper"/)
+  assert.match(markup, /<div dir="rtl" data-slot="tags-input-root"/)
 })

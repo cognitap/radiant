@@ -190,6 +190,7 @@ export function TagsInput({
   }
   return (
     <div
+      dir={props.dir}
       data-slot="tags-input-root"
       className="grid min-w-0 gap-[var(--rad-spacing-field-gap,0.375rem)]"
     >

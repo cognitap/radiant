@@ -75,6 +75,13 @@ Omitting the locale inherits formatting and matching from the closest provider. 
 
 `NumberField` localizes its display and parsing. `NumberFormatter` preserves server text when browser locale data differs during hydration. Select and Menu use locale-aware prefix search. Combobox, Autocomplete and their composed families use locale-aware substring search. Built-in matching ignores case and distinguishes accents. Caller filters and text props still apply.
 
+### Right-to-left (RTL)
+
+Direction-sensitive behavior reads computed CSS direction from the host or anchor, so components follow `LocaleProvider`, document `dir`, nested subtree overrides, and direct control `dir` props without separate RTL props. Logical CSS properties (`inset-inline-*`, `padding-inline-*`, `border-inline-*`, `rounded-s-*`/`rounded-e-*`, `text-start`) drive alignment, borders, indicators, and `ToastViewport` placement.
+
+- **Verified coverage:** Horizontal arrow navigation, drag/pointer geometry, disclosure/branch chevron mirroring, logical alignment/positioning, horizontal and vertical scrolling, reading order, nested overrides, and SSR hydration are verified across overlays (`Popover`, `Tooltip`, `HoverCard`, `ContextMenu`, `Menu`, `Drawer`, `Toast`, `Tour`, `Select`, `Combobox`, `MultiSelect`, `Cascader`, `TreeSelect`), navigation (`Tabs`, `Toolbar`, `ToggleGroup`, `Menubar`, `NavigationMenu`, `Breadcrumb`, `Pagination`, `NavLink`, `AppShell`, `Stepper`, `Timeline`, `Tree`), controls (`Slider`, `RangeSlider`, `Rating`, `Calendar`, `DateField`, `DatePicker`, `DateRangePicker`, `TimeInput`, `ColorPicker`, `ColorInput`, `Switch`, `Checkbox`, `Radio`, `OTPField`, `TagsInput`, `NumberField`, `PasswordInput`, `FileInput`, `ButtonGroup`, `InputGroup`), and layout/data families (`Collapsible`, `Accordion`, `ScrollArea`, `Carousel`, `Resizable`, `DataTable`, `Indicator`, `CodeBlock`, `Charts`).
+- **Intentional exceptions and limitations:** `TimeInput` keeps numeric `hour:minute[:second]` segments left-to-right while placing `dayPeriod` in the ambient flow. `CodeBlockViewport` defaults to `dir="ltr"` for source code and accepts an explicit `dir` override. `Popover`, `Tooltip`, and `HoverCard` keep physical `side` values (`'left' | 'right'`) while `align` (`'start' | 'end'`), `MenuSubContent`, `Drawer` (`'start' | 'end'`), and `Indicator` resolve logically. `Charts` preserve left-to-right SVG plot geometry while reversing horizontal keyboard stepping in RTL. Caller-supplied icons and `BreadcrumbSeparator` content are not mirrored automatically.
+
 ## Customization limits
 
 `render(props)` on button and link parts must return a `<button>` or `<a>`, or a component that forwards to one, with all props, the ref, and the children.
