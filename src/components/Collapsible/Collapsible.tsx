@@ -56,7 +56,7 @@ const collapsibleTriggerVariants = cva([
 const collapsibleMarkerVariants = cva([
   'size-4 shrink-0',
   'transition-transform duration-[var(--rad-collapsible-duration,var(--rad-motion-disclosure-duration,150ms))] ease-out',
-  '[details[open]>summary>&]:rotate-90',
+  'rtl:rotate-180 [details[open]>summary>&]:rotate-90 rtl:[details[open]>summary>&]:rotate-90',
   'motion-reduce:transition-none'
 ])
 

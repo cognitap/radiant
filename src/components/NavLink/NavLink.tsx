@@ -160,12 +160,7 @@ export function NavLinkGroupTrigger({
       {...native}
       data-slot={joinIds('nav-link-group-trigger', slot)}
       data-control-size={controlSize}
-      className={cn(
-        controlMetrics({ controlSize }),
-        itemClass,
-        'rtl:[&>svg]:rotate-180 rtl:data-[state=open]:[&>svg]:rotate-90',
-        className
-      )}
+      className={cn(controlMetrics({ controlSize }), itemClass, className)}
     >
       <Content {...{ icon, description, parts, children }} />
     </CollapsibleTrigger>

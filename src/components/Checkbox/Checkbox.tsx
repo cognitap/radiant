@@ -121,6 +121,7 @@ export function Checkbox({
   })
   const controlNode = (
     <span
+      dir={!labelled ? props.dir : undefined}
       className={cn(
         'relative inline-grid w-fit shrink-0',
         indicatorPressClass,
@@ -186,6 +187,7 @@ export function Checkbox({
 
   return (
     <label
+      dir={props.dir}
       className={cn(rowClass, parts?.wrapper?.className)}
       style={parts?.wrapper?.style}
       data-slot="checkbox-wrapper"

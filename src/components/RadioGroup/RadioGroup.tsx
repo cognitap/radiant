@@ -232,6 +232,7 @@ export function Radio({
   }, [controlled, selected])
   const controlNode = (
     <span
+      dir={!labelled && !described ? props.dir : undefined}
       className={cn(
         'relative inline-grid shrink-0',
         indicatorPressClass,
@@ -273,6 +274,7 @@ export function Radio({
 
   const row = labelled ? (
     <label
+      dir={!described ? props.dir : undefined}
       className={cn(rowClass, !described && parts?.wrapper?.className)}
       style={!described ? parts?.wrapper?.style : undefined}
       data-slot={!described ? 'radio-wrapper' : undefined}
@@ -294,6 +296,7 @@ export function Radio({
 
   return (
     <div
+      dir={props.dir}
       className={cn('grid min-w-0 max-w-full justify-items-start', parts?.wrapper?.className)}
       style={parts?.wrapper?.style}
       data-slot="radio-wrapper"

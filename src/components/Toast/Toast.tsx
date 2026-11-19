@@ -401,7 +401,7 @@ export function ToastViewport({ hotkey = true, ref, className, ...props }: Toast
       tabIndex={-1}
       data-slot={joinIds('toast-viewport', props['data-slot'])}
       className={cn(
-        'pointer-events-none fixed right-[var(--rad-toast-inset,1rem)] bottom-[var(--rad-toast-inset,1rem)] z-[var(--rad-toast-z-index,50)] grid min-w-0 w-[var(--rad-toast-width,24rem)] max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-2rem)] overflow-visible',
+        'pointer-events-none fixed end-[var(--rad-toast-inset,1rem)] bottom-[var(--rad-toast-inset,1rem)] z-[var(--rad-toast-z-index,50)] grid min-w-0 w-[var(--rad-toast-width,24rem)] max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-2rem)] overflow-visible',
         className
       )}
     />
