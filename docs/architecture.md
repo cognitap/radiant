@@ -2,7 +2,7 @@
 
 Radiant wraps native HTML in React components. The browser provides behavior: button activation, radio grouping, modal focus. Radiant adds composition, state, and styling. Applications provide content and logic.
 
-Component APIs live in the [component guides](https://github.com/cognitap/radiant-docs). Cross-family topics live in [theming](theming.md), [motion](motion.md), and [accessibility](accessibility.md).
+Component APIs live in the [component guides](https://github.com/cognitap/radiant-docs). Cross-family topics live in [theming](theming.md), [motion](motion.md), and [accessibility](accessibility.md). Generative UI boundaries and defaults live in [ADR 0002](adr/0002-generative-ui-scope.md).
 
 ## Package entries
 
