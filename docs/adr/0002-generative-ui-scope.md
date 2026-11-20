@@ -14,6 +14,6 @@ Radiant ships generic, domain-agnostic primitives only. A component belongs in R
 
 ## Protocol
 
-Radiant defines one canonical catalog independent of any wire format. Protocol adapters translate from that catalog; A2UI 1.0 is the first adapter, with `json-render` as the fallback if the renderer spike fails its streaming-patch or client-state checks.
+Radiant defines one canonical catalog independent of any wire format. Protocol adapters translate from that catalog; A2UI 1.0 is the first adapter.
 
 **Rejected:** Authoring schemas and guidance directly inside A2UI or another single protocol. Tying the catalog definition to one wire format locks component contracts to a transport and forces a full rewrite if the adapter changes.
