@@ -44,7 +44,7 @@ test('core package entry does not expose catalog symbols and catalog rejects for
   assert.equal('radiantCatalog' in core, false)
   assert.equal('extendCatalog' in core, false)
   assert.deepEqual(validateCatalog(radiantCatalog), [])
-  assert.deepEqual(CHOICE_PRESENTATIONS, ['segmented', 'chips', 'cards', 'dropdown'])
+  assert.deepEqual(CHOICE_PRESENTATIONS, ['list', 'segmented', 'chips', 'cards', 'dropdown'])
   assert.deepEqual(CATALOG_SPACING, ['tight', 'normal', 'airy'])
 
   assert.throws(

@@ -61,6 +61,7 @@ test('radiantCatalog passes contract validation, is deeply frozen, and uses inte
   const choice = radiantCatalog.entries.Choice
   assert.deepEqual(choice.propsSchema.properties.presentation.enum, CHOICE_PRESENTATIONS)
   assert.deepEqual(choice.propsSchema.properties.presentation.enum, [
+    'list',
     'segmented',
     'chips',
     'cards',
@@ -120,6 +121,8 @@ test('validation rejects entries exposing className, style, render, DOM handlers
     'ariaHidden',
     'data-slot',
     'onClick',
+    'onclick',
+    'onkeydown',
     'dangerouslySetInnerHTML'
   ]
 
@@ -256,35 +259,90 @@ test('extendCatalog adds custom entries cleanly and forbids shadowing base entri
   )
 })
 
-test('A2UI basic and extension catalogs are generated deterministically from radiantCatalog', () => {
+// Copy of google/A2UI catalogs/basic/v1/catalog.json (Apache-2.0).
+const officialBasicCatalog = JSON.parse(
+  readFileSync(new URL('./fixtures/a2ui/basic-catalog-v1_0.json', import.meta.url), 'utf8')
+)
+
+// Descriptions are prose, and enum and required order carry no meaning.
+function wireShape(value, key) {
+  if (Array.isArray(value)) {
+    const items = value.map(item => wireShape(item))
+    return key === 'enum' || key === 'required' ? items.sort() : items
+  }
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([name]) => name !== 'description')
+      .map(([name, nested]) => [name, wireShape(nested, name)])
+  )
+}
+
+const wireProps = schema => (schema.allOf ? schema.allOf.at(-1) : schema).properties
+
+const customEntry = name => ({
+  name,
+  category: 'data',
+  description: 'Custom application entry.',
+  propsSchema: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['label'],
+    properties: { label: { type: 'string' } }
+  },
+  slots: {},
+  bindings: {},
+  actions: {}
+})
+
+test('generated A2UI basic catalog matches the A2UI 1.0 specification', () => {
+  const { basic } = generateA2uiCatalogs(radiantCatalog)
+
+  assert.equal(basic.catalogId, officialBasicCatalog.catalogId)
+  assert.equal(basic.$id, officialBasicCatalog.$id)
+  assert.equal(basic.protocolVersion, officialBasicCatalog.protocolVersion)
+  assert.deepEqual(
+    Object.keys(basic.components).sort(),
+    Object.keys(officialBasicCatalog.components).sort()
+  )
+  for (const [name, official] of Object.entries(officialBasicCatalog.components)) {
+    assert.deepEqual(
+      wireShape(basic.components[name]),
+      wireShape(official),
+      `${name} differs from the A2UI basic catalog`
+    )
+  }
+  assert.deepEqual(wireShape(basic.$defs.Weight), wireShape(officialBasicCatalog.$defs.Weight))
+  assert.deepEqual(
+    wireShape(basic.$defs.anyComponent.oneOf)
+      .map(ref => ref.$ref)
+      .sort(),
+    officialBasicCatalog.$defs.anyComponent.oneOf.map(ref => ref.$ref).sort()
+  )
+})
+
+test('A2UI catalogs are generated deterministically and stay free of forbidden props', () => {
   const first = generateA2uiCatalogs(radiantCatalog)
-  const second = generateA2uiCatalogs(radiantCatalog)
-  assert.deepEqual(first, second)
+  assert.deepEqual(first, generateA2uiCatalogs(radiantCatalog))
 
   assert.equal(first.basic.catalogId, A2UI_BASIC_CATALOG_ID)
   assert.equal(first.extension.catalogId, RADIANT_A2UI_EXTENSION_CATALOG_ID)
-  assert.equal(first.extension.extends, A2UI_BASIC_CATALOG_ID)
-
-  assert.deepEqual(Object.keys(first.basic.components).sort(), [
-    'AudioPlayer',
-    'Button',
-    'Card',
-    'CheckBox',
-    'ChoicePicker',
-    'Column',
-    'DateTimeInput',
-    'Divider',
-    'Icon',
-    'Image',
-    'List',
-    'Modal',
-    'Row',
-    'Slider',
-    'Tabs',
-    'Text',
-    'TextField',
-    'Video'
-  ])
+  for (const doc of [first.basic, first.extension]) {
+    assert.equal('extends' in doc, false)
+    assert.ok(doc.$defs.anyComponent && doc.$defs.anyFunction)
+    for (const [componentName, schema] of Object.entries(doc.components)) {
+      assert.equal(
+        wireProps(schema).id,
+        undefined,
+        `${componentName} must leave id to the envelope`
+      )
+      assert.deepEqual(
+        findForbiddenPropsInSchema({ properties: wireProps(schema) }, componentName),
+        [],
+        `Generated A2UI component ${componentName} leaked a forbidden prop`
+      )
+    }
+  }
 
   assert.deepEqual(Object.keys(first.extension.components).sort(), [
     'Accordion',
@@ -299,62 +357,74 @@ test('A2UI basic and extension catalogs are generated deterministically from rad
     'Textarea',
     'Toast'
   ])
+  const ext = first.extension.components
+  assert.equal(wireProps(ext.Select).presentation, undefined)
+  assert.equal(wireProps(ext.Textarea).kind, undefined)
+  assert.ok(wireProps(ext.Textarea).rows)
+  assert.equal(wireProps(ext.Table).rows.$ref, 'common_types.json#/$defs/ChildList')
+  assert.equal(ext.Switch.allOf[0].$ref, 'common_types.json#/$defs/Checkable')
+})
 
-  // Bindings, checks, slots, and actions translate from the canonical contract
-  assert.equal(first.basic.components.TextField.properties.value.$ref, '#/$defs/DynamicString')
-  assert.ok(first.basic.components.TextField.properties.checks)
-  assert.equal(first.basic.components.Button.properties.action.$ref, '#/$defs/Action')
-  assert.equal(first.basic.components.Row.properties.children.$ref, '#/$defs/ChildList')
-  assert.equal(first.basic.components.Card.properties.child.$ref, '#/$defs/ComponentId')
-  assert.equal(
-    first.basic.components.ChoicePicker.properties.value.$ref,
-    '#/$defs/DynamicStringList'
+test('A2UI projection keeps the constraints of props that are also bindable', () => {
+  const { extension, basic } = generateA2uiCatalogs(radiantCatalog)
+  const progressValue = wireProps(extension.components.Progress).value
+  assert.deepEqual(progressValue.oneOf[0], { type: ['number', 'null'], minimum: 0 })
+  assert.deepEqual(
+    progressValue.oneOf.slice(1).map(branch => branch.$ref),
+    ['common_types.json#/$defs/DataBinding', 'common_types.json#/$defs/FunctionCall']
   )
-  assert.equal(first.extension.components.Select.properties.presentation, undefined)
-  assert.equal(first.extension.components.Select.properties.value.$ref, '#/$defs/DynamicStringList')
-  assert.equal(first.extension.components.Textarea.properties.kind, undefined)
-  assert.ok(first.extension.components.Textarea.properties.rows)
-  assert.equal(first.extension.components.Table.properties.rows.$ref, '#/$defs/ChildList')
+  assert.equal(wireProps(extension.components.Alert).title.type, 'string')
+  assert.equal(wireProps(basic.components.Text).text.$ref, 'common_types.json#/$defs/DynamicString')
+})
 
-  // Every generated A2UI component remains free of forbidden props
-  for (const doc of [first.basic, first.extension]) {
-    for (const [componentName, schema] of Object.entries(doc.components)) {
-      assert.deepEqual(
-        findForbiddenPropsInSchema(schema, componentName),
-        [],
-        `Generated A2UI component ${componentName} leaked a forbidden prop`
-      )
-    }
-  }
+test('single-selection A2UI choice components bind a string value', () => {
+  const { basic, extension } = generateA2uiCatalogs(radiantCatalog)
+  const valueRef = schema => wireProps(schema).value.$ref
+  assert.equal(valueRef(extension.components.Select), 'common_types.json#/$defs/DynamicString')
+  assert.equal(valueRef(extension.components.RadioGroup), 'common_types.json#/$defs/DynamicString')
+  assert.equal(
+    valueRef(extension.components.Combobox),
+    'common_types.json#/$defs/DynamicStringList'
+  )
+  assert.equal(
+    valueRef(basic.components.ChoicePicker),
+    'common_types.json#/$defs/DynamicStringList'
+  )
+})
 
-  // Custom entries added via extendCatalog flow automatically into the generated extension catalog
+test('custom entries join the extension catalog but cannot reuse generated A2UI names', () => {
   const extended = extendCatalog(radiantCatalog, {
     id: 'example/custom',
     version: '1.0.0',
-    entries: {
-      MetricTile: {
-        name: 'MetricTile',
-        category: 'data',
-        description: 'Single headline metric.',
-        propsSchema: {
-          type: 'object',
-          additionalProperties: false,
-          required: ['label', 'value'],
-          properties: {
-            label: { type: 'string' },
-            value: { type: 'string' }
-          }
-        },
-        slots: {},
-        bindings: {},
-        actions: {}
-      }
-    }
+    entries: { MetricTile: customEntry('MetricTile') }
   })
-  const generatedExtended = generateA2uiCatalogs(extended)
-  assert.ok('MetricTile' in generatedExtended.extension.components)
-  assert.equal(
-    generatedExtended.extension.components.MetricTile.properties.component.const,
-    'MetricTile'
-  )
+  const generated = generateA2uiCatalogs(extended)
+  assert.equal(generated.extension.components.MetricTile.properties.component.const, 'MetricTile')
+  assert.equal(generated.basic.components.MetricTile, undefined)
+
+  for (const name of ['Select', 'CheckBox', 'ChoicePicker']) {
+    const clashing = extendCatalog(radiantCatalog, {
+      id: 'example/clash',
+      version: '1.0.0',
+      entries: { [name]: customEntry(name) }
+    })
+    assert.throws(
+      () => generateA2uiCatalogs(clashing),
+      new RegExp(`"${name}": a custom entry cannot reuse the name`)
+    )
+  }
+})
+
+test('validation rejects actions that share a name with a prop, slot, or binding', () => {
+  const entry = {
+    ...customEntry('Clashing'),
+    bindings: { value: { description: 'Value.', valueType: 'string', direction: 'two-way' } },
+    actions: {
+      label: { description: 'Clashes with a prop.', scope: 'outbound' },
+      value: { description: 'Clashes with a binding.', scope: 'outbound' }
+    }
+  }
+  const violations = validateCatalogEntry(entry, 'Clashing')
+  assert.ok(violations.some(message => message.includes('action "label" collides with a prop')))
+  assert.ok(violations.some(message => message.includes('action "value" collides with a binding')))
 })

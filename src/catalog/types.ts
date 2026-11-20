@@ -16,10 +16,18 @@ export type CatalogOrientation = (typeof CATALOG_ORIENTATIONS)[number]
 export const CATALOG_ALIGNMENTS = ['start', 'center', 'end', 'stretch'] as const
 export type CatalogAlignment = (typeof CATALOG_ALIGNMENTS)[number]
 
-export const CATALOG_JUSTIFY = ['start', 'center', 'end', 'between', 'around', 'evenly'] as const
+export const CATALOG_JUSTIFY = [
+  'start',
+  'center',
+  'end',
+  'between',
+  'around',
+  'evenly',
+  'stretch'
+] as const
 export type CatalogJustify = (typeof CATALOG_JUSTIFY)[number]
 
-export const CHOICE_PRESENTATIONS = ['segmented', 'chips', 'cards', 'dropdown'] as const
+export const CHOICE_PRESENTATIONS = ['list', 'segmented', 'chips', 'cards', 'dropdown'] as const
 export type ChoicePresentation = (typeof CHOICE_PRESENTATIONS)[number]
 
 export const CATALOG_ANNOUNCEMENTS = ['off', 'polite', 'assertive'] as const

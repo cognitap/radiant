@@ -95,7 +95,7 @@ Custom styling and rendering must keep:
 
 ## Model-facing catalog
 
-Radiant separates its human React API from its model-facing contract in `@cognitap/radiant/catalog`. Human applications compose explicit sub-parts (`Select`, `SelectTrigger`, `SelectContent`, `SelectItem`), pass `className`, `style`, `render`, and refs, and wire native form and ARIA relationships. Models target a smaller, intent-driven catalog instead: one `Choice` entry with `presentation: 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
+Radiant separates its human React API from its model-facing contract in `@cognitap/radiant/catalog`. Human applications compose explicit sub-parts (`Select`, `SelectTrigger`, `SelectContent`, `SelectItem`), pass `className`, `style`, `render`, and refs, and wire native form and ARIA relationships. Models target a smaller, intent-driven catalog instead: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
 
 Catalog entries never expose `className`, `style`, `render`, DOM event handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; protocol adapters such as A2UI generate their basic and extension catalog schemas from it, and applications add custom entries through `extendCatalog` without shadowing Radiant names.
 

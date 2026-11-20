@@ -35,6 +35,58 @@ const EXACT_FORBIDDEN_PROPS = new Set([
   'innerhtml'
 ])
 
+// Lowercase DOM handler attributes such as `onclick`; camelCase handlers match /^on[A-Z]/.
+const DOM_EVENT_NAMES = new Set([
+  'abort',
+  'beforeinput',
+  'blur',
+  'change',
+  'click',
+  'contextmenu',
+  'copy',
+  'cut',
+  'dblclick',
+  'drag',
+  'dragend',
+  'dragenter',
+  'dragleave',
+  'dragover',
+  'dragstart',
+  'drop',
+  'error',
+  'focus',
+  'focusin',
+  'focusout',
+  'input',
+  'invalid',
+  'keydown',
+  'keypress',
+  'keyup',
+  'load',
+  'mousedown',
+  'mouseenter',
+  'mouseleave',
+  'mousemove',
+  'mouseout',
+  'mouseover',
+  'mouseup',
+  'paste',
+  'pointerdown',
+  'pointerenter',
+  'pointerleave',
+  'pointermove',
+  'pointerup',
+  'reset',
+  'scroll',
+  'select',
+  'submit',
+  'toggle',
+  'touchend',
+  'touchmove',
+  'touchstart',
+  'wheel'
+])
+
 /**
  * Returns true when a prop name leaks host styling, React rendering escape hatches,
  * DOM event handlers, or raw ARIA attributes into the model-facing contract.
@@ -45,6 +97,7 @@ export function isForbiddenCatalogProp(name: string): boolean {
   if (lower.startsWith('aria-') || /^aria[A-Z]/.test(name)) return true
   if (lower.startsWith('data-')) return true
   if (/^on[A-Z]/.test(name)) return true
+  if (lower.startsWith('on') && DOM_EVENT_NAMES.has(lower.slice(2))) return true
   return false
 }
 
@@ -260,6 +313,17 @@ export function validateCatalogEntry(entry: CatalogEntry, key?: string): readonl
   } else {
     for (const [actionName, action] of Object.entries(entry.actions)) {
       validateAction(label, actionName, action, violations)
+      for (const [kind, names] of [
+        ['prop', entry.propsSchema?.properties],
+        ['slot', entry.slots],
+        ['binding', entry.bindings]
+      ] as const) {
+        if (isPlainObject(names) && Object.hasOwn(names, actionName)) {
+          violations.push(
+            `${label}: action "${actionName}" collides with a ${kind} of the same name.`
+          )
+        }
+      }
     }
   }
   if (entry.guidance !== undefined) {

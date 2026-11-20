@@ -135,7 +135,7 @@ export const radiantCatalog: Catalog = defineCatalog({
           },
           fit: {
             type: 'string',
-            enum: ['contain', 'cover', 'fill', 'scale-down'],
+            enum: ['contain', 'cover', 'fill', 'none', 'scale-down'],
             default: 'cover',
             description: 'How the image fits inside its frame.'
           },
