@@ -1,0 +1,430 @@
+import assert from 'node:assert/strict'
+import { readdirSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { test } from 'node:test'
+import ts from 'typescript'
+import {
+  CATALOG_SPACING,
+  CHOICE_PRESENTATIONS,
+  assertValidCatalog,
+  defineCatalog,
+  extendCatalog,
+  findForbiddenPropsInSchema,
+  isForbiddenCatalogProp,
+  radiantCatalog,
+  validateCatalog,
+  validateCatalogEntry
+} from '../dist/library/catalog/index.js'
+import {
+  A2UI_BASIC_CATALOG_ID,
+  RADIANT_A2UI_EXTENSION_CATALOG_ID,
+  generateA2uiCatalogs
+} from '../dist/library/a2ui/catalogGenerator.js'
+
+const catalogSourceDir = fileURLToPath(new URL('../src/catalog/', import.meta.url))
+
+test('canonical catalog source has zero host, React, DOM, or protocol imports', () => {
+  const files = readdirSync(catalogSourceDir, { recursive: true }).filter(file =>
+    file.endsWith('.ts')
+  )
+  assert.ok(files.length > 0)
+  for (const relative of files) {
+    const filename = resolve(catalogSourceDir, relative)
+    const sourceFile = ts.createSourceFile(
+      filename,
+      readFileSync(filename, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    )
+    for (const statement of sourceFile.statements) {
+      if (!ts.isImportDeclaration(statement) && !ts.isExportDeclaration(statement)) continue
+      const specifier = statement.moduleSpecifier
+      if (!specifier || !ts.isStringLiteral(specifier)) continue
+      assert.ok(
+        specifier.text.startsWith('./'),
+        `${relative} must stay self-contained; found import "${specifier.text}"`
+      )
+    }
+  }
+})
+
+test('radiantCatalog passes contract validation, is deeply frozen, and uses intent vocabulary', () => {
+  assert.deepEqual(validateCatalog(radiantCatalog), [])
+  assert.doesNotThrow(() => assertValidCatalog(radiantCatalog))
+  assert.equal(Object.isFrozen(radiantCatalog), true)
+  assert.equal(Object.isFrozen(radiantCatalog.entries), true)
+  assert.equal(Object.isFrozen(radiantCatalog.entries.Choice.propsSchema.properties), true)
+  assert.deepEqual(JSON.parse(JSON.stringify(radiantCatalog)), radiantCatalog)
+
+  // Intent-oriented Choice entry with curated presentations instead of 11 Select parts
+  const choice = radiantCatalog.entries.Choice
+  assert.deepEqual(choice.propsSchema.properties.presentation.enum, CHOICE_PRESENTATIONS)
+  assert.deepEqual(choice.propsSchema.properties.presentation.enum, [
+    'list',
+    'segmented',
+    'chips',
+    'cards',
+    'dropdown'
+  ])
+  assert.equal(choice.bindings.value.direction, 'two-way')
+  assert.equal(choice.bindings.value.validatable, true)
+
+  // Semantic spacing scale rather than pixel widths or utility classes
+  assert.deepEqual(radiantCatalog.entries.Row.propsSchema.properties.gap.enum, CATALOG_SPACING)
+  assert.deepEqual(radiantCatalog.entries.Column.propsSchema.properties.gap.enum, [
+    'tight',
+    'normal',
+    'airy'
+  ])
+  assert.deepEqual(radiantCatalog.entries.Card.propsSchema.properties.padding.enum, CATALOG_SPACING)
+})
+
+test('every entry in radiantCatalog has zero forbidden props in props, slots, bindings, or actions', () => {
+  for (const [name, entry] of Object.entries(radiantCatalog.entries)) {
+    assert.deepEqual(
+      findForbiddenPropsInSchema(entry.propsSchema, `${name}.props`),
+      [],
+      `${name} leaked a forbidden prop`
+    )
+    for (const bindingName of Object.keys(entry.bindings)) {
+      assert.equal(isForbiddenCatalogProp(bindingName), false, `${name}.bindings.${bindingName}`)
+    }
+    for (const [slotName, slot] of Object.entries(entry.slots)) {
+      for (const childProp of Object.keys(slot.childProps ?? {})) {
+        assert.equal(
+          isForbiddenCatalogProp(childProp),
+          false,
+          `${name}.slots.${slotName}.childProps.${childProp}`
+        )
+      }
+    }
+  }
+})
+
+test('validation rejects entries exposing className, style, render, DOM handlers, or ARIA props', () => {
+  const forbiddenNames = [
+    'className',
+    'class',
+    'style',
+    'render',
+    'as',
+    'asChild',
+    'ref',
+    'parts',
+    'role',
+    'tabIndex',
+    'aria-label',
+    'aria-describedby',
+    'aria-invalid',
+    'ariaLabel',
+    'ariaHidden',
+    'data-slot',
+    'onClick',
+    'onclick',
+    'onkeydown',
+    'dangerouslySetInnerHTML'
+  ]
+
+  for (const propName of forbiddenNames) {
+    assert.equal(isForbiddenCatalogProp(propName), true, `Expected "${propName}" to be forbidden`)
+    const badEntry = {
+      name: 'LeakyWidget',
+      category: 'content',
+      description: 'Should be rejected.',
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          [propName]: { type: 'string' }
+        }
+      },
+      slots: {},
+      bindings: {},
+      actions: {}
+    }
+    const violations = validateCatalogEntry(badEntry, 'LeakyWidget')
+    assert.ok(
+      violations.some(message => message.includes(propName) && message.includes('forbidden')),
+      `Expected violation for "${propName}", got: ${violations.join('; ')}`
+    )
+    assert.throws(
+      () =>
+        defineCatalog({
+          id: 'bad/catalog',
+          version: '1.0.0',
+          description: 'Invalid catalog.',
+          entries: { LeakyWidget: badEntry }
+        }),
+      TypeError
+    )
+  }
+
+  // Also catches forbidden props nested inside object properties, arrays, or slot childProps
+  const nestedViolations = validateCatalogEntry(
+    {
+      name: 'NestedLeak',
+      category: 'layout',
+      description: 'Leaks nested styling and ARIA props.',
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                title: { type: 'string' },
+                style: { type: 'object' }
+              }
+            }
+          }
+        }
+      },
+      slots: {
+        children: {
+          description: 'Child nodes.',
+          cardinality: 'many',
+          childProps: {
+            'aria-label': { type: 'string' }
+          }
+        }
+      },
+      bindings: {},
+      actions: {}
+    },
+    'NestedLeak'
+  )
+  assert.ok(nestedViolations.some(message => message.includes('items[].style')))
+  assert.ok(nestedViolations.some(message => message.includes('childProps.aria-label')))
+})
+
+test('extendCatalog adds custom entries cleanly and forbids shadowing base entries', () => {
+  const extended = extendCatalog(radiantCatalog, {
+    id: 'example/custom',
+    version: '1.0.0',
+    description: 'Custom application catalog.',
+    entries: {
+      Sparkline: {
+        name: 'Sparkline',
+        category: 'data',
+        description: 'Compact inline trend line.',
+        propsSchema: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['label', 'values'],
+          properties: {
+            label: { type: 'string', minLength: 1 },
+            values: { type: 'array', minItems: 2, items: { type: 'number' } },
+            tone: { type: 'string', enum: ['accent', 'neutral', 'warning', 'danger'] }
+          }
+        },
+        slots: {},
+        bindings: {},
+        actions: {}
+      }
+    }
+  })
+
+  assert.equal(extended.extends, radiantCatalog.id)
+  assert.ok('Sparkline' in extended.entries)
+  assert.ok('Choice' in extended.entries)
+  assert.equal('Sparkline' in radiantCatalog.entries, false)
+  assert.equal(Object.isFrozen(extended), true)
+
+  assert.throws(
+    () =>
+      extendCatalog(radiantCatalog, {
+        id: 'example/shadow',
+        version: '1.0.0',
+        entries: {
+          Button: {
+            name: 'Button',
+            category: 'action',
+            description: 'Shadow attempt.',
+            propsSchema: {
+              type: 'object',
+              additionalProperties: false,
+              properties: { label: { type: 'string' } }
+            },
+            slots: {},
+            bindings: {},
+            actions: {}
+          }
+        }
+      }),
+    /cannot shadow base entries: Button/
+  )
+})
+
+// Copy of google/A2UI catalogs/basic/v1/catalog.json (Apache-2.0).
+const officialBasicCatalog = JSON.parse(
+  readFileSync(new URL('./fixtures/a2ui/basic-catalog-v1_0.json', import.meta.url), 'utf8')
+)
+
+// Descriptions are prose, and enum and required order carry no meaning.
+function wireShape(value, key) {
+  if (Array.isArray(value)) {
+    const items = value.map(item => wireShape(item))
+    return key === 'enum' || key === 'required' ? items.sort() : items
+  }
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([name]) => name !== 'description')
+      .map(([name, nested]) => [name, wireShape(nested, name)])
+  )
+}
+
+const wireProps = schema => (schema.allOf ? schema.allOf.at(-1) : schema).properties
+
+const customEntry = name => ({
+  name,
+  category: 'data',
+  description: 'Custom application entry.',
+  propsSchema: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['label'],
+    properties: { label: { type: 'string' } }
+  },
+  slots: {},
+  bindings: {},
+  actions: {}
+})
+
+test('generated A2UI basic catalog matches the A2UI 1.0 specification', () => {
+  const { basic } = generateA2uiCatalogs(radiantCatalog)
+
+  assert.equal(basic.catalogId, officialBasicCatalog.catalogId)
+  assert.equal(basic.$id, officialBasicCatalog.$id)
+  assert.equal(basic.protocolVersion, officialBasicCatalog.protocolVersion)
+  assert.deepEqual(
+    Object.keys(basic.components).sort(),
+    Object.keys(officialBasicCatalog.components).sort()
+  )
+  for (const [name, official] of Object.entries(officialBasicCatalog.components)) {
+    assert.deepEqual(
+      wireShape(basic.components[name]),
+      wireShape(official),
+      `${name} differs from the A2UI basic catalog`
+    )
+  }
+  assert.deepEqual(wireShape(basic.$defs.Weight), wireShape(officialBasicCatalog.$defs.Weight))
+  assert.deepEqual(
+    wireShape(basic.$defs.anyComponent.oneOf)
+      .map(ref => ref.$ref)
+      .sort(),
+    officialBasicCatalog.$defs.anyComponent.oneOf.map(ref => ref.$ref).sort()
+  )
+})
+
+test('A2UI catalogs are generated deterministically and stay free of forbidden props', () => {
+  const first = generateA2uiCatalogs(radiantCatalog)
+  assert.deepEqual(first, generateA2uiCatalogs(radiantCatalog))
+
+  assert.equal(first.basic.catalogId, A2UI_BASIC_CATALOG_ID)
+  assert.equal(first.extension.catalogId, RADIANT_A2UI_EXTENSION_CATALOG_ID)
+  for (const doc of [first.basic, first.extension]) {
+    assert.equal('extends' in doc, false)
+    assert.ok(doc.$defs.anyComponent && doc.$defs.anyFunction)
+    for (const [componentName, schema] of Object.entries(doc.components)) {
+      assert.equal(
+        wireProps(schema).id,
+        undefined,
+        `${componentName} must leave id to the envelope`
+      )
+      assert.deepEqual(
+        findForbiddenPropsInSchema({ properties: wireProps(schema) }, componentName),
+        [],
+        `Generated A2UI component ${componentName} leaked a forbidden prop`
+      )
+    }
+  }
+
+  assert.deepEqual(Object.keys(first.extension.components).sort(), [
+    'Accordion',
+    'Alert',
+    'Badge',
+    'Combobox',
+    'Progress',
+    'RadioGroup',
+    'Select',
+    'Switch',
+    'Table',
+    'Textarea',
+    'Toast'
+  ])
+  const ext = first.extension.components
+  assert.equal(wireProps(ext.Select).presentation, undefined)
+  assert.equal(wireProps(ext.Textarea).kind, undefined)
+  assert.ok(wireProps(ext.Textarea).rows)
+  assert.equal(wireProps(ext.Table).rows.$ref, 'common_types.json#/$defs/ChildList')
+  assert.equal(ext.Switch.allOf[0].$ref, 'common_types.json#/$defs/Checkable')
+})
+
+test('A2UI projection keeps the constraints of props that are also bindable', () => {
+  const { extension, basic } = generateA2uiCatalogs(radiantCatalog)
+  const progressValue = wireProps(extension.components.Progress).value
+  assert.deepEqual(progressValue.oneOf[0], { type: ['number', 'null'], minimum: 0 })
+  assert.deepEqual(
+    progressValue.oneOf.slice(1).map(branch => branch.$ref),
+    ['common_types.json#/$defs/DataBinding', 'common_types.json#/$defs/FunctionCall']
+  )
+  assert.equal(wireProps(extension.components.Alert).title.type, 'string')
+  assert.equal(wireProps(basic.components.Text).text.$ref, 'common_types.json#/$defs/DynamicString')
+})
+
+test('single-selection A2UI choice components bind a string value', () => {
+  const { basic, extension } = generateA2uiCatalogs(radiantCatalog)
+  const valueRef = schema => wireProps(schema).value.$ref
+  assert.equal(valueRef(extension.components.Select), 'common_types.json#/$defs/DynamicString')
+  assert.equal(valueRef(extension.components.RadioGroup), 'common_types.json#/$defs/DynamicString')
+  assert.equal(
+    valueRef(extension.components.Combobox),
+    'common_types.json#/$defs/DynamicStringList'
+  )
+  assert.equal(
+    valueRef(basic.components.ChoicePicker),
+    'common_types.json#/$defs/DynamicStringList'
+  )
+})
+
+test('custom entries join the extension catalog but cannot reuse generated A2UI names', () => {
+  const extended = extendCatalog(radiantCatalog, {
+    id: 'example/custom',
+    version: '1.0.0',
+    entries: { MetricTile: customEntry('MetricTile') }
+  })
+  const generated = generateA2uiCatalogs(extended)
+  assert.equal(generated.extension.components.MetricTile.properties.component.const, 'MetricTile')
+  assert.equal(generated.basic.components.MetricTile, undefined)
+
+  for (const name of ['Select', 'CheckBox', 'ChoicePicker']) {
+    const clashing = extendCatalog(radiantCatalog, {
+      id: 'example/clash',
+      version: '1.0.0',
+      entries: { [name]: customEntry(name) }
+    })
+    assert.throws(
+      () => generateA2uiCatalogs(clashing),
+      new RegExp(`"${name}": a custom entry cannot reuse the name`)
+    )
+  }
+})
+
+test('validation rejects actions that share a name with a prop, slot, or binding', () => {
+  const entry = {
+    ...customEntry('Clashing'),
+    bindings: { value: { description: 'Value.', valueType: 'string', direction: 'two-way' } },
+    actions: {
+      label: { description: 'Clashes with a prop.', scope: 'outbound' },
+      value: { description: 'Clashes with a binding.', scope: 'outbound' }
+    }
+  }
+  const violations = validateCatalogEntry(entry, 'Clashing')
+  assert.ok(violations.some(message => message.includes('action "label" collides with a prop')))
+  assert.ok(violations.some(message => message.includes('action "value" collides with a binding')))
+})

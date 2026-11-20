@@ -9,6 +9,7 @@ Component APIs live in the [component guides](https://github.com/cognitap/radian
 - `@cognitap/radiant`: components
 - `@cognitap/radiant/charts`: charts
 - `@cognitap/radiant/examples`: theme presets
+- `@cognitap/radiant/catalog`: canonical model-facing catalog
 
 [package.json](../package.json) lists every import path, including CSS and motion.
 
@@ -91,5 +92,11 @@ Custom styling and rendering must keep:
 - Connected labels and descriptions, and visible focus, invalid, disabled, and pending states.
 - Closed dialog and disclosure content hidden, focus contained in modal dialogs, and `<summary>` as a direct child of `<details>`.
 - `aria-hidden` on decorative indicators, and support for reduced motion and forced colors.
+
+## Model-facing catalog
+
+Radiant separates its human React API from its model-facing contract in `@cognitap/radiant/catalog`. Human applications compose explicit sub-parts (`Select`, `SelectTrigger`, `SelectContent`, `SelectItem`), pass `className`, `style`, `render`, and refs, and wire native form and ARIA relationships. Models target a smaller, intent-driven catalog instead: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
+
+Catalog entries never expose `className`, `style`, `render`, DOM event handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; protocol adapters such as A2UI generate their basic and extension catalog schemas from it, and applications add custom entries through `extendCatalog` without shadowing Radiant names.
 
 When a contract changes, update the component's stories and the compile checks in [tests/package](../tests/package).

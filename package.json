@@ -69,6 +69,10 @@
     "./charts": {
       "types": "./dist/library/charts/index.d.ts",
       "default": "./dist/library/charts/index.js"
+    },
+    "./catalog": {
+      "types": "./dist/library/catalog/index.d.ts",
+      "default": "./dist/library/catalog/index.js"
     }
   },
   "publishConfig": {

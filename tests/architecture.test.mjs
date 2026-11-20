@@ -98,6 +98,7 @@ test('static rendering entries do not depend on client bindings', () => {
   }
   for (const entry of [
     'index.js',
+    'catalog/index.js',
     'components/Card/Card.js',
     'components/Link/Link.js',
     'themes/index.js',

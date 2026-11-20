@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add `@cognitap/radiant/catalog` defining Radiant's canonical, protocol-independent model-facing catalog with schema validation, forbidden-prop guardrails, and `extendCatalog`.
+
 ## 0.0.91
 
 - `ToastViewport` anchors to logical inline-end so notifications appear on the left in RTL.
