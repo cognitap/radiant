@@ -34,6 +34,7 @@ import { focusRingClass } from '../components/shared/focusStyles.js'
 import type { MotionProfile } from '../motion/config.js'
 import { MotionProfileContext } from '../motion/context.js'
 import { useComposedRefs } from '../react/useComposedRefs.js'
+import { useLocale } from '../react/useLocale.js'
 import { warnA2uiAccessibility } from './accessibility.js'
 import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import {
@@ -427,8 +428,11 @@ function createSurfaceStore(
   initialMessages: readonly A2uiMessage[],
   initialOnAction: ((action: A2uiActionPayload) => void) | undefined,
   initialOnDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined,
-  runtime: SurfaceDomRuntime
+  runtime: SurfaceDomRuntime,
+  initialLocale: string
 ) {
+  // Basic functions such as formatNumber and pluralize format in this locale.
+  let locale = initialLocale
   let surfaceId = initialSurfaceId
   let registry = initialRegistry
   let processedMessages: A2uiMessage[] = []
@@ -449,6 +453,8 @@ function createSurfaceStore(
   let bufferedUpdates: A2uiMessage[] = []
   // Unknown components and icon names report once per node and value for each engine build.
   let reportedUnknown = new Set<string>()
+  // A failing expression reports once per engine build, not once per evaluation.
+  let reportedExpressions = new Set<string>()
   const pendingDiagnostics: CatalogDiagnostic[] = []
   const listeners = new Set<() => void>()
 
@@ -600,6 +606,7 @@ function createSurfaceStore(
     registry = nextRegistry
     bufferedUpdates = []
     reportedUnknown = new Set()
+    reportedExpressions = new Set()
     runtime.pendingText.clear()
     phase = 'awaiting'
     const wireSnapshot = nextMessages.map(message => cloneMessageValue(message))
@@ -610,7 +617,7 @@ function createSurfaceStore(
       reported[2].length === wireSnapshot.length &&
       isMessagePrefix(reported[2], wireSnapshot)
     processor = new MessageProcessor(
-      [nextRegistry.toWebCoreCatalog()],
+      [nextRegistry.toWebCoreCatalog(locale)],
       action => {
         if (action.name === COERCED_NOOP_ACTION_NAME) return
         const state = processor?.getSurface(action.surfaceId)?.dataModel.get('/')
@@ -631,6 +638,10 @@ function createSurfaceStore(
     const errorSubscription = processor.model.onError.subscribe(error => {
       if (errorMode === 'suppress' || (error.surfaceId && error.surfaceId !== surfaceId)) return
       const diagnostic = protocolErrorDiagnostic(error)
+      if (diagnostic.code === 'EXPRESSION_ERROR') {
+        if (reportedExpressions.has(diagnostic.reason)) return
+        reportedExpressions.add(diagnostic.reason)
+      }
       if (errorMode === 'queue') pendingDiagnostics.push(diagnostic)
       else diagnosticHandler?.(diagnostic)
     })
@@ -671,13 +682,17 @@ function createSurfaceStore(
       nextRegistry: A2uiRegistry,
       nextMessages: readonly A2uiMessage[],
       nextOnAction: ((action: A2uiActionPayload) => void) | undefined,
-      nextOnDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined
+      nextOnDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined,
+      nextLocale: string
     ) {
+      const localeChanged = locale !== nextLocale
+      locale = nextLocale
       actionHandler = nextOnAction
       diagnosticHandler = nextOnDiagnostic
       if (!diagnosticHandler) pendingDiagnostics.length = 0
       if (
         disposed ||
+        localeChanged ||
         !processor ||
         surfaceId !== nextSurfaceId ||
         registry !== nextRegistry ||
@@ -731,10 +746,11 @@ export function A2uiSurface({
 }: A2uiSurfaceProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const motionProfile = useContext(MotionProfileContext)
+  const locale = useLocale()
 
   const [runtime] = useState(() => createSurfaceDomRuntime(motionProfile))
   const [store] = useState(() =>
-    createSurfaceStore(surfaceId, registry, messages, onAction, onDiagnostic, runtime)
+    createSurfaceStore(surfaceId, registry, messages, onAction, onDiagnostic, runtime, locale)
   )
 
   useLayoutEffect(() => {
@@ -747,8 +763,8 @@ export function A2uiSurface({
   }, [runtime, motionProfile])
 
   useEffect(() => {
-    store.sync(surfaceId, registry, messages, onAction, onDiagnostic)
-  }, [store, surfaceId, registry, messages, onAction, onDiagnostic])
+    store.sync(surfaceId, registry, messages, onAction, onDiagnostic, locale)
+  }, [store, surfaceId, registry, messages, onAction, onDiagnostic, locale])
 
   useEffect(() => () => store.dispose(), [store])
 

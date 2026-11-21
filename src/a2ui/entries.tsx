@@ -40,6 +40,12 @@ import {
   type A2uiBoundValue,
   type A2uiRejectedUrl
 } from './media.js'
+import {
+  fromNativeDateTime,
+  toNativeBound,
+  toNativeDateTime,
+  type DateTimeInputType
+} from './dateTimeValue.js'
 
 function unwrapDisplayText(value: unknown): string {
   const raw = value instanceof ResolvedBinding ? value.value : value
@@ -651,6 +657,42 @@ const audioPlayerEntry = createA2uiRegistryEntry({
   }
 })
 
+const dateTimeInputEntry = createA2uiRegistryEntry({
+  name: 'DateTimeInput',
+  accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
+  component: [Field, Input],
+  schema: basicSchema('DateTimeInput'),
+  description: basicDescription('DateTimeInput'),
+  adapter(props, context) {
+    const label = resolveControlLabel(props, context.node.componentId)
+    const enableDate = unwrapBoolean(props.enableDate) === true
+    const enableTime = unwrapBoolean(props.enableTime) === true
+    const type: DateTimeInputType =
+      enableDate && enableTime ? 'datetime-local' : enableTime ? 'time' : 'date'
+    const current = unwrapString(props.value) ?? ''
+    const bound = (raw: unknown, edge: 'min' | 'max') =>
+      toNativeBound(unwrapString(raw) ?? '', type, edge)
+
+    return (
+      <Field
+        label={label.text}
+        error={readValidationError(props)}
+        parts={label.srOnly ? SR_ONLY_LABEL_PARTS : undefined}
+      >
+        <Input
+          type={type}
+          value={toNativeDateTime(current, type)}
+          min={bound(props.min, 'min')}
+          max={bound(props.max, 'max')}
+          onChange={event =>
+            writeBinding(props.value, fromNativeDateTime(event.currentTarget.value, type, current))
+          }
+        />
+      </Field>
+    )
+  }
+})
+
 /**
  * Radiant's built-in A2UI 1.0 component registry.
  * Generated catalog JSON (`src/a2ui/catalog.json`) is derived directly from this registry.
@@ -672,6 +714,7 @@ export const radiantA2uiRegistry = createA2uiRegistry({
     iconEntry,
     imageEntry,
     videoEntry,
-    audioPlayerEntry
+    audioPlayerEntry,
+    dateTimeInputEntry
   ]
 })

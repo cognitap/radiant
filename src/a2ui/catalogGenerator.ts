@@ -12,6 +12,7 @@ import {
   type CatalogSlotConstraint
 } from '../catalog/index.js'
 import { collectSchemaProps, findGuidancePropViolations } from '../catalog/guidance.js'
+import { a2uiBasicFunctionSchemas } from './basicFunctions.js'
 
 export const A2UI_PROTOCOL_VERSION = '1.0'
 export const A2UI_BASIC_CATALOG_ID =
@@ -789,8 +790,10 @@ function catalogDocument(
   title: string,
   description: string,
   instructions: string,
-  components: Record<string, A2uiJsonSchema>
+  components: Record<string, A2uiJsonSchema>,
+  withFunctions = false
 ): A2uiCatalogDocument {
+  const fns = withFunctions ? a2uiBasicFunctionSchemas() : undefined
   return {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     $id: catalogId,
@@ -800,13 +803,13 @@ function catalogDocument(
     description,
     instructions,
     components,
-    functions: {},
+    functions: fns?.functions ?? {},
     $defs: {
       anyComponent: {
         oneOf: Object.keys(components).map(name => ({ $ref: `#/components/${name}` })),
         discriminator: { propertyName: 'component' }
       },
-      anyFunction: { not: {} },
+      anyFunction: fns?.anyFunction ?? { not: {} },
       Weight: {
         type: 'number',
         description:
@@ -879,7 +882,7 @@ function extensionInstructions(components: Readonly<Record<string, A2uiJsonSchem
 /**
  * Generates the A2UI 1.0 basic catalog and the Radiant extension catalog from a canonical
  * Radiant catalog. Entries added through `extendCatalog` join the extension catalog.
- * Neither document defines functions yet.
+ * The basic catalog defines the basic functions Radiant runs; see `A2UI_OMITTED_FUNCTIONS`.
  */
 export function generateA2uiCatalogs(catalog: Catalog): GeneratedA2uiCatalogs {
   assertValidCatalog(catalog)
@@ -961,7 +964,8 @@ export function generateA2uiCatalogs(catalog: Catalog): GeneratedA2uiCatalogs {
       'A2UI Basic Catalog',
       generatedFrom,
       BASIC_INSTRUCTIONS,
-      basicComponents
+      basicComponents,
+      true
     ),
     extension: catalogDocument(
       catalog.extends
