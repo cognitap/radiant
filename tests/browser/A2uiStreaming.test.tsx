@@ -113,8 +113,8 @@ test('a fixture streamed one prop at a time does not shift a node once its size 
     // Placeholders reserve the title's line, so the next node never moves
     expect(rect(second()).top).toBe(nextTop)
   }
-  // Text without its text yet stays a placeholder
-  expect(sizes[0]!.title).toBeUndefined()
+  // Text without its text yet reserves its line from the first message
+  expect(sizes[0]!.title!.height).toBeGreaterThan(0)
   for (const key of ['title', 'button'] as const) {
     const known = sizes.flatMap(size => (size[key] ? [size[key]] : []))
     expect(known.length, key).toBeGreaterThan(1)
@@ -439,4 +439,25 @@ test('a StrictMode stream settles aria-busy without duplicate diagnostics', asyn
   expect(errors.map(d => d.code)).toEqual(['UNKNOWN_COMPONENT_TYPE', expect.any(String)])
   const keys = diagnostics.map(d => JSON.stringify(d))
   expect(new Set(keys).size).toBe(keys.length)
+})
+
+test('a finished surface with a text-less Text reserves the line and is not busy', async () => {
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="textless"
+      messages={[
+        create('textless', {
+          components: [
+            { id: 'root', component: 'Column', children: ['missing'] },
+            { id: 'missing', component: 'Text' }
+          ]
+        })
+      ]}
+    />
+  )
+  const text = host.querySelector<HTMLElement>('[data-slot="a2ui-text"]')!
+  expect(text.textContent).toBe('')
+  expect(text.getBoundingClientRect().height).toBeGreaterThan(0)
+  expect(placeholderIds(host)).toEqual([])
+  expect(surfaceOf(host).hasAttribute('aria-busy')).toBe(false)
 })

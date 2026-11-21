@@ -17,6 +17,7 @@ import {
   type ReactNode,
   type Ref
 } from 'react'
+import { cn } from 'cn'
 import type { ComponentApi, FunctionImplementation } from '@a2ui/web_core/catalog'
 import { MessageProcessor, type ProcessableMessage } from '@a2ui/web_core/processing'
 import { effect, getValue, peekValue, type Signal } from '@a2ui/web_core/reactivity'
@@ -105,7 +106,7 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
   let motionProfile = initialMotionProfile
   let pendingFocus: FocusSnapshot | null = null
   const placeholders = createPlaceholderTracker()
-  // Text nodes whose latest definition has not streamed its text yet.
+  // Text nodes whose latest definition has not streamed its text yet; they reserve a line.
   const pendingText = new Set<string>()
 
   function flushBatch() {
@@ -307,7 +308,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   const active = Boolean(entry)
 
   let hasChildNodes = false
-  const rendered =
+  const adapted =
     props && entry
       ? entry.adapter(props, {
           node,
@@ -327,6 +328,18 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
           }
         })
       : null
+  // Text whose text has not streamed yet stays empty but reserves its line.
+  const rendered =
+    runtime.pendingText.has(node.componentId) &&
+    isValidElement<{ className?: string }>(adapted) &&
+    adapted.type !== Fragment
+      ? cloneElement(adapted, {
+          className: cn(
+            adapted.props.className,
+            inline ? 'inline-block min-h-[1lh]' : 'block min-h-[1lh]'
+          )
+        })
+      : adapted
 
   const isContainer = node.type === 'Column' || hasChildNodes
   const [probing, setProbing] = useState(false)
@@ -352,7 +365,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
     return () => runtime.onNodeUnmount(node.id, node.instanceId)
   }, [active, inline, node.id, node.instanceId, runtime])
 
-  if (node.state === 'pending' || (active && runtime.pendingText.has(node.componentId))) {
+  if (node.state === 'pending') {
     return (
       <A2uiPlaceholder
         nodeId={node.componentId}
