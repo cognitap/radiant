@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useState, type ChangeEvent } from 'react'
+import { Fragment, useState, type ChangeEvent, type Ref } from 'react'
 import {
   isComponentNode,
   isWritable,
@@ -308,6 +308,7 @@ function readChoiceOptions(raw: unknown): readonly ChoiceOptionItem[] {
 }
 
 function A2uiChoicePicker({
+  ref,
   label,
   srOnly,
   error,
@@ -318,6 +319,7 @@ function A2uiChoicePicker({
   filterable,
   onSelect
 }: {
+  ref?: Ref<HTMLElement>
   label: string
   srOnly: boolean
   error?: string
@@ -354,6 +356,7 @@ function A2uiChoicePicker({
     ))
     return (
       <Field
+        ref={ref as Ref<HTMLFieldSetElement>}
         layout="group"
         label={label}
         error={error}
@@ -410,13 +413,15 @@ function A2uiChoicePicker({
     </RadioGroup>
   )
 
-  return filterInput ? (
-    <div className="grid gap-2">
+  return (
+    <div
+      ref={ref as Ref<HTMLDivElement>}
+      data-slot="a2ui-choice-picker"
+      className="grid gap-2"
+    >
       {filterInput}
       {group}
     </div>
-  ) : (
-    group
   )
 }
 

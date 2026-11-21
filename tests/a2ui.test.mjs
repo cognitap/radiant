@@ -261,3 +261,144 @@ test('A2uiSurface deduplicates ChoicePicker option values at the boundary and ke
     stdio: 'pipe'
   })
 })
+
+test('wire message cloning detaches nested values and isMessagePrefix matches identical, appended, repeated, and edited histories', async () => {
+  const { cloneMessageValue, isMessagePrefix } =
+    await import('../dist/library/a2ui/surfaceRuntime.js')
+
+  const createMsg = {
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: 's_history',
+      catalogId: radiantA2uiRegistry.catalogId,
+      dataModel: { draft: { note: 'Initial', tags: ['v1'] } },
+      components: [{ id: 'root', component: 'Column', children: [] }]
+    }
+  }
+  const updateDataMsg = {
+    version: A2UI_PROTOCOL_VERSION,
+    updateDataModel: {
+      surfaceId: 's_history',
+      path: '/draft',
+      value: { note: 'Seeded', tags: ['a', 'b'] }
+    }
+  }
+  const updateCompMsg = {
+    version: A2UI_PROTOCOL_VERSION,
+    updateComponents: {
+      surfaceId: 's_history',
+      components: [{ id: 'status', component: 'Text', text: 'Updated' }]
+    }
+  }
+
+  // Cloning detaches nested objects and arrays in createSurface and updateDataModel
+  const baseHistory = [createMsg, updateDataMsg]
+  const detached = baseHistory.map(message => cloneMessageValue(message))
+  detached[0].createSurface.dataModel.draft.note = 'Mutated locally'
+  detached[0].createSurface.dataModel.draft.tags.push('mutated')
+  detached[1].updateDataModel.value.note = 'Mutated update'
+  detached[1].updateDataModel.value.tags[0] = 'z'
+  assert.equal(createMsg.createSurface.dataModel.draft.note, 'Initial')
+  assert.deepEqual(createMsg.createSurface.dataModel.draft.tags, ['v1'])
+  assert.equal(updateDataMsg.updateDataModel.value.note, 'Seeded')
+  assert.deepEqual(updateDataMsg.updateDataModel.value.tags, ['a', 'b'])
+
+  // Identical recreated history matches as a no-op prefix
+  assert.equal(isMessagePrefix(baseHistory, structuredClone(baseHistory)), true)
+
+  // Unchanged prefix with an appended mixed suffix matches
+  const withSuffix = [
+    ...structuredClone(baseHistory),
+    updateCompMsg,
+    structuredClone(updateDataMsg)
+  ]
+  assert.equal(isMessagePrefix(baseHistory, withSuffix), true)
+
+  // Repeated payloads at different positions preserve exact positional ordering
+  assert.equal(
+    isMessagePrefix(
+      [createMsg, updateDataMsg, updateCompMsg],
+      [createMsg, updateDataMsg, updateDataMsg, updateCompMsg]
+    ),
+    false
+  )
+  assert.equal(
+    isMessagePrefix(
+      [createMsg, updateDataMsg, updateDataMsg],
+      [createMsg, updateDataMsg, updateDataMsg, updateCompMsg]
+    ),
+    true
+  )
+
+  // Editing an earlier message or shortening history fails prefix matching
+  const editedEarlier = structuredClone(withSuffix)
+  editedEarlier[1].updateDataModel.value.note = 'Changed earlier'
+  assert.equal(isMessagePrefix(baseHistory, editedEarlier), false)
+  assert.equal(isMessagePrefix(withSuffix, baseHistory), false)
+
+  // Deep JSON (> 64 levels) detaches and compares structurally across full depth
+  const buildDeep = (depth, leaf) => {
+    let current = { leaf }
+    for (let i = 0; i < depth; i++) current = { nested: current }
+    return current
+  }
+  const deepA = {
+    version: A2UI_PROTOCOL_VERSION,
+    updateDataModel: { surfaceId: 's_history', path: '/deep', value: buildDeep(75, 'ok') }
+  }
+  const deepB = cloneMessageValue(deepA)
+  assert.equal(isMessagePrefix([deepA], [deepB]), true)
+  let cursor = deepB.updateDataModel.value
+  for (let i = 0; i < 75; i++) cursor = cursor.nested
+  cursor.leaf = 'changed'
+  assert.equal(isMessagePrefix([deepA], [deepB]), false)
+  let origCursor = deepA.updateDataModel.value
+  for (let i = 0; i < 75; i++) origCursor = origCursor.nested
+  assert.equal(origCursor.leaf, 'ok')
+
+  // Cloning preserves own JSON keys named "__proto__" on both structuredClone and fallback paths
+  const withProto = JSON.parse('{"__proto__":{"role":"admin"},"ok":true}')
+  const clonedProto = cloneMessageValue(withProto)
+  assert.equal(Object.hasOwn(clonedProto, '__proto__'), true)
+  assert.deepEqual(clonedProto['__proto__'], { role: 'admin' })
+  assert.notEqual(clonedProto['__proto__'], withProto['__proto__'])
+  assert.equal(
+    isMessagePrefix(
+      [{ version: A2UI_PROTOCOL_VERSION, updateDataModel: { surfaceId: 's', value: withProto } }],
+      [{ version: A2UI_PROTOCOL_VERSION, updateDataModel: { surfaceId: 's', value: clonedProto } }]
+    ),
+    true
+  )
+
+  const withProtoAndFn = Object.assign(JSON.parse('{"__proto__":{"flag":1}}'), {
+    fn: () => {}
+  })
+  const fallbackClone = cloneMessageValue(withProtoAndFn)
+  assert.equal(Object.hasOwn(fallbackClone, '__proto__'), true)
+  assert.deepEqual(fallbackClone['__proto__'], { flag: 1 })
+  assert.notEqual(fallbackClone['__proto__'], withProtoAndFn['__proto__'])
+
+  // Cyclic objects and arrays terminate cleanly for both equivalent cycles and real differences
+  const cycleA = { label: 'same' }
+  cycleA.self = cycleA
+  const cycleB = cloneMessageValue(cycleA)
+  const cycleC = { label: 'same' }
+  cycleC.self = cycleC
+  const cycleDiff = { label: 'different' }
+  cycleDiff.self = cycleDiff
+  const wrap = value => [
+    { version: A2UI_PROTOCOL_VERSION, updateDataModel: { surfaceId: 's', value } }
+  ]
+  assert.equal(isMessagePrefix(wrap(cycleA), wrap(cycleB)), true)
+  assert.equal(isMessagePrefix(wrap(cycleA), wrap(cycleC)), true)
+  assert.equal(isMessagePrefix(wrap(cycleA), wrap(cycleDiff)), false)
+
+  const arrA = [1]
+  arrA.push(arrA)
+  const arrB = [1]
+  arrB.push(arrB)
+  const arrDiff = [2]
+  arrDiff.push(arrDiff)
+  assert.equal(isMessagePrefix(wrap(arrA), wrap(arrB)), true)
+  assert.equal(isMessagePrefix(wrap(arrA), wrap(arrDiff)), false)
+})
