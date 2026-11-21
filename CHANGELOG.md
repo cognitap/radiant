@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.93
+
 - Add `Stack`, a one-dimensional flex layout with `orientation`, `gap` from the theme spacing scale, `align`, `justify`, and `wrap`.
 - Breaking: catalog entries, including `extendCatalog` entries, require `guidance` (`{ whenToUse, whenNotToUse, examples: [string, string] }`) within `CATALOG_GUIDANCE_TOKEN_BUDGET`, with props written as `` `prop: value` `` spans the entry accepts; before, `guidance` was optional with optional examples. `@cognitap/radiant/catalog` adds `renderCatalogGuidance`, `renderCatalogInstructions`, `describeCatalogEntry` and `estimateCatalogTokens`. Generated A2UI catalogs carry wire-correct guidance in each description and per-catalog `instructions`.
 - Render A2UI `Icon`, `Image`, `Video`, and `AudioPlayer` with native elements and controls, map icon names and check media URLs through `A2uiMediaProvider` (`icons`, `urlPolicy`; `lucideA2uiIcons` from `@cognitap/radiant/a2ui/lucide` for the optional `lucide-react` peer), add the `imageAltRule` and `mediaNameRule` accessibility rules, and pass an optional `reportDiagnostic` to registry adapters.
