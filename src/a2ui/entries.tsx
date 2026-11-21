@@ -67,7 +67,7 @@ import {
   type DateTimeInputType
 } from './dateTimeValue.js'
 
-function unwrapDisplayText(value: unknown): string {
+export function unwrapDisplayText(value: unknown): string {
   const raw = value instanceof ResolvedBinding ? value.value : value
   if (typeof raw === 'string') return raw
   if (typeof raw === 'number' && Number.isFinite(raw)) return String(raw)
@@ -75,14 +75,14 @@ function unwrapDisplayText(value: unknown): string {
   return ''
 }
 
-function unwrapString(value: unknown): string | undefined {
+export function unwrapString(value: unknown): string | undefined {
   if (value instanceof ResolvedBinding) {
     return typeof value.value === 'string' ? value.value : undefined
   }
   return typeof value === 'string' ? value : undefined
 }
 
-function unwrapBoolean(value: unknown): boolean | undefined {
+export function unwrapBoolean(value: unknown): boolean | undefined {
   const raw = value instanceof ResolvedBinding ? value.value : value
   return typeof raw === 'boolean' ? raw : undefined
 }
@@ -92,18 +92,18 @@ function unwrapNumber(value: unknown): number | undefined {
   return typeof raw === 'number' && Number.isFinite(raw) ? raw : undefined
 }
 
-function unwrapStringList(value: unknown): string[] {
+export function unwrapStringList(value: unknown): string[] {
   const raw = value instanceof ResolvedBinding ? value.value : value
   return Array.isArray(raw) ? raw.filter((item): item is string => typeof item === 'string') : []
 }
 
-function writeBinding(raw: unknown, nextValue: unknown) {
+export function writeBinding(raw: unknown, nextValue: unknown) {
   if (raw instanceof ResolvedBinding && isWritable(raw)) {
     raw.set(nextValue)
   }
 }
 
-function readValidationError(props: Readonly<Record<string, unknown>>): string | undefined {
+export function readValidationError(props: Readonly<Record<string, unknown>>): string | undefined {
   const errors = props.validationErrors
   if (!Array.isArray(errors) || errors.length === 0) return undefined
   const first = errors[0]
@@ -574,6 +574,8 @@ const buttonEntry = createA2uiRegistryEntry({
       <A2uiButton
         nodeId={context.node.id}
         variant={variant}
+        // A Button with failing `checks` stays disabled until they pass.
+        disabled={props.isValid === false}
         onClick={() => {
           void action?.()
         }}
@@ -584,7 +586,7 @@ const buttonEntry = createA2uiRegistryEntry({
   }
 })
 
-function resolveControlLabel(
+export function resolveControlLabel(
   props: Readonly<Record<string, unknown>>,
   componentId: string
 ): { readonly text: string; readonly srOnly: boolean } {
@@ -599,7 +601,7 @@ function resolveControlLabel(
   return { text: humanizeNodeId(componentId), srOnly: false }
 }
 
-const SR_ONLY_LABEL_PARTS = { label: { className: 'sr-only' } } as const
+export const SR_ONLY_LABEL_PARTS = { label: { className: 'sr-only' } } as const
 
 const checkBoxEntry = createA2uiRegistryEntry({
   name: 'CheckBox',

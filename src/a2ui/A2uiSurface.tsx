@@ -45,7 +45,7 @@ import {
   getRegistryEntry
 } from './coerce.js'
 import { A2uiPlaceholder, createPlaceholderTracker } from './A2uiPlaceholder.js'
-import { radiantA2uiRegistry } from './entries.js'
+import { radiantA2uiExtensionRegistry } from './extensionEntries.js'
 import {
   createsSurface,
   deletesSurface,
@@ -54,7 +54,7 @@ import {
   supersededBy,
   updatesSurface
 } from './protocolErrors.js'
-import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
+import { a2uiWebCoreCatalogs, type A2uiRegistry, type A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import { useSignalValue } from './useSignalValue.js'
 import { A2uiLabelsContext, type A2uiSurfaceLabels } from './surfaceContext.js'
@@ -82,7 +82,7 @@ export type A2uiSurfaceProps = {
   readonly surfaceId: string
   /** A2UI 1.0 protocol messages defining and updating the surface. */
   readonly messages: readonly A2uiMessage[]
-  /** Registry mapping A2UI component names to Radiant adapters. Defaults to `radiantA2uiRegistry`. */
+  /** Registry mapping A2UI component names to Radiant adapters. Defaults to `radiantA2uiExtensionRegistry`. */
   readonly registry?: A2uiRegistry
   /** Host callback invoked when an outbound A2UI action event fires. */
   readonly onAction?: (action: A2uiActionPayload) => void
@@ -544,41 +544,50 @@ function createSurfaceStore(
     batch: readonly A2uiMessage[],
     record: boolean
   ) {
-    const detached = batch.map(message => cloneMessageValue(message))
-    const { messages: coerced, diagnostics } = coerceA2uiMessages(detached, targetRegistry)
-    trackPendingText(coerced, diagnostics)
-    if (record) {
-      for (const diagnostic of diagnostics) {
-        if (diagnostic.code === 'UNKNOWN_COMPONENT_TYPE' || diagnostic.code === 'UNKNOWN_ICON') {
-          const key = `${diagnostic.nodeId}\u0000${String(diagnostic.received)}`
-          if (reportedUnknown.has(key)) continue
-          reportedUnknown.add(key)
+    // Coerce each message once its surface's catalog is known, so held updates wait raw.
+    const coerce = (messages: readonly A2uiMessage[]) => {
+      const { messages: coerced, diagnostics } = coerceA2uiMessages(
+        messages,
+        targetRegistry,
+        id => target.getSurface(id)?.defaultCatalog?.id
+      )
+      trackPendingText(coerced, diagnostics)
+      if (record) {
+        for (const diagnostic of diagnostics) {
+          if (diagnostic.code === 'UNKNOWN_COMPONENT_TYPE' || diagnostic.code === 'UNKNOWN_ICON') {
+            const key = `${diagnostic.nodeId}\u0000${String(diagnostic.received)}`
+            if (reportedUnknown.has(key)) continue
+            reportedUnknown.add(key)
+          }
+          pendingDiagnostics.push(diagnostic)
         }
-        pendingDiagnostics.push(diagnostic)
       }
+      return coerced
     }
     const apply = (message: A2uiMessage) =>
       target.processMessages([message] as readonly ProcessableMessage[])
-    for (const message of coerced) {
-      if (phase === 'awaiting' && updatesSurface(message, surfaceId)) {
-        bufferedUpdates.push(message)
+    for (const raw of batch.map(message => cloneMessageValue(message))) {
+      if (phase === 'awaiting' && updatesSurface(raw, surfaceId)) {
+        bufferedUpdates.push(raw)
         continue
       }
-      apply(message)
-      if (createsSurface(message, surfaceId)) {
-        if (target.getSurface(surfaceId)) {
-          phase = 'live'
-          const held = bufferedUpdates.filter(update => !supersededBy(message, update))
-          bufferedUpdates = []
-          for (const update of held) apply(update)
-        } else if (phase === 'awaiting') {
+      for (const message of coerce([raw])) {
+        apply(message)
+        if (createsSurface(message, surfaceId)) {
+          if (target.getSurface(surfaceId)) {
+            phase = 'live'
+            const held = bufferedUpdates.filter(update => !supersededBy(message, update))
+            bufferedUpdates = []
+            for (const update of coerce(held)) apply(update)
+          } else if (phase === 'awaiting') {
+            phase = 'closed'
+            dropBuffered('createSurface failed; buffered updates were dropped.')
+          }
+        } else if (deletesSurface(message, surfaceId) && !target.getSurface(surfaceId)) {
           phase = 'closed'
-          dropBuffered('createSurface failed; buffered updates were dropped.')
         }
-      } else if (deletesSurface(message, surfaceId) && !target.getSurface(surfaceId)) {
-        phase = 'closed'
+        refreshResolver(target)
       }
-      refreshResolver(target)
     }
   }
 
@@ -605,7 +614,7 @@ function createSurfaceStore(
       reported[2].length === wireSnapshot.length &&
       isMessagePrefix(reported[2], wireSnapshot)
     processor = new MessageProcessor(
-      [nextRegistry.toWebCoreCatalog(locale)],
+      a2uiWebCoreCatalogs(nextRegistry, locale),
       action => {
         if (action.name === COERCED_NOOP_ACTION_NAME) return
         const state = processor?.getSurface(action.surfaceId)?.dataModel.get('/')
@@ -728,7 +737,7 @@ const zeroPlaceholders = () => 0
 export function A2uiSurface({
   surfaceId,
   messages,
-  registry = radiantA2uiRegistry,
+  registry = radiantA2uiExtensionRegistry,
   onAction,
   onDiagnostic,
   labels

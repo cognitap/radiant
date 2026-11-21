@@ -1,7 +1,7 @@
 import { isPlainRecord } from '../catalog/coerce.js'
 import type { A2uiComponentRecord } from './accessibilityRules.js'
-import { getRegistryEntry } from './coerce.js'
-import { radiantA2uiRegistry } from './entries.js'
+import { componentRegistry, getRegistryEntry } from './coerce.js'
+import { radiantA2uiExtensionRegistry } from './extensionEntries.js'
 import type { A2uiRegistry } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 
@@ -17,7 +17,7 @@ export type A2uiAccessibilityError = {
 }
 
 export type ValidateA2uiAccessibilityOptions = {
-  /** Registry whose entry rules apply. Defaults to `radiantA2uiRegistry`. */
+  /** Registry whose entry rules apply. Defaults to `radiantA2uiExtensionRegistry`. */
   readonly registry?: A2uiRegistry
   /** Apply safe fixes to a copy of the messages. */
   readonly fix?: boolean
@@ -70,15 +70,28 @@ export function validateA2uiAccessibility(
   messages: readonly A2uiMessage[],
   options: ValidateA2uiAccessibilityOptions = {}
 ): ValidateA2uiAccessibilityResult {
-  const registry = options.registry ?? radiantA2uiRegistry
+  const registry = options.registry ?? radiantA2uiExtensionRegistry
   const errors: A2uiAccessibilityError[] = []
   const fixes: { readonly at: Located; readonly props: Readonly<Record<string, unknown>> }[] = []
 
+  const surfaceCatalogs = new Map<string, string>()
+  for (const message of messages) {
+    const body = isPlainRecord(message) ? message.createSurface : undefined
+    if (isPlainRecord(body) && typeof body.surfaceId === 'string') {
+      if (typeof body.catalogId === 'string') surfaceCatalogs.set(body.surfaceId, body.catalogId)
+      else surfaceCatalogs.delete(body.surfaceId)
+    }
+  }
   for (const [surfaceId, nodes] of collectSurfaces(messages)) {
     const context = { getComponent: (id: string) => nodes.get(id)?.component }
     for (const [nodeId, at] of nodes) {
       const name = typeof at.component.component === 'string' ? at.component.component : ''
-      const entry = getRegistryEntry(registry, name)
+      const scope = componentRegistry(
+        registry,
+        at.component.catalogId,
+        surfaceCatalogs.get(surfaceId)
+      )
+      const entry = scope && getRegistryEntry(scope, name)
       if (!entry) continue
       for (const rule of entry.accessibility) {
         const finding = rule.check(at.component, context)

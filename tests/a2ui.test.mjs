@@ -424,3 +424,116 @@ test('wire message cloning detaches nested values and isMessagePrefix matches id
   assert.equal(isMessagePrefix(wrap(arrA), wrap(arrB)), true)
   assert.equal(isMessagePrefix(wrap(arrA), wrap(arrDiff)), false)
 })
+
+test('the extension registry extends the basic registry and publishes its own catalog', async () => {
+  const {
+    A2UI_BASIC_CATALOG_ID,
+    RADIANT_A2UI_EXTENSION_CATALOG_ID,
+    createA2uiRegistry,
+    findA2uiRegistry,
+    radiantA2uiExtensionRegistry: extension
+  } = await import('../dist/library/a2ui/index.js')
+  const { a2uiWebCoreCatalogs } = await import('../dist/library/a2ui/registry.js')
+  const onDisk = JSON.parse(
+    readFileSync(new URL('../src/a2ui/extension-catalog.json', import.meta.url), 'utf8')
+  )
+  assert.deepEqual(onDisk, extension.toCatalogJson())
+  assert.equal(onDisk.catalogId, RADIANT_A2UI_EXTENSION_CATALOG_ID)
+  for (const name of [...Object.keys(radiantA2uiRegistry.entries), 'Select', 'Switch']) {
+    assert.ok(onDisk.components[name], `${name} is in the extension catalog`)
+  }
+  assert.deepEqual(
+    Object.keys(onDisk.functions),
+    Object.keys(radiantA2uiRegistry.toCatalogJson().functions)
+  )
+  assert.deepEqual(
+    a2uiWebCoreCatalogs(extension).map(catalog => catalog.id),
+    [A2UI_BASIC_CATALOG_ID, RADIANT_A2UI_EXTENSION_CATALOG_ID]
+  )
+  assert.equal(findA2uiRegistry(extension, A2UI_BASIC_CATALOG_ID), radiantA2uiRegistry)
+  assert.ok(extension.instructions.startsWith(radiantA2uiRegistry.instructions))
+  const app = createA2uiRegistry({
+    catalogId: 'example/app',
+    title: 'App',
+    description: 'App.',
+    extends: extension,
+    entries: [{ ...radiantA2uiRegistry.entries.Text, name: 'Note' }]
+  })
+  assert.equal(app.instructions, extension.instructions)
+  assert.deepEqual(
+    a2uiWebCoreCatalogs(app).map(catalog => [catalog.id, catalog.functions.has('required')]),
+    [
+      [A2UI_BASIC_CATALOG_ID, true],
+      [RADIANT_A2UI_EXTENSION_CATALOG_ID, true],
+      ['example/app', true]
+    ]
+  )
+
+  const base = { catalogId: 'example/x', title: 'X', description: 'X.', extends: extension }
+  assert.throws(
+    () => createA2uiRegistry({ ...base, entries: [radiantA2uiRegistry.entries.Text] }),
+    /Duplicate A2UI registry entry "Text"/
+  )
+  assert.throws(
+    () =>
+      createA2uiRegistry({
+        ...base,
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        entries: [{ ...radiantA2uiRegistry.entries.Text, name: 'Note' }]
+      }),
+    /already extended/
+  )
+})
+
+test('extension coercion scopes components to the catalog their surface names', async () => {
+  const { radiantA2uiExtensionRegistry, RADIANT_A2UI_EXTENSION_CATALOG_ID } =
+    await import('../dist/library/a2ui/index.js')
+  const surface = catalogId => ({
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: 's',
+      catalogId,
+      components: [{ id: 'root', component: 'Switch', label: 'Dark mode', controlSize: 'huge' }]
+    }
+  })
+  const basic = coerceA2uiMessages(
+    [surface(radiantA2uiRegistry.catalogId)],
+    radiantA2uiExtensionRegistry
+  )
+  assert.equal(basic.messages[0].createSurface.components[0].component, 'Text')
+  const ext = coerceA2uiMessages(
+    [surface(RADIANT_A2UI_EXTENSION_CATALOG_ID)],
+    radiantA2uiExtensionRegistry
+  )
+  assert.equal(ext.messages[0].createSurface.components[0].controlSize, 'medium')
+  assert.ok(ext.diagnostics.some(d => d.prop === 'controlSize' && d.kind === 'coerced'))
+})
+
+test('components naming an unknown catalog degrade, and accessibility follows the surface catalog', async () => {
+  const {
+    radiantA2uiExtensionRegistry,
+    RADIANT_A2UI_EXTENSION_CATALOG_ID,
+    validateA2uiAccessibility
+  } = await import('../dist/library/a2ui/index.js')
+  const surface = (catalogId, extra = {}) => ({
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: 's',
+      catalogId,
+      components: [{ id: 'root', component: 'Select', label: '', items: [], ...extra }]
+    }
+  })
+  for (const catalogId of ['example/missing', '']) {
+    const { messages, diagnostics } = coerceA2uiMessages(
+      [surface(RADIANT_A2UI_EXTENSION_CATALOG_ID, { catalogId })],
+      radiantA2uiExtensionRegistry
+    )
+    const [root] = messages[0].createSurface.components
+    assert.equal(root.component, 'Text')
+    assert.equal('catalogId' in root, false)
+    assert.ok(diagnostics.some(d => d.code === 'UNKNOWN_COMPONENT_TYPE'))
+  }
+  const rules = catalogId => validateA2uiAccessibility([surface(catalogId)]).errors.map(e => e.rule)
+  assert.deepEqual(rules(RADIANT_A2UI_EXTENSION_CATALOG_ID), ['control-label'])
+  assert.deepEqual(rules(radiantA2uiRegistry.catalogId), [])
+})
