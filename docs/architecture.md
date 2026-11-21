@@ -98,7 +98,7 @@ Custom styling and rendering must keep:
 
 Radiant separates its human React API from its model-facing contract in `@cognitap/radiant/catalog`. Human applications compose sub-parts such as `SelectItem`, pass `className`, `style`, `render`, and refs, and wire native form and ARIA relationships. Models target a smaller, intent-driven catalog instead: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
 
-Catalog entries never expose `className`, `style`, `render`, DOM event handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; protocol adapters such as A2UI generate their basic and extension catalog schemas from it, and applications add custom entries through `extendCatalog` without shadowing Radiant names. Entry `guidance` (when to use, when not to, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET` and generates A2UI descriptions, `instructions`, and `llms.txt`.
+Catalog entries never expose `className`, `style`, `render`, DOM event handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; protocol adapters such as A2UI generate their basic and extension catalog schemas from it, and applications add custom entries through `extendCatalog` without shadowing Radiant names. Entry `guidance` (use, avoid, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET` and renders `llms.txt`; renaming A2UI projections supply their own.
 
 ## A2UI renderer and registry
 

@@ -71,5 +71,10 @@ export {
   renderCatalogGuidance,
   renderCatalogInstructions
 } from './guidance.js'
-export type { RenderCatalogGuidanceOptions } from './guidance.js'
+export type {
+  CatalogInstructionTopic,
+  DescribeCatalogEntryOptions,
+  RenderCatalogGuidanceOptions,
+  RenderCatalogInstructionsOptions
+} from './guidance.js'
 export { RADIANT_CATALOG_ID, RADIANT_CATALOG_VERSION, radiantCatalog } from './radiantCatalog.js'

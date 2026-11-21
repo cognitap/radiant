@@ -6,7 +6,9 @@ import {
 } from '@a2ui/web_core/catalog'
 import type { ComponentNode } from '@a2ui/web_core/resolution'
 import { findForbiddenPropsInSchema, type CatalogJsonSchema } from '../catalog/index.js'
+import { renameEntryReferences } from '../catalog/guidance.js'
 import {
+  A2UI_GENERATED_COMPONENT_NAMES,
   A2UI_PROTOCOL_VERSION,
   type A2uiCatalogDocument,
   type A2uiJsonSchema
@@ -168,9 +170,17 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
   const frozenEntries = Object.freeze(entryMap)
 
   const buildDocument = (): A2uiCatalogDocument => {
+    // Pointers such as "(Alert)" to generated components this registry lacks are dropped.
+    const names: Record<string, string | null> = {}
+    for (const name of A2UI_GENERATED_COMPONENT_NAMES) {
+      names[name] = Object.hasOwn(frozenEntries, name) ? name : null
+    }
     const components: Record<string, A2uiJsonSchema> = {}
     for (const [name, entry] of Object.entries(frozenEntries)) {
-      components[name] = structuredClone(entry.schema)
+      components[name] = {
+        ...structuredClone(entry.schema),
+        description: renameEntryReferences(entry.description, names)
+      }
     }
     return {
       $schema: 'https://json-schema.org/draft/2020-12/schema',

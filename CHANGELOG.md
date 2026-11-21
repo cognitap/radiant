@@ -5,7 +5,7 @@
 ## Unreleased
 
 - Add `Stack`, a one-dimensional flex layout with `orientation`, `gap` from the theme spacing scale, `align`, `justify`, and `wrap`.
-- Breaking: catalog entries, including `extendCatalog` entries, require `guidance` (`{ whenToUse, whenNotToUse, examples: [string, string] }`) within a token budget; before, `guidance` was optional with optional examples. `@cognitap/radiant/catalog` adds `renderCatalogGuidance`, `renderCatalogInstructions` and `describeCatalogEntry`, and the A2UI `catalog.json` carries the generated descriptions and `instructions`.
+- Breaking: catalog entries, including `extendCatalog` entries, require `guidance` (`{ whenToUse, whenNotToUse, examples: [string, string] }`) within `CATALOG_GUIDANCE_TOKEN_BUDGET`, with props written as `` `prop: value` `` spans the entry accepts; before, `guidance` was optional with optional examples. `@cognitap/radiant/catalog` adds `renderCatalogGuidance`, `renderCatalogInstructions`, `describeCatalogEntry` and `estimateCatalogTokens`. Generated A2UI catalogs carry wire-correct guidance in each description and per-catalog `instructions`.
 
 ## 0.0.92
 

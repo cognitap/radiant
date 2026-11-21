@@ -12,8 +12,10 @@ import {
 } from './types.js'
 import {
   CATALOG_GUIDANCE_TOKEN_BUDGET,
+  catalogEntryProps,
   describeCatalogEntry,
-  estimateCatalogTokens
+  estimateCatalogTokens,
+  findGuidancePropViolations
 } from './guidance.js'
 
 const ENTRY_NAME_PATTERN = /^[A-Z][A-Za-z0-9]*$/
@@ -348,6 +350,10 @@ export function validateCatalogEntry(entry: CatalogEntry, key?: string): readonl
     ) {
       violations.push(`${label}: guidance.examples must be two non-empty strings.`)
     } else if (typeof entry.description === 'string') {
+      const text = [entry.guidance.whenToUse, entry.guidance.whenNotToUse, ...examples].join('\n')
+      for (const violation of findGuidancePropViolations(text, catalogEntryProps(entry))) {
+        violations.push(`${label}: guidance ${violation}.`)
+      }
       const tokens = estimateCatalogTokens(describeCatalogEntry(entry))
       if (tokens > CATALOG_GUIDANCE_TOKEN_BUDGET) {
         violations.push(

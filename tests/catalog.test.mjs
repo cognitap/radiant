@@ -26,9 +26,15 @@ import {
 } from '../dist/library/catalog/index.js'
 import {
   A2UI_BASIC_CATALOG_ID,
+  A2UI_GENERATED_COMPONENT_NAMES,
   RADIANT_A2UI_EXTENSION_CATALOG_ID,
+  findA2uiDescriptionViolations,
   generateA2uiCatalogs
 } from '../dist/library/a2ui/catalogGenerator.js'
+import {
+  CATALOG_TONE_MEANINGS,
+  CATALOG_VARIANT_MEANINGS
+} from '../dist/library/catalog/guidance.js'
 
 const catalogSourceDir = fileURLToPath(new URL('../src/catalog/', import.meta.url))
 
@@ -605,8 +611,8 @@ test('guidance renders into llms.txt Markdown and generated A2UI catalogs', () =
     version: '1.0.0',
     entries: { MetricTile: customEntry('MetricTile') }
   })
-  const markdown = renderCatalogGuidance(extended, { title: 'Example' })
-  assert.match(markdown, /^# Example\n/)
+  const markdown = renderCatalogGuidance(extended, { title: 'Example', summary: 'Agent catalog.' })
+  assert.match(markdown, /^# Example\n\n> Agent catalog\. Catalog example\/custom 1\.0\.0\.\n/)
   assert.ok(markdown.includes(renderCatalogInstructions()))
   assert.match(markdown, /### Button\n[\s\S]*- Avoid: Navigation/)
   assert.match(
@@ -616,22 +622,83 @@ test('guidance renders into llms.txt Markdown and generated A2UI catalogs', () =
   assert.doesNotMatch(markdown, /\b[A-Z]{2,}-\d+\b|\b20\d\d-\d\d-\d\d\b/)
 
   const { basic, extension } = generateA2uiCatalogs(extended)
-  assert.equal(basic.instructions, renderCatalogInstructions())
-  assert.equal(
-    basic.components.Button.description,
-    describeCatalogEntry(radiantCatalog.entries.Button)
+  assert.match(extension.components.MetricTile.description, /^Custom application entry\.\nUse: /)
+  // Each document carries only the rules for the props it exposes.
+  assert.match(basic.instructions, /Button runs actions/)
+  assert.doesNotMatch(basic.instructions, /Tone|Spacing|Control size/)
+  assert.match(extension.instructions, /Tone is/)
+  assert.doesNotMatch(extension.instructions, /Button|Bind input/)
+  assert.throws(
+    () => describeCatalogEntry({ ...customEntry('Bare'), guidance: undefined }),
+    /"Bare" has no guidance/
   )
-  assert.equal(
-    extension.components.MetricTile.description,
-    describeCatalogEntry(extended.entries.MetricTile)
+})
+
+test('A2UI descriptions name only props, values and components their catalog has', () => {
+  const { basic, extension } = generateA2uiCatalogs(radiantCatalog)
+  const known = new Set([...Object.keys(radiantCatalog.entries), ...A2UI_GENERATED_COMPONENT_NAMES])
+  const basicNames = new Set(Object.keys(basic.components))
+  assert.deepEqual(findA2uiDescriptionViolations(basic.components, basicNames, known), [])
+  assert.deepEqual(
+    findA2uiDescriptionViolations(
+      extension.components,
+      new Set([...basicNames, ...Object.keys(extension.components)]),
+      known
+    ),
+    []
   )
+  for (const document of [basic, extension]) {
+    for (const [name, schema] of Object.entries(document.components)) {
+      assert.ok(estimateCatalogTokens(schema.description) <= CATALOG_GUIDANCE_TOKEN_BUDGET, name)
+    }
+  }
+  assert.match(basic.components.CheckBox.description, /\(ChoicePicker\)/)
+  assert.doesNotMatch(basic.components.Text.description, /Alert/)
+
+  // Canonical guidance names props the basic projections rename or drop.
+  for (const [a2uiName, entryName] of [
+    ['Button', 'Button'],
+    ['TextField', 'TextField'],
+    ['Slider', 'Slider'],
+    ['Text', 'Text'],
+    ['ChoicePicker', 'Choice'],
+    ['CheckBox', 'Checkbox'],
+    ['Image', 'Image'],
+    ['Divider', 'Divider'],
+    ['Row', 'Row']
+  ]) {
+    const canonical = {
+      [a2uiName]: {
+        ...basic.components[a2uiName],
+        description: describeCatalogEntry(radiantCatalog.entries[entryName])
+      }
+    }
+    assert.notDeepEqual(findA2uiDescriptionViolations(canonical, basicNames, known), [], a2uiName)
+  }
 
   const shipped = JSON.parse(
     readFileSync(fileURLToPath(new URL('../src/a2ui/catalog.json', import.meta.url)), 'utf8')
   )
-  assert.equal(shipped.instructions, renderCatalogInstructions())
-  assert.equal(
-    shipped.components.CheckBox.description,
-    describeCatalogEntry(radiantCatalog.entries.Checkbox)
+  assert.equal(shipped.instructions, basic.instructions)
+  assert.deepEqual(
+    findA2uiDescriptionViolations(
+      shipped.components,
+      new Set(Object.keys(shipped.components)),
+      known
+    ),
+    []
   )
+})
+
+test('tone and variant meanings come from GLOSSARY.md', () => {
+  const glossary = readFileSync(
+    fileURLToPath(new URL('../GLOSSARY.md', import.meta.url)),
+    'utf8'
+  ).replace(/\s+/g, ' ')
+  for (const [name, meaning] of [
+    ...Object.entries(CATALOG_TONE_MEANINGS),
+    ...Object.entries(CATALOG_VARIANT_MEANINGS)
+  ]) {
+    assert.ok(glossary.includes(`${name} for ${meaning}`), `${name} for ${meaning}`)
+  }
 })

@@ -1,14 +1,17 @@
 import {
   assertValidCatalog,
+  CATALOG_SPACING,
   describeCatalogEntry,
   renderCatalogInstructions,
   type Catalog,
+  type CatalogEntryGuidance,
   type CatalogBindingValueType,
   type CatalogEntry,
   type CatalogJsonPrimitive,
   type CatalogJsonSchema,
   type CatalogSlotConstraint
 } from '../catalog/index.js'
+import { collectSchemaProps, findGuidancePropViolations } from '../catalog/guidance.js'
 
 export const A2UI_PROTOCOL_VERSION = '1.0'
 export const A2UI_BASIC_CATALOG_ID =
@@ -61,6 +64,8 @@ type BasicProjection = {
   readonly a2uiName: string
   readonly sourceEntry: string
   readonly checkable?: boolean
+  /** Guidance in wire prop names; required when the canonical guidance names props this projection renames or drops. */
+  readonly guidance?: CatalogEntryGuidance
   readonly required: readonly string[]
   readonly props: Readonly<Record<string, PropMapping>>
 }
@@ -69,6 +74,8 @@ type ExtensionProjection = {
   readonly a2uiName: string
   readonly sourceEntry: string
   readonly description?: string
+  /** Guidance in wire prop names; required with `description` or `omit`. */
+  readonly guidance?: CatalogEntryGuidance
   readonly omit?: readonly string[]
   readonly bindingValueTypes?: Readonly<Record<string, CatalogBindingValueType>>
 }
@@ -176,6 +183,11 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Text',
     sourceEntry: 'Text',
+    guidance: {
+      whenToUse: 'Body copy and captions; `variant` picks between them.',
+      whenNotToUse: 'Status messages (Alert) or button labels.',
+      examples: ['intro paragraph, `variant: body`', 'note under a form, `variant: caption`']
+    },
     required: ['text'],
     props: {
       text: binding('text'),
@@ -185,6 +197,15 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Image',
     sourceEntry: 'Image',
+    guidance: {
+      whenToUse:
+        'Photos, illustrations and avatars. Set `variant` for size intent and `description` for meaning.',
+      whenNotToUse: 'Standard icons (Icon). Leave `description` empty only for decoration.',
+      examples: [
+        'product photo, `variant: mediumFeature`, `fit: cover`',
+        'profile picture, `variant: avatar`, `description` naming the person'
+      ]
+    },
     required: ['url'],
     props: {
       url: binding('url'),
@@ -205,6 +226,14 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Icon',
     sourceEntry: 'Icon',
+    guidance: {
+      whenToUse: 'A standard icon that adds meaning beside text.',
+      whenNotToUse: 'Photos or illustrations (Image), or meaning the icon alone must carry.',
+      examples: [
+        'warning glyph before a note, `name: warning`',
+        'download action, `name: download`, inside a Button'
+      ]
+    },
     required: ['name'],
     props: {
       name: spec(['name'], {
@@ -225,18 +254,36 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Video',
     sourceEntry: 'Video',
+    guidance: {
+      whenToUse: 'A video clip the user starts.',
+      whenNotToUse: 'Still images (Image), audio only (AudioPlayer) or decorative motion.',
+      examples: ['product walkthrough with a `posterUrl` frame', 'recorded lecture clip']
+    },
     required: ['url'],
     props: { url: binding('url'), posterUrl: dynamicProp('poster') }
   },
   {
     a2uiName: 'AudioPlayer',
     sourceEntry: 'AudioPlayer',
+    guidance: {
+      whenToUse: 'An audio track such as a podcast or voice note; `description` says what it is.',
+      whenNotToUse: 'Video (Video) or sounds tied to actions.',
+      examples: ['podcast episode with a `description`', 'pronunciation sample of one word']
+    },
     required: ['url'],
     props: { url: binding('url'), description: dynamicProp('description') }
   },
   {
     a2uiName: 'Row',
     sourceEntry: 'Row',
+    guidance: {
+      whenToUse: 'A few peers side by side: actions, a label and value, or cards.',
+      whenNotToUse: 'Stacked content (Column) or repeated data (List).',
+      examples: [
+        'Cancel and Save buttons, `justify: end`',
+        'two Card summaries, `justify: spaceBetween`'
+      ]
+    },
     required: ['children'],
     props: {
       children: slot('children'),
@@ -247,6 +294,11 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Column',
     sourceEntry: 'Column',
+    guidance: {
+      whenToUse: 'Stacking sections, form fields or a card body top to bottom.',
+      whenNotToUse: 'Side-by-side peers (Row) or data-driven repeats (List).',
+      examples: ['form fields followed by a submit Button', 'heading and paragraph, `align: start`']
+    },
     required: ['children'],
     props: {
       children: slot('children'),
@@ -257,10 +309,26 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'List',
     sourceEntry: 'List',
+    guidance: {
+      whenToUse:
+        'The same template repeated for each item in a collection, or a static run of similar items.',
+      whenNotToUse: 'One-off layout (Row, Column).',
+      examples: ['one Card per search result', 'image thumbnails, `direction: horizontal`']
+    },
     required: ['children'],
     props: { children: slot('children'), direction: prop('direction'), align: prop('align') }
   },
-  { a2uiName: 'Card', sourceEntry: 'Card', required: ['child'], props: { child: slot('child') } },
+  {
+    a2uiName: 'Card',
+    sourceEntry: 'Card',
+    guidance: {
+      whenToUse: 'Several items about one subject side by side, such as projects in a grid.',
+      whenNotToUse: 'A single section in the page flow or focused tasks (Modal).',
+      examples: ['project summary Column inside a Card', 'plan options as Cards in a Row']
+    },
+    required: ['child'],
+    props: { child: slot('child') }
+  },
   {
     a2uiName: 'Tabs',
     sourceEntry: 'Tabs',
@@ -291,12 +359,22 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Divider',
     sourceEntry: 'Divider',
+    guidance: {
+      whenToUse: 'Splitting related content into groups, such as form sections.',
+      whenNotToUse: 'Adding space, or separating every List item.',
+      examples: ['between account and billing sections', 'between action groups, `axis: vertical`']
+    },
     required: [],
     props: { axis: prop('orientation') }
   },
   {
     a2uiName: 'Button',
     sourceEntry: 'Button',
+    guidance: {
+      whenToUse: 'An action: submit, save, start, or emit a named `action`.',
+      whenNotToUse: 'Navigation; Button never renders a link. Picking options (Choice).',
+      examples: ['Save changes, `variant: primary`', 'Cancel beside it, `variant: borderless`']
+    },
     checkable: true,
     required: ['child', 'action'],
     props: {
@@ -311,6 +389,12 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'TextField',
     sourceEntry: 'TextField',
+    guidance: {
+      whenToUse: 'Free text: names, numbers or passwords; `variant: longText` for paragraphs.',
+      whenNotToUse:
+        'Known options (Choice), dates (DateTimeInput) or an approximate number in a range (Slider).',
+      examples: ['password, `variant: obscured`', 'feedback, `variant: longText`']
+    },
     checkable: true,
     required: ['label', 'value'],
     props: {
@@ -325,6 +409,11 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'CheckBox',
     sourceEntry: 'Checkbox',
+    guidance: {
+      whenToUse: 'An independent yes/no choice submitted later, such as consent.',
+      whenNotToUse: 'One of several options (Choice).',
+      examples: ['accept the terms', 'email me product updates']
+    },
     checkable: true,
     required: ['label', 'value'],
     props: { label: dynamicProp('label'), value: binding('checked') }
@@ -332,6 +421,15 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'ChoicePicker',
     sourceEntry: 'Choice',
+    guidance: {
+      whenToUse:
+        'Known options. `displayStyle: chips` suits tags; `filterable: true` suits long lists.',
+      whenNotToUse: 'Free text (TextField), a single yes/no (Checkbox) or switching views (Tabs).',
+      examples: [
+        'toppings, `variant: multipleSelection`, `displayStyle: chips`',
+        'country, `variant: mutuallyExclusive`, `filterable: true`'
+      ]
+    },
     checkable: true,
     required: ['options', 'value'],
     props: {
@@ -363,6 +461,14 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Slider',
     sourceEntry: 'Slider',
+    guidance: {
+      whenToUse: 'An approximate number in a bounded range where relative position matters.',
+      whenNotToUse: 'Exact values (TextField) or a few discrete options (Choice).',
+      examples: [
+        'volume, `min: 0`, `max: 100`',
+        'budget in steps of 100, `min: 500`, `max: 5000`, `steps: 45`'
+      ]
+    },
     checkable: true,
     required: ['value', 'max'],
     props: {
@@ -380,6 +486,15 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'DateTimeInput',
     sourceEntry: 'DateTimeInput',
+    guidance: {
+      whenToUse: 'A calendar date, a time, or both; set `enableDate` and `enableTime`.',
+      whenNotToUse:
+        'Durations or free text (TextField), or relative picks such as this week (Choice).',
+      examples: [
+        'delivery date, `enableDate: true`, with a `min` bound',
+        'meeting start, `enableDate: true`, `enableTime: true`'
+      ]
+    },
     checkable: true,
     required: ['value'],
     props: {
@@ -397,6 +512,12 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
   {
     a2uiName: 'Select',
     sourceEntry: 'Choice',
+    guidance: {
+      whenToUse: 'One value from a long list in a compact dropdown.',
+      whenNotToUse:
+        'A few options better seen at once (RadioGroup) or filtering by typing (Combobox).',
+      examples: ['country, `placeholder: Choose a country`', 'time zone with `description` text']
+    },
     description: 'Single-value dropdown selection backed by Radiant Select.',
     omit: ['selection', 'presentation', 'searchable'],
     bindingValueTypes: { value: 'string' }
@@ -404,12 +525,22 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
   {
     a2uiName: 'Combobox',
     sourceEntry: 'Choice',
+    guidance: {
+      whenToUse: 'Filtering many options by typing, for one or several values.',
+      whenNotToUse: 'Short lists (RadioGroup) or free text (TextField).',
+      examples: ['city search, `selection: single`', 'assignees, `selection: multiple`']
+    },
     description: 'Filterable dropdown selection backed by Radiant Combobox.',
     omit: ['presentation', 'searchable']
   },
   {
     a2uiName: 'RadioGroup',
     sourceEntry: 'Choice',
+    guidance: {
+      whenToUse: 'One value from a few options, all visible at once.',
+      whenNotToUse: 'Many options (Select) or several values (Combobox).',
+      examples: ['delivery speed with a `description` per option', 'plan size, `required: true`']
+    },
     description: 'Mutually exclusive radio options backed by Radiant RadioGroup.',
     omit: ['selection', 'presentation', 'searchable', 'placeholder'],
     bindingValueTypes: { value: 'string' }
@@ -418,6 +549,11 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
   {
     a2uiName: 'Textarea',
     sourceEntry: 'TextField',
+    guidance: {
+      whenToUse: 'Paragraphs of free text; set `rows` for the expected length.',
+      whenNotToUse: 'Single-line values (TextField) or known options (Select).',
+      examples: ['feedback, `rows: 4`', 'bug report, `required: true`']
+    },
     description: 'Multi-line text input backed by Radiant Textarea.',
     omit: ['kind']
   },
@@ -560,7 +696,13 @@ function componentSchema(
   return { type: 'object', description, allOf: [{ $ref: `${COMMON}Checkable` }, body] }
 }
 
-function projectBasic(entry: CatalogEntry, projection: BasicProjection): A2uiJsonSchema {
+type EntryNames = Readonly<Record<string, string | null>>
+
+function projectBasic(
+  entry: CatalogEntry,
+  projection: BasicProjection,
+  names: EntryNames
+): A2uiJsonSchema {
   const properties: Record<string, A2uiJsonSchema> = {}
   for (const [wireName, mapping] of Object.entries(projection.props)) {
     properties[wireName] = projectMappedProp(projection.a2uiName, entry, mapping)
@@ -572,14 +714,21 @@ function projectBasic(entry: CatalogEntry, projection: BasicProjection): A2uiJso
   }
   return componentSchema(
     projection.a2uiName,
-    describeCatalogEntry(entry),
+    describeCatalogEntry(entry, { guidance: projection.guidance, names }),
     properties,
     projection.required,
     projection.checkable ?? false
   )
 }
 
-function projectExtension(entry: CatalogEntry, projection: ExtensionProjection): A2uiJsonSchema {
+function projectExtension(
+  entry: CatalogEntry,
+  projection: ExtensionProjection,
+  names: EntryNames
+): A2uiJsonSchema {
+  if ((projection.description || projection.omit) && !projection.guidance) {
+    fail(projection.a2uiName, 'a projection that renames or omits props needs its own guidance.')
+  }
   const omit = new Set(projection.omit ?? [])
   const properties: Record<string, A2uiJsonSchema> = {}
   const required: string[] = []
@@ -624,7 +773,11 @@ function projectExtension(entry: CatalogEntry, projection: ExtensionProjection):
 
   return componentSchema(
     projection.a2uiName,
-    projection.description ?? describeCatalogEntry(entry),
+    describeCatalogEntry(entry, {
+      description: projection.description,
+      guidance: projection.guidance,
+      names
+    }),
     properties,
     required,
     checkable
@@ -635,6 +788,7 @@ function catalogDocument(
   catalogId: string,
   title: string,
   description: string,
+  instructions: string,
   components: Record<string, A2uiJsonSchema>
 ): A2uiCatalogDocument {
   return {
@@ -644,7 +798,7 @@ function catalogDocument(
     protocolVersion: A2UI_PROTOCOL_VERSION,
     title,
     description,
-    instructions: renderCatalogInstructions(),
+    instructions,
     components,
     functions: {},
     $defs: {
@@ -662,6 +816,66 @@ function catalogDocument(
   }
 }
 
+/** Every component name the generated A2UI catalogs can contain, before custom entries. */
+export const A2UI_GENERATED_COMPONENT_NAMES: readonly string[] = [
+  ...BASIC_PROJECTIONS,
+  ...EXTENSION_PROJECTIONS
+].map(projection => projection.a2uiName)
+
+/**
+ * Returns one message per description in `components` that names a prop or value its own
+ * schema lacks, or a known component outside `available`.
+ */
+export function findA2uiDescriptionViolations(
+  components: Readonly<Record<string, A2uiJsonSchema>>,
+  available: ReadonlySet<string>,
+  known: ReadonlySet<string>
+): readonly string[] {
+  const violations: string[] = []
+  for (const [name, schema] of Object.entries(components)) {
+    const description = typeof schema.description === 'string' ? schema.description : ''
+    for (const violation of findGuidancePropViolations(description, collectSchemaProps(schema))) {
+      violations.push(`${name}: ${violation}`)
+    }
+    for (const [word] of description.matchAll(/\b[A-Z][A-Za-z0-9]*\b/g)) {
+      if (known.has(word) && !available.has(word)) {
+        violations.push(`${name}: names ${word}, which this catalog does not contain`)
+      }
+    }
+  }
+  return violations
+}
+
+const BASIC_INSTRUCTIONS = renderCatalogInstructions({
+  topics: ['intent', 'navigation', 'state'],
+  extra: [
+    'Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.'
+  ]
+})
+
+function extensionInstructions(components: Readonly<Record<string, A2uiJsonSchema>>): string {
+  const props = collectSchemaProps(Object.values(components))
+  const hasEnum = (prop: string, value: string) =>
+    (props.get(prop) ?? []).some(
+      schema => Array.isArray(schema.enum) && (schema.enum as unknown[]).includes(value)
+    )
+  const spacing = [...props.values()]
+    .flat()
+    .some(
+      schema =>
+        Array.isArray(schema.enum) &&
+        CATALOG_SPACING.every(step => (schema.enum as unknown[]).includes(step))
+    )
+  return renderCatalogInstructions({
+    topics: [
+      ...(hasEnum('variant', 'solid') ? (['variant'] as const) : []),
+      ...(props.has('tone') ? (['tone'] as const) : []),
+      ...(props.has('controlSize') ? (['controlSize'] as const) : []),
+      ...(spacing ? (['spacing'] as const) : [])
+    ]
+  })
+}
+
 /**
  * Generates the A2UI 1.0 basic catalog and the Radiant extension catalog from a canonical
  * Radiant catalog. Entries added through `extendCatalog` join the extension catalog.
@@ -673,33 +887,71 @@ export function generateA2uiCatalogs(catalog: Catalog): GeneratedA2uiCatalogs {
   const sourceFor = (a2uiName: string, sourceEntry: string): CatalogEntry =>
     catalog.entries[sourceEntry] ?? fail(a2uiName, `missing canonical entry "${sourceEntry}".`)
 
+  const customNames = Object.keys(catalog.entries).filter(
+    name =>
+      ![...BASIC_PROJECTIONS, ...EXTENSION_PROJECTIONS].some(
+        projection => projection.sourceEntry === name
+      )
+  )
+  for (const name of customNames) {
+    if (A2UI_GENERATED_COMPONENT_NAMES.includes(name)) {
+      fail(name, 'a custom entry cannot reuse the name of a generated A2UI component.')
+    }
+  }
+  const nameIn = (projections: readonly { a2uiName: string; sourceEntry: string }[]) => {
+    const names: Record<string, string | null> = {}
+    for (const entryName of Object.keys(catalog.entries)) {
+      names[entryName] =
+        projections.find(projection => projection.sourceEntry === entryName)?.a2uiName ?? null
+    }
+    return names
+  }
+  const basicNames = nameIn(BASIC_PROJECTIONS)
+  const extensionNames = nameIn(EXTENSION_PROJECTIONS)
+  const alongsideNames: Record<string, string | null> = {}
+  for (const entryName of Object.keys(catalog.entries)) {
+    alongsideNames[entryName] =
+      basicNames[entryName] ??
+      extensionNames[entryName] ??
+      (customNames.includes(entryName) ? entryName : null)
+  }
+
   const basicComponents: Record<string, A2uiJsonSchema> = {}
   const extensionComponents: Record<string, A2uiJsonSchema> = {}
-  const mappedSources = new Set<string>()
-
   for (const projection of BASIC_PROJECTIONS) {
     const entry = sourceFor(projection.a2uiName, projection.sourceEntry)
-    basicComponents[projection.a2uiName] = projectBasic(entry, projection)
-    mappedSources.add(projection.sourceEntry)
+    basicComponents[projection.a2uiName] = projectBasic(entry, projection, basicNames)
   }
   for (const projection of EXTENSION_PROJECTIONS) {
     const entry = sourceFor(projection.a2uiName, projection.sourceEntry)
-    extensionComponents[projection.a2uiName] = projectExtension(entry, projection)
-    mappedSources.add(projection.sourceEntry)
+    extensionComponents[projection.a2uiName] = projectExtension(entry, projection, alongsideNames)
+  }
+  for (const entryName of customNames) {
+    extensionComponents[entryName] = projectExtension(
+      catalog.entries[entryName]!,
+      { a2uiName: entryName, sourceEntry: entryName },
+      alongsideNames
+    )
   }
 
-  for (const [entryName, entry] of Object.entries(catalog.entries)) {
-    if (mappedSources.has(entryName)) continue
-    if (
-      Object.hasOwn(basicComponents, entryName) ||
-      Object.hasOwn(extensionComponents, entryName)
-    ) {
-      fail(entryName, 'a custom entry cannot reuse the name of a generated A2UI component.')
-    }
-    extensionComponents[entryName] = projectExtension(entry, {
-      a2uiName: entryName,
-      sourceEntry: entryName
-    })
+  const known = new Set([
+    ...Object.keys(catalog.entries),
+    ...A2UI_GENERATED_COMPONENT_NAMES,
+    ...customNames
+  ])
+  const basicSet = new Set(Object.keys(basicComponents))
+  const violations = [
+    ...findA2uiDescriptionViolations(basicComponents, basicSet, known),
+    ...findA2uiDescriptionViolations(
+      extensionComponents,
+      new Set([...basicSet, ...Object.keys(extensionComponents)]),
+      known
+    )
+  ]
+  if (violations.length > 0) {
+    throw new TypeError(
+      `Generated A2UI guidance does not fit its schemas:\n- ${violations.join('\n- ')}`
+    )
   }
 
   const generatedFrom = `Generated from canonical catalog "${catalog.id}" (${catalog.version}).`
@@ -708,6 +960,7 @@ export function generateA2uiCatalogs(catalog: Catalog): GeneratedA2uiCatalogs {
       A2UI_BASIC_CATALOG_ID,
       'A2UI Basic Catalog',
       generatedFrom,
+      BASIC_INSTRUCTIONS,
       basicComponents
     ),
     extension: catalogDocument(
@@ -716,6 +969,7 @@ export function generateA2uiCatalogs(catalog: Catalog): GeneratedA2uiCatalogs {
         : RADIANT_A2UI_EXTENSION_CATALOG_ID,
       'Radiant A2UI Extension Catalog',
       `${generatedFrom} Use alongside the A2UI basic catalog.`,
+      extensionInstructions(extensionComponents),
       extensionComponents
     )
   }
