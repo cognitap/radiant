@@ -8,11 +8,13 @@ import {
   CATALOG_SPACING,
   CHOICE_PRESENTATIONS,
   assertValidCatalog,
+  coerceCatalogProps,
   defineCatalog,
   extendCatalog,
   findForbiddenPropsInSchema,
   isForbiddenCatalogProp,
   radiantCatalog,
+  summarizeCatalogDiagnostics,
   validateCatalog,
   validateCatalogEntry
 } from '../dist/library/catalog/index.js'
@@ -427,4 +429,106 @@ test('validation rejects actions that share a name with a prop, slot, or binding
   const violations = validateCatalogEntry(entry, 'Clashing')
   assert.ok(violations.some(message => message.includes('action "label" collides with a prop')))
   assert.ok(violations.some(message => message.includes('action "value" collides with a binding')))
+})
+
+test('coerceCatalogProps coerces unknown tones, missing labels, mixed controlled/uncontrolled state, and forbidden props', () => {
+  const buttonResult = coerceCatalogProps(
+    radiantCatalog.entries.Button,
+    {
+      label: 'Save',
+      tone: 'urgent',
+      variant: 'PRIMARY',
+      className: 'bg-red-500',
+      extraProp: 123
+    },
+    { nodeId: 'save_btn' }
+  )
+  assert.equal(buttonResult.props.label, 'Save')
+  assert.equal(buttonResult.props.tone, 'accent')
+  assert.equal(buttonResult.props.variant, 'solid')
+  assert.equal('className' in buttonResult.props, false)
+  assert.equal('extraProp' in buttonResult.props, false)
+
+  const toneDiagnostic = buttonResult.diagnostics.find(d => d.prop === 'tone')
+  assert.deepEqual(
+    {
+      kind: toneDiagnostic?.kind,
+      nodeId: toneDiagnostic?.nodeId,
+      component: toneDiagnostic?.component,
+      prop: toneDiagnostic?.prop,
+      received: toneDiagnostic?.received,
+      used: toneDiagnostic?.used
+    },
+    {
+      kind: 'coerced',
+      nodeId: 'save_btn',
+      component: 'Button',
+      prop: 'tone',
+      received: 'urgent',
+      used: 'accent'
+    }
+  )
+
+  const fieldResult = coerceCatalogProps(
+    radiantCatalog.entries.TextField,
+    {
+      value: 'Ada',
+      defaultValue: 'Grace',
+      style: { color: 'red' }
+    },
+    { nodeId: 'display_name' }
+  )
+  assert.equal(fieldResult.props.label, 'Display name')
+  assert.equal(fieldResult.props.value, 'Ada')
+  assert.equal('defaultValue' in fieldResult.props, false)
+  assert.equal('style' in fieldResult.props, false)
+  assert.ok(
+    fieldResult.diagnostics.some(
+      d =>
+        d.nodeId === 'display_name' &&
+        d.prop === 'defaultValue' &&
+        d.received === 'Grace' &&
+        d.used === undefined
+    )
+  )
+  assert.ok(
+    fieldResult.diagnostics.some(
+      d =>
+        d.nodeId === 'display_name' &&
+        d.kind === 'defaulted' &&
+        d.prop === 'label' &&
+        d.received === undefined &&
+        d.used === 'Display name'
+    )
+  )
+
+  const switchResult = coerceCatalogProps(
+    radiantCatalog.entries.Switch,
+    {
+      label: 'Notifications',
+      checked: true,
+      defaultChecked: false
+    },
+    { nodeId: 'notify_switch' }
+  )
+  assert.equal(switchResult.props.checked, true)
+  assert.equal('defaultChecked' in switchResult.props, false)
+
+  const summary = summarizeCatalogDiagnostics([
+    ...buttonResult.diagnostics,
+    ...fieldResult.diagnostics,
+    ...switchResult.diagnostics
+  ])
+  assert.equal(
+    summary.total,
+    buttonResult.diagnostics.length +
+      fieldResult.diagnostics.length +
+      switchResult.diagnostics.length
+  )
+  assert.equal(summary.coercions, 4)
+  assert.equal(summary.defaults, 1)
+  assert.equal(summary.stripped, 3)
+  assert.equal(summary.fallbacks, 0)
+  assert.equal(summary.byComponent.Button, 4)
+  assert.equal(summary.byProp['Button.tone'], 1)
 })

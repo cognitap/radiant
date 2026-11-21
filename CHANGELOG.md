@@ -6,6 +6,7 @@
 
 - Add `@cognitap/radiant/catalog` defining Radiant's canonical, protocol-independent model-facing catalog with schema validation, forbidden-prop guardrails, and `extendCatalog`.
 - Add `@cognitap/radiant/a2ui` with `A2uiSurface`, the A2UI 1.0 component registry, and generated `catalog.json` for rendering A2UI surfaces with Radiant components.
+- Coerce invalid, missing, forbidden, and mixed controlled/uncontrolled props at the catalog and A2UI boundaries, isolate each rendered node in a text-fallback error boundary, and report structured diagnostics via `onDiagnostic` and `summarizeCatalogDiagnostics`.
 
 ## 0.0.91
 
