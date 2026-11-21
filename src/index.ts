@@ -242,8 +242,15 @@ export type {
   CardProps,
   CardTitleProps
 } from './components/Card/Card.js'
-export { defineTheme, updateThemeAppearance, defaultTheme } from './themes/index.js'
+export {
+  defineTheme,
+  updateThemeAppearance,
+  defaultTheme,
+  PUBLIC_THEME_TOKENS,
+  themeTokenVar
+} from './themes/index.js'
 export type {
+  PublicThemeToken,
   SharedTokens,
   ThemeAppearanceSettings,
   ThemeGeometrySettings,

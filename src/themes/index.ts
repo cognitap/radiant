@@ -12,6 +12,8 @@ export { defineTheme } from './defineTheme.js'
 export { updateThemeAppearance } from './updateThemeAppearance.js'
 export type { ThemeAppearanceSettings, ThemeGeometrySettings } from './updateThemeAppearance.js'
 export { defaultTheme } from './default.js'
+export { PUBLIC_THEME_TOKENS, themeTokenVar } from './publicTokens.js'
+export type { PublicThemeToken } from './publicTokens.js'
 
 export {
   defineThemeDocument,

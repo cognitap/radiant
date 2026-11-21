@@ -203,7 +203,9 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
   const entryMap: Record<string, A2uiRegistryEntry> = { ...base?.entries }
   for (const entry of input.entries) {
     if (Object.hasOwn(entryMap, entry.name)) {
-      throw new TypeError(`Duplicate A2UI registry entry "${entry.name}".`)
+      throw new TypeError(
+        `Duplicate A2UI registry entry "${entry.name}"; an entry cannot shadow another entry's name.`
+      )
     }
     const validated = createA2uiRegistryEntry(entry)
     entryMap[validated.name] = validated
