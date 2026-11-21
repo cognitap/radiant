@@ -51,6 +51,7 @@ import {
 import { unknownIconDiagnostic } from './coerce.js'
 import { useSignalValue } from './useSignalValue.js'
 import { A2uiModalTriggerContext, useA2uiLabels } from './surfaceContext.js'
+import { A2UI_BASIC_CATALOG_REVISION } from './specRevision.js'
 import {
   A2uiAudioPlayer,
   A2uiIcon,
@@ -995,8 +996,7 @@ const dateTimeInputEntry = createA2uiRegistryEntry({
 export const radiantA2uiRegistry = createA2uiRegistry({
   catalogId: A2UI_BASIC_CATALOG_ID,
   title: 'Radiant A2UI 1.0 Catalog',
-  description:
-    'A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog.',
+  description: `A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog, tested against @a2ui/web_core ${A2UI_BASIC_CATALOG_REVISION.webCore}.`,
   instructions: basicCatalog.instructions,
   entries: [
     columnEntry,

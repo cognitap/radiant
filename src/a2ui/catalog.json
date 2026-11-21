@@ -4,7 +4,7 @@
   "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
   "protocolVersion": "1.0",
   "title": "Radiant A2UI 1.0 Catalog",
-  "description": "A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog.",
+  "description": "A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog, tested against @a2ui/web_core 0.15.0.",
   "instructions": "Pick each component by intent; the host theme owns appearance.\n- Button runs actions and never navigates. Leave navigation to the host.\n- Bind input values to surface state; named actions receive a snapshot of that state.\n- Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.",
   "components": {
     "Column": {

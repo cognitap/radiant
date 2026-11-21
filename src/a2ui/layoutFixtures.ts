@@ -21,18 +21,27 @@ const surface = (
 const noop = { event: { name: 'noop' } }
 
 /** A Row whose search field takes the free space beside its button. */
-export const rowFixtureMessages = surface([
-  {
-    id: 'root',
-    component: 'Row',
-    justify: 'spaceBetween',
-    align: 'end',
-    children: ['trail_field', 'search_button']
-  },
-  { id: 'trail_field', component: 'TextField', label: 'Trail', weight: 1 },
-  { id: 'search_button', component: 'Button', child: 'search_text', action: noop },
-  { id: 'search_text', component: 'Text', text: 'Search' }
-])
+export const rowFixtureMessages = surface(
+  [
+    {
+      id: 'root',
+      component: 'Row',
+      justify: 'spaceBetween',
+      align: 'end',
+      children: ['trail_field', 'search_button']
+    },
+    {
+      id: 'trail_field',
+      component: 'TextField',
+      label: 'Trail',
+      value: { '@path': '/trail' },
+      weight: 1
+    },
+    { id: 'search_button', component: 'Button', child: 'search_text', action: noop },
+    { id: 'search_text', component: 'Text', text: 'Search' }
+  ],
+  { trail: '' }
+)
 
 /** A centred Column of a heading line and a caption. */
 export const columnFixtureMessages = surface([
@@ -85,12 +94,25 @@ export const tabsFixtureMessages = surface(
 )
 
 /** A Modal opened by its Button trigger, holding a short form. */
-export const modalFixtureMessages = surface([
-  { id: 'root', component: 'Column', children: ['details_modal'] },
-  { id: 'details_modal', component: 'Modal', trigger: 'details_button', content: 'details_column' },
-  { id: 'details_button', component: 'Button', child: 'details_text', action: noop },
-  { id: 'details_text', component: 'Text', text: 'Trail details' },
-  { id: 'details_column', component: 'Column', children: ['details_body', 'details_field'] },
-  { id: 'details_body', component: 'Text', text: 'Parking opens at dawn.' },
-  { id: 'details_field', component: 'TextField', label: 'Group size' }
-])
+export const modalFixtureMessages = surface(
+  [
+    { id: 'root', component: 'Column', children: ['details_modal'] },
+    {
+      id: 'details_modal',
+      component: 'Modal',
+      trigger: 'details_button',
+      content: 'details_column'
+    },
+    { id: 'details_button', component: 'Button', child: 'details_text', action: noop },
+    { id: 'details_text', component: 'Text', text: 'Trail details' },
+    { id: 'details_column', component: 'Column', children: ['details_body', 'details_field'] },
+    { id: 'details_body', component: 'Text', text: 'Parking opens at dawn.' },
+    {
+      id: 'details_field',
+      component: 'TextField',
+      label: 'Group size',
+      value: { '@path': '/groupSize' }
+    }
+  ],
+  { groupSize: '' }
+)
