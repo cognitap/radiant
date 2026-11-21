@@ -22,6 +22,7 @@
     "dist/library",
     "src/**/*.ts",
     "src/**/*.tsx",
+    "src/a2ui/catalog.json",
     "src/styles.css",
     "src/themes/baseline.css",
     "!src/**/*.stories.*",
@@ -73,7 +74,12 @@
     "./catalog": {
       "types": "./dist/library/catalog/index.d.ts",
       "default": "./dist/library/catalog/index.js"
-    }
+    },
+    "./a2ui": {
+      "types": "./dist/library/a2ui/index.d.ts",
+      "default": "./dist/library/a2ui/index.js"
+    },
+    "./a2ui/catalog.json": "./src/a2ui/catalog.json"
   },
   "publishConfig": {
     "access": "public",
@@ -98,15 +104,18 @@
     "format:check": "oxfmt --check",
     "docs:check": "node scripts/check-docs.ts",
     "check": "pnpm check:library && pnpm check:storybook",
-    "check:library": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm build && tsc --noEmit && pnpm docs:check && node --test tests/*.test.mjs && node scripts/pack-and-test.ts",
+    "check:library": "pnpm theme:check && pnpm format:check && pnpm lint && pnpm build && pnpm catalog:check && tsc --noEmit && pnpm docs:check && node --test tests/*.test.mjs && node scripts/pack-and-test.ts",
     "check:storybook": "pnpm build:storybook && pnpm test:browser --project=storybook-radiant-light --project=storybook-radiant-dark",
     "release:prepare": "node scripts/prepare-release.ts",
+    "catalog:generate": "pnpm build:js && node scripts/generate-a2ui-catalog.ts",
+    "catalog:check": "node scripts/generate-a2ui-catalog.ts --check",
     "theme:generate": "node scripts/generate-theme-css.ts",
     "theme:check": "node scripts/generate-theme-css.ts --check",
     "watch:theme": "node scripts/generate-theme-css.ts --watch",
     "test:browser": "pnpm theme:generate && vitest run"
   },
   "dependencies": {
+    "@a2ui/web_core": "0.15.0",
     "class-variance-authority": "0.7.1",
     "cn": "0.4.0",
     "motion": "14.7.1"

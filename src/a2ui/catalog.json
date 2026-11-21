@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+  "protocolVersion": "1.0",
+  "title": "Radiant A2UI 1.0 Catalog",
+  "description": "A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog.",
+  "components": {
+    "Column": {
+      "description": "Arranges child elements vertically with semantic spacing and alignment.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Column"
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Ordered vertical children."
+        },
+        "justify": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "spaceBetween",
+            "spaceAround",
+            "spaceEvenly",
+            "stretch"
+          ],
+          "default": "start",
+          "description": "Main-axis distribution of children."
+        },
+        "align": {
+          "type": "string",
+          "enum": ["start", "center", "end", "stretch"],
+          "default": "stretch",
+          "description": "Cross-axis alignment of children."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "children"]
+    },
+    "Text": {
+      "description": "Displays formatted text with semantic typographic hierarchy.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Text"
+        },
+        "text": {
+          "$ref": "common_types.json#/$defs/DynamicString",
+          "description": "Optional dynamic text value read from surface state."
+        },
+        "variant": {
+          "type": "string",
+          "enum": ["caption", "body"],
+          "default": "body",
+          "description": "Semantic typographic hierarchy."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "text"]
+    },
+    "TextField": {
+      "type": "object",
+      "description": "Collects single-line or multi-line text input with label, description, and validation.",
+      "allOf": [
+        {
+          "$ref": "common_types.json#/$defs/Checkable"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TextField"
+            },
+            "label": {
+              "$ref": "common_types.json#/$defs/DynamicString",
+              "description": "Visible field label."
+            },
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicString",
+              "description": "Current text value bound to surface state."
+            },
+            "placeholder": {
+              "$ref": "common_types.json#/$defs/DynamicString",
+              "description": "Example value shown when empty."
+            },
+            "variant": {
+              "type": "string",
+              "enum": ["longText", "number", "shortText", "obscured"],
+              "default": "shortText",
+              "description": "Input intent controlling native input type or multiline textarea."
+            },
+            "weight": {
+              "$ref": "#/$defs/Weight"
+            }
+          },
+          "required": ["component", "label", "value"]
+        }
+      ]
+    },
+    "Button": {
+      "type": "object",
+      "description": "Triggers a client-local update or emits a named outbound action.",
+      "allOf": [
+        {
+          "$ref": "common_types.json#/$defs/Checkable"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Button"
+            },
+            "child": {
+              "$ref": "common_types.json#/$defs/Child",
+              "description": "Optional rich content inside the button."
+            },
+            "variant": {
+              "type": "string",
+              "enum": ["default", "primary", "borderless"],
+              "default": "default",
+              "description": "Visual treatment of the button."
+            },
+            "action": {
+              "$ref": "common_types.json#/$defs/Action",
+              "description": "Action dispatched when the user activates the button."
+            },
+            "weight": {
+              "$ref": "#/$defs/Weight"
+            }
+          },
+          "required": ["component", "child", "action"]
+        }
+      ]
+    }
+  },
+  "functions": {},
+  "$defs": {
+    "anyComponent": {
+      "oneOf": [
+        {
+          "$ref": "#/components/Column"
+        },
+        {
+          "$ref": "#/components/Text"
+        },
+        {
+          "$ref": "#/components/TextField"
+        },
+        {
+          "$ref": "#/components/Button"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "component"
+      }
+    },
+    "anyFunction": {
+      "not": {}
+    },
+    "Weight": {
+      "type": "number",
+      "description": "Relative flex growth of this component inside a Row or Column. Set it only on direct children of a Row or Column."
+    }
+  }
+}

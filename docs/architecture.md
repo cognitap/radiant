@@ -10,6 +10,7 @@ Component APIs live in the [component guides](https://github.com/cognitap/radian
 - `@cognitap/radiant/charts`: charts
 - `@cognitap/radiant/examples`: theme presets
 - `@cognitap/radiant/catalog`: canonical model-facing catalog
+- `@cognitap/radiant/a2ui`: A2UI 1.0 surface renderer, component registry, and generated `catalog.json`
 
 [package.json](../package.json) lists every import path, including CSS and motion.
 
@@ -98,5 +99,9 @@ Custom styling and rendering must keep:
 Radiant separates its human React API from its model-facing contract in `@cognitap/radiant/catalog`. Human applications compose explicit sub-parts (`Select`, `SelectTrigger`, `SelectContent`, `SelectItem`), pass `className`, `style`, `render`, and refs, and wire native form and ARIA relationships. Models target a smaller, intent-driven catalog instead: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
 
 Catalog entries never expose `className`, `style`, `render`, DOM event handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; protocol adapters such as A2UI generate their basic and extension catalog schemas from it, and applications add custom entries through `extendCatalog` without shadowing Radiant names.
+
+## A2UI renderer and registry
+
+`@cognitap/radiant/a2ui` keeps `@a2ui/web_core` out of the core `@cognitap/radiant` entry. Each registry entry created with `createA2uiRegistryEntry` pairs a component `name`, Radiant `component`, `description`, JSON `schema` (validated against forbidden host props), and React `adapter`. `createA2uiRegistry` exports a spec-compliant A2UI 1.0 catalog document via `toCatalogJson()`, synced to `src/a2ui/catalog.json` and checked with `pnpm catalog:check`. `A2uiSurface` processes A2UI 1.0 messages, strips agent theme hints so the surrounding `ThemeScope` governs appearance, bridges reactive data-model bindings into Radiant controls, and emits action payloads to `onAction`.
 
 When a contract changes, update the component's stories and the compile checks in [tests/package](../tests/package).
