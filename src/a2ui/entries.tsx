@@ -24,8 +24,22 @@ import {
   generateA2uiCatalogs,
   type A2uiJsonSchema
 } from './catalogGenerator.js'
-import { createA2uiRegistry, createA2uiRegistryEntry } from './registry.js'
-import { buttonNameRule, controlLabelRule } from './accessibilityRules.js'
+import { createA2uiRegistry, createA2uiRegistryEntry, type A2uiAdapterContext } from './registry.js'
+import {
+  buttonNameRule,
+  controlLabelRule,
+  imageAltRule,
+  mediaNameRule
+} from './accessibilityRules.js'
+import { unknownIconDiagnostic } from './coerce.js'
+import {
+  A2uiAudioPlayer,
+  A2uiIcon,
+  A2uiImage,
+  A2uiVideo,
+  type A2uiBoundValue,
+  type A2uiRejectedUrl
+} from './media.js'
 
 function unwrapDisplayText(value: unknown): string {
   const raw = value instanceof ResolvedBinding ? value.value : value
@@ -506,6 +520,137 @@ const sliderEntry = createA2uiRegistryEntry({
   }
 })
 
+function readAccessibility(props: Readonly<Record<string, unknown>>) {
+  const value = props.accessibility
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : undefined
+}
+
+const accessibleLabel = (props: Readonly<Record<string, unknown>>) =>
+  unwrapString(readAccessibility(props)?.label)?.trim() || undefined
+
+const isHiddenFromAssistiveTech = (props: Readonly<Record<string, unknown>>) =>
+  unwrapBoolean(readAccessibility(props)?.hidden) === true
+
+function rejectedUrlReporter(component: string, context: A2uiAdapterContext) {
+  const nodeId = context.node.componentId
+  return ({ url, prop }: A2uiRejectedUrl) =>
+    context.reportDiagnostic?.({
+      kind: 'stripped',
+      code: 'UNSAFE_URL',
+      nodeId,
+      component,
+      prop,
+      received: url,
+      used: undefined,
+      reason: 'URL scheme or host URL policy rejected the URL.'
+    })
+}
+
+const iconEntry = createA2uiRegistryEntry({
+  name: 'Icon',
+  accessibility: [],
+  component: A2uiIcon,
+  schema: basicSchema('Icon'),
+  description: basicDescription('Icon'),
+  adapter(props, context) {
+    const raw = props.name instanceof ResolvedBinding ? props.name.value : props.name
+    const record =
+      raw && typeof raw === 'object' && !(props.name instanceof ResolvedBinding)
+        ? (raw as Record<string, unknown>)
+        : undefined
+    const nodeId = context.node.componentId
+    return (
+      <A2uiIcon
+        name={record ? undefined : raw}
+        boundName={record && !('svgPath' in record) ? bindIconName(record, context) : undefined}
+        svgPath={record ? unwrapString(record.svgPath)?.trim() : undefined}
+        label={isHiddenFromAssistiveTech(props) ? undefined : accessibleLabel(props)}
+        onMissing={name => context.reportDiagnostic?.(unknownIconDiagnostic(nodeId, name))}
+      />
+    )
+  }
+})
+
+type IconDataContext = {
+  resolveDynamicValue(value: unknown): unknown
+  subscribeDynamicValue(
+    value: unknown,
+    onChange: (value: unknown) => void
+  ): { readonly unsubscribe: () => void }
+}
+
+// web_core leaves a binding inside the Icon `name` union unresolved, so the icon follows it itself.
+function bindIconName(
+  binding: Record<string, unknown>,
+  context: A2uiAdapterContext
+): A2uiBoundValue | undefined {
+  const data = (context.node.context as { dataContext?: IconDataContext } | undefined)?.dataContext
+  if (!data) return undefined
+  return {
+    key: JSON.stringify(binding),
+    read: () => data.resolveDynamicValue(binding),
+    subscribe: onChange => data.subscribeDynamicValue(binding, onChange).unsubscribe
+  }
+}
+
+const imageEntry = createA2uiRegistryEntry({
+  name: 'Image',
+  accessibility: [imageAltRule()],
+  component: A2uiImage,
+  schema: basicSchema('Image'),
+  description: basicDescription('Image'),
+  adapter(props, context) {
+    const alt = isHiddenFromAssistiveTech(props)
+      ? ''
+      : unwrapString(props.description)?.trim() || accessibleLabel(props) || ''
+    return (
+      <A2uiImage
+        url={unwrapString(props.url)?.trim()}
+        alt={alt}
+        fit={typeof props.fit === 'string' ? props.fit : undefined}
+        variant={typeof props.variant === 'string' ? props.variant : undefined}
+        onRejectedUrl={rejectedUrlReporter('Image', context)}
+      />
+    )
+  }
+})
+
+const videoEntry = createA2uiRegistryEntry({
+  name: 'Video',
+  accessibility: [mediaNameRule({ names: ['accessibility.label'] })],
+  component: A2uiVideo,
+  schema: basicSchema('Video'),
+  description: basicDescription('Video'),
+  adapter(props, context) {
+    return (
+      <A2uiVideo
+        url={unwrapString(props.url)?.trim()}
+        posterUrl={unwrapString(props.posterUrl)?.trim()}
+        label={accessibleLabel(props)}
+        onRejectedUrl={rejectedUrlReporter('Video', context)}
+      />
+    )
+  }
+})
+
+const audioPlayerEntry = createA2uiRegistryEntry({
+  name: 'AudioPlayer',
+  accessibility: [mediaNameRule({ names: ['description', 'accessibility.label'] })],
+  component: A2uiAudioPlayer,
+  schema: basicSchema('AudioPlayer'),
+  description: basicDescription('AudioPlayer'),
+  adapter(props, context) {
+    return (
+      <A2uiAudioPlayer
+        url={unwrapString(props.url)?.trim()}
+        description={unwrapString(props.description)?.trim() || undefined}
+        label={accessibleLabel(props)}
+        onRejectedUrl={rejectedUrlReporter('AudioPlayer', context)}
+      />
+    )
+  }
+})
+
 /**
  * Radiant's built-in A2UI 1.0 component registry.
  * Generated catalog JSON (`src/a2ui/catalog.json`) is derived directly from this registry.
@@ -523,6 +668,10 @@ export const radiantA2uiRegistry = createA2uiRegistry({
     checkBoxEntry,
     choicePickerEntry,
     sliderEntry,
-    buttonEntry
+    buttonEntry,
+    iconEntry,
+    imageEntry,
+    videoEntry,
+    audioPlayerEntry
   ]
 })

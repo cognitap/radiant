@@ -107,3 +107,12 @@ test('installed @cognitap/radiant/a2ui validates surface accessibility on the se
   assert.equal('label' in messages[0]!.createSurface.components[0]!, false)
   assert.equal(validateA2uiAccessibility(result.messages).errors.length, 0)
 })
+
+test('the lucide icon adapter is a separate subpath that needs the optional lucide-react peer', async () => {
+  const manifest = JSON.parse(
+    readFileSync(new URL('node_modules/@cognitap/radiant/package.json', import.meta.url), 'utf8')
+  )
+  assert.equal(manifest.peerDependenciesMeta['lucide-react'].optional, true)
+  assert.ok(manifest.exports['./a2ui/lucide'])
+  await assert.rejects(import('@cognitap/radiant/a2ui/lucide'), /lucide-react/)
+})

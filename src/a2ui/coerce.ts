@@ -278,7 +278,64 @@ function coerceKnownComponent(
     }
   }
 
+  // A name that fails the spec would make web_core reject the whole batch; an empty path renders nothing.
+  const iconNames = entry.name === 'Icon' ? specIconNames(entry.schema) : undefined
+  if (iconNames) {
+    const name = props.name
+    if (typeof name === 'string') {
+      if (!iconNames.includes(name)) {
+        diagnostics.push(unknownIconDiagnostic(id, name))
+        props.name = { svgPath: '' }
+      }
+    } else {
+      const valid = coerceIconObject(name)
+      if (valid === undefined) {
+        const kind = raw.name === undefined ? 'defaulted' : 'coerced'
+        log(kind, 'name', raw.name, { svgPath: '' }, 'Missing or invalid icon name.')
+        props.name = { svgPath: '' }
+      } else if (valid !== name) {
+        log('coerced', 'name', name, valid, 'Coerced svgPath to a string.')
+        props.name = valid
+      }
+    }
+  }
+
   return { ...envelope, ...props, id, component: entry.name }
+}
+
+/** The warning reported when an icon name has no icon; the icon renders nothing. */
+export const unknownIconDiagnostic = (nodeId: string, name: unknown): CatalogDiagnostic => ({
+  kind: 'fallback',
+  nodeId,
+  component: 'Icon',
+  prop: 'name',
+  received: name,
+  used: null,
+  reason:
+    typeof name === 'string' ? 'No icon is provided for this name.' : 'Icon name is not a string.',
+  code: 'UNKNOWN_ICON'
+})
+
+const isBinding = (v: unknown): boolean =>
+  isPlainRecord(v) &&
+  Object.keys(v).length === 1 &&
+  (typeof v['@path'] === 'string' || typeof v.path === 'string')
+
+/** Returns a spec-valid object icon name (a binding or exactly `{ svgPath }`), or undefined. */
+function coerceIconObject(value: unknown): unknown {
+  if (isBinding(value)) return value
+  if (!isPlainRecord(value) || Object.keys(value).length !== 1 || !('svgPath' in value)) return
+  const path = value.svgPath
+  if (typeof path === 'string' || isDynamicExpression(path)) return value
+  if (typeof path === 'number' || typeof path === 'boolean') return { svgPath: String(path) }
+  return undefined
+}
+
+function specIconNames(schema: Readonly<Record<string, unknown>>): readonly unknown[] | undefined {
+  const name = isPlainRecord(schema.properties) ? schema.properties.name : undefined
+  const options = isPlainRecord(name) && Array.isArray(name.oneOf) ? name.oneOf : []
+  const named = options.find(o => isPlainRecord(o) && Array.isArray(o.enum))
+  return isPlainRecord(named) ? (named.enum as readonly unknown[]) : undefined
 }
 
 function coerceComponentList(

@@ -25,13 +25,17 @@ test('generated A2UI catalog JSON matches radiantA2uiRegistry and loads into @a2
   const parsed = Catalog.fromJson(onDisk, A2UI_PROTOCOL_VERSION)
   assert.equal(parsed.id, radiantA2uiRegistry.catalogId)
   assert.deepEqual([...parsed.components.keys()].sort(), [
+    'AudioPlayer',
     'Button',
     'CheckBox',
     'ChoicePicker',
     'Column',
+    'Icon',
+    'Image',
     'Slider',
     'Text',
-    'TextField'
+    'TextField',
+    'Video'
   ])
 })
 

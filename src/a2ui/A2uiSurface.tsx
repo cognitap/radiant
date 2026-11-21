@@ -313,6 +313,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
       ? entry.adapter(props, {
           node,
           inline,
+          reportDiagnostic: onDiagnostic,
           renderNode(child: ComponentNode, options?: A2uiRenderOptions) {
             if (!options?.inline) hasChildNodes = true
             return (
@@ -446,7 +447,7 @@ function createSurfaceStore(
   let phase: SurfacePhase = 'awaiting'
   // Updates that arrive before their createSurface wait here instead of failing.
   let bufferedUpdates: A2uiMessage[] = []
-  // Unknown components report once per node and type for each engine build.
+  // Unknown components and icon names report once per node and value for each engine build.
   let reportedUnknown = new Set<string>()
   const pendingDiagnostics: CatalogDiagnostic[] = []
   const listeners = new Set<() => void>()
@@ -554,7 +555,7 @@ function createSurfaceStore(
     trackPendingText(coerced, diagnostics)
     if (record) {
       for (const diagnostic of diagnostics) {
-        if (diagnostic.code === 'UNKNOWN_COMPONENT_TYPE') {
+        if (diagnostic.code === 'UNKNOWN_COMPONENT_TYPE' || diagnostic.code === 'UNKNOWN_ICON') {
           const key = `${diagnostic.nodeId}\u0000${String(diagnostic.received)}`
           if (reportedUnknown.has(key)) continue
           reportedUnknown.add(key)

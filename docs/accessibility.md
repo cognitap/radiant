@@ -15,7 +15,7 @@ Automation does not cover screen readers, real browser zoom, OS forced colors, o
 
 `validateA2uiAccessibility(messages, { registry, fix })` from `@cognitap/radiant/a2ui` checks a surface against the rules on each registry entry, without a DOM. Run it on the server before storing a surface. Each error names `nodeId`, `component`, `rule`, `prop`, and `message`. With `fix: true` it returns a fixed copy, filling a missing `label` from author text such as `placeholder`; input is never mutated. `A2uiSurface` warns once per problem outside production.
 
-Every `createA2uiRegistryEntry` call declares `accessibility` rules, or `[]` for none: `controlLabelRule` for form controls and `buttonNameRule` for buttons.
+Every `createA2uiRegistryEntry` call declares `accessibility` rules, or `[]` for none: `controlLabelRule` for form controls, `buttonNameRule` for buttons, `imageAltRule` for images, and `mediaNameRule` for video and audio. An image needs `description` or `accessibility.label`; mark a decorative one with `description: ""` or `accessibility.hidden: true`. Icons are hidden from assistive technology unless `accessibility.label` names them.
 
 ## Manual targets
 
