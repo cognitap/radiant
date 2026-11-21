@@ -4,6 +4,22 @@ import type { A2uiMessage } from './sanitize.js'
 
 const MAX_COMPARE_DEPTH = 64
 
+export const A2UI_NODE_ATTR = 'data-a2ui-node'
+
+/** Deep-clones wire message objects and arrays so live state cannot mutate stored history. */
+export function cloneMessageValue<T>(value: T, depth = 0): T {
+  if (depth >= MAX_COMPARE_DEPTH || !value || typeof value !== 'object') return value
+  if (Array.isArray(value)) {
+    return value.map(item => cloneMessageValue(item, depth + 1)) as unknown as T
+  }
+  if (!isPlainRecord(value)) return value
+  const next: Record<string, unknown> = {}
+  for (const [key, entry] of Object.entries(value)) {
+    next[key] = cloneMessageValue(entry, depth + 1)
+  }
+  return next as T
+}
+
 function sameMessageValue(a: unknown, b: unknown, depth = 0): boolean {
   if (Object.is(a, b)) return true
   if (depth >= MAX_COMPARE_DEPTH || !a || !b || typeof a !== 'object' || typeof b !== 'object') {
@@ -26,11 +42,7 @@ function sameMessageValue(a: unknown, b: unknown, depth = 0): boolean {
   return true
 }
 
-/**
- * Returns true when `previous` is a structurally equal prefix of `next`.
- * Structural matching avoids tearing down the live surface when callers recreate
- * message arrays or objects across React renders.
- */
+/** Returns true when `previous` is a structurally equal prefix of `next`. */
 export function isMessagePrefix(
   previous: readonly A2uiMessage[],
   next: readonly A2uiMessage[]
@@ -42,6 +54,19 @@ export function isMessagePrefix(
   return true
 }
 
+/** Coalesces repeated calls within the same turn into a single microtask invocation. */
+export function createMicrotaskCoalescer(run: () => void): () => void {
+  let scheduled = false
+  return () => {
+    if (scheduled) return
+    scheduled = true
+    queueMicrotask(() => {
+      scheduled = false
+      run()
+    })
+  }
+}
+
 const FOCUSABLE_SELECTOR =
   'a[href],area[href],button,input,select,textarea,summary,[tabindex],[contenteditable]:not([contenteditable="false"])'
 
@@ -50,12 +75,13 @@ function isHtmlElement(node: Element | null): node is HTMLElement {
   return Boolean(node && win && node instanceof win.HTMLElement)
 }
 
-/**
- * Checks whether `element` is a currently reachable, focusable control inside `root`.
- */
-export function isFocusableWithin(element: HTMLElement, root: HTMLElement): boolean {
+function isFocusableWithin(
+  element: HTMLElement,
+  root: HTMLElement,
+  allowProgrammatic = false
+): boolean {
   if (!element.isConnected || !root.contains(element) || element === root) return false
-  if (element.tabIndex < 0) return false
+  if (element.tabIndex < 0 && !(allowProgrammatic && element.hasAttribute('tabindex'))) return false
   if (element.tagName === 'INPUT' && (element as HTMLInputElement).type === 'hidden') return false
   if (element.matches(':disabled') || element.getAttribute('aria-disabled') === 'true') return false
   if (element.closest('[hidden],[inert]')) return false
@@ -65,33 +91,62 @@ export function isFocusableWithin(element: HTMLElement, root: HTMLElement): bool
   return true
 }
 
-export function getFocusableElements(root: HTMLElement): HTMLElement[] {
+function getFocusableElements(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(element =>
     isFocusableWithin(element, root)
   )
 }
 
+function findNodeHost(root: HTMLElement, instanceId: string): HTMLElement | null {
+  for (const element of root.querySelectorAll<HTMLElement>(`[${A2UI_NODE_ATTR}]`)) {
+    if (element.getAttribute(A2UI_NODE_ATTR) === instanceId) return element
+  }
+  return null
+}
+
+function getHostControls(host: HTMLElement, root: HTMLElement): HTMLElement[] {
+  const controls: HTMLElement[] = []
+  if (isFocusableWithin(host, root, true)) controls.push(host)
+  for (const element of host.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)) {
+    if (isFocusableWithin(element, root, true)) controls.push(element)
+  }
+  return controls
+}
+
 export type FocusSnapshot = {
   readonly active: HTMLElement
+  readonly instanceId: string | null
+  readonly controlIndex: number
   readonly after: readonly HTMLElement[]
   readonly before: readonly HTMLElement[]
   readonly selectionStart: number | null
   readonly selectionEnd: number | null
+  readonly scrollTop: number
+  readonly scrollLeft: number
 }
 
-/**
- * Captures the currently focused element inside `root` along with its surrounding
- * focusable controls in DOM order so focus can recover if a patch removes it.
- */
+/** Captures the active control, its owning rendered instance, and surrounding tabbable order. */
 export function captureFocusSnapshot(root: HTMLElement | null): FocusSnapshot | null {
   if (!root || !root.isConnected) return null
   const active = root.ownerDocument.activeElement
   if (!isHtmlElement(active) || !root.contains(active) || active === root) return null
 
-  const focusables = getFocusableElements(root)
-  const index = focusables.indexOf(active)
-  const after = index >= 0 ? focusables.slice(index + 1) : []
-  const before = index >= 0 ? focusables.slice(0, index).reverse() : []
+  const after: HTMLElement[] = []
+  const before: HTMLElement[] = []
+  for (const candidate of getFocusableElements(root)) {
+    if (candidate === active) continue
+    const position = active.compareDocumentPosition(candidate)
+    if (position & active.DOCUMENT_POSITION_FOLLOWING) after.push(candidate)
+    else if (position & active.DOCUMENT_POSITION_PRECEDING) before.push(candidate)
+  }
+  before.reverse()
+
+  const owner = active.closest<HTMLElement>(`[${A2UI_NODE_ATTR}]`)
+  const ownedInSurface = owner && root.contains(owner) ? owner : null
+  const instanceId = ownedInSurface?.getAttribute(A2UI_NODE_ATTR) ?? null
+  const controlIndex = ownedInSurface
+    ? Math.max(0, getHostControls(ownedInSurface, root).indexOf(active))
+    : 0
 
   let selectionStart: number | null = null
   let selectionEnd: number | null = null
@@ -105,37 +160,60 @@ export function captureFocusSnapshot(root: HTMLElement | null): FocusSnapshot | 
     }
   }
 
-  return { active, after, before, selectionStart, selectionEnd }
+  return {
+    active,
+    instanceId,
+    controlIndex,
+    after,
+    before,
+    selectionStart,
+    selectionEnd,
+    scrollTop: active.scrollTop,
+    scrollLeft: active.scrollLeft
+  }
 }
 
-/**
- * Restores focus if a patch caused focus to fall back to `document.body` (or null / root).
- * Fallback order:
- * 1. The previously focused element if it survived (e.g. after a DOM reorder blurred it).
- * 2. The next surviving focusable control in DOM order.
- * 3. The previous surviving focusable control in DOM order.
- * 4. The first focusable control currently in the surface.
- * 5. The surface root container itself (`tabIndex={-1}`).
- */
+function restoreControlState(target: HTMLElement, snapshot: FocusSnapshot): void {
+  target.focus({ preventScroll: true })
+  if (
+    (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') &&
+    snapshot.selectionStart !== null &&
+    snapshot.selectionEnd !== null
+  ) {
+    try {
+      const input = target as HTMLInputElement | HTMLTextAreaElement
+      input.setSelectionRange(snapshot.selectionStart, snapshot.selectionEnd)
+    } catch {
+      // Ignore inputs that disallow setting a selection range.
+    }
+  }
+  if (snapshot.scrollTop > 0) target.scrollTop = snapshot.scrollTop
+  if (snapshot.scrollLeft > 0) target.scrollLeft = snapshot.scrollLeft
+}
+
+/** Restores focus synchronously in an active document using the order documented in architecture.md. */
 export function restoreFocusFallback(root: HTMLElement | null, snapshot: FocusSnapshot): void {
   if (!root || !root.isConnected) return
   const doc = root.ownerDocument
+  if (typeof doc.hasFocus === 'function' && !doc.hasFocus()) return
   const current = doc.activeElement
-  if (current && current !== doc.body && current !== doc.documentElement) {
+  if (current && current !== doc.body && current !== doc.documentElement) return
+
+  if (isFocusableWithin(snapshot.active, root, true)) {
+    restoreControlState(snapshot.active, snapshot)
     return
   }
 
-  if (isFocusableWithin(snapshot.active, root)) {
-    snapshot.active.focus({ preventScroll: true })
-    if (snapshot.selectionStart !== null && snapshot.selectionEnd !== null) {
-      try {
-        const input = snapshot.active as HTMLInputElement | HTMLTextAreaElement
-        input.setSelectionRange(snapshot.selectionStart, snapshot.selectionEnd)
-      } catch {
-        // Ignore inputs that disallow setting a selection range.
+  if (snapshot.instanceId) {
+    const movedHost = findNodeHost(root, snapshot.instanceId)
+    if (movedHost) {
+      const controls = getHostControls(movedHost, root)
+      const movedTarget = controls[snapshot.controlIndex] ?? controls[0]
+      if (movedTarget) {
+        restoreControlState(movedTarget, snapshot)
+        return
       }
     }
-    return
   }
 
   const target =
@@ -149,56 +227,47 @@ export function restoreFocusFallback(root: HTMLElement | null, snapshot: FocusSn
 
 export const A2UI_NODE_ENTRY_ANIMATION_ID = 'radiant-a2ui-entry'
 
-const LEAF_CONTROL_SLOTS = new Set([
-  'field',
-  'button',
-  'a2ui-text',
-  'a2ui-fallback',
-  'a2ui-choice-picker',
-  'checkbox',
-  'radio',
-  'slider',
-  'input',
-  'textarea',
-  'toggle-group'
-])
+const DEFAULT_ENTRY_EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 
-function hasSlotToken(slotValue: string, target: string): boolean {
-  if (!slotValue) return false
-  return slotValue.split(/\s+/).includes(target)
-}
-
-function hasLeafControlSlot(slotValue: string): boolean {
-  if (!slotValue) return false
-  return slotValue.split(/\s+/).some(token => LEAF_CONTROL_SLOTS.has(token))
-}
-
-/**
- * Collects top-level newly inserted node host elements inside `container` that have
- * never been seen before, descending through `a2ui-column` containers so each child
- * node animates individually while existing elements are never re-animated.
- */
-export function collectEntryTargets(
-  container: HTMLElement,
-  seenElements: WeakSet<Element>,
-  targets: HTMLElement[] = []
+/** Resolves entry targets for newly added rendered model instances in a single surface pass. */
+export function collectNewNodeEntryTargets(
+  root: HTMLElement,
+  pendingInstanceIds: ReadonlySet<string>,
+  seenElements: WeakSet<Element>
 ): HTMLElement[] {
-  for (const child of Array.from(container.children)) {
-    if (!isHtmlElement(child)) continue
-    const slot = child.getAttribute('data-slot') ?? ''
-    const isColumn = hasSlotToken(slot, 'a2ui-column')
-    if (seenElements.has(child)) {
-      if (isColumn || !hasLeafControlSlot(slot)) {
-        collectEntryTargets(child, seenElements, targets)
-      }
+  if (pendingInstanceIds.size === 0) return []
+  const targets: HTMLElement[] = []
+  const matchedIds = new Set<string>()
+  const containers: HTMLElement[] = [root]
+
+  for (const element of root.querySelectorAll<HTMLElement>(`[${A2UI_NODE_ATTR}]`)) {
+    const instanceId = element.getAttribute(A2UI_NODE_ATTR)
+    if (!instanceId) continue
+    if (element.getAttribute('data-slot') === 'a2ui-column') {
+      containers.push(element)
+      if (pendingInstanceIds.has(instanceId)) matchedIds.add(instanceId)
       continue
     }
-    if (isColumn) {
-      collectEntryTargets(child, seenElements, targets)
-      continue
+    if (pendingInstanceIds.has(instanceId)) {
+      matchedIds.add(instanceId)
+      if (!seenElements.has(element)) targets.push(element)
     }
-    targets.push(child)
   }
+
+  if (matchedIds.size < pendingInstanceIds.size) {
+    for (const container of containers) {
+      for (const child of Array.from(container.children)) {
+        if (
+          isHtmlElement(child) &&
+          !child.hasAttribute(A2UI_NODE_ATTR) &&
+          !seenElements.has(child)
+        ) {
+          targets.push(child)
+        }
+      }
+    }
+  }
+
   return targets
 }
 
@@ -224,10 +293,7 @@ function parseDurationMs(value: string): number | undefined {
   return undefined
 }
 
-/**
- * Runs entry motion once on a newly mounted A2UI node host element using the active
- * Radiant motion profile and CSS motion tokens, skipping when motion is off or reduced.
- */
+/** Runs entry motion once on a newly mounted node host, ignoring invalid easing values safely. */
 export function animateNodeEntry(
   element: HTMLElement,
   profile: MotionProfile
@@ -241,13 +307,18 @@ export function animateNodeEntry(
   const styles = win.getComputedStyle(element)
   const duration = parseDurationMs(styles.getPropertyValue('--rad-motion-release-duration')) ?? 160
   if (duration <= 0) return undefined
-  const easing =
-    styles.getPropertyValue('--rad-motion-release-ease').trim() || 'cubic-bezier(0.2, 0.8, 0.2, 1)'
+  const easing = styles.getPropertyValue('--rad-motion-release-ease').trim() || DEFAULT_ENTRY_EASING
+  const keyframes = [{ transform: 'translateY(6px)' }, { transform: 'translateY(0px)' }]
+  const options = { id: A2UI_NODE_ENTRY_ANIMATION_ID, duration, easing, fill: 'none' as const }
 
-  return element.animate([{ transform: 'translateY(6px)' }, { transform: 'translateY(0px)' }], {
-    id: A2UI_NODE_ENTRY_ANIMATION_ID,
-    duration,
-    easing,
-    fill: 'none'
-  })
+  try {
+    return element.animate(keyframes, options)
+  } catch {
+    if (easing === DEFAULT_ENTRY_EASING) return undefined
+    try {
+      return element.animate(keyframes, { ...options, easing: DEFAULT_ENTRY_EASING })
+    } catch {
+      return undefined
+    }
+  }
 }

@@ -25,6 +25,9 @@ import {
   type A2uiJsonSchema
 } from './catalogGenerator.js'
 import { createA2uiRegistry, createA2uiRegistryEntry } from './registry.js'
+import { A2UI_NODE_ATTR } from './surfaceRuntime.js'
+
+const nodeMarker = (instanceId: string) => ({ [A2UI_NODE_ATTR]: instanceId })
 
 function unwrapDisplayText(value: unknown): string {
   const raw = value instanceof ResolvedBinding ? value.value : value
@@ -117,6 +120,7 @@ const columnEntry = createA2uiRegistryEntry({
     return (
       <div
         data-slot="a2ui-column"
+        {...nodeMarker(context.node.instanceId)}
         className={`flex flex-col gap-[var(--rad-surface-gap,1rem)] ${justify} ${align}`}
       >
         {children.map(child => (
@@ -150,6 +154,7 @@ const textEntry = createA2uiRegistryEntry({
         <span
           data-slot="a2ui-text"
           data-variant="caption"
+          {...nodeMarker(context.node.instanceId)}
           className="text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.4)] [color:var(--rad-color-muted-foreground,oklch(0.45_0.01_286))]"
         >
           {text}
@@ -160,6 +165,7 @@ const textEntry = createA2uiRegistryEntry({
       <p
         data-slot="a2ui-text"
         data-variant="body"
+        {...nodeMarker(context.node.instanceId)}
         className="m-0 text-[length:var(--rad-typography-roles-ui-body-size,1rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]"
       >
         {text}
@@ -179,7 +185,7 @@ const textFieldEntry = createA2uiRegistryEntry({
   component: [Field, Input, Textarea],
   schema: basicSchema('TextField'),
   description: radiantCatalog.entries.TextField.description,
-  adapter(props) {
+  adapter(props, context) {
     const label = unwrapString(props.label) ?? ''
     const placeholder = unwrapString(props.placeholder)
     const error = readValidationError(props)
@@ -198,6 +204,7 @@ const textFieldEntry = createA2uiRegistryEntry({
       <Field
         label={label}
         error={error}
+        {...nodeMarker(context.node.instanceId)}
       >
         {variant === 'longText' ? (
           <Textarea
@@ -240,6 +247,7 @@ const buttonEntry = createA2uiRegistryEntry({
     return (
       <Button
         variant={variant}
+        {...nodeMarker(context.node.instanceId)}
         onClick={() => {
           void action?.()
         }}
@@ -272,7 +280,7 @@ const checkBoxEntry = createA2uiRegistryEntry({
   component: [Checkbox, Field],
   schema: basicSchema('CheckBox'),
   description: radiantCatalog.entries.Checkbox.description,
-  adapter(props) {
+  adapter(props, context) {
     const label = unwrapDisplayText(props.label)
     const error = readValidationError(props)
     const checked = unwrapBoolean(props.value) ?? false
@@ -281,6 +289,7 @@ const checkBoxEntry = createA2uiRegistryEntry({
       <Field
         label={label}
         error={error}
+        {...nodeMarker(context.node.instanceId)}
       >
         <Checkbox
           checked={checked}
@@ -308,6 +317,7 @@ function readChoiceOptions(raw: unknown): readonly ChoiceOptionItem[] {
 }
 
 function A2uiChoicePicker({
+  instanceId,
   label,
   srOnly,
   error,
@@ -318,6 +328,7 @@ function A2uiChoicePicker({
   filterable,
   onSelect
 }: {
+  instanceId: string
   label: string
   srOnly: boolean
   error?: string
@@ -333,6 +344,7 @@ function A2uiChoicePicker({
   const visible =
     filterable && needle ? options.filter(o => o.label.toLowerCase().includes(needle)) : options
   const parts = srOnly ? SR_ONLY_LABEL_PARTS : undefined
+  const marker = nodeMarker(instanceId)
   const filterInput = filterable ? (
     <Input
       type="search"
@@ -358,6 +370,7 @@ function A2uiChoicePicker({
         label={label}
         error={error}
         parts={parts}
+        {...marker}
       >
         {filterInput}
         {multiple ? (
@@ -383,6 +396,7 @@ function A2uiChoicePicker({
     )
   }
 
+  const groupMarker = filterInput ? undefined : marker
   const group = multiple ? (
     <CheckboxGroup
       label={label}
@@ -391,6 +405,7 @@ function A2uiChoicePicker({
       items={visible}
       value={[...selected]}
       onValueChange={onSelect}
+      {...groupMarker}
     />
   ) : (
     <RadioGroup
@@ -399,6 +414,7 @@ function A2uiChoicePicker({
       parts={parts}
       value={selected[0] ?? null}
       onValueChange={next => onSelect([next])}
+      {...groupMarker}
     >
       {visible.map(o => (
         <Radio
@@ -413,6 +429,7 @@ function A2uiChoicePicker({
   return filterInput ? (
     <div
       data-slot="a2ui-choice-picker"
+      {...marker}
       className="grid gap-2"
     >
       {filterInput}
@@ -432,6 +449,7 @@ const choicePickerEntry = createA2uiRegistryEntry({
     const label = resolveControlLabel(props, context.node.componentId)
     return (
       <A2uiChoicePicker
+        instanceId={context.node.instanceId}
         label={label.text}
         srOnly={label.srOnly}
         error={readValidationError(props)}
@@ -470,6 +488,7 @@ const sliderEntry = createA2uiRegistryEntry({
         label={label.text}
         error={error}
         parts={label.srOnly ? SR_ONLY_LABEL_PARTS : undefined}
+        {...nodeMarker(context.node.instanceId)}
       >
         <Slider
           min={min}

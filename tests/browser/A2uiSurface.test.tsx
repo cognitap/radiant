@@ -1,4 +1,4 @@
-import { act, StrictMode, useEffect, useRef, type ComponentProps } from 'react'
+import { act, StrictMode, useEffect, useRef, type ComponentProps, type CSSProperties } from 'react'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import {
@@ -1562,4 +1562,533 @@ test('removing a focused node moves focus to the documented fallback instead of 
     </div>
   )
   expect(document.activeElement).toBe(outsideBtn)
+})
+
+test('keeps wire history independent of local nested edits across identical replays, appended suffixes, and earlier edits', async () => {
+  const serverHistory: A2uiMessage[] = [
+    surfaceMessage(
+      's_wire_history',
+      [
+        { id: 'root', component: 'Column', children: ['status_text', 'draft_field'] },
+        { id: 'status_text', component: 'Text', text: { '@path': '/status' } },
+        {
+          id: 'draft_field',
+          component: 'TextField',
+          label: 'Nested note',
+          value: { '@path': '/draft/note' },
+          variant: 'shortText'
+        }
+      ],
+      { status: 'Initial', draft: { note: 'Seed', tags: ['v1'] } }
+    ),
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_wire_history',
+        path: '/draft',
+        value: { note: 'Server value', tags: ['a', 'b'] }
+      }
+    }
+  ]
+  const pristineHistory = structuredClone(serverHistory)
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_wire_history"
+      messages={serverHistory}
+    />
+  )
+
+  const input = view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  expect(input.value).toBe('Server value')
+
+  await act(async () => {
+    input.focus()
+    input.setSelectionRange(0, input.value.length)
+    await userEvent.type(input, 'Local edited draft')
+    input.setSelectionRange(6, 12)
+  })
+  expect(input.value).toBe('Local edited draft')
+  expect(document.activeElement).toBe(input)
+  expect(serverHistory).toEqual(pristineHistory)
+
+  // Resending a structurally identical recreated copy is a no-op that preserves the live draft
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_wire_history"
+      messages={structuredClone(pristineHistory)}
+    />
+  )
+  const inputAfterReplay = view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  expect(inputAfterReplay).toBe(input)
+  expect(inputAfterReplay.value).toBe('Local edited draft')
+  expect(document.activeElement).toBe(input)
+  expect(inputAfterReplay.selectionStart).toBe(6)
+  expect(inputAfterReplay.selectionEnd).toBe(12)
+
+  // Appending a mixed suffix to the pristine history applies only the suffix without losing user state
+  const withAppendedPatch: A2uiMessage[] = [
+    ...structuredClone(pristineHistory),
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_wire_history',
+        path: '/status',
+        value: 'Sibling status updated'
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_wire_history',
+        components: [
+          {
+            id: 'root',
+            component: 'Column',
+            children: ['status_text', 'draft_field', 'sibling_note']
+          },
+          { id: 'sibling_note', component: 'Text', text: 'Appended sibling' }
+        ]
+      }
+    }
+  ]
+  const appendedSnapshot = structuredClone(withAppendedPatch)
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_wire_history"
+      messages={withAppendedPatch}
+    />
+  )
+  expect(serverHistory).toEqual(pristineHistory)
+  expect(withAppendedPatch).toEqual(appendedSnapshot)
+  expect(view.host.textContent).toContain('Sibling status updated')
+  expect(view.host.textContent).toContain('Appended sibling')
+  expect(view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')).toBe(input)
+  expect(input.value).toBe('Local edited draft')
+  expect(document.activeElement).toBe(input)
+  expect(input.selectionStart).toBe(6)
+  expect(input.selectionEnd).toBe(12)
+
+  // Editing an already-applied earlier message triggers a rebuild with the revised wire value
+  const editedEarlier = structuredClone(pristineHistory)
+  ;(editedEarlier[1]!.updateDataModel as { value: { note: string; tags: string[] } }).value.note =
+    'Rebuilt from edited history'
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_wire_history"
+      messages={editedEarlier}
+    />
+  )
+  const rebuiltInput = view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  expect(rebuiltInput.value).toBe('Rebuilt from edited history')
+})
+
+test('restores focus, draft, selection, and scroll when a surviving TextField moves between Columns', async () => {
+  const initialMessages: A2uiMessage[] = [
+    surfaceMessage(
+      's_move_field',
+      [
+        { id: 'root', component: 'Column', children: ['col_a', 'col_b', 'other_btn'] },
+        { id: 'col_a', component: 'Column', children: ['note_field'] },
+        { id: 'col_b', component: 'Column', children: [] },
+        {
+          id: 'note_field',
+          component: 'TextField',
+          label: 'Movable note',
+          value: { '@path': '/note' },
+          variant: 'longText'
+        },
+        {
+          id: 'other_btn',
+          component: 'Button',
+          child: 'other_label',
+          action: { event: { name: 'noop' } }
+        },
+        { id: 'other_label', component: 'Text', text: 'Surviving control' }
+      ],
+      { note: Array.from({ length: 18 }, (_, i) => `Line ${i + 1}`).join('\n') }
+    )
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_move_field"
+      messages={initialMessages}
+    />
+  )
+
+  const textareaBefore = view.host.querySelector<HTMLTextAreaElement>(
+    'textarea[data-slot~="textarea"]'
+  )!
+  textareaBefore.style.height = '64px'
+  await act(async () => {
+    textareaBefore.focus()
+    textareaBefore.setSelectionRange(0, 0)
+    await userEvent.type(textareaBefore, 'Draft ')
+    textareaBefore.setSelectionRange(1, 5)
+    textareaBefore.scrollTop = 48
+  })
+  const expectedDraft = textareaBefore.value
+  const scrollBefore = textareaBefore.scrollTop
+  expect(scrollBefore).toBeGreaterThan(0)
+  expect(document.activeElement).toBe(textareaBefore)
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_move_field"
+      messages={[
+        ...initialMessages,
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          updateComponents: {
+            surfaceId: 's_move_field',
+            components: [
+              { id: 'col_a', component: 'Column', children: [] },
+              { id: 'col_b', component: 'Column', children: ['note_field'] }
+            ]
+          }
+        }
+      ]}
+    />
+  )
+
+  const colB = view.host.querySelector<HTMLElement>('[data-a2ui-node="col_b"]')!
+  const textareaAfter = colB.querySelector<HTMLTextAreaElement>('textarea[data-slot~="textarea"]')!
+  expect(textareaAfter).not.toBeNull()
+  expect(textareaAfter.value).toBe(expectedDraft)
+  expect(document.activeElement).toBe(textareaAfter)
+  expect(textareaAfter.selectionStart).toBe(1)
+  expect(textareaAfter.selectionEnd).toBe(5)
+  expect(textareaAfter.scrollTop).toBe(scrollBefore)
+})
+
+test('preserves DOM fallback order when removing a programmatically focused tabindex=-1 control', async () => {
+  const focusRegistry = createA2uiRegistry({
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    title: 'Programmatic focus test catalog',
+    description: 'Registry with a programmatically focusable control.',
+    entries: [
+      ...Object.values(radiantA2uiRegistry.entries),
+      createA2uiRegistryEntry({
+        name: 'ProgrammaticTarget',
+        component: 'div',
+        description: 'Control with tabindex=-1.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'ProgrammaticTarget' },
+            label: { type: 'string' }
+          },
+          required: ['component', 'label']
+        },
+        adapter: (props, context) => (
+          <div
+            tabIndex={-1}
+            data-a2ui-node={context.node.instanceId}
+            data-testid="programmatic-target"
+          >
+            {String(props.label ?? '')}
+          </div>
+        )
+      })
+    ]
+  })
+
+  const initialMessages: A2uiMessage[] = [
+    surfaceMessage('s_programmatic_focus', [
+      { id: 'root', component: 'Column', children: ['first_btn', 'mid_target', 'last_btn'] },
+      {
+        id: 'first_btn',
+        component: 'Button',
+        child: 'first_label',
+        action: { event: { name: 'first' } }
+      },
+      { id: 'first_label', component: 'Text', text: 'First' },
+      { id: 'mid_target', component: 'ProgrammaticTarget', label: 'Programmatic middle' },
+      {
+        id: 'last_btn',
+        component: 'Button',
+        child: 'last_label',
+        action: { event: { name: 'last' } }
+      },
+      { id: 'last_label', component: 'Text', text: 'Last' }
+    ])
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_programmatic_focus"
+      registry={focusRegistry}
+      messages={initialMessages}
+    />
+  )
+
+  const midTarget = view.host.querySelector<HTMLDivElement>('[data-testid="programmatic-target"]')!
+  const lastBtn = Array.from(view.host.querySelectorAll<HTMLButtonElement>('button')).find(
+    button => button.textContent === 'Last'
+  )!
+  midTarget.focus()
+  expect(document.activeElement).toBe(midTarget)
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_programmatic_focus"
+      registry={focusRegistry}
+      messages={[
+        ...initialMessages,
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          updateComponents: {
+            surfaceId: 's_programmatic_focus',
+            components: [{ id: 'root', component: 'Column', children: ['first_btn', 'last_btn'] }]
+          }
+        }
+      ]}
+    />
+  )
+
+  expect(document.activeElement).toBe(lastBtn)
+})
+
+test('skips focus restoration when document.hasFocus() is false and restores normally when active', async () => {
+  const step0: A2uiMessage[] = [
+    surfaceMessage('s_inactive_doc', [
+      { id: 'root', component: 'Column', children: ['btn_a', 'btn_b', 'btn_c'] },
+      { id: 'btn_a', component: 'Button', child: 'lbl_a', action: { event: { name: 'a' } } },
+      { id: 'lbl_a', component: 'Text', text: 'Alpha' },
+      { id: 'btn_b', component: 'Button', child: 'lbl_b', action: { event: { name: 'b' } } },
+      { id: 'lbl_b', component: 'Text', text: 'Beta' },
+      { id: 'btn_c', component: 'Button', child: 'lbl_c', action: { event: { name: 'c' } } },
+      { id: 'lbl_c', component: 'Text', text: 'Gamma' }
+    ])
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_inactive_doc"
+      messages={step0}
+    />
+  )
+
+  const buttonByText = (text: string) =>
+    Array.from(view.host.querySelectorAll<HTMLButtonElement>('button')).find(
+      button => button.textContent === text
+    )!
+
+  buttonByText('Alpha').focus()
+  expect(document.activeElement).toBe(buttonByText('Alpha'))
+
+  const hasFocusSpy = vi.spyOn(document, 'hasFocus').mockReturnValue(false)
+  const focusSpy = vi.spyOn(HTMLElement.prototype, 'focus')
+  try {
+    const step1: A2uiMessage[] = [
+      ...step0,
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        updateComponents: {
+          surfaceId: 's_inactive_doc',
+          components: [{ id: 'root', component: 'Column', children: ['btn_b', 'btn_c'] }]
+        }
+      }
+    ]
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_inactive_doc"
+        messages={step1}
+      />
+    )
+    expect(focusSpy).not.toHaveBeenCalled()
+    expect(document.activeElement).not.toBe(buttonByText('Beta'))
+
+    // Restoring foreground focus resumes normal fallback restoration
+    hasFocusSpy.mockRestore()
+    focusSpy.mockClear()
+    buttonByText('Beta').focus()
+    expect(document.activeElement).toBe(buttonByText('Beta'))
+
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_inactive_doc"
+        messages={[
+          ...step1,
+          {
+            version: A2UI_PROTOCOL_VERSION,
+            updateComponents: {
+              surfaceId: 's_inactive_doc',
+              components: [{ id: 'root', component: 'Column', children: ['btn_c'] }]
+            }
+          }
+        ]}
+      />
+    )
+    expect(document.activeElement).toBe(buttonByText('Gamma'))
+  } finally {
+    hasFocusSpy.mockRestore()
+    focusSpy.mockRestore()
+  }
+})
+
+test('animates only newly added model instances across variant swaps and coalesces multi-insert discovery', async () => {
+  const animatedElements: HTMLElement[] = []
+  const originalAnimate = Element.prototype.animate
+  const animateSpy = vi.spyOn(Element.prototype, 'animate').mockImplementation(function (
+    this: Element,
+    keyframes,
+    options
+  ) {
+    if (
+      typeof options === 'object' &&
+      options !== null &&
+      'id' in options &&
+      options.id === A2UI_NODE_ENTRY_ANIMATION_ID &&
+      this instanceof HTMLElement
+    ) {
+      animatedElements.push(this)
+    }
+    return originalAnimate.call(this, keyframes, options)
+  })
+
+  try {
+    const step0: A2uiMessage[] = [
+      surfaceMessage('s_variant_motion', [
+        { id: 'root', component: 'Column', children: ['intro'] },
+        { id: 'intro', component: 'Text', text: 'Existing body copy', variant: 'body' }
+      ])
+    ]
+
+    const view = await mount(
+      <A2uiSurface
+        surfaceId="s_variant_motion"
+        messages={step0}
+      />
+    )
+    expect(animatedElements).toHaveLength(1)
+    animatedElements.length = 0
+
+    // Swap existing Text from body (<p>) to caption (<span>) and insert one new sibling in one patch
+    const step1: A2uiMessage[] = [
+      ...step0,
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        updateComponents: {
+          surfaceId: 's_variant_motion',
+          components: [
+            { id: 'root', component: 'Column', children: ['intro', 'new_sibling'] },
+            { id: 'intro', component: 'Text', text: 'Existing caption copy', variant: 'caption' },
+            { id: 'new_sibling', component: 'Text', text: 'Brand new sibling', variant: 'body' }
+          ]
+        }
+      }
+    ]
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_variant_motion"
+        messages={step1}
+      />
+    )
+
+    const introSpan = view.host.querySelector<HTMLElement>(
+      'span[data-a2ui-node="intro"][data-variant="caption"]'
+    )!
+    const newSiblingEl = view.host.querySelector<HTMLElement>('p[data-a2ui-node="new_sibling"]')!
+    expect(introSpan).not.toBeNull()
+    expect(animatedElements).toEqual([newSiblingEl])
+    expect(animatedElements).not.toContain(introSpan)
+    animatedElements.length = 0
+
+    // Multi-insert coalesces target discovery to one surface pass and one animation per new node
+    const surfaceEl = view.host.querySelector<HTMLDivElement>('[data-slot="a2ui-surface"]')!
+    let discoveryScans = 0
+    const originalQsa = surfaceEl.querySelectorAll.bind(surfaceEl)
+    const qsaSpy = vi.spyOn(surfaceEl, 'querySelectorAll').mockImplementation(((
+      selector: string
+    ) => {
+      if (selector === '[data-a2ui-node]') discoveryScans += 1
+      return originalQsa(selector)
+    }) as typeof surfaceEl.querySelectorAll)
+
+    try {
+      await view.render(
+        <A2uiSurface
+          surfaceId="s_variant_motion"
+          messages={[
+            ...step1,
+            {
+              version: A2UI_PROTOCOL_VERSION,
+              updateComponents: {
+                surfaceId: 's_variant_motion',
+                components: [
+                  {
+                    id: 'root',
+                    component: 'Column',
+                    children: ['intro', 'new_sibling', 'batch_a', 'batch_b', 'batch_c']
+                  },
+                  { id: 'batch_a', component: 'Text', text: 'Batch A' },
+                  { id: 'batch_b', component: 'Text', text: 'Batch B' },
+                  { id: 'batch_c', component: 'Text', text: 'Batch C' }
+                ]
+              }
+            }
+          ]}
+        />
+      )
+    } finally {
+      qsaSpy.mockRestore()
+    }
+
+    expect(discoveryScans).toBe(1)
+    expect(animatedElements).toEqual([
+      view.host.querySelector<HTMLElement>('[data-a2ui-node="batch_a"]')!,
+      view.host.querySelector<HTMLElement>('[data-a2ui-node="batch_b"]')!,
+      view.host.querySelector<HTMLElement>('[data-a2ui-node="batch_c"]')!
+    ])
+  } finally {
+    animateSpy.mockRestore()
+  }
+})
+
+test('renders and stays interactive when --rad-motion-release-ease uses an invalid CSS easing list', async () => {
+  const onAction = vi.fn<(action: A2uiActionPayload) => void>()
+  const { host } = await mount(
+    <div style={{ '--rad-motion-release-ease': 'ease, linear' } as CSSProperties}>
+      <A2uiSurface
+        surfaceId="s_invalid_ease"
+        onAction={onAction}
+        messages={[
+          surfaceMessage(
+            's_invalid_ease',
+            [
+              { id: 'root', component: 'Column', children: ['intro', 'name_field', 'go_btn'] },
+              { id: 'intro', component: 'Text', text: 'Still renders cleanly' },
+              {
+                id: 'name_field',
+                component: 'TextField',
+                label: 'Workspace name',
+                value: { '@path': '/name' }
+              },
+              {
+                id: 'go_btn',
+                component: 'Button',
+                child: 'go_label',
+                action: { event: { name: 'submit' } }
+              },
+              { id: 'go_label', component: 'Text', text: 'Submit' }
+            ],
+            { name: 'Radiant' }
+          )
+        ]}
+      />
+    </div>
+  )
+
+  expect(host.textContent).toContain('Still renders cleanly')
+  const input = host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  const button = host.querySelector<HTMLButtonElement>('button[data-slot~="button"]')!
+  expect(input.value).toBe('Radiant')
+  await act(async () => {
+    await userEvent.click(button)
+  })
+  expect(onAction).toHaveBeenCalledTimes(1)
+  expect(onAction.mock.calls[0]![0].action).toBe('submit')
 })

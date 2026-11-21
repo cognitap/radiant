@@ -38,9 +38,12 @@ import { radiantA2uiRegistry } from './entries.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import {
+  A2UI_NODE_ATTR,
   animateNodeEntry,
   captureFocusSnapshot,
-  collectEntryTargets,
+  cloneMessageValue,
+  collectNewNodeEntryTargets,
+  createMicrotaskCoalescer,
   isMessagePrefix,
   markTreeSeen,
   restoreFocusFallback,
@@ -71,22 +74,21 @@ type SurfaceDomRuntime = {
   readonly setSurfaceElement: (element: HTMLDivElement | null) => void
   readonly setMotionProfile: (profile: MotionProfile) => void
   readonly captureFocus: () => void
-  readonly flushFocus: () => void
-  readonly onNodeMount: (nodeId: string) => void
-  readonly onNodeUnmount: (nodeId: string) => void
+  readonly onNodeMount: (instanceId: string) => void
+  readonly onNodeUnmount: (instanceId: string) => void
   readonly onNodeCommit: () => void
   readonly onSurfaceRebuild: () => void
 }
 
 function createSurfaceDomRuntime(initialMotionProfile: MotionProfile): SurfaceDomRuntime {
   const seenElements = new WeakSet<Element>()
-  const seenNodeIds = new Set<string>()
+  const seenInstanceIds = new Set<string>()
+  const mountedCounts = new Map<string, number>()
+  const pendingNewInstanceIds = new Set<string>()
+  const pendingRemovedInstanceIds = new Set<string>()
   let surfaceElement: HTMLDivElement | null = null
   let motionProfile = initialMotionProfile
-  let hasPendingNewNodes = false
   let pendingFocus: FocusSnapshot | null = null
-  let focusMicrotaskScheduled = false
-  let seenMicrotaskScheduled = false
 
   function flushFocus() {
     if (!pendingFocus) return
@@ -95,42 +97,33 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile): SurfaceDo
     restoreFocusFallback(surfaceElement, snapshot)
   }
 
-  function flushEntryMotion() {
-    if (!hasPendingNewNodes || !surfaceElement || !surfaceElement.isConnected) return
-    hasPendingNewNodes = false
-    const targets = collectEntryTargets(surfaceElement, seenElements)
-    markTreeSeen(surfaceElement, seenElements)
-    for (const target of targets) {
-      animateNodeEntry(target, motionProfile)
+  function flushBatch() {
+    for (const instanceId of pendingRemovedInstanceIds) {
+      if ((mountedCounts.get(instanceId) ?? 0) === 0) seenInstanceIds.delete(instanceId)
     }
+    pendingRemovedInstanceIds.clear()
+
+    if (!surfaceElement || !surfaceElement.isConnected) return
+    if (pendingNewInstanceIds.size > 0) {
+      const targets = collectNewNodeEntryTargets(
+        surfaceElement,
+        pendingNewInstanceIds,
+        seenElements
+      )
+      pendingNewInstanceIds.clear()
+      markTreeSeen(surfaceElement, seenElements)
+      for (const target of targets) animateNodeEntry(target, motionProfile)
+      return
+    }
+    markTreeSeen(surfaceElement, seenElements)
   }
+
+  const scheduleFocusFlush = createMicrotaskCoalescer(flushFocus)
+  const scheduleBatchFlush = createMicrotaskCoalescer(flushBatch)
 
   function captureFocus() {
-    if (!pendingFocus) {
-      pendingFocus = captureFocusSnapshot(surfaceElement)
-    }
-    if (pendingFocus && !focusMicrotaskScheduled) {
-      focusMicrotaskScheduled = true
-      queueMicrotask(() => {
-        focusMicrotaskScheduled = false
-        flushFocus()
-      })
-    }
-  }
-
-  function scheduleSeenSync() {
-    if (seenMicrotaskScheduled) return
-    seenMicrotaskScheduled = true
-    queueMicrotask(() => {
-      seenMicrotaskScheduled = false
-      if (hasPendingNewNodes) {
-        flushEntryMotion()
-        return
-      }
-      if (surfaceElement && surfaceElement.isConnected) {
-        markTreeSeen(surfaceElement, seenElements)
-      }
-    })
+    if (!pendingFocus) pendingFocus = captureFocusSnapshot(surfaceElement)
+    if (pendingFocus) scheduleFocusFlush()
   }
 
   return {
@@ -141,25 +134,35 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile): SurfaceDo
       motionProfile = nextProfile
     },
     captureFocus,
-    flushFocus,
-    onNodeMount(nodeId) {
-      if (seenNodeIds.has(nodeId)) return
-      seenNodeIds.add(nodeId)
-      hasPendingNewNodes = true
-      flushEntryMotion()
+    onNodeMount(instanceId) {
+      mountedCounts.set(instanceId, (mountedCounts.get(instanceId) ?? 0) + 1)
+      pendingRemovedInstanceIds.delete(instanceId)
+      if (!seenInstanceIds.has(instanceId)) {
+        seenInstanceIds.add(instanceId)
+        pendingNewInstanceIds.add(instanceId)
+      }
+      scheduleBatchFlush()
     },
-    onNodeUnmount(nodeId) {
-      seenNodeIds.delete(nodeId)
+    onNodeUnmount(instanceId) {
+      const next = (mountedCounts.get(instanceId) ?? 1) - 1
+      if (next <= 0) {
+        mountedCounts.delete(instanceId)
+        pendingRemovedInstanceIds.add(instanceId)
+      } else {
+        mountedCounts.set(instanceId, next)
+      }
       captureFocus()
+      scheduleBatchFlush()
     },
     onNodeCommit() {
       flushFocus()
-      flushEntryMotion()
-      scheduleSeenSync()
+      scheduleBatchFlush()
     },
     onSurfaceRebuild() {
-      seenNodeIds.clear()
-      hasPendingNewNodes = false
+      seenInstanceIds.clear()
+      mountedCounts.clear()
+      pendingNewInstanceIds.clear()
+      pendingRemovedInstanceIds.clear()
     }
   }
 }
@@ -232,6 +235,7 @@ class A2uiNodeErrorBoundary extends Component<
       <span
         data-slot="a2ui-fallback"
         data-node-id={this.props.node.componentId}
+        {...{ [A2UI_NODE_ATTR]: this.props.node.instanceId }}
       >
         {text}
       </span>
@@ -262,12 +266,14 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   useLayoutEffect(() => {
     if (!active) return
     if (!inline) {
-      runtime.onNodeMount(node.id)
+      runtime.onNodeMount(node.instanceId)
     }
     return () => {
-      runtime.onNodeUnmount(node.id)
+      if (!inline) {
+        runtime.onNodeUnmount(node.instanceId)
+      }
     }
-  }, [active, inline, node.id, runtime])
+  }, [active, inline, node.id, node.instanceId, runtime])
 
   useLayoutEffect(() => {
     if (!active) return
@@ -327,7 +333,7 @@ function createSurfaceStore(
 ): SurfaceStore {
   let surfaceId = initialSurfaceId
   let registry = initialRegistry
-  let processedMessages = initialMessages
+  let processedMessages: readonly A2uiMessage[] = []
   let reported: readonly [string, A2uiRegistry, readonly A2uiMessage[]] | undefined
   let actionHandler = initialOnAction
   let diagnosticHandler = initialOnDiagnostic
@@ -383,7 +389,8 @@ function createSurfaceStore(
     batch: readonly A2uiMessage[],
     record: boolean
   ) {
-    const { messages: coerced, diagnostics } = coerceA2uiMessages(batch, targetRegistry)
+    const detached = batch.map(message => cloneMessageValue(message))
+    const { messages: coerced, diagnostics } = coerceA2uiMessages(detached, targetRegistry)
     if (record && diagnostics.length > 0) pendingDiagnostics.push(...diagnostics)
     if (coerced.length > 0) {
       target.processMessages(coerced as readonly ProcessableMessage[])
@@ -400,11 +407,13 @@ function createSurfaceStore(
     disposed = false
     surfaceId = nextSurfaceId
     registry = nextRegistry
-    processedMessages = nextMessages
+    const wireSnapshot = nextMessages.map(message => cloneMessageValue(message))
+    processedMessages = wireSnapshot
     const sameBatch =
       reported?.[0] === nextSurfaceId &&
       reported[1] === nextRegistry &&
-      reported[2] === nextMessages
+      reported[2].length === wireSnapshot.length &&
+      isMessagePrefix(reported[2], wireSnapshot)
     const webCoreCatalog = nextRegistry.toWebCoreCatalog()
     processor = new MessageProcessor(
       [webCoreCatalog],
@@ -425,10 +434,10 @@ function createSurfaceStore(
       },
       { version: A2UI_PROTOCOL_VERSION }
     )
-    if (nextMessages.length > 0) {
-      processBatch(processor, nextRegistry, nextMessages, Boolean(diagnosticHandler) && !sameBatch)
+    if (wireSnapshot.length > 0) {
+      processBatch(processor, nextRegistry, wireSnapshot, Boolean(diagnosticHandler) && !sameBatch)
     }
-    reported = [nextSurfaceId, nextRegistry, nextMessages]
+    reported = [nextSurfaceId, nextRegistry, wireSnapshot]
     resolver = makeResolver(processor.getSurface(nextSurfaceId))
     bindRootSignal()
   }
@@ -474,12 +483,14 @@ function createSurfaceStore(
       }
       if (nextMessages.length > processedMessages.length) {
         runtime.captureFocus()
-        const delta = nextMessages.slice(processedMessages.length)
+        const delta = nextMessages
+          .slice(processedMessages.length)
+          .map(message => cloneMessageValue(message))
         if (delta.length > 0) {
           processBatch(processor, nextRegistry, delta, Boolean(diagnosticHandler))
         }
-        processedMessages = nextMessages
-        reported = [nextSurfaceId, nextRegistry, nextMessages]
+        processedMessages = [...processedMessages, ...delta]
+        reported = [nextSurfaceId, nextRegistry, processedMessages]
         if (!resolver || resolver.disposed) {
           resolver = makeResolver(processor.getSurface(nextSurfaceId))
           bindRootSignal()
@@ -500,12 +511,9 @@ function createSurfaceStore(
 
 /**
  * Renders an A2UI 1.0 surface directly onto Radiant components via `@a2ui/web_core`.
- * Patches merge incrementally by stable node ID so surviving interactive controls keep
- * local state, focus, scroll position, and in-progress drags while entry motion runs only
- * for newly mounted nodes. When a patch removes the focused node, focus moves to the next
- * surviving focusable control in DOM order, then the previous surviving focusable control,
- * then the first remaining focusable control in the surface, and finally the surface root
- * container (`tabIndex={-1}`).
+ * Merges appended patches incrementally by stable node ID to keep local state, focus,
+ * scroll position, and drags intact, animates newly added instances once, and recovers
+ * removed-node focus as documented in `docs/architecture.md`.
  */
 export function A2uiSurface({
   surfaceId,
