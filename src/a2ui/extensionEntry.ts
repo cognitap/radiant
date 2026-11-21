@@ -2,13 +2,17 @@ import { radiantCatalog, type Catalog } from '../catalog/index.js'
 import type { A2uiAccessibilityRule } from './accessibilityRules.js'
 import {
   A2UI_GENERATED_COMPONENT_NAMES,
+  a2uiExtensionInstructions,
   generateA2uiCatalogs,
   type A2uiJsonSchema
 } from './catalogGenerator.js'
+import { radiantA2uiExtensionRegistry } from './extensionEntries.js'
 import {
+  createA2uiRegistry,
   createA2uiRegistryEntry,
   type A2uiComponentAdapter,
   type A2uiComponentReference,
+  type A2uiRegistry,
   type A2uiRegistryEntry
 } from './registry.js'
 
@@ -72,5 +76,63 @@ export function createA2uiExtensionEntry(
     accessibility: input.accessibility,
     schema,
     description
+  })
+}
+
+export type A2uiExtensionRegistryInput = {
+  /** Registry the host extends. Defaults to `radiantA2uiExtensionRegistry`. */
+  readonly base?: A2uiRegistry
+  /** The host's own catalog ID; surfaces may still name any catalog in the base chain. */
+  readonly catalogId: string
+  /** Defaults to the catalog's `id`. */
+  readonly title?: string
+  /** Defaults to the catalog's `description`. */
+  readonly description?: string
+  /** Entries made with `createA2uiExtensionEntry` from the same catalog. */
+  readonly entries: readonly A2uiRegistryEntry[]
+}
+
+function mergeInstructions(...blocks: readonly (string | undefined)[]): string | undefined {
+  const lines: string[] = []
+  for (const block of blocks) {
+    for (const line of block?.split('\n') ?? []) {
+      if (line.trim() && !lines.includes(line)) lines.push(line)
+    }
+  }
+  return lines.length > 0 ? lines.join('\n') : undefined
+}
+
+/**
+ * Builds a host registry that extends Radiant's A2UI registries with application entries.
+ * Its instructions add the rules the app entries' props need, such as `tone`, to the base's.
+ */
+export function createA2uiExtensionRegistry(
+  catalog: Catalog,
+  input: A2uiExtensionRegistryInput
+): A2uiRegistry {
+  if (!input || typeof input !== 'object' || !Array.isArray(input.entries)) {
+    throw new TypeError('createA2uiExtensionRegistry requires an input with an entries array.')
+  }
+  const missing = input.entries
+    .map(entry => entry?.name)
+    .filter(name => !Object.hasOwn(catalog?.entries ?? {}, name))
+  if (missing.length > 0) {
+    throw new TypeError(
+      `Catalog has no entry for ${missing.map(name => `"${String(name)}"`).join(', ')}; create entries with createA2uiExtensionEntry from the same catalog.`
+    )
+  }
+  const base = input.base ?? radiantA2uiExtensionRegistry
+  return createA2uiRegistry({
+    catalogId: input.catalogId,
+    title: input.title ?? catalog.id,
+    description: input.description ?? catalog.description,
+    instructions: mergeInstructions(
+      base.instructions,
+      a2uiExtensionInstructions(
+        Object.fromEntries(input.entries.map(entry => [entry.name, entry.schema]))
+      )
+    ),
+    extends: base,
+    entries: input.entries
   })
 }

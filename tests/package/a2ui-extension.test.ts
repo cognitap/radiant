@@ -8,14 +8,18 @@ import {
   extendCatalog,
   radiantCatalog,
   renderCatalogGuidance,
+  renderCatalogInstructions,
   validateCatalog,
   type CatalogEntry
 } from '@cognitap/radiant/catalog'
 import {
+  A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
   A2uiSurface,
   createA2uiExtensionEntry,
+  createA2uiExtensionRegistry,
   createA2uiRegistry,
+  radiantA2uiExtensionRegistry,
   radiantA2uiRegistry,
   readA2uiValue,
   runA2uiAction,
@@ -44,11 +48,23 @@ const gaugeEntry: CatalogEntry = {
     properties: {
       label: { type: 'string', minLength: 1, description: 'Accessible name.' },
       value: { type: 'number', minimum: 0, description: 'Current value.' },
-      max: { type: 'number', exclusiveMinimum: 0, default: 100, description: 'Range maximum.' }
+      max: { type: 'number', exclusiveMinimum: 0, default: 100, description: 'Range maximum.' },
+      tone: {
+        type: 'string',
+        enum: ['accent', 'neutral', 'warning', 'danger'],
+        default: 'accent',
+        description: 'Semantic palette intent.'
+      }
     }
   },
   slots: {},
-  bindings: {},
+  bindings: {
+    value: {
+      description: 'Current value from surface state.',
+      valueType: 'number',
+      direction: 'read'
+    }
+  },
   actions: {}
 }
 
@@ -93,26 +109,37 @@ const gauge = createA2uiExtensionEntry(appCatalog, {
   name: 'Gauge',
   component: Gauge,
   accessibility: [gaugeLabel],
-  adapter: props =>
-    h(Gauge, {
-      label: typeof props.label === 'string' ? props.label : '',
-      value: typeof props.value === 'number' ? props.value : 0,
-      max: typeof props.max === 'number' ? props.max : 100
+  adapter(props) {
+    const label = readA2uiValue(props.label)
+    const value = readA2uiValue(props.value)
+    const max = readA2uiValue(props.max)
+    return h(Gauge, {
+      label: typeof label === 'string' ? label : '',
+      value: typeof value === 'number' ? value : 0,
+      max: typeof max === 'number' ? max : 100
     })
+  }
 })
 
-const appRegistry = createA2uiRegistry({
+const appRegistry = createA2uiExtensionRegistry(appCatalog, {
   catalogId: HOST_CATALOG_ID,
   title: 'App catalog',
-  description: 'Radiant entries plus app components.',
-  instructions: radiantA2uiRegistry.instructions,
-  entries: [...Object.values(radiantA2uiRegistry.entries), gauge]
+  entries: [gauge]
 })
 
-const surface = (components: readonly Record<string, unknown>[]) => [
+const surface = (
+  components: readonly Record<string, unknown>[],
+  catalogId = HOST_CATALOG_ID,
+  dataModel?: Record<string, unknown>
+) => [
   {
     version: A2UI_PROTOCOL_VERSION,
-    createSurface: { surfaceId: 'usage', catalogId: HOST_CATALOG_ID, components }
+    createSurface: {
+      surfaceId: 'usage',
+      catalogId,
+      ...(dataModel ? { dataModel } : {}),
+      components
+    }
   }
 ]
 
@@ -176,6 +203,37 @@ test('app entries cannot shadow Radiant entries in the catalog or the registry',
       }),
     /Duplicate A2UI registry entry "Text"; an entry cannot shadow/
   )
+  assert.throws(
+    () =>
+      createA2uiExtensionEntry(appCatalog, {
+        name: 'Select',
+        component: Gauge,
+        adapter: () => null,
+        accessibility: []
+      }),
+    /"Select" is a Radiant entry/
+  )
+  assert.throws(
+    () =>
+      createA2uiExtensionRegistry(appCatalog, {
+        catalogId: HOST_CATALOG_ID,
+        entries: [{ ...gauge, name: 'Switch' }]
+      }),
+    /Duplicate A2UI registry entry "Switch"; an entry cannot shadow/
+  )
+  assert.throws(
+    () =>
+      createA2uiExtensionRegistry(appCatalog, { catalogId: 'urn:x', entries: 'Gauge' as never }),
+    /requires an input with an entries array/
+  )
+  assert.throws(
+    () =>
+      createA2uiExtensionRegistry(appCatalog, {
+        catalogId: HOST_CATALOG_ID,
+        entries: [{ ...gauge, name: 'Dial' }]
+      }),
+    /Catalog has no entry for "Dial"/
+  )
 })
 
 test('an app A2UI entry needs a catalog entry, an adapter and accessibility rules', () => {
@@ -231,11 +289,27 @@ test('the host catalog document carries the app entry with generated schema and 
     'component',
     'label',
     'max',
+    'tone',
     'value',
     'weight'
   ])
   assert.deepEqual(component.required, ['component', 'label', 'value'])
-  assert.ok(document.components.Button, 'Radiant components share the document')
+  assert.ok(
+    (component.properties.value as { anyOf?: unknown[] }).anyOf,
+    'a prop that shares a binding name accepts a literal or a binding'
+  )
+  assert.ok(document.components.Button, 'basic components share the document')
+  assert.ok(document.components.Switch, 'Radiant extension components share the document')
+  assert.equal(document.title, 'App catalog')
+  assert.equal(appRegistry.extends, radiantA2uiExtensionRegistry)
+
+  const lines = document.instructions!.split('\n')
+  const tone = renderCatalogInstructions({ topics: ['tone'] })
+  for (const line of [...radiantA2uiExtensionRegistry.instructions!.split('\n'), tone]) {
+    assert.ok(lines.includes(line), `instructions keep ${line}`)
+  }
+  assert.equal(new Set(lines).size, lines.length, 'instructions repeat no rule')
+  assert.ok(!radiantA2uiExtensionRegistry.instructions!.includes(tone), 'tone comes from Gauge')
   assert.ok(
     (document.$defs.anyComponent as { oneOf: { $ref: string }[] }).oneOf.some(
       ref => ref.$ref === '#/components/Gauge'
@@ -259,6 +333,44 @@ test('A2uiSurface renders the app entry beside Radiant entries under the host ca
   assert.match(html, /<svg[^>]*role="img"[^>]*aria-label="Disk usage"[^>]*data-app="gauge"/)
   assert.match(html, /stroke-dasharray="0\.42 1"/)
   assert.match(html, /stroke:var\(--rad-color-accent\)/)
+})
+
+test('the host registry renders basic surfaces and mixes basic, extension and app components', () => {
+  const basic = renderToStaticMarkup(
+    h(A2uiSurface, {
+      surfaceId: 'usage',
+      registry: appRegistry,
+      messages: surface(
+        [{ id: 'root', component: 'Text', text: 'Basic only' }],
+        A2UI_BASIC_CATALOG_ID
+      )
+    })
+  )
+  assert.match(basic, /Basic only/)
+
+  const diagnostics: unknown[] = []
+  const mixed = renderToStaticMarkup(
+    h(A2uiSurface, {
+      surfaceId: 'usage',
+      registry: appRegistry,
+      onDiagnostic: diagnostic => diagnostics.push(diagnostic),
+      messages: surface(
+        [
+          { id: 'root', component: 'Column', children: ['title', 'alerts', 'disk'] },
+          { id: 'title', component: 'Text', text: 'Storage' },
+          { id: 'alerts', component: 'Switch', label: 'Alerts', checked: { '@path': '/alerts' } },
+          { id: 'disk', component: 'Gauge', label: 'Disk usage', value: { '@path': '/disk' } }
+        ],
+        HOST_CATALOG_ID,
+        { alerts: true, disk: 42 }
+      )
+    })
+  )
+  assert.match(mixed, /Storage/)
+  assert.match(mixed, /role="switch"[^>]*checked=""|checked=""[^>]*role="switch"/)
+  assert.match(mixed, /aria-label="Disk usage"/)
+  assert.match(mixed, /stroke-dasharray="0\.42 1"/, 'readA2uiValue reads the bound app prop')
+  assert.deepEqual(diagnostics, [])
 })
 
 test('validateA2uiAccessibility runs the app entry rules', () => {
@@ -341,11 +453,9 @@ test('app adapters read and write surface state and run actions through public h
     'save',
     'weight'
   ])
-  const registry = createA2uiRegistry({
+  const registry = createA2uiExtensionRegistry(tallyCatalog, {
     catalogId: HOST_CATALOG_ID,
-    title: 'App catalog',
-    description: 'Radiant entries plus a tally.',
-    entries: [...Object.values(radiantA2uiRegistry.entries), tally]
+    entries: [tally]
   })
   const actions: A2uiActionPayload[] = []
   const html = renderToStaticMarkup(

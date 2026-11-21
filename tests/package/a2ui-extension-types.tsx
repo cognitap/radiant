@@ -7,6 +7,8 @@ import {
 import { extendCatalog, radiantCatalog, type CatalogEntry } from '@cognitap/radiant/catalog'
 import {
   createA2uiExtensionEntry,
+  createA2uiExtensionRegistry,
+  type A2uiRegistry,
   isA2uiChildNode,
   readA2uiValue,
   runA2uiAction,
@@ -105,3 +107,10 @@ export const helperAdapter: A2uiComponentAdapter = (props, context) => {
   void ran
   return isA2uiChildNode(props.child) && wrote ? context.renderNode(props.child) : null
 }
+
+export const hostRegistry: A2uiRegistry = createA2uiExtensionRegistry(appCatalog, {
+  catalogId: 'https://consumer.example/catalog.json',
+  entries: [registered]
+})
+// @ts-expect-error a host registry needs its own catalog ID
+createA2uiExtensionRegistry(appCatalog, { entries: [registered] })

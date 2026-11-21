@@ -96,11 +96,11 @@ Custom styling and rendering must keep:
 
 ## Model-facing catalog
 
-`@cognitap/radiant/catalog` is the model-facing contract. In the React API, applications compose sub-parts, pass `className`, `style`, `render`, and refs, and wire form and ARIA relationships. Models target a smaller, intent-driven catalog: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
+`@cognitap/radiant/catalog` is the model-facing contract. In React, applications compose sub-parts, pass `className`, `style`, `render`, and refs, and wire form and ARIA relationships. Models target a smaller, intent-driven catalog: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
 
 Catalog entries never expose `className`, `style`, `render`, DOM handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; A2UI generates its basic and extension catalogs from it. Entry `guidance` (use, avoid, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET` and renders `llms.txt`; renaming A2UI projections supply their own.
 
-`extendCatalog` adds app entries and rejects Radiant names. `createA2uiExtensionEntry(catalog, input)` derives its A2UI schema and guidance; list it with `radiantA2uiRegistry.entries` under the host's `catalogId`. Adapters use `readA2uiValue`, `writeA2uiBinding`, `runA2uiAction` and [public tokens](theming.md#public-tokens).
+`extendCatalog` adds app entries but no Radiant names. `createA2uiExtensionEntry` derives A2UI schema and guidance; `createA2uiExtensionRegistry(catalog, { catalogId, entries })` extends `radiantA2uiExtensionRegistry` with them and their instructions. Adapters use `readA2uiValue`, `writeA2uiBinding`, `runA2uiAction` and [public tokens](theming.md#public-tokens).
 
 ## A2UI renderer and registry
 

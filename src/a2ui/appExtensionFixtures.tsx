@@ -4,9 +4,8 @@ import { themeTokenVar, type PublicThemeToken } from '../themes/publicTokens.js'
 import type { A2uiAccessibilityRule } from './accessibilityRules.js'
 import { readA2uiValue } from './adapterValues.js'
 import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
-import { radiantA2uiRegistry } from './entries.js'
-import { createA2uiExtensionEntry } from './extensionEntry.js'
-import { createA2uiRegistry, type A2uiRegistry } from './registry.js'
+import { createA2uiExtensionEntry, createA2uiExtensionRegistry } from './extensionEntry.js'
+import type { A2uiRegistry } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 
 /*
@@ -150,12 +149,11 @@ export const sparklineEntry = createA2uiExtensionEntry(sparklineCatalog, {
 
 export const SPARKLINE_CATALOG_ID = 'https://example.com/a2ui/sparkline-catalog.json'
 
-export const sparklineRegistry: A2uiRegistry = createA2uiRegistry({
+export const sparklineRegistry: A2uiRegistry = createA2uiExtensionRegistry(sparklineCatalog, {
   catalogId: SPARKLINE_CATALOG_ID,
   title: 'Example host catalog',
   description: 'Radiant A2UI entries plus an application Sparkline.',
-  instructions: radiantA2uiRegistry.instructions,
-  entries: [...Object.values(radiantA2uiRegistry.entries), sparklineEntry]
+  entries: [sparklineEntry]
 })
 
 export const SPARKLINE_SURFACE_ID = 'trends'
@@ -166,11 +164,12 @@ export const sparklineFixtureMessages: readonly A2uiMessage[] = [
     createSurface: {
       surfaceId: SPARKLINE_SURFACE_ID,
       catalogId: SPARKLINE_CATALOG_ID,
+      dataModel: { alerts: false },
       components: [
         {
           id: 'root',
           component: 'Column',
-          children: ['heading', 'signups', 'latency', 'errors']
+          children: ['heading', 'signups', 'latency', 'errors', 'alerts']
         },
         { id: 'heading', component: 'Text', text: 'This week' },
         {
@@ -192,6 +191,12 @@ export const sparklineFixtureMessages: readonly A2uiMessage[] = [
           label: 'Errors',
           values: [1, 0, 2, 1, 4, 6, 9],
           tone: 'danger'
+        },
+        {
+          id: 'alerts',
+          component: 'Switch',
+          label: 'Alert on errors',
+          checked: { '@path': '/alerts' }
         }
       ]
     }
