@@ -20,7 +20,7 @@ import {
 import { cn } from 'cn'
 import type { ComponentApi, FunctionImplementation } from '@a2ui/web_core/catalog'
 import { MessageProcessor, type ProcessableMessage } from '@a2ui/web_core/processing'
-import { effect, getValue, peekValue, type Signal } from '@a2ui/web_core/reactivity'
+import { effect, getValue, peekValue } from '@a2ui/web_core/reactivity'
 import { NodeResolver, type ComponentNode } from '@a2ui/web_core/resolution'
 import type { ActionPayload, SurfaceModel } from '@a2ui/web_core/state'
 import {
@@ -55,6 +55,7 @@ import {
 } from './protocolErrors.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
+import { useSignalValue } from './useSignalValue.js'
 import {
   animateNodeEntry,
   captureFocusSnapshot,
@@ -211,25 +212,6 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
 
 type SurfaceDomRuntime = ReturnType<typeof createSurfaceDomRuntime>
 
-function useSignalValue<T>(signal: Signal<T> | undefined): T | undefined {
-  return useSyncExternalStore(
-    onStoreChange => {
-      if (!signal) return () => {}
-      let initial = true
-      return effect(() => {
-        getValue(signal)
-        if (initial) {
-          initial = false
-          return
-        }
-        onStoreChange()
-      })
-    },
-    () => (signal ? peekValue(signal) : undefined),
-    () => (signal ? peekValue(signal) : undefined)
-  )
-}
-
 const boundaryFallbackText = (node: ComponentNode, token: unknown) =>
   extractA2uiNodeFallbackText(node, isPlainRecord(token) ? token : undefined)
 
@@ -296,6 +278,8 @@ type A2uiNodeRendererProps = {
   readonly runtime: SurfaceDomRuntime
 }
 
+const LAYOUT_TYPES = new Set(['Column', 'Row', 'List'])
+
 const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   node,
   registry,
@@ -343,7 +327,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
         })
       : adapted
 
-  const isContainer = node.type === 'Column' || hasChildNodes
+  const isContainer = LAYOUT_TYPES.has(node.type) || hasChildNodes
   const [probing, setProbing] = useState(false)
   const startRef = useRef<HTMLTemplateElement>(null)
 

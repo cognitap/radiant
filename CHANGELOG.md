@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Render the A2UI `Row`, `Column`, `List`, `Card`, `Divider`, `Tabs`, and `Modal` with Radiant `Stack`, `Card`, `Separator`, `Tabs`, and `Dialog`: `Row` and `Column` translate `justify` and `align` (unknown values fall back to the defaults) and grow children by `weight`, a templated `List` renders one item per data entry with paths relative to it, and `Modal` opens a native dialog from its Button `trigger`, named by the trigger text. `validateA2uiAccessibility` flags untitled tabs and a `Modal` without a Button trigger or trigger text. Breaking: the A2UI `Column` gap reads `--rad-spacing-normal` instead of `--rad-surface-gap` (both 1rem by default), and its `data-slot` becomes `stack a2ui-column`.
+
 ## 0.0.93
 
 - Add `Stack`, a one-dimensional flex layout with `orientation`, `gap` from the theme spacing scale, `align`, `justify`, and `wrap`.

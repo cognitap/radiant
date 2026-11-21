@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useState, type ChangeEvent, type Ref } from 'react'
+import { useId, useState, type ChangeEvent, type ReactNode, type Ref } from 'react'
 import {
   isComponentNode,
   isWritable,
@@ -9,16 +9,22 @@ import {
   type NodeAction
 } from '@a2ui/web_core/resolution'
 import { Button, type ButtonVariant } from '../components/Button/Button.js'
+import { Card } from '../components/Card/Card.js'
 import { Checkbox } from '../components/Checkbox/Checkbox.js'
 import { CheckboxGroup } from '../components/CheckboxGroup/CheckboxGroup.js'
+import { Dialog, DialogClose, DialogContent, useDialog } from '../components/Dialog/Dialog.js'
 import { Field } from '../components/Field/Field.js'
 import { Input } from '../components/Input/Input.js'
 import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
+import { Separator } from '../components/Separator/Separator.js'
 import { Slider } from '../components/Slider/Slider.js'
+import { Stack, type StackAlign, type StackJustify } from '../components/Stack/Stack.js'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/Tabs/Tabs.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { ToggleGroup, ToggleGroupItem } from '../components/ToggleGroup/ToggleGroup.js'
 import { radiantCatalog } from '../catalog/index.js'
 import { humanizeNodeId } from '../catalog/coerce.js'
+import type { Orientation } from '../presentation.js'
 import {
   A2UI_BASIC_CATALOG_ID,
   generateA2uiCatalogs,
@@ -29,9 +35,12 @@ import {
   buttonNameRule,
   controlLabelRule,
   imageAltRule,
-  mediaNameRule
+  mediaNameRule,
+  modalTriggerRule,
+  tabTitlesRule
 } from './accessibilityRules.js'
 import { unknownIconDiagnostic } from './coerce.js'
+import { useSignalValue } from './useSignalValue.js'
 import {
   A2uiAudioPlayer,
   A2uiIcon,
@@ -108,51 +117,277 @@ function basicDescription(name: string): string {
   return description
 }
 
-const COLUMN_JUSTIFY: Record<string, string> = {
-  start: 'justify-start',
-  center: 'justify-center',
-  end: 'justify-end',
-  spaceBetween: 'justify-between',
-  spaceAround: 'justify-around',
-  spaceEvenly: 'justify-evenly',
-  stretch: 'justify-stretch'
+const STACK_JUSTIFY: Readonly<Record<string, StackJustify>> = {
+  start: 'start',
+  center: 'center',
+  end: 'end',
+  spaceBetween: 'between',
+  spaceAround: 'around',
+  spaceEvenly: 'evenly',
+  stretch: 'stretch'
 }
 
-const COLUMN_ALIGN: Record<string, string> = {
-  start: 'items-start',
-  center: 'items-center',
-  end: 'items-end',
-  stretch: 'items-stretch'
+const STACK_ALIGN: Readonly<Record<string, StackAlign>> = {
+  start: 'start',
+  center: 'center',
+  end: 'end',
+  stretch: 'stretch'
 }
 
-const columnEntry = createA2uiRegistryEntry({
-  name: 'Column',
+const ORIENTATION: Readonly<Record<string, Orientation>> = {
+  horizontal: 'horizontal',
+  vertical: 'vertical'
+}
+
+/** Looks a wire value up in a translation table; unknown values fall back instead of throwing. */
+function translate<T>(table: Readonly<Record<string, T>>, value: unknown, fallback: T): T {
+  return typeof value === 'string' && Object.hasOwn(table, value) ? table[value]! : fallback
+}
+
+function readChildNodes(value: unknown): ComponentNode[] {
+  return Array.isArray(value)
+    ? value.filter((child): child is ComponentNode => isComponentNode(child))
+    : []
+}
+
+/** Renders a Row or Column child, wrapping it in a growing box when it sets a positive `weight`. */
+function A2uiFlexChild({
+  node,
+  children
+}: {
+  readonly node: ComponentNode
+  readonly children: ReactNode
+}) {
+  const weight = useSignalValue(node.props)?.weight
+  if (typeof weight !== 'number' || !Number.isFinite(weight) || weight <= 0) return children
+  return (
+    <div
+      data-slot="a2ui-weight"
+      className="grid min-w-0"
+      style={{ flexGrow: weight, flexBasis: 0 }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function flexEntry(name: 'Row' | 'Column', orientation: Orientation) {
+  return createA2uiRegistryEntry({
+    name,
+    accessibility: [],
+    component: Stack,
+    schema: basicSchema(name),
+    description: basicDescription(name),
+    adapter(props, context) {
+      return (
+        <Stack
+          data-slot={`a2ui-${name.toLowerCase()}`}
+          orientation={orientation}
+          justify={translate(STACK_JUSTIFY, props.justify, 'start')}
+          align={translate(STACK_ALIGN, props.align, 'stretch')}
+        >
+          {readChildNodes(props.children).map(child => (
+            <A2uiFlexChild
+              key={child.id}
+              node={child}
+            >
+              {context.renderNode(child)}
+            </A2uiFlexChild>
+          ))}
+        </Stack>
+      )
+    }
+  })
+}
+
+const rowEntry = flexEntry('Row', 'horizontal')
+const columnEntry = flexEntry('Column', 'vertical')
+
+const listEntry = createA2uiRegistryEntry({
+  name: 'List',
   accessibility: [],
-  component: 'div',
-  schema: basicSchema('Column'),
-  description: basicDescription('Column'),
+  component: Stack,
+  schema: basicSchema('List'),
+  description: basicDescription('List'),
   adapter(props, context) {
-    const children = Array.isArray(props.children)
-      ? props.children.filter((child): child is ComponentNode => isComponentNode(child))
-      : []
-    const justify =
-      typeof props.justify === 'string' && props.justify in COLUMN_JUSTIFY
-        ? COLUMN_JUSTIFY[props.justify]
-        : COLUMN_JUSTIFY.start
-    const align =
-      typeof props.align === 'string' && props.align in COLUMN_ALIGN
-        ? COLUMN_ALIGN[props.align]
-        : COLUMN_ALIGN.stretch
-
+    // Stack renders a div host, so list semantics come from roles.
     return (
-      <div
-        data-slot="a2ui-column"
-        className={`flex flex-col gap-[var(--rad-surface-gap,1rem)] ${justify} ${align}`}
+      <Stack
+        data-slot="a2ui-list"
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+        role="list"
+        orientation={translate(ORIENTATION, props.direction, 'vertical')}
+        align={translate(STACK_ALIGN, props.align, 'stretch')}
       >
-        {children.map(child => (
-          <Fragment key={child.id}>{context.renderNode(child)}</Fragment>
+        {readChildNodes(props.children).map(child => (
+          <div
+            key={child.id}
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+            role="listitem"
+            data-slot="a2ui-list-item"
+            className="grid min-w-0"
+          >
+            {context.renderNode(child)}
+          </div>
         ))}
-      </div>
+      </Stack>
+    )
+  }
+})
+
+const cardEntry = createA2uiRegistryEntry({
+  name: 'Card',
+  accessibility: [],
+  component: Card,
+  schema: basicSchema('Card'),
+  description: basicDescription('Card'),
+  adapter(props, context) {
+    return (
+      <Card data-slot="a2ui-card">
+        {isComponentNode(props.child) ? context.renderNode(props.child) : null}
+      </Card>
+    )
+  }
+})
+
+const dividerEntry = createA2uiRegistryEntry({
+  name: 'Divider',
+  accessibility: [],
+  component: Separator,
+  schema: basicSchema('Divider'),
+  description: basicDescription('Divider'),
+  adapter(props) {
+    return (
+      <Separator
+        data-slot="a2ui-divider"
+        orientation={translate(ORIENTATION, props.axis, 'horizontal')}
+      />
+    )
+  }
+})
+
+type A2uiTab = { readonly title: string; readonly panel: ReactNode }
+
+function readTabs(value: unknown, context: A2uiAdapterContext): readonly A2uiTab[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .filter((tab): tab is Record<string, unknown> => Boolean(tab) && typeof tab === 'object')
+    .map(tab => ({
+      title: unwrapDisplayText(tab.title),
+      panel: isComponentNode(tab.child) ? context.renderNode(tab.child) : null
+    }))
+}
+
+function A2uiTabs({ tabs }: { readonly tabs: readonly A2uiTab[] }) {
+  const [selected, setSelected] = useState('0')
+  if (tabs.length === 0) return null
+  const value = Number(selected) < tabs.length ? selected : '0'
+  return (
+    <Tabs
+      data-slot="a2ui-tabs"
+      value={value}
+      onValueChange={setSelected}
+    >
+      <TabsList>
+        {tabs.map((tab, index) => (
+          <TabsTrigger
+            key={index}
+            value={String(index)}
+          >
+            {tab.title || String(index + 1)}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {tabs.map((tab, index) => (
+        <TabsContent
+          key={index}
+          value={String(index)}
+          keepMounted
+        >
+          {tab.panel}
+        </TabsContent>
+      ))}
+    </Tabs>
+  )
+}
+
+const tabsEntry = createA2uiRegistryEntry({
+  name: 'Tabs',
+  accessibility: [tabTitlesRule()],
+  component: [Tabs, TabsList, TabsTrigger, TabsContent],
+  schema: basicSchema('Tabs'),
+  description: basicDescription('Tabs'),
+  adapter(props, context) {
+    return <A2uiTabs tabs={readTabs(props.tabs, context)} />
+  }
+})
+
+function A2uiModalTrigger({ id, children }: { readonly id: string; readonly children: ReactNode }) {
+  const dialog = useDialog()
+  return (
+    // The trigger is an agent-provided Button; its native click opens the dialog.
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+    <div
+      id={id}
+      data-slot="a2ui-modal-trigger"
+      className="contents"
+      onClick={() => dialog?.setOpen(true)}
+    >
+      {children}
+    </div>
+  )
+}
+
+function A2uiModal({
+  trigger,
+  content,
+  fallbackName
+}: {
+  readonly trigger: ReactNode
+  readonly content: ReactNode
+  readonly fallbackName: string
+}) {
+  const triggerId = useId()
+  return (
+    <div
+      data-slot="a2ui-modal-root"
+      className="grid min-w-0"
+    >
+      <Dialog>
+        <A2uiModalTrigger id={triggerId}>{trigger}</A2uiModalTrigger>
+        <DialogContent
+          data-slot="a2ui-modal"
+          aria-label={fallbackName}
+          aria-labelledby={triggerId}
+        >
+          <Stack>
+            {content}
+            <Stack
+              orientation="horizontal"
+              justify="end"
+            >
+              <DialogClose>Close</DialogClose>
+            </Stack>
+          </Stack>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+const modalEntry = createA2uiRegistryEntry({
+  name: 'Modal',
+  accessibility: [modalTriggerRule()],
+  component: [Dialog, DialogContent, DialogClose],
+  schema: basicSchema('Modal'),
+  description: basicDescription('Modal'),
+  adapter(props, context) {
+    return (
+      <A2uiModal
+        trigger={isComponentNode(props.trigger) ? context.renderNode(props.trigger) : null}
+        content={isComponentNode(props.content) ? context.renderNode(props.content) : null}
+        fallbackName={humanizeNodeId(context.node.componentId)}
+      />
     )
   }
 })
@@ -715,6 +950,12 @@ export const radiantA2uiRegistry = createA2uiRegistry({
     imageEntry,
     videoEntry,
     audioPlayerEntry,
-    dateTimeInputEntry
+    dateTimeInputEntry,
+    rowEntry,
+    listEntry,
+    cardEntry,
+    dividerEntry,
+    tabsEntry,
+    modalEntry
   ]
 })
