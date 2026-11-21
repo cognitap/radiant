@@ -48,4 +48,12 @@ export {
   validateCatalog,
   validateCatalogEntry
 } from './validate.js'
+export { coerceSchemaProps, summarizeCatalogDiagnostics } from './coerce.js'
+export type {
+  CatalogDiagnostic,
+  CatalogDiagnosticKind,
+  CatalogDiagnosticSummary,
+  CoercePropsResult,
+  CoerceSchemaPropsOptions
+} from './coerce.js'
 export { RADIANT_CATALOG_ID, RADIANT_CATALOG_VERSION, radiantCatalog } from './radiantCatalog.js'

@@ -18,6 +18,14 @@ import {
 } from './catalogGenerator.js'
 import { createA2uiRegistry, createA2uiRegistryEntry } from './registry.js'
 
+function unwrapDisplayText(value: unknown): string {
+  const raw = value instanceof ResolvedBinding ? value.value : value
+  if (typeof raw === 'string') return raw
+  if (typeof raw === 'number' && Number.isFinite(raw)) return String(raw)
+  if (typeof raw === 'boolean') return String(raw)
+  return ''
+}
+
 function unwrapString(value: unknown): string | undefined {
   if (value instanceof ResolvedBinding) {
     return typeof value.value === 'string' ? value.value : undefined
@@ -96,7 +104,7 @@ const textEntry = createA2uiRegistryEntry({
   schema: basicSchema('Text'),
   description: radiantCatalog.entries.Text.description,
   adapter(props, context) {
-    const text = unwrapString(props.text) ?? ''
+    const text = unwrapDisplayText(props.text)
     const variant = props.variant === 'caption' ? 'caption' : 'body'
     if (context.inline) {
       return (

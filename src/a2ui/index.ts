@@ -25,3 +25,6 @@ export type {
 } from './catalogGenerator.js'
 export { sanitizeA2uiMessages } from './sanitize.js'
 export type { A2uiMessage } from './sanitize.js'
+export { COERCED_NOOP_ACTION_NAME, coerceA2uiMessages } from './coerce.js'
+export type { CoerceA2uiMessagesResult } from './coerce.js'
+export type { CatalogDiagnostic, CatalogDiagnosticKind } from '../catalog/index.js'
