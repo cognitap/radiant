@@ -2509,6 +2509,156 @@ test('animates only a newly inserted non-ref-forwarding leaf when a surviving no
   }
 })
 
+test('animates visible top-level hosts of a newly inserted Fragment adapter even when preceded by a hidden span', async () => {
+  const registry = createA2uiRegistry({
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    title: 'Fragment motion catalog',
+    description: 'Registry with Fragment adapters returning hidden and visible top-level hosts.',
+    entries: [
+      ...Object.values(radiantA2uiRegistry.entries),
+      createA2uiRegistryEntry({
+        name: 'HiddenPrefixCard',
+        component: 'article',
+        description: 'Fragment with a hidden span followed by a visible article.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'HiddenPrefixCard' },
+            label: { type: 'string' }
+          },
+          required: ['component', 'label']
+        },
+        adapter: props => (
+          <>
+            <span
+              hidden
+              data-testid="fragment-hidden-span"
+            >
+              hidden metadata
+            </span>
+            <article data-testid="fragment-visible-article">{String(props.label ?? '')}</article>
+          </>
+        )
+      }),
+      createA2uiRegistryEntry({
+        name: 'MultiHostFragment',
+        component: 'article',
+        description: 'Fragment with a hidden span and two visible top-level hosts.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'MultiHostFragment' },
+            first: { type: 'string' },
+            second: { type: 'string' }
+          },
+          required: ['component', 'first', 'second']
+        },
+        adapter: props => (
+          <>
+            <span
+              hidden
+              data-testid="multi-hidden-span"
+            >
+              meta
+            </span>
+            <article data-testid="multi-first-article">{String(props.first ?? '')}</article>
+            <aside data-testid="multi-second-aside">{String(props.second ?? '')}</aside>
+          </>
+        )
+      })
+    ]
+  })
+
+  const { animated, restore } = spyEntryAnimations()
+  try {
+    const step0: A2uiMessage[] = [
+      surfaceMessage('s_fragment_motion', [
+        { id: 'root', component: 'Column', children: ['existing_text'] },
+        { id: 'existing_text', component: 'Text', text: 'Surviving sibling' }
+      ])
+    ]
+
+    const view = await mount(
+      <A2uiSurface
+        surfaceId="s_fragment_motion"
+        registry={registry}
+        messages={step0}
+      />
+    )
+    const existingText = view.host.querySelector<HTMLElement>('p[data-slot="a2ui-text"]')!
+    expect(animated).toEqual([existingText])
+    animated.length = 0
+
+    // Insert a Fragment with a hidden <span> followed by a visible <article>
+    const step1 = [
+      ...step0,
+      updateComponentsMsg('s_fragment_motion', [
+        { id: 'root', component: 'Column', children: ['existing_text', 'hidden_prefix_card'] },
+        {
+          id: 'hidden_prefix_card',
+          component: 'HiddenPrefixCard',
+          label: 'Visible article after hidden span'
+        }
+      ])
+    ]
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_fragment_motion"
+        registry={registry}
+        messages={step1}
+      />
+    )
+
+    const hiddenSpan = view.host.querySelector<HTMLElement>('[data-testid="fragment-hidden-span"]')!
+    const visibleArticle = view.host.querySelector<HTMLElement>(
+      '[data-testid="fragment-visible-article"]'
+    )!
+    expect(hiddenSpan).not.toBeNull()
+    expect(visibleArticle).not.toBeNull()
+    expect(animated).toEqual([visibleArticle])
+    expect(animated).not.toContain(hiddenSpan)
+    expect(animated).not.toContain(existingText)
+    animated.length = 0
+
+    // Insert a Fragment with a hidden <span> and two visible top-level hosts
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_fragment_motion"
+        registry={registry}
+        messages={[
+          ...step1,
+          updateComponentsMsg('s_fragment_motion', [
+            {
+              id: 'root',
+              component: 'Column',
+              children: ['existing_text', 'hidden_prefix_card', 'multi_host_card']
+            },
+            {
+              id: 'multi_host_card',
+              component: 'MultiHostFragment',
+              first: 'First visible host',
+              second: 'Second visible host'
+            }
+          ])
+        ]}
+      />
+    )
+
+    const multiHidden = view.host.querySelector<HTMLElement>('[data-testid="multi-hidden-span"]')!
+    const multiFirst = view.host.querySelector<HTMLElement>('[data-testid="multi-first-article"]')!
+    const multiSecond = view.host.querySelector<HTMLElement>('[data-testid="multi-second-aside"]')!
+    expect(animated).toEqual([multiFirst, multiSecond])
+    expect(animated).not.toContain(multiHidden)
+    expect(animated).not.toContain(visibleArticle)
+    expect(animated).not.toContain(existingText)
+    expect(view.host.querySelectorAll('template')).toHaveLength(0)
+  } finally {
+    restore()
+  }
+})
+
 test('restores focus to the next control when rendering inside a same-origin iframe', async () => {
   const step0: A2uiMessage[] = [
     surfaceMessage('s_iframe_focus', [

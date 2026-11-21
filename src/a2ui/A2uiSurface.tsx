@@ -75,8 +75,14 @@ export type A2uiSurfaceProps = {
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
 }
 
+function isVisibleHost(element: HTMLElement): boolean {
+  if (!element.isConnected || element.hidden || element.getClientRects().length === 0) return false
+  const win = element.ownerDocument.defaultView
+  return !win || win.getComputedStyle(element).visibility !== 'hidden'
+}
+
 function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
-  const hosts = new Map<string, NodeHost>()
+  const hosts = new Map<string, NodeHost & { readonly elements?: readonly HTMLElement[] }>()
   const mountedInstances = new Map<string, string>()
   const containers = new Set<string>()
   const committedInstances = new Set<string>()
@@ -99,7 +105,9 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
         if (committedInstances.has(host.instanceId) && unmountedInstances.has(host.instanceId)) {
           continue
         }
-        animateNodeEntry(host.element, motionProfile)
+        for (const el of host.elements ?? [host.element]) {
+          if (el.isConnected) animateNodeEntry(el, motionProfile)
+        }
       }
       pendingMounts.clear()
     }
@@ -128,12 +136,19 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
     setMotionProfile(nextProfile: MotionProfile) {
       motionProfile = nextProfile
     },
-    setNodeHost(nodeId: string, instanceId: string, element: unknown, isContainer?: boolean) {
+    setNodeHost(
+      nodeId: string,
+      instanceId: string,
+      element: unknown,
+      isContainer?: boolean,
+      elements?: readonly HTMLElement[]
+    ) {
       if (isHtmlElement(element)) {
         hosts.set(nodeId, {
           nodeId,
           instanceId,
           element,
+          elements,
           isContainer: isContainer ?? containers.has(nodeId)
         })
       } else if (element === null) {
@@ -337,15 +352,22 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
             if (!end) return
             const start = startRef.current
             if (start && start.parentNode === end.parentNode) {
+              const visible: HTMLElement[] = []
               for (
                 let el = start.nextElementSibling;
                 el && el !== end;
                 el = el.nextElementSibling
               ) {
-                if (isHtmlElement(el)) {
-                  runtime.setNodeHost(node.id, node.instanceId, el, isContainer)
-                  break
-                }
+                if (isHtmlElement(el) && isVisibleHost(el)) visible.push(el)
+              }
+              if (visible.length > 0) {
+                runtime.setNodeHost(
+                  node.id,
+                  node.instanceId,
+                  visible[0],
+                  isContainer,
+                  visible.length > 1 ? visible : undefined
+                )
               }
             }
             setProbing(false)
