@@ -987,7 +987,8 @@ test('installed modules retain their declared client boundaries and CSS side eff
     'Pagination',
     'Table',
     'Fieldset',
-    'AspectRatio'
+    'AspectRatio',
+    'Stack'
   ]) {
     assert.doesNotMatch(
       readFileSync(new URL(`dist/library/${modulePath(file)}.js`, root), 'utf8'),

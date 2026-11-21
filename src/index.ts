@@ -459,6 +459,9 @@ export type {
 export { AspectRatio } from './components/AspectRatio/AspectRatio.js'
 export type { AspectRatioProps } from './components/AspectRatio/AspectRatio.js'
 
+export { Stack } from './components/Stack/Stack.js'
+export type { StackProps, StackAlign, StackJustify } from './components/Stack/Stack.js'
+
 export { ScrollArea } from './components/ScrollArea/ScrollArea.js'
 export type {
   ScrollAreaProps,
