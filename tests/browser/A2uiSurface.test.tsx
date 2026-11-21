@@ -730,3 +730,281 @@ test('A2uiSurface keeps generated IDs distinct across appended batches and coerc
   expect(buttons).toContain('Second button')
   expect(view.host.querySelector('label')?.textContent).toContain('Full name')
 })
+
+test('A2uiSurface isolates root accessibility errors, unregistered catalogIds, and duplicate IDs while keeping siblings rendered', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const badOffset = { '@call': '@index', args: { offset: 'bad' } }
+  const initialMessages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_isolate_full',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          {
+            id: 'root',
+            component: 'Column',
+            accessibility: { label: badOffset },
+            children: ['healthy', 'bad_cat', 'bad_fn', 'dup']
+          },
+          { id: 'healthy', component: 'Text', text: 'Healthy child survives' },
+          {
+            id: 'bad_cat',
+            component: 'Text',
+            catalogId: 'https://example.com/unknown.json',
+            text: 'Recovered catalog node'
+          },
+          {
+            id: 'bad_fn',
+            component: 'Text',
+            text: { '@call': 'unknownFn', catalogId: 'https://example.com/unknown.json' }
+          },
+          { id: 'dup', component: 'Text', text: 'Original duplicate' },
+          { id: 'dup', component: 'Text', text: 'Ignored duplicate' }
+        ]
+      }
+    }
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_isolate_full"
+      messages={initialMessages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  expect(view.host.textContent).toContain('Healthy child survives')
+  expect(view.host.textContent).toContain('Recovered catalog node')
+  expect(view.host.textContent).toContain('Original duplicate')
+  expect(view.host.textContent).not.toContain('Ignored duplicate')
+  expect(
+    diagnostics.some(
+      d =>
+        d.nodeId === 'root' &&
+        d.component === 'Column' &&
+        d.prop === 'accessibility.label' &&
+        d.kind === 'stripped' &&
+        d.used === undefined
+    )
+  ).toBe(true)
+
+  const appended: A2uiMessage[] = [
+    ...initialMessages,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_isolate_full',
+        components: [
+          { id: 'dup', component: 'Text', text: 'Updated duplicate' },
+          { id: 'dup', component: 'Text', text: 'Second batch ignored' }
+        ]
+      }
+    }
+  ]
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_isolate_full"
+      messages={appended}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  expect(view.host.textContent).toContain('Updated duplicate')
+  expect(view.host.textContent).not.toContain('Second batch ignored')
+})
+
+test('A2uiSurface renders rows for empty root template path and preserves explicit null in outbound action context', async () => {
+  const actions: Array<{ readonly name: string; readonly context?: Record<string, unknown> }> = []
+  const messages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_empty_root_tpl',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          { id: 'root', component: 'Column', children: ['list', 'submit_btn'] },
+          { id: 'list', component: 'Column', children: { componentId: 'row_item', path: '' } },
+          { id: 'row_item', component: 'Text', text: { '@path': '' } },
+          {
+            id: 'submit_btn',
+            component: 'Button',
+            child: 'submit_label',
+            action: { event: { name: 'save', context: { note: null, tag: 'v1' } } }
+          },
+          { id: 'submit_label', component: 'Text', text: 'Save row' }
+        ]
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_empty_root_tpl',
+        path: '/',
+        value: ['First root row', 'Second root row']
+      }
+    }
+  ]
+
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_empty_root_tpl"
+      messages={messages}
+      onAction={a => actions.push(a)}
+    />
+  )
+
+  expect(host.textContent).toContain('First root row')
+  expect(host.textContent).toContain('Second root row')
+  ;(host.querySelector('button') as HTMLButtonElement).click()
+  expect(actions).toHaveLength(1)
+  expect(actions[0]?.name).toBe('save')
+  expect(actions[0]?.context).toEqual({ note: null, tag: 'v1' })
+})
+
+test('A2uiSurface preserves both button label and incoming real Text on reverse-order synthetic ID collision', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const initialMessages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_reverse_collision',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          { id: 'root', component: 'Column', children: ['btn_1'] },
+          { id: 'btn_1', component: 'Button', label: 'Primary action' }
+        ]
+      }
+    }
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_reverse_collision"
+      messages={initialMessages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  expect(view.host.querySelector('button')?.textContent?.trim()).toBe('Primary action')
+  const synthDiag = diagnostics.find(d => d.nodeId === 'btn_1' && d.prop === 'child')
+  expect(typeof synthDiag?.used).toBe('string')
+  const syntheticId = synthDiag!.used as string
+
+  const appendedMessages: A2uiMessage[] = [
+    ...initialMessages,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_reverse_collision',
+        components: [
+          { id: 'root', component: 'Column', children: ['btn_1', syntheticId] },
+          { id: syntheticId, component: 'Text', text: 'Real streamed text' }
+        ]
+      }
+    }
+  ]
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_reverse_collision"
+      messages={appendedMessages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  expect(view.host.querySelector('button')?.textContent?.trim()).toBe('Primary action')
+  expect(view.host.textContent).toContain('Real streamed text')
+})
+
+test('A2uiSurface safely reports bound label objects with non-function toString and keeps distinct invalid objects separate', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const badToString = { toString: 'not-a-function' }
+  const invalidObjA = { a: 1 }
+  const invalidObjB = { b: 2 }
+
+  const initialMessages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_bad_obj_label',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          { id: 'root', component: 'Column', children: ['email_field'] },
+          {
+            id: 'email_field',
+            component: 'TextField',
+            label: { '@path': '/labelVal' },
+            value: { '@path': '/email' }
+          }
+        ]
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_bad_obj_label',
+        path: '/',
+        value: { labelVal: badToString, email: 'a@b.com' }
+      }
+    }
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_bad_obj_label"
+      messages={initialMessages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  expect(view.host.querySelector('label')?.textContent).toContain('Email field')
+
+  const step2: A2uiMessage[] = [
+    ...initialMessages,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: { surfaceId: 's_bad_obj_label', path: '/labelVal', value: invalidObjA }
+    }
+  ]
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_bad_obj_label"
+      messages={step2}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  const step3: A2uiMessage[] = [
+    ...step2,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: { surfaceId: 's_bad_obj_label', path: '/labelVal', value: invalidObjB }
+    }
+  ]
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_bad_obj_label"
+      messages={step3}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  const labelDiags = diagnostics.filter(d => d.nodeId === 'email_field' && d.prop === 'label')
+  expect(labelDiags.map(d => d.received)).toEqual([badToString, invalidObjA, invalidObjB])
+
+  const step4: A2uiMessage[] = [
+    ...step3,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: { surfaceId: 's_bad_obj_label', path: '/labelVal', value: 'Work email' }
+    }
+  ]
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_bad_obj_label"
+      messages={step4}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  expect(view.host.querySelector('label')?.textContent).toContain('Work email')
+})

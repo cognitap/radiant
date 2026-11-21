@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 import { Catalog } from '@a2ui/web_core/catalog'
+import { MessageProcessor } from '@a2ui/web_core/processing'
 import {
   A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
@@ -255,7 +256,7 @@ test('coerceA2uiMessages isolates malformed nested actions, dynamic expressions,
   assert.equal(healthy.text, 'Sibling remains healthy')
 })
 
-test('coerceA2uiMessages preserves repeated template expressions, catalogId routing, and container children', () => {
+test('coerceA2uiMessages preserves repeated template expressions, catalogId routing, explicit nulls, and container children', () => {
   const result = coerceA2uiMessages(
     [
       {
@@ -266,13 +267,13 @@ test('coerceA2uiMessages preserves repeated template expressions, catalogId rout
             {
               id: 'root',
               component: 'UnknownPanel',
-              catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+              catalogId: A2UI_BASIC_CATALOG_ID,
               children: ['list', 'btn']
             },
             {
               id: 'list',
               component: 'Column',
-              catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+              catalogId: A2UI_BASIC_CATALOG_ID,
               children: { componentId: 'item_row', path: '' }
             },
             {
@@ -284,21 +285,21 @@ test('coerceA2uiMessages preserves repeated template expressions, catalogId rout
             {
               id: 'idx_cell',
               component: 'Text',
-              catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+              catalogId: A2UI_BASIC_CATALOG_ID,
               text: { '@call': '@index' }
             },
             {
               id: 'val_cell',
               component: 'Text',
-              catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+              catalogId: A2UI_BASIC_CATALOG_ID,
               text: { '@path': '' }
             },
             {
               id: 'btn',
               component: 'Button',
-              catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+              catalogId: A2UI_BASIC_CATALOG_ID,
               label: 'Submit',
-              action: { event: { name: 'submit' } }
+              action: { event: { name: 'submit', context: { note: null, keep: 'yes' } } }
             }
           ]
         }
@@ -311,10 +312,10 @@ test('coerceA2uiMessages preserves repeated template expressions, catalogId rout
   const root = components.find(c => c.id === 'root')
   assert.equal(root.component, 'Column')
   assert.deepEqual(root.children, ['list', 'btn'])
-  assert.equal(root.catalogId, RADIANT_A2UI_EXTENSION_CATALOG_ID)
+  assert.equal(root.catalogId, A2UI_BASIC_CATALOG_ID)
 
   const list = components.find(c => c.id === 'list')
-  assert.deepEqual(list.children, { componentId: 'item_row', path: '' })
+  assert.deepEqual(list.children, { componentId: 'item_row', path: '/' })
 
   const idxCell = components.find(c => c.id === 'idx_cell')
   assert.deepEqual(idxCell.text, { '@call': '@index' })
@@ -323,8 +324,104 @@ test('coerceA2uiMessages preserves repeated template expressions, catalogId rout
   assert.deepEqual(valCell.text, { '@path': '' })
 
   const btn = components.find(c => c.id === 'btn')
+  assert.deepEqual(btn.action, { event: { name: 'submit', context: { note: null, keep: 'yes' } } })
   const synthChild = components.find(c => c.id === btn.child)
-  assert.equal(synthChild.catalogId, RADIANT_A2UI_EXTENSION_CATALOG_ID)
+  assert.equal(synthChild.catalogId, A2UI_BASIC_CATALOG_ID)
+
+  const processor = new MessageProcessor([radiantA2uiRegistry.toWebCoreCatalog()], () => {}, {
+    version: A2UI_PROTOCOL_VERSION
+  })
+  processor.processMessages(result.messages)
+  assert.ok(processor.getSurface('s_template'))
+  processor.dispose()
+})
+
+test('coerceA2uiMessages isolates nested accessibility errors, unregistered catalogIds, and duplicate IDs across batches', () => {
+  const badOffsetExpr = { '@call': '@index', args: { offset: 'bad' } }
+  const result = coerceA2uiMessages(
+    [
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        createSurface: {
+          surfaceId: 's_iso',
+          catalogId: A2UI_BASIC_CATALOG_ID,
+          components: [
+            {
+              id: 'root',
+              component: 'Column',
+              accessibility: { label: badOffsetExpr },
+              children: ['healthy', 'bad_cat', 'bad_fn', 'dup']
+            },
+            { id: 'healthy', component: 'Text', text: 'Healthy child' },
+            {
+              id: 'bad_cat',
+              component: 'Text',
+              catalogId: 'https://example.com/unregistered.json',
+              text: 'Still kept'
+            },
+            {
+              id: 'bad_fn',
+              component: 'Text',
+              text: { '@call': 'customFn', catalogId: 'https://example.com/unregistered.json' }
+            },
+            { id: 'dup', component: 'Text', text: 'First copy' },
+            { id: 'dup', component: 'Text', text: 'Second duplicate' }
+          ]
+        }
+      },
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        updateComponents: {
+          surfaceId: 's_iso',
+          components: [
+            { id: 'dup', component: 'Text', text: 'Updated copy' },
+            { id: 'dup', component: 'Text', text: 'Second batch duplicate' },
+            {
+              id: 'bad_cat_2',
+              component: 'Text',
+              catalogId: 'https://example.com/other.json',
+              text: 'Appended kept'
+            }
+          ]
+        }
+      }
+    ],
+    radiantA2uiRegistry
+  )
+
+  const initial = result.messages[0].createSurface.components
+  const root = initial.find(c => c.id === 'root')
+  assert.equal(root.component, 'Column')
+  assert.deepEqual(root.children, ['healthy', 'bad_cat', 'bad_fn', 'dup'])
+  assert.equal(root.accessibility, undefined)
+  assert.ok(
+    result.diagnostics.some(
+      d =>
+        d.nodeId === 'root' &&
+        d.component === 'Column' &&
+        d.prop === 'accessibility.label' &&
+        d.kind === 'stripped' &&
+        d.received?.args?.offset === 'bad' &&
+        d.used === undefined
+    )
+  )
+  assert.equal(initial.filter(c => c.id === 'dup').length, 1)
+  assert.equal(initial.find(c => c.id === 'bad_cat').catalogId, undefined)
+  assert.equal(typeof initial.find(c => c.id === 'bad_fn').text, 'string')
+
+  const updated = result.messages[1].updateComponents.components
+  assert.equal(updated.filter(c => c.id === 'dup').length, 1)
+  assert.equal(updated.find(c => c.id === 'dup').text, 'Updated copy')
+  assert.equal(updated.find(c => c.id === 'bad_cat_2').catalogId, undefined)
+
+  const processor = new MessageProcessor([radiantA2uiRegistry.toWebCoreCatalog()], () => {}, {
+    version: A2UI_PROTOCOL_VERSION
+  })
+  processor.processMessages(result.messages)
+  const surface = processor.getSurface('s_iso')
+  assert.equal(surface.componentsModel.get('healthy')?.properties.text, 'Healthy child')
+  assert.equal(surface.componentsModel.get('dup')?.properties.text, 'Updated copy')
+  processor.dispose()
 })
 
 test('coerceA2uiMessages avoids cross-batch ID collisions, handles custom registries without Text, and isolates direct SSR adapter throws', () => {
@@ -520,6 +617,181 @@ test('coerceA2uiMessages avoids cross-batch ID collisions, handles custom regist
     assert.match(ssrHtml, /data-slot="a2ui-fallback"/);
     assert.match(ssrHtml, /Direct throw fallback text/);
     assert.match(ssrHtml, /Sibling rendered on SSR/);
+
+    // Custom Text requiring extra fields + incompatible Text + single-child wrapper with multiple children
+    const { MessageProcessor } = await import('@a2ui/web_core/processing');
+    const customTextRegistry = createA2uiRegistry({
+      catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+      title: 'Custom Text',
+      description: 'Text requires extra tone field; Card accepts only one child',
+      entries: [
+        createA2uiRegistryEntry({
+          name: 'Text',
+          component: () => null,
+          description: 'Text with required tone',
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['text', 'tone'],
+            properties: {
+              text: { $ref: 'common_types.json#/$defs/DynamicString' },
+              tone: { type: 'string', enum: ['neutral', 'accent'], default: 'neutral' }
+            }
+          },
+          adapter: (props) => h('span', null, String(props.text ?? ''))
+        }),
+        createA2uiRegistryEntry({
+          name: 'Card',
+          component: () => null,
+          description: 'Single-child wrapper',
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['child'],
+            properties: { child: { $ref: 'common_types.json#/$defs/Child' } }
+          },
+          adapter: (props, ctx) => h('section', null, props.child ? ctx.renderNode(props.child) : null)
+        }),
+        createA2uiRegistryEntry({
+          name: 'Action',
+          component: () => null,
+          description: 'Button-like requiring Child',
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['child'],
+            properties: { child: { $ref: 'common_types.json#/$defs/Child' } }
+          },
+          adapter: (props, ctx) => h('button', null, props.child ? ctx.renderNode(props.child) : null)
+        })
+      ]
+    });
+
+    const customRes = coerceA2uiMessages(
+      [{
+        version: A2UI_PROTOCOL_VERSION,
+        createSurface: {
+          surfaceId: 's_custom_text',
+          catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+          components: [
+            { id: 'root', component: 'UnknownGroup', children: ['c1', 'c2'] },
+            { id: 'c1', component: 'Text', text: 'First item', tone: 'neutral' },
+            { id: 'c2', component: 'Text', text: 'Second item', tone: 'neutral' },
+            { id: 'btn', component: 'Action', label: 'Run now' }
+          ]
+        }
+      }],
+      customTextRegistry
+    );
+    const customComps = customRes.messages[0].createSurface.components;
+    const customRoot = customComps.find(c => c.id === 'root');
+    assert.equal(customRoot.component, 'Text');
+    assert.equal(customRoot.tone, 'neutral');
+    assert.equal(customRoot.text, 'First item Second item');
+    const customBtn = customComps.find(c => c.id === 'btn');
+    const customSynth = customComps.find(c => c.id === customBtn.child);
+    assert.equal(customSynth.tone, 'neutral');
+    const customProc = new MessageProcessor([customTextRegistry.toWebCoreCatalog()], () => {}, { version: A2UI_PROTOCOL_VERSION });
+    customProc.processMessages(customRes.messages);
+    assert.ok(customProc.getSurface('s_custom_text'));
+    customProc.dispose();
+
+    const incompatTextRegistry = createA2uiRegistry({
+      catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+      title: 'Incompatible Text',
+      description: 'Text requires a Child ref that fallback synthesis cannot satisfy',
+      entries: [
+        createA2uiRegistryEntry({
+          name: 'Text',
+          component: () => null,
+          description: 'Incompatible text',
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['text', 'child'],
+            properties: {
+              text: { $ref: 'common_types.json#/$defs/DynamicString' },
+              child: { $ref: 'common_types.json#/$defs/Child' }
+            }
+          },
+          adapter: () => null
+        }),
+        createA2uiRegistryEntry({
+          name: 'Box',
+          component: () => null,
+          description: 'Container',
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            properties: { children: { $ref: 'common_types.json#/$defs/ChildList' } }
+          },
+          adapter: () => null
+        }),
+        createA2uiRegistryEntry({
+          name: 'Action',
+          component: () => null,
+          description: 'Needs child',
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['child'],
+            properties: { child: { $ref: 'common_types.json#/$defs/Child' } }
+          },
+          adapter: () => null
+        })
+      ]
+    });
+
+    const incompatRes = coerceA2uiMessages(
+      [{
+        version: A2UI_PROTOCOL_VERSION,
+        createSurface: {
+          surfaceId: 's_incompat',
+          catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+          components: [
+            { id: 'root', component: 'Box', children: ['unknown_leaf', 'broken_btn'] },
+            { id: 'unknown_leaf', component: 'Mystery', text: 'Should omit' },
+            { id: 'broken_btn', component: 'Action' }
+          ]
+        }
+      }],
+      incompatTextRegistry
+    );
+    const incompatIds = incompatRes.messages[0].createSurface.components.map(c => c.id);
+    assert.deepEqual(incompatIds, ['root']);
+    const incompatProc = new MessageProcessor([incompatTextRegistry.toWebCoreCatalog()], () => {}, { version: A2UI_PROTOCOL_VERSION });
+    incompatProc.processMessages(incompatRes.messages);
+    assert.ok(incompatProc.getSurface('s_incompat'));
+    incompatProc.dispose();
+
+    // Bound label resolving to an object with a non-function toString property must not abort SSR
+    const { radiantA2uiRegistry: ssrReg, A2UI_BASIC_CATALOG_ID: BASIC_ID } = await import('./dist/library/a2ui/index.js');
+    const badLabelSsr = renderToString(h(A2uiSurface, {
+      surfaceId: 's_bad_tostring_ssr',
+      registry: ssrReg,
+      messages: [
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          createSurface: {
+            surfaceId: 's_bad_tostring_ssr',
+            catalogId: BASIC_ID,
+            components: [
+              { id: 'root', component: 'Column', children: ['email_input'] },
+              { id: 'email_input', component: 'TextField', label: { '@path': '/badLabel' } }
+            ]
+          }
+        },
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          updateDataModel: {
+            surfaceId: 's_bad_tostring_ssr',
+            path: '/',
+            value: { badLabel: { toString: 'not-a-function' } }
+          }
+        }
+      ]
+    }));
+    assert.match(badLabelSsr, /Email input/);
   `
   execFileSync(process.execPath, ['--input-type=module', '-e', script], {
     cwd: fileURLToPath(new URL('../', import.meta.url)),

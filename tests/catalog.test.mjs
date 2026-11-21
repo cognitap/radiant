@@ -566,7 +566,7 @@ test('coerceCatalogProps enforces Choice minItems and nested required option key
   )
 })
 
-test('coerceCatalogProps honors nested additionalProperties, forbidden host props, and preserves nested value/defaultValue', () => {
+test('coerceCatalogProps honors nested additionalProperties, forbidden host props, plain objects, and nullable enums', () => {
   const customEntry = {
     name: 'ConfigCard',
     propsSchema: {
@@ -580,9 +580,10 @@ test('coerceCatalogProps honors nested additionalProperties, forbidden host prop
             value: { type: 'string' },
             defaultValue: { type: 'string' },
             mode: { type: ['string', 'null'], enum: ['a', 'b'] },
-            score: { type: 'number', exclusiveMaximum: 10 }
+            nullableMode: { type: ['string', 'null'], enum: ['a', 'b', null] }
           }
-        }
+        },
+        meta: { type: 'object' }
       }
     },
     bindings: {}
@@ -596,7 +597,12 @@ test('coerceCatalogProps honors nested additionalProperties, forbidden host prop
         extraCount: 42,
         className: 'bg-red-500',
         mode: null,
-        score: 10
+        nullableMode: null
+      },
+      meta: {
+        tag: 'ok',
+        className: 'secret',
+        style: { color: 'red' }
       }
     },
     { nodeId: 'cfg_1' }
@@ -606,9 +612,12 @@ test('coerceCatalogProps honors nested additionalProperties, forbidden host prop
     defaultValue: 'initial',
     extraCount: '42',
     mode: 'a',
-    score: 9
+    nullableMode: null
   })
+  assert.deepEqual(result.props.meta, { tag: 'ok' })
   assert.ok(result.diagnostics.some(d => d.kind === 'stripped' && d.prop === 'config.className'))
+  assert.ok(result.diagnostics.some(d => d.kind === 'stripped' && d.prop === 'meta.className'))
+  assert.ok(result.diagnostics.some(d => d.kind === 'stripped' && d.prop === 'meta.style'))
   assert.ok(
     result.diagnostics.some(
       d => d.kind === 'coerced' && d.prop === 'config.extraCount' && d.used === '42'
@@ -617,7 +626,40 @@ test('coerceCatalogProps honors nested additionalProperties, forbidden host prop
   assert.ok(
     result.diagnostics.some(d => d.kind === 'coerced' && d.prop === 'config.mode' && d.used === 'a')
   )
-  assert.ok(
-    result.diagnostics.some(d => d.kind === 'coerced' && d.prop === 'config.score' && d.used === 9)
-  )
+})
+
+test('summarizeCatalogDiagnostics returns numeric counts for inherited Object.prototype names', () => {
+  const summary = summarizeCatalogDiagnostics([
+    {
+      kind: 'fallback',
+      nodeId: 'n1',
+      component: 'toString',
+      prop: 'component',
+      received: 'toString',
+      used: 'Text',
+      reason: 'Unknown component.'
+    },
+    {
+      kind: 'fallback',
+      nodeId: 'n2',
+      component: 'constructor',
+      prop: 'component',
+      received: 'constructor',
+      used: 'Text',
+      reason: 'Unknown component.'
+    },
+    {
+      kind: 'fallback',
+      nodeId: 'n3',
+      component: 'toString',
+      prop: 'component',
+      received: 'toString',
+      used: 'Text',
+      reason: 'Unknown component.'
+    }
+  ])
+  assert.equal(summary.byComponent.toString, 2)
+  assert.equal(summary.byComponent.constructor, 1)
+  assert.equal(summary.byProp['toString.component'], 2)
+  assert.equal(summary.byProp['constructor.component'], 1)
 })
