@@ -202,6 +202,14 @@ function coerceUnknownComponent(
   }
 }
 
+const ACCESSIBLE_NAME_COMPONENTS = new Set(['ChoicePicker', 'Slider'])
+
+function hasUsableDynamicLabel(value: unknown): boolean {
+  if (isDynamicExpression(value)) return true
+  if (typeof value === 'string') return value.trim().length > 0
+  return (typeof value === 'number' && Number.isFinite(value)) || typeof value === 'boolean'
+}
+
 function coerceKnownComponent(
   raw: Readonly<Record<string, unknown>>,
   id: string,
@@ -228,7 +236,41 @@ function coerceKnownComponent(
     }
   })
   diagnostics.push(...result.diagnostics)
-  return { ...envelope, ...result.props, id, component: entry.name }
+  const props: Record<string, unknown> = { ...result.props }
+  const log = createDiagnosticLogger(diagnostics, id, entry.name)
+
+  if (entry.name === 'ChoicePicker' && Array.isArray(props.options)) {
+    const seen = new Set<string>()
+    const deduped: unknown[] = []
+    for (const option of props.options) {
+      if (isPlainRecord(option) && typeof option.value === 'string') {
+        if (seen.has(option.value)) continue
+        seen.add(option.value)
+      }
+      deduped.push(option)
+    }
+    if (deduped.length !== props.options.length) {
+      log('coerced', 'options', props.options, deduped, 'Removed duplicate option values.')
+      props.options = deduped
+    }
+  }
+
+  if (ACCESSIBLE_NAME_COMPONENTS.has(entry.name)) {
+    const accessibility = isPlainRecord(envelope.accessibility) ? envelope.accessibility : undefined
+    if (!hasUsableDynamicLabel(props.label) && !hasUsableDynamicLabel(accessibility?.label)) {
+      const fallback = humanizeNodeId(id)
+      log(
+        raw.label === undefined ? 'defaulted' : 'coerced',
+        'label',
+        raw.label,
+        fallback,
+        'Missing accessible label.'
+      )
+      props.label = fallback
+    }
+  }
+
+  return { ...envelope, ...props, id, component: entry.name }
 }
 
 function coerceComponentList(

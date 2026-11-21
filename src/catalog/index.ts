@@ -56,4 +56,12 @@ export type {
   CoercePropsResult,
   CoerceSchemaPropsOptions
 } from './coerce.js'
+export { createCatalogActionEvent, snapshotSurfaceState } from './actions.js'
+export type {
+  CatalogActionEvent,
+  CatalogActionEventInput,
+  CatalogActionHandler,
+  CatalogJsonValue,
+  CatalogSurfaceState
+} from './actions.js'
 export { RADIANT_CATALOG_ID, RADIANT_CATALOG_VERSION, radiantCatalog } from './radiantCatalog.js'

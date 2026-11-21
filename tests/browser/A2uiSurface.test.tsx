@@ -14,7 +14,9 @@ import {
 } from '../../src/a2ui/index.js'
 import { summarizeCatalogDiagnostics } from '../../src/catalog/index.js'
 import {
+  interactivePreferencesFixtureMessages,
   malformedProfileFixtureMessages,
+  PREFERENCES_SURFACE_ID,
   PROFILE_SURFACE_ID,
   profileFixtureMessages,
   profileFixtureWithThemeHintMessages
@@ -66,9 +68,12 @@ test('renders the A2UI 1.0 tracer-bullet fixture with Radiant Field, Input, Butt
   })
   expect(onAction).toHaveBeenCalledTimes(1)
   const payload = onAction.mock.calls[0]![0]
+  expect(payload.action).toBe('save_profile')
   expect(payload.name).toBe('save_profile')
   expect(payload.surfaceId).toBe(PROFILE_SURFACE_ID)
+  expect(payload.nodeId).toBe('save_button')
   expect(payload.sourceComponentId).toBe('save_button')
+  expect(payload.state).toEqual({ profile: { displayName: 'Grace Hopper' } })
   expect(payload.context).toEqual({ displayName: 'Grace Hopper' })
 })
 
@@ -493,4 +498,418 @@ test('recovers a failed node after updateComponents replaces its failing props',
   } finally {
     consoleErrorSpy.mockRestore()
   }
+})
+
+test('interactive entries update client-local state without host calls and named actions deliver a state snapshot', async () => {
+  const onAction = vi.fn<(event: A2uiActionPayload) => void>()
+
+  const { host } = await mount(
+    <StrictMode>
+      <A2uiSurface
+        surfaceId={PREFERENCES_SURFACE_ID}
+        messages={interactivePreferencesFixtureMessages}
+        onAction={onAction}
+      />
+    </StrictMode>,
+    true
+  )
+
+  const note = host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  const weekly = host.querySelector<HTMLInputElement>('input[type="radio"][value="weekly"]')!
+  const inApp = host.querySelector<HTMLInputElement>('input[type="checkbox"][value="in_app"]')!
+  const slider = host.querySelector<HTMLInputElement>('input[type="range"][data-slot~="slider"]')!
+  const quietHours = Array.from(
+    host.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+  ).find(el => !el.value || el.value === 'on')!
+  const applyButton = host.querySelector<HTMLButtonElement>('button[data-slot~="button"]')!
+
+  // Typing, selecting, scrubbing, and toggling all stay local on the client
+  await act(async () => {
+    note.focus()
+    await userEvent.type(note, 'Keep evenings quiet')
+    await userEvent.click(weekly)
+    await userEvent.click(inApp)
+    slider.focus()
+    await userEvent.keyboard('{ArrowRight}')
+    await userEvent.click(quietHours)
+  })
+
+  expect(note.value).toBe('Keep evenings quiet')
+  expect(weekly.checked).toBe(true)
+  expect(inApp.checked).toBe(true)
+  expect(slider.value).toBe('50')
+  expect(quietHours.checked).toBe(true)
+  expect(onAction).toHaveBeenCalledTimes(0)
+
+  // Clicking the named action button delivers { action, surfaceId, nodeId, state } once
+  await act(async () => {
+    await userEvent.click(applyButton)
+  })
+
+  expect(onAction).toHaveBeenCalledTimes(1)
+  const delivered = onAction.mock.calls[0]![0]
+  expect(delivered.action).toBe('apply_preferences')
+  expect(delivered.surfaceId).toBe(PREFERENCES_SURFACE_ID)
+  expect(delivered.nodeId).toBe('apply_button')
+  expect(Object.isFrozen(delivered)).toBe(true)
+  expect(Object.isFrozen(delivered.state)).toBe(true)
+  expect(delivered.state).toEqual({
+    note: 'Keep evenings quiet',
+    cadence: ['weekly'],
+    channels: ['email', 'in_app'],
+    volume: 50,
+    notify: true
+  })
+
+  // Further local edits stay client-side and never mutate the delivered state snapshot
+  await act(async () => {
+    note.focus()
+    await userEvent.type(note, ' (edited)')
+  })
+  expect(note.value).toBe('Keep evenings quiet (edited)')
+  expect(onAction).toHaveBeenCalledTimes(1)
+  expect(delivered.state).toEqual({
+    note: 'Keep evenings quiet',
+    cadence: ['weekly'],
+    channels: ['email', 'in_app'],
+    volume: 50,
+    notify: true
+  })
+})
+
+const surfaceMessage = (
+  surfaceId: string,
+  components: readonly Record<string, unknown>[],
+  dataModel?: Record<string, unknown>
+): A2uiMessage => ({
+  version: A2UI_PROTOCOL_VERSION,
+  createSurface: {
+    surfaceId,
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    ...(dataModel ? { dataModel } : {}),
+    components
+  }
+})
+
+test('preserves array root state and freezes both state and nested action context snapshots', async () => {
+  const onAction = vi.fn<(event: A2uiActionPayload) => void>()
+  const messages: A2uiMessage[] = [
+    surfaceMessage('s_array_root', [
+      { id: 'root', component: 'Column', children: ['flag', 'apply'] },
+      {
+        id: 'flag',
+        component: 'CheckBox',
+        label: 'Enable feature',
+        value: { '@path': '/0/enabled' }
+      },
+      {
+        id: 'apply',
+        component: 'Button',
+        child: 'apply_label',
+        action: { event: { name: 'apply', context: { item: { '@path': '/0' } } } }
+      },
+      { id: 'apply_label', component: 'Text', text: 'Apply' }
+    ]),
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: { surfaceId: 's_array_root', path: '/', value: [{ enabled: false }] }
+    }
+  ]
+
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_array_root"
+      messages={messages}
+      onAction={onAction}
+    />
+  )
+  const checkbox = host.querySelector<HTMLInputElement>('input[type="checkbox"]')!
+  const apply = host.querySelector<HTMLButtonElement>('button[data-slot~="button"]')!
+
+  await act(async () => {
+    await userEvent.click(checkbox)
+  })
+  expect(checkbox.checked).toBe(true)
+  expect(onAction).toHaveBeenCalledTimes(0)
+
+  await act(async () => {
+    await userEvent.click(apply)
+  })
+  expect(onAction).toHaveBeenCalledTimes(1)
+  const payload = onAction.mock.calls[0]![0]
+  expect(payload.state).toEqual([{ enabled: true }])
+  expect(payload.context).toEqual({ item: { enabled: true } })
+  for (const obj of [
+    payload,
+    payload.state,
+    (payload.state as readonly unknown[])[0],
+    payload.context,
+    payload.context.item
+  ]) {
+    expect(Object.isFrozen(obj)).toBe(true)
+  }
+
+  await act(async () => {
+    await userEvent.click(checkbox)
+  })
+  expect(onAction).toHaveBeenCalledTimes(1)
+  expect(payload.state).toEqual([{ enabled: true }])
+  expect(payload.context).toEqual({ item: { enabled: true } })
+})
+
+test('ChoicePicker defaults to single selection, honors chips and filtering with retained hidden picks, and reports duplicate values', async () => {
+  const onAction = vi.fn<(event: A2uiActionPayload) => void>()
+  const diagnostics: CatalogDiagnostic[] = []
+  const messages: A2uiMessage[] = [
+    surfaceMessage(
+      's_choice_opts',
+      [
+        { id: 'root', component: 'Column', children: ['mode_picker', 'tag_chips', 'apply'] },
+        {
+          id: 'mode_picker',
+          component: 'ChoicePicker',
+          label: 'Mode',
+          options: [
+            { label: 'Fast', value: 'fast' },
+            { label: 'Accurate', value: 'accurate' }
+          ],
+          value: { '@path': '/mode' }
+        },
+        {
+          id: 'tag_chips',
+          component: 'ChoicePicker',
+          label: 'Tags',
+          variant: 'multipleSelection',
+          displayStyle: 'chips',
+          filterable: true,
+          options: [
+            { label: 'Alpha', value: 'alpha' },
+            { label: 'Alpha copy', value: 'alpha' },
+            { label: 'Beta', value: 'beta' }
+          ],
+          value: { '@path': '/tags' }
+        },
+        {
+          id: 'apply',
+          component: 'Button',
+          child: 'apply_text',
+          action: { event: { name: 'apply' } }
+        },
+        { id: 'apply_text', component: 'Text', text: 'Apply' }
+      ],
+      { mode: [], tags: [] }
+    )
+  ]
+
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_choice_opts"
+      messages={messages}
+      onAction={onAction}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  expect(diagnostics).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: 'coerced',
+        nodeId: 'tag_chips',
+        component: 'ChoicePicker',
+        prop: 'options'
+      })
+    ])
+  )
+
+  const chipGroup = host.querySelector('[role="group"][aria-label="Tags"]')!
+  const filter = host.querySelector<HTMLInputElement>(
+    'input[type="search"][aria-label="Filter Tags"]'
+  )!
+  const chip = (name: string) =>
+    Array.from(chipGroup.querySelectorAll('button')).find(b => b.textContent === name)!
+
+  await act(async () => {
+    await userEvent.click(
+      host.querySelector<HTMLInputElement>('input[type="radio"][value="fast"]')!
+    )
+    await userEvent.click(
+      host.querySelector<HTMLInputElement>('input[type="radio"][value="accurate"]')!
+    )
+    await userEvent.click(chip('Alpha'))
+  })
+  expect(chip('Alpha').getAttribute('aria-pressed')).toBe('true')
+
+  await act(async () => {
+    filter.focus()
+    await userEvent.type(filter, 'Bet')
+  })
+  expect(chipGroup.textContent).not.toContain('Alpha')
+  await act(async () => {
+    await userEvent.click(chip('Beta'))
+  })
+  expect(chip('Beta').getAttribute('aria-pressed')).toBe('true')
+  expect(onAction).toHaveBeenCalledTimes(0)
+
+  await act(async () => {
+    await userEvent.click(
+      Array.from(host.querySelectorAll('button')).find(b => b.textContent === 'Apply')!
+    )
+  })
+  expect(onAction).toHaveBeenCalledTimes(1)
+  expect(onAction.mock.calls[0]![0].state).toEqual({ mode: ['accurate'], tags: ['alpha', 'beta'] })
+})
+
+test('CheckBox preserves DOM identity and focus when validation errors appear and clear', async () => {
+  const baseMessages: A2uiMessage[] = [
+    surfaceMessage(
+      's_cb_valid',
+      [
+        { id: 'root', component: 'Column', children: ['consent_cb'] },
+        {
+          id: 'consent_cb',
+          component: 'CheckBox',
+          label: 'Accept terms',
+          value: { '@path': '/consent' },
+          checks: [{ condition: { '@path': '/ok' }, message: 'Acceptance is required.' }]
+        }
+      ],
+      { consent: false, ok: true }
+    )
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_cb_valid"
+      messages={baseMessages}
+    />
+  )
+  const cbBefore = view.host.querySelector<HTMLInputElement>('input[type="checkbox"]')!
+  cbBefore.focus()
+  expect(document.activeElement).toBe(cbBefore)
+  expect(view.host.querySelector('[data-slot="field-error"]')).toBeNull()
+
+  const withError: A2uiMessage[] = [
+    ...baseMessages,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: { surfaceId: 's_cb_valid', path: '/ok', value: false }
+    }
+  ]
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_cb_valid"
+      messages={withError}
+    />
+  )
+  expect(view.host.querySelector('[data-slot="field-error"]')?.textContent).toBe(
+    'Acceptance is required.'
+  )
+  expect(view.host.querySelector<HTMLInputElement>('input[type="checkbox"]')).toBe(cbBefore)
+  expect(document.activeElement).toBe(cbBefore)
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_cb_valid"
+      messages={[
+        ...withError,
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          updateDataModel: { surfaceId: 's_cb_valid', path: '/ok', value: true }
+        }
+      ]}
+    />
+  )
+  expect(view.host.querySelector('[data-slot="field-error"]')).toBeNull()
+  expect(view.host.querySelector<HTMLInputElement>('input[type="checkbox"]')).toBe(cbBefore)
+  expect(document.activeElement).toBe(cbBefore)
+})
+
+test('ChoicePicker and Slider use authored accessible names and diagnose missing or blank labels without dropping siblings', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_a11y_names"
+      onDiagnostic={d => diagnostics.push(d)}
+      messages={[
+        surfaceMessage(
+          's_a11y_names',
+          [
+            {
+              id: 'root',
+              component: 'Column',
+              children: [
+                'sibling',
+                'authored_slider',
+                'authored_picker',
+                'unnamed_slider',
+                'blank_picker'
+              ]
+            },
+            { id: 'sibling', component: 'Text', text: 'Sibling intact' },
+            {
+              id: 'authored_slider',
+              component: 'Slider',
+              accessibility: { label: 'Playback speed' },
+              min: 0,
+              max: 100,
+              value: { '@path': '/speed' }
+            },
+            {
+              id: 'authored_picker',
+              component: 'ChoicePicker',
+              accessibility: { label: 'Sort order' },
+              options: [{ label: 'Newest', value: 'a' }],
+              value: { '@path': '/pickA' }
+            },
+            {
+              id: 'unnamed_slider',
+              component: 'Slider',
+              label: '   ',
+              min: 0,
+              max: 100,
+              value: { '@path': '/fallbackNum' }
+            },
+            {
+              id: 'blank_picker',
+              component: 'ChoicePicker',
+              options: [{ label: 'Item X', value: 'x' }],
+              value: { '@path': '/pickB' }
+            }
+          ],
+          { speed: 50, fallbackNum: 20, pickA: ['a'], pickB: ['x'] }
+        )
+      ]}
+    />
+  )
+
+  expect(host.textContent).toContain('Sibling intact')
+  const sliders = Array.from(host.querySelectorAll<HTMLInputElement>('input[type="range"]'))
+  const fieldsets = Array.from(host.querySelectorAll<HTMLFieldSetElement>('fieldset'))
+  expect(sliders.map(s => host.querySelector(`label[for="${s.id}"]`)?.textContent)).toEqual([
+    'Playback speed',
+    'Unnamed slider'
+  ])
+  expect(fieldsets.map(f => f.querySelector('legend')?.textContent)).toEqual([
+    'Sort order',
+    'Blank picker'
+  ])
+  expect(diagnostics).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: 'coerced',
+        nodeId: 'unnamed_slider',
+        component: 'Slider',
+        prop: 'label',
+        received: '   ',
+        used: 'Unnamed slider'
+      }),
+      expect.objectContaining({
+        kind: 'defaulted',
+        nodeId: 'blank_picker',
+        component: 'ChoicePicker',
+        prop: 'label',
+        received: undefined,
+        used: 'Blank picker'
+      })
+    ])
+  )
 })
