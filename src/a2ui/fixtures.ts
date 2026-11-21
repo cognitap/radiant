@@ -317,3 +317,86 @@ export const inaccessibleFixtureMessages: readonly A2uiMessage[] = [
     }
   }
 ]
+
+export const STREAMED_SURFACE_ID = 'weekly_check_in'
+
+const streamed = (body: Record<string, unknown>): A2uiMessage => ({
+  version: A2UI_PROTOCOL_VERSION,
+  ...body
+})
+const streamedComponents = (...components: Record<string, unknown>[]) =>
+  streamed({ updateComponents: { surfaceId: STREAMED_SURFACE_ID, components } })
+
+/**
+ * Recorded stream, replayed one message at a time: a component arrives before the root,
+ * children arrive out of order, and a binding names a data path that arrives last.
+ */
+export const streamedFixtureMessages: readonly A2uiMessage[] = [
+  streamed({ createSurface: { surfaceId: STREAMED_SURFACE_ID, catalogId: A2UI_BASIC_CATALOG_ID } }),
+  streamedComponents({
+    id: 'greeting_text',
+    component: 'Text',
+    text: { '@path': '/learner/greeting' }
+  }),
+  streamedComponents({
+    id: 'root',
+    component: 'Column',
+    children: ['heading_text', 'greeting_text', 'name_field', 'submit_button']
+  }),
+  streamedComponents({
+    id: 'submit_button',
+    component: 'Button',
+    child: 'submit_label',
+    variant: 'primary',
+    action: { event: { name: 'submit_check_in' } }
+  }),
+  streamedComponents({ id: 'heading_text', component: 'Text', text: 'Weekly check-in' }),
+  streamedComponents({
+    id: 'name_field',
+    component: 'TextField',
+    label: 'Your name',
+    value: { '@path': '/learner/name' }
+  }),
+  streamed({
+    updateDataModel: {
+      surfaceId: STREAMED_SURFACE_ID,
+      path: '/learner',
+      value: { name: 'Ada', greeting: 'Welcome back, Ada.' }
+    }
+  }),
+  streamedComponents({ id: 'submit_label', component: 'Text', text: 'Send check-in' })
+]
+
+/** Recorded stream that sends each component one prop at a time. */
+export const propStreamFixtureMessages: readonly A2uiMessage[] = [
+  streamed({
+    createSurface: {
+      surfaceId: STREAMED_SURFACE_ID,
+      catalogId: A2UI_BASIC_CATALOG_ID,
+      components: [{ id: 'root', component: 'Column', children: ['title_text', 'next_button'] }]
+    }
+  }),
+  streamedComponents({ id: 'title_text', component: 'Text' }),
+  streamedComponents({ id: 'title_text', component: 'Text', text: 'Lesson complete' }),
+  streamedComponents({
+    id: 'title_text',
+    component: 'Text',
+    text: 'Lesson complete',
+    variant: 'body'
+  }),
+  streamedComponents({ id: 'next_button', component: 'Button', child: 'next_label' }),
+  streamedComponents({
+    id: 'next_button',
+    component: 'Button',
+    child: 'next_label',
+    action: { event: { name: 'next_lesson' } }
+  }),
+  streamedComponents({ id: 'next_label', component: 'Text', text: 'Next lesson' }),
+  streamedComponents({
+    id: 'next_button',
+    component: 'Button',
+    child: 'next_label',
+    action: { event: { name: 'next_lesson' } },
+    variant: 'primary'
+  })
+]

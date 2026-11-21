@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, within } from 'storybook/test'
 import type { CatalogActionEvent, CatalogDiagnostic } from '../catalog/index.js'
@@ -11,7 +11,9 @@ import {
   malformedProfileFixtureMessages,
   PREFERENCES_SURFACE_ID,
   PROFILE_SURFACE_ID,
-  profileFixtureMessages
+  profileFixtureMessages,
+  STREAMED_SURFACE_ID,
+  streamedFixtureMessages
 } from './fixtures.js'
 
 function ProfileSurfaceDemo() {
@@ -145,6 +147,54 @@ function LiveAgentPatchDemo() {
   )
 }
 
+const STREAM_STEP_MS = 250
+
+function StreamedSurfaceDemo({
+  surfaceId,
+  messages
+}: {
+  readonly surfaceId: string
+  readonly messages: readonly A2uiMessage[]
+}) {
+  const [run, setRun] = useState(0)
+  const [count, setCount] = useState(1)
+  const done = count >= messages.length
+
+  useEffect(() => {
+    if (done) return
+    const timer = setTimeout(() => setCount(next => next + 1), STREAM_STEP_MS)
+    return () => clearTimeout(timer)
+  }, [count, done])
+
+  return (
+    <div className="grid max-w-md gap-4">
+      <A2uiSurface
+        key={run}
+        surfaceId={surfaceId}
+        messages={messages.slice(0, count)}
+      />
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          disabled={!done}
+          onClick={() => {
+            setRun(next => next + 1)
+            setCount(1)
+          }}
+        >
+          Replay stream
+        </Button>
+        <output
+          data-testid="a2ui-stream-progress"
+          className="text-sm"
+        >
+          {`Messages: ${count} of ${messages.length}`}
+        </output>
+      </div>
+    </div>
+  )
+}
+
 const meta = {
   title: 'A2UI/Surface',
   component: A2uiSurface
@@ -243,5 +293,29 @@ export const LiveAgentPatch: Story = {
     ).toBeVisible()
     await expect(input).toHaveFocus()
     await expect(input).toHaveValue('Margaret Hamilton')
+  }
+}
+
+export const StreamedSurface: Story = {
+  args: {
+    surfaceId: STREAMED_SURFACE_ID,
+    messages: streamedFixtureMessages
+  },
+  render: args => (
+    <StreamedSurfaceDemo
+      surfaceId={args.surfaceId}
+      messages={args.messages}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const surface = canvasElement.querySelector('[data-slot="a2ui-surface"]')!
+    await expect(surface).toHaveAttribute('aria-busy', 'true')
+    await expect(
+      await canvas.findByRole('button', { name: 'Send check-in' }, { timeout: 5000 })
+    ).toBeVisible()
+    await expect(canvas.getByRole('textbox', { name: 'Your name' })).toHaveValue('Ada')
+    await expect(canvas.getByText('Welcome back, Ada.')).toBeVisible()
+    await expect(surface).not.toHaveAttribute('aria-busy')
   }
 }

@@ -192,8 +192,16 @@ function coerceUnknownComponent(
   componentName: string,
   diagnostics: CatalogDiagnostic[]
 ): Record<string, unknown> {
-  const log = createDiagnosticLogger(diagnostics, id, componentName || 'unknown')
-  log('fallback', 'component', raw.component, 'Text', 'Unknown component; degraded to Text.')
+  diagnostics.push({
+    kind: 'error',
+    code: 'UNKNOWN_COMPONENT_TYPE',
+    nodeId: id,
+    component: componentName || 'unknown',
+    prop: 'component',
+    received: raw.component,
+    used: 'Text',
+    reason: 'Unknown component; degraded to Text.'
+  })
   return {
     id,
     component: 'Text',

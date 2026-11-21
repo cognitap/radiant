@@ -138,6 +138,11 @@ const textEntry = createA2uiRegistryEntry({
   adapter(props, context) {
     const text = unwrapDisplayText(props.text)
     const variant = props.variant === 'caption' ? 'caption' : 'body'
+    // Text bound to a data path with no value yet reserves its line.
+    const reserve =
+      props.text instanceof ResolvedBinding && props.text.value === undefined
+        ? ' block min-h-[1lh]'
+        : ''
     if (context.inline) {
       return (
         <span
@@ -153,7 +158,7 @@ const textEntry = createA2uiRegistryEntry({
         <span
           data-slot="a2ui-text"
           data-variant="caption"
-          className="text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.4)] [color:var(--rad-color-muted-foreground,oklch(0.45_0.01_286))]"
+          className={`text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.4)] [color:var(--rad-color-muted-foreground,oklch(0.45_0.01_286))]${reserve}`}
         >
           {text}
         </span>
@@ -163,7 +168,7 @@ const textEntry = createA2uiRegistryEntry({
       <p
         data-slot="a2ui-text"
         data-variant="body"
-        className="m-0 text-[length:var(--rad-typography-roles-ui-body-size,1rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]"
+        className={`m-0 text-[length:var(--rad-typography-roles-ui-body-size,1rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]${reserve}`}
       >
         {text}
       </p>

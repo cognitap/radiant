@@ -217,7 +217,8 @@ test('coerces invalid props, missing required props, and mixed state without thr
         used: undefined
       }),
       expect.objectContaining({
-        kind: 'fallback',
+        kind: 'error',
+        code: 'UNKNOWN_COMPONENT_TYPE',
         nodeId: 'unknown_banner',
         component: 'PromoBanner',
         prop: 'component',
@@ -231,7 +232,8 @@ test('coerces invalid props, missing required props, and mixed state without thr
   expect(summary.total).toBe(diagnostics.length)
   expect(summary.defaults).toBe(1)
   expect(summary.stripped).toBe(2)
-  expect(summary.fallbacks).toBe(1)
+  expect(summary.fallbacks).toBe(0)
+  expect(summary.errors).toBe(1)
   expect(summary.coercions).toBeGreaterThanOrEqual(5)
 })
 
