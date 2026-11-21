@@ -23,6 +23,7 @@ Storybook runs at [http://localhost:6006](http://localhost:6006), where the tool
 
 | Command                | Purpose                                                                                                                   |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm build`           | Build `dist/library` in place, then delete output of removed sources. The folder stays readable during the build.         |
 | `pnpm watch`           | Rebuild on change, except `reset.css`. Run `pnpm build` first.                                                            |
 | `pnpm test`            | Build, run `tests/*.test.mjs`, and run `pnpm test:package`.                                                               |
 | `pnpm test:package`    | Pack the tarball, install it in a temporary directory, and run `tests/package/`.                                          |
