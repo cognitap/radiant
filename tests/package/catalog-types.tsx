@@ -83,6 +83,17 @@ export const coercedDiagnostics: readonly CatalogDiagnostic[] = coerceSchemaProp
   { nodeId: 'go', component: 'Button' }
 ).diagnostics
 export const summary: CatalogDiagnosticSummary = summarizeCatalogDiagnostics(coercedDiagnostics)
+export const protocolError: CatalogDiagnostic = {
+  kind: 'error',
+  code: 'CYCLIC_REFERENCE',
+  nodeId: 'root',
+  component: 'surface',
+  prop: 'message',
+  received: undefined,
+  used: undefined,
+  reason: 'Cycle.'
+}
+export const errorCount: number = summary.errors
 export const stateSnapshot: CatalogSurfaceState = snapshotSurfaceState({ answer: '42' })
 export const arrayStateSnapshot: CatalogSurfaceState = snapshotSurfaceState([{ enabled: true }])
 export const primitiveJsonValue: CatalogJsonValue = 'ready'

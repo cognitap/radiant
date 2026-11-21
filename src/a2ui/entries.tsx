@@ -153,7 +153,7 @@ const textEntry = createA2uiRegistryEntry({
         <span
           data-slot="a2ui-text"
           data-variant="caption"
-          className="text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.4)] [color:var(--rad-color-muted-foreground,oklch(0.45_0.01_286))]"
+          className="min-h-[1lh] text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.4)] [color:var(--rad-color-muted-foreground,oklch(0.45_0.01_286))]"
         >
           {text}
         </span>
@@ -163,7 +163,7 @@ const textEntry = createA2uiRegistryEntry({
       <p
         data-slot="a2ui-text"
         data-variant="body"
-        className="m-0 text-[length:var(--rad-typography-roles-ui-body-size,1rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]"
+        className="m-0 min-h-[1lh] text-[length:var(--rad-typography-roles-ui-body-size,1rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]"
       >
         {text}
       </p>

@@ -1,7 +1,7 @@
 import type { CatalogJsonPrimitive, CatalogJsonSchema } from './types.js'
 import { isForbiddenCatalogProp } from './validate.js'
 
-export type CatalogDiagnosticKind = 'coerced' | 'defaulted' | 'stripped' | 'fallback'
+export type CatalogDiagnosticKind = 'coerced' | 'defaulted' | 'stripped' | 'fallback' | 'error'
 
 export type CatalogDiagnostic = {
   readonly kind: CatalogDiagnosticKind
@@ -11,6 +11,8 @@ export type CatalogDiagnostic = {
   readonly received: unknown
   readonly used: unknown
   readonly reason: string
+  /** Stable machine-readable code for catalog and protocol errors, such as `UNKNOWN_COMPONENT_TYPE`. */
+  readonly code?: string
 }
 
 export type CatalogDiagnosticSummary = {
@@ -19,6 +21,7 @@ export type CatalogDiagnosticSummary = {
   readonly defaults: number
   readonly stripped: number
   readonly fallbacks: number
+  readonly errors: number
   readonly byComponent: Readonly<Record<string, number>>
   readonly byProp: Readonly<Record<string, number>>
 }
@@ -110,7 +113,7 @@ export function extractFallbackText(rawProps: Readonly<Record<string, unknown>>)
 export function summarizeCatalogDiagnostics(
   diagnostics: readonly CatalogDiagnostic[]
 ): CatalogDiagnosticSummary {
-  const counts = { coerced: 0, defaulted: 0, stripped: 0, fallback: 0 }
+  const counts = { coerced: 0, defaulted: 0, stripped: 0, fallback: 0, error: 0 }
   const byComponent: Record<string, number> = {}
   const byProp: Record<string, number> = {}
   const increment = (map: Record<string, number>, key: string) => {
@@ -127,6 +130,7 @@ export function summarizeCatalogDiagnostics(
     defaults: counts.defaulted,
     stripped: counts.stripped,
     fallbacks: counts.fallback,
+    errors: counts.error,
     byComponent: Object.freeze(byComponent),
     byProp: Object.freeze(byProp)
   })
