@@ -26,6 +26,8 @@ import {
 import { A2UI_NODE_ENTRY_ANIMATION_ID } from '../../src/a2ui/surfaceRuntime.js'
 import { summarizeCatalogDiagnostics } from '../../src/catalog/index.js'
 import {
+  INACCESSIBLE_SURFACE_ID,
+  inaccessibleFixtureMessages,
   interactivePreferencesFixtureMessages,
   malformedProfileFixtureMessages,
   PREFERENCES_SURFACE_ID,
@@ -2818,4 +2820,23 @@ test('renders and stays interactive when --rad-motion-release-ease uses an inval
   })
   expect(onAction).toHaveBeenCalledTimes(1)
   expect(onAction.mock.calls[0]![0].action).toBe('submit')
+})
+
+test('warns once in development about inaccessible nodes and keeps rendering', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  try {
+    const { host } = await mount(
+      <A2uiSurface
+        surfaceId={INACCESSIBLE_SURFACE_ID}
+        messages={inaccessibleFixtureMessages}
+      />
+    )
+    const accessibilityWarnings = () =>
+      warn.mock.calls.filter(([message]) => String(message).startsWith('A2UI accessibility'))
+    await expect.poll(() => accessibilityWarnings().length).toBe(1)
+    expect(String(accessibilityWarnings()[0]?.[0])).toContain('Button "submit_button"')
+    expect(host.querySelector('[data-slot="a2ui-surface"]')).not.toBeNull()
+  } finally {
+    warn.mockRestore()
+  }
 })

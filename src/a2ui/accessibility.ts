@@ -127,7 +127,14 @@ export function warnA2uiAccessibility(
   if (!isDevelopment()) return
   let warned = warnedByRegistry.get(registry)
   if (!warned) warnedByRegistry.set(registry, (warned = new Set()))
-  const fresh = validateA2uiAccessibility(messages, { registry }).errors.filter(error => {
+  let errors: readonly A2uiAccessibilityError[]
+  try {
+    errors = validateA2uiAccessibility(messages, { registry }).errors
+  } catch (error) {
+    console.warn('A2UI accessibility check failed.', error)
+    return
+  }
+  const fresh = errors.filter(error => {
     const key = `${error.surfaceId}\u0000${error.nodeId}\u0000${error.rule}`
     if (warned.has(key)) return false
     warned.add(key)

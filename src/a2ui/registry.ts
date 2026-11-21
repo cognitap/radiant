@@ -108,6 +108,15 @@ export function createA2uiRegistryEntry(input: A2uiRegistryEntryInput): A2uiRegi
   if (!Array.isArray(input.accessibility)) {
     throw new TypeError(`A2UI registry entry "${input.name}" must declare accessibility rules.`)
   }
+  if (
+    !input.accessibility.every(
+      rule => rule && typeof rule.id === 'string' && rule.id && typeof rule.check === 'function'
+    )
+  ) {
+    throw new TypeError(
+      `A2UI registry entry "${input.name}" has an accessibility rule without an id or check function.`
+    )
+  }
   const forbidden = findForbiddenInA2uiSchema(input.schema, `${input.name}.schema`)
   if (forbidden.length > 0) {
     throw new TypeError(

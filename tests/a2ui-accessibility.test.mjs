@@ -83,6 +83,18 @@ test('every registry entry declares its accessibility rules', () => {
       }),
     /must declare accessibility rules/
   )
+  assert.throws(
+    () =>
+      createA2uiRegistryEntry({
+        name: 'Malformed',
+        component: 'div',
+        description: 'Declares a rule without a check.',
+        schema: { type: 'object', properties: { component: { const: 'Malformed' } } },
+        adapter: () => null,
+        accessibility: [{ id: 'broken' }]
+      }),
+    /accessibility rule without an id or check function/
+  )
 })
 
 test('validateA2uiAccessibility reports exact errors across patches without a DOM', () => {
