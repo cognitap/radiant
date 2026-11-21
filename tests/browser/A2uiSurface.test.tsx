@@ -1,6 +1,6 @@
-import { act, StrictMode, type ComponentProps } from 'react'
-import { expect, test, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { act, StrictMode, useEffect, useRef, type ComponentProps } from 'react'
+import { afterEach, expect, test, vi } from 'vitest'
+import { commands, userEvent } from 'vitest/browser'
 import {
   A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
@@ -12,6 +12,7 @@ import {
   type A2uiMessage,
   type CatalogDiagnostic
 } from '../../src/a2ui/index.js'
+import { A2UI_NODE_ENTRY_ANIMATION_ID } from '../../src/a2ui/surfaceRuntime.js'
 import { summarizeCatalogDiagnostics } from '../../src/catalog/index.js'
 import {
   interactivePreferencesFixtureMessages,
@@ -21,9 +22,15 @@ import {
   profileFixtureMessages,
   profileFixtureWithThemeHintMessages
 } from '../../src/a2ui/fixtures.js'
-import { Input, ThemeScope, defaultTheme } from '../../src/index.js'
+import { Button, Input, ThemeScope, defaultTheme, defineTheme } from '../../src/index.js'
+import { useSpringDrag } from '../../src/motion/react.js'
 import { themes } from '../../src/examples/index.js'
 import { mount } from './familyHarness.js'
+import type {} from './mediaCommands.js'
+
+afterEach(async () => {
+  await commands.emulatePreferences({ reducedMotion: 'no-preference' })
+})
 
 test('renders the A2UI 1.0 tracer-bullet fixture with Radiant Field, Input, Button and Text, and hydrates cleanly', async () => {
   const onAction = vi.fn<(action: A2uiActionPayload) => void>()
@@ -912,4 +919,647 @@ test('ChoicePicker and Slider use authored accessible names and diagnose missing
       })
     ])
   )
+})
+
+test('patches a surface while an input has focus, typed text, selection, and scroll position without losing them', async () => {
+  const initialMessages: A2uiMessage[] = [
+    surfaceMessage(
+      's_patch_input',
+      [
+        { id: 'root', component: 'Column', children: ['status_text', 'note_field', 'notes_area'] },
+        { id: 'status_text', component: 'Text', text: { '@path': '/status' } },
+        {
+          id: 'note_field',
+          component: 'TextField',
+          label: 'Summary note',
+          placeholder: 'Write a note',
+          value: { '@path': '/note' },
+          variant: 'shortText'
+        },
+        {
+          id: 'notes_area',
+          component: 'TextField',
+          label: 'Long notes',
+          value: { '@path': '/longNote' },
+          variant: 'longText'
+        }
+      ],
+      {
+        status: 'Waiting for agent',
+        note: '',
+        longNote: Array.from({ length: 24 }, (_, i) => `Line ${i + 1}`).join('\n')
+      }
+    )
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_patch_input"
+      messages={initialMessages}
+    />
+  )
+
+  const input = view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  const textarea = view.host.querySelector<HTMLTextAreaElement>('textarea[data-slot~="textarea"]')!
+
+  // Establish scroll position on the textarea and focus + typed text + caret on the input
+  textarea.style.height = '64px'
+  textarea.scrollTop = 90
+  const scrollBefore = textarea.scrollTop
+  expect(scrollBefore).toBeGreaterThan(0)
+
+  await act(async () => {
+    input.focus()
+    await userEvent.type(input, 'Keep focus alive')
+    input.setSelectionRange(4, 10)
+  })
+  expect(document.activeElement).toBe(input)
+  expect(input.value).toBe('Keep focus alive')
+
+  // Pass a freshly cloned prefix plus incremental patches updating siblings, the input's own label,
+  // an unrelated data path, and inserting new siblings before and after the focused input.
+  const patchedMessages: A2uiMessage[] = [
+    structuredClone(initialMessages[0]!),
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_patch_input',
+        components: [
+          {
+            id: 'root',
+            component: 'Column',
+            children: ['top_banner', 'status_text', 'note_field', 'notes_area', 'bottom_note']
+          },
+          { id: 'top_banner', component: 'Text', text: 'Agent suggestion ready' },
+          {
+            id: 'note_field',
+            component: 'TextField',
+            label: 'Summary note (synced)',
+            placeholder: 'Updated placeholder',
+            value: { '@path': '/note' },
+            variant: 'shortText'
+          },
+          { id: 'bottom_note', component: 'Text', text: 'Draft saved locally', variant: 'caption' }
+        ]
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_patch_input',
+        path: '/status',
+        value: 'Agent updated sibling'
+      }
+    }
+  ]
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_patch_input"
+      messages={patchedMessages}
+    />
+  )
+
+  expect(view.host.textContent).toContain('Agent suggestion ready')
+  expect(view.host.textContent).toContain('Agent updated sibling')
+  expect(view.host.textContent).toContain('Summary note (synced)')
+  expect(view.host.textContent).toContain('Draft saved locally')
+
+  const inputAfter = view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  const textareaAfter = view.host.querySelector<HTMLTextAreaElement>(
+    'textarea[data-slot~="textarea"]'
+  )!
+
+  expect(inputAfter).toBe(input)
+  expect(document.activeElement).toBe(input)
+  expect(inputAfter.value).toBe('Keep focus alive')
+  expect(inputAfter.selectionStart).toBe(4)
+  expect(inputAfter.selectionEnd).toBe(10)
+  expect(textareaAfter).toBe(textarea)
+  expect(textareaAfter.scrollTop).toBe(scrollBefore)
+
+  // Continued typing works immediately without refocusing
+  await act(async () => {
+    inputAfter.setSelectionRange(inputAfter.value.length, inputAfter.value.length)
+    await userEvent.type(inputAfter, '!')
+  })
+  expect(inputAfter.value).toBe('Keep focus alive!')
+  expect(document.activeElement).toBe(input)
+})
+
+test('patches a sibling while a drag is in progress without interrupting the drag', async () => {
+  let latestDrag: ReturnType<typeof useSpringDrag> | undefined
+
+  function DragHandle({ label }: { readonly label: string }) {
+    const ref = useRef<HTMLButtonElement>(null)
+    const drag = useSpringDrag(ref, 0, { min: 0, max: 160, snapPoints: [0, 80, 160] })
+    useEffect(() => {
+      latestDrag = drag
+    }, [drag])
+    return (
+      <Button
+        ref={ref}
+        data-testid="a2ui-drag-handle"
+      >
+        {label}
+      </Button>
+    )
+  }
+
+  const dragRegistry = createA2uiRegistry({
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    title: 'Drag patch test catalog',
+    description: 'Registry with a draggable handle entry for mid-drag patch verification.',
+    entries: [
+      ...Object.values(radiantA2uiRegistry.entries),
+      createA2uiRegistryEntry({
+        name: 'DragHandle',
+        component: DragHandle,
+        description: 'One-axis spring drag handle.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'DragHandle' },
+            label: { type: 'string' }
+          },
+          required: ['component', 'label']
+        },
+        adapter: props => <DragHandle label={String(props.label ?? 'Drag')} />
+      })
+    ]
+  })
+
+  const initialMessages: A2uiMessage[] = [
+    surfaceMessage('s_patch_drag', [
+      { id: 'root', component: 'Column', children: ['status_text', 'drag_node'] },
+      { id: 'status_text', component: 'Text', text: 'Before sibling patch' },
+      { id: 'drag_node', component: 'DragHandle', label: 'Slide handle' }
+    ])
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_patch_drag"
+      registry={dragRegistry}
+      messages={initialMessages}
+    />
+  )
+
+  const handleBefore = view.host.querySelector<HTMLButtonElement>(
+    '[data-testid="a2ui-drag-handle"]'
+  )!
+  const rect = handleBefore.getBoundingClientRect()
+  const startX = rect.left + rect.width / 2
+  const startY = rect.top + rect.height / 2
+
+  // Begin a real pointer drag and move past the drag threshold
+  handleBefore.dispatchEvent(
+    new PointerEvent('pointerdown', {
+      bubbles: true,
+      button: 0,
+      isPrimary: true,
+      pointerId: 1,
+      clientX: startX,
+      clientY: startY
+    })
+  )
+  document.dispatchEvent(
+    new PointerEvent('pointermove', {
+      bubbles: true,
+      isPrimary: true,
+      pointerId: 1,
+      clientX: startX + 40,
+      clientY: startY
+    })
+  )
+  expect(latestDrag!.get()).toBeCloseTo(40, 1)
+
+  // Patch the surface mid-drag: update an existing sibling and append a new sibling
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_patch_drag"
+      registry={dragRegistry}
+      messages={[
+        ...initialMessages,
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          updateComponents: {
+            surfaceId: 's_patch_drag',
+            components: [
+              {
+                id: 'root',
+                component: 'Column',
+                children: ['status_text', 'drag_node', 'live_hint']
+              },
+              { id: 'status_text', component: 'Text', text: 'Updated while dragging' },
+              { id: 'live_hint', component: 'Text', text: 'New sibling appeared mid-drag' }
+            ]
+          }
+        }
+      ]}
+    />
+  )
+
+  const handleAfter = view.host.querySelector<HTMLButtonElement>(
+    '[data-testid="a2ui-drag-handle"]'
+  )!
+  expect(handleAfter).toBe(handleBefore)
+  expect(view.host.textContent).toContain('Updated while dragging')
+  expect(view.host.textContent).toContain('New sibling appeared mid-drag')
+
+  // Continue dragging after the patch and release; the drag completes seamlessly
+  document.dispatchEvent(
+    new PointerEvent('pointermove', {
+      bubbles: true,
+      isPrimary: true,
+      pointerId: 1,
+      clientX: startX + 135,
+      clientY: startY
+    })
+  )
+  expect(latestDrag!.get()).toBeCloseTo(135, 1)
+
+  document.dispatchEvent(
+    new PointerEvent('pointerup', {
+      bubbles: true,
+      isPrimary: true,
+      pointerId: 1,
+      clientX: startX + 135,
+      clientY: startY
+    })
+  )
+  await expect.poll(() => Math.abs(latestDrag!.get() - 160) < 0.5, { timeout: 4_000 }).toBe(true)
+})
+
+test('runs entry motion only for newly mounted nodes and respects reduced motion and off mode', async () => {
+  const animatedElements: HTMLElement[] = []
+  const originalAnimate = Element.prototype.animate
+  const animateSpy = vi.spyOn(Element.prototype, 'animate').mockImplementation(function (
+    this: Element,
+    keyframes,
+    options
+  ) {
+    if (
+      typeof options === 'object' &&
+      options !== null &&
+      'id' in options &&
+      options.id === A2UI_NODE_ENTRY_ANIMATION_ID &&
+      this instanceof HTMLElement
+    ) {
+      animatedElements.push(this)
+    }
+    return originalAnimate.call(this, keyframes, options)
+  })
+
+  try {
+    const initialMessages: A2uiMessage[] = [
+      surfaceMessage(
+        's_entry_motion',
+        [
+          { id: 'root', component: 'Column', children: ['intro', 'name_field', 'save_btn'] },
+          { id: 'intro', component: 'Text', text: 'Initial intro' },
+          {
+            id: 'name_field',
+            component: 'TextField',
+            label: 'Name',
+            value: { '@path': '/name' },
+            checks: [{ condition: { '@path': '/ok' }, message: 'Name required' }]
+          },
+          {
+            id: 'save_btn',
+            component: 'Button',
+            child: 'save_label',
+            action: { event: { name: 'save' } }
+          },
+          { id: 'save_label', component: 'Text', text: 'Save' }
+        ],
+        { name: 'Ada', ok: true }
+      )
+    ]
+
+    const view = await mount(
+      <A2uiSurface
+        surfaceId="s_entry_motion"
+        messages={initialMessages}
+      />
+    )
+
+    const introEl = view.host.querySelector<HTMLElement>('p[data-slot="a2ui-text"]')!
+    const fieldEl = view.host.querySelector<HTMLElement>('[data-slot~="field"]')!
+    const buttonEl = view.host.querySelector<HTMLElement>('button[data-slot~="button"]')!
+
+    expect(animatedElements).toEqual([introEl, fieldEl, buttonEl])
+    animatedElements.length = 0
+
+    // Patch existing nodes (text, label, validation error) and add one new sibling
+    const patchWithNewNode: A2uiMessage[] = [
+      ...initialMessages,
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        updateComponents: {
+          surfaceId: 's_entry_motion',
+          components: [
+            {
+              id: 'root',
+              component: 'Column',
+              children: ['intro', 'name_field', 'new_hint', 'save_btn']
+            },
+            { id: 'intro', component: 'Text', text: 'Updated intro' },
+            {
+              id: 'name_field',
+              component: 'TextField',
+              label: 'Full name',
+              value: { '@path': '/name' },
+              checks: [{ condition: { '@path': '/ok' }, message: 'Name required' }]
+            },
+            { id: 'new_hint', component: 'Text', text: 'Brand new sibling', variant: 'caption' }
+          ]
+        }
+      },
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        updateDataModel: { surfaceId: 's_entry_motion', path: '/ok', value: false }
+      }
+    ]
+
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_entry_motion"
+        messages={patchWithNewNode}
+      />
+    )
+
+    const newHintEl = view.host.querySelector<HTMLElement>(
+      'span[data-slot="a2ui-text"][data-variant="caption"]'
+    )!
+    expect(animatedElements).toEqual([newHintEl])
+    expect(animatedElements).not.toContain(introEl)
+    expect(animatedElements).not.toContain(fieldEl)
+    expect(animatedElements).not.toContain(buttonEl)
+    animatedElements.length = 0
+
+    // Patching without adding any new node triggers zero entry animations
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_entry_motion"
+        messages={[
+          ...patchWithNewNode,
+          {
+            version: A2UI_PROTOCOL_VERSION,
+            updateComponents: {
+              surfaceId: 's_entry_motion',
+              components: [
+                {
+                  id: 'root',
+                  component: 'Column',
+                  children: ['name_field', 'new_hint', 'save_btn']
+                },
+                { id: 'new_hint', component: 'Text', text: 'Edited hint', variant: 'caption' }
+              ]
+            }
+          }
+        ]}
+      />
+    )
+    expect(animatedElements).toEqual([])
+
+    // Reduced motion disables entry motion
+    await commands.emulatePreferences({ reducedMotion: 'reduce' })
+    await mount(
+      <A2uiSurface
+        surfaceId="s_entry_reduced"
+        messages={[
+          surfaceMessage('s_entry_reduced', [
+            { id: 'root', component: 'Column', children: ['t1'] },
+            { id: 't1', component: 'Text', text: 'Reduced motion' }
+          ])
+        ]}
+      />
+    )
+    expect(animatedElements).toEqual([])
+
+    // Theme motion mode="off" disables entry motion
+    await commands.emulatePreferences({ reducedMotion: 'no-preference' })
+    const stillTheme = defineTheme({
+      id: 'still',
+      name: 'Still',
+      motion: { mode: 'off' }
+    })
+    await mount(
+      <ThemeScope
+        theme={stillTheme}
+        mode="light"
+      >
+        <A2uiSurface
+          surfaceId="s_entry_off"
+          messages={[
+            surfaceMessage('s_entry_off', [
+              { id: 'root', component: 'Column', children: ['t1'] },
+              { id: 't1', component: 'Text', text: 'Motion off' }
+            ])
+          ]}
+        />
+      </ThemeScope>
+    )
+    expect(animatedElements).toEqual([])
+  } finally {
+    animateSpy.mockRestore()
+  }
+})
+
+test('removing a focused node moves focus to the documented fallback instead of document.body', async () => {
+  const step0: A2uiMessage[] = [
+    surfaceMessage(
+      's_focus_fallback',
+      [
+        {
+          id: 'root',
+          component: 'Column',
+          children: ['intro', 'field_a', 'field_b', 'save_btn']
+        },
+        { id: 'intro', component: 'Text', text: 'Focus test' },
+        { id: 'field_a', component: 'TextField', label: 'First', value: { '@path': '/a' } },
+        { id: 'field_b', component: 'TextField', label: 'Second', value: { '@path': '/b' } },
+        {
+          id: 'save_btn',
+          component: 'Button',
+          child: 'save_label',
+          action: { event: { name: 'save' } }
+        },
+        { id: 'save_label', component: 'Text', text: 'Save' }
+      ],
+      { a: 'A', b: 'B' }
+    )
+  ]
+
+  const view = await mount(
+    <div>
+      <button
+        type="button"
+        data-testid="outside-btn"
+      >
+        Outside
+      </button>
+      <A2uiSurface
+        surfaceId="s_focus_fallback"
+        messages={step0}
+      />
+    </div>
+  )
+
+  const inputs = () =>
+    Array.from(view.host.querySelectorAll<HTMLInputElement>('input[data-slot~="input"]'))
+  const surfaceEl = () => view.host.querySelector<HTMLDivElement>('[data-slot="a2ui-surface"]')!
+  const saveBtn = () => view.host.querySelector<HTMLButtonElement>('button[data-slot~="button"]')!
+
+  // 1. Removing a middle focused node moves focus to the next surviving focusable control
+  inputs()[1]!.focus()
+  expect(document.activeElement).toBe(inputs()[1])
+  const step1: A2uiMessage[] = [
+    ...step0,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_focus_fallback',
+        components: [
+          { id: 'root', component: 'Column', children: ['intro', 'field_a', 'save_btn'] }
+        ]
+      }
+    }
+  ]
+  await view.render(
+    <div>
+      <button
+        type="button"
+        data-testid="outside-btn"
+      >
+        Outside
+      </button>
+      <A2uiSurface
+        surfaceId="s_focus_fallback"
+        messages={step1}
+      />
+    </div>
+  )
+  expect(document.activeElement).toBe(saveBtn())
+  expect(document.activeElement).not.toBe(document.body)
+
+  // 2. Removing the last focused node moves focus to the previous surviving focusable control
+  const step2: A2uiMessage[] = [
+    ...step1,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_focus_fallback',
+        components: [{ id: 'root', component: 'Column', children: ['intro', 'field_a'] }]
+      }
+    }
+  ]
+  await view.render(
+    <div>
+      <button
+        type="button"
+        data-testid="outside-btn"
+      >
+        Outside
+      </button>
+      <A2uiSurface
+        surfaceId="s_focus_fallback"
+        messages={step2}
+      />
+    </div>
+  )
+  expect(document.activeElement).toBe(inputs()[0])
+  expect(document.activeElement).not.toBe(document.body)
+
+  // 3. Replacing the only focused node with a new focusable node moves focus to the first remaining focusable
+  const step3: A2uiMessage[] = [
+    ...step2,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_focus_fallback',
+        components: [
+          { id: 'root', component: 'Column', children: ['intro', 'field_c'] },
+          { id: 'field_c', component: 'TextField', label: 'Replacement', value: { '@path': '/c' } }
+        ]
+      }
+    }
+  ]
+  await view.render(
+    <div>
+      <button
+        type="button"
+        data-testid="outside-btn"
+      >
+        Outside
+      </button>
+      <A2uiSurface
+        surfaceId="s_focus_fallback"
+        messages={step3}
+      />
+    </div>
+  )
+  expect(document.activeElement).toBe(inputs()[0])
+  expect(view.host.querySelector('label[data-slot~="field-label"]')?.textContent).toBe(
+    'Replacement'
+  )
+
+  // 4. Removing the last remaining focusable node moves focus to the surface root container
+  const step4: A2uiMessage[] = [
+    ...step3,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_focus_fallback',
+        components: [{ id: 'root', component: 'Column', children: ['intro'] }]
+      }
+    }
+  ]
+  await view.render(
+    <div>
+      <button
+        type="button"
+        data-testid="outside-btn"
+      >
+        Outside
+      </button>
+      <A2uiSurface
+        surfaceId="s_focus_fallback"
+        messages={step4}
+      />
+    </div>
+  )
+  expect(document.activeElement).toBe(surfaceEl())
+  expect(document.activeElement).not.toBe(document.body)
+
+  // 5. Patching the surface when focus is outside never steals external focus
+  const outsideBtn = view.host.querySelector<HTMLButtonElement>('[data-testid="outside-btn"]')!
+  outsideBtn.focus()
+  expect(document.activeElement).toBe(outsideBtn)
+  await view.render(
+    <div>
+      <button
+        type="button"
+        data-testid="outside-btn"
+      >
+        Outside
+      </button>
+      <A2uiSurface
+        surfaceId="s_focus_fallback"
+        messages={[
+          ...step4,
+          {
+            version: A2UI_PROTOCOL_VERSION,
+            updateComponents: {
+              surfaceId: 's_focus_fallback',
+              components: [{ id: 'root', component: 'Column', children: [] }]
+            }
+          }
+        ]}
+      />
+    </div>
+  )
+  expect(document.activeElement).toBe(outsideBtn)
 })

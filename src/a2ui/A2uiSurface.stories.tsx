@@ -2,7 +2,10 @@ import { useCallback, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, within } from 'storybook/test'
 import type { CatalogActionEvent, CatalogDiagnostic } from '../catalog/index.js'
+import { Button } from '../components/Button/Button.js'
+import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import { A2uiSurface, type A2uiActionPayload } from './A2uiSurface.js'
+import type { A2uiMessage } from './sanitize.js'
 import {
   interactivePreferencesFixtureMessages,
   malformedProfileFixtureMessages,
@@ -93,6 +96,55 @@ function LocalStateActionDemo() {
   )
 }
 
+function LiveAgentPatchDemo() {
+  const [patched, setPatched] = useState(false)
+  const messages: readonly A2uiMessage[] = patched
+    ? [
+        ...profileFixtureMessages,
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          updateComponents: {
+            surfaceId: PROFILE_SURFACE_ID,
+            components: [
+              {
+                id: 'root',
+                component: 'Column',
+                children: ['intro_text', 'agent_note', 'caption_text', 'name_field', 'save_button']
+              },
+              {
+                id: 'agent_note',
+                component: 'Text',
+                text: 'Live agent update applied without interrupting your edit.',
+                variant: 'caption'
+              }
+            ]
+          }
+        }
+      ]
+    : profileFixtureMessages
+
+  return (
+    <div className="grid max-w-md gap-4">
+      <A2uiSurface
+        surfaceId={PROFILE_SURFACE_ID}
+        messages={messages}
+      />
+      <div>
+        <Button
+          variant="outline"
+          disabled={patched}
+          onMouseDown={event => {
+            event.preventDefault()
+          }}
+          onClick={() => setPatched(true)}
+        >
+          Apply agent patch
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 const meta = {
   title: 'A2UI/Surface',
   component: A2uiSurface
@@ -168,5 +220,28 @@ export const LocalStateThenAction: Story = {
     await expect(canvas.getByTestId('a2ui-action-event')).toHaveTextContent(
       '"action":"apply_preferences"'
     )
+  }
+}
+
+export const LiveAgentPatch: Story = {
+  args: {
+    surfaceId: PROFILE_SURFACE_ID,
+    messages: profileFixtureMessages
+  },
+  render: () => <LiveAgentPatchDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', { name: 'Display name' })
+    await userEvent.clear(input)
+    await userEvent.type(input, 'Margaret Hamilton')
+    await expect(input).toHaveFocus()
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Apply agent patch' }))
+
+    await expect(
+      canvas.getByText('Live agent update applied without interrupting your edit.')
+    ).toBeVisible()
+    await expect(input).toHaveFocus()
+    await expect(input).toHaveValue('Margaret Hamilton')
   }
 }

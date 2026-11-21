@@ -411,7 +411,10 @@ function A2uiChoicePicker({
   )
 
   return filterInput ? (
-    <div className="grid gap-2">
+    <div
+      data-slot="a2ui-choice-picker"
+      className="grid gap-2"
+    >
       {filterInput}
       {group}
     </div>
