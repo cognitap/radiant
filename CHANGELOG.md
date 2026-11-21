@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add `Stack`, a one-dimensional flex layout with `direction`, `gap` from the theme spacing scale, `align`, `justify`, and `wrap`.
+
 ## 0.0.92
 
 - Add `@cognitap/radiant/catalog` defining Radiant's canonical, protocol-independent model-facing catalog with schema validation, forbidden-prop guardrails, and `extendCatalog`.
