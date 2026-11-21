@@ -77,8 +77,17 @@ type ExtensionProjection = {
   readonly description?: string
   /** Guidance in wire prop names; required with `description` or `omit`. */
   readonly guidance?: CatalogEntryGuidance
+  /** Canonical props to drop; `prop.field` drops a field from that prop's array items. */
   readonly omit?: readonly string[]
+  /** Canonical prop names renamed on the wire, such as `options` to `items`. */
+  readonly rename?: Readonly<Record<string, string>>
+  /** Canonical props that also accept a data binding or function call. */
+  readonly bindable?: readonly string[]
   readonly bindingValueTypes?: Readonly<Record<string, CatalogBindingValueType>>
+  /** Wire props added or replaced after projection, for renderer behavior with no canonical prop. */
+  readonly props?: Readonly<Record<string, A2uiJsonSchema>>
+  /** Require the bound value, as the basic inputs do; coercion defaults a missing one. */
+  readonly requireBindings?: boolean
 }
 
 const prop = (
@@ -520,6 +529,12 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   }
 ]
 
+const REQUIRED_MARK: A2uiJsonSchema = {
+  type: 'boolean',
+  default: false,
+  description: 'Marks the field required; use checks to enforce it.'
+}
+
 const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
   {
     a2uiName: 'Select',
@@ -528,22 +543,46 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
       whenToUse: 'One value from a long list in a compact dropdown.',
       whenNotToUse:
         'A few options better seen at once (RadioGroup) or filtering by typing (Combobox).',
-      examples: ['country, `placeholder: Choose a country`', 'time zone with `description` text']
+      examples: ['country, `items` bound to a data path', 'time zone with `description` text']
     },
     description: 'Single-value dropdown selection backed by Radiant Select.',
-    omit: ['selection', 'presentation', 'searchable'],
-    bindingValueTypes: { value: 'string' }
+    omit: ['selection', 'presentation', 'searchable', 'options.description'],
+    rename: { options: 'items' },
+    bindable: ['options'],
+    bindingValueTypes: { value: 'string' },
+    props: { required: REQUIRED_MARK },
+    requireBindings: true
   },
   {
     a2uiName: 'Combobox',
     sourceEntry: 'Choice',
     guidance: {
-      whenToUse: 'Filtering many options by typing, for one or several values.',
+      whenToUse:
+        'Filtering many options by typing. To search on the host, bind `query`, handle `search`, and update bound `items`, keeping selected ones.',
       whenNotToUse: 'Short lists (RadioGroup) or free text (TextField).',
       examples: ['city search, `selection: single`', 'assignees, `selection: multiple`']
     },
     description: 'Filterable dropdown selection backed by Radiant Combobox.',
-    omit: ['presentation', 'searchable']
+    omit: ['presentation', 'searchable', 'options.description'],
+    rename: { options: 'items' },
+    bindable: ['options'],
+    props: {
+      required: REQUIRED_MARK,
+      query: {
+        $ref: `${COMMON}DynamicString`,
+        description: 'Typed search text written to surface state.'
+      },
+      search: {
+        $ref: `${COMMON}Action`,
+        description:
+          'Action sent 250 ms after the typed text changes; with it or query set, items are shown unfiltered.'
+      },
+      loading: {
+        $ref: `${COMMON}DynamicBoolean`,
+        description: 'Shows a loading status while the host fetches items.'
+      }
+    },
+    requireBindings: true
   },
   {
     a2uiName: 'RadioGroup',
@@ -551,23 +590,27 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
     guidance: {
       whenToUse: 'One value from a few options, all visible at once.',
       whenNotToUse: 'Many options (Select) or several values (Combobox).',
-      examples: ['delivery speed with a `description` per option', 'plan size, `required: true`']
+      examples: ['delivery speed with a `description` per option', 'plan size, enforced by checks']
     },
     description: 'Mutually exclusive radio options backed by Radiant RadioGroup.',
     omit: ['selection', 'presentation', 'searchable', 'placeholder'],
-    bindingValueTypes: { value: 'string' }
+    bindingValueTypes: { value: 'string' },
+    props: { required: REQUIRED_MARK },
+    requireBindings: true
   },
-  { a2uiName: 'Switch', sourceEntry: 'Switch' },
+  { a2uiName: 'Switch', sourceEntry: 'Switch', requireBindings: true },
   {
     a2uiName: 'Textarea',
     sourceEntry: 'TextField',
     guidance: {
       whenToUse: 'Paragraphs of free text; set `rows` for the expected length.',
       whenNotToUse: 'Single-line values (TextField) or known options (Select).',
-      examples: ['feedback, `rows: 4`', 'bug report, `required: true`']
+      examples: ['feedback, `rows: 4`', 'bug report, enforced by checks']
     },
     description: 'Multi-line text input backed by Radiant Textarea.',
-    omit: ['kind']
+    omit: ['kind'],
+    props: { required: REQUIRED_MARK },
+    requireBindings: true
   },
   { a2uiName: 'Alert', sourceEntry: 'Alert' },
   { a2uiName: 'Badge', sourceEntry: 'Badge' },
@@ -733,12 +776,30 @@ function projectBasic(
   )
 }
 
+function omitItemFields(
+  schema: CatalogJsonSchema,
+  propName: string,
+  omit: ReadonlySet<string>
+): CatalogJsonSchema {
+  const copy = structuredClone(schema)
+  const fields = [...omit]
+    .filter(path => path.startsWith(`${propName}.`))
+    .map(path => path.slice(propName.length + 1))
+  const items = copy.items as
+    | { properties?: Record<string, unknown>; required?: string[] }
+    | undefined
+  if (!fields.length || !items?.properties) return copy
+  for (const field of fields) delete items.properties[field]
+  if (items.required) items.required = items.required.filter(field => !fields.includes(field))
+  return copy
+}
+
 function projectExtension(
   entry: CatalogEntry,
   projection: ExtensionProjection,
   names: EntryNames
 ): A2uiJsonSchema {
-  if ((projection.description || projection.omit) && !projection.guidance) {
+  if ((projection.description || projection.omit || projection.props) && !projection.guidance) {
     fail(projection.a2uiName, 'a projection that renames or omits props needs its own guidance.')
   }
   const omit = new Set(projection.omit ?? [])
@@ -746,24 +807,26 @@ function projectExtension(
   const required: string[] = []
   let checkable = false
 
+  const wire = (propName: string) => projection.rename?.[propName] ?? propName
   for (const [propName, propSchema] of Object.entries(entry.propsSchema.properties)) {
     if (omit.has(propName)) continue
+    const schema = omitItemFields(propSchema, propName, omit)
     // A binding that shares a prop's name makes that prop bindable without losing its constraints.
-    const bound = Object.hasOwn(entry.bindings, propName)
+    const bound = Object.hasOwn(entry.bindings, propName) || projection.bindable?.includes(propName)
     if (bound) {
-      const { description, ...literal } = structuredClone(propSchema)
-      properties[propName] = withDescription(
+      const { description, ...literal } = schema
+      properties[wire(propName)] = withDescription(
         {
-          oneOf: [literal, { $ref: `${COMMON}DataBinding` }, { $ref: `${COMMON}FunctionCall` }]
+          anyOf: [literal, { $ref: `${COMMON}DataBinding` }, { $ref: `${COMMON}FunctionCall` }]
         },
         description
       )
     } else {
-      properties[propName] = structuredClone(propSchema)
+      properties[wire(propName)] = schema
     }
   }
   for (const requiredProp of entry.propsSchema.required ?? []) {
-    if (!omit.has(requiredProp)) required.push(requiredProp)
+    if (!omit.has(requiredProp)) required.push(wire(requiredProp))
   }
   for (const [bindingName, bound] of Object.entries(entry.bindings)) {
     if (omit.has(bindingName)) continue
@@ -774,6 +837,14 @@ function projectExtension(
       $ref: DYNAMIC_REF_BY_BINDING_TYPE[valueType],
       description: bound.description
     }
+  }
+  if (projection.requireBindings) {
+    for (const bindingName of Object.keys(entry.bindings)) {
+      if (!omit.has(bindingName)) required.push(bindingName)
+    }
+  }
+  for (const [wireName, schema] of Object.entries(projection.props ?? {})) {
+    properties[wireName] = structuredClone(schema)
   }
   for (const [slotName, slotConstraint] of Object.entries(entry.slots)) {
     properties[slotName] = slotSchema(slotConstraint)
@@ -867,7 +938,10 @@ const BASIC_INSTRUCTIONS = renderCatalogInstructions({
   ]
 })
 
-function extensionInstructions(components: Readonly<Record<string, A2uiJsonSchema>>): string {
+/** Design rules for the Radiant vocabulary (variant, tone, controlSize, spacing) `components` use. */
+export function a2uiExtensionInstructions(
+  components: Readonly<Record<string, A2uiJsonSchema>>
+): string {
   const props = collectSchemaProps(Object.values(components))
   const hasEnum = (prop: string, value: string) =>
     (props.get(prop) ?? []).some(
@@ -896,6 +970,17 @@ function extensionInstructions(components: Readonly<Record<string, A2uiJsonSchem
  * The basic catalog defines the basic functions Radiant runs; see `A2UI_OMITTED_FUNCTIONS`.
  */
 export function generateA2uiCatalogs(catalog: Catalog): GeneratedA2uiCatalogs {
+  let generated = generatedCatalogs.get(catalog)
+  if (!generated) {
+    generated = generateUncached(catalog)
+    generatedCatalogs.set(catalog, generated)
+  }
+  return structuredClone(generated)
+}
+
+const generatedCatalogs = new WeakMap<Catalog, GeneratedA2uiCatalogs>()
+
+function generateUncached(catalog: Catalog): GeneratedA2uiCatalogs {
   assertValidCatalog(catalog)
 
   const sourceFor = (a2uiName: string, sourceEntry: string): CatalogEntry =>
@@ -984,7 +1069,7 @@ export function generateA2uiCatalogs(catalog: Catalog): GeneratedA2uiCatalogs {
         : RADIANT_A2UI_EXTENSION_CATALOG_ID,
       'Radiant A2UI Extension Catalog',
       `${generatedFrom} Use alongside the A2UI basic catalog.`,
-      extensionInstructions(extensionComponents),
+      a2uiExtensionInstructions(extensionComponents),
       extensionComponents
     )
   }

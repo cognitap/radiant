@@ -23,6 +23,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/a2ui/catalog.json",
+    "src/a2ui/extension-catalog.json",
     "src/styles.css",
     "src/themes/baseline.css",
     "!src/**/*.stories.*",
@@ -80,6 +81,7 @@
       "default": "./dist/library/a2ui/index.js"
     },
     "./a2ui/catalog.json": "./src/a2ui/catalog.json",
+    "./a2ui/extension-catalog.json": "./src/a2ui/extension-catalog.json",
     "./a2ui/lucide": {
       "types": "./dist/library/a2ui/lucide.d.ts",
       "default": "./dist/library/a2ui/lucide.js"

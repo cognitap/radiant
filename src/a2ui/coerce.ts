@@ -13,7 +13,7 @@ import {
   type DiagnosticLogger
 } from '../catalog/coerce.js'
 import type { CatalogJsonSchema } from '../catalog/types.js'
-import type { A2uiRegistry, A2uiRegistryEntry } from './registry.js'
+import { findA2uiRegistry, type A2uiRegistry, type A2uiRegistryEntry } from './registry.js'
 import { sanitizeA2uiMessages, type A2uiMessage } from './sanitize.js'
 
 /** Internal action name used when a required A2UI action was missing and coerced to a no-op. */
@@ -25,6 +25,19 @@ export type CoerceA2uiMessagesResult = {
 }
 
 const ENVELOPE_KEYS = new Set(['id', 'catalogId', 'checks', 'metadata', 'accessibility'])
+
+/**
+ * The registry whose catalog a component belongs to: the catalog it names, else its surface's.
+ * A component naming a catalog outside `registry`'s `extends` chain belongs to none.
+ */
+export function componentRegistry(
+  registry: A2uiRegistry,
+  componentCatalogId: unknown,
+  surfaceCatalogId: string | undefined
+): A2uiRegistry | undefined {
+  if (typeof componentCatalogId === 'string') return findA2uiRegistry(registry, componentCatalogId)
+  return (surfaceCatalogId && findA2uiRegistry(registry, surfaceCatalogId)) || registry
+}
 
 export const getRegistryEntry = (r: A2uiRegistry, name: string): A2uiRegistryEntry | undefined =>
   Object.hasOwn(r.entries, name) ? r.entries[name] : undefined
@@ -364,7 +377,8 @@ function specIconNames(schema: Readonly<Record<string, unknown>>): readonly unkn
 function coerceComponentList(
   rawComponents: readonly unknown[],
   registry: A2uiRegistry,
-  diagnostics: CatalogDiagnostic[]
+  diagnostics: CatalogDiagnostic[],
+  surfaceCatalogId: string | undefined
 ): Record<string, unknown>[] {
   const usedIds = new Set<string>()
   for (const item of rawComponents) {
@@ -378,11 +392,17 @@ function coerceComponentList(
     if (!isPlainRecord(raw)) continue
     const id = typeof raw.id === 'string' && raw.id ? raw.id : `component_${i}`
     const name = typeof raw.component === 'string' ? raw.component : ''
-    const entry = getRegistryEntry(registry, name)
+    const scope = componentRegistry(registry, raw.catalogId, surfaceCatalogId)
+    const entry = scope && getRegistryEntry(scope, name)
     output.push(
       entry
         ? coerceKnownComponent(raw, id, entry, diagnostics, synthesized, usedIds)
-        : coerceUnknownComponent(raw, id, name, diagnostics)
+        : coerceUnknownComponent(
+            scope ? raw : { ...raw, catalogId: undefined },
+            id,
+            name,
+            diagnostics
+          )
     )
   }
 
@@ -393,18 +413,30 @@ function coerceComponentList(
 /** Sanitizes and coerces incoming A2UI 1.0 messages against the active registry. */
 export function coerceA2uiMessages(
   messages: readonly A2uiMessage[],
-  registry: A2uiRegistry
+  registry: A2uiRegistry,
+  /** Catalog of a surface created in an earlier batch. */
+  surfaceCatalogOf?: (surfaceId: string) => string | undefined
 ): CoerceA2uiMessagesResult {
   const sanitized = sanitizeA2uiMessages(messages)
   const diagnostics: CatalogDiagnostic[] = []
+  const surfaceCatalogs = new Map<unknown, string>()
   const coerced = sanitized.map(m => {
     if (!isPlainRecord(m)) return m
+    if (isPlainRecord(m.createSurface)) {
+      const { surfaceId, catalogId } = m.createSurface
+      if (typeof catalogId === 'string') surfaceCatalogs.set(surfaceId, catalogId)
+    }
     if (isPlainRecord(m.createSurface) && Array.isArray(m.createSurface.components)) {
       return {
         ...m,
         createSurface: {
           ...m.createSurface,
-          components: coerceComponentList(m.createSurface.components, registry, diagnostics)
+          components: coerceComponentList(
+            m.createSurface.components,
+            registry,
+            diagnostics,
+            surfaceCatalogs.get(m.createSurface.surfaceId)
+          )
         }
       }
     }
@@ -413,7 +445,15 @@ export function coerceA2uiMessages(
         ...m,
         updateComponents: {
           ...m.updateComponents,
-          components: coerceComponentList(m.updateComponents.components, registry, diagnostics)
+          components: coerceComponentList(
+            m.updateComponents.components,
+            registry,
+            diagnostics,
+            surfaceCatalogs.get(m.updateComponents.surfaceId) ??
+              (typeof m.updateComponents.surfaceId === 'string'
+                ? surfaceCatalogOf?.(m.updateComponents.surfaceId)
+                : undefined)
+          )
         }
       }
     }

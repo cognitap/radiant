@@ -639,7 +639,7 @@ export const radiantCatalog: Catalog = defineCatalog({
             type: 'integer',
             minimum: 2,
             maximum: 20,
-            description: 'Visible row count when kind is "long".'
+            description: 'Visible row count for long text.'
           },
           required: { type: 'boolean', default: false, description: 'Marks the field required.' },
           disabled: { type: 'boolean', default: false, description: 'Disables editing.' },
@@ -845,7 +845,8 @@ export const radiantCatalog: Catalog = defineCatalog({
         properties: {
           label: { type: 'string', minLength: 1, description: 'Visible setting label.' },
           description: { type: 'string', description: 'Optional explanation of the setting.' },
-          disabled: { type: 'boolean', default: false, description: 'Disables toggling.' }
+          disabled: { type: 'boolean', default: false, description: 'Disables toggling.' },
+          controlSize: controlSizeSchema
         }
       },
       slots: {},

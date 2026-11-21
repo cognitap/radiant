@@ -387,14 +387,26 @@ test('A2UI catalogs are generated deterministically and stay free of forbidden p
   assert.ok(wireProps(ext.Textarea).rows)
   assert.equal(wireProps(ext.Table).rows.$ref, 'common_types.json#/$defs/ChildList')
   assert.equal(ext.Switch.allOf[0].$ref, 'common_types.json#/$defs/Checkable')
+  assert.equal(wireProps(ext.Switch).controlSize.default, 'medium')
+  for (const name of ['Select', 'Combobox']) {
+    const props = wireProps(ext[name])
+    assert.equal(props.options, undefined)
+    assert.deepEqual(
+      props.items.anyOf.slice(1).map(branch => branch.$ref),
+      ['common_types.json#/$defs/DataBinding', 'common_types.json#/$defs/FunctionCall']
+    )
+    assert.equal(props.items.anyOf[0].items.properties.description, undefined)
+    assert.ok(ext[name].allOf[1].required.includes('items'))
+  }
+  assert.ok(wireProps(ext.RadioGroup).options.items.properties.description)
 })
 
 test('A2UI projection keeps the constraints of props that are also bindable', () => {
   const { extension, basic } = generateA2uiCatalogs(radiantCatalog)
   const progressValue = wireProps(extension.components.Progress).value
-  assert.deepEqual(progressValue.oneOf[0], { type: ['number', 'null'], minimum: 0 })
+  assert.deepEqual(progressValue.anyOf[0], { type: ['number', 'null'], minimum: 0 })
   assert.deepEqual(
-    progressValue.oneOf.slice(1).map(branch => branch.$ref),
+    progressValue.anyOf.slice(1).map(branch => branch.$ref),
     ['common_types.json#/$defs/DataBinding', 'common_types.json#/$defs/FunctionCall']
   )
   assert.equal(wireProps(extension.components.Alert).title.type, 'string')

@@ -70,9 +70,14 @@ export type A2uiRegistryInput = {
   readonly catalogId: string
   readonly title: string
   readonly description: string
-  /** Catalog-wide design rules, such as `renderCatalogInstructions()`. */
+  /** Catalog-wide design rules, such as `renderCatalogInstructions()`; defaults to the base's. */
   readonly instructions?: string
   readonly entries: readonly A2uiRegistryEntry[]
+  /**
+   * A registry this one extends. Its entries join this catalog, entries may not reuse its
+   * names, and surfaces may name either catalog.
+   */
+  readonly extends?: A2uiRegistry
 }
 
 export type A2uiRegistry = {
@@ -80,10 +85,33 @@ export type A2uiRegistry = {
   readonly title: string
   readonly description: string
   readonly instructions?: string
+  /** Every entry this catalog contains, including those of the registry it extends. */
   readonly entries: Readonly<Record<string, A2uiRegistryEntry>>
+  readonly extends?: A2uiRegistry
   toCatalogJson(): A2uiCatalogDocument
   /** The executable catalog, with basic functions that format in `locale`. */
   toWebCoreCatalog(locale?: string): WebCoreCatalog<ComponentApi, FunctionImplementation>
+}
+
+/** `registry`'s executable catalog and those of every registry it extends, base first. */
+export function a2uiWebCoreCatalogs(
+  registry: A2uiRegistry,
+  locale?: string
+): WebCoreCatalog<ComponentApi, FunctionImplementation>[] {
+  const chain: A2uiRegistry[] = []
+  for (let r: A2uiRegistry | undefined = registry; r; r = r.extends) chain.unshift(r)
+  return chain.map(r => r.toWebCoreCatalog(locale))
+}
+
+/** The registry in `registry`'s `extends` chain whose catalog is `catalogId`. */
+export function findA2uiRegistry(
+  registry: A2uiRegistry,
+  catalogId: string
+): A2uiRegistry | undefined {
+  for (let r: A2uiRegistry | undefined = registry; r; r = r.extends) {
+    if (r.catalogId === catalogId) return r
+  }
+  return undefined
 }
 
 function findForbiddenInA2uiSchema(schema: A2uiJsonSchema, path: string): readonly string[] {
@@ -166,8 +194,13 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
   if (!Array.isArray(input.entries) || input.entries.length === 0) {
     throw new TypeError('A2UI registry requires at least one entry.')
   }
+  const base = input.extends
+  if (base && findA2uiRegistry(base, input.catalogId)) {
+    throw new TypeError(`A2UI registry catalogId "${input.catalogId}" is already extended.`)
+  }
 
-  const entryMap: Record<string, A2uiRegistryEntry> = {}
+  const instructions = input.instructions ?? base?.instructions
+  const entryMap: Record<string, A2uiRegistryEntry> = { ...base?.entries }
   for (const entry of input.entries) {
     if (Object.hasOwn(entryMap, entry.name)) {
       throw new TypeError(`Duplicate A2UI registry entry "${entry.name}".`)
@@ -198,7 +231,7 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
       protocolVersion: A2UI_PROTOCOL_VERSION,
       title: input.title,
       description: input.description,
-      ...(input.instructions === undefined ? {} : { instructions: input.instructions }),
+      ...(instructions === undefined ? {} : { instructions }),
       components,
       functions: fns.functions,
       $defs: {
@@ -222,8 +255,9 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
     catalogId: input.catalogId,
     title: input.title,
     description: input.description,
-    ...(input.instructions === undefined ? {} : { instructions: input.instructions }),
+    ...(instructions === undefined ? {} : { instructions }),
     entries: frozenEntries,
+    ...(base ? { extends: base } : {}),
     toCatalogJson(): A2uiCatalogDocument {
       return buildDocument()
     },

@@ -2,7 +2,8 @@ export { A2uiSurface } from './A2uiSurface.js'
 export type { A2uiActionPayload, A2uiSurfaceProps } from './A2uiSurface.js'
 export type { A2uiSurfaceLabels } from './surfaceContext.js'
 export { radiantA2uiRegistry } from './entries.js'
-export { createA2uiRegistry, createA2uiRegistryEntry } from './registry.js'
+export { radiantA2uiExtensionRegistry } from './extensionEntries.js'
+export { createA2uiRegistry, createA2uiRegistryEntry, findA2uiRegistry } from './registry.js'
 export type {
   A2uiAdapterContext,
   A2uiComponentAdapter,
