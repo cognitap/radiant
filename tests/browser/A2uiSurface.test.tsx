@@ -14,7 +14,9 @@ import {
 } from '../../src/a2ui/index.js'
 import { summarizeCatalogDiagnostics } from '../../src/catalog/index.js'
 import {
+  interactivePreferencesFixtureMessages,
   malformedProfileFixtureMessages,
+  PREFERENCES_SURFACE_ID,
   PROFILE_SURFACE_ID,
   profileFixtureMessages,
   profileFixtureWithThemeHintMessages
@@ -66,9 +68,12 @@ test('renders the A2UI 1.0 tracer-bullet fixture with Radiant Field, Input, Butt
   })
   expect(onAction).toHaveBeenCalledTimes(1)
   const payload = onAction.mock.calls[0]![0]
+  expect(payload.action).toBe('save_profile')
   expect(payload.name).toBe('save_profile')
   expect(payload.surfaceId).toBe(PROFILE_SURFACE_ID)
+  expect(payload.nodeId).toBe('save_button')
   expect(payload.sourceComponentId).toBe('save_button')
+  expect(payload.state).toEqual({ profile: { displayName: 'Grace Hopper' } })
   expect(payload.context).toEqual({ displayName: 'Grace Hopper' })
 })
 
@@ -493,4 +498,79 @@ test('recovers a failed node after updateComponents replaces its failing props',
   } finally {
     consoleErrorSpy.mockRestore()
   }
+})
+
+test('interactive entries update client-local state without host calls and named actions deliver a state snapshot', async () => {
+  const onAction = vi.fn<(event: A2uiActionPayload) => void>()
+
+  const { host } = await mount(
+    <StrictMode>
+      <A2uiSurface
+        surfaceId={PREFERENCES_SURFACE_ID}
+        messages={interactivePreferencesFixtureMessages}
+        onAction={onAction}
+      />
+    </StrictMode>,
+    true
+  )
+
+  const note = host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
+  const weekly = host.querySelector<HTMLInputElement>('input[type="radio"][value="weekly"]')!
+  const inApp = host.querySelector<HTMLInputElement>('input[type="checkbox"][value="in_app"]')!
+  const slider = host.querySelector<HTMLInputElement>('input[type="range"][data-slot~="slider"]')!
+  const quietHours = Array.from(
+    host.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+  ).find(el => !el.value || el.value === 'on')!
+  const applyButton = host.querySelector<HTMLButtonElement>('button[data-slot~="button"]')!
+
+  // Typing, selecting, scrubbing, and toggling all stay local on the client
+  await act(async () => {
+    note.focus()
+    await userEvent.type(note, 'Keep evenings quiet')
+    await userEvent.click(weekly)
+    await userEvent.click(inApp)
+    slider.focus()
+    await userEvent.keyboard('{ArrowRight}{ArrowRight}')
+    await userEvent.click(quietHours)
+  })
+
+  expect(note.value).toBe('Keep evenings quiet')
+  expect(weekly.checked).toBe(true)
+  expect(inApp.checked).toBe(true)
+  expect(slider.value).toBe('60')
+  expect(quietHours.checked).toBe(true)
+  expect(onAction).toHaveBeenCalledTimes(0)
+
+  // Clicking the named action button delivers { action, surfaceId, nodeId, state } once
+  await act(async () => {
+    await userEvent.click(applyButton)
+  })
+
+  expect(onAction).toHaveBeenCalledTimes(1)
+  const delivered = onAction.mock.calls[0]![0]
+  expect(delivered.action).toBe('apply_preferences')
+  expect(delivered.surfaceId).toBe(PREFERENCES_SURFACE_ID)
+  expect(delivered.nodeId).toBe('apply_button')
+  expect(delivered.state).toEqual({
+    note: 'Keep evenings quiet',
+    cadence: ['weekly'],
+    channels: ['email', 'in_app'],
+    volume: 60,
+    notify: true
+  })
+
+  // Further local edits stay client-side and never mutate the delivered state snapshot
+  await act(async () => {
+    note.focus()
+    await userEvent.type(note, ' (edited)')
+  })
+  expect(note.value).toBe('Keep evenings quiet (edited)')
+  expect(onAction).toHaveBeenCalledTimes(1)
+  expect(delivered.state).toEqual({
+    note: 'Keep evenings quiet',
+    cadence: ['weekly'],
+    channels: ['email', 'in_app'],
+    volume: 60,
+    notify: true
+  })
 })

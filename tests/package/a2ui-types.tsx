@@ -13,6 +13,8 @@ import {
   type A2uiRegistry,
   type A2uiRegistryEntry,
   type A2uiSurfaceProps,
+  type CatalogActionEvent,
+  type CatalogActionHandler,
   type CatalogDiagnostic
 } from '@cognitap/radiant/a2ui'
 
@@ -28,8 +30,18 @@ const messages: readonly A2uiMessage[] = sanitizeA2uiMessages([
 ])
 
 const onAction = (action: A2uiActionPayload) => {
+  void action.action
+  void action.nodeId
+  void action.state
   void action.name
   void action.context
+}
+
+export const catalogActionHandler: CatalogActionHandler = (event: CatalogActionEvent) => {
+  void event.action
+  void event.surfaceId
+  void event.nodeId
+  void event.state
 }
 
 const customEntry: A2uiRegistryEntry = createA2uiRegistryEntry({
@@ -74,3 +86,10 @@ const props: A2uiSurfaceProps = {
 }
 
 export const element = <A2uiSurface {...props} />
+export const catalogBoundElement = (
+  <A2uiSurface
+    surfaceId="demo"
+    messages={messages}
+    onAction={catalogActionHandler}
+  />
+)

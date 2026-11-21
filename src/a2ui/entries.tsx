@@ -7,8 +7,12 @@ import {
   type NodeAction
 } from '@a2ui/web_core/resolution'
 import { Button, type ButtonVariant } from '../components/Button/Button.js'
+import { Checkbox } from '../components/Checkbox/Checkbox.js'
+import { CheckboxGroup } from '../components/CheckboxGroup/CheckboxGroup.js'
 import { Field } from '../components/Field/Field.js'
 import { Input } from '../components/Input/Input.js'
+import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
+import { Slider } from '../components/Slider/Slider.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { radiantCatalog } from '../catalog/index.js'
 import {
@@ -31,6 +35,27 @@ function unwrapString(value: unknown): string | undefined {
     return typeof value.value === 'string' ? value.value : undefined
   }
   return typeof value === 'string' ? value : undefined
+}
+
+function unwrapBoolean(value: unknown): boolean | undefined {
+  const raw = value instanceof ResolvedBinding ? value.value : value
+  return typeof raw === 'boolean' ? raw : undefined
+}
+
+function unwrapNumber(value: unknown): number | undefined {
+  const raw = value instanceof ResolvedBinding ? value.value : value
+  return typeof raw === 'number' && Number.isFinite(raw) ? raw : undefined
+}
+
+function unwrapStringList(value: unknown): string[] {
+  const raw = value instanceof ResolvedBinding ? value.value : value
+  return Array.isArray(raw) ? raw.filter((item): item is string => typeof item === 'string') : []
+}
+
+function writeBinding(raw: unknown, nextValue: unknown) {
+  if (raw instanceof ResolvedBinding && isWritable(raw)) {
+    raw.set(nextValue)
+  }
 }
 
 function readValidationError(props: Readonly<Record<string, unknown>>): string | undefined {
@@ -221,6 +246,134 @@ const buttonEntry = createA2uiRegistryEntry({
   }
 })
 
+const checkBoxEntry = createA2uiRegistryEntry({
+  name: 'CheckBox',
+  component: [Checkbox, Field],
+  schema: basicSchema('CheckBox'),
+  description: radiantCatalog.entries.Checkbox.description,
+  adapter(props) {
+    const label = unwrapDisplayText(props.label)
+    const error = readValidationError(props)
+    const checked = unwrapBoolean(props.value) ?? false
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+      writeBinding(props.value, event.currentTarget.checked)
+    }
+
+    if (error) {
+      return (
+        <Field
+          label={label}
+          error={error}
+        >
+          <Checkbox
+            checked={checked}
+            onChange={handleChange}
+          />
+        </Field>
+      )
+    }
+    return (
+      <Checkbox
+        label={label}
+        checked={checked}
+        onChange={handleChange}
+      />
+    )
+  }
+})
+
+type ChoiceOptionItem = { readonly value: string; readonly label: string }
+
+function readChoiceOptions(raw: unknown): readonly ChoiceOptionItem[] {
+  if (!Array.isArray(raw)) return []
+  const items: ChoiceOptionItem[] = []
+  for (const option of raw) {
+    if (!option || typeof option !== 'object') continue
+    const record = option as Record<string, unknown>
+    if (typeof record.value !== 'string') continue
+    items.push({ value: record.value, label: unwrapDisplayText(record.label) || record.value })
+  }
+  return items
+}
+
+const choicePickerEntry = createA2uiRegistryEntry({
+  name: 'ChoicePicker',
+  component: [RadioGroup, Radio, CheckboxGroup],
+  schema: basicSchema('ChoicePicker'),
+  description: radiantCatalog.entries.Choice.description,
+  adapter(props) {
+    const label = unwrapDisplayText(props.label) || 'Options'
+    const error = readValidationError(props)
+    const options = readChoiceOptions(props.options)
+    const selected = unwrapStringList(props.value)
+
+    if (props.variant === 'mutuallyExclusive') {
+      return (
+        <RadioGroup
+          label={label}
+          error={error}
+          value={selected[0] ?? null}
+          onValueChange={next => writeBinding(props.value, [next])}
+        >
+          {options.map(option => (
+            <Radio
+              key={option.value}
+              value={option.value}
+              label={option.label}
+            />
+          ))}
+        </RadioGroup>
+      )
+    }
+
+    return (
+      <CheckboxGroup
+        label={label}
+        error={error}
+        items={options}
+        value={selected}
+        onValueChange={next => writeBinding(props.value, next)}
+      />
+    )
+  }
+})
+
+const sliderEntry = createA2uiRegistryEntry({
+  name: 'Slider',
+  component: [Field, Slider],
+  schema: basicSchema('Slider'),
+  description: radiantCatalog.entries.Slider.description,
+  adapter(props) {
+    const label = unwrapDisplayText(props.label) || 'Value'
+    const error = readValidationError(props)
+    const min = typeof props.min === 'number' && Number.isFinite(props.min) ? props.min : 0
+    const rawMax = typeof props.max === 'number' && Number.isFinite(props.max) ? props.max : 100
+    const max = rawMax >= min ? rawMax : min
+    const rawValue = unwrapNumber(props.value) ?? min
+    const value = Math.min(max, Math.max(min, rawValue))
+    const steps =
+      typeof props.steps === 'number' && Number.isFinite(props.steps) && props.steps >= 1
+        ? props.steps
+        : undefined
+    const step = steps && max > min ? (max - min) / steps : undefined
+
+    return (
+      <Field
+        label={label}
+        error={error}
+      >
+        <Slider
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onValueChange={next => writeBinding(props.value, next)}
+        />
+      </Field>
+    )
+  }
+})
+
 /**
  * Radiant's built-in A2UI 1.0 component registry.
  * Generated catalog JSON (`src/a2ui/catalog.json`) is derived directly from this registry.
@@ -230,5 +383,13 @@ export const radiantA2uiRegistry = createA2uiRegistry({
   title: 'Radiant A2UI 1.0 Catalog',
   description:
     'A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog.',
-  entries: [columnEntry, textEntry, textFieldEntry, buttonEntry]
+  entries: [
+    columnEntry,
+    textEntry,
+    textFieldEntry,
+    checkBoxEntry,
+    choicePickerEntry,
+    sliderEntry,
+    buttonEntry
+  ]
 })

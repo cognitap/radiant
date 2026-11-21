@@ -105,6 +105,141 @@
         }
       ]
     },
+    "CheckBox": {
+      "type": "object",
+      "description": "Collects an explicit boolean consent or selection state.",
+      "allOf": [
+        {
+          "$ref": "common_types.json#/$defs/Checkable"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "CheckBox"
+            },
+            "label": {
+              "$ref": "common_types.json#/$defs/DynamicString",
+              "description": "Visible checkbox label."
+            },
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicBoolean",
+              "description": "Checked state bound to surface state."
+            },
+            "weight": {
+              "$ref": "#/$defs/Weight"
+            }
+          },
+          "required": ["component", "label", "value"]
+        }
+      ]
+    },
+    "ChoicePicker": {
+      "type": "object",
+      "description": "Selects one or multiple values from curated options using an intent-based presentation.",
+      "allOf": [
+        {
+          "$ref": "common_types.json#/$defs/Checkable"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ChoicePicker"
+            },
+            "label": {
+              "$ref": "common_types.json#/$defs/DynamicString",
+              "description": "Visible field or group label."
+            },
+            "variant": {
+              "type": "string",
+              "enum": ["multipleSelection", "mutuallyExclusive"],
+              "default": "mutuallyExclusive",
+              "description": "Whether one or multiple options can be selected."
+            },
+            "options": {
+              "type": "array",
+              "description": "Selectable choices presented to the user.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "$ref": "common_types.json#/$defs/DynamicString"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["label", "value"],
+                "additionalProperties": false
+              }
+            },
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicStringList",
+              "description": "Selected option value or values bound to surface state."
+            },
+            "displayStyle": {
+              "type": "string",
+              "enum": ["checkbox", "chips"],
+              "default": "checkbox",
+              "description": "Visual presentation intent for the choice control."
+            },
+            "filterable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enables filtering options by typing when presented as a dropdown."
+            },
+            "weight": {
+              "$ref": "#/$defs/Weight"
+            }
+          },
+          "required": ["component", "options", "value"]
+        }
+      ]
+    },
+    "Slider": {
+      "type": "object",
+      "description": "Selects a numeric value within a bounded range.",
+      "allOf": [
+        {
+          "$ref": "common_types.json#/$defs/Checkable"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Slider"
+            },
+            "label": {
+              "$ref": "common_types.json#/$defs/DynamicString",
+              "description": "Visible slider label."
+            },
+            "min": {
+              "type": "number",
+              "description": "Minimum allowed value.",
+              "default": 0
+            },
+            "max": {
+              "type": "number",
+              "description": "Maximum allowed value."
+            },
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicNumber",
+              "description": "Current numeric value bound to surface state."
+            },
+            "steps": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of discrete divisions; the renderer derives the canonical step size."
+            },
+            "weight": {
+              "$ref": "#/$defs/Weight"
+            }
+          },
+          "required": ["component", "value", "max"]
+        }
+      ]
+    },
     "Button": {
       "type": "object",
       "description": "Triggers a client-local update or emits a named outbound action.",
@@ -153,6 +288,15 @@
         },
         {
           "$ref": "#/components/TextField"
+        },
+        {
+          "$ref": "#/components/CheckBox"
+        },
+        {
+          "$ref": "#/components/ChoicePicker"
+        },
+        {
+          "$ref": "#/components/Slider"
         },
         {
           "$ref": "#/components/Button"

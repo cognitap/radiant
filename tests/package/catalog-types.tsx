@@ -3,17 +3,22 @@ import {
   CHOICE_PRESENTATIONS,
   assertValidCatalog,
   coerceSchemaProps,
+  createCatalogActionEvent,
   defineCatalog,
   extendCatalog,
   isForbiddenCatalogProp,
   radiantCatalog,
+  snapshotSurfaceState,
   summarizeCatalogDiagnostics,
   validateCatalog,
   type Catalog,
+  type CatalogActionEvent,
+  type CatalogActionHandler,
   type CatalogDiagnostic,
   type CatalogDiagnosticSummary,
   type CatalogEntry,
   type CatalogSpacing,
+  type CatalogSurfaceState,
   type ChoicePresentation
 } from '@cognitap/radiant/catalog'
 
@@ -77,3 +82,16 @@ export const coercedDiagnostics: readonly CatalogDiagnostic[] = coerceSchemaProp
   { nodeId: 'go', component: 'Button' }
 ).diagnostics
 export const summary: CatalogDiagnosticSummary = summarizeCatalogDiagnostics(coercedDiagnostics)
+export const stateSnapshot: CatalogSurfaceState = snapshotSurfaceState({ answer: '42' })
+export const actionEvent: CatalogActionEvent = createCatalogActionEvent({
+  action: 'submit',
+  surfaceId: 'demo',
+  nodeId: 'submit_btn',
+  state: stateSnapshot
+})
+export const actionHandler: CatalogActionHandler = event => {
+  void event.action
+  void event.surfaceId
+  void event.nodeId
+  void event.state
+}

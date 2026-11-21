@@ -9,11 +9,13 @@ import {
   CHOICE_PRESENTATIONS,
   assertValidCatalog,
   coerceSchemaProps,
+  createCatalogActionEvent,
   defineCatalog,
   extendCatalog,
   findForbiddenPropsInSchema,
   isForbiddenCatalogProp,
   radiantCatalog,
+  snapshotSurfaceState,
   validateCatalog,
   validateCatalogEntry
 } from '../dist/library/catalog/index.js'
@@ -480,4 +482,45 @@ test('coerceSchemaProps coerces unknown enum values, missing required labels, an
       }
     ]
   )
+})
+
+test('catalog action contract delivers isolated state snapshots and interactive entries bind locally', () => {
+  const liveState = { note: 'Draft', nested: { count: 1 }, tags: ['a'] }
+  const event = createCatalogActionEvent({
+    action: 'check',
+    surfaceId: 's_1',
+    nodeId: 'check_btn',
+    state: liveState
+  })
+
+  // Mutating the source state later must not affect the delivered snapshot
+  liveState.note = 'Edited later'
+  liveState.nested.count = 99
+  liveState.tags.push('b')
+
+  assert.deepEqual(event, {
+    action: 'check',
+    surfaceId: 's_1',
+    nodeId: 'check_btn',
+    state: { note: 'Draft', nested: { count: 1 }, tags: ['a'] }
+  })
+  assert.equal(Object.isFrozen(event), true)
+  assert.equal(Object.isFrozen(event.state), true)
+  assert.deepEqual(snapshotSurfaceState(null), {})
+  assert.throws(
+    () => createCatalogActionEvent({ action: '  ', surfaceId: 's_1', nodeId: 'n_1', state: {} }),
+    TypeError
+  )
+
+  // Every interactive input entry binds two-way local state without outbound actions
+  const inputEntries = Object.values(radiantCatalog.entries).filter(e => e.category === 'input')
+  assert.ok(inputEntries.length > 0)
+  for (const entry of inputEntries) {
+    assert.ok(
+      Object.values(entry.bindings).some(binding => binding.direction === 'two-way'),
+      `${entry.name} should bind two-way local state`
+    )
+    assert.deepEqual(entry.actions, {}, `${entry.name} should not declare outbound actions`)
+  }
+  assert.equal(radiantCatalog.entries.Button.actions.action.scope, 'outbound')
 })

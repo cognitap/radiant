@@ -150,3 +150,101 @@ export const malformedProfileFixtureMessages: readonly A2uiMessage[] = [
     }
   }
 ]
+
+export const PREFERENCES_SURFACE_ID = 'workspace_preferences'
+
+/**
+ * Recorded A2UI 1.0 fixture combining several client-local controls (TextField, ChoicePicker,
+ * Slider, CheckBox) with one named outbound action that delivers a surface state snapshot.
+ */
+export const interactivePreferencesFixtureMessages: readonly A2uiMessage[] = [
+  {
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: PREFERENCES_SURFACE_ID,
+      catalogId: A2UI_BASIC_CATALOG_ID,
+      dataModel: {
+        note: '',
+        cadence: ['daily'],
+        channels: ['email'],
+        volume: 40,
+        notify: false
+      },
+      components: [
+        {
+          id: 'root',
+          component: 'Column',
+          children: [
+            'note_field',
+            'cadence_picker',
+            'channel_picker',
+            'volume_slider',
+            'notify_checkbox',
+            'apply_button'
+          ]
+        },
+        {
+          id: 'note_field',
+          component: 'TextField',
+          label: 'Summary note',
+          placeholder: 'Add a short note',
+          value: { '@path': '/note' },
+          variant: 'shortText'
+        },
+        {
+          id: 'cadence_picker',
+          component: 'ChoicePicker',
+          label: 'Digest cadence',
+          variant: 'mutuallyExclusive',
+          options: [
+            { label: 'Daily', value: 'daily' },
+            { label: 'Weekly', value: 'weekly' }
+          ],
+          value: { '@path': '/cadence' }
+        },
+        {
+          id: 'channel_picker',
+          component: 'ChoicePicker',
+          label: 'Delivery channels',
+          variant: 'multipleSelection',
+          options: [
+            { label: 'Email', value: 'email' },
+            { label: 'In-app', value: 'in_app' }
+          ],
+          value: { '@path': '/channels' }
+        },
+        {
+          id: 'volume_slider',
+          component: 'Slider',
+          label: 'Alert volume',
+          min: 0,
+          max: 100,
+          steps: 10,
+          value: { '@path': '/volume' }
+        },
+        {
+          id: 'notify_checkbox',
+          component: 'CheckBox',
+          label: 'Enable quiet hours',
+          value: { '@path': '/notify' }
+        },
+        {
+          id: 'apply_button',
+          component: 'Button',
+          variant: 'primary',
+          child: 'apply_button_label',
+          action: {
+            event: {
+              name: 'apply_preferences'
+            }
+          }
+        },
+        {
+          id: 'apply_button_label',
+          component: 'Text',
+          text: 'Apply preferences'
+        }
+      ]
+    }
+  }
+]

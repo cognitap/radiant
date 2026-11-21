@@ -24,7 +24,15 @@ test('generated A2UI catalog JSON matches radiantA2uiRegistry and loads into @a2
 
   const parsed = Catalog.fromJson(onDisk, A2UI_PROTOCOL_VERSION)
   assert.equal(parsed.id, radiantA2uiRegistry.catalogId)
-  assert.deepEqual([...parsed.components.keys()].sort(), ['Button', 'Column', 'Text', 'TextField'])
+  assert.deepEqual([...parsed.components.keys()].sort(), [
+    'Button',
+    'CheckBox',
+    'ChoicePicker',
+    'Column',
+    'Slider',
+    'Text',
+    'TextField'
+  ])
 })
 
 test('createA2uiRegistryEntry rejects forbidden host styling, render, handler, and ARIA props', () => {

@@ -13,7 +13,12 @@ import { MessageProcessor, type ProcessableMessage } from '@a2ui/web_core/proces
 import { effect, getValue, peekValue, type Signal } from '@a2ui/web_core/reactivity'
 import { NodeResolver, type ComponentNode } from '@a2ui/web_core/resolution'
 import type { ActionPayload, SurfaceModel } from '@a2ui/web_core/state'
-import { isPlainRecord, type CatalogDiagnostic } from '../catalog/coerce.js'
+import {
+  createCatalogActionEvent,
+  type CatalogActionEvent,
+  type CatalogDiagnostic
+} from '../catalog/index.js'
+import { isPlainRecord } from '../catalog/coerce.js'
 import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import {
   COERCED_NOOP_ACTION_NAME,
@@ -25,7 +30,12 @@ import { radiantA2uiRegistry } from './entries.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 
-export type A2uiActionPayload = ActionPayload
+/**
+ * Outbound action payload delivered by `A2uiSurface`.
+ * Implements the protocol-independent `CatalogActionEvent` (`{ action, surfaceId, nodeId, state }`)
+ * while preserving the underlying A2UI wire fields (`name`, `sourceComponentId`, `context`, `timestamp`).
+ */
+export type A2uiActionPayload = CatalogActionEvent & ActionPayload
 
 export type A2uiSurfaceProps = {
   /** Identifier of the A2UI surface to render. */
@@ -268,7 +278,15 @@ function createSurfaceStore(
     processor = new MessageProcessor(
       [webCoreCatalog],
       action => {
-        if (action.name !== COERCED_NOOP_ACTION_NAME) actionHandler?.(action)
+        if (action.name === COERCED_NOOP_ACTION_NAME) return
+        const state = processor?.getSurface(action.surfaceId)?.dataModel.get('/')
+        const catalogEvent = createCatalogActionEvent({
+          action: action.name,
+          surfaceId: action.surfaceId,
+          nodeId: action.sourceComponentId,
+          state
+        })
+        actionHandler?.({ ...action, ...catalogEvent })
       },
       { version: A2UI_PROTOCOL_VERSION }
     )
