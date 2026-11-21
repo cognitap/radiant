@@ -12,9 +12,9 @@ import {
 const meta = {
   title: 'Components/Stack',
   component: Stack,
-  args: { direction: 'vertical', gap: 'normal', align: 'stretch', justify: 'start', wrap: false },
+  args: { orientation: 'vertical', gap: 'normal', align: 'stretch', justify: 'start', wrap: false },
   argTypes: {
-    direction: { control: 'inline-radio', options: ['vertical', 'horizontal'] },
+    orientation: { control: 'inline-radio', options: ['vertical', 'horizontal'] },
     gap: { control: 'inline-radio', options: ['tight', 'normal', 'airy'] },
     align: { control: 'inline-radio', options: ['start', 'center', 'end', 'stretch'] },
     justify: {
@@ -52,7 +52,7 @@ export const SpacingSteps: Story = {
       {(['tight', 'normal', 'airy'] as const).map(gap => (
         <Stack
           key={gap}
-          direction="horizontal"
+          orientation="horizontal"
           gap={gap}
           align="center"
           wrap
@@ -75,14 +75,14 @@ export const CardFooterRow: Story = {
       </CardHeader>
       <CardContent>
         <Stack
-          direction="horizontal"
+          orientation="horizontal"
           justify="between"
           align="center"
           wrap
         >
           <Button variant="ghost">Skip</Button>
           <Stack
-            direction="horizontal"
+            orientation="horizontal"
             gap="tight"
           >
             <Button variant="outline">Later</Button>

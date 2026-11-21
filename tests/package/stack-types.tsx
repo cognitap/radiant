@@ -3,7 +3,7 @@ import { Stack, type StackAlign, type StackJustify, type StackProps } from '@cog
 const align: StackAlign = 'center'
 const justify: StackJustify = 'evenly'
 const props: StackProps = {
-  direction: 'horizontal',
+  orientation: 'horizontal',
   gap: 'tight',
   align,
   justify,
@@ -16,7 +16,7 @@ const props: StackProps = {
   <span>Item</span>
 </Stack>
 // @ts-expect-error Direction is horizontal or vertical.
-;<Stack direction="row" />
+;<Stack orientation="row" />
 // @ts-expect-error Gap is a theme spacing step, not a length.
 ;<Stack gap="1rem" />
 // @ts-expect-error Gap is a theme spacing step, not a number.

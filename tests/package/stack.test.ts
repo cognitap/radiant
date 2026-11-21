@@ -13,10 +13,10 @@ test('Stack renders a flex div spaced by the theme spacing scale on the server',
   assert.match(html, /gap-\[var\(--rad-spacing-normal,1rem\)\]/)
   assert.match(html, /items-stretch/)
   assert.match(html, /style="width:320px"/)
-  assert.doesNotMatch(html, /role=|tabindex=| direction=| gap=| align=| justify=| wrap=/)
+  assert.doesNotMatch(html, /role=|tabindex=| orientation=| gap=| align=| justify=| wrap=/)
   const row = renderToStaticMarkup(
     h(Stack, {
-      direction: 'horizontal',
+      orientation: 'horizontal',
       gap: 'airy',
       align: 'center',
       justify: 'between',
@@ -32,7 +32,7 @@ test('Stack renders a flex div spaced by the theme spacing scale on the server',
   ])
     assert.ok(row.includes(name), name)
   for (const [prop, value] of [
-    ['direction', 'diagonal'],
+    ['orientation', 'diagonal'],
     ['gap', 'large'],
     ['align', 'baseline'],
     ['justify', 'space-between']

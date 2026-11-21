@@ -25,7 +25,7 @@ Component APIs live in the [component guides](https://github.com/cognitap/radian
 
 ## Composition
 
-Each native element or behavior has one base family. `Stack` owns flex layout; its `gap` uses the spacing scale. Higher-level components compose that family instead of rendering raw elements or duplicating its behavior.
+Each native element or behavior has one base family. Higher-level components compose that family instead of rendering raw elements or duplicating its behavior. `Stack` is the one-dimensional layout, spaced by the spacing scale.
 
 `Button` owns `<button>` actions and `Link` owns `<a>` navigation, even when a link looks like a button. Triggers, close buttons, and action items in other families build on `Button`, and navigation items build on `Link`.
 

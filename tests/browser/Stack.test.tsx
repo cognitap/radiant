@@ -50,7 +50,7 @@ test.each(modes)(
 )
 
 test.each(modes)(
-  'direction, gap, align, justify and wrap lay children out in %s mode',
+  'orientation, gap, align, justify and wrap lay children out in %s mode',
   async mode => {
     const ref = createRef<HTMLDivElement>()
     const { render } = await mount(<ThemeScope mode={mode}>{items({ ref })}</ThemeScope>)
@@ -64,37 +64,37 @@ test.each(modes)(
         return [rect.left - root.left, rect.top - root.top, rect.width, rect.height]
       })
     }
-    expect(await layout({ direction: 'horizontal', gap: 'tight' })).toEqual([
+    expect(await layout({ orientation: 'horizontal', gap: 'tight' })).toEqual([
       [0, 0, 40, 40],
       [48, 0, 60, 40],
       [116, 0, 80, 40]
     ])
-    expect(await layout({ direction: 'horizontal', gap: 'airy', align: 'center' })).toEqual([
+    expect(await layout({ orientation: 'horizontal', gap: 'airy', align: 'center' })).toEqual([
       [0, 10, 40, 20],
       [64, 5, 60, 30],
       [148, 0, 80, 40]
     ])
-    expect(await layout({ direction: 'horizontal', align: 'end', justify: 'end' })).toEqual([
+    expect(await layout({ orientation: 'horizontal', align: 'end', justify: 'end' })).toEqual([
       [188, 20, 40, 20],
       [244, 10, 60, 30],
       [320, 0, 80, 40]
     ])
-    expect((await layout({ direction: 'horizontal', justify: 'between' })).map(([x]) => x)).toEqual(
-      [0, 150, 320]
-    )
     expect(
-      (await layout({ direction: 'horizontal', gap: 'tight', justify: 'stretch' })).map(
+      (await layout({ orientation: 'horizontal', justify: 'between' })).map(([x]) => x)
+    ).toEqual([0, 150, 320])
+    expect(
+      (await layout({ orientation: 'horizontal', gap: 'tight', justify: 'stretch' })).map(
         ([, , w]) => w
       )
     ).toEqual([128, 128, 128])
     expect((await layout({ align: 'center' })).map(([x]) => x)).toEqual([180, 170, 160])
-    const wrapped = await layout({ direction: 'horizontal', wrap: true, style: { width: 120 } })
+    const wrapped = await layout({ orientation: 'horizontal', wrap: true, style: { width: 120 } })
     expect(wrapped.map(([x, y]) => [x, y])).toEqual([
       [0, 0],
       [56, 0],
       [0, 46]
     ])
-    const unwrapped = await layout({ direction: 'horizontal', style: { width: 120 } })
+    const unwrapped = await layout({ orientation: 'horizontal', style: { width: 120 } })
     expect(unwrapped.every(([, y]) => y === 0)).toBe(true)
   }
 )
@@ -118,4 +118,37 @@ test.each(modes)('themes and caller tokens change Stack spacing in %s mode', asy
   )
   const gap = (id: string) => getComputedStyle(host.querySelector(`#${id}`)!).rowGap
   expect(['normal', 'tight', 'local', 'caller'].map(gap)).toEqual(['32px', '3px', '5px', '7px'])
+})
+
+test('mirrors horizontal justification in RTL and lets children opt out of stretch', async () => {
+  const ref = createRef<HTMLDivElement>()
+  const { render } = await mount(<div />)
+  await render(
+    <div dir="rtl">
+      {items({ ref, orientation: 'horizontal', justify: 'end', style: { width: 400 } })}
+    </div>
+  )
+  const root = box(ref.current!)
+  const [first, , last] = [...ref.current!.children]
+  expect(box(last!).left - root.left).toBe(0)
+  expect(box(first!).right - root.left).toBe(212)
+
+  await render(
+    <Stack
+      ref={ref}
+      orientation="horizontal"
+      gap="tight"
+      justify="stretch"
+      style={{ width: 400 }}
+    >
+      <div
+        className="flex-none"
+        style={{ width: 40 }}
+      />
+      <div />
+    </Stack>
+  )
+  const [fixed, grown] = [...ref.current!.children]
+  expect(box(fixed!).width).toBe(40)
+  expect(box(grown!).width).toBe(352)
 })

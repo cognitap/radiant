@@ -1,17 +1,18 @@
 import type { ComponentProps } from 'react'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
+import type { CatalogAlignment, CatalogJustify } from '../../catalog/types.js'
 import type { Orientation, Spacing } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 
 /** Cross-axis alignment of children. */
-export type StackAlign = 'start' | 'center' | 'end' | 'stretch'
-/** Main-axis distribution of children; `stretch` grows every child equally. */
-export type StackJustify = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly' | 'stretch'
+export type StackAlign = CatalogAlignment
+/** Main-axis distribution of children; `stretch` makes children share the line equally. */
+export type StackJustify = CatalogJustify
 
 export type StackProps = Omit<ComponentProps<'div'>, 'style'> & {
   /** Main axis: `vertical` (the default) stacks children top to bottom. */
-  direction?: Orientation
+  orientation?: Orientation
   /** Space between children from the theme spacing scale. */
   gap?: Spacing
   align?: StackAlign
@@ -22,7 +23,7 @@ export type StackProps = Omit<ComponentProps<'div'>, 'style'> & {
   'data-slot'?: string
 }
 
-const directions: Record<Orientation, string> = {
+const orientations: Record<Orientation, string> = {
   horizontal: 'flex-row',
   vertical: 'flex-col'
 }
@@ -44,7 +45,7 @@ const justifications: Record<StackJustify, string> = {
   between: 'justify-between',
   around: 'justify-around',
   evenly: 'justify-evenly',
-  stretch: 'justify-start *:flex-1'
+  stretch: 'justify-start [:where(&>*)]:flex-1'
 }
 
 function pick<T extends string>(map: Record<T, string>, prop: string, value: T) {
@@ -55,7 +56,7 @@ function pick<T extends string>(map: Record<T, string>, prop: string, value: T) 
 
 /** One-dimensional flex layout spaced by the theme spacing scale. */
 export function Stack({
-  direction = 'vertical',
+  orientation = 'vertical',
   gap = 'normal',
   align = 'stretch',
   justify = 'start',
@@ -69,7 +70,7 @@ export function Stack({
       data-slot={joinIds('stack', props['data-slot'])}
       className={cn(
         'flex min-w-0',
-        pick(directions, 'direction', direction),
+        pick(orientations, 'orientation', orientation),
         pick(gaps, 'gap', gap),
         pick(alignments, 'align', align),
         pick(justifications, 'justify', justify),
