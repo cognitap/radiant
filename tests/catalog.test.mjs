@@ -8,6 +8,7 @@ import {
   CATALOG_SPACING,
   CHOICE_PRESENTATIONS,
   assertValidCatalog,
+  coerceSchemaProps,
   defineCatalog,
   extendCatalog,
   findForbiddenPropsInSchema,
@@ -427,4 +428,56 @@ test('validation rejects actions that share a name with a prop, slot, or binding
   const violations = validateCatalogEntry(entry, 'Clashing')
   assert.ok(violations.some(message => message.includes('action "label" collides with a prop')))
   assert.ok(violations.some(message => message.includes('action "value" collides with a binding')))
+})
+
+test('coerceSchemaProps coerces unknown enum values, missing required labels, and mixed controlled/uncontrolled props', () => {
+  const buttonResult = coerceSchemaProps(
+    radiantCatalog.entries.Button.propsSchema,
+    { label: 'Save', tone: 'neon' },
+    { nodeId: 'save_btn', component: 'Button' }
+  )
+  assert.equal(buttonResult.props.tone, 'accent')
+  assert.equal(buttonResult.diagnostics.length, 1)
+  assert.equal(buttonResult.diagnostics[0].nodeId, 'save_btn')
+  assert.equal(buttonResult.diagnostics[0].prop, 'tone')
+  assert.equal(buttonResult.diagnostics[0].received, 'neon')
+  assert.equal(buttonResult.diagnostics[0].used, 'accent')
+
+  const fieldSchema = {
+    ...radiantCatalog.entries.TextField.propsSchema,
+    properties: {
+      ...radiantCatalog.entries.TextField.propsSchema.properties,
+      value: { type: 'string' }
+    }
+  }
+  const fieldResult = coerceSchemaProps(
+    fieldSchema,
+    { value: 'Ada', defaultValue: 'Grace' },
+    { nodeId: 'display_name', component: 'TextField' }
+  )
+  assert.equal(fieldResult.props.label, 'Display name')
+  assert.equal(fieldResult.props.value, 'Ada')
+  assert.equal('defaultValue' in fieldResult.props, false)
+  assert.deepEqual(
+    fieldResult.diagnostics.map(({ nodeId, prop, received, used }) => ({
+      nodeId,
+      prop,
+      received,
+      used
+    })),
+    [
+      {
+        nodeId: 'display_name',
+        prop: 'defaultValue',
+        received: 'Grace',
+        used: undefined
+      },
+      {
+        nodeId: 'display_name',
+        prop: 'label',
+        received: undefined,
+        used: 'Display name'
+      }
+    ]
+  )
 })

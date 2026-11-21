@@ -48,22 +48,12 @@ export {
   validateCatalog,
   validateCatalogEntry
 } from './validate.js'
-export {
-  coerceCatalogProps,
-  coerceSchemaProps,
-  extractFallbackText,
-  humanizeNodeId,
-  summarizeCatalogDiagnostics
-} from './coerce.js'
+export { coerceSchemaProps, summarizeCatalogDiagnostics } from './coerce.js'
 export type {
   CatalogDiagnostic,
   CatalogDiagnosticKind,
   CatalogDiagnosticSummary,
-  CoerceCatalogPropsOptions,
   CoercePropsResult,
-  CoerceSchemaPropsOptions,
-  PropCoercer,
-  PropCoercerContext,
-  PropCoercerResult
+  CoerceSchemaPropsOptions
 } from './coerce.js'
 export { RADIANT_CATALOG_ID, RADIANT_CATALOG_VERSION, radiantCatalog } from './radiantCatalog.js'

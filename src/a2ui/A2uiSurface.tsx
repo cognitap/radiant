@@ -3,7 +3,6 @@
 import {
   Component,
   useEffect,
-  useRef,
   useState,
   useSyncExternalStore,
   type ErrorInfo,
@@ -19,11 +18,8 @@ import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import {
   COERCED_NOOP_ACTION_NAME,
   coerceA2uiMessages,
-  coerceA2uiResolvedProps,
-  createA2uiCoerceState,
   extractA2uiNodeFallbackText,
-  getRegistryEntry,
-  type A2uiCoerceState
+  getRegistryEntry
 } from './coerce.js'
 import { radiantA2uiRegistry } from './entries.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
@@ -44,8 +40,6 @@ export type A2uiSurfaceProps = {
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
 }
 
-type EmitDiag = (d: CatalogDiagnostic) => void
-
 function useSignalValue<T>(signal: Signal<T> | undefined): T | undefined {
   return useSyncExternalStore(
     onStoreChange => {
@@ -65,106 +59,86 @@ function useSignalValue<T>(signal: Signal<T> | undefined): T | undefined {
   )
 }
 
-const errorMsg = (e: unknown) =>
-  e instanceof Error && e.message ? e.message : typeof e === 'string' ? e : 'Render error'
-
-const renderDiag = (
-  nodeId: string,
-  component: string,
-  received: string,
-  used: string
-): CatalogDiagnostic => ({
-  kind: 'fallback',
-  nodeId,
-  component,
-  prop: '$render',
-  received,
-  used,
-  reason: 'Component threw during render.'
-})
-
-const sameDiags = (a: readonly CatalogDiagnostic[], b: readonly CatalogDiagnostic[]) =>
-  a.length === b.length &&
-  a.every(
-    (l, i) =>
-      l.kind === b[i]!.kind &&
-      l.prop === b[i]!.prop &&
-      Object.is(l.received, b[i]!.received) &&
-      Object.is(l.used, b[i]!.used)
-  )
-
-const boundaryText = (node: ComponentNode, token: unknown) =>
+const boundaryFallbackText = (node: ComponentNode, token: unknown) =>
   extractA2uiNodeFallbackText(node, isPlainRecord(token) ? token : undefined)
-
-const renderFallbackSpan = (nodeId: string, text: string): ReactNode =>
-  text ? (
-    <span
-      data-slot="a2ui-fallback"
-      data-node-id={nodeId}
-    >
-      {text}
-    </span>
-  ) : null
 
 type BoundaryProps = {
   readonly node: ComponentNode
   readonly resetToken: unknown
-  readonly emit: EmitDiag
+  readonly onDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined
   readonly children: ReactNode
 }
 
 class A2uiNodeErrorBoundary extends Component<
   BoundaryProps,
-  { readonly failed: boolean; readonly token: unknown }
+  { readonly failed: boolean; readonly failedToken: unknown }
 > {
-  override state = { failed: false, token: undefined as unknown }
+  override state = { failed: false, failedToken: undefined as unknown }
+
   static getDerivedStateFromError() {
     return { failed: true }
   }
+
   static getDerivedStateFromProps(
     next: BoundaryProps,
-    prev: { readonly failed: boolean; readonly token: unknown }
+    prev: { readonly failed: boolean; readonly failedToken: unknown }
   ) {
     if (!prev.failed) return null
-    if (prev.token === undefined) return { failed: true, token: next.resetToken }
-    return next.resetToken !== prev.token ? { failed: false, token: undefined } : null
+    if (prev.failedToken === undefined) return { failed: true, failedToken: next.resetToken }
+    return next.resetToken !== prev.failedToken ? { failed: false, failedToken: undefined } : null
   }
+
   override componentDidCatch(error: Error, _info: ErrorInfo) {
-    const { node, resetToken, emit } = this.props
-    emit(renderDiag(node.componentId, node.type, errorMsg(error), boundaryText(node, resetToken)))
+    const { node, resetToken, onDiagnostic } = this.props
+    onDiagnostic?.({
+      kind: 'fallback',
+      nodeId: node.componentId,
+      component: node.type,
+      prop: 'render',
+      received: error.message || 'Render error',
+      used: boundaryFallbackText(node, resetToken),
+      reason: 'Component threw during render.'
+    })
   }
+
   override render(): ReactNode {
     if (!this.state.failed) return this.props.children
-    return renderFallbackSpan(
-      this.props.node.componentId,
-      boundaryText(this.props.node, this.props.resetToken)
-    )
+    const text = boundaryFallbackText(this.props.node, this.props.resetToken)
+    return text ? (
+      <span
+        data-slot="a2ui-fallback"
+        data-node-id={this.props.node.componentId}
+      >
+        {text}
+      </span>
+    ) : null
   }
 }
 
-type NodeRenderProps = {
+function A2uiNodeRenderer({
+  node,
+  registry,
+  inline,
+  onDiagnostic
+}: {
   readonly node: ComponentNode
   readonly registry: A2uiRegistry
   readonly inline: boolean
-  readonly emit: EmitDiag
-}
-
-function A2uiNodeContent({
-  node,
-  props,
-  registry,
-  inline,
-  emit
-}: NodeRenderProps & { readonly props: Readonly<Record<string, unknown>> }): ReactNode {
+  readonly onDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined
+}): ReactNode {
+  const props = useSignalValue(node.props)
+  if (!props || node.state !== 'resolved') return null
   const entry = getRegistryEntry(registry, node.type)
-  const resolved = entry ? coerceA2uiResolvedProps(entry, node, props) : undefined
-  const reportedRef = useRef<readonly CatalogDiagnostic[]>([])
-  const diags: CatalogDiagnostic[] = resolved ? [...resolved.diagnostics] : []
-  let content: ReactNode = null
+  if (!entry) return null
 
-  if (entry && resolved) {
-    try {
-      content = entry.adapter(resolved.props, {
+  return (
+    <A2uiNodeErrorBoundary
+      key={node.id}
+      node={node}
+      resetToken={props}
+      onDiagnostic={onDiagnostic}
+    >
+      {entry.adapter(props, {
         node,
         inline,
         renderNode(child: ComponentNode, options?: A2uiRenderOptions) {
@@ -174,48 +148,11 @@ function A2uiNodeContent({
               node={child}
               registry={registry}
               inline={options?.inline ?? false}
-              emit={emit}
+              onDiagnostic={onDiagnostic}
             />
           )
         }
-      })
-    } catch (error) {
-      const text = extractA2uiNodeFallbackText(node, resolved.props)
-      diags.push(renderDiag(node.componentId, node.type, errorMsg(error), text))
-      content = renderFallbackSpan(node.componentId, text)
-    }
-  }
-
-  useEffect(() => {
-    if (!diags.length) {
-      reportedRef.current = []
-      return
-    }
-    if (sameDiags(reportedRef.current, diags)) return
-    reportedRef.current = diags
-    for (const d of diags) emit(d)
-  })
-
-  return content
-}
-
-function A2uiNodeRenderer({ node, registry, inline, emit }: NodeRenderProps): ReactNode {
-  const props = useSignalValue(node.props)
-  if (!props || node.state !== 'resolved') return null
-  return (
-    <A2uiNodeErrorBoundary
-      key={node.id}
-      node={node}
-      resetToken={props}
-      emit={emit}
-    >
-      <A2uiNodeContent
-        node={node}
-        props={props}
-        registry={registry}
-        inline={inline}
-        emit={emit}
-      />
+      })}
     </A2uiNodeErrorBoundary>
   )
 }
@@ -231,13 +168,12 @@ function isPrefixOf(previous: readonly A2uiMessage[], next: readonly A2uiMessage
 type SurfaceStore = {
   readonly subscribe: (listener: () => void) => () => void
   readonly getSnapshot: () => ComponentNode | undefined
-  readonly emitDiagnostic: EmitDiag
   readonly sync: (
     surfaceId: string,
     registry: A2uiRegistry,
     messages: readonly A2uiMessage[],
     onAction: ((action: A2uiActionPayload) => void) | undefined,
-    onDiagnostic: EmitDiag | undefined
+    onDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined
   ) => void
   readonly dispose: () => void
 }
@@ -247,7 +183,7 @@ function createSurfaceStore(
   initialRegistry: A2uiRegistry,
   initialMessages: readonly A2uiMessage[],
   initialOnAction: ((action: A2uiActionPayload) => void) | undefined,
-  initialOnDiagnostic: EmitDiag | undefined
+  initialOnDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined
 ): SurfaceStore {
   let surfaceId = initialSurfaceId
   let registry = initialRegistry
@@ -256,7 +192,6 @@ function createSurfaceStore(
   let actionHandler = initialOnAction
   let diagnosticHandler = initialOnDiagnostic
   let disposed = false
-  let coerceState: A2uiCoerceState = createA2uiCoerceState()
   let processor: MessageProcessor<ComponentApi> | undefined
   let resolver: NodeResolver<ComponentApi, FunctionImplementation> | undefined
   let stopRootEffect: (() => void) | undefined
@@ -304,77 +239,14 @@ function createSurfaceStore(
 
   function processBatch(
     target: MessageProcessor<ComponentApi>,
-    targetSurfaceId: string,
     targetRegistry: A2uiRegistry,
     batch: readonly A2uiMessage[],
     record: boolean
   ) {
-    const { messages: coerced, diagnostics } = coerceA2uiMessages(
-      batch,
-      targetRegistry,
-      coerceState
-    )
+    const { messages: coerced, diagnostics } = coerceA2uiMessages(batch, targetRegistry)
     if (record && diagnostics.length > 0) pendingDiagnostics.push(...diagnostics)
-    const pushFallback = (
-      nodeId: string,
-      component: string,
-      prop: string,
-      received: unknown,
-      err: unknown
-    ) => {
-      if (record)
-        pendingDiagnostics.push({
-          kind: 'fallback',
-          nodeId,
-          component,
-          prop,
-          received,
-          used: undefined,
-          reason: errorMsg(err)
-        })
-    }
-    for (const message of coerced) {
-      try {
-        target.processMessages([message as ProcessableMessage])
-      } catch (error) {
-        const msg = isPlainRecord(message) ? message : undefined
-        const version = typeof msg?.version === 'string' ? msg.version : A2UI_PROTOCOL_VERSION
-        const createOp = isPlainRecord(msg?.createSurface) ? msg.createSurface : undefined
-        const op =
-          createOp ?? (isPlainRecord(msg?.updateComponents) ? msg.updateComponents : undefined)
-        const sid = typeof op?.surfaceId === 'string' ? op.surfaceId : targetSurfaceId
-        const comps = op && Array.isArray(op.components) ? op.components : undefined
-
-        if (createOp && comps && !target.getSurface(sid)) {
-          try {
-            const { components: _drop, ...surfaceOnly } = createOp
-            target.processMessages([{ version, createSurface: surfaceOnly } as ProcessableMessage])
-          } catch {}
-        }
-        if (comps && target.getSurface(sid)) {
-          for (const comp of comps) {
-            try {
-              target.processMessages([
-                {
-                  version,
-                  updateComponents: { surfaceId: sid, components: [comp] }
-                } as ProcessableMessage
-              ])
-            } catch (err) {
-              const rec = isPlainRecord(comp) ? comp : undefined
-              pushFallback(
-                typeof rec?.id === 'string' ? rec.id : sid,
-                typeof rec?.component === 'string' ? rec.component : '$surface',
-                '$node',
-                comp,
-                err
-              )
-            }
-          }
-          continue
-        }
-        pushFallback(sid, '$surface', '$message', message, error)
-      }
+    if (coerced.length > 0) {
+      target.processMessages(coerced as readonly ProcessableMessage[])
     }
   }
 
@@ -388,7 +260,6 @@ function createSurfaceStore(
     surfaceId = nextSurfaceId
     registry = nextRegistry
     processedMessages = nextMessages
-    coerceState = createA2uiCoerceState()
     const sameBatch =
       reported?.[0] === nextSurfaceId &&
       reported[1] === nextRegistry &&
@@ -402,13 +273,7 @@ function createSurfaceStore(
       { version: A2UI_PROTOCOL_VERSION }
     )
     if (nextMessages.length > 0) {
-      processBatch(
-        processor,
-        nextSurfaceId,
-        nextRegistry,
-        nextMessages,
-        Boolean(diagnosticHandler) && !sameBatch
-      )
+      processBatch(processor, nextRegistry, nextMessages, Boolean(diagnosticHandler) && !sameBatch)
     }
     reported = [nextSurfaceId, nextRegistry, nextMessages]
     resolver = makeResolver(processor.getSurface(nextSurfaceId))
@@ -434,7 +299,6 @@ function createSurfaceStore(
     getSnapshot() {
       return resolver ? peekValue(resolver.rootNode) : undefined
     },
-    emitDiagnostic: d => diagnosticHandler?.(d),
     sync(nextSurfaceId, nextRegistry, nextMessages, nextOnAction, nextOnDiagnostic) {
       actionHandler = nextOnAction
       diagnosticHandler = nextOnDiagnostic
@@ -454,7 +318,7 @@ function createSurfaceStore(
       if (nextMessages.length > processedMessages.length) {
         const delta = nextMessages.slice(processedMessages.length)
         if (delta.length > 0) {
-          processBatch(processor, nextSurfaceId, nextRegistry, delta, Boolean(diagnosticHandler))
+          processBatch(processor, nextRegistry, delta, Boolean(diagnosticHandler))
         }
         processedMessages = nextMessages
         reported = [nextSurfaceId, nextRegistry, nextMessages]
@@ -478,9 +342,8 @@ function createSurfaceStore(
 
 /**
  * Renders an A2UI 1.0 surface directly onto Radiant components via `@a2ui/web_core`.
- * Coerces invalid model props at the catalog boundary, isolates rendered nodes inside
- * per-node text-fallback error boundaries on the client (and catches direct adapter throws
- * during synchronous `renderToString` SSR), inherits styling from the surrounding
+ * Coerces invalid model props at the boundary, isolates failing nodes inside per-node
+ * error boundaries with text-content fallbacks, inherits styling from the surrounding
  * `ThemeScope`, and ignores agent-supplied theme hints.
  */
 export function A2uiSurface({
@@ -516,7 +379,7 @@ export function A2uiSurface({
           node={rootNode}
           registry={registry}
           inline={false}
-          emit={store.emitDiagnostic}
+          onDiagnostic={onDiagnostic}
         />
       ) : null}
     </div>
