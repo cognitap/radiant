@@ -532,3 +532,92 @@ test('coerceCatalogProps coerces unknown tones, missing labels, mixed controlled
   assert.equal(summary.byComponent.Button, 4)
   assert.equal(summary.byProp['Button.tone'], 1)
 })
+
+test('coerceCatalogProps enforces Choice minItems and nested required option keys', () => {
+  const emptyResult = coerceCatalogProps(
+    radiantCatalog.entries.Choice,
+    { label: 'Tier', options: [] },
+    { nodeId: 'tier_empty' }
+  )
+  assert.equal(Array.isArray(emptyResult.props.options), true)
+  assert.equal(emptyResult.props.options.length, 1)
+  assert.equal(typeof emptyResult.props.options[0].value, 'string')
+  assert.equal(typeof emptyResult.props.options[0].label, 'string')
+  assert.ok(
+    emptyResult.diagnostics.some(
+      d => d.kind === 'coerced' && d.prop === 'options' && d.nodeId === 'tier_empty'
+    )
+  )
+
+  const nullItemResult = coerceCatalogProps(
+    radiantCatalog.entries.Choice,
+    { label: 'Tier', options: [null] },
+    { nodeId: 'tier_null' }
+  )
+  assert.equal(nullItemResult.props.options.length, 1)
+  assert.equal(typeof nullItemResult.props.options[0].value, 'string')
+  assert.equal(typeof nullItemResult.props.options[0].label, 'string')
+  assert.ok(nullItemResult.props.options[0].value.length > 0)
+  assert.ok(nullItemResult.props.options[0].label.length > 0)
+  assert.ok(
+    nullItemResult.diagnostics.some(
+      d => d.kind === 'coerced' && d.prop === 'options[0]' && d.nodeId === 'tier_null'
+    )
+  )
+})
+
+test('coerceCatalogProps honors nested additionalProperties, forbidden host props, and preserves nested value/defaultValue', () => {
+  const customEntry = {
+    name: 'ConfigCard',
+    propsSchema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        config: {
+          type: 'object',
+          additionalProperties: { type: 'string' },
+          properties: {
+            value: { type: 'string' },
+            defaultValue: { type: 'string' },
+            mode: { type: ['string', 'null'], enum: ['a', 'b'] },
+            score: { type: 'number', exclusiveMaximum: 10 }
+          }
+        }
+      }
+    },
+    bindings: {}
+  }
+  const result = coerceCatalogProps(
+    customEntry,
+    {
+      config: {
+        value: 'live',
+        defaultValue: 'initial',
+        extraCount: 42,
+        className: 'bg-red-500',
+        mode: null,
+        score: 10
+      }
+    },
+    { nodeId: 'cfg_1' }
+  )
+  assert.deepEqual(result.props.config, {
+    value: 'live',
+    defaultValue: 'initial',
+    extraCount: '42',
+    mode: 'a',
+    score: 9
+  })
+  assert.ok(result.diagnostics.some(d => d.kind === 'stripped' && d.prop === 'config.className'))
+  assert.ok(
+    result.diagnostics.some(
+      d => d.kind === 'coerced' && d.prop === 'config.extraCount' && d.used === '42'
+    )
+  )
+  assert.ok(
+    result.diagnostics.some(d => d.kind === 'coerced' && d.prop === 'config.mode' && d.used === 'a')
+  )
+  assert.ok(
+    result.diagnostics.some(d => d.kind === 'coerced' && d.prop === 'config.score' && d.used === 9)
+  )
+})

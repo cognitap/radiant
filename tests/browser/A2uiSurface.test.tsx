@@ -2,6 +2,7 @@ import { act, StrictMode, type ComponentProps } from 'react'
 import { expect, test, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import {
+  A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
   A2uiSurface,
   createA2uiRegistry,
@@ -9,6 +10,7 @@ import {
   radiantA2uiRegistry,
   summarizeCatalogDiagnostics,
   type A2uiActionPayload,
+  type A2uiMessage,
   type CatalogDiagnostic
 } from '../../src/a2ui/index.js'
 import {
@@ -336,4 +338,395 @@ test('Radiant React core still throws on mixed controlled and uncontrolled state
   } finally {
     consoleErrorSpy.mockRestore()
   }
+})
+
+test('A2uiSurface isolates malformed nested actions and prototype component names while keeping siblings visible', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const messages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_isolate_browser',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          {
+            id: 'root',
+            component: 'Column',
+            children: ['bad_btn', 'proto', 'healthy']
+          },
+          {
+            id: 'bad_btn',
+            component: 'Button',
+            child: 'btn_txt',
+            action: { event: { name: 'save', context: 'not-an-object' } }
+          },
+          { id: 'btn_txt', component: 'Text', text: 'Save' },
+          { id: 'proto', component: 'toString', text: 'Fallback from toString' },
+          { id: 'healthy', component: 'Text', text: 'Healthy sibling visible' }
+        ]
+      }
+    }
+  ]
+
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_isolate_browser"
+      messages={messages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  expect(host.textContent).toContain('Healthy sibling visible')
+  expect(host.textContent).toContain('Fallback from toString')
+  expect(host.querySelector('button')?.textContent).toContain('Save')
+  expect(diagnostics.some(d => d.nodeId === 'bad_btn' && d.prop === 'action')).toBe(true)
+  expect(
+    diagnostics.some(
+      d => d.nodeId === 'proto' && d.kind === 'fallback' && d.component === 'toString'
+    )
+  ).toBe(true)
+})
+
+test('A2uiSurface renders repeated template items and surfaces with component-level catalogId', async () => {
+  const messages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_list_catalog',
+        components: [
+          {
+            id: 'root',
+            component: 'Column',
+            catalogId: A2UI_BASIC_CATALOG_ID,
+            children: { componentId: 'row_tpl', path: '/items' }
+          },
+          {
+            id: 'row_tpl',
+            component: 'Column',
+            catalogId: A2UI_BASIC_CATALOG_ID,
+            children: ['idx_cell', 'name_cell']
+          },
+          {
+            id: 'idx_cell',
+            component: 'Text',
+            catalogId: A2UI_BASIC_CATALOG_ID,
+            text: { '@call': '@index' }
+          },
+          {
+            id: 'name_cell',
+            component: 'Text',
+            catalogId: A2UI_BASIC_CATALOG_ID,
+            text: { '@path': '' }
+          }
+        ]
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_list_catalog',
+        path: '/items',
+        value: ['Alpha', 'Beta', 'Gamma']
+      }
+    }
+  ]
+
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_list_catalog"
+      messages={messages}
+    />
+  )
+
+  expect(host.textContent).toContain('0')
+  expect(host.textContent).toContain('Alpha')
+  expect(host.textContent).toContain('1')
+  expect(host.textContent).toContain('Beta')
+  expect(host.textContent).toContain('2')
+  expect(host.textContent).toContain('Gamma')
+})
+
+test('A2uiSurface recovers a failed node after same-ID updateComponents while sibling keeps DOM identity and focus', async () => {
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  function ToggleThrow({ shouldFail, text }: { shouldFail: boolean; text: string }) {
+    if (shouldFail) {
+      throw new Error('transient render crash')
+    }
+    return <span data-slot="recovered-node">{text}</span>
+  }
+
+  const registry = createA2uiRegistry({
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    title: 'Recovery test catalog',
+    description: 'Registry with ToggleThrow for recovery testing.',
+    entries: [
+      ...Object.values(radiantA2uiRegistry.entries),
+      createA2uiRegistryEntry({
+        name: 'ToggleThrow',
+        component: ToggleThrow,
+        description: 'Throws when shouldFail is true.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            shouldFail: { type: 'boolean' },
+            text: { type: 'string' }
+          }
+        },
+        adapter: (props, _context) => (
+          <ToggleThrow
+            shouldFail={Boolean(props.shouldFail)}
+            text={String(props.text ?? '')}
+          />
+        )
+      })
+    ]
+  })
+
+  const initialMessages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_recover',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          { id: 'root', component: 'Column', children: ['flaky', 'sibling_field'] },
+          { id: 'flaky', component: 'ToggleThrow', shouldFail: true, text: 'Initial fallback' },
+          {
+            id: 'sibling_field',
+            component: 'TextField',
+            label: 'Notes',
+            value: { '@path': '/notes' }
+          }
+        ]
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_recover',
+        path: '/notes',
+        value: 'keep focus'
+      }
+    }
+  ]
+
+  try {
+    const view = await mount(
+      <A2uiSurface
+        surfaceId="s_recover"
+        messages={initialMessages}
+        registry={registry}
+      />
+    )
+
+    expect(view.host.querySelector('[data-slot="a2ui-fallback"]')?.textContent).toBe(
+      'Initial fallback'
+    )
+
+    const inputBefore = view.host.querySelector('input') as HTMLInputElement
+    expect(inputBefore).not.toBeNull()
+    inputBefore.focus()
+    expect(document.activeElement).toBe(inputBefore)
+
+    const fixedMessages: A2uiMessage[] = [
+      ...initialMessages,
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        updateComponents: {
+          surfaceId: 's_recover',
+          components: [
+            {
+              id: 'flaky',
+              component: 'ToggleThrow',
+              shouldFail: false,
+              text: 'Recovered live content'
+            }
+          ]
+        }
+      }
+    ]
+
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_recover"
+        messages={fixedMessages}
+        registry={registry}
+      />
+    )
+
+    expect(view.host.querySelector('[data-slot="recovered-node"]')?.textContent).toBe(
+      'Recovered live content'
+    )
+    expect(view.host.querySelector('[data-slot="a2ui-fallback"]')).toBeNull()
+
+    const inputAfter = view.host.querySelector('input') as HTMLInputElement
+    expect(inputAfter).toBe(inputBefore)
+    expect(document.activeElement).toBe(inputBefore)
+  } finally {
+    consoleErrorSpy.mockRestore()
+  }
+})
+
+test('A2uiSurface delivers initial diagnostics at mount, drops diagnostics without a listener, and delivers later updates', async () => {
+  const initialMessages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_diag_lifecycle',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          { id: 'root', component: 'Column', children: ['btn_1'] },
+          {
+            id: 'btn_1',
+            component: 'Button',
+            child: 'btn_1_txt',
+            variant: 'bogus',
+            action: { event: { name: 'ok' } }
+          },
+          { id: 'btn_1_txt', component: 'Text', text: 'First' }
+        ]
+      }
+    }
+  ]
+
+  const mountedDiagnostics: CatalogDiagnostic[] = []
+  await mount(
+    <A2uiSurface
+      surfaceId="s_diag_lifecycle"
+      messages={initialMessages}
+      onDiagnostic={d => mountedDiagnostics.push(d)}
+    />
+  )
+  expect(mountedDiagnostics.some(d => d.nodeId === 'btn_1' && d.prop === 'variant')).toBe(true)
+
+  const lateDiagnostics: CatalogDiagnostic[] = []
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_diag_lifecycle"
+      messages={initialMessages}
+    />
+  )
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_diag_lifecycle"
+      messages={initialMessages}
+      onDiagnostic={d => lateDiagnostics.push(d)}
+    />
+  )
+  expect(lateDiagnostics).toHaveLength(0)
+
+  const updatedMessages: A2uiMessage[] = [
+    ...initialMessages,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_diag_lifecycle',
+        components: [
+          {
+            id: 'btn_1',
+            component: 'Button',
+            child: 'btn_1_txt',
+            tone: 'rainbow',
+            action: { event: { name: 'ok' } }
+          }
+        ]
+      }
+    }
+  ]
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_diag_lifecycle"
+      messages={updatedMessages}
+      onDiagnostic={d => lateDiagnostics.push(d)}
+    />
+  )
+  expect(lateDiagnostics.some(d => d.nodeId === 'btn_1' && d.prop === 'tone')).toBe(true)
+  expect(lateDiagnostics.some(d => d.prop === 'variant')).toBe(false)
+})
+
+test('A2uiSurface keeps generated IDs distinct across appended batches and coerces invalid resolved TextField labels reactively', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const initialMessages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_ids_and_labels',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          { id: 'root', component: 'Column', children: ['first_btn', 'user_name'] },
+          { id: 'first_btn', component: 'Button', label: 'First button' },
+          {
+            id: 'user_name',
+            component: 'TextField',
+            label: { '@path': '/labelText' },
+            value: { '@path': '/name' }
+          }
+        ]
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_ids_and_labels',
+        path: '/',
+        value: { labelText: 42, name: 'Ada' }
+      }
+    }
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_ids_and_labels"
+      messages={initialMessages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  const labelEl = view.host.querySelector('label')
+  expect(labelEl?.textContent).toContain('User name')
+  expect(
+    diagnostics.some(d => d.nodeId === 'user_name' && d.prop === 'label' && d.received === 42)
+  ).toBe(true)
+
+  const appendedMessages: A2uiMessage[] = [
+    ...initialMessages,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateComponents: {
+        surfaceId: 's_ids_and_labels',
+        components: [
+          {
+            id: 'root',
+            component: 'Column',
+            children: ['first_btn', 'second_btn', 'user_name']
+          },
+          { id: 'second_btn', component: 'Button', label: 'Second button' }
+        ]
+      }
+    },
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: {
+        surfaceId: 's_ids_and_labels',
+        path: '/labelText',
+        value: 'Full name'
+      }
+    }
+  ]
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_ids_and_labels"
+      messages={appendedMessages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+
+  const buttons = Array.from(view.host.querySelectorAll('button')).map(b => b.textContent?.trim())
+  expect(buttons).toContain('First button')
+  expect(buttons).toContain('Second button')
+  expect(view.host.querySelector('label')?.textContent).toContain('Full name')
 })

@@ -47,6 +47,7 @@ export type CoerceSchemaPropsOptions = {
   readonly passthroughKeys?: ReadonlySet<string>
   readonly customCoercers?: Readonly<Record<string, PropCoercer>>
   readonly customPropCoercer?: PropCoercer
+  readonly normalizeStateOwnership?: boolean
 }
 
 export type CoerceCatalogPropsOptions = {
@@ -68,6 +69,10 @@ const FALLBACK_TEXT_KEYS = [
   'placeholder',
   'value'
 ] as const
+
+export function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
 
 /**
  * Turns a component ID (such as `display_name` or `emailField`) into a readable fallback label.
@@ -133,22 +138,20 @@ export function summarizeCatalogDiagnostics(
   })
 }
 
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-}
-
 function cloneDefault<T>(value: T): T {
   return typeof value === 'object' && value !== null ? structuredClone(value) : value
 }
 
-type FlattenedObjectSchema = {
+export type FlattenedObjectSchema = {
   readonly properties: Record<string, CatalogJsonSchema>
   readonly required: Set<string>
+  readonly additionalProperties: boolean | CatalogJsonSchema | undefined
 }
 
-function flattenObjectSchema(schema: Record<string, unknown>): FlattenedObjectSchema {
+export function flattenObjectSchema(schema: Record<string, unknown>): FlattenedObjectSchema {
   const properties: Record<string, CatalogJsonSchema> = {}
   const required = new Set<string>()
+  let additionalProperties: boolean | CatalogJsonSchema | undefined
 
   function visit(node: Record<string, unknown>) {
     if (isPlainRecord(node.properties)) {
@@ -163,6 +166,11 @@ function flattenObjectSchema(schema: Record<string, unknown>): FlattenedObjectSc
         if (typeof key === 'string') required.add(key)
       }
     }
+    if (typeof node.additionalProperties === 'boolean') {
+      additionalProperties = node.additionalProperties
+    } else if (isPlainRecord(node.additionalProperties)) {
+      additionalProperties = node.additionalProperties as CatalogJsonSchema
+    }
     if (Array.isArray(node.allOf)) {
       for (const branch of node.allOf) {
         if (isPlainRecord(branch)) visit(branch)
@@ -171,7 +179,7 @@ function flattenObjectSchema(schema: Record<string, unknown>): FlattenedObjectSc
   }
 
   visit(schema)
-  return { properties, required }
+  return { properties, required, additionalProperties }
 }
 
 function primarySchemaType(schema: CatalogJsonSchema): string | undefined {
@@ -186,11 +194,12 @@ function primarySchemaType(schema: CatalogJsonSchema): string | undefined {
   return undefined
 }
 
-function defaultForSchema(
+function synthesizeFallbackValue(
   prop: string,
   schema: CatalogJsonSchema,
   nodeId: string,
-  rawProps: Readonly<Record<string, unknown>>
+  rawProps: Readonly<Record<string, unknown>>,
+  itemIndex?: number
 ): unknown {
   if (schema.default !== undefined) return cloneDefault(schema.default)
   if (schema.const !== undefined) return schema.const
@@ -198,7 +207,7 @@ function defaultForSchema(
 
   const type = primarySchemaType(schema)
   if (type === 'string') {
-    if (prop === 'label') {
+    if (prop === 'label' && itemIndex === undefined) {
       const placeholder = rawProps.placeholder
       if (typeof placeholder === 'string' && placeholder.trim().length > 0) {
         return placeholder.trim()
@@ -206,7 +215,11 @@ function defaultForSchema(
       return humanizeNodeId(nodeId)
     }
     if (typeof schema.minLength === 'number' && schema.minLength > 0) {
-      return humanizeNodeId(nodeId)
+      if (itemIndex !== undefined) {
+        const suffix = itemIndex + 1
+        return prop === 'label' ? `Option ${suffix}` : `${prop}_${suffix}`
+      }
+      return humanizeNodeId(prop || nodeId)
     }
     return ''
   }
@@ -220,8 +233,26 @@ function defaultForSchema(
     return 0
   }
   if (type === 'boolean') return false
-  if (type === 'array') return []
-  if (type === 'object') return {}
+  if (type === 'array') {
+    const count = typeof schema.minItems === 'number' && schema.minItems > 0 ? schema.minItems : 0
+    if (count === 0 || !schema.items) return []
+    const items: unknown[] = []
+    for (let i = 0; i < count; i++) {
+      items.push(synthesizeFallbackValue(prop, schema.items, nodeId, rawProps, i))
+    }
+    return items
+  }
+  if (type === 'object') {
+    const { properties, required } = flattenObjectSchema(schema as Record<string, unknown>)
+    const obj: Record<string, unknown> = {}
+    for (const reqKey of required) {
+      const propSchema = Object.hasOwn(properties, reqKey) ? properties[reqKey] : undefined
+      if (!propSchema) continue
+      const val = synthesizeFallbackValue(reqKey, propSchema, nodeId, rawProps, itemIndex)
+      if (val !== undefined) obj[reqKey] = val
+    }
+    return obj
+  }
   return undefined
 }
 
@@ -244,7 +275,8 @@ function coerceValueToSchema(
   schema: CatalogJsonSchema,
   nodeId: string,
   rawProps: Readonly<Record<string, unknown>>,
-  emit: (diagnostic: Omit<CatalogDiagnostic, 'nodeId' | 'component'>) => void
+  emit: (diagnostic: Omit<CatalogDiagnostic, 'nodeId' | 'component'>) => void,
+  itemIndex?: number
 ): unknown {
   if (schema.const !== undefined) {
     if (received === schema.const) return received
@@ -306,7 +338,7 @@ function coerceValueToSchema(
         reason: `Expected string; converted ${typeof received} to string.`
       })
     } else {
-      next = String(defaultForSchema(prop, schema, nodeId, rawProps) ?? '')
+      next = String(synthesizeFallbackValue(prop, schema, nodeId, rawProps, itemIndex) ?? '')
       emit({
         kind: 'coerced',
         prop,
@@ -318,7 +350,9 @@ function coerceValueToSchema(
     }
 
     if (typeof schema.minLength === 'number' && next.length < schema.minLength) {
-      const fallback = String(defaultForSchema(prop, schema, nodeId, rawProps) ?? '')
+      const fallback = String(
+        synthesizeFallbackValue(prop, schema, nodeId, rawProps, itemIndex) ?? ''
+      )
       emit({
         kind: 'coerced',
         prop,
@@ -355,7 +389,9 @@ function coerceValueToSchema(
       num = Number(received)
       alreadyCoerced = true
     } else {
-      const fallback = Number(defaultForSchema(prop, schema, nodeId, rawProps) ?? 0)
+      const fallback = Number(
+        synthesizeFallbackValue(prop, schema, nodeId, rawProps, itemIndex) ?? 0
+      )
       emit({
         kind: 'coerced',
         prop,
@@ -367,6 +403,7 @@ function coerceValueToSchema(
     }
 
     let clamped = type === 'integer' ? Math.round(num) : num
+    const schemaWithExMax = schema as CatalogJsonSchema & { readonly exclusiveMaximum?: number }
     if (typeof schema.minimum === 'number' && clamped < schema.minimum) {
       clamped = schema.minimum
     }
@@ -376,6 +413,15 @@ function coerceValueToSchema(
     }
     if (typeof schema.maximum === 'number' && clamped > schema.maximum) {
       clamped = schema.maximum
+    }
+    if (
+      typeof schemaWithExMax.exclusiveMaximum === 'number' &&
+      clamped >= schemaWithExMax.exclusiveMaximum
+    ) {
+      clamped =
+        type === 'integer'
+          ? Math.ceil(schemaWithExMax.exclusiveMaximum) - 1
+          : schemaWithExMax.exclusiveMaximum - 1
     }
 
     if (alreadyCoerced || clamped !== received) {
@@ -405,7 +451,7 @@ function coerceValueToSchema(
       })
       return parsed
     }
-    const fallback = Boolean(defaultForSchema(prop, schema, nodeId, rawProps))
+    const fallback = Boolean(synthesizeFallbackValue(prop, schema, nodeId, rawProps, itemIndex))
     emit({
       kind: 'coerced',
       prop,
@@ -418,38 +464,75 @@ function coerceValueToSchema(
 
   if (type === 'array') {
     if (!Array.isArray(received)) {
-      const fallback: unknown[] = []
+      const fallback = synthesizeFallbackValue(prop, schema, nodeId, rawProps) as unknown[]
       emit({
         kind: 'coerced',
         prop,
         received,
         used: fallback,
-        reason: 'Expected array; fell back to empty array.'
+        reason: 'Expected array; fell back to safe default.'
       })
       return fallback
     }
-    if (!schema.items) return received
-    return received.map((item, index) =>
-      coerceValueToSchema(item, `${prop}[${index}]`, schema.items!, nodeId, rawProps, emit)
-    )
+    let next = schema.items
+      ? received.map((item, index) =>
+          coerceValueToSchema(
+            item,
+            `${prop}[${index}]`,
+            schema.items!,
+            nodeId,
+            rawProps,
+            emit,
+            index
+          )
+        )
+      : [...received]
+
+    if (typeof schema.maxItems === 'number' && next.length > schema.maxItems) {
+      next = next.slice(0, schema.maxItems)
+      emit({
+        kind: 'coerced',
+        prop,
+        received,
+        used: next,
+        reason: `Array exceeded maxItems ${schema.maxItems}; truncated.`
+      })
+    }
+    if (typeof schema.minItems === 'number' && next.length < schema.minItems && schema.items) {
+      const padded = [...next]
+      for (let i = padded.length; i < schema.minItems; i++) {
+        padded.push(synthesizeFallbackValue(prop, schema.items, nodeId, rawProps, i))
+      }
+      emit({
+        kind: 'coerced',
+        prop,
+        received,
+        used: padded,
+        reason: `Array shorter than minItems ${schema.minItems}; supplied fallback item(s).`
+      })
+      return padded
+    }
+    return next
   }
 
   if (type === 'object') {
     if (!isPlainRecord(received)) {
-      const fallback = defaultForSchema(prop, schema, nodeId, rawProps) ?? {}
+      const fallback = synthesizeFallbackValue(prop, schema, nodeId, rawProps, itemIndex) ?? {}
       emit({
         kind: 'coerced',
         prop,
         received,
         used: fallback,
-        reason: 'Expected object; fell back to safe default.'
+        reason: 'Expected object; supplied schema-valid fallback.'
       })
       return fallback
     }
-    if (!schema.properties) return received
-    const nested = coerceSchemaProps(schema, received, {
+    if (!schema.properties && schema.additionalProperties === undefined) return received
+    const nested = coerceObjectRecord(schema, received, {
       nodeId,
-      component: prop
+      component: prop,
+      normalizeStateOwnership: false,
+      strictDefaultAdditionalProperties: false
     })
     for (const diagnostic of nested.diagnostics) {
       emit({
@@ -473,17 +556,24 @@ function controlledKeyForDefaultProp(key: string): string | undefined {
   return rest.charAt(0).toLowerCase() + rest.slice(1)
 }
 
-/**
- * Validates and coerces raw model props against a JSON Schema object at the catalog boundary.
- * Never throws: invalid values, missing required props, forbidden host props, and mixed
- * controlled/uncontrolled state are coerced to safe defaults with structured diagnostics.
- */
-export function coerceSchemaProps(
+type InternalCoerceOptions = CoerceSchemaPropsOptions & {
+  readonly strictDefaultAdditionalProperties: boolean
+}
+
+function coerceObjectRecord(
   schema: CatalogJsonSchema | Record<string, unknown>,
   rawProps: Readonly<Record<string, unknown>>,
-  options: CoerceSchemaPropsOptions
+  options: InternalCoerceOptions
 ): CoercePropsResult {
-  const { nodeId, component, passthroughKeys, customCoercers, customPropCoercer } = options
+  const {
+    nodeId,
+    component,
+    passthroughKeys,
+    customCoercers,
+    customPropCoercer,
+    normalizeStateOwnership = true,
+    strictDefaultAdditionalProperties
+  } = options
   const diagnostics: CatalogDiagnostic[] = []
   const emit = (diagnostic: Omit<CatalogDiagnostic, 'nodeId' | 'component'>) => {
     diagnostics.push({
@@ -493,38 +583,42 @@ export function coerceSchemaProps(
     })
   }
 
-  const { properties, required } = flattenObjectSchema(schema as Record<string, unknown>)
+  const { properties, required, additionalProperties } = flattenObjectSchema(
+    schema as Record<string, unknown>
+  )
   const working: Record<string, unknown> = {}
   const skippedKeys = new Set<string>()
 
-  // 1. Resolve mixed controlled + uncontrolled state pairs (e.g., value + defaultValue)
-  for (const [key, value] of Object.entries(rawProps)) {
-    if (value === undefined) continue
-    const controlledKey = controlledKeyForDefaultProp(key)
-    if (!controlledKey) continue
-    const hasControlledInInput = rawProps[controlledKey] !== undefined
-    const hasControlledInSchema = Object.hasOwn(properties, controlledKey)
-    const hasDefaultInSchema = Object.hasOwn(properties, key)
+  // 1. Resolve mixed controlled + uncontrolled state pairs for component props only
+  if (normalizeStateOwnership) {
+    for (const [key, value] of Object.entries(rawProps)) {
+      if (value === undefined) continue
+      const controlledKey = controlledKeyForDefaultProp(key)
+      if (!controlledKey) continue
+      const hasControlledInInput = rawProps[controlledKey] !== undefined
+      const hasControlledInSchema = Object.hasOwn(properties, controlledKey)
+      const hasDefaultInSchema = Object.hasOwn(properties, key)
 
-    if (hasControlledInInput) {
-      skippedKeys.add(key)
-      emit({
-        kind: 'coerced',
-        prop: key,
-        received: value,
-        used: undefined,
-        reason: `Mixed controlled ("${controlledKey}") and uncontrolled ("${key}") state; kept "${controlledKey}".`
-      })
-    } else if (hasControlledInSchema && !hasDefaultInSchema) {
-      skippedKeys.add(key)
-      working[controlledKey] = value
-      emit({
-        kind: 'coerced',
-        prop: key,
-        received: value,
-        used: value,
-        reason: `Mapped uncontrolled "${key}" to "${controlledKey}".`
-      })
+      if (hasControlledInInput) {
+        skippedKeys.add(key)
+        emit({
+          kind: 'coerced',
+          prop: key,
+          received: value,
+          used: undefined,
+          reason: `Mixed controlled ("${controlledKey}") and uncontrolled ("${key}") state; kept "${controlledKey}".`
+        })
+      } else if (hasControlledInSchema && !hasDefaultInSchema) {
+        skippedKeys.add(key)
+        working[controlledKey] = value
+        emit({
+          kind: 'coerced',
+          prop: key,
+          received: value,
+          used: value,
+          reason: `Mapped uncontrolled "${key}" to "${controlledKey}".`
+        })
+      }
     }
   }
 
@@ -536,7 +630,7 @@ export function coerceSchemaProps(
     }
   }
 
-  // 3. Coerce declared props, pass through allowed envelope keys, and strip forbidden/unknown props
+  // 3. Coerce declared props, apply additionalProperties, and strip forbidden/unknown props
   const coerced: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(working)) {
     if (passthroughKeys?.has(key)) {
@@ -555,8 +649,27 @@ export function coerceSchemaProps(
       continue
     }
 
-    const propSchema = properties[key]
+    const propSchema = Object.hasOwn(properties, key) ? properties[key] : undefined
     if (!propSchema) {
+      if (additionalProperties === true) {
+        coerced[key] = value
+        continue
+      }
+      if (isPlainRecord(additionalProperties)) {
+        coerced[key] = coerceValueToSchema(
+          value,
+          key,
+          additionalProperties as CatalogJsonSchema,
+          nodeId,
+          rawProps,
+          emit
+        )
+        continue
+      }
+      if (additionalProperties === undefined && !strictDefaultAdditionalProperties) {
+        coerced[key] = value
+        continue
+      }
       emit({
         kind: 'stripped',
         prop: key,
@@ -600,7 +713,7 @@ export function coerceSchemaProps(
   for (const reqKey of required) {
     if (Object.hasOwn(coerced, reqKey) && coerced[reqKey] !== undefined) continue
     if (passthroughKeys?.has(reqKey)) continue
-    const propSchema = properties[reqKey]
+    const propSchema = Object.hasOwn(properties, reqKey) ? properties[reqKey] : undefined
     if (!propSchema) continue
 
     const ctx: PropCoercerContext = {
@@ -629,7 +742,7 @@ export function coerceSchemaProps(
       continue
     }
 
-    const fallback = defaultForSchema(reqKey, propSchema, nodeId, rawProps)
+    const fallback = synthesizeFallbackValue(reqKey, propSchema, nodeId, rawProps)
     if (fallback !== undefined) {
       coerced[reqKey] = fallback
       emit({
@@ -643,6 +756,22 @@ export function coerceSchemaProps(
   }
 
   return { props: coerced, diagnostics }
+}
+
+/**
+ * Validates and coerces raw model props against a JSON Schema object at the catalog boundary.
+ * Never throws: invalid values, missing required props, forbidden host props, and mixed
+ * controlled/uncontrolled state are coerced to safe defaults with structured diagnostics.
+ */
+export function coerceSchemaProps(
+  schema: CatalogJsonSchema | Record<string, unknown>,
+  rawProps: Readonly<Record<string, unknown>>,
+  options: CoerceSchemaPropsOptions
+): CoercePropsResult {
+  return coerceObjectRecord(schema, rawProps, {
+    ...options,
+    strictDefaultAdditionalProperties: true
+  })
 }
 
 function schemaForBindingValueType(
@@ -677,7 +806,7 @@ export function coerceCatalogProps(
       properties[bindingKey] = schemaForBindingValueType(binding.valueType)
     }
   }
-  return coerceSchemaProps(
+  return coerceObjectRecord(
     {
       ...entry.propsSchema,
       properties
@@ -685,7 +814,9 @@ export function coerceCatalogProps(
     rawProps,
     {
       nodeId: options.nodeId,
-      component: entry.name
+      component: entry.name,
+      normalizeStateOwnership: true,
+      strictDefaultAdditionalProperties: true
     }
   )
 }

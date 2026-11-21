@@ -3,6 +3,7 @@
 import {
   Component,
   useEffect,
+  useRef,
   useState,
   useSyncExternalStore,
   type ErrorInfo,
@@ -12,13 +13,17 @@ import type { ComponentApi, FunctionImplementation } from '@a2ui/web_core/catalo
 import { MessageProcessor, type ProcessableMessage } from '@a2ui/web_core/processing'
 import { effect, getValue, peekValue, type Signal } from '@a2ui/web_core/reactivity'
 import { NodeResolver, type ComponentNode } from '@a2ui/web_core/resolution'
-import type { ActionPayload } from '@a2ui/web_core/state'
+import type { ActionPayload, SurfaceModel } from '@a2ui/web_core/state'
 import type { CatalogDiagnostic } from '../catalog/index.js'
 import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import {
   COERCED_NOOP_ACTION_NAME,
   coerceA2uiMessages,
-  extractA2uiNodeFallbackText
+  coerceA2uiResolvedProps,
+  createA2uiCoerceState,
+  extractA2uiNodeFallbackText,
+  getRegistryEntry,
+  type A2uiCoerceState
 } from './coerce.js'
 import { radiantA2uiRegistry } from './entries.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
@@ -102,19 +107,34 @@ function A2uiFallbackText({
 
 type NodeErrorBoundaryProps = {
   readonly node: ComponentNode
+  readonly resetToken: unknown
   readonly emitDiagnostic: (diagnostic: CatalogDiagnostic) => void
   readonly children: ReactNode
 }
 
 type NodeErrorBoundaryState = {
   readonly failed: boolean
+  readonly failedToken: unknown
 }
 
 class A2uiNodeErrorBoundary extends Component<NodeErrorBoundaryProps, NodeErrorBoundaryState> {
-  override state: NodeErrorBoundaryState = { failed: false }
+  override state: NodeErrorBoundaryState = { failed: false, failedToken: undefined }
 
-  static getDerivedStateFromError(): NodeErrorBoundaryState {
+  static getDerivedStateFromError(): Partial<NodeErrorBoundaryState> {
     return { failed: true }
+  }
+
+  static getDerivedStateFromProps(
+    nextProps: NodeErrorBoundaryProps,
+    prevState: NodeErrorBoundaryState
+  ): NodeErrorBoundaryState | null {
+    if (prevState.failed && prevState.failedToken === undefined) {
+      return { failed: true, failedToken: nextProps.resetToken }
+    }
+    if (prevState.failed && nextProps.resetToken !== prevState.failedToken) {
+      return { failed: false, failedToken: undefined }
+    }
+    return null
   }
 
   override componentDidCatch(error: Error, _info: ErrorInfo) {
@@ -133,8 +153,13 @@ class A2uiNodeErrorBoundary extends Component<NodeErrorBoundaryProps, NodeErrorB
 
   override render(): ReactNode {
     if (this.state.failed) {
-      const { node } = this.props
-      const fallbackText = extractA2uiNodeFallbackText(node)
+      const { node, resetToken } = this.props
+      const fallbackText = extractA2uiNodeFallbackText(
+        node,
+        resetToken && typeof resetToken === 'object'
+          ? (resetToken as Readonly<Record<string, unknown>>)
+          : undefined
+      )
       if (!fallbackText) return null
       return (
         <span
@@ -151,22 +176,41 @@ class A2uiNodeErrorBoundary extends Component<NodeErrorBoundaryProps, NodeErrorB
 
 function A2uiNodeContent({
   node,
+  props,
   registry,
   inline,
   emitDiagnostic
 }: {
   readonly node: ComponentNode
+  readonly props: Readonly<Record<string, unknown>>
   readonly registry: A2uiRegistry
   readonly inline: boolean
   readonly emitDiagnostic: (diagnostic: CatalogDiagnostic) => void
 }): ReactNode {
-  const props = useSignalValue(node.props)
-  if (!props || node.state !== 'resolved') return null
-  const entry = registry.entries[node.type]
-  if (!entry) return null
+  const entry = getRegistryEntry(registry, node.type)
+  const resolved = entry ? coerceA2uiResolvedProps(entry, node, props) : undefined
+  const reportedKeyRef = useRef<string>('')
+  const diagnosticSignature =
+    resolved && resolved.diagnostics.length > 0
+      ? resolved.diagnostics.map(d => `${d.prop}:${String(d.received)}:${String(d.used)}`).join('|')
+      : ''
+
+  useEffect(() => {
+    if (!diagnosticSignature) {
+      reportedKeyRef.current = ''
+      return
+    }
+    if (reportedKeyRef.current === diagnosticSignature) return
+    reportedKeyRef.current = diagnosticSignature
+    for (const diagnostic of resolved!.diagnostics) {
+      emitDiagnostic(diagnostic)
+    }
+  }, [diagnosticSignature, emitDiagnostic, resolved])
+
+  if (!entry || !resolved) return null
 
   try {
-    return entry.adapter(props, {
+    return entry.adapter(resolved.props, {
       node,
       inline,
       renderNode(child: ComponentNode, options?: A2uiRenderOptions) {
@@ -186,7 +230,7 @@ function A2uiNodeContent({
       <A2uiFallbackText
         nodeId={node.componentId}
         component={node.type}
-        fallbackText={extractA2uiNodeFallbackText(node, props)}
+        fallbackText={extractA2uiNodeFallbackText(node, resolved.props)}
         errorMessage={errorToMessage(error)}
         emitDiagnostic={emitDiagnostic}
       />
@@ -205,14 +249,18 @@ function A2uiNodeRenderer({
   readonly inline: boolean
   readonly emitDiagnostic: (diagnostic: CatalogDiagnostic) => void
 }): ReactNode {
+  const props = useSignalValue(node.props)
+  if (!props || node.state !== 'resolved') return null
   return (
     <A2uiNodeErrorBoundary
       key={node.id}
       node={node}
+      resetToken={props}
       emitDiagnostic={emitDiagnostic}
     >
       <A2uiNodeContent
         node={node}
+        props={props}
         registry={registry}
         inline={inline}
         emitDiagnostic={emitDiagnostic}
@@ -243,6 +291,13 @@ type SurfaceStore = {
   readonly dispose: () => void
 }
 
+function createResolverForSurface(
+  surface: SurfaceModel<ComponentApi> | undefined
+): NodeResolver<ComponentApi, FunctionImplementation> | undefined {
+  if (!surface) return undefined
+  return new NodeResolver(surface as SurfaceModel<ComponentApi, FunctionImplementation>)
+}
+
 function createSurfaceStore(
   initialSurfaceId: string,
   initialRegistry: A2uiRegistry,
@@ -259,6 +314,7 @@ function createSurfaceStore(
   let actionHandler = initialOnAction
   let diagnosticHandler = initialOnDiagnostic
   let disposed = false
+  let coerceState: A2uiCoerceState = createA2uiCoerceState()
   let processor: MessageProcessor<ComponentApi> | undefined
   let resolver: NodeResolver<ComponentApi, FunctionImplementation> | undefined
   let stopRootEffect: (() => void) | undefined
@@ -272,8 +328,9 @@ function createSurfaceStore(
   }
 
   function flushDiagnostics() {
-    if (!diagnosticHandler || pendingDiagnostics.length === 0) return
+    if (pendingDiagnostics.length === 0) return
     const batch = pendingDiagnostics.splice(0, pendingDiagnostics.length)
+    if (!diagnosticHandler) return
     for (const diagnostic of batch) {
       diagnosticHandler(diagnostic)
     }
@@ -311,7 +368,11 @@ function createSurfaceStore(
     batch: readonly A2uiMessage[],
     recordDiagnostics: boolean
   ) {
-    const { messages: coerced, diagnostics } = coerceA2uiMessages(batch, targetRegistry)
+    const { messages: coerced, diagnostics } = coerceA2uiMessages(
+      batch,
+      targetRegistry,
+      coerceState
+    )
     if (recordDiagnostics && diagnostics.length > 0) {
       pendingDiagnostics.push(...diagnostics)
     }
@@ -344,6 +405,7 @@ function createSurfaceStore(
     surfaceId = nextSurfaceId
     registry = nextRegistry
     processedMessages = nextMessages
+    coerceState = createA2uiCoerceState()
     const isSameReportedBatch =
       reportedSurfaceId === nextSurfaceId &&
       reportedRegistry === nextRegistry &&
@@ -363,14 +425,13 @@ function createSurfaceStore(
         nextSurfaceId,
         nextRegistry,
         nextMessages,
-        !isSameReportedBatch
+        Boolean(diagnosticHandler) && !isSameReportedBatch
       )
     }
     reportedSurfaceId = nextSurfaceId
     reportedRegistry = nextRegistry
     reportedMessages = nextMessages
-    const surface = processor.getSurface(nextSurfaceId)
-    resolver = surface ? new NodeResolver(surface, webCoreCatalog) : undefined
+    resolver = createResolverForSurface(processor.getSurface(nextSurfaceId))
     bindRootSignal()
   }
 
@@ -394,15 +455,14 @@ function createSurfaceStore(
       return resolver ? peekValue(resolver.rootNode) : undefined
     },
     emitDiagnostic(diagnostic) {
-      if (diagnosticHandler) {
-        diagnosticHandler(diagnostic)
-      } else {
-        pendingDiagnostics.push(diagnostic)
-      }
+      diagnosticHandler?.(diagnostic)
     },
     sync(nextSurfaceId, nextRegistry, nextMessages, nextOnAction, nextOnDiagnostic) {
       actionHandler = nextOnAction
       diagnosticHandler = nextOnDiagnostic
+      if (!diagnosticHandler) {
+        pendingDiagnostics.length = 0
+      }
       if (
         disposed ||
         !processor ||
@@ -418,15 +478,18 @@ function createSurfaceStore(
       if (nextMessages.length > processedMessages.length) {
         const delta = nextMessages.slice(processedMessages.length)
         if (delta.length > 0) {
-          processCoercedMessages(processor, nextSurfaceId, nextRegistry, delta, true)
+          processCoercedMessages(
+            processor,
+            nextSurfaceId,
+            nextRegistry,
+            delta,
+            Boolean(diagnosticHandler)
+          )
         }
         processedMessages = nextMessages
         reportedMessages = nextMessages
         if (!resolver || resolver.disposed) {
-          const surface = processor.getSurface(nextSurfaceId)
-          resolver = surface
-            ? new NodeResolver(surface, nextRegistry.toWebCoreCatalog())
-            : undefined
+          resolver = createResolverForSurface(processor.getSurface(nextSurfaceId))
           bindRootSignal()
         }
         flushDiagnostics()
@@ -445,9 +508,10 @@ function createSurfaceStore(
 
 /**
  * Renders an A2UI 1.0 surface directly onto Radiant components via `@a2ui/web_core`.
- * Coerces invalid model props at the catalog boundary, isolates every node in its own
- * error boundary, inherits styling from the surrounding `ThemeScope`, and ignores
- * agent-supplied theme hints.
+ * Coerces invalid model props at the catalog boundary, isolates rendered nodes inside
+ * per-node text-fallback error boundaries on the client (and catches direct adapter throws
+ * during synchronous `renderToString` SSR), inherits styling from the surrounding
+ * `ThemeScope`, and ignores agent-supplied theme hints.
  */
 export function A2uiSurface({
   surfaceId,
