@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import {
   A2uiSurface,
   validateA2uiAccessibility,
@@ -53,14 +53,29 @@ test('Row lays children out on Stack with translated justify, align and child we
   expect(style.justifyContent).toBe('space-between')
   expect(style.alignItems).toBe('flex-end')
   expect(style.columnGap).toBe('16px')
-  const weighted = row.querySelector<HTMLElement>(':scope > [data-slot="a2ui-weight"]')!
-  expect(weighted.style.flexGrow).toBe('1')
-  expect(weighted.querySelector('input')).not.toBeNull()
-  const button = row.querySelector('button')!
-  expect(button.parentElement).toBe(row)
+  const [weighted, plain] = row.querySelectorAll<HTMLElement>(
+    ':scope > [data-slot="a2ui-flex-item"]'
+  )
+  expect(weighted!.style.flexGrow).toBe('1')
+  expect(weighted!.querySelector('input')).not.toBeNull()
+  expect(plain!.style.flexGrow).toBe('')
+  expect(plain!.querySelector('button')).not.toBeNull()
   expect(
-    weighted.getBoundingClientRect().width + button.getBoundingClientRect().width + 16
+    weighted!.getBoundingClientRect().width + plain!.getBoundingClientRect().width + 16
   ).toBeCloseTo(row.getBoundingClientRect().width, 0)
+})
+
+test('Row justify stretch shares the line between its child boxes', async () => {
+  const { host } = await render(
+    surfaceOf([
+      { id: 'root', component: 'Row', justify: 'stretch', children: ['a_text', 'b_text'] },
+      { id: 'a_text', component: 'Text', text: 'A' },
+      { id: 'b_text', component: 'Text', text: 'Longer B' }
+    ])
+  )
+  const items = [...host.querySelectorAll<HTMLElement>('[data-slot="a2ui-flex-item"]')]
+  const [a, b] = items.map(item => item.getBoundingClientRect().width)
+  expect(a).toBeCloseTo(b!, 0)
 })
 
 test('Row and Column coerce unknown justify and align values instead of throwing', async () => {
@@ -179,7 +194,44 @@ test('Tabs switch panels by keyboard and keep the inactive panel state', async (
   expect(panel().querySelector('input')!.value).toBe('Poles')
 })
 
-test('Modal opens from its trigger, is named by it, and restores focus on Escape and close', async () => {
+test('Tabs keep the selected tab and its panel when the agent reorders them', async () => {
+  const { host, render: rerender } = await render(tabsFixtureMessages)
+  await userEvent.click(host.querySelectorAll<HTMLButtonElement>('[role="tab"]')[1]!)
+  const panel = host.querySelector<HTMLElement>('[role="tabpanel"]:not([hidden])')!
+  await userEvent.type(panel.querySelector('input')!, 'Poles')
+  const reorder = (tabs: readonly Record<string, unknown>[]): A2uiMessage => ({
+    version: A2UI_PROTOCOL_VERSION,
+    updateComponents: {
+      surfaceId: LAYOUT_SURFACE_ID,
+      components: [{ id: 'root', component: 'Tabs', tabs }]
+    }
+  })
+  const gear = { title: 'Gear', child: 'gear_field' }
+  const overview = { title: 'Overview', child: 'overview_text' }
+  const show = (messages: readonly A2uiMessage[]) =>
+    rerender(
+      <div style={{ width: '480px' }}>
+        <A2uiSurface
+          surfaceId={LAYOUT_SURFACE_ID}
+          messages={messages}
+        />
+      </div>
+    )
+  const reordered = [...tabsFixtureMessages, reorder([gear, overview])]
+  await show(reordered)
+  const tabs = () => [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')]
+  await vi.waitFor(() => expect(tabs().map(tab => tab.textContent)).toEqual(['Gear', 'Overview']))
+  expect(tabs()[0]!.getAttribute('aria-selected')).toBe('true')
+  // web_core rebuilds a moved panel's node, so only the Radiant tab panel itself is kept.
+  expect(host.querySelector('[role="tabpanel"]:not([hidden])')).toBe(panel)
+  expect(panel.querySelector('input')!.value).toBe('Poles')
+
+  await show([...reordered, reorder([overview])])
+  await vi.waitFor(() => expect(tabs().map(tab => tab.textContent)).toEqual(['Overview']))
+  expect(tabs()[0]!.getAttribute('aria-selected')).toBe('true')
+})
+
+test('Modal opens from its Button trigger, is named by it, and restores focus on Escape', async () => {
   const actions: unknown[] = []
   const { host } = await mount(
     <A2uiSurface
@@ -190,26 +242,69 @@ test('Modal opens from its trigger, is named by it, and restores focus on Escape
   )
   const trigger = host.querySelector<HTMLButtonElement>('button')!
   const dialog = host.querySelector<HTMLDialogElement>('dialog[data-slot~="a2ui-modal"]')!
+  expect(host.querySelector('[data-slot="a2ui-modal-trigger"]')).toBeNull()
+  expect(trigger.getAttribute('aria-haspopup')).toBe('dialog')
+  expect(trigger.getAttribute('aria-controls')).toBe(dialog.id)
+  expect(trigger.getAttribute('aria-expanded')).toBe('false')
+  expect(dialog.getAttribute('aria-labelledby')).toBe(trigger.id)
   expect(dialog.open).toBe(false)
 
   await userEvent.click(trigger)
   expect(dialog.open).toBe(true)
   expect(dialog.matches(':modal')).toBe(true)
-  expect(dialog.getAttribute('aria-labelledby')).toBe(trigger.parentElement!.id)
+  expect(trigger.getAttribute('aria-expanded')).toBe('true')
+  expect(actions).toHaveLength(1)
+  expect(dialog.ariaLabelledByElements).toEqual([trigger])
+  await expect.element(page.getByRole('dialog', { name: 'Trail details' })).toBeVisible()
   expect(dialog.textContent).toContain('Parking opens at dawn.')
   expect(dialog.contains(document.activeElement)).toBe(true)
+  expect([...dialog.querySelectorAll('button')].map(b => b.textContent)).toEqual([])
 
   await userEvent.keyboard('{Escape}')
   await vi.waitFor(() => expect(dialog.open).toBe(false))
   expect(document.activeElement).toBe(trigger)
+})
 
+test('Modal renders a close button only with host-supplied modalClose text', async () => {
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId={LAYOUT_SURFACE_ID}
+      messages={modalFixtureMessages}
+      labels={{ modalClose: 'Fermer' }}
+    />
+  )
+  const trigger = host.querySelector<HTMLButtonElement>('button')!
+  const dialog = host.querySelector<HTMLDialogElement>('dialog[data-slot~="a2ui-modal"]')!
   trigger.focus()
   await userEvent.keyboard('{Enter}')
   expect(dialog.open).toBe(true)
-  const close = [...dialog.querySelectorAll('button')].find(b => b.textContent === 'Close')!
+  const close = [...dialog.querySelectorAll('button')].find(b => b.textContent === 'Fermer')!
   await userEvent.click(close)
   await vi.waitFor(() => expect(dialog.open).toBe(false))
   expect(document.activeElement).toBe(trigger)
+
+  const blank = await mount(
+    <A2uiSurface
+      surfaceId={LAYOUT_SURFACE_ID}
+      messages={modalFixtureMessages}
+      labels={{ modalClose: '  ' }}
+    />
+  )
+  expect(blank.host.querySelectorAll('dialog button')).toHaveLength(0)
+})
+
+test('a Modal with a non-Button trigger renders it as plain content', async () => {
+  const { host } = await render(
+    surfaceOf([
+      { id: 'root', component: 'Modal', trigger: 'label_text', content: 'body_text' },
+      { id: 'label_text', component: 'Text', text: 'Details' },
+      { id: 'body_text', component: 'Text', text: 'Body' }
+    ])
+  )
+  const dialog = host.querySelector<HTMLDialogElement>('dialog')!
+  await userEvent.click(host.querySelector('[data-slot="a2ui-text"]')!)
+  expect(dialog.open).toBe(false)
+  expect(host.querySelector('[aria-haspopup]')).toBeNull()
 })
 
 test('layout fixtures pass accessibility validation and the rules flag unnamed tabs and modals', () => {

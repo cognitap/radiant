@@ -1,6 +1,14 @@
 'use client'
 
-import { useId, useState, type ChangeEvent, type ReactNode, type Ref } from 'react'
+import {
+  useContext,
+  useId,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+  type Ref
+} from 'react'
 import {
   isComponentNode,
   isWritable,
@@ -12,7 +20,7 @@ import { Button, type ButtonVariant } from '../components/Button/Button.js'
 import { Card } from '../components/Card/Card.js'
 import { Checkbox } from '../components/Checkbox/Checkbox.js'
 import { CheckboxGroup } from '../components/CheckboxGroup/CheckboxGroup.js'
-import { Dialog, DialogClose, DialogContent, useDialog } from '../components/Dialog/Dialog.js'
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../components/Dialog/Dialog.js'
 import { Field } from '../components/Field/Field.js'
 import { Input } from '../components/Input/Input.js'
 import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
@@ -24,6 +32,7 @@ import { Textarea } from '../components/Textarea/Textarea.js'
 import { ToggleGroup, ToggleGroupItem } from '../components/ToggleGroup/ToggleGroup.js'
 import { radiantCatalog } from '../catalog/index.js'
 import { humanizeNodeId } from '../catalog/coerce.js'
+import { useLocale } from '../react/useLocale.js'
 import type { Orientation } from '../presentation.js'
 import {
   A2UI_BASIC_CATALOG_ID,
@@ -41,6 +50,7 @@ import {
 } from './accessibilityRules.js'
 import { unknownIconDiagnostic } from './coerce.js'
 import { useSignalValue } from './useSignalValue.js'
+import { A2uiModalTriggerContext, useA2uiLabels } from './surfaceContext.js'
 import {
   A2uiAudioPlayer,
   A2uiIcon,
@@ -150,7 +160,7 @@ function readChildNodes(value: unknown): ComponentNode[] {
     : []
 }
 
-/** Renders a Row or Column child, wrapping it in a growing box when it sets a positive `weight`. */
+/** Wraps a Row or Column child in a box that grows by the child's positive `weight`. */
 function A2uiFlexChild({
   node,
   children
@@ -159,12 +169,12 @@ function A2uiFlexChild({
   readonly children: ReactNode
 }) {
   const weight = useSignalValue(node.props)?.weight
-  if (typeof weight !== 'number' || !Number.isFinite(weight) || weight <= 0) return children
+  const grows = typeof weight === 'number' && Number.isFinite(weight) && weight > 0
   return (
     <div
-      data-slot="a2ui-weight"
+      data-slot="a2ui-flex-item"
       className="grid min-w-0"
-      style={{ flexGrow: weight, flexBasis: 0 }}
+      style={grows ? { flexGrow: weight, flexBasis: 0 } : undefined}
     >
       {children}
     </div>
@@ -266,22 +276,37 @@ const dividerEntry = createA2uiRegistryEntry({
   }
 })
 
-type A2uiTab = { readonly title: string; readonly panel: ReactNode }
+type A2uiTab = { readonly key: string; readonly title: string; readonly panel: ReactNode }
 
 function readTabs(value: unknown, context: A2uiAdapterContext): readonly A2uiTab[] {
   if (!Array.isArray(value)) return []
-  return value
-    .filter((tab): tab is Record<string, unknown> => Boolean(tab) && typeof tab === 'object')
-    .map(tab => ({
-      title: unwrapDisplayText(tab.title),
-      panel: isComponentNode(tab.child) ? context.renderNode(tab.child) : null
-    }))
+  const seen = new Set<string>()
+  const tabs: A2uiTab[] = []
+  value.forEach((tab: unknown, index) => {
+    if (!tab || typeof tab !== 'object') return
+    const record = tab as Record<string, unknown>
+    const child = isComponentNode(record.child) ? record.child : undefined
+    // Tabs are keyed by their panel component so reordering keeps selection and panel state.
+    let key = child ? child.componentId : `#${index}`
+    while (seen.has(key)) key = `${key}#${index}`
+    seen.add(key)
+    tabs.push({
+      key,
+      title: unwrapDisplayText(record.title),
+      panel: child ? context.renderNode(child) : null
+    })
+  })
+  return tabs
 }
 
 function A2uiTabs({ tabs }: { readonly tabs: readonly A2uiTab[] }) {
-  const [selected, setSelected] = useState('0')
-  if (tabs.length === 0) return null
-  const value = Number(selected) < tabs.length ? selected : '0'
+  const locale = useLocale()
+  const [selected, setSelected] = useState<string | undefined>(undefined)
+  const first = tabs[0]?.key
+  const value = tabs.some(tab => tab.key === selected) ? selected : first
+  if (value !== selected) setSelected(value)
+  if (value === undefined) return null
+  const format = new Intl.NumberFormat(locale)
   return (
     <Tabs
       data-slot="a2ui-tabs"
@@ -291,17 +316,17 @@ function A2uiTabs({ tabs }: { readonly tabs: readonly A2uiTab[] }) {
       <TabsList>
         {tabs.map((tab, index) => (
           <TabsTrigger
-            key={index}
-            value={String(index)}
+            key={tab.key}
+            value={tab.key}
           >
-            {tab.title || String(index + 1)}
+            {tab.title || format.format(index + 1)}
           </TabsTrigger>
         ))}
       </TabsList>
-      {tabs.map((tab, index) => (
+      {tabs.map(tab => (
         <TabsContent
-          key={index}
-          value={String(index)}
+          key={tab.key}
+          value={tab.key}
           keepMounted
         >
           {tab.panel}
@@ -322,39 +347,32 @@ const tabsEntry = createA2uiRegistryEntry({
   }
 })
 
-function A2uiModalTrigger({ id, children }: { readonly id: string; readonly children: ReactNode }) {
-  const dialog = useDialog()
-  return (
-    // The trigger is an agent-provided Button; its native click opens the dialog.
-    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div
-      id={id}
-      data-slot="a2ui-modal-trigger"
-      className="contents"
-      onClick={() => dialog?.setOpen(true)}
-    >
-      {children}
-    </div>
-  )
-}
-
 function A2uiModal({
   trigger,
+  triggerNodeId,
   content,
   fallbackName
 }: {
   readonly trigger: ReactNode
+  readonly triggerNodeId: string | undefined
   readonly content: ReactNode
   readonly fallbackName: string
 }) {
   const triggerId = useId()
+  const closeText = useA2uiLabels().modalClose?.trim()
+  const triggerContext = useMemo(
+    () => (triggerNodeId ? { nodeId: triggerNodeId, id: triggerId } : null),
+    [triggerNodeId, triggerId]
+  )
   return (
     <div
       data-slot="a2ui-modal-root"
       className="grid min-w-0"
     >
       <Dialog>
-        <A2uiModalTrigger id={triggerId}>{trigger}</A2uiModalTrigger>
+        <A2uiModalTriggerContext.Provider value={triggerContext}>
+          {trigger}
+        </A2uiModalTriggerContext.Provider>
         <DialogContent
           data-slot="a2ui-modal"
           aria-label={fallbackName}
@@ -362,12 +380,14 @@ function A2uiModal({
         >
           <Stack>
             {content}
-            <Stack
-              orientation="horizontal"
-              justify="end"
-            >
-              <DialogClose>Close</DialogClose>
-            </Stack>
+            {closeText ? (
+              <Stack
+                orientation="horizontal"
+                justify="end"
+              >
+                <DialogClose>{closeText}</DialogClose>
+              </Stack>
+            ) : null}
           </Stack>
         </DialogContent>
       </Dialog>
@@ -378,13 +398,14 @@ function A2uiModal({
 const modalEntry = createA2uiRegistryEntry({
   name: 'Modal',
   accessibility: [modalTriggerRule()],
-  component: [Dialog, DialogContent, DialogClose],
+  component: [Dialog, DialogContent, DialogTrigger, DialogClose],
   schema: basicSchema('Modal'),
   description: basicDescription('Modal'),
   adapter(props, context) {
     return (
       <A2uiModal
         trigger={isComponentNode(props.trigger) ? context.renderNode(props.trigger) : null}
+        triggerNodeId={isComponentNode(props.trigger) ? props.trigger.id : undefined}
         content={isComponentNode(props.content) ? context.renderNode(props.content) : null}
         fallbackName={humanizeNodeId(context.node.componentId)}
       />
@@ -496,6 +517,44 @@ const BUTTON_VARIANT_MAP: Record<string, ButtonVariant> = {
   borderless: 'ghost'
 }
 
+/** A Button that becomes its Modal's dialog trigger when it fills that Modal's `trigger` slot. */
+function A2uiButton({
+  ref,
+  nodeId,
+  variant,
+  onClick,
+  children
+}: {
+  ref?: Ref<HTMLButtonElement>
+  nodeId: string
+  variant: ButtonVariant
+  onClick: () => void
+  children: ReactNode
+}) {
+  const trigger = useContext(A2uiModalTriggerContext)
+  if (trigger?.nodeId === nodeId) {
+    return (
+      <DialogTrigger
+        ref={ref}
+        id={trigger.id}
+        variant={variant}
+        onClick={onClick}
+      >
+        {children}
+      </DialogTrigger>
+    )
+  }
+  return (
+    <Button
+      ref={ref}
+      variant={variant}
+      onClick={onClick}
+    >
+      {children}
+    </Button>
+  )
+}
+
 const buttonEntry = createA2uiRegistryEntry({
   name: 'Button',
   accessibility: [buttonNameRule()],
@@ -511,14 +570,15 @@ const buttonEntry = createA2uiRegistryEntry({
     const action = typeof props.action === 'function' ? (props.action as NodeAction) : undefined
 
     return (
-      <Button
+      <A2uiButton
+        nodeId={context.node.id}
         variant={variant}
         onClick={() => {
           void action?.()
         }}
       >
         {childNode ? context.renderNode(childNode, { inline: true }) : null}
-      </Button>
+      </A2uiButton>
     )
   }
 })

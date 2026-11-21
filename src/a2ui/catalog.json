@@ -575,7 +575,7 @@
       "required": ["component", "children"]
     },
     "List": {
-      "description": "Renders a static or data-templated sequence of repeated items.\nUse: The same template repeated for each item in a collection, or a static run of similar items.\nAvoid: One-off layout (Row, Column).\nExamples: one Card per search result; image thumbnails, `direction: horizontal`.",
+      "description": "Renders a static or data-templated sequence of repeated items.\nUse: One template per collection item, or a static run of similar items; templated item state follows index order.\nAvoid: One-off layout (Row, Column).\nExamples: one Card per search result; image thumbnails, `direction: horizontal`.",
       "type": "object",
       "properties": {
         "component": {

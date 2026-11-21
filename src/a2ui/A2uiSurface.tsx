@@ -10,6 +10,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -56,6 +57,7 @@ import {
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import { useSignalValue } from './useSignalValue.js'
+import { A2uiLabelsContext, type A2uiSurfaceLabels } from './surfaceContext.js'
 import {
   animateNodeEntry,
   captureFocusSnapshot,
@@ -89,6 +91,8 @@ export type A2uiSurfaceProps = {
    * catalog or protocol errors (`kind: 'error'` with a `code`).
    */
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
+  /** Host-supplied text for controls the agent cannot describe, such as `modalClose`. */
+  readonly labels?: A2uiSurfaceLabels
 }
 
 function isVisibleHost(element: HTMLElement): boolean {
@@ -726,7 +730,8 @@ export function A2uiSurface({
   messages,
   registry = radiantA2uiRegistry,
   onAction,
-  onDiagnostic
+  onDiagnostic,
+  labels
 }: A2uiSurfaceProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const motionProfile = useContext(MotionProfileContext)
@@ -762,6 +767,8 @@ export function A2uiSurface({
     zeroPlaceholders
   )
   const waiting = !rootNode && phase !== 'closed'
+  const modalClose = labels?.modalClose
+  const labelValue = useMemo(() => ({ modalClose }), [modalClose])
 
   return (
     <div
@@ -773,13 +780,15 @@ export function A2uiSurface({
       data-surface-id={surfaceId}
     >
       {rootNode ? (
-        <A2uiNodeRenderer
-          node={rootNode}
-          registry={registry}
-          inline={false}
-          onDiagnostic={store.reportDiagnostic}
-          runtime={runtime}
-        />
+        <A2uiLabelsContext.Provider value={labelValue}>
+          <A2uiNodeRenderer
+            node={rootNode}
+            registry={registry}
+            inline={false}
+            onDiagnostic={store.reportDiagnostic}
+            runtime={runtime}
+          />
+        </A2uiLabelsContext.Provider>
       ) : waiting ? (
         <A2uiPlaceholder
           inline={false}

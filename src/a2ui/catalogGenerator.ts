@@ -312,7 +312,7 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
     sourceEntry: 'List',
     guidance: {
       whenToUse:
-        'The same template repeated for each item in a collection, or a static run of similar items.',
+        'One template per collection item, or a static run of similar items; templated item state follows index order.',
       whenNotToUse: 'One-off layout (Row, Column).',
       examples: ['one Card per search result', 'image thumbnails, `direction: horizontal`']
     },
