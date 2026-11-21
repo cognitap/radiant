@@ -62,3 +62,4 @@ export type {
   A2uiMediaProviderProps,
   A2uiUrlPolicy
 } from './media.js'
+export { A2UI_BASIC_CATALOG_REVISION } from './specRevision.js'
