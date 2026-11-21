@@ -77,80 +77,41 @@ export type A2uiSurfaceProps = {
 
 function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
   const hosts = new Map<string, NodeHost>()
-  const mountedNodes = new Map<string, readonly [string, string | null]>()
+  const mountedInstances = new Map<string, string>()
+  const containers = new Set<string>()
   const committedInstances = new Set<string>()
   const pendingMounts = new Set<string>()
   const unmountedInstances = new Set<string>()
-  const pendingAdded = new Set<HTMLElement>()
   let surfaceElement: HTMLDivElement | null = null
-  let observer: MutationObserver | null = null
   let motionProfile = initialMotionProfile
   let pendingFocus: FocusSnapshot | null = null
 
-  const recordAdded = (records: readonly MutationRecord[]) => {
-    for (const record of records) {
-      for (const node of record.addedNodes) if (isHtmlElement(node)) pendingAdded.add(node)
-    }
-  }
-
-  function resolveContainerHost(parentNodeId: string | null): HTMLElement | null {
-    for (let cursor = parentNodeId; cursor; cursor = mountedNodes.get(cursor)?.[1] ?? null) {
-      const host = hosts.get(cursor)
-      if (host?.element.isConnected) return host.element
-    }
-    return surfaceElement
-  }
-
-  function animateUnhosted(scopes: ReadonlySet<HTMLElement>) {
-    if (scopes.size === 0 || pendingAdded.size === 0) return
-    for (const element of pendingAdded) {
-      if (!element.isConnected) continue
-      let owner: NodeHost | null = null
-      for (const host of hosts.values()) {
-        if (host.element.isConnected && host.element.contains(element)) {
-          if (!owner || owner.element.contains(host.element)) owner = host
-        }
-      }
-      if (owner && (!owner.isContainer || owner.element === element)) continue
-      const scope = owner?.element ?? surfaceElement
-      if (!scope || !scopes.has(scope)) continue
-      if (Array.from(pendingAdded).some(other => other !== element && other.contains(element))) {
-        continue
-      }
-      animateNodeEntry(element, motionProfile)
-    }
-  }
-
   function flushBatch() {
-    if (observer) recordAdded(observer.takeRecords())
     if (pendingFocus) {
       const snapshot = pendingFocus
       pendingFocus = null
       restoreFocusFallback(surfaceElement, snapshot, hosts)
     }
     if (surfaceElement?.isConnected && pendingMounts.size > 0) {
-      const unhostedScopes = new Set<HTMLElement>()
       for (const nodeId of pendingMounts) {
-        const meta = mountedNodes.get(nodeId)
-        if (!meta) continue
-        if (committedInstances.has(meta[0]) && unmountedInstances.has(meta[0])) continue
         const host = hosts.get(nodeId)
-        if (host) {
-          if (!host.isContainer && host.element.isConnected) {
-            animateNodeEntry(host.element, motionProfile)
-          }
-        } else {
-          const scope = resolveContainerHost(meta[1])
-          if (scope) unhostedScopes.add(scope)
+        if (!host || host.isContainer || !host.element.isConnected) continue
+        if (committedInstances.has(host.instanceId) && unmountedInstances.has(host.instanceId)) {
+          continue
         }
+        animateNodeEntry(host.element, motionProfile)
       }
-      animateUnhosted(unhostedScopes)
       pendingMounts.clear()
     }
-    pendingAdded.clear()
+    for (const [nodeId, host] of hosts) {
+      if (!mountedInstances.has(nodeId) || !host.element.isConnected) hosts.delete(nodeId)
+    }
+    for (const nodeId of containers) {
+      if (!mountedInstances.has(nodeId)) containers.delete(nodeId)
+    }
     unmountedInstances.clear()
     committedInstances.clear()
-    for (const [instanceId] of mountedNodes.values()) committedInstances.add(instanceId)
+    for (const instanceId of mountedInstances.values()) committedInstances.add(instanceId)
   }
 
   const scheduleBatchFlush = createMicrotaskCoalescer(flushBatch)
@@ -162,41 +123,46 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
 
   return {
     setSurfaceElement(element: HTMLDivElement | null) {
-      observer?.disconnect()
-      observer = null
-      pendingAdded.clear()
       surfaceElement = element
-      const Observer = element?.ownerDocument.defaultView?.MutationObserver
-      if (element && typeof Observer === 'function') {
-        observer = new Observer(recordAdded)
-        observer.observe(element, { childList: true, subtree: true })
-      }
     },
     setMotionProfile(nextProfile: MotionProfile) {
       motionProfile = nextProfile
     },
-    setNodeHost(nodeId: string, instanceId: string, element: unknown) {
+    setNodeHost(nodeId: string, instanceId: string, element: unknown, isContainer?: boolean) {
       if (isHtmlElement(element)) {
-        const prev = hosts.get(nodeId)
-        hosts.set(nodeId, { nodeId, instanceId, element, isContainer: prev?.isContainer ?? false })
-      } else {
+        hosts.set(nodeId, {
+          nodeId,
+          instanceId,
+          element,
+          isContainer: isContainer ?? containers.has(nodeId)
+        })
+      } else if (element === null) {
         hosts.delete(nodeId)
       }
     },
     captureFocus,
-    onNodeMount(nodeId: string, instanceId: string, parentNodeId: string | null) {
-      mountedNodes.set(nodeId, [instanceId, parentNodeId])
+    onNodeMount(nodeId: string, instanceId: string, requestProbe: () => void) {
+      mountedInstances.set(nodeId, instanceId)
       pendingMounts.add(nodeId)
+      const host = hosts.get(nodeId)
+      if (
+        !containers.has(nodeId) &&
+        (!host || host.instanceId !== instanceId || !host.element.isConnected)
+      ) {
+        requestProbe()
+      }
       scheduleBatchFlush()
     },
     onNodeUnmount(nodeId: string, instanceId: string) {
-      mountedNodes.delete(nodeId)
+      mountedInstances.delete(nodeId)
       pendingMounts.delete(nodeId)
       unmountedInstances.add(instanceId)
       captureFocus()
       scheduleBatchFlush()
     },
     setNodeContainer(nodeId: string, isContainer: boolean) {
+      if (isContainer) containers.add(nodeId)
+      else containers.delete(nodeId)
       const host = hosts.get(nodeId)
       if (host && host.isContainer !== isContainer) hosts.set(nodeId, { ...host, isContainer })
     },
@@ -204,7 +170,6 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
       committedInstances.clear()
       pendingMounts.clear()
       unmountedInstances.clear()
-      pendingAdded.clear()
     }
   }
 }
@@ -290,7 +255,6 @@ class A2uiNodeErrorBoundary extends Component<
 
 type A2uiNodeRendererProps = {
   readonly node: ComponentNode
-  readonly parentNodeId: string | null
   readonly registry: A2uiRegistry
   readonly inline: boolean
   readonly onDiagnostic: (diagnostic: CatalogDiagnostic) => void
@@ -299,7 +263,6 @@ type A2uiNodeRendererProps = {
 
 const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   node,
-  parentNodeId,
   registry,
   inline,
   onDiagnostic,
@@ -322,7 +285,6 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
               <A2uiNodeRenderer
                 key={child.id}
                 node={child}
-                parentNodeId={node.id}
                 registry={registry}
                 inline={options?.inline ?? false}
                 onDiagnostic={onDiagnostic}
@@ -334,6 +296,9 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
       : null
 
   const isContainer = node.type === 'Column' || hasChildNodes
+  const [probing, setProbing] = useState(false)
+  const startRef = useRef<HTMLTemplateElement>(null)
+
   const setHostRef = useCallback(
     (element: HTMLElement | null) => runtime.setNodeHost(node.id, node.instanceId, element),
     [node.id, node.instanceId, runtime]
@@ -345,14 +310,14 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   const composedRef = useComposedRefs(setHostRef, hostElement?.props.ref)
 
   useLayoutEffect(() => {
-    if (!active || inline) return
-    runtime.onNodeMount(node.id, node.instanceId, parentNodeId)
-    return () => runtime.onNodeUnmount(node.id, node.instanceId)
-  }, [active, inline, node.id, node.instanceId, parentNodeId, runtime])
-
-  useLayoutEffect(() => {
     if (active && !inline) runtime.setNodeContainer(node.id, isContainer)
   }, [active, inline, isContainer, node.id, props, runtime])
+
+  useLayoutEffect(() => {
+    if (!active || inline) return
+    runtime.onNodeMount(node.id, node.instanceId, () => setProbing(true))
+    return () => runtime.onNodeUnmount(node.id, node.instanceId)
+  }, [active, inline, node.id, node.instanceId, runtime])
 
   if (!props || !entry) return null
 
@@ -364,7 +329,29 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
       onDiagnostic={onDiagnostic}
       onFallbackRef={inline ? undefined : setHostRef}
     >
+      {probing ? <template ref={startRef} /> : null}
       {hostElement ? cloneElement(hostElement, { ref: composedRef }) : rendered}
+      {probing ? (
+        <template
+          ref={end => {
+            if (!end) return
+            const start = startRef.current
+            if (start && start.parentNode === end.parentNode) {
+              for (
+                let el = start.nextElementSibling;
+                el && el !== end;
+                el = el.nextElementSibling
+              ) {
+                if (isHtmlElement(el)) {
+                  runtime.setNodeHost(node.id, node.instanceId, el, isContainer)
+                  break
+                }
+              }
+            }
+            setProbing(false)
+          }}
+        />
+      ) : null}
     </A2uiNodeErrorBoundary>
   )
 })
@@ -602,7 +589,6 @@ export function A2uiSurface({
       {rootNode ? (
         <A2uiNodeRenderer
           node={rootNode}
-          parentNodeId={null}
           registry={registry}
           inline={false}
           onDiagnostic={store.reportDiagnostic}

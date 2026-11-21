@@ -1,4 +1,14 @@
-import { act, StrictMode, useEffect, useRef, type ComponentProps, type CSSProperties } from 'react'
+import {
+  act,
+  StrictMode,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode,
+  type Ref
+} from 'react'
 import { createPortal } from 'react-dom'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
@@ -2127,7 +2137,40 @@ test('animates only newly added model instances across variant swaps and coalesc
   }
 })
 
-test('animates newly inserted direct and non-ref-forwarding custom leaves inside an existing custom container without reanimating surviving nodes', async () => {
+test('animates newly inserted direct and non-ref-forwarding custom leaves inside an existing custom container without reanimating surviving nodes or earlier local insertions', async () => {
+  function CustomPanel({
+    ref,
+    title,
+    children
+  }: {
+    readonly ref?: Ref<HTMLElement>
+    readonly title: string
+    readonly children: ReactNode
+  }) {
+    const [showLocalNote, setShowLocalNote] = useState(false)
+    return (
+      <section
+        ref={ref}
+        data-testid="custom-panel"
+      >
+        <header>
+          {title}
+          <button
+            type="button"
+            data-testid="toggle-local-note"
+            onClick={() => setShowLocalNote(true)}
+          >
+            Add local note
+          </button>
+        </header>
+        <div data-testid="custom-panel-body">
+          {showLocalNote ? <aside data-testid="local-panel-note">Local note</aside> : null}
+          {children}
+        </div>
+      </section>
+    )
+  }
+
   function WrappedBadge({ label }: { readonly label: string }) {
     return <article data-testid="wrapped-badge">{label}</article>
   }
@@ -2140,7 +2183,7 @@ test('animates newly inserted direct and non-ref-forwarding custom leaves inside
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'CustomPanel',
-        component: 'section',
+        component: CustomPanel,
         description: 'Custom container wrapping children in nested markup.',
         schema: {
           type: 'object',
@@ -2153,18 +2196,15 @@ test('animates newly inserted direct and non-ref-forwarding custom leaves inside
           required: ['component', 'title', 'children']
         },
         adapter: (props, ctx) => (
-          <section data-testid="custom-panel">
-            <header>{String(props.title ?? '')}</header>
-            <div data-testid="custom-panel-body">
-              {Array.isArray(props.children)
-                ? props.children.map(child =>
-                    child && typeof child === 'object' && 'id' in child
-                      ? ctx.renderNode(child as Parameters<typeof ctx.renderNode>[0])
-                      : null
-                  )
-                : null}
-            </div>
-          </section>
+          <CustomPanel title={String(props.title ?? '')}>
+            {Array.isArray(props.children)
+              ? props.children.map(child =>
+                  child && typeof child === 'object' && 'id' in child
+                    ? ctx.renderNode(child as Parameters<typeof ctx.renderNode>[0])
+                    : null
+                )
+              : null}
+          </CustomPanel>
         )
       }),
       createA2uiRegistryEntry({
@@ -2246,6 +2286,16 @@ test('animates newly inserted direct and non-ref-forwarding custom leaves inside
     expect(animated).not.toContain(panel)
     animated.length = 0
 
+    // Trigger an unrelated local DOM insertion inside the same container before the next model patch
+    await act(async () => {
+      await userEvent.click(
+        view.host.querySelector<HTMLButtonElement>('[data-testid="toggle-local-note"]')!
+      )
+    })
+    const localNote = view.host.querySelector<HTMLElement>('[data-testid="local-panel-note"]')!
+    expect(localNote).not.toBeNull()
+    expect(animated).toEqual([])
+
     // Non-ref-forwarding custom leaf inserted into the same existing custom container
     await view.render(
       <A2uiSurface
@@ -2269,9 +2319,191 @@ test('animates newly inserted direct and non-ref-forwarding custom leaves inside
     const wrappedLeaf = view.host.querySelector<HTMLElement>('[data-testid="wrapped-badge"]')!
     expect(wrappedLeaf).not.toBeNull()
     expect(animated).toEqual([wrappedLeaf])
+    expect(animated).not.toContain(localNote)
     expect(animated).not.toContain(badges[0])
     expect(animated).not.toContain(badges[1])
     expect(animated).not.toContain(panel)
+    expect(view.host.querySelectorAll('template')).toHaveLength(0)
+  } finally {
+    restore()
+  }
+})
+
+test('animates a non-ref-forwarding custom leaf once on initial mount', async () => {
+  function WrappedLeaf({ label }: { readonly label: string }) {
+    return <article data-testid="initial-wrapped-leaf">{label}</article>
+  }
+
+  const registry = createA2uiRegistry({
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    title: 'Initial wrapped leaf catalog',
+    description: 'Registry with a non-ref-forwarding leaf adapter.',
+    entries: [
+      ...Object.values(radiantA2uiRegistry.entries),
+      createA2uiRegistryEntry({
+        name: 'WrappedLeaf',
+        component: WrappedLeaf,
+        description: 'Leaf component that renders its own DOM element without forwarding ref.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'WrappedLeaf' },
+            label: { type: 'string' }
+          },
+          required: ['component', 'label']
+        },
+        adapter: props => <WrappedLeaf label={String(props.label ?? '')} />
+      })
+    ]
+  })
+
+  const { animated, restore } = spyEntryAnimations()
+  try {
+    const view = await mount(
+      <StrictMode>
+        <A2uiSurface
+          surfaceId="s_initial_wrapped_leaf"
+          registry={registry}
+          messages={[
+            surfaceMessage('s_initial_wrapped_leaf', [
+              { id: 'root', component: 'Column', children: ['wrapped_leaf'] },
+              { id: 'wrapped_leaf', component: 'WrappedLeaf', label: 'Present on mount' }
+            ])
+          ]}
+        />
+      </StrictMode>
+    )
+
+    const leaf = view.host.querySelector<HTMLElement>('[data-testid="initial-wrapped-leaf"]')!
+    expect(leaf).not.toBeNull()
+    expect(animated).toEqual([leaf])
+    expect(view.host.querySelectorAll('template')).toHaveLength(0)
+  } finally {
+    restore()
+  }
+})
+
+test('animates only a newly inserted non-ref-forwarding leaf when a surviving non-ref-forwarding sibling swaps DOM tags in the same patch', async () => {
+  function SwappableNote({
+    emphasized,
+    text
+  }: {
+    readonly emphasized: boolean
+    readonly text: string
+  }) {
+    return emphasized ? (
+      <strong data-testid="swappable-note">{text}</strong>
+    ) : (
+      <p data-testid="swappable-note">{text}</p>
+    )
+  }
+
+  function WrappedLeaf({ label }: { readonly label: string }) {
+    return <article data-testid="patched-wrapped-leaf">{label}</article>
+  }
+
+  const registry = createA2uiRegistry({
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    title: 'Sibling swap motion catalog',
+    description: 'Registry with two non-ref-forwarding leaf adapters.',
+    entries: [
+      ...Object.values(radiantA2uiRegistry.entries),
+      createA2uiRegistryEntry({
+        name: 'SwappableNote',
+        component: SwappableNote,
+        description: 'Non-ref-forwarding leaf that swaps between p and strong.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'SwappableNote' },
+            emphasized: { type: 'boolean' },
+            text: { type: 'string' }
+          },
+          required: ['component', 'emphasized', 'text']
+        },
+        adapter: props => (
+          <SwappableNote
+            emphasized={props.emphasized === true}
+            text={String(props.text ?? '')}
+          />
+        )
+      }),
+      createA2uiRegistryEntry({
+        name: 'WrappedLeaf',
+        component: WrappedLeaf,
+        description: 'Non-ref-forwarding leaf component.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'WrappedLeaf' },
+            label: { type: 'string' }
+          },
+          required: ['component', 'label']
+        },
+        adapter: props => <WrappedLeaf label={String(props.label ?? '')} />
+      })
+    ]
+  })
+
+  const { animated, restore } = spyEntryAnimations()
+  try {
+    const step0: A2uiMessage[] = [
+      surfaceMessage('s_swap_wrapped_sibling', [
+        { id: 'root', component: 'Column', children: ['surviving_note'] },
+        {
+          id: 'surviving_note',
+          component: 'SwappableNote',
+          emphasized: false,
+          text: 'Initial paragraph'
+        }
+      ])
+    ]
+
+    const view = await mount(
+      <A2uiSurface
+        surfaceId="s_swap_wrapped_sibling"
+        registry={registry}
+        messages={step0}
+      />
+    )
+
+    const noteBefore = view.host.querySelector<HTMLElement>('[data-testid="swappable-note"]')!
+    expect(noteBefore.tagName).toBe('P')
+    expect(animated).toEqual([noteBefore])
+    animated.length = 0
+
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_swap_wrapped_sibling"
+        registry={registry}
+        messages={[
+          ...step0,
+          updateComponentsMsg('s_swap_wrapped_sibling', [
+            { id: 'root', component: 'Column', children: ['surviving_note', 'new_leaf'] },
+            {
+              id: 'surviving_note',
+              component: 'SwappableNote',
+              emphasized: true,
+              text: 'Promoted strong text'
+            },
+            { id: 'new_leaf', component: 'WrappedLeaf', label: 'Inserted wrapped leaf' }
+          ])
+        ]}
+      />
+    )
+
+    const noteAfter = view.host.querySelector<HTMLElement>('[data-testid="swappable-note"]')!
+    const newLeaf = view.host.querySelector<HTMLElement>('[data-testid="patched-wrapped-leaf"]')!
+    expect(noteAfter.tagName).toBe('STRONG')
+    expect(noteAfter).not.toBe(noteBefore)
+    expect(noteBefore.isConnected).toBe(false)
+    expect(newLeaf).not.toBeNull()
+    expect(animated).toEqual([newLeaf])
+    expect(animated).not.toContain(noteAfter)
+    expect(view.host.querySelectorAll('template')).toHaveLength(0)
   } finally {
     restore()
   }
