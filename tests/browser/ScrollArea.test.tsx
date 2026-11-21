@@ -110,22 +110,18 @@ test('native keyboard, wheel over content and bars, touch, pointer drag and cons
   const node = ref.current!
   await act(async () => node.focus())
   await key('{ArrowDown}')
-  await pause(220)
-  expect(node.scrollTop).toBeGreaterThan(0)
+  await expect.poll(() => node.scrollTop).toBeGreaterThan(0)
   await act(async () => node.scrollTo({ top: 0, behavior: 'instant' }))
   await act(async () => commands.scrollViewport('#native-scroll-proof', 0, 160))
-  await pause(100)
-  expect(node.scrollTop).toBeGreaterThan(0)
-  const before = node.scrollTop
+  await expect.poll(() => node.scrollTop).toBeGreaterThan(0)
+  await act(async () => node.scrollTo({ top: 0, behavior: 'instant' }))
   await act(async () =>
     commands.scrollViewport('#native-scroll-proof [data-scroll-area-hit]', 0, 160)
   )
-  await pause(100)
-  expect(node.scrollTop).toBeGreaterThan(before)
+  await expect.poll(() => node.scrollTop).toBeGreaterThan(0)
   await act(async () => node.scrollTo({ top: 0, behavior: 'instant' }))
   await act(async () => commands.scrollViewport('#native-scroll-proof', 0, 70, true))
-  await pause(250)
-  expect(node.scrollTop).toBeGreaterThan(0)
+  await expect.poll(() => node.scrollTop).toBeGreaterThan(0)
   await act(async () => node.scrollTo({ top: 0, behavior: 'instant' }))
   await act(async () =>
     commands.dragHandle('#native-scroll-proof [data-scroll-area-thumb-hit]', 0, false, false, 50)
@@ -178,17 +174,16 @@ test('scroll visibility, live content measurement, axis updates and visual overr
   await act(async () => {
     node.scrollTop = 50
   })
-  await pause(25)
-  expect(node.querySelector('[data-state="visible"]')).not.toBeNull()
+  await expect.poll(() => node.querySelector('[data-state="visible"]')).not.toBeNull()
   expect(getComputedStyle(thumb).width).toBe('12px')
   expect(getComputedStyle(thumb).backgroundColor).toBe('rgb(30, 70, 90)')
-  await pause(950)
-  expect(node.querySelector('[data-state="visible"]')).toBeNull()
+  await expect
+    .poll(() => node.querySelector('[data-state="visible"]'), { timeout: 2500 })
+    .toBeNull()
   await act(async () => {
     body.current!.style.height = '20px'
   })
-  await pause(50)
-  expect(node.querySelector('[data-scroll-area-hit]')).toBeNull()
+  await expect.poll(() => node.querySelector('[data-scroll-area-hit]')).toBeNull()
   await render(
     <ScrollArea
       ref={ref}
@@ -342,8 +337,7 @@ test('Select, Combobox, Menu and native Dialog retain their focus and selection 
   expect(dialog.open).toBe(true)
   await act(async () => area.focus())
   await key('{ArrowDown}')
-  await pause(220)
-  expect(area.scrollTop).toBeGreaterThan(0)
+  await expect.poll(() => area.scrollTop).toBeGreaterThan(0)
   await click(dialog.querySelector('[data-slot~="dialog-close"]')!)
   expect(dialog.open).toBe(false)
 })
