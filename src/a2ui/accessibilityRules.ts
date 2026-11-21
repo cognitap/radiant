@@ -74,6 +74,9 @@ export function controlLabelRule(options: ControlLabelRuleOptions = {}): A2uiAcc
   }
 }
 
+/** Built-in components whose renderer announces `accessibility.label` as their name. */
+const LABEL_RENDERING_COMPONENTS = new Set(['Icon', 'Image', 'Video', 'AudioPlayer'])
+
 function subtreeHasText(
   id: unknown,
   context: A2uiAccessibilityRuleContext,
@@ -84,7 +87,17 @@ function subtreeHasText(
   const node = context.getComponent(id)
   // A child that has not arrived yet cannot be judged.
   if (!node) return true
+  // Children hidden from assistive technology contribute no name.
+  if (readPath(node, 'accessibility.hidden') === true) return false
   if (hasText(node.text) || hasText(node.label)) return true
+  if (
+    typeof node.component === 'string' &&
+    LABEL_RENDERING_COMPONENTS.has(node.component) &&
+    hasText(readPath(node, 'accessibility.label'))
+  ) {
+    return true
+  }
+  if (node.component === 'Image' && hasText(node.description)) return true
   if (subtreeHasText(node.child, context, visited)) return true
   const children = node.children
   if (isPlainRecord(children)) return true
@@ -100,6 +113,51 @@ export function buttonNameRule(): A2uiAccessibilityRule {
       return {
         prop: 'child',
         message: `${describe(component)} has no text content to name it.`
+      }
+    }
+  }
+}
+
+/** True when `accessibility.hidden` is set or bound, marking the component decorative. */
+const isMarkedDecorative = (component: A2uiComponentRecord): boolean => {
+  const hidden = readPath(component, 'accessibility.hidden')
+  return hidden === true || isDynamic(hidden)
+}
+
+/**
+ * Requires an image to have alt text in `description` or `accessibility.label`, or an explicit
+ * decorative marker: `description: ""` or `accessibility.hidden: true`.
+ */
+export function imageAltRule(): A2uiAccessibilityRule {
+  return {
+    id: 'image-alt',
+    check(component) {
+      if (component.description === '' || isMarkedDecorative(component)) return
+      if (hasText(component.description) || hasText(readPath(component, 'accessibility.label'))) {
+        return
+      }
+      return {
+        prop: 'description',
+        message: `${describe(component)} has no description or accessibility.label; mark decorative images with description "".`
+      }
+    }
+  }
+}
+
+export type MediaNameRuleOptions = {
+  /** Props the renderer announces as the media name, in priority order. */
+  readonly names: readonly string[]
+}
+
+/** Requires a media player to have a non-empty name in one of `names`. */
+export function mediaNameRule(options: MediaNameRuleOptions): A2uiAccessibilityRule {
+  return {
+    id: 'media-name',
+    check(component) {
+      if (options.names.some(path => hasText(readPath(component, path)))) return
+      return {
+        prop: options.names[0] ?? 'accessibility.label',
+        message: `${describe(component)} has no ${options.names.join(' or ')}.`
       }
     }
   }

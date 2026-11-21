@@ -29,13 +29,19 @@ export type {
   ValidateA2uiAccessibilityOptions,
   ValidateA2uiAccessibilityResult
 } from './accessibility.js'
-export { buttonNameRule, controlLabelRule } from './accessibilityRules.js'
+export {
+  buttonNameRule,
+  controlLabelRule,
+  imageAltRule,
+  mediaNameRule
+} from './accessibilityRules.js'
 export type {
   A2uiAccessibilityFinding,
   A2uiAccessibilityRule,
   A2uiAccessibilityRuleContext,
   A2uiComponentRecord,
-  ControlLabelRuleOptions
+  ControlLabelRuleOptions,
+  MediaNameRuleOptions
 } from './accessibilityRules.js'
 export { sanitizeA2uiMessages } from './sanitize.js'
 export type { A2uiMessage } from './sanitize.js'
@@ -48,3 +54,10 @@ export type {
   CatalogDiagnosticKind,
   CatalogSurfaceState
 } from '../catalog/index.js'
+export { A2uiMediaProvider } from './media.js'
+export type {
+  A2uiIconComponent,
+  A2uiIconMap,
+  A2uiMediaProviderProps,
+  A2uiUrlPolicy
+} from './media.js'

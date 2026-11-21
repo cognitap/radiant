@@ -18,6 +18,10 @@ import {
   type CatalogDiagnostic,
   validateA2uiAccessibility,
   controlLabelRule,
+  imageAltRule,
+  mediaNameRule,
+  A2uiMediaProvider,
+  type A2uiIconMap,
   type A2uiAccessibilityError
 } from '@cognitap/radiant/a2ui'
 
@@ -119,4 +123,23 @@ createA2uiRegistryEntry({
   description: 'Missing rules.',
   schema: { type: 'object' },
   adapter: () => null
+})
+
+const StarGlyph = ({ className }: { readonly className?: string }) => <svg className={className} />
+export const iconMap: A2uiIconMap = { star: StarGlyph }
+export const iconProviderElement = (
+  <A2uiMediaProvider icons={iconMap}>
+    <A2uiSurface
+      surfaceId="demo"
+      messages={messages}
+    />
+  </A2uiMediaProvider>
+)
+export const mediaEntry = createA2uiRegistryEntry({
+  name: 'Clip',
+  component: 'video',
+  description: 'Named clip.',
+  schema: { type: 'object', properties: { component: { const: 'Clip' } } },
+  adapter: () => null,
+  accessibility: [imageAltRule(), mediaNameRule({ names: ['accessibility.label'] })]
 })

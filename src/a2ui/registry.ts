@@ -5,7 +5,11 @@ import {
   type FunctionImplementation
 } from '@a2ui/web_core/catalog'
 import type { ComponentNode } from '@a2ui/web_core/resolution'
-import { findForbiddenPropsInSchema, type CatalogJsonSchema } from '../catalog/index.js'
+import {
+  findForbiddenPropsInSchema,
+  type CatalogDiagnostic,
+  type CatalogJsonSchema
+} from '../catalog/index.js'
 import { renameEntryReferences } from '../catalog/guidance.js'
 import {
   A2UI_GENERATED_COMPONENT_NAMES,
@@ -25,6 +29,8 @@ export type A2uiAdapterContext = {
   readonly node: ComponentNode
   readonly inline: boolean
   readonly renderNode: (child: ComponentNode, options?: A2uiRenderOptions) => ReactNode
+  /** Reports a diagnostic to the surface's `onDiagnostic`. Call it from an effect, not during render. */
+  readonly reportDiagnostic?: (diagnostic: CatalogDiagnostic) => void
 }
 
 export type A2uiComponentAdapter = (
