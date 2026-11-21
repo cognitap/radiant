@@ -1,6 +1,7 @@
 import { radiantCatalog } from '../catalog/index.js'
 import { A2UI_BASIC_CATALOG_ID, generateA2uiCatalogs } from './catalogGenerator.js'
 import type { A2uiMessage } from './sanitize.js'
+import * as extensionFixtures from './extensionFixtures.js'
 import * as profileFixtures from './fixtures.js'
 import * as inputFixtures from './inputFixtures.js'
 import * as layoutFixtures from './layoutFixtures.js'
@@ -34,7 +35,8 @@ const FIXTURE_MODULES: Readonly<Record<string, Readonly<Record<string, unknown>>
   'fixtures.ts': profileFixtures,
   'inputFixtures.ts': inputFixtures,
   'layoutFixtures.ts': layoutFixtures,
-  'mediaFixtures.ts': mediaFixtures
+  'mediaFixtures.ts': mediaFixtures,
+  'extensionFixtures.ts': extensionFixtures
 }
 
 /** Fixture files in `src/a2ui/` that the conformance suite reads. */
