@@ -17,6 +17,7 @@ import {
   type CatalogDiagnostic,
   type CatalogDiagnosticSummary,
   type CatalogEntry,
+  type CatalogJsonValue,
   type CatalogSpacing,
   type CatalogSurfaceState,
   type ChoicePresentation
@@ -83,6 +84,8 @@ export const coercedDiagnostics: readonly CatalogDiagnostic[] = coerceSchemaProp
 ).diagnostics
 export const summary: CatalogDiagnosticSummary = summarizeCatalogDiagnostics(coercedDiagnostics)
 export const stateSnapshot: CatalogSurfaceState = snapshotSurfaceState({ answer: '42' })
+export const arrayStateSnapshot: CatalogSurfaceState = snapshotSurfaceState([{ enabled: true }])
+export const primitiveJsonValue: CatalogJsonValue = 'ready'
 export const actionEvent: CatalogActionEvent = createCatalogActionEvent({
   action: 'submit',
   surfaceId: 'demo',

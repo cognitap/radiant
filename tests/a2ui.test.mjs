@@ -207,3 +207,57 @@ test('A2uiSurface renders malformed fixtures cleanly on Node SSR without throwin
     stdio: 'pipe'
   })
 })
+
+test('A2uiSurface deduplicates ChoicePicker option values at the boundary and keeps SSR siblings intact', () => {
+  const duplicateMessages = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 'dup_choices',
+        catalogId: radiantA2uiRegistry.catalogId,
+        dataModel: { picks: [] },
+        components: [
+          { id: 'root', component: 'Column', children: ['healthy_sibling', 'dup_picker'] },
+          { id: 'healthy_sibling', component: 'Text', text: 'Healthy sibling renders' },
+          {
+            id: 'dup_picker',
+            component: 'ChoicePicker',
+            label: 'Channels',
+            variant: 'multipleSelection',
+            options: [
+              { label: 'Email', value: 'email' },
+              { label: 'Email duplicate', value: 'email' },
+              { label: 'SMS', value: 'sms' }
+            ],
+            value: { '@path': '/picks' }
+          }
+        ]
+      }
+    }
+  ]
+
+  const { diagnostics } = coerceA2uiMessages(duplicateMessages, radiantA2uiRegistry)
+  const dupDiag = diagnostics.find(d => d.nodeId === 'dup_picker' && d.prop === 'options')
+  assert.ok(dupDiag)
+  assert.equal(dupDiag.kind, 'coerced')
+  assert.equal(dupDiag.received.length, 3)
+  assert.equal(dupDiag.used.length, 2)
+
+  const script = `
+    import assert from 'node:assert/strict';
+    import { createElement as h } from 'react';
+    import { renderToString } from 'react-dom/server';
+    const { A2uiSurface } = await import('./dist/library/a2ui/index.js');
+    const html = renderToString(h(A2uiSurface, {
+      surfaceId: 'dup_choices',
+      messages: ${JSON.stringify(duplicateMessages)}
+    }));
+    assert.match(html, /Healthy sibling renders/);
+    assert.match(html, /Email/);
+    assert.doesNotMatch(html, /Email duplicate/);
+  `
+  execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+    cwd: fileURLToPath(new URL('../', import.meta.url)),
+    stdio: 'pipe'
+  })
+})

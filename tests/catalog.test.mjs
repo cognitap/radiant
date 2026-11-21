@@ -506,7 +506,30 @@ test('catalog action contract delivers isolated state snapshots and interactive 
   })
   assert.equal(Object.isFrozen(event), true)
   assert.equal(Object.isFrozen(event.state), true)
-  assert.deepEqual(snapshotSurfaceState(null), {})
+  assert.equal(Object.isFrozen(event.state.nested), true)
+  assert.equal(Object.isFrozen(event.state.tags), true)
+
+  // Preserves JSON root values (arrays, primitives, null) and normalizes undefined/unsupported roots to {}
+  const arrayRoot = snapshotSurfaceState([{ enabled: false }])
+  assert.deepEqual(arrayRoot, [{ enabled: false }])
+  assert.equal(Object.isFrozen(arrayRoot), true)
+  assert.equal(Object.isFrozen(arrayRoot[0]), true)
+  assert.equal(snapshotSurfaceState('ok'), 'ok')
+  assert.equal(snapshotSurfaceState(42), 42)
+  assert.equal(snapshotSurfaceState(null), null)
+  assert.deepEqual(snapshotSurfaceState(undefined), {})
+  assert.deepEqual(snapshotSurfaceState(new Map([['a', 1]])), {})
+  assert.deepEqual(snapshotSurfaceState(new Date()), {})
+
+  // Unsupported mutable instances are omitted from objects and nulled in arrays
+  const sanitized = snapshotSurfaceState({
+    ok: 'yes',
+    map: new Map([['k', 'v']]),
+    date: new Date('2026-01-01T00:00:00Z'),
+    list: [1, new Date('2026-01-01T00:00:00Z'), new Map()]
+  })
+  assert.deepEqual(sanitized, { ok: 'yes', list: [1, null, null] })
+  assert.equal(Object.isFrozen(sanitized.list), true)
   assert.throws(
     () => createCatalogActionEvent({ action: '  ', surfaceId: 's_1', nodeId: 'n_1', state: {} }),
     TypeError

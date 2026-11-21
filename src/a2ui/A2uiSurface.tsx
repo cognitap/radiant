@@ -15,6 +15,7 @@ import { NodeResolver, type ComponentNode } from '@a2ui/web_core/resolution'
 import type { ActionPayload, SurfaceModel } from '@a2ui/web_core/state'
 import {
   createCatalogActionEvent,
+  snapshotSurfaceState,
   type CatalogActionEvent,
   type CatalogDiagnostic
 } from '../catalog/index.js'
@@ -286,7 +287,11 @@ function createSurfaceStore(
           nodeId: action.sourceComponentId,
           state
         })
-        actionHandler?.({ ...action, ...catalogEvent })
+        const contextSnapshot = snapshotSurfaceState(action.context)
+        const context = (
+          isPlainRecord(contextSnapshot) ? contextSnapshot : Object.freeze({})
+        ) as Record<string, unknown>
+        actionHandler?.(Object.freeze({ ...action, ...catalogEvent, context }))
       },
       { version: A2UI_PROTOCOL_VERSION }
     )

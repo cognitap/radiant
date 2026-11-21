@@ -1,4 +1,6 @@
-import { Fragment, type ChangeEvent } from 'react'
+'use client'
+
+import { Fragment, useState, type ChangeEvent } from 'react'
 import {
   isComponentNode,
   isWritable,
@@ -14,7 +16,9 @@ import { Input } from '../components/Input/Input.js'
 import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
 import { Slider } from '../components/Slider/Slider.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
+import { ToggleGroup, ToggleGroupItem } from '../components/ToggleGroup/ToggleGroup.js'
 import { radiantCatalog } from '../catalog/index.js'
+import { humanizeNodeId } from '../catalog/coerce.js'
 import {
   A2UI_BASIC_CATALOG_ID,
   generateA2uiCatalogs,
@@ -246,6 +250,23 @@ const buttonEntry = createA2uiRegistryEntry({
   }
 })
 
+function resolveControlLabel(
+  props: Readonly<Record<string, unknown>>,
+  componentId: string
+): { readonly text: string; readonly srOnly: boolean } {
+  const visible = unwrapDisplayText(props.label).trim()
+  if (visible) return { text: visible, srOnly: false }
+  const accessibility =
+    props.accessibility && typeof props.accessibility === 'object'
+      ? (props.accessibility as Record<string, unknown>)
+      : undefined
+  const accessible = unwrapDisplayText(accessibility?.label).trim()
+  if (accessible) return { text: accessible, srOnly: true }
+  return { text: humanizeNodeId(componentId), srOnly: false }
+}
+
+const SR_ONLY_LABEL_PARTS = { label: { className: 'sr-only' } } as const
+
 const checkBoxEntry = createA2uiRegistryEntry({
   name: 'CheckBox',
   component: [Checkbox, Field],
@@ -255,29 +276,17 @@ const checkBoxEntry = createA2uiRegistryEntry({
     const label = unwrapDisplayText(props.label)
     const error = readValidationError(props)
     const checked = unwrapBoolean(props.value) ?? false
-    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-      writeBinding(props.value, event.currentTarget.checked)
-    }
 
-    if (error) {
-      return (
-        <Field
-          label={label}
-          error={error}
-        >
-          <Checkbox
-            checked={checked}
-            onChange={handleChange}
-          />
-        </Field>
-      )
-    }
     return (
-      <Checkbox
+      <Field
         label={label}
-        checked={checked}
-        onChange={handleChange}
-      />
+        error={error}
+      >
+        <Checkbox
+          checked={checked}
+          onChange={event => writeBinding(props.value, event.currentTarget.checked)}
+        />
+      </Field>
     )
   }
 })
@@ -286,53 +295,149 @@ type ChoiceOptionItem = { readonly value: string; readonly label: string }
 
 function readChoiceOptions(raw: unknown): readonly ChoiceOptionItem[] {
   if (!Array.isArray(raw)) return []
+  const seen = new Set<string>()
   const items: ChoiceOptionItem[] = []
   for (const option of raw) {
     if (!option || typeof option !== 'object') continue
     const record = option as Record<string, unknown>
-    if (typeof record.value !== 'string') continue
+    if (typeof record.value !== 'string' || seen.has(record.value)) continue
+    seen.add(record.value)
     items.push({ value: record.value, label: unwrapDisplayText(record.label) || record.value })
   }
   return items
 }
 
-const choicePickerEntry = createA2uiRegistryEntry({
-  name: 'ChoicePicker',
-  component: [RadioGroup, Radio, CheckboxGroup],
-  schema: basicSchema('ChoicePicker'),
-  description: radiantCatalog.entries.Choice.description,
-  adapter(props) {
-    const label = unwrapDisplayText(props.label) || 'Options'
-    const error = readValidationError(props)
-    const options = readChoiceOptions(props.options)
-    const selected = unwrapStringList(props.value)
+function A2uiChoicePicker({
+  label,
+  srOnly,
+  error,
+  options,
+  selected,
+  multiple,
+  chips,
+  filterable,
+  onSelect
+}: {
+  label: string
+  srOnly: boolean
+  error?: string
+  options: readonly ChoiceOptionItem[]
+  selected: readonly string[]
+  multiple: boolean
+  chips: boolean
+  filterable: boolean
+  onSelect: (next: string[]) => void
+}) {
+  const [query, setQuery] = useState('')
+  const needle = query.trim().toLowerCase()
+  const visible =
+    filterable && needle ? options.filter(o => o.label.toLowerCase().includes(needle)) : options
+  const parts = srOnly ? SR_ONLY_LABEL_PARTS : undefined
+  const filterInput = filterable ? (
+    <Input
+      type="search"
+      aria-label={`Filter ${label}`}
+      placeholder={`Filter ${label}`}
+      value={query}
+      onChange={e => setQuery(e.currentTarget.value)}
+    />
+  ) : null
 
-    if (props.variant === 'mutuallyExclusive') {
-      return (
-        <RadioGroup
-          label={label}
-          error={error}
-          value={selected[0] ?? null}
-          onValueChange={next => writeBinding(props.value, [next])}
-        >
-          {options.map(option => (
-            <Radio
-              key={option.value}
-              value={option.value}
-              label={option.label}
-            />
-          ))}
-        </RadioGroup>
-      )
-    }
-
+  if (chips) {
+    const items = visible.map(o => (
+      <ToggleGroupItem
+        key={o.value}
+        value={o.value}
+      >
+        {o.label}
+      </ToggleGroupItem>
+    ))
     return (
-      <CheckboxGroup
+      <Field
+        layout="group"
         label={label}
         error={error}
-        items={options}
-        value={selected}
-        onValueChange={next => writeBinding(props.value, next)}
+        parts={parts}
+      >
+        {filterInput}
+        {multiple ? (
+          <ToggleGroup
+            type="multiple"
+            aria-label={label}
+            value={[...selected]}
+            onValueChange={onSelect}
+          >
+            {items}
+          </ToggleGroup>
+        ) : (
+          <ToggleGroup
+            type="single"
+            aria-label={label}
+            value={selected[0] ?? null}
+            onValueChange={next => onSelect(next ? [next] : [])}
+          >
+            {items}
+          </ToggleGroup>
+        )}
+      </Field>
+    )
+  }
+
+  const group = multiple ? (
+    <CheckboxGroup
+      label={label}
+      error={error}
+      parts={parts}
+      items={visible}
+      value={[...selected]}
+      onValueChange={onSelect}
+    />
+  ) : (
+    <RadioGroup
+      label={label}
+      error={error}
+      parts={parts}
+      value={selected[0] ?? null}
+      onValueChange={next => onSelect([next])}
+    >
+      {visible.map(o => (
+        <Radio
+          key={o.value}
+          value={o.value}
+          label={o.label}
+        />
+      ))}
+    </RadioGroup>
+  )
+
+  return filterInput ? (
+    <div className="grid gap-2">
+      {filterInput}
+      {group}
+    </div>
+  ) : (
+    group
+  )
+}
+
+const choicePickerEntry = createA2uiRegistryEntry({
+  name: 'ChoicePicker',
+  component: [RadioGroup, Radio, CheckboxGroup, ToggleGroup, ToggleGroupItem, Input, Field],
+  schema: basicSchema('ChoicePicker'),
+  description: radiantCatalog.entries.Choice.description,
+  adapter(props, context) {
+    const label = resolveControlLabel(props, context.node.componentId)
+    return (
+      <A2uiChoicePicker
+        label={label.text}
+        srOnly={label.srOnly}
+        error={readValidationError(props)}
+        options={readChoiceOptions(props.options)}
+        selected={unwrapStringList(props.value)}
+        multiple={props.variant === 'multipleSelection'}
+        chips={props.displayStyle === 'chips'}
+        filterable={props.filterable === true}
+        onSelect={next => writeBinding(props.value, next)}
       />
     )
   }
@@ -343,8 +448,8 @@ const sliderEntry = createA2uiRegistryEntry({
   component: [Field, Slider],
   schema: basicSchema('Slider'),
   description: radiantCatalog.entries.Slider.description,
-  adapter(props) {
-    const label = unwrapDisplayText(props.label) || 'Value'
+  adapter(props, context) {
+    const label = resolveControlLabel(props, context.node.componentId)
     const error = readValidationError(props)
     const min = typeof props.min === 'number' && Number.isFinite(props.min) ? props.min : 0
     const rawMax = typeof props.max === 'number' && Number.isFinite(props.max) ? props.max : 100
@@ -359,8 +464,9 @@ const sliderEntry = createA2uiRegistryEntry({
 
     return (
       <Field
-        label={label}
+        label={label.text}
         error={error}
+        parts={label.srOnly ? SR_ONLY_LABEL_PARTS : undefined}
       >
         <Slider
           min={min}
