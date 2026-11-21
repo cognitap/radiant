@@ -17,7 +17,11 @@ import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
 import { Slider } from '../components/Slider/Slider.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { ToggleGroup, ToggleGroupItem } from '../components/ToggleGroup/ToggleGroup.js'
-import { radiantCatalog } from '../catalog/index.js'
+import {
+  describeCatalogEntry,
+  radiantCatalog,
+  renderCatalogInstructions
+} from '../catalog/index.js'
 import { humanizeNodeId } from '../catalog/coerce.js'
 import {
   A2UI_BASIC_CATALOG_ID,
@@ -102,7 +106,7 @@ const columnEntry = createA2uiRegistryEntry({
   accessibility: [],
   component: 'div',
   schema: basicSchema('Column'),
-  description: radiantCatalog.entries.Column.description,
+  description: describeCatalogEntry(radiantCatalog.entries.Column),
   adapter(props, context) {
     const children = Array.isArray(props.children)
       ? props.children.filter((child): child is ComponentNode => isComponentNode(child))
@@ -134,7 +138,7 @@ const textEntry = createA2uiRegistryEntry({
   accessibility: [],
   component: 'p',
   schema: basicSchema('Text'),
-  description: radiantCatalog.entries.Text.description,
+  description: describeCatalogEntry(radiantCatalog.entries.Text),
   adapter(props, context) {
     const text = unwrapDisplayText(props.text)
     const variant = props.variant === 'caption' ? 'caption' : 'body'
@@ -187,7 +191,7 @@ const textFieldEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ fixFrom: ['accessibility.label', 'placeholder'] })],
   component: [Field, Input, Textarea],
   schema: basicSchema('TextField'),
-  description: radiantCatalog.entries.TextField.description,
+  description: describeCatalogEntry(radiantCatalog.entries.TextField),
   adapter(props) {
     const label = unwrapString(props.label) ?? ''
     const placeholder = unwrapString(props.placeholder)
@@ -238,7 +242,7 @@ const buttonEntry = createA2uiRegistryEntry({
   accessibility: [buttonNameRule()],
   component: Button,
   schema: basicSchema('Button'),
-  description: radiantCatalog.entries.Button.description,
+  description: describeCatalogEntry(radiantCatalog.entries.Button),
   adapter(props, context) {
     const variant: ButtonVariant =
       typeof props.variant === 'string' && props.variant in BUTTON_VARIANT_MAP
@@ -282,7 +286,7 @@ const checkBoxEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ fixFrom: ['accessibility.label'] })],
   component: [Checkbox, Field],
   schema: basicSchema('CheckBox'),
-  description: radiantCatalog.entries.Checkbox.description,
+  description: describeCatalogEntry(radiantCatalog.entries.Checkbox),
   adapter(props) {
     const label = unwrapDisplayText(props.label)
     const error = readValidationError(props)
@@ -441,7 +445,7 @@ const choicePickerEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
   component: [RadioGroup, Radio, CheckboxGroup, ToggleGroup, ToggleGroupItem, Input, Field],
   schema: basicSchema('ChoicePicker'),
-  description: radiantCatalog.entries.Choice.description,
+  description: describeCatalogEntry(radiantCatalog.entries.Choice),
   adapter(props, context) {
     const label = resolveControlLabel(props, context.node.componentId)
     return (
@@ -465,7 +469,7 @@ const sliderEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
   component: [Field, Slider],
   schema: basicSchema('Slider'),
-  description: radiantCatalog.entries.Slider.description,
+  description: describeCatalogEntry(radiantCatalog.entries.Slider),
   adapter(props, context) {
     const label = resolveControlLabel(props, context.node.componentId)
     const error = readValidationError(props)
@@ -507,6 +511,7 @@ export const radiantA2uiRegistry = createA2uiRegistry({
   title: 'Radiant A2UI 1.0 Catalog',
   description:
     'A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog.',
+  instructions: renderCatalogInstructions(),
   entries: [
     columnEntry,
     textEntry,

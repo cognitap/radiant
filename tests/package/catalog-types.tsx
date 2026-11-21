@@ -8,6 +8,7 @@ import {
   extendCatalog,
   isForbiddenCatalogProp,
   radiantCatalog,
+  renderCatalogGuidance,
   snapshotSurfaceState,
   summarizeCatalogDiagnostics,
   validateCatalog,
@@ -36,6 +37,11 @@ export const customCatalog: Catalog = extendCatalog(canonical, {
       name: 'MetricSummary',
       category: 'data',
       description: 'Summarizes a single metric.',
+      guidance: {
+        whenToUse: 'One headline metric.',
+        whenNotToUse: 'Several records (Table).',
+        examples: ['monthly revenue', 'active users']
+      },
       propsSchema: {
         type: 'object',
         additionalProperties: false,
@@ -61,6 +67,11 @@ export const standaloneCatalog: Catalog = defineCatalog({
       name: 'Note',
       category: 'content',
       description: 'Short note block.',
+      guidance: {
+        whenToUse: 'A short aside.',
+        whenNotToUse: 'Status messages.',
+        examples: ['tip', 'footnote']
+      },
       propsSchema: {
         type: 'object',
         additionalProperties: false,
@@ -109,3 +120,5 @@ export const actionHandler: CatalogActionHandler = event => {
   void event.nodeId
   void event.state
 }
+
+export const llmsTxt: string = renderCatalogGuidance(customCatalog, { title: 'Consumer' })

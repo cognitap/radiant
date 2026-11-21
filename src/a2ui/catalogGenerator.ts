@@ -1,5 +1,7 @@
 import {
   assertValidCatalog,
+  describeCatalogEntry,
+  renderCatalogInstructions,
   type Catalog,
   type CatalogBindingValueType,
   type CatalogEntry,
@@ -25,6 +27,8 @@ export type A2uiCatalogDocument = {
   readonly protocolVersion: typeof A2UI_PROTOCOL_VERSION
   readonly title: string
   readonly description: string
+  /** Catalog-wide design rules for agents. */
+  readonly instructions?: string
   readonly components: Readonly<Record<string, A2uiJsonSchema>>
   readonly functions: Readonly<Record<string, A2uiJsonSchema>>
   readonly $defs: Readonly<Record<string, A2uiJsonSchema>>
@@ -568,7 +572,7 @@ function projectBasic(entry: CatalogEntry, projection: BasicProjection): A2uiJso
   }
   return componentSchema(
     projection.a2uiName,
-    entry.description,
+    describeCatalogEntry(entry),
     properties,
     projection.required,
     projection.checkable ?? false
@@ -620,7 +624,7 @@ function projectExtension(entry: CatalogEntry, projection: ExtensionProjection):
 
   return componentSchema(
     projection.a2uiName,
-    projection.description ?? entry.description,
+    projection.description ?? describeCatalogEntry(entry),
     properties,
     required,
     checkable
@@ -640,6 +644,7 @@ function catalogDocument(
     protocolVersion: A2UI_PROTOCOL_VERSION,
     title,
     description,
+    instructions: renderCatalogInstructions(),
     components,
     functions: {},
     $defs: {

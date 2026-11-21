@@ -10,6 +10,11 @@ import {
   type CatalogSlotConstraint,
   type CatalogStateBinding
 } from './types.js'
+import {
+  CATALOG_GUIDANCE_TOKEN_BUDGET,
+  describeCatalogEntry,
+  estimateCatalogTokens
+} from './guidance.js'
 
 const ENTRY_NAME_PATTERN = /^[A-Z][A-Za-z0-9]*$/
 const VALID_CATEGORIES = new Set<string>(CATALOG_CATEGORIES)
@@ -326,15 +331,28 @@ export function validateCatalogEntry(entry: CatalogEntry, key?: string): readonl
       }
     }
   }
-  if (entry.guidance !== undefined) {
-    if (!isPlainObject(entry.guidance)) {
-      violations.push(`${label}: guidance must be an object.`)
-    } else {
-      if (typeof entry.guidance.whenToUse !== 'string' || !entry.guidance.whenToUse.trim()) {
-        violations.push(`${label}: guidance.whenToUse must be a non-empty string.`)
-      }
-      if (typeof entry.guidance.whenNotToUse !== 'string' || !entry.guidance.whenNotToUse.trim()) {
-        violations.push(`${label}: guidance.whenNotToUse must be a non-empty string.`)
+  if (!isPlainObject(entry.guidance)) {
+    violations.push(`${label}: guidance must be an object.`)
+  } else {
+    if (typeof entry.guidance.whenToUse !== 'string' || !entry.guidance.whenToUse.trim()) {
+      violations.push(`${label}: guidance.whenToUse must be a non-empty string.`)
+    }
+    if (typeof entry.guidance.whenNotToUse !== 'string' || !entry.guidance.whenNotToUse.trim()) {
+      violations.push(`${label}: guidance.whenNotToUse must be a non-empty string.`)
+    }
+    const examples: unknown = entry.guidance.examples
+    if (
+      !Array.isArray(examples) ||
+      examples.length !== 2 ||
+      !examples.every(example => typeof example === 'string' && example.trim())
+    ) {
+      violations.push(`${label}: guidance.examples must be two non-empty strings.`)
+    } else if (typeof entry.description === 'string') {
+      const tokens = estimateCatalogTokens(describeCatalogEntry(entry))
+      if (tokens > CATALOG_GUIDANCE_TOKEN_BUDGET) {
+        violations.push(
+          `${label}: description and guidance use about ${tokens} tokens; the budget is ${CATALOG_GUIDANCE_TOKEN_BUDGET}.`
+        )
       }
     }
   }

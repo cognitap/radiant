@@ -5,9 +5,14 @@ import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 import ts from 'typescript'
 import {
+  CATALOG_GUIDANCE_TOKEN_BUDGET,
   CATALOG_SPACING,
   CHOICE_PRESENTATIONS,
   assertValidCatalog,
+  describeCatalogEntry,
+  estimateCatalogTokens,
+  renderCatalogGuidance,
+  renderCatalogInstructions,
   coerceSchemaProps,
   createCatalogActionEvent,
   defineCatalog,
@@ -214,6 +219,11 @@ test('extendCatalog adds custom entries cleanly and forbids shadowing base entri
         name: 'Sparkline',
         category: 'data',
         description: 'Compact inline trend line.',
+        guidance: {
+          whenToUse: 'A trend beside a metric.',
+          whenNotToUse: 'Exact values (Table).',
+          examples: ['weekly signups', 'error rate']
+        },
         propsSchema: {
           type: 'object',
           additionalProperties: false,
@@ -287,6 +297,11 @@ const customEntry = name => ({
   name,
   category: 'data',
   description: 'Custom application entry.',
+  guidance: {
+    whenToUse: 'Custom data.',
+    whenNotToUse: 'Built-in data.',
+    examples: ['first', 'second']
+  },
   propsSchema: {
     type: 'object',
     additionalProperties: false,
@@ -546,4 +561,77 @@ test('catalog action contract delivers isolated state snapshots and interactive 
     assert.deepEqual(entry.actions, {}, `${entry.name} should not declare outbound actions`)
   }
   assert.equal(radiantCatalog.entries.Button.actions.action.scope, 'outbound')
+})
+
+test('every entry carries guidance within the token budget, including app entries', () => {
+  for (const entry of Object.values(radiantCatalog.entries)) {
+    assert.equal(entry.guidance.examples.length, 2, entry.name)
+    assert.ok(
+      estimateCatalogTokens(describeCatalogEntry(entry)) <= CATALOG_GUIDANCE_TOKEN_BUDGET,
+      entry.name
+    )
+  }
+
+  const { guidance, ...unguided } = customEntry('Unguided')
+  assert.match(validateCatalogEntry(unguided).join('\n'), /guidance must be an object/)
+  assert.match(
+    validateCatalogEntry({
+      ...customEntry('OneExample'),
+      guidance: { ...guidance, examples: ['a'] }
+    }).join('\n'),
+    /two non-empty strings/
+  )
+  assert.match(
+    validateCatalogEntry({
+      ...customEntry('Verbose'),
+      guidance: { ...guidance, whenToUse: 'word '.repeat(200) }
+    }).join('\n'),
+    /the budget is/
+  )
+  assert.throws(
+    () =>
+      extendCatalog(radiantCatalog, {
+        id: 'example/unguided',
+        version: '1.0.0',
+        entries: { Unguided: unguided }
+      }),
+    /guidance must be an object/
+  )
+})
+
+test('guidance renders into llms.txt Markdown and generated A2UI catalogs', () => {
+  const extended = extendCatalog(radiantCatalog, {
+    id: 'example/custom',
+    version: '1.0.0',
+    entries: { MetricTile: customEntry('MetricTile') }
+  })
+  const markdown = renderCatalogGuidance(extended, { title: 'Example' })
+  assert.match(markdown, /^# Example\n/)
+  assert.ok(markdown.includes(renderCatalogInstructions()))
+  assert.match(markdown, /### Button\n[\s\S]*- Avoid: Navigation/)
+  assert.match(
+    markdown,
+    /### MetricTile\n[\s\S]*- Use: Custom data\.\n- Avoid: Built-in data\.\n- Example: first\n- Example: second/
+  )
+  assert.doesNotMatch(markdown, /\b[A-Z]{2,}-\d+\b|\b20\d\d-\d\d-\d\d\b/)
+
+  const { basic, extension } = generateA2uiCatalogs(extended)
+  assert.equal(basic.instructions, renderCatalogInstructions())
+  assert.equal(
+    basic.components.Button.description,
+    describeCatalogEntry(radiantCatalog.entries.Button)
+  )
+  assert.equal(
+    extension.components.MetricTile.description,
+    describeCatalogEntry(extended.entries.MetricTile)
+  )
+
+  const shipped = JSON.parse(
+    readFileSync(fileURLToPath(new URL('../src/a2ui/catalog.json', import.meta.url)), 'utf8')
+  )
+  assert.equal(shipped.instructions, renderCatalogInstructions())
+  assert.equal(
+    shipped.components.CheckBox.description,
+    describeCatalogEntry(radiantCatalog.entries.Checkbox)
+  )
 })
