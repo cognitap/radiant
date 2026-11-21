@@ -82,7 +82,8 @@ test('every registry entry declares its accessibility rules', () => {
     Icon: [],
     Image: ['image-alt'],
     Video: ['media-name'],
-    AudioPlayer: ['media-name']
+    AudioPlayer: ['media-name'],
+    DateTimeInput: ['control-label']
   })
   assert.throws(
     () =>

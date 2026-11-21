@@ -30,6 +30,7 @@ test('generated A2UI catalog JSON matches radiantA2uiRegistry and loads into @a2
     'CheckBox',
     'ChoicePicker',
     'Column',
+    'DateTimeInput',
     'Icon',
     'Image',
     'Slider',

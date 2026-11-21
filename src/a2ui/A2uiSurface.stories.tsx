@@ -15,6 +15,11 @@ import {
   STREAMED_SURFACE_ID,
   streamedFixtureMessages
 } from './fixtures.js'
+import {
+  TRIP_SURFACE_ID,
+  tripRequestFixtureMessages,
+  tripRequestRejectionMessages
+} from './inputFixtures.js'
 
 function ProfileSurfaceDemo() {
   const [lastAction, setLastAction] = useState<A2uiActionPayload | null>(null)
@@ -195,6 +200,34 @@ function StreamedSurfaceDemo({
   )
 }
 
+function InputsAndChecksDemo() {
+  const [messages, setMessages] = useState<readonly A2uiMessage[]>(tripRequestFixtureMessages)
+  const [context, setContext] = useState<string | null>(null)
+  // Stands in for the agent: it reads the action context and replies with failed checks.
+  const handleAction = useCallback((event: A2uiActionPayload) => {
+    setContext(JSON.stringify(event.context))
+    setMessages([...tripRequestFixtureMessages, ...tripRequestRejectionMessages])
+  }, [])
+
+  return (
+    <div className="grid max-w-md gap-4">
+      <A2uiSurface
+        surfaceId={TRIP_SURFACE_ID}
+        messages={messages}
+        onAction={handleAction}
+      />
+      {context ? (
+        <output
+          data-testid="a2ui-action-context"
+          className="text-sm break-all"
+        >
+          {context}
+        </output>
+      ) : null}
+    </div>
+  )
+}
+
 const meta = {
   title: 'A2UI/Surface',
   component: A2uiSurface
@@ -317,5 +350,32 @@ export const StreamedSurface: Story = {
     await expect(canvas.getByRole('textbox', { name: 'Your name' })).toHaveValue('Ada')
     await expect(canvas.getByText('Welcome back, Ada.')).toBeVisible()
     await expect(surface).not.toHaveAttribute('aria-busy')
+  }
+}
+
+export const InputsAndChecks: Story = {
+  args: {
+    surfaceId: TRIP_SURFACE_ID,
+    messages: tripRequestFixtureMessages
+  },
+  render: () => <InputsAndChecksDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const date = canvas.getByLabelText('Departure date')
+    await expect(date).toHaveAttribute('type', 'date')
+    await expect(canvas.getByLabelText('Earliest departure time')).toHaveAttribute('type', 'time')
+    await expect(canvas.getByLabelText('Return flight')).toHaveAttribute('type', 'datetime-local')
+
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Traveler name' }), 'Ada')
+    fireEvent.change(date, { target: { value: '2026-03-14' } })
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Wi-Fi' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Request trip' }))
+
+    await expect(canvas.getByTestId('a2ui-action-context')).toHaveTextContent(
+      '"traveler":"Ada","departureDate":"2026-03-14"'
+    )
+    await expect(canvas.getByText('Choose a date with seats left.')).toBeVisible()
+    await expect(date).toHaveAttribute('aria-invalid', 'true')
+    await expect(date).toHaveAccessibleDescription('Choose a date with seats left.')
   }
 }

@@ -651,6 +651,54 @@ const audioPlayerEntry = createA2uiRegistryEntry({
   }
 })
 
+type DateTimeInputType = 'date' | 'time' | 'datetime-local'
+
+/** Trims an ISO 8601 value to what the native input type accepts, without shifting time zones. */
+function toNativeDateTime(value: string, type: DateTimeInputType): string {
+  const [datePart = '', timePart = ''] = value.includes('T')
+    ? value.split('T')
+    : value.includes(':')
+      ? ['', value]
+      : [value, '']
+  const date = /^\d{4}-\d{2}-\d{2}/.test(datePart) ? datePart.slice(0, 10) : ''
+  const time = /^\d{2}:\d{2}/.test(timePart) ? timePart.slice(0, 5) : ''
+  if (type === 'date') return date
+  if (type === 'time') return time
+  return date && time ? `${date}T${time}` : ''
+}
+
+const dateTimeInputEntry = createA2uiRegistryEntry({
+  name: 'DateTimeInput',
+  accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
+  component: [Field, Input],
+  schema: basicSchema('DateTimeInput'),
+  description: radiantCatalog.entries.DateTimeInput.description,
+  adapter(props, context) {
+    const label = resolveControlLabel(props, context.node.componentId)
+    const enableDate = unwrapBoolean(props.enableDate) === true
+    const enableTime = unwrapBoolean(props.enableTime) === true
+    const type: DateTimeInputType =
+      enableDate && enableTime ? 'datetime-local' : enableTime ? 'time' : 'date'
+    const bound = (raw: unknown) => toNativeDateTime(unwrapString(raw) ?? '', type) || undefined
+
+    return (
+      <Field
+        label={label.text}
+        error={readValidationError(props)}
+        parts={label.srOnly ? SR_ONLY_LABEL_PARTS : undefined}
+      >
+        <Input
+          type={type}
+          value={toNativeDateTime(unwrapString(props.value) ?? '', type)}
+          min={bound(props.min)}
+          max={bound(props.max)}
+          onChange={event => writeBinding(props.value, event.currentTarget.value)}
+        />
+      </Field>
+    )
+  }
+})
+
 /**
  * Radiant's built-in A2UI 1.0 component registry.
  * Generated catalog JSON (`src/a2ui/catalog.json`) is derived directly from this registry.
@@ -672,6 +720,7 @@ export const radiantA2uiRegistry = createA2uiRegistry({
     iconEntry,
     imageEntry,
     videoEntry,
-    audioPlayerEntry
+    audioPlayerEntry,
+    dateTimeInputEntry
   ]
 })
