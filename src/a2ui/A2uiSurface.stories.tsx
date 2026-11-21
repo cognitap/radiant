@@ -149,10 +149,16 @@ function LiveAgentPatchDemo() {
 
 const STREAM_STEP_MS = 250
 
-function StreamedSurfaceDemo() {
+function StreamedSurfaceDemo({
+  surfaceId,
+  messages
+}: {
+  readonly surfaceId: string
+  readonly messages: readonly A2uiMessage[]
+}) {
   const [run, setRun] = useState(0)
   const [count, setCount] = useState(1)
-  const done = count >= streamedFixtureMessages.length
+  const done = count >= messages.length
 
   useEffect(() => {
     if (done) return
@@ -164,8 +170,8 @@ function StreamedSurfaceDemo() {
     <div className="grid max-w-md gap-4">
       <A2uiSurface
         key={run}
-        surfaceId={STREAMED_SURFACE_ID}
-        messages={streamedFixtureMessages.slice(0, count)}
+        surfaceId={surfaceId}
+        messages={messages.slice(0, count)}
       />
       <div className="flex items-center gap-3">
         <Button
@@ -182,7 +188,7 @@ function StreamedSurfaceDemo() {
           data-testid="a2ui-stream-progress"
           className="text-sm"
         >
-          {`Messages: ${count} of ${streamedFixtureMessages.length}`}
+          {`Messages: ${count} of ${messages.length}`}
         </output>
       </div>
     </div>
@@ -295,7 +301,12 @@ export const StreamedSurface: Story = {
     surfaceId: STREAMED_SURFACE_ID,
     messages: streamedFixtureMessages
   },
-  render: () => <StreamedSurfaceDemo />,
+  render: args => (
+    <StreamedSurfaceDemo
+      surfaceId={args.surfaceId}
+      messages={args.messages}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const surface = canvasElement.querySelector('[data-slot="a2ui-surface"]')!

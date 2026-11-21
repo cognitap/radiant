@@ -30,7 +30,34 @@ function surfaceOf(message: A2uiMessage, key: string): string | undefined {
 export const createsSurface = (message: A2uiMessage, surfaceId: string) =>
   surfaceOf(message, 'createSurface') === surfaceId
 
+export const deletesSurface = (message: A2uiMessage, surfaceId: string) =>
+  surfaceOf(message, 'deleteSurface') === surfaceId
+
+/** Drops buffered updates a snapshot `createSurface` already supersedes. */
+export function supersededBy(create: A2uiMessage, held: A2uiMessage): boolean {
+  const body = isPlainRecord(create) ? create.createSurface : undefined
+  if (!isPlainRecord(body) || !isPlainRecord(held)) return false
+  return (
+    (body.components !== undefined && 'updateComponents' in held) ||
+    (body.dataModel !== undefined && 'updateDataModel' in held)
+  )
+}
+
 /** True for component and data updates that need the surface to exist first. */
 export const updatesSurface = (message: A2uiMessage, surfaceId: string) =>
   surfaceOf(message, 'updateComponents') === surfaceId ||
   surfaceOf(message, 'updateDataModel') === surfaceId
+
+/** Component definitions a `createSurface` or `updateComponents` message carries for this surface. */
+export function streamedComponents(
+  message: A2uiMessage,
+  surfaceId: string
+): readonly Readonly<Record<string, unknown>>[] {
+  for (const key of ['createSurface', 'updateComponents']) {
+    const body = isPlainRecord(message) ? message[key] : undefined
+    if (isPlainRecord(body) && body.surfaceId === surfaceId && Array.isArray(body.components)) {
+      return body.components.filter(isPlainRecord)
+    }
+  }
+  return []
+}

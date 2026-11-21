@@ -1,6 +1,7 @@
+import { act, StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test } from 'vitest'
-import { commands } from 'vitest/browser'
+import { commands, userEvent } from 'vitest/browser'
 import {
   A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
@@ -100,20 +101,25 @@ test('a fixture streamed one prop at a time does not shift a node once its size 
   const second = () => surfaceOf(host).querySelector('[data-slot="a2ui-column"]')!.children[1]!
 
   const nextTop = rect(second()).top
-  const sizes: { title: ReturnType<typeof rect>; button?: ReturnType<typeof rect> }[] = []
+  const sizes: { title?: ReturnType<typeof rect>; button?: ReturnType<typeof rect> }[] = []
   for (let count = 2; count <= propStreamFixtureMessages.length; count++) {
     await view.render(surface(count))
     const title = host.querySelector('[data-slot="a2ui-text"]')
     const button = host.querySelector('button')
-    sizes.push({ title: rect(title), button: button ? rect(button) : undefined })
-    // The title placeholder reserved the title's line, so the next node never moves
+    sizes.push({
+      title: title ? rect(title) : undefined,
+      button: button ? rect(button) : undefined
+    })
+    // Placeholders reserve the title's line, so the next node never moves
     expect(rect(second()).top).toBe(nextTop)
   }
-  const [firstTitle] = sizes
-  for (const size of sizes) expect(size.title).toEqual(firstTitle!.title)
-  const buttons = sizes.flatMap(size => (size.button ? [size.button] : []))
-  expect(buttons.length).toBeGreaterThan(1)
-  for (const button of buttons) expect(button).toEqual(buttons[0])
+  // Text without its text yet stays a placeholder
+  expect(sizes[0]!.title).toBeUndefined()
+  for (const key of ['title', 'button'] as const) {
+    const known = sizes.flatMap(size => (size[key] ? [size[key]] : []))
+    expect(known.length, key).toBeGreaterThan(1)
+    for (const box of known) expect(box, key).toEqual(known[0])
+  }
 })
 
 test('a snapshot createSurface with components and dataModel renders in one pass', async () => {
@@ -238,4 +244,199 @@ test('every registry entry renders cleanly from partial props', async () => {
     ).toEqual([])
     expect(host.querySelector('[data-slot="a2ui-column"]')!.childElementCount, name).toBe(1)
   }
+})
+
+const create = (surfaceId: string, extra: Record<string, unknown> = {}) =>
+  message({ createSurface: { surfaceId, catalogId: A2UI_BASIC_CATALOG_ID, ...extra } })
+const rootText = (text: unknown) => [{ id: 'root', component: 'Text', text }]
+
+test('renders nothing after deleteSurface and renders a recreated surface', async () => {
+  const first = create('cycle', { components: rootText('First') })
+  const deleted = message({ deleteSurface: { surfaceId: 'cycle' } })
+  const second = create('cycle', { components: rootText('Second') })
+  const surface = (messages: readonly A2uiMessage[]) => (
+    <A2uiSurface
+      surfaceId="cycle"
+      messages={messages}
+    />
+  )
+  const view = await mount(surface([first]))
+  expect(view.host.textContent).toBe('First')
+
+  await view.render(surface([first, deleted]))
+  expect(view.host.textContent).toBe('')
+  expect(placeholderIds(view.host)).toEqual([])
+  expect(surfaceOf(view.host).hasAttribute('aria-busy')).toBe(false)
+
+  await view.render(surface([first, deleted, second]))
+  expect(view.host.textContent).toBe('Second')
+  expect(surfaceOf(view.host).hasAttribute('aria-busy')).toBe(false)
+})
+
+test('reports errors raised after an interaction and protocol errors arriving in a patch', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const onDiagnostic = (d: CatalogDiagnostic) => diagnostics.push(d)
+  const initial = [
+    create('late_errors', {
+      components: [
+        {
+          id: 'root',
+          component: 'Button',
+          child: 'label',
+          action: { functionCall: { call: 'missingFn' } }
+        },
+        { id: 'label', component: 'Text', text: 'Run' }
+      ]
+    })
+  ]
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="late_errors"
+      messages={initial}
+      onDiagnostic={onDiagnostic}
+    />
+  )
+  expect(errorsOf(diagnostics)).toEqual([])
+
+  await act(async () => {
+    await userEvent.click(view.host.querySelector('button')!)
+  })
+  expect(errorsOf(diagnostics)).toEqual([
+    expect.objectContaining({ kind: 'error', code: expect.any(String) })
+  ])
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="late_errors"
+      messages={[
+        ...initial,
+        message({ updateComponents: { surfaceId: 'late_errors', components: 'nope' } })
+      ]}
+      onDiagnostic={onDiagnostic}
+    />
+  )
+  expect(errorsOf(diagnostics)).toHaveLength(2)
+  expect(view.host.textContent).toBe('Run')
+})
+
+test('reports an unknown component once while its props stream in', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const stream = [
+    create('unknown_stream', {
+      components: [{ id: 'root', component: 'Column', children: ['promo'] }]
+    }),
+    ...[{}, { text: 'Promo' }, { text: 'Promo', tone: 'loud' }].map(props =>
+      message({
+        updateComponents: {
+          surfaceId: 'unknown_stream',
+          components: [{ id: 'promo', component: 'PromoBanner', ...props }]
+        }
+      })
+    )
+  ]
+  const surface = (count: number) => (
+    <A2uiSurface
+      surfaceId="unknown_stream"
+      messages={stream.slice(0, count)}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  const view = await mount(surface(1))
+  for (let count = 2; count <= stream.length; count++) await view.render(surface(count))
+  expect(view.host.textContent).toBe('Promo')
+  expect(errorsOf(diagnostics)).toEqual([
+    expect.objectContaining({ code: 'UNKNOWN_COMPONENT_TYPE', nodeId: 'promo' })
+  ])
+})
+
+test('a snapshot createSurface supersedes buffered updates', async () => {
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="snapshot"
+      messages={[
+        message({ updateComponents: { surfaceId: 'snapshot', components: rootText('Early') } }),
+        message({ updateDataModel: { surfaceId: 'snapshot', path: '/note', value: 'Stale' } }),
+        create('snapshot', {
+          components: rootText({ '@path': '/note' }),
+          dataModel: { note: 'Snapshot' }
+        })
+      ]}
+    />
+  )
+  expect(host.textContent).toBe('Snapshot')
+})
+
+test('a failed createSurface clears busy and reports the dropped updates', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="bad_catalog"
+      messages={[
+        message({ updateComponents: { surfaceId: 'bad_catalog', components: rootText('Held') } }),
+        message({
+          createSurface: { surfaceId: 'bad_catalog', catalogId: 'https://example.com/unknown.json' }
+        })
+      ]}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  expect(host.textContent).toBe('')
+  expect(placeholderIds(host)).toEqual([])
+  expect(surfaceOf(host).hasAttribute('aria-busy')).toBe(false)
+  expect(errorsOf(diagnostics).map(d => d.code)).toEqual([expect.any(String), 'DROPPED_UPDATES'])
+})
+
+test('authored empty text does not reserve a line', async () => {
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="empty_text"
+      messages={[
+        create('empty_text', {
+          components: [
+            { id: 'root', component: 'Column', children: ['empty', 'pending'] },
+            { id: 'empty', component: 'Text', text: '' },
+            { id: 'pending', component: 'Text', text: { '@path': '/missing' } }
+          ]
+        })
+      ]}
+    />
+  )
+  const [empty, pending] = host.querySelectorAll<HTMLElement>('[data-slot="a2ui-text"]')
+  expect(empty!.getBoundingClientRect().height).toBe(0)
+  expect(pending!.getBoundingClientRect().height).toBeGreaterThan(0)
+})
+
+test('a StrictMode stream settles aria-busy without duplicate diagnostics', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const stream = [
+    ...streamedFixtureMessages,
+    message({
+      updateComponents: {
+        surfaceId: STREAMED_SURFACE_ID,
+        components: [
+          { id: 'root', component: 'Column', children: ['heading_text', 'promo'] },
+          { id: 'promo', component: 'PromoBanner', text: 'Promo' }
+        ]
+      }
+    }),
+    message({ updateComponents: { surfaceId: STREAMED_SURFACE_ID, components: 'nope' } })
+  ]
+  const surface = (count: number) => (
+    <StrictMode>
+      <A2uiSurface
+        surfaceId={STREAMED_SURFACE_ID}
+        messages={stream.slice(0, count)}
+        onDiagnostic={d => diagnostics.push(d)}
+      />
+    </StrictMode>
+  )
+  const view = await mount(surface(1))
+  expect(surfaceOf(view.host).getAttribute('aria-busy')).toBe('true')
+  for (let count = 2; count <= stream.length; count++) await view.render(surface(count))
+  expect(surfaceOf(view.host).hasAttribute('aria-busy')).toBe(false)
+  expect(view.host.textContent).toBe('Weekly check-inPromo')
+  const errors = errorsOf(diagnostics)
+  expect(errors.map(d => d.code)).toEqual(['UNKNOWN_COMPONENT_TYPE', expect.any(String)])
+  const keys = diagnostics.map(d => JSON.stringify(d))
+  expect(new Set(keys).size).toBe(keys.length)
 })

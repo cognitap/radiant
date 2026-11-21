@@ -43,7 +43,14 @@ import {
 } from './coerce.js'
 import { A2uiPlaceholder, createPlaceholderTracker } from './A2uiPlaceholder.js'
 import { radiantA2uiRegistry } from './entries.js'
-import { createsSurface, protocolErrorDiagnostic, updatesSurface } from './protocolErrors.js'
+import {
+  createsSurface,
+  deletesSurface,
+  streamedComponents,
+  protocolErrorDiagnostic,
+  supersededBy,
+  updatesSurface
+} from './protocolErrors.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import {
@@ -98,6 +105,8 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
   let motionProfile = initialMotionProfile
   let pendingFocus: FocusSnapshot | null = null
   const placeholders = createPlaceholderTracker()
+  // Text nodes whose latest definition has not streamed its text yet.
+  const pendingText = new Set<string>()
 
   function flushBatch() {
     if (pendingFocus) {
@@ -138,6 +147,7 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
 
   return {
     placeholders,
+    pendingText,
     setSurfaceElement(element: HTMLDivElement | null) {
       surfaceElement = element
     },
@@ -342,7 +352,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
     return () => runtime.onNodeUnmount(node.id, node.instanceId)
   }, [active, inline, node.id, node.instanceId, runtime])
 
-  if (node.state === 'pending') {
+  if (node.state === 'pending' || (active && runtime.pendingText.has(node.componentId))) {
     return (
       <A2uiPlaceholder
         nodeId={node.componentId}
@@ -395,6 +405,8 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   )
 })
 
+type SurfacePhase = 'awaiting' | 'live' | 'closed'
+
 function createSurfaceStore(
   initialSurfaceId: string,
   initialRegistry: A2uiRegistry,
@@ -414,9 +426,15 @@ function createSurfaceStore(
   let resolver: NodeResolver<ComponentApi, FunctionImplementation> | undefined
   let stopRootEffect: (() => void) | undefined
   let stopErrors: (() => void) | undefined
-  let recordErrors = false
+  let resolvedSurface: SurfaceModel<ComponentApi> | undefined
+  // Errors are queued during sync, dropped on an identical rebuild, and delivered directly otherwise.
+  let errorMode: 'direct' | 'queue' | 'suppress' = 'direct'
+  // `awaiting` until createSurface succeeds; `closed` after deleteSurface or a failed create.
+  let phase: SurfacePhase = 'awaiting'
   // Updates that arrive before their createSurface wait here instead of failing.
   let bufferedUpdates: A2uiMessage[] = []
+  // Unknown components report once per node and type for each engine build.
+  let reportedUnknown = new Set<string>()
   const pendingDiagnostics: CatalogDiagnostic[] = []
   const listeners = new Set<() => void>()
 
@@ -452,6 +470,7 @@ function createSurfaceStore(
     stopErrors = undefined
     resolver?.dispose()
     resolver = undefined
+    resolvedSurface = undefined
     processor?.dispose()
     processor = undefined
   }
@@ -459,13 +478,55 @@ function createSurfaceStore(
   const makeResolver = (s: SurfaceModel<ComponentApi> | undefined) =>
     s ? new NodeResolver(s as SurfaceModel<ComponentApi, FunctionImplementation>) : undefined
 
-  function withErrors(record: boolean, run: () => void) {
-    recordErrors = record
+  function withErrors(mode: typeof errorMode, run: () => void) {
+    const previous = errorMode
+    errorMode = mode
     try {
       run()
     } finally {
-      recordErrors = false
+      errorMode = previous
     }
+  }
+
+  // Rebinds the resolver whenever the surface model is created, deleted, or recreated.
+  function refreshResolver(target: MessageProcessor<ComponentApi>) {
+    const surface = target.getSurface(surfaceId)
+    if (resolver && !resolver.disposed && resolvedSurface === surface) return
+    resolver?.dispose()
+    resolvedSurface = surface
+    resolver = makeResolver(surface)
+    bindRootSignal()
+  }
+
+  function trackPendingText(
+    coerced: readonly A2uiMessage[],
+    diagnostics: readonly CatalogDiagnostic[]
+  ) {
+    for (const message of coerced) {
+      for (const component of streamedComponents(message, surfaceId)) {
+        if (component.component === 'Text') runtime.pendingText.delete(String(component.id))
+      }
+    }
+    for (const d of diagnostics) {
+      if (d.component === 'Text' && d.prop === 'text' && d.kind === 'defaulted') {
+        runtime.pendingText.add(d.nodeId)
+      }
+    }
+  }
+
+  function dropBuffered(reason: string) {
+    if (bufferedUpdates.length === 0) return
+    pendingDiagnostics.push({
+      kind: 'error',
+      code: 'DROPPED_UPDATES',
+      nodeId: '',
+      component: 'surface',
+      prop: 'message',
+      received: bufferedUpdates.length,
+      used: undefined,
+      reason
+    })
+    bufferedUpdates = []
   }
 
   // Each message is applied on its own so one protocol error cannot drop the rest of a batch.
@@ -477,21 +538,40 @@ function createSurfaceStore(
   ) {
     const detached = batch.map(message => cloneMessageValue(message))
     const { messages: coerced, diagnostics } = coerceA2uiMessages(detached, targetRegistry)
-    if (record && diagnostics.length > 0) pendingDiagnostics.push(...diagnostics)
+    trackPendingText(coerced, diagnostics)
+    if (record) {
+      for (const diagnostic of diagnostics) {
+        if (diagnostic.code === 'UNKNOWN_COMPONENT_TYPE') {
+          const key = `${diagnostic.nodeId}\u0000${String(diagnostic.received)}`
+          if (reportedUnknown.has(key)) continue
+          reportedUnknown.add(key)
+        }
+        pendingDiagnostics.push(diagnostic)
+      }
+    }
     const apply = (message: A2uiMessage) =>
       target.processMessages([message] as readonly ProcessableMessage[])
-    withErrors(record, () => {
-      for (const message of coerced) {
-        if (!target.getSurface(surfaceId) && updatesSurface(message, surfaceId)) {
-          bufferedUpdates.push(message)
-          continue
-        }
-        apply(message)
-        if (createsSurface(message, surfaceId) && target.getSurface(surfaceId)) {
-          for (const held of bufferedUpdates.splice(0)) apply(held)
-        }
+    for (const message of coerced) {
+      if (phase === 'awaiting' && updatesSurface(message, surfaceId)) {
+        bufferedUpdates.push(message)
+        continue
       }
-    })
+      apply(message)
+      if (createsSurface(message, surfaceId)) {
+        if (target.getSurface(surfaceId)) {
+          phase = 'live'
+          const held = bufferedUpdates.filter(update => !supersededBy(message, update))
+          bufferedUpdates = []
+          for (const update of held) apply(update)
+        } else if (phase === 'awaiting') {
+          phase = 'closed'
+          dropBuffered('createSurface failed; buffered updates were dropped.')
+        }
+      } else if (deletesSurface(message, surfaceId) && !target.getSurface(surfaceId)) {
+        phase = 'closed'
+      }
+      refreshResolver(target)
+    }
   }
 
   function buildEngine(
@@ -505,6 +585,9 @@ function createSurfaceStore(
     surfaceId = nextSurfaceId
     registry = nextRegistry
     bufferedUpdates = []
+    reportedUnknown = new Set()
+    runtime.pendingText.clear()
+    phase = 'awaiting'
     const wireSnapshot = nextMessages.map(message => cloneMessageValue(message))
     processedMessages = wireSnapshot
     const sameBatch =
@@ -532,19 +615,20 @@ function createSurfaceStore(
       { version: A2UI_PROTOCOL_VERSION, reportErrorsOnly: true }
     )
     const errorSubscription = processor.model.onError.subscribe(error => {
-      if (!recordErrors || (error.surfaceId && error.surfaceId !== surfaceId)) return
-      pendingDiagnostics.push(protocolErrorDiagnostic(error))
+      if (errorMode === 'suppress' || (error.surfaceId && error.surfaceId !== surfaceId)) return
+      const diagnostic = protocolErrorDiagnostic(error)
+      if (errorMode === 'queue') pendingDiagnostics.push(diagnostic)
+      else diagnosticHandler?.(diagnostic)
     })
     stopErrors = () => errorSubscription.unsubscribe()
-    const record = Boolean(diagnosticHandler) && !sameBatch
-    if (wireSnapshot.length > 0) {
-      processBatch(processor, nextRegistry, wireSnapshot, record)
-    }
-    reported = [nextSurfaceId, nextRegistry, wireSnapshot]
-    withErrors(record, () => {
-      resolver = makeResolver(processor!.getSurface(nextSurfaceId))
+    const target = processor
+    withErrors(sameBatch ? 'suppress' : 'queue', () => {
+      const before = pendingDiagnostics.length
+      processBatch(target, nextRegistry, wireSnapshot, Boolean(diagnosticHandler) && !sameBatch)
+      refreshResolver(target)
+      if (sameBatch) pendingDiagnostics.length = before
     })
-    bindRootSignal()
+    reported = [nextSurfaceId, nextRegistry, wireSnapshot]
   }
 
   buildEngine(initialSurfaceId, initialRegistry, initialMessages)
@@ -564,6 +648,7 @@ function createSurfaceStore(
     getSnapshot() {
       return resolver ? peekValue(resolver.rootNode) : undefined
     },
+    getPhase: () => phase,
     reportDiagnostic(diagnostic: CatalogDiagnostic) {
       diagnosticHandler?.(diagnostic)
     },
@@ -595,17 +680,12 @@ function createSurfaceStore(
         const delta = nextMessages
           .slice(processedMessages.length)
           .map(message => cloneMessageValue(message))
-        if (delta.length > 0) {
-          processBatch(processor, nextRegistry, delta, Boolean(diagnosticHandler))
-          processedMessages.push(...delta)
-        }
-        if (!resolver || resolver.disposed) {
-          const target = processor
-          withErrors(Boolean(diagnosticHandler), () => {
-            resolver = makeResolver(target.getSurface(nextSurfaceId))
-          })
-          bindRootSignal()
-        }
+        const target = processor
+        withErrors('queue', () => {
+          processBatch(target, nextRegistry, delta, Boolean(diagnosticHandler))
+          refreshResolver(target)
+        })
+        processedMessages.push(...delta)
         flushDiagnostics()
         notify()
         return
@@ -661,18 +741,20 @@ export function A2uiSurface({
   useEffect(() => warnA2uiAccessibility(messages, registry), [messages, registry])
 
   const rootNode = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
+  const phase = useSyncExternalStore(store.subscribe, store.getPhase, store.getPhase)
   const placeholders = useSyncExternalStore(
     runtime.placeholders.subscribe,
     runtime.placeholders.getSnapshot,
     zeroPlaceholders
   )
+  const waiting = !rootNode && phase !== 'closed'
 
   return (
     <div
       ref={surfaceRef}
       tabIndex={-1}
       className={focusRingClass}
-      aria-busy={!rootNode || placeholders > 0 ? true : undefined}
+      aria-busy={waiting || placeholders > 0 ? true : undefined}
       data-slot="a2ui-surface"
       data-surface-id={surfaceId}
     >
@@ -684,12 +766,12 @@ export function A2uiSurface({
           onDiagnostic={store.reportDiagnostic}
           runtime={runtime}
         />
-      ) : (
+      ) : waiting ? (
         <A2uiPlaceholder
           inline={false}
           tracker={runtime.placeholders}
         />
-      )}
+      ) : null}
     </div>
   )
 }
