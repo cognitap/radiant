@@ -41,6 +41,7 @@ test('createA2uiRegistryEntry rejects forbidden host styling, render, handler, a
       () =>
         createA2uiRegistryEntry({
           name: 'BadWidget',
+          accessibility: [],
           component: 'div',
           description: 'Leaks a forbidden prop.',
           schema: {

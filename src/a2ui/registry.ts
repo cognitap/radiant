@@ -11,6 +11,7 @@ import {
   type A2uiCatalogDocument,
   type A2uiJsonSchema
 } from './catalogGenerator.js'
+import type { A2uiAccessibilityRule } from './accessibilityRules.js'
 
 const ENTRY_NAME_PATTERN = /^[A-Z][A-Za-z0-9]*$/
 
@@ -42,6 +43,8 @@ export type A2uiRegistryEntryInput = {
   readonly schema: A2uiJsonSchema
   readonly description: string
   readonly adapter: A2uiComponentAdapter
+  /** Accessibility rules checked by `validateA2uiAccessibility`; `[]` declares none. */
+  readonly accessibility: readonly A2uiAccessibilityRule[]
 }
 
 export type A2uiRegistryEntry = {
@@ -50,6 +53,8 @@ export type A2uiRegistryEntry = {
   readonly schema: A2uiJsonSchema
   readonly description: string
   readonly adapter: A2uiComponentAdapter
+  /** Accessibility rules checked by `validateA2uiAccessibility`; `[]` declares none. */
+  readonly accessibility: readonly A2uiAccessibilityRule[]
 }
 
 export type A2uiRegistryInput = {
@@ -100,6 +105,9 @@ export function createA2uiRegistryEntry(input: A2uiRegistryEntryInput): A2uiRegi
   if (typeof input.adapter !== 'function') {
     throw new TypeError(`A2UI registry entry "${input.name}" requires an adapter function.`)
   }
+  if (!Array.isArray(input.accessibility)) {
+    throw new TypeError(`A2UI registry entry "${input.name}" must declare accessibility rules.`)
+  }
   const forbidden = findForbiddenInA2uiSchema(input.schema, `${input.name}.schema`)
   if (forbidden.length > 0) {
     throw new TypeError(
@@ -111,7 +119,8 @@ export function createA2uiRegistryEntry(input: A2uiRegistryEntryInput): A2uiRegi
     component: input.component,
     schema: structuredClone(input.schema),
     description: input.description,
-    adapter: input.adapter
+    adapter: input.adapter,
+    accessibility: Object.freeze([...input.accessibility])
   })
 }
 

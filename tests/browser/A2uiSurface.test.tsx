@@ -240,6 +240,7 @@ test('isolates a throwing node inside its error boundary, falls back to its text
 
   const failingEntry = createA2uiRegistryEntry({
     name: 'ExplodingNote',
+    accessibility: [],
     component: ThrowingWidget,
     description: 'Test component that throws during React render.',
     schema: {
@@ -437,6 +438,7 @@ test('recovers a failed node after updateComponents replaces its failing props',
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'ToggleThrow',
+        accessibility: [],
         component: ToggleThrow,
         description: 'Throws when shouldFail is true.',
         schema: {
@@ -1085,6 +1087,7 @@ test('patches a sibling while a drag is in progress without interrupting the dra
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'DragHandle',
+        accessibility: [],
         component: DragHandle,
         description: 'One-axis spring drag handle.',
         schema: {
@@ -1917,6 +1920,7 @@ test('preserves DOM fallback order when removing a programmatically focused tabi
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'ProgrammaticTarget',
+        accessibility: [],
         component: 'div',
         description: 'Control with tabindex=-1.',
         schema: {
@@ -2183,6 +2187,7 @@ test('animates newly inserted direct and non-ref-forwarding custom leaves inside
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'CustomPanel',
+        accessibility: [],
         component: CustomPanel,
         description: 'Custom container wrapping children in nested markup.',
         schema: {
@@ -2209,6 +2214,7 @@ test('animates newly inserted direct and non-ref-forwarding custom leaves inside
       }),
       createA2uiRegistryEntry({
         name: 'CustomBadge',
+        accessibility: [],
         component: 'article',
         description: 'Direct DOM custom leaf rendered inside a custom container.',
         schema: {
@@ -2224,6 +2230,7 @@ test('animates newly inserted direct and non-ref-forwarding custom leaves inside
       }),
       createA2uiRegistryEntry({
         name: 'WrappedBadge',
+        accessibility: [],
         component: WrappedBadge,
         description: 'Non-ref-forwarding custom leaf component rendered inside a custom container.',
         schema: {
@@ -2342,6 +2349,7 @@ test('animates a non-ref-forwarding custom leaf once on initial mount', async ()
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'WrappedLeaf',
+        accessibility: [],
         component: WrappedLeaf,
         description: 'Leaf component that renders its own DOM element without forwarding ref.',
         schema: {
@@ -2411,6 +2419,7 @@ test('animates only a newly inserted non-ref-forwarding leaf when a surviving no
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'SwappableNote',
+        accessibility: [],
         component: SwappableNote,
         description: 'Non-ref-forwarding leaf that swaps between p and strong.',
         schema: {
@@ -2432,6 +2441,7 @@ test('animates only a newly inserted non-ref-forwarding leaf when a surviving no
       }),
       createA2uiRegistryEntry({
         name: 'WrappedLeaf',
+        accessibility: [],
         component: WrappedLeaf,
         description: 'Non-ref-forwarding leaf component.',
         schema: {
@@ -2518,6 +2528,7 @@ test('animates visible top-level hosts of a newly inserted Fragment adapter even
       ...Object.values(radiantA2uiRegistry.entries),
       createA2uiRegistryEntry({
         name: 'HiddenPrefixCard',
+        accessibility: [],
         component: 'article',
         description: 'Fragment with a hidden span followed by a visible article.',
         schema: {
@@ -2543,6 +2554,7 @@ test('animates visible top-level hosts of a newly inserted Fragment adapter even
       }),
       createA2uiRegistryEntry({
         name: 'MultiHostFragment',
+        accessibility: [],
         component: 'article',
         description: 'Fragment with a hidden span and two visible top-level hosts.',
         schema: {

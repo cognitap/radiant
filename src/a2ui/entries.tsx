@@ -25,6 +25,7 @@ import {
   type A2uiJsonSchema
 } from './catalogGenerator.js'
 import { createA2uiRegistry, createA2uiRegistryEntry } from './registry.js'
+import { buttonNameRule, controlLabelRule } from './accessibilityRules.js'
 
 function unwrapDisplayText(value: unknown): string {
   const raw = value instanceof ResolvedBinding ? value.value : value
@@ -98,6 +99,7 @@ const COLUMN_ALIGN: Record<string, string> = {
 
 const columnEntry = createA2uiRegistryEntry({
   name: 'Column',
+  accessibility: [],
   component: 'div',
   schema: basicSchema('Column'),
   description: radiantCatalog.entries.Column.description,
@@ -129,6 +131,7 @@ const columnEntry = createA2uiRegistryEntry({
 
 const textEntry = createA2uiRegistryEntry({
   name: 'Text',
+  accessibility: [],
   component: 'p',
   schema: basicSchema('Text'),
   description: radiantCatalog.entries.Text.description,
@@ -176,6 +179,7 @@ const TEXT_FIELD_INPUT_TYPE: Record<string, string> = {
 
 const textFieldEntry = createA2uiRegistryEntry({
   name: 'TextField',
+  accessibility: [controlLabelRule({ fixFrom: ['accessibility.label', 'placeholder'] })],
   component: [Field, Input, Textarea],
   schema: basicSchema('TextField'),
   description: radiantCatalog.entries.TextField.description,
@@ -226,6 +230,7 @@ const BUTTON_VARIANT_MAP: Record<string, ButtonVariant> = {
 
 const buttonEntry = createA2uiRegistryEntry({
   name: 'Button',
+  accessibility: [buttonNameRule()],
   component: Button,
   schema: basicSchema('Button'),
   description: radiantCatalog.entries.Button.description,
@@ -269,6 +274,7 @@ const SR_ONLY_LABEL_PARTS = { label: { className: 'sr-only' } } as const
 
 const checkBoxEntry = createA2uiRegistryEntry({
   name: 'CheckBox',
+  accessibility: [controlLabelRule({ fixFrom: ['accessibility.label'] })],
   component: [Checkbox, Field],
   schema: basicSchema('CheckBox'),
   description: radiantCatalog.entries.Checkbox.description,
@@ -427,6 +433,7 @@ function A2uiChoicePicker({
 
 const choicePickerEntry = createA2uiRegistryEntry({
   name: 'ChoicePicker',
+  accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
   component: [RadioGroup, Radio, CheckboxGroup, ToggleGroup, ToggleGroupItem, Input, Field],
   schema: basicSchema('ChoicePicker'),
   description: radiantCatalog.entries.Choice.description,
@@ -450,6 +457,7 @@ const choicePickerEntry = createA2uiRegistryEntry({
 
 const sliderEntry = createA2uiRegistryEntry({
   name: 'Slider',
+  accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
   component: [Field, Slider],
   schema: basicSchema('Slider'),
   description: radiantCatalog.entries.Slider.description,

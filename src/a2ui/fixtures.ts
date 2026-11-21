@@ -248,3 +248,72 @@ export const interactivePreferencesFixtureMessages: readonly A2uiMessage[] = [
     }
   }
 ]
+
+export const INACCESSIBLE_SURFACE_ID = 'inaccessible_signup'
+
+/**
+ * A2UI 1.0 fixture that fails `validateA2uiAccessibility`: unlabeled controls (some fixable from
+ * author text), a button with no text, and a patch that adds another unlabeled control.
+ */
+export const inaccessibleFixtureMessages: readonly A2uiMessage[] = [
+  {
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: INACCESSIBLE_SURFACE_ID,
+      catalogId: A2UI_BASIC_CATALOG_ID,
+      components: [
+        {
+          id: 'root',
+          component: 'Column',
+          children: ['email_field', 'terms_checkbox', 'plan_picker', 'submit_button']
+        },
+        {
+          id: 'email_field',
+          component: 'TextField',
+          placeholder: 'Email address',
+          value: { '@path': '/email' }
+        },
+        {
+          id: 'terms_checkbox',
+          component: 'CheckBox',
+          accessibility: { label: 'Accept the terms' },
+          value: false
+        },
+        {
+          id: 'plan_picker',
+          component: 'ChoicePicker',
+          accessibility: { label: 'Plan' },
+          options: [{ label: 'Free', value: 'free' }],
+          value: ['free']
+        },
+        {
+          id: 'submit_button',
+          component: 'Button',
+          child: 'submit_icon',
+          action: { event: { name: 'submit' } }
+        },
+        { id: 'submit_icon', component: 'Text', text: ' ' }
+      ]
+    }
+  },
+  {
+    version: A2UI_PROTOCOL_VERSION,
+    updateComponents: {
+      surfaceId: INACCESSIBLE_SURFACE_ID,
+      components: [
+        {
+          id: 'root',
+          component: 'Column',
+          children: [
+            'email_field',
+            'terms_checkbox',
+            'plan_picker',
+            'seats_slider',
+            'submit_button'
+          ]
+        },
+        { id: 'seats_slider', component: 'Slider', min: 1, max: 10, value: 1 }
+      ]
+    }
+  }
+]

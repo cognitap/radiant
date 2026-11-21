@@ -15,7 +15,10 @@ import {
   type A2uiSurfaceProps,
   type CatalogActionEvent,
   type CatalogActionHandler,
-  type CatalogDiagnostic
+  type CatalogDiagnostic,
+  validateA2uiAccessibility,
+  controlLabelRule,
+  type A2uiAccessibilityError
 } from '@cognitap/radiant/a2ui'
 
 const messages: readonly A2uiMessage[] = sanitizeA2uiMessages([
@@ -46,6 +49,7 @@ export const catalogActionHandler: CatalogActionHandler = (event: CatalogActionE
 
 const customEntry: A2uiRegistryEntry = createA2uiRegistryEntry({
   name: 'Notice',
+  accessibility: [],
   component: 'div',
   description: 'Simple notice block.',
   schema: {
@@ -93,3 +97,26 @@ export const catalogBoundElement = (
     onAction={catalogActionHandler}
   />
 )
+
+export const accessibilityErrors: readonly A2uiAccessibilityError[] = validateA2uiAccessibility(
+  messages,
+  { registry: customRegistry, fix: true }
+).errors
+
+export const labeledEntry = createA2uiRegistryEntry({
+  name: 'LabeledNotice',
+  component: 'div',
+  description: 'Notice with a required label.',
+  schema: { type: 'object', properties: { component: { const: 'LabeledNotice' } } },
+  adapter: () => null,
+  accessibility: [controlLabelRule()]
+})
+
+// @ts-expect-error entries must declare accessibility rules
+createA2uiRegistryEntry({
+  name: 'Undeclared',
+  component: 'div',
+  description: 'Missing rules.',
+  schema: { type: 'object' },
+  adapter: () => null
+})
