@@ -33,6 +33,7 @@ import { focusRingClass } from '../components/shared/focusStyles.js'
 import type { MotionProfile } from '../motion/config.js'
 import { MotionProfileContext } from '../motion/context.js'
 import { useComposedRefs } from '../react/useComposedRefs.js'
+import { warnA2uiAccessibility } from './accessibility.js'
 import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import {
   COERCED_NOOP_ACTION_NAME,
@@ -597,6 +598,8 @@ export function A2uiSurface({
   }, [store, surfaceId, registry, messages, onAction, onDiagnostic])
 
   useEffect(() => () => store.dispose(), [store])
+
+  useEffect(() => warnA2uiAccessibility(messages, registry), [messages, registry])
 
   const rootNode = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
 

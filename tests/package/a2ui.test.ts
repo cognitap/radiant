@@ -8,7 +8,8 @@ import {
   A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
   A2uiSurface,
-  radiantA2uiRegistry
+  radiantA2uiRegistry,
+  validateA2uiAccessibility
 } from '@cognitap/radiant/a2ui'
 
 test('core package entry never imports @a2ui/web_core or the a2ui subpath', () => {
@@ -78,4 +79,31 @@ test('installed @cognitap/radiant/a2ui renders a surface on the server and ships
     readFileSync(new URL(import.meta.resolve('@cognitap/radiant/a2ui/catalog.json')), 'utf8')
   )
   assert.deepEqual(shippedJson, radiantA2uiRegistry.toCatalogJson())
+})
+
+test('installed @cognitap/radiant/a2ui validates surface accessibility on the server', () => {
+  const messages = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 'signup',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [{ id: 'email', component: 'TextField', placeholder: 'Email' }]
+      }
+    }
+  ]
+  const result = validateA2uiAccessibility(messages, { fix: true })
+  assert.deepEqual(result.errors, [
+    {
+      surfaceId: 'signup',
+      nodeId: 'email',
+      component: 'TextField',
+      rule: 'control-label',
+      prop: 'label',
+      message: 'TextField "email" has no label.',
+      fixable: true
+    }
+  ])
+  assert.equal('label' in messages[0]!.createSurface.components[0]!, false)
+  assert.equal(validateA2uiAccessibility(result.messages).errors.length, 0)
 })

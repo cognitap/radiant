@@ -23,6 +23,20 @@ export type {
   A2uiJsonSchema,
   GeneratedA2uiCatalogs
 } from './catalogGenerator.js'
+export { validateA2uiAccessibility } from './accessibility.js'
+export type {
+  A2uiAccessibilityError,
+  ValidateA2uiAccessibilityOptions,
+  ValidateA2uiAccessibilityResult
+} from './accessibility.js'
+export { buttonNameRule, controlLabelRule } from './accessibilityRules.js'
+export type {
+  A2uiAccessibilityFinding,
+  A2uiAccessibilityRule,
+  A2uiAccessibilityRuleContext,
+  A2uiComponentRecord,
+  ControlLabelRuleOptions
+} from './accessibilityRules.js'
 export { sanitizeA2uiMessages } from './sanitize.js'
 export type { A2uiMessage } from './sanitize.js'
 export { COERCED_NOOP_ACTION_NAME, coerceA2uiMessages } from './coerce.js'

@@ -10,6 +10,7 @@
 - Add the protocol-independent `CatalogActionEvent` contract (`{ action, surfaceId, nodeId, state }`) in `@cognitap/radiant/catalog`, bind `CheckBox`, `ChoicePicker`, and `Slider` to client-local surface state in `@cognitap/radiant/a2ui`, and deliver immutable state snapshots on named outbound actions.
 - Add the themeable `tight | normal | airy` spacing scale (`--rad-spacing-tight`, `-normal`, `-airy`), `Card` `padding` and `Table` `density` steps with per-step component overrides, and the `Spacing` type.
 - Merge incremental A2UI surface patches by stable node ID against detached wire history to preserve local state, focus, scroll position, and drags, animate newly added rendered instances once, and restore lost focus in active documents.
+- Add `validateA2uiAccessibility` to `@cognitap/radiant/a2ui`, a pure check of A2UI surfaces against per-entry accessibility rules with optional safe fixes; `A2uiSurface` warns in development, and every registry entry must declare `accessibility` rules.
 
 ## 0.0.91
 
