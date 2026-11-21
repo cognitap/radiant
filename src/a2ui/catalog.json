@@ -5,9 +5,10 @@
   "protocolVersion": "1.0",
   "title": "Radiant A2UI 1.0 Catalog",
   "description": "A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog.",
+  "instructions": "Pick each component by intent; the host theme owns appearance.\n- Button runs actions and never navigates. Leave navigation to the host.\n- Bind input values to surface state; named actions receive a snapshot of that state.\n- Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.",
   "components": {
     "Column": {
-      "description": "Arranges child elements vertically with semantic spacing and alignment.",
+      "description": "Arranges child elements vertically with semantic spacing and alignment.\nUse: Stacking sections, form fields or a card body top to bottom.\nAvoid: Side-by-side peers or data-driven repeats.\nExamples: form fields followed by a submit Button; heading and paragraph, `align: start`.",
       "type": "object",
       "properties": {
         "component": {
@@ -44,7 +45,7 @@
       "required": ["component", "children"]
     },
     "Text": {
-      "description": "Displays formatted text with semantic typographic hierarchy.",
+      "description": "Displays formatted text with semantic typographic hierarchy.\nUse: Body copy and captions; `variant` picks between them.\nAvoid: Status messages or button labels.\nExamples: intro paragraph, `variant: body`; note under a form, `variant: caption`.",
       "type": "object",
       "properties": {
         "component": {
@@ -68,7 +69,7 @@
     },
     "TextField": {
       "type": "object",
-      "description": "Collects single-line or multi-line text input with label, description, and validation.",
+      "description": "Collects single-line or multi-line text input with label, description, and validation.\nUse: Free text: names, numbers or passwords; `variant: longText` for paragraphs.\nAvoid: Known options (ChoicePicker), dates or an approximate number in a range (Slider).\nExamples: password, `variant: obscured`; feedback, `variant: longText`.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"
@@ -107,7 +108,7 @@
     },
     "CheckBox": {
       "type": "object",
-      "description": "Collects an explicit boolean consent or selection state.",
+      "description": "Collects an explicit boolean consent or selection state.\nUse: An independent yes/no choice submitted later, such as consent.\nAvoid: One of several options (ChoicePicker).\nExamples: accept the terms; email me product updates.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"
@@ -136,7 +137,7 @@
     },
     "ChoicePicker": {
       "type": "object",
-      "description": "Selects one or multiple values from curated options using an intent-based presentation.",
+      "description": "Selects one or multiple values from curated options using an intent-based presentation.\nUse: Known options. `displayStyle: chips` suits tags; `filterable: true` suits long lists.\nAvoid: Free text (TextField), a single yes/no (CheckBox) or switching views.\nExamples: toppings, `variant: multipleSelection`, `displayStyle: chips`; country, `variant: mutuallyExclusive`, `filterable: true`.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"
@@ -199,7 +200,7 @@
     },
     "Slider": {
       "type": "object",
-      "description": "Selects a numeric value within a bounded range.",
+      "description": "Selects a numeric value within a bounded range.\nUse: An approximate number in a bounded range where relative position matters.\nAvoid: Exact values (TextField) or a few discrete options (ChoicePicker).\nExamples: volume, `min: 0`, `max: 100`; budget in steps of 100, `min: 500`, `max: 5000`, `steps: 45`.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"
@@ -242,7 +243,7 @@
     },
     "Button": {
       "type": "object",
-      "description": "Triggers a client-local update or emits a named outbound action.",
+      "description": "Triggers a client-local update or emits a named outbound action.\nUse: An action: submit, save, start, or emit a named `action`.\nAvoid: Navigation; Button never renders a link. Picking options (ChoicePicker).\nExamples: Save changes, `variant: primary`; Cancel beside it, `variant: borderless`.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"

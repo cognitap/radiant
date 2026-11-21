@@ -33,6 +33,7 @@ test('installed catalog subpath loads without React, DOM, or protocol dependenci
     const catalog = await import('@cognitap/radiant/catalog');
     assert.equal(catalog.validateCatalog(catalog.radiantCatalog).length, 0);
     assert.ok('Choice' in catalog.radiantCatalog.entries);
+    assert.match(catalog.renderCatalogGuidance(catalog.radiantCatalog), /### Choice\\n/);
   `
   execFileSync(process.execPath, ['--input-type=module', '-e', script], {
     cwd: new URL('.', import.meta.url),
@@ -57,6 +58,7 @@ test('core package entry does not expose catalog symbols and catalog rejects for
             name: 'BadCard',
             category: 'layout',
             description: 'Attempts to expose className.',
+            guidance: { whenToUse: 'Never.', whenNotToUse: 'Always.', examples: ['a', 'b'] },
             propsSchema: {
               type: 'object',
               additionalProperties: false,

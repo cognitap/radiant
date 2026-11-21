@@ -39,11 +39,16 @@ The light or dark appearance of a theme; system preference chooses between them.
 Mode is independent of a theme's identity.
 
 **Variant**:
-The visual treatment of an action, such as solid, soft, outline or ghost.
+The visual treatment of an action: solid for the primary action, outline for
+the usual secondary action, ghost for low emphasis, such as Cancel or toolbar
+actions, and soft for tinted, rarely used emphasis.
 _Avoid_: Tone, intent
 
 **Tone**:
-The semantic color role of an action: accent, neutral, warning or danger.
+The semantic color role of an action or message: accent for primary intent,
+success or confirmation, neutral for information and secondary actions,
+warning for a problem the user can still avoid, and danger for a failure or a
+destructive action.
 _Avoid_: Outline tone, ghost tone
 
 **Control size**:

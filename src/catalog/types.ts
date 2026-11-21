@@ -115,10 +115,11 @@ export type CatalogActionShape = {
   readonly payloadSchema?: CatalogJsonSchema
 }
 
+/** When an agent should pick an entry, when it should not, and two short examples. */
 export type CatalogEntryGuidance = {
   readonly whenToUse: string
   readonly whenNotToUse: string
-  readonly examples?: readonly string[]
+  readonly examples: readonly [string, string]
 }
 
 export type CatalogEntryInvocation = 'render' | 'action'
@@ -132,7 +133,7 @@ export type CatalogEntry = {
   readonly bindings: Readonly<Record<string, CatalogStateBinding>>
   readonly actions: Readonly<Record<string, CatalogActionShape>>
   readonly invocation?: CatalogEntryInvocation
-  readonly guidance?: CatalogEntryGuidance
+  readonly guidance: CatalogEntryGuidance
 }
 
 export type Catalog = {

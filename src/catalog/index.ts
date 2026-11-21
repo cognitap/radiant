@@ -64,4 +64,17 @@ export type {
   CatalogJsonValue,
   CatalogSurfaceState
 } from './actions.js'
+export {
+  CATALOG_GUIDANCE_TOKEN_BUDGET,
+  describeCatalogEntry,
+  estimateCatalogTokens,
+  renderCatalogGuidance,
+  renderCatalogInstructions
+} from './guidance.js'
+export type {
+  CatalogInstructionTopic,
+  DescribeCatalogEntryOptions,
+  RenderCatalogGuidanceOptions,
+  RenderCatalogInstructionsOptions
+} from './guidance.js'
 export { RADIANT_CATALOG_ID, RADIANT_CATALOG_VERSION, radiantCatalog } from './radiantCatalog.js'

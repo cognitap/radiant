@@ -80,6 +80,14 @@ function basicSchema(name: string): A2uiJsonSchema {
   return schema
 }
 
+function basicDescription(name: string): string {
+  const description = basicSchema(name).description
+  if (typeof description !== 'string') {
+    throw new TypeError(`A2UI basic catalog generator did not describe "${name}".`)
+  }
+  return description
+}
+
 const COLUMN_JUSTIFY: Record<string, string> = {
   start: 'justify-start',
   center: 'justify-center',
@@ -102,7 +110,7 @@ const columnEntry = createA2uiRegistryEntry({
   accessibility: [],
   component: 'div',
   schema: basicSchema('Column'),
-  description: radiantCatalog.entries.Column.description,
+  description: basicDescription('Column'),
   adapter(props, context) {
     const children = Array.isArray(props.children)
       ? props.children.filter((child): child is ComponentNode => isComponentNode(child))
@@ -134,7 +142,7 @@ const textEntry = createA2uiRegistryEntry({
   accessibility: [],
   component: 'p',
   schema: basicSchema('Text'),
-  description: radiantCatalog.entries.Text.description,
+  description: basicDescription('Text'),
   adapter(props, context) {
     const text = unwrapDisplayText(props.text)
     const variant = props.variant === 'caption' ? 'caption' : 'body'
@@ -187,7 +195,7 @@ const textFieldEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ fixFrom: ['accessibility.label', 'placeholder'] })],
   component: [Field, Input, Textarea],
   schema: basicSchema('TextField'),
-  description: radiantCatalog.entries.TextField.description,
+  description: basicDescription('TextField'),
   adapter(props) {
     const label = unwrapString(props.label) ?? ''
     const placeholder = unwrapString(props.placeholder)
@@ -238,7 +246,7 @@ const buttonEntry = createA2uiRegistryEntry({
   accessibility: [buttonNameRule()],
   component: Button,
   schema: basicSchema('Button'),
-  description: radiantCatalog.entries.Button.description,
+  description: basicDescription('Button'),
   adapter(props, context) {
     const variant: ButtonVariant =
       typeof props.variant === 'string' && props.variant in BUTTON_VARIANT_MAP
@@ -282,7 +290,7 @@ const checkBoxEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ fixFrom: ['accessibility.label'] })],
   component: [Checkbox, Field],
   schema: basicSchema('CheckBox'),
-  description: radiantCatalog.entries.Checkbox.description,
+  description: basicDescription('CheckBox'),
   adapter(props) {
     const label = unwrapDisplayText(props.label)
     const error = readValidationError(props)
@@ -441,7 +449,7 @@ const choicePickerEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
   component: [RadioGroup, Radio, CheckboxGroup, ToggleGroup, ToggleGroupItem, Input, Field],
   schema: basicSchema('ChoicePicker'),
-  description: radiantCatalog.entries.Choice.description,
+  description: basicDescription('ChoicePicker'),
   adapter(props, context) {
     const label = resolveControlLabel(props, context.node.componentId)
     return (
@@ -465,7 +473,7 @@ const sliderEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
   component: [Field, Slider],
   schema: basicSchema('Slider'),
-  description: radiantCatalog.entries.Slider.description,
+  description: basicDescription('Slider'),
   adapter(props, context) {
     const label = resolveControlLabel(props, context.node.componentId)
     const error = readValidationError(props)
@@ -507,6 +515,7 @@ export const radiantA2uiRegistry = createA2uiRegistry({
   title: 'Radiant A2UI 1.0 Catalog',
   description:
     'A2UI 1.0 catalog generated from Radiant registry entries backed by @cognitap/radiant/catalog.',
+  instructions: basicCatalog.instructions,
   entries: [
     columnEntry,
     textEntry,

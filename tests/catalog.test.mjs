@@ -5,9 +5,14 @@ import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 import ts from 'typescript'
 import {
+  CATALOG_GUIDANCE_TOKEN_BUDGET,
   CATALOG_SPACING,
   CHOICE_PRESENTATIONS,
   assertValidCatalog,
+  describeCatalogEntry,
+  estimateCatalogTokens,
+  renderCatalogGuidance,
+  renderCatalogInstructions,
   coerceSchemaProps,
   createCatalogActionEvent,
   defineCatalog,
@@ -21,9 +26,15 @@ import {
 } from '../dist/library/catalog/index.js'
 import {
   A2UI_BASIC_CATALOG_ID,
+  A2UI_GENERATED_COMPONENT_NAMES,
   RADIANT_A2UI_EXTENSION_CATALOG_ID,
+  findA2uiDescriptionViolations,
   generateA2uiCatalogs
 } from '../dist/library/a2ui/catalogGenerator.js'
+import {
+  CATALOG_TONE_MEANINGS,
+  CATALOG_VARIANT_MEANINGS
+} from '../dist/library/catalog/guidance.js'
 
 const catalogSourceDir = fileURLToPath(new URL('../src/catalog/', import.meta.url))
 
@@ -214,6 +225,11 @@ test('extendCatalog adds custom entries cleanly and forbids shadowing base entri
         name: 'Sparkline',
         category: 'data',
         description: 'Compact inline trend line.',
+        guidance: {
+          whenToUse: 'A trend beside a metric.',
+          whenNotToUse: 'Exact values (Table).',
+          examples: ['weekly signups', 'error rate']
+        },
         propsSchema: {
           type: 'object',
           additionalProperties: false,
@@ -287,6 +303,11 @@ const customEntry = name => ({
   name,
   category: 'data',
   description: 'Custom application entry.',
+  guidance: {
+    whenToUse: 'Custom data.',
+    whenNotToUse: 'Built-in data.',
+    examples: ['first', 'second']
+  },
   propsSchema: {
     type: 'object',
     additionalProperties: false,
@@ -546,4 +567,138 @@ test('catalog action contract delivers isolated state snapshots and interactive 
     assert.deepEqual(entry.actions, {}, `${entry.name} should not declare outbound actions`)
   }
   assert.equal(radiantCatalog.entries.Button.actions.action.scope, 'outbound')
+})
+
+test('every entry carries guidance within the token budget, including app entries', () => {
+  for (const entry of Object.values(radiantCatalog.entries)) {
+    assert.equal(entry.guidance.examples.length, 2, entry.name)
+    assert.ok(
+      estimateCatalogTokens(describeCatalogEntry(entry)) <= CATALOG_GUIDANCE_TOKEN_BUDGET,
+      entry.name
+    )
+  }
+
+  const { guidance, ...unguided } = customEntry('Unguided')
+  assert.match(validateCatalogEntry(unguided).join('\n'), /guidance must be an object/)
+  assert.match(
+    validateCatalogEntry({
+      ...customEntry('OneExample'),
+      guidance: { ...guidance, examples: ['a'] }
+    }).join('\n'),
+    /two non-empty strings/
+  )
+  assert.match(
+    validateCatalogEntry({
+      ...customEntry('Verbose'),
+      guidance: { ...guidance, whenToUse: 'word '.repeat(200) }
+    }).join('\n'),
+    /the budget is/
+  )
+  assert.throws(
+    () =>
+      extendCatalog(radiantCatalog, {
+        id: 'example/unguided',
+        version: '1.0.0',
+        entries: { Unguided: unguided }
+      }),
+    /guidance must be an object/
+  )
+})
+
+test('guidance renders into llms.txt Markdown and generated A2UI catalogs', () => {
+  const extended = extendCatalog(radiantCatalog, {
+    id: 'example/custom',
+    version: '1.0.0',
+    entries: { MetricTile: customEntry('MetricTile') }
+  })
+  const markdown = renderCatalogGuidance(extended, { title: 'Example', summary: 'Agent catalog.' })
+  assert.match(markdown, /^# Example\n\n> Agent catalog\. Catalog example\/custom 1\.0\.0\.\n/)
+  assert.ok(markdown.includes(renderCatalogInstructions()))
+  assert.match(markdown, /### Button\n[\s\S]*- Avoid: Navigation/)
+  assert.match(
+    markdown,
+    /### MetricTile\n[\s\S]*- Use: Custom data\.\n- Avoid: Built-in data\.\n- Example: first\n- Example: second/
+  )
+  assert.doesNotMatch(markdown, /\b[A-Z]{2,}-\d+\b|\b20\d\d-\d\d-\d\d\b/)
+
+  const { basic, extension } = generateA2uiCatalogs(extended)
+  assert.match(extension.components.MetricTile.description, /^Custom application entry\.\nUse: /)
+  // Each document carries only the rules for the props it exposes.
+  assert.match(basic.instructions, /Button runs actions/)
+  assert.doesNotMatch(basic.instructions, /Tone|Spacing|Control size/)
+  assert.match(extension.instructions, /Tone is/)
+  assert.doesNotMatch(extension.instructions, /Button|Bind input/)
+  assert.throws(
+    () => describeCatalogEntry({ ...customEntry('Bare'), guidance: undefined }),
+    /"Bare" has no guidance/
+  )
+})
+
+test('A2UI descriptions name only props, values and components their catalog has', () => {
+  const { basic, extension } = generateA2uiCatalogs(radiantCatalog)
+  const known = new Set([...Object.keys(radiantCatalog.entries), ...A2UI_GENERATED_COMPONENT_NAMES])
+  const basicNames = new Set(Object.keys(basic.components))
+  assert.deepEqual(findA2uiDescriptionViolations(basic.components, basicNames, known), [])
+  assert.deepEqual(
+    findA2uiDescriptionViolations(
+      extension.components,
+      new Set([...basicNames, ...Object.keys(extension.components)]),
+      known
+    ),
+    []
+  )
+  for (const document of [basic, extension]) {
+    for (const [name, schema] of Object.entries(document.components)) {
+      assert.ok(estimateCatalogTokens(schema.description) <= CATALOG_GUIDANCE_TOKEN_BUDGET, name)
+    }
+  }
+  assert.match(basic.components.CheckBox.description, /\(ChoicePicker\)/)
+  assert.doesNotMatch(basic.components.Text.description, /Alert/)
+
+  // Canonical guidance names props the basic projections rename or drop.
+  for (const [a2uiName, entryName] of [
+    ['Button', 'Button'],
+    ['TextField', 'TextField'],
+    ['Slider', 'Slider'],
+    ['Text', 'Text'],
+    ['ChoicePicker', 'Choice'],
+    ['CheckBox', 'Checkbox'],
+    ['Image', 'Image'],
+    ['Divider', 'Divider'],
+    ['Row', 'Row']
+  ]) {
+    const canonical = {
+      [a2uiName]: {
+        ...basic.components[a2uiName],
+        description: describeCatalogEntry(radiantCatalog.entries[entryName])
+      }
+    }
+    assert.notDeepEqual(findA2uiDescriptionViolations(canonical, basicNames, known), [], a2uiName)
+  }
+
+  const shipped = JSON.parse(
+    readFileSync(fileURLToPath(new URL('../src/a2ui/catalog.json', import.meta.url)), 'utf8')
+  )
+  assert.equal(shipped.instructions, basic.instructions)
+  assert.deepEqual(
+    findA2uiDescriptionViolations(
+      shipped.components,
+      new Set(Object.keys(shipped.components)),
+      known
+    ),
+    []
+  )
+})
+
+test('tone and variant meanings come from GLOSSARY.md', () => {
+  const glossary = readFileSync(
+    fileURLToPath(new URL('../GLOSSARY.md', import.meta.url)),
+    'utf8'
+  ).replace(/\s+/g, ' ')
+  for (const [name, meaning] of [
+    ...Object.entries(CATALOG_TONE_MEANINGS),
+    ...Object.entries(CATALOG_VARIANT_MEANINGS)
+  ]) {
+    assert.ok(glossary.includes(`${name} for ${meaning}`), `${name} for ${meaning}`)
+  }
 })

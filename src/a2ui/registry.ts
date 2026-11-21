@@ -6,7 +6,9 @@ import {
 } from '@a2ui/web_core/catalog'
 import type { ComponentNode } from '@a2ui/web_core/resolution'
 import { findForbiddenPropsInSchema, type CatalogJsonSchema } from '../catalog/index.js'
+import { renameEntryReferences } from '../catalog/guidance.js'
 import {
+  A2UI_GENERATED_COMPONENT_NAMES,
   A2UI_PROTOCOL_VERSION,
   type A2uiCatalogDocument,
   type A2uiJsonSchema
@@ -61,6 +63,8 @@ export type A2uiRegistryInput = {
   readonly catalogId: string
   readonly title: string
   readonly description: string
+  /** Catalog-wide design rules, such as `renderCatalogInstructions()`. */
+  readonly instructions?: string
   readonly entries: readonly A2uiRegistryEntry[]
 }
 
@@ -68,6 +72,7 @@ export type A2uiRegistry = {
   readonly catalogId: string
   readonly title: string
   readonly description: string
+  readonly instructions?: string
   readonly entries: Readonly<Record<string, A2uiRegistryEntry>>
   toCatalogJson(): A2uiCatalogDocument
   toWebCoreCatalog(): WebCoreCatalog<ComponentApi, FunctionImplementation>
@@ -147,6 +152,9 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
   if (typeof input.description !== 'string' || !input.description.trim()) {
     throw new TypeError('A2UI registry requires a non-empty description.')
   }
+  if (input.instructions !== undefined && typeof input.instructions !== 'string') {
+    throw new TypeError('A2UI registry instructions must be a string.')
+  }
   if (!Array.isArray(input.entries) || input.entries.length === 0) {
     throw new TypeError('A2UI registry requires at least one entry.')
   }
@@ -162,9 +170,17 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
   const frozenEntries = Object.freeze(entryMap)
 
   const buildDocument = (): A2uiCatalogDocument => {
+    // Pointers such as "(Alert)" to generated components this registry lacks are dropped.
+    const names: Record<string, string | null> = {}
+    for (const name of A2UI_GENERATED_COMPONENT_NAMES) {
+      names[name] = Object.hasOwn(frozenEntries, name) ? name : null
+    }
     const components: Record<string, A2uiJsonSchema> = {}
     for (const [name, entry] of Object.entries(frozenEntries)) {
-      components[name] = structuredClone(entry.schema)
+      components[name] = {
+        ...structuredClone(entry.schema),
+        description: renameEntryReferences(entry.description, names)
+      }
     }
     return {
       $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -173,6 +189,7 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
       protocolVersion: A2UI_PROTOCOL_VERSION,
       title: input.title,
       description: input.description,
+      ...(input.instructions === undefined ? {} : { instructions: input.instructions }),
       components,
       functions: {},
       $defs: {
@@ -196,6 +213,7 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
     catalogId: input.catalogId,
     title: input.title,
     description: input.description,
+    ...(input.instructions === undefined ? {} : { instructions: input.instructions }),
     entries: frozenEntries,
     toCatalogJson(): A2uiCatalogDocument {
       return buildDocument()
