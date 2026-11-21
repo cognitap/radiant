@@ -662,7 +662,7 @@ const dateTimeInputEntry = createA2uiRegistryEntry({
   accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
   component: [Field, Input],
   schema: basicSchema('DateTimeInput'),
-  description: radiantCatalog.entries.DateTimeInput.description,
+  description: basicDescription('DateTimeInput'),
   adapter(props, context) {
     const label = resolveControlLabel(props, context.node.componentId)
     const enableDate = unwrapBoolean(props.enableDate) === true

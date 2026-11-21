@@ -69,7 +69,7 @@
     },
     "TextField": {
       "type": "object",
-      "description": "Collects single-line or multi-line text input with label, description, and validation.\nUse: Free text: names, numbers or passwords; `variant: longText` for paragraphs.\nAvoid: Known options (ChoicePicker), dates or an approximate number in a range (Slider).\nExamples: password, `variant: obscured`; feedback, `variant: longText`.",
+      "description": "Collects single-line or multi-line text input with label, description, and validation.\nUse: Free text: names, numbers or passwords; `variant: longText` for paragraphs.\nAvoid: Known options (ChoicePicker), dates (DateTimeInput) or an approximate number in a range (Slider).\nExamples: password, `variant: obscured`; feedback, `variant: longText`.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"
@@ -278,7 +278,7 @@
     },
     "DateTimeInput": {
       "type": "object",
-      "description": "Collects a calendar date, wall-clock time, or combined date and time.",
+      "description": "Collects a calendar date, wall-clock time, or combined date and time.\nUse: A calendar date, a time, or both; set `enableDate` and `enableTime`.\nAvoid: Durations or free text (TextField), or relative picks such as this week (ChoicePicker).\nExamples: delivery date, `enableDate: true`, with a `min` bound; meeting start, `enableDate: true`, `enableTime: true`.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"
