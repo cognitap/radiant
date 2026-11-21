@@ -523,12 +523,14 @@ function A2uiButton({
   ref,
   nodeId,
   variant,
+  disabled,
   onClick,
   children
 }: {
   ref?: Ref<HTMLButtonElement>
   nodeId: string
   variant: ButtonVariant
+  disabled: boolean
   onClick: () => void
   children: ReactNode
 }) {
@@ -539,6 +541,7 @@ function A2uiButton({
         ref={ref}
         id={trigger.id}
         variant={variant}
+        disabled={disabled}
         onClick={onClick}
       >
         {children}
@@ -549,6 +552,7 @@ function A2uiButton({
     <Button
       ref={ref}
       variant={variant}
+      disabled={disabled}
       onClick={onClick}
     >
       {children}
