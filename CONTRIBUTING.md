@@ -21,17 +21,18 @@ pnpm storybook
 
 Storybook runs at [http://localhost:6006](http://localhost:6006), where the toolbar switches **Theme** and **Mode**. To inspect a story without running its `play` function, add `&embed=true` to the iframe URL.
 
-| Command                | Purpose                                                                                                                   |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm build`           | Build `dist/library` in place, then delete output of removed sources. The folder stays readable during the build.         |
-| `pnpm watch`           | Rebuild on change, except `reset.css`. Run `pnpm build` first.                                                            |
-| `pnpm test`            | Build, run `tests/*.test.mjs`, and run `pnpm test:package`.                                                               |
-| `pnpm test:package`    | Pack the tarball, install it in a temporary directory, and run `tests/package/`.                                          |
-| `pnpm test:browser`    | Run every story in every theme and mode with axe, plus `tests/browser/*.test.tsx`. Writes artifacts to `output/browser/`. |
-| `pnpm check:library`   | Check generated theme CSS, formatting, lint, types and docs budgets, then build and run the Node and package tests.       |
-| `pnpm check:storybook` | Build Storybook and run every story in the Radiant theme, light and dark.                                                 |
+| Command                  | Purpose                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm build`             | Build `dist/library` in place, then delete output of removed sources. The folder stays readable during the build.         |
+| `pnpm watch`             | Rebuild on change, except `reset.css`. Run `pnpm build` first.                                                            |
+| `pnpm test`              | Build, run `tests/*.test.mjs`, and run `pnpm test:package`.                                                               |
+| `pnpm test:package`      | Pack the tarball, install it in a temporary directory, and run `tests/package/`.                                          |
+| `pnpm test:browser`      | Run every story in every theme and mode with axe, plus `tests/browser/*.test.tsx`. Writes artifacts to `output/browser/`. |
+| `pnpm check:library`     | Check generated theme CSS, formatting, lint, types and docs budgets, then build and run the Node and package tests.       |
+| `pnpm check:storybook`   | Build Storybook and run every story in the Radiant theme, light and dark.                                                 |
+| `pnpm check:conformance` | Run the A2UI conformance stories in every other theme and mode.                                                           |
 
-CI runs three jobs: `pnpm check:library`, `pnpm check:storybook`, and `pnpm test:browser --project=browser-platform`. `pnpm check` runs the first two.
+CI runs four jobs: `pnpm check:library`, `pnpm check:storybook`, `pnpm check:conformance`, and `pnpm test:browser --project=browser-platform`. `pnpm check` runs the first three.
 
 Install the headless Chromium shell once before running browser tests:
 

@@ -17,6 +17,8 @@ Automation does not cover screen readers, real browser zoom, OS forced colors, o
 
 Every `createA2uiRegistryEntry` call declares `accessibility` rules, or `[]` for none: `controlLabelRule` for form controls, `buttonNameRule` for buttons, `imageAltRule` for images, and `mediaNameRule` for video and audio. An image needs `description` or `accessibility.label`; mark a decorative one with `description: ""` or `accessibility.hidden: true`. Icons are hidden from assistive technology unless `accessibility.label` names them. Every tab needs a `title`. A `Modal` needs a Button `trigger`, whose text names the dialog; Escape and backdrop clicks close it, and `A2uiSurface` `labels.modalClose` adds a close button with host-supplied text.
 
+The `A2UI/Conformance` stories replay every basic-catalog fixture in every theme and mode, failing on axe violations, error or fallback diagnostics, and `validateA2uiAccessibility` errors. Only fixtures that break the rules on purpose skip axe.
+
 ## Manual targets
 
 | Platform | Setup                                                                 |
