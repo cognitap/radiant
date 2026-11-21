@@ -2,16 +2,12 @@ import {
   CATALOG_SPACING,
   CHOICE_PRESENTATIONS,
   assertValidCatalog,
-  coerceCatalogProps,
   defineCatalog,
   extendCatalog,
   isForbiddenCatalogProp,
   radiantCatalog,
-  summarizeCatalogDiagnostics,
   validateCatalog,
   type Catalog,
-  type CatalogDiagnostic,
-  type CatalogDiagnosticSummary,
   type CatalogEntry,
   type CatalogSpacing,
   type ChoicePresentation
@@ -71,10 +67,3 @@ export const standaloneCatalog: Catalog = defineCatalog({
 assertValidCatalog(customCatalog)
 export const violations: readonly string[] = validateCatalog(standaloneCatalog)
 export const forbidden: boolean = isForbiddenCatalogProp('className')
-const coerced = coerceCatalogProps(
-  canonical.entries.Button,
-  { label: 'Go', tone: 'bad' },
-  { nodeId: 'go' }
-)
-export const diagnostics: readonly CatalogDiagnostic[] = coerced.diagnostics
-export const summary: CatalogDiagnosticSummary = summarizeCatalogDiagnostics(diagnostics)

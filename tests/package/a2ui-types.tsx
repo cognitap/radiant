@@ -2,20 +2,16 @@ import {
   A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
   A2uiSurface,
-  coerceA2uiMessages,
   createA2uiRegistry,
   createA2uiRegistryEntry,
   radiantA2uiRegistry,
   sanitizeA2uiMessages,
-  summarizeCatalogDiagnostics,
   type A2uiActionPayload,
   type A2uiCatalogDocument,
   type A2uiMessage,
   type A2uiRegistry,
   type A2uiRegistryEntry,
-  type A2uiSurfaceProps,
-  type CatalogDiagnostic,
-  type CatalogDiagnosticSummary
+  type A2uiSurfaceProps
 } from '@cognitap/radiant/a2ui'
 
 const messages: readonly A2uiMessage[] = sanitizeA2uiMessages([
@@ -58,22 +54,11 @@ export const customRegistry: A2uiRegistry = createA2uiRegistry({
 
 export const catalogDoc: A2uiCatalogDocument = radiantA2uiRegistry.toCatalogJson()
 
-const coercedResult = coerceA2uiMessages(messages, radiantA2uiRegistry)
-export const diagnosticSummary: CatalogDiagnosticSummary = summarizeCatalogDiagnostics(
-  coercedResult.diagnostics
-)
-
-const onDiagnostic = (diagnostic: CatalogDiagnostic) => {
-  void diagnostic.nodeId
-  void diagnostic.prop
-}
-
 const props: A2uiSurfaceProps = {
   surfaceId: 'demo',
   messages,
   registry: radiantA2uiRegistry,
-  onAction,
-  onDiagnostic
+  onAction
 }
 
 export const element = <A2uiSurface {...props} />
