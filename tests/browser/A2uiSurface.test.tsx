@@ -1849,7 +1849,7 @@ test('restores focus, draft, selection, and scroll when a surviving TextField mo
     />
   )
 
-  const columns = Array.from(view.host.querySelectorAll<HTMLElement>('[data-slot="a2ui-column"]'))
+  const columns = Array.from(view.host.querySelectorAll<HTMLElement>('[data-slot~="a2ui-column"]'))
   const colB = columns[2]!
   const textareaAfter = colB.querySelector<HTMLTextAreaElement>('textarea[data-slot~="textarea"]')!
   expect(textareaAfter).not.toBeNull()

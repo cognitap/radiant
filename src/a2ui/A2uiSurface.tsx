@@ -10,6 +10,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -20,7 +21,7 @@ import {
 import { cn } from 'cn'
 import type { ComponentApi, FunctionImplementation } from '@a2ui/web_core/catalog'
 import { MessageProcessor, type ProcessableMessage } from '@a2ui/web_core/processing'
-import { effect, getValue, peekValue, type Signal } from '@a2ui/web_core/reactivity'
+import { effect, getValue, peekValue } from '@a2ui/web_core/reactivity'
 import { NodeResolver, type ComponentNode } from '@a2ui/web_core/resolution'
 import type { ActionPayload, SurfaceModel } from '@a2ui/web_core/state'
 import {
@@ -55,6 +56,8 @@ import {
 } from './protocolErrors.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
+import { useSignalValue } from './useSignalValue.js'
+import { A2uiLabelsContext, type A2uiSurfaceLabels } from './surfaceContext.js'
 import {
   animateNodeEntry,
   captureFocusSnapshot,
@@ -88,6 +91,8 @@ export type A2uiSurfaceProps = {
    * catalog or protocol errors (`kind: 'error'` with a `code`).
    */
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
+  /** Host-supplied text for controls the agent cannot describe, such as `modalClose`. */
+  readonly labels?: A2uiSurfaceLabels
 }
 
 function isVisibleHost(element: HTMLElement): boolean {
@@ -211,25 +216,6 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
 
 type SurfaceDomRuntime = ReturnType<typeof createSurfaceDomRuntime>
 
-function useSignalValue<T>(signal: Signal<T> | undefined): T | undefined {
-  return useSyncExternalStore(
-    onStoreChange => {
-      if (!signal) return () => {}
-      let initial = true
-      return effect(() => {
-        getValue(signal)
-        if (initial) {
-          initial = false
-          return
-        }
-        onStoreChange()
-      })
-    },
-    () => (signal ? peekValue(signal) : undefined),
-    () => (signal ? peekValue(signal) : undefined)
-  )
-}
-
 const boundaryFallbackText = (node: ComponentNode, token: unknown) =>
   extractA2uiNodeFallbackText(node, isPlainRecord(token) ? token : undefined)
 
@@ -296,6 +282,8 @@ type A2uiNodeRendererProps = {
   readonly runtime: SurfaceDomRuntime
 }
 
+const LAYOUT_TYPES = new Set(['Column', 'Row', 'List'])
+
 const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   node,
   registry,
@@ -343,7 +331,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
         })
       : adapted
 
-  const isContainer = node.type === 'Column' || hasChildNodes
+  const isContainer = LAYOUT_TYPES.has(node.type) || hasChildNodes
   const [probing, setProbing] = useState(false)
   const startRef = useRef<HTMLTemplateElement>(null)
 
@@ -742,7 +730,8 @@ export function A2uiSurface({
   messages,
   registry = radiantA2uiRegistry,
   onAction,
-  onDiagnostic
+  onDiagnostic,
+  labels
 }: A2uiSurfaceProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const motionProfile = useContext(MotionProfileContext)
@@ -778,6 +767,8 @@ export function A2uiSurface({
     zeroPlaceholders
   )
   const waiting = !rootNode && phase !== 'closed'
+  const modalClose = labels?.modalClose
+  const labelValue = useMemo(() => ({ modalClose }), [modalClose])
 
   return (
     <div
@@ -789,13 +780,15 @@ export function A2uiSurface({
       data-surface-id={surfaceId}
     >
       {rootNode ? (
-        <A2uiNodeRenderer
-          node={rootNode}
-          registry={registry}
-          inline={false}
-          onDiagnostic={store.reportDiagnostic}
-          runtime={runtime}
-        />
+        <A2uiLabelsContext.Provider value={labelValue}>
+          <A2uiNodeRenderer
+            node={rootNode}
+            registry={registry}
+            inline={false}
+            onDiagnostic={store.reportDiagnostic}
+            runtime={runtime}
+          />
+        </A2uiLabelsContext.Provider>
       ) : waiting ? (
         <A2uiPlaceholder
           inline={false}

@@ -278,6 +278,29 @@ function coerceKnownComponent(
     }
   }
 
+  // A tab missing its title or panel would make web_core reject the whole batch.
+  if (entry.name === 'Tabs' && Array.isArray(props.tabs)) {
+    props.tabs = props.tabs.map((tab: unknown, index) => {
+      const record = isPlainRecord(tab) ? tab : {}
+      const ctx = {
+        nodeId: id,
+        prop: `tabs.${index}`,
+        required: true,
+        rawProps: raw,
+        log,
+        synthesized,
+        usedIds,
+        catalogId
+      }
+      const title = A2UI_REF_COERCERS.DynamicString!(record.title, {
+        ...ctx,
+        prop: `tabs.${index}.title`
+      })
+      const child = A2UI_REF_COERCERS.Child!(record.child, { ...ctx, prop: `tabs.${index}.child` })
+      return { title: title.omit ? '' : title.value, child: child.value }
+    })
+  }
+
   // A name that fails the spec would make web_core reject the whole batch; an empty path renders nothing.
   const iconNames = entry.name === 'Icon' ? specIconNames(entry.schema) : undefined
   if (iconNames) {

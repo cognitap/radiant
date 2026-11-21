@@ -98,7 +98,7 @@ test('a fixture streamed one prop at a time does not shift a node once its size 
     const box = el!.getBoundingClientRect()
     return { top: box.top, width: box.width, height: box.height }
   }
-  const second = () => surfaceOf(host).querySelector('[data-slot="a2ui-column"]')!.children[1]!
+  const second = () => surfaceOf(host).querySelector('[data-slot~="a2ui-column"]')!.children[1]!
 
   const nextTop = rect(second()).top
   const sizes: { title?: ReturnType<typeof rect>; button?: ReturnType<typeof rect> }[] = []
@@ -242,7 +242,7 @@ test('every registry entry renders cleanly from partial props', async () => {
       diagnostics.filter(d => d.kind === 'error' || d.prop === 'render'),
       name
     ).toEqual([])
-    expect(host.querySelector('[data-slot="a2ui-column"]')!.childElementCount, name).toBe(1)
+    expect(host.querySelector('[data-slot~="a2ui-column"]')!.childElementCount, name).toBe(1)
   }
 })
 

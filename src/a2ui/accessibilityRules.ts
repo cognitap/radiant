@@ -162,3 +162,41 @@ export function mediaNameRule(options: MediaNameRuleOptions): A2uiAccessibilityR
     }
   }
 }
+
+/** Requires every tab to have a non-empty `title`. */
+export function tabTitlesRule(): A2uiAccessibilityRule {
+  return {
+    id: 'tab-titles',
+    check(component) {
+      const tabs = Array.isArray(component.tabs) ? component.tabs : []
+      const missing = tabs.findIndex(tab => !isPlainRecord(tab) || !hasText(tab.title))
+      if (missing < 0) return
+      return {
+        prop: 'tabs',
+        message: `${describe(component)} tab ${missing + 1} has no title.`
+      }
+    }
+  }
+}
+
+/** Requires a modal's `trigger` to be a Button whose text also names the dialog. */
+export function modalTriggerRule(): A2uiAccessibilityRule {
+  return {
+    id: 'modal-trigger',
+    check(component, context) {
+      const trigger =
+        typeof component.trigger === 'string' ? context.getComponent(component.trigger) : undefined
+      if (trigger && trigger.component !== 'Button') {
+        return {
+          prop: 'trigger',
+          message: `${describe(component)} needs a Button trigger so keyboard users can open it.`
+        }
+      }
+      if (subtreeHasText(component.trigger, context, new Set())) return
+      return {
+        prop: 'trigger',
+        message: `${describe(component)} has no trigger text to name the dialog.`
+      }
+    }
+  }
+}

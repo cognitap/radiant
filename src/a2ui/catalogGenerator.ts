@@ -312,7 +312,7 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
     sourceEntry: 'List',
     guidance: {
       whenToUse:
-        'The same template repeated for each item in a collection, or a static run of similar items.',
+        'One template per collection item, or a static run of similar items; templated item state follows index order.',
       whenNotToUse: 'One-off layout (Row, Column).',
       examples: ['one Card per search result', 'image thumbnails, `direction: horizontal`']
     },
@@ -333,6 +333,11 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Tabs',
     sourceEntry: 'Tabs',
+    guidance: {
+      whenToUse: 'Peer views where exactly one shows at a time; give each of the `tabs` a `title`.',
+      whenNotToUse: 'Sections read in sequence, picking a value (ChoicePicker) or navigation.',
+      examples: ['Overview, Activity and Settings views', 'one code sample per language']
+    },
     required: ['tabs'],
     props: {
       tabs: spec(['tabs', 'panels'], {
@@ -354,6 +359,12 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
     a2uiName: 'Modal',
     sourceEntry: 'Modal',
+    guidance: {
+      whenToUse:
+        'A focused task or detail that interrupts the page; a Button `trigger` opens it and names it.',
+      whenNotToUse: 'Messages that stay in the page, confirmations or content that fits inline.',
+      examples: ['edit-profile form behind an Edit Button', 'full terms behind a Read terms Button']
+    },
     required: ['trigger', 'content'],
     props: { trigger: slot('trigger'), content: slot('content') }
   },

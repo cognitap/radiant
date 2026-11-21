@@ -8,7 +8,7 @@
   "instructions": "Pick each component by intent; the host theme owns appearance.\n- Button runs actions and never navigates. Leave navigation to the host.\n- Bind input values to surface state; named actions receive a snapshot of that state.\n- Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.",
   "components": {
     "Column": {
-      "description": "Arranges child elements vertically with semantic spacing and alignment.\nUse: Stacking sections, form fields or a card body top to bottom.\nAvoid: Side-by-side peers or data-driven repeats.\nExamples: form fields followed by a submit Button; heading and paragraph, `align: start`.",
+      "description": "Arranges child elements vertically with semantic spacing and alignment.\nUse: Stacking sections, form fields or a card body top to bottom.\nAvoid: Side-by-side peers (Row) or data-driven repeats (List).\nExamples: form fields followed by a submit Button; heading and paragraph, `align: start`.",
       "type": "object",
       "properties": {
         "component": {
@@ -137,7 +137,7 @@
     },
     "ChoicePicker": {
       "type": "object",
-      "description": "Selects one or multiple values from curated options using an intent-based presentation.\nUse: Known options. `displayStyle: chips` suits tags; `filterable: true` suits long lists.\nAvoid: Free text (TextField), a single yes/no (CheckBox) or switching views.\nExamples: toppings, `variant: multipleSelection`, `displayStyle: chips`; country, `variant: mutuallyExclusive`, `filterable: true`.",
+      "description": "Selects one or multiple values from curated options using an intent-based presentation.\nUse: Known options. `displayStyle: chips` suits tags; `filterable: true` suits long lists.\nAvoid: Free text (TextField), a single yes/no (CheckBox) or switching views (Tabs).\nExamples: toppings, `variant: multipleSelection`, `displayStyle: chips`; country, `variant: mutuallyExclusive`, `filterable: true`.",
       "allOf": [
         {
           "$ref": "common_types.json#/$defs/Checkable"
@@ -536,6 +536,160 @@
           "required": ["component", "value"]
         }
       ]
+    },
+    "Row": {
+      "description": "Arranges child elements horizontally with semantic spacing and alignment.\nUse: A few peers side by side: actions, a label and value, or cards.\nAvoid: Stacked content (Column) or repeated data (List).\nExamples: Cancel and Save buttons, `justify: end`; two Card summaries, `justify: spaceBetween`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Row"
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Ordered horizontal children."
+        },
+        "justify": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "spaceBetween",
+            "spaceAround",
+            "spaceEvenly",
+            "stretch"
+          ],
+          "default": "start",
+          "description": "Main-axis distribution of children."
+        },
+        "align": {
+          "type": "string",
+          "enum": ["start", "center", "end", "stretch"],
+          "default": "stretch",
+          "description": "Cross-axis alignment of children."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "children"]
+    },
+    "List": {
+      "description": "Renders a static or data-templated sequence of repeated items.\nUse: One template per collection item, or a static run of similar items; templated item state follows index order.\nAvoid: One-off layout (Row, Column).\nExamples: one Card per search result; image thumbnails, `direction: horizontal`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "List"
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Static item list or templated item prototype bound to collection data."
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["horizontal", "vertical"],
+          "default": "vertical",
+          "description": "Primary flow direction of list items."
+        },
+        "align": {
+          "type": "string",
+          "enum": ["start", "center", "end", "stretch"],
+          "default": "stretch",
+          "description": "Cross-axis alignment of list items."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "children"]
+    },
+    "Card": {
+      "description": "Groups related content and actions inside a bounded surface container.\nUse: Several items about one subject side by side, such as projects in a grid.\nAvoid: A single section in the page flow or focused tasks (Modal).\nExamples: project summary Column inside a Card; plan options as Cards in a Row.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Card"
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Primary body content inside the card."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "child"]
+    },
+    "Divider": {
+      "description": "Separates adjacent sections visually and semantically.\nUse: Splitting related content into groups, such as form sections.\nAvoid: Adding space, or separating every List item.\nExamples: between account and billing sections; between action groups, `axis: vertical`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Divider"
+        },
+        "axis": {
+          "type": "string",
+          "enum": ["horizontal", "vertical"],
+          "default": "horizontal",
+          "description": "Axis along which the divider runs."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component"]
+    },
+    "Tabs": {
+      "description": "Switches between peer content views in place without leaving the surface.\nUse: Peer views where exactly one shows at a time; give each of the `tabs` a `title`.\nAvoid: Sections read in sequence, picking a value (ChoicePicker) or navigation.\nExamples: Overview, Activity and Settings views; one code sample per language.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Tabs"
+        },
+        "tabs": {
+          "type": "array",
+          "description": "Tabs, each pairing a title with the panel component it shows.",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "$ref": "common_types.json#/$defs/DynamicString"
+              },
+              "child": {
+                "$ref": "common_types.json#/$defs/Child"
+              }
+            },
+            "required": ["title", "child"],
+            "additionalProperties": false
+          }
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "tabs"]
+    },
+    "Modal": {
+      "description": "Presents focused secondary content in a native modal dialog.\nUse: A focused task or detail that interrupts the page; a Button `trigger` opens it and names it.\nAvoid: Messages that stay in the page, confirmations or content that fits inline.\nExamples: edit-profile form behind an Edit Button; full terms behind a Read terms Button.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Modal"
+        },
+        "trigger": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Interactive trigger element that opens the dialog."
+        },
+        "content": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Body content rendered inside the modal dialog."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "trigger", "content"]
     }
   },
   "functions": {
@@ -952,6 +1106,24 @@
         },
         {
           "$ref": "#/components/DateTimeInput"
+        },
+        {
+          "$ref": "#/components/Row"
+        },
+        {
+          "$ref": "#/components/List"
+        },
+        {
+          "$ref": "#/components/Card"
+        },
+        {
+          "$ref": "#/components/Divider"
+        },
+        {
+          "$ref": "#/components/Tabs"
+        },
+        {
+          "$ref": "#/components/Modal"
         }
       ],
       "discriminator": {
