@@ -13,7 +13,7 @@ import {
   TableRow,
   type TableProps
 } from '../../src/index.js'
-export type TableTaskOptions = Pick<TableProps, 'className' | 'style'>
+export type TableTaskOptions = Pick<TableProps, 'className' | 'style' | 'density'>
 const frame = { width: '32rem', maxWidth: '100%' }
 const numeric = { textAlign: 'end', fontVariantNumeric: 'tabular-nums' } as const
 const members = [

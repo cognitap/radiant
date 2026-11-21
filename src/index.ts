@@ -265,7 +265,7 @@ export { getLocaleAttributes } from './internal/locale.js'
 export type { ButtonProps, ButtonRenderProps, ButtonVariant } from './components/Button/Button.js'
 export { generateTypography, typographyPresets, typographyRoles } from './typography/index.js'
 export type * from './typography/types.js'
-export type { ControlSize, Orientation, Tone } from './presentation.js'
+export type { ControlSize, Orientation, Spacing, Tone } from './presentation.js'
 
 export {
   defineThemeDocument,

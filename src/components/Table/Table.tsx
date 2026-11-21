@@ -5,10 +5,14 @@ import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 import { focusRingClass } from '../shared/focusStyles.js'
+import type { Spacing } from '../../presentation.js'
 type Part<
   Host extends 'table' | 'caption' | 'thead' | 'tbody' | 'tfoot' | 'tr' | 'th' | 'td' | 'section'
 > = Omit<ComponentProps<Host>, 'role' | 'style'> & { style?: ThemeStyle; 'data-slot'?: string }
-export type TableProps = Part<'table'>
+export type TableProps = Part<'table'> & {
+  /** Step of the cell padding scale; `normal` keeps `--rad-table-padding-inline` and `-block`. */
+  density?: Spacing
+}
 export type TableCaptionProps = Part<'caption'>
 export type TableHeadProps = Part<'thead'>
 export type TableBodyProps = Part<'tbody'>
@@ -21,15 +25,24 @@ export type TableContainerProps = Omit<
   'aria-label' | 'aria-labelledby' | 'tabIndex'
 > &
   AccessibleName
+// Density sets a step override and a scale on the table; cells resolve them against their own padding tokens.
+const densityClass: Record<Spacing, string> = {
+  tight:
+    '[--_rad-table-density:calc(2/3)] [--_rad-table-padding-inline:var(--rad-table-padding-inline-tight)] [--_rad-table-padding-block:var(--rad-table-padding-block-tight)]',
+  normal:
+    '[--_rad-table-density:initial] [--_rad-table-padding-inline:initial] [--_rad-table-padding-block:initial]',
+  airy: '[--_rad-table-density:calc(4/3)] [--_rad-table-padding-inline:var(--rad-table-padding-inline-airy)] [--_rad-table-padding-block:var(--rad-table-padding-block-airy)]'
+}
 const cellClass =
-  'px-[var(--rad-table-padding-inline,var(--rad-control-small-padding-inline,0.75rem))] py-[var(--rad-table-padding-block,0.625rem)] text-start align-top [overflow-wrap:anywhere]'
-export function Table({ className, ...props }: TableProps) {
+  'px-[var(--_rad-table-padding-inline,calc(var(--_rad-table-density,1)*var(--rad-table-padding-inline,var(--rad-control-small-padding-inline,0.75rem))))] py-[var(--_rad-table-padding-block,calc(var(--_rad-table-density,1)*var(--rad-table-padding-block,0.625rem)))] text-start align-top [overflow-wrap:anywhere]'
+export function Table({ density = 'normal', className, ...props }: TableProps) {
   const nativeProps = { ...props, role: undefined }
   return (
     <table
       {...nativeProps}
       data-slot={joinIds('table', props['data-slot'])}
       className={cn(
+        densityClass[density],
         'w-full border-collapse text-start bg-[var(--rad-table-background,var(--rad-color-surface,white))] [color:var(--rad-table-color,var(--rad-color-foreground))] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-table-font-size,var(--rad-typography-roles-ui-body-size,0.875rem))] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
         className
       )}

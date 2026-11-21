@@ -27,3 +27,6 @@ h(TableContainer, {})
 h(TableContainer, { 'aria-label': 'A', 'aria-labelledby': 'B' })
 // @ts-expect-error Table retains native table semantics.
 h(Table, { role: 'grid' })
+h(Table, { density: 'tight' })
+// @ts-expect-error Density is a step of the theme spacing scale.
+h(Table, { density: 'compact' })

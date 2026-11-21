@@ -21,6 +21,7 @@ const meta = {
   },
   argTypes: {
     className: { control: 'text' },
+    density: { control: 'inline-radio', options: ['tight', 'normal', 'airy'] },
     style: { control: 'object' }
   }
 } satisfies Meta<TableTaskOptions>
@@ -30,6 +31,10 @@ export const Default: Story = { render: options => <TeamTable {...options} /> }
 export const AligningNumbers: Story = { render: options => <InvoiceTotals {...options} /> }
 export const ActionsInCells: Story = { render: options => <MemberActions {...options} /> }
 export const ScrollingWideTables: Story = { render: options => <WideSignups {...options} /> }
+export const Density: Story = {
+  args: { density: 'tight' },
+  render: options => <TeamTable {...options} />
+}
 export const EmptyTable: Story = { render: options => <NoMatchingInvoices {...options} /> }
 export const Customisation: Story = {
   args: {
