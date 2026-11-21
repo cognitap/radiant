@@ -77,33 +77,80 @@ export type A2uiSurfaceProps = {
 
 function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
   const hosts = new Map<string, NodeHost>()
+  const mountedNodes = new Map<string, readonly [string, string | null]>()
   const committedInstances = new Set<string>()
   const pendingMounts = new Set<string>()
   const unmountedInstances = new Set<string>()
+  const pendingAdded = new Set<HTMLElement>()
   let surfaceElement: HTMLDivElement | null = null
+  let observer: MutationObserver | null = null
   let motionProfile = initialMotionProfile
   let pendingFocus: FocusSnapshot | null = null
 
+  const recordAdded = (records: readonly MutationRecord[]) => {
+    for (const record of records) {
+      for (const node of record.addedNodes) if (isHtmlElement(node)) pendingAdded.add(node)
+    }
+  }
+
+  function resolveContainerHost(parentNodeId: string | null): HTMLElement | null {
+    for (let cursor = parentNodeId; cursor; cursor = mountedNodes.get(cursor)?.[1] ?? null) {
+      const host = hosts.get(cursor)
+      if (host?.element.isConnected) return host.element
+    }
+    return surfaceElement
+  }
+
+  function animateUnhosted(scopes: ReadonlySet<HTMLElement>) {
+    if (scopes.size === 0 || pendingAdded.size === 0) return
+    for (const element of pendingAdded) {
+      if (!element.isConnected) continue
+      let owner: NodeHost | null = null
+      for (const host of hosts.values()) {
+        if (host.element.isConnected && host.element.contains(element)) {
+          if (!owner || owner.element.contains(host.element)) owner = host
+        }
+      }
+      if (owner && (!owner.isContainer || owner.element === element)) continue
+      const scope = owner?.element ?? surfaceElement
+      if (!scope || !scopes.has(scope)) continue
+      if (Array.from(pendingAdded).some(other => other !== element && other.contains(element))) {
+        continue
+      }
+      animateNodeEntry(element, motionProfile)
+    }
+  }
+
   function flushBatch() {
+    if (observer) recordAdded(observer.takeRecords())
     if (pendingFocus) {
       const snapshot = pendingFocus
       pendingFocus = null
       restoreFocusFallback(surfaceElement, snapshot, hosts)
     }
     if (surfaceElement?.isConnected && pendingMounts.size > 0) {
+      const unhostedScopes = new Set<HTMLElement>()
       for (const nodeId of pendingMounts) {
+        const meta = mountedNodes.get(nodeId)
+        if (!meta) continue
+        if (committedInstances.has(meta[0]) && unmountedInstances.has(meta[0])) continue
         const host = hosts.get(nodeId)
-        if (!host || host.isContainer || !host.element.isConnected) continue
-        if (committedInstances.has(host.instanceId) && unmountedInstances.has(host.instanceId)) {
-          continue
+        if (host) {
+          if (!host.isContainer && host.element.isConnected) {
+            animateNodeEntry(host.element, motionProfile)
+          }
+        } else {
+          const scope = resolveContainerHost(meta[1])
+          if (scope) unhostedScopes.add(scope)
         }
-        animateNodeEntry(host.element, motionProfile)
       }
+      animateUnhosted(unhostedScopes)
       pendingMounts.clear()
     }
+    pendingAdded.clear()
     unmountedInstances.clear()
     committedInstances.clear()
-    for (const host of hosts.values()) committedInstances.add(host.instanceId)
+    for (const [instanceId] of mountedNodes.values()) committedInstances.add(instanceId)
   }
 
   const scheduleBatchFlush = createMicrotaskCoalescer(flushBatch)
@@ -115,7 +162,15 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
 
   return {
     setSurfaceElement(element: HTMLDivElement | null) {
+      observer?.disconnect()
+      observer = null
+      pendingAdded.clear()
       surfaceElement = element
+      const Observer = element?.ownerDocument.defaultView?.MutationObserver
+      if (element && typeof Observer === 'function') {
+        observer = new Observer(recordAdded)
+        observer.observe(element, { childList: true, subtree: true })
+      }
     },
     setMotionProfile(nextProfile: MotionProfile) {
       motionProfile = nextProfile
@@ -129,11 +184,13 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
       }
     },
     captureFocus,
-    onNodeMount(nodeId: string) {
+    onNodeMount(nodeId: string, instanceId: string, parentNodeId: string | null) {
+      mountedNodes.set(nodeId, [instanceId, parentNodeId])
       pendingMounts.add(nodeId)
       scheduleBatchFlush()
     },
     onNodeUnmount(nodeId: string, instanceId: string) {
+      mountedNodes.delete(nodeId)
       pendingMounts.delete(nodeId)
       unmountedInstances.add(instanceId)
       captureFocus()
@@ -147,6 +204,7 @@ function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
       committedInstances.clear()
       pendingMounts.clear()
       unmountedInstances.clear()
+      pendingAdded.clear()
     }
   }
 }
@@ -232,6 +290,7 @@ class A2uiNodeErrorBoundary extends Component<
 
 type A2uiNodeRendererProps = {
   readonly node: ComponentNode
+  readonly parentNodeId: string | null
   readonly registry: A2uiRegistry
   readonly inline: boolean
   readonly onDiagnostic: (diagnostic: CatalogDiagnostic) => void
@@ -240,6 +299,7 @@ type A2uiNodeRendererProps = {
 
 const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   node,
+  parentNodeId,
   registry,
   inline,
   onDiagnostic,
@@ -262,6 +322,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
               <A2uiNodeRenderer
                 key={child.id}
                 node={child}
+                parentNodeId={node.id}
                 registry={registry}
                 inline={options?.inline ?? false}
                 onDiagnostic={onDiagnostic}
@@ -285,9 +346,9 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
 
   useLayoutEffect(() => {
     if (!active || inline) return
-    runtime.onNodeMount(node.id)
+    runtime.onNodeMount(node.id, node.instanceId, parentNodeId)
     return () => runtime.onNodeUnmount(node.id, node.instanceId)
-  }, [active, inline, node.id, node.instanceId, runtime])
+  }, [active, inline, node.id, node.instanceId, parentNodeId, runtime])
 
   useLayoutEffect(() => {
     if (active && !inline) runtime.setNodeContainer(node.id, isContainer)
@@ -541,6 +602,7 @@ export function A2uiSurface({
       {rootNode ? (
         <A2uiNodeRenderer
           node={rootNode}
+          parentNodeId={null}
           registry={registry}
           inline={false}
           onDiagnostic={store.reportDiagnostic}

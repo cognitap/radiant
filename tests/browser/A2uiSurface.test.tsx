@@ -1,4 +1,5 @@
 import { act, StrictMode, useEffect, useRef, type ComponentProps, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import {
@@ -1585,6 +1586,7 @@ function buildDeepNested(depth: number, leaf: string): Record<string, unknown> {
 
 function spyEntryAnimations() {
   const animated: HTMLElement[] = []
+  const durations: (number | undefined)[] = []
   const originalAnimate = Element.prototype.animate
   const spy = vi.spyOn(Element.prototype, 'animate').mockImplementation(function (
     this: Element,
@@ -1599,10 +1601,11 @@ function spyEntryAnimations() {
       this instanceof HTMLElement
     ) {
       animated.push(this)
+      durations.push(typeof options.duration === 'number' ? options.duration : undefined)
     }
     return originalAnimate.call(this, keyframes, options)
   })
-  return { animated, restore: () => spy.mockRestore() }
+  return { animated, durations, restore: () => spy.mockRestore() }
 }
 
 test('keeps wire history independent of local nested edits across identical deep replays, appended suffixes, and earlier edits', async () => {
@@ -2113,18 +2116,22 @@ test('animates only newly added model instances across variant swaps and coalesc
           ]}
         />
       )
+      expect(qsaSpy).not.toHaveBeenCalled()
     } finally {
       qsaSpy.mockRestore()
     }
 
-    expect(qsaSpy).not.toHaveBeenCalled()
     expect(animated.map(el => el.textContent)).toEqual(['Batch A', 'Batch B', 'Batch C'])
   } finally {
     restore()
   }
 })
 
-test('animates a newly inserted custom leaf inside an existing custom container without reanimating surviving nodes', async () => {
+test('animates newly inserted direct and non-ref-forwarding custom leaves inside an existing custom container without reanimating surviving nodes', async () => {
+  function WrappedBadge({ label }: { readonly label: string }) {
+    return <article data-testid="wrapped-badge">{label}</article>
+  }
+
   const customRegistry = createA2uiRegistry({
     catalogId: A2UI_BASIC_CATALOG_ID,
     title: 'Custom container motion catalog',
@@ -2163,7 +2170,7 @@ test('animates a newly inserted custom leaf inside an existing custom container 
       createA2uiRegistryEntry({
         name: 'CustomBadge',
         component: 'article',
-        description: 'Custom leaf rendered inside a custom container.',
+        description: 'Direct DOM custom leaf rendered inside a custom container.',
         schema: {
           type: 'object',
           additionalProperties: false,
@@ -2174,6 +2181,21 @@ test('animates a newly inserted custom leaf inside an existing custom container 
           required: ['component', 'label']
         },
         adapter: props => <article data-testid="custom-badge">{String(props.label ?? '')}</article>
+      }),
+      createA2uiRegistryEntry({
+        name: 'WrappedBadge',
+        component: WrappedBadge,
+        description: 'Non-ref-forwarding custom leaf component rendered inside a custom container.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'WrappedBadge' },
+            label: { type: 'string' }
+          },
+          required: ['component', 'label']
+        },
+        adapter: props => <WrappedBadge label={String(props.label ?? '')} />
       })
     ]
   })
@@ -2198,32 +2220,162 @@ test('animates a newly inserted custom leaf inside an existing custom container 
     expect(animated).toEqual([firstBadge])
     animated.length = 0
 
+    // Direct DOM custom leaf inserted into existing custom container
+    const step1 = [
+      ...step0,
+      updateComponentsMsg('s_custom_container', [
+        { id: 'root', component: 'CustomPanel', title: 'Status', children: ['badge_1', 'badge_2'] },
+        { id: 'badge_2', component: 'CustomBadge', label: 'Inserted direct leaf' }
+      ])
+    ]
     await view.render(
       <A2uiSurface
         surfaceId="s_custom_container"
         registry={customRegistry}
-        messages={[
-          ...step0,
-          updateComponentsMsg('s_custom_container', [
-            {
-              id: 'root',
-              component: 'CustomPanel',
-              title: 'Status',
-              children: ['badge_1', 'badge_2']
-            },
-            { id: 'badge_2', component: 'CustomBadge', label: 'Inserted leaf' }
-          ])
-        ]}
+        messages={step1}
       />
     )
 
     const badges = Array.from(
       view.host.querySelectorAll<HTMLElement>('[data-testid="custom-badge"]')
     )
+    const panel = view.host.querySelector<HTMLElement>('[data-testid="custom-panel"]')!
     expect(badges).toHaveLength(2)
     expect(animated).toEqual([badges[1]])
     expect(animated).not.toContain(badges[0])
-    expect(animated).not.toContain(view.host.querySelector('[data-testid="custom-panel"]'))
+    expect(animated).not.toContain(panel)
+    animated.length = 0
+
+    // Non-ref-forwarding custom leaf inserted into the same existing custom container
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_custom_container"
+        registry={customRegistry}
+        messages={[
+          ...step1,
+          updateComponentsMsg('s_custom_container', [
+            {
+              id: 'root',
+              component: 'CustomPanel',
+              title: 'Status',
+              children: ['badge_1', 'badge_2', 'wrapped_leaf']
+            },
+            { id: 'wrapped_leaf', component: 'WrappedBadge', label: 'Inserted wrapped leaf' }
+          ])
+        ]}
+      />
+    )
+
+    const wrappedLeaf = view.host.querySelector<HTMLElement>('[data-testid="wrapped-badge"]')!
+    expect(wrappedLeaf).not.toBeNull()
+    expect(animated).toEqual([wrappedLeaf])
+    expect(animated).not.toContain(badges[0])
+    expect(animated).not.toContain(badges[1])
+    expect(animated).not.toContain(panel)
+  } finally {
+    restore()
+  }
+})
+
+test('restores focus to the next control when rendering inside a same-origin iframe', async () => {
+  const step0: A2uiMessage[] = [
+    surfaceMessage('s_iframe_focus', [
+      { id: 'root', component: 'Column', children: ['btn_1', 'btn_2'] },
+      { id: 'btn_1', component: 'Button', child: 'lbl_1', action: { event: { name: 'first' } } },
+      { id: 'lbl_1', component: 'Text', text: 'First in iframe' },
+      { id: 'btn_2', component: 'Button', child: 'lbl_2', action: { event: { name: 'second' } } },
+      { id: 'lbl_2', component: 'Text', text: 'Second in iframe' }
+    ])
+  ]
+
+  const iframe = document.createElement('iframe')
+  document.body.appendChild(iframe)
+  try {
+    const iframeDoc = iframe.contentDocument!
+    const iframeHost = iframeDoc.createElement('div')
+    iframeDoc.body.appendChild(iframeHost)
+
+    const view = await mount(
+      createPortal(
+        <A2uiSurface
+          surfaceId="s_iframe_focus"
+          messages={step0}
+        />,
+        iframeHost
+      )
+    )
+
+    const buttons = () => Array.from(iframeHost.querySelectorAll<HTMLButtonElement>('button'))
+    expect(buttons()).toHaveLength(2)
+    buttons()[0]!.focus()
+    expect(iframeDoc.activeElement).toBe(buttons()[0])
+
+    await view.render(
+      createPortal(
+        <A2uiSurface
+          surfaceId="s_iframe_focus"
+          messages={[
+            ...step0,
+            updateComponentsMsg('s_iframe_focus', [
+              { id: 'root', component: 'Column', children: ['btn_2'] }
+            ])
+          ]}
+        />,
+        iframeHost
+      )
+    )
+
+    expect(iframeDoc.activeElement).toBe(buttons()[0])
+    expect(buttons()[0]!.textContent).toBe('Second in iframe')
+  } finally {
+    iframe.remove()
+  }
+})
+
+test('parses leading-decimal motion durations (.25s -> 250ms, .0s -> off) and falls back for invalid tokens', async () => {
+  const { animated, durations, restore } = spyEntryAnimations()
+  const singleText = (surfaceId: string) => [
+    surfaceMessage(surfaceId, [
+      { id: 'root', component: 'Column', children: ['t1'] },
+      { id: 't1', component: 'Text', text: surfaceId }
+    ])
+  ]
+
+  try {
+    await mount(
+      <div style={{ '--rad-motion-release-duration': '.25s' } as CSSProperties}>
+        <A2uiSurface
+          surfaceId="s_dur_250"
+          messages={singleText('s_dur_250')}
+        />
+      </div>
+    )
+    expect(animated).toHaveLength(1)
+    expect(durations).toEqual([250])
+    animated.length = 0
+    durations.length = 0
+
+    await mount(
+      <div style={{ '--rad-motion-release-duration': '.0s' } as CSSProperties}>
+        <A2uiSurface
+          surfaceId="s_dur_zero"
+          messages={singleText('s_dur_zero')}
+        />
+      </div>
+    )
+    expect(animated).toEqual([])
+    expect(durations).toEqual([])
+
+    await mount(
+      <div style={{ '--rad-motion-release-duration': 'invalid' } as CSSProperties}>
+        <A2uiSurface
+          surfaceId="s_dur_invalid"
+          messages={singleText('s_dur_invalid')}
+        />
+      </div>
+    )
+    expect(animated).toHaveLength(1)
+    expect(durations).toEqual([160])
   } finally {
     restore()
   }

@@ -42,11 +42,16 @@ export function cloneMessageValue<T>(value: T): T {
 }
 
 function sameMessageValue(a: unknown, b: unknown): boolean {
+  const seen = new WeakMap<object, WeakSet<object>>()
   const stack: [unknown, unknown][] = [[a, b]]
   while (stack.length > 0) {
     const [left, right] = stack.pop()!
     if (Object.is(left, right)) continue
     if (!left || !right || typeof left !== 'object' || typeof right !== 'object') return false
+    let rightSeen = seen.get(left)
+    if (rightSeen?.has(right)) continue
+    if (!rightSeen) seen.set(left, (rightSeen = new WeakSet()))
+    rightSeen.add(right)
     if (Array.isArray(left) || Array.isArray(right)) {
       if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
         return false
@@ -91,10 +96,8 @@ export function createMicrotaskCoalescer(run: () => void): () => void {
 }
 
 export function isHtmlElement(node: unknown): node is HTMLElement {
-  const win =
-    node instanceof Object && 'ownerDocument' in node
-      ? (node as Element).ownerDocument?.defaultView
-      : null
+  if (typeof node !== 'object' || node === null || !('ownerDocument' in node)) return false
+  const win = (node as Element).ownerDocument?.defaultView
   return Boolean(win && node instanceof win.HTMLElement)
 }
 
@@ -278,7 +281,7 @@ export function restoreFocusFallback(
 }
 
 function parseDurationMs(value: string): number | undefined {
-  const match = /^(\d+(?:\.\d+)?)(ms|s)$/.exec(value.trim())
+  const match = /^(\d+(?:\.\d+)?|\.\d+)(ms|s)$/.exec(value.trim())
   if (!match) return undefined
   const num = Number.parseFloat(match[1]!)
   return Number.isFinite(num) ? (match[2] === 's' ? num * 1000 : num) : undefined

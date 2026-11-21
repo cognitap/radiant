@@ -377,4 +377,28 @@ test('wire message cloning detaches nested values and isMessagePrefix matches id
   assert.equal(Object.hasOwn(fallbackClone, '__proto__'), true)
   assert.deepEqual(fallbackClone['__proto__'], { flag: 1 })
   assert.notEqual(fallbackClone['__proto__'], withProtoAndFn['__proto__'])
+
+  // Cyclic objects and arrays terminate cleanly for both equivalent cycles and real differences
+  const cycleA = { label: 'same' }
+  cycleA.self = cycleA
+  const cycleB = cloneMessageValue(cycleA)
+  const cycleC = { label: 'same' }
+  cycleC.self = cycleC
+  const cycleDiff = { label: 'different' }
+  cycleDiff.self = cycleDiff
+  const wrap = value => [
+    { version: A2UI_PROTOCOL_VERSION, updateDataModel: { surfaceId: 's', value } }
+  ]
+  assert.equal(isMessagePrefix(wrap(cycleA), wrap(cycleB)), true)
+  assert.equal(isMessagePrefix(wrap(cycleA), wrap(cycleC)), true)
+  assert.equal(isMessagePrefix(wrap(cycleA), wrap(cycleDiff)), false)
+
+  const arrA = [1]
+  arrA.push(arrA)
+  const arrB = [1]
+  arrB.push(arrB)
+  const arrDiff = [2]
+  arrDiff.push(arrDiff)
+  assert.equal(isMessagePrefix(wrap(arrA), wrap(arrB)), true)
+  assert.equal(isMessagePrefix(wrap(arrA), wrap(arrDiff)), false)
 })
