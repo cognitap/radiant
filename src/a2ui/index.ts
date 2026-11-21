@@ -14,6 +14,9 @@ export type {
   A2uiRegistryInput,
   A2uiRenderOptions
 } from './registry.js'
+export { createA2uiExtensionEntry, createA2uiExtensionRegistry } from './extensionEntry.js'
+export { isA2uiChildNode, readA2uiValue, runA2uiAction, writeA2uiBinding } from './adapterValues.js'
+export type { A2uiExtensionEntryInput, A2uiExtensionRegistryInput } from './extensionEntry.js'
 export {
   A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,

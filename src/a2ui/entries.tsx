@@ -66,9 +66,10 @@ import {
   toNativeDateTime,
   type DateTimeInputType
 } from './dateTimeValue.js'
+import { readA2uiValue, writeA2uiBinding } from './adapterValues.js'
 
 export function unwrapDisplayText(value: unknown): string {
-  const raw = value instanceof ResolvedBinding ? value.value : value
+  const raw = readA2uiValue(value)
   if (typeof raw === 'string') return raw
   if (typeof raw === 'number' && Number.isFinite(raw)) return String(raw)
   if (typeof raw === 'boolean') return String(raw)
@@ -76,31 +77,27 @@ export function unwrapDisplayText(value: unknown): string {
 }
 
 export function unwrapString(value: unknown): string | undefined {
-  if (value instanceof ResolvedBinding) {
-    return typeof value.value === 'string' ? value.value : undefined
-  }
-  return typeof value === 'string' ? value : undefined
+  const raw = readA2uiValue(value)
+  return typeof raw === 'string' ? raw : undefined
 }
 
 export function unwrapBoolean(value: unknown): boolean | undefined {
-  const raw = value instanceof ResolvedBinding ? value.value : value
+  const raw = readA2uiValue(value)
   return typeof raw === 'boolean' ? raw : undefined
 }
 
 function unwrapNumber(value: unknown): number | undefined {
-  const raw = value instanceof ResolvedBinding ? value.value : value
+  const raw = readA2uiValue(value)
   return typeof raw === 'number' && Number.isFinite(raw) ? raw : undefined
 }
 
 export function unwrapStringList(value: unknown): string[] {
-  const raw = value instanceof ResolvedBinding ? value.value : value
+  const raw = readA2uiValue(value)
   return Array.isArray(raw) ? raw.filter((item): item is string => typeof item === 'string') : []
 }
 
 export function writeBinding(raw: unknown, nextValue: unknown) {
-  if (raw instanceof ResolvedBinding && isWritable(raw)) {
-    raw.set(nextValue)
-  }
+  writeA2uiBinding(raw, nextValue)
 }
 
 export function readValidationError(props: Readonly<Record<string, unknown>>): string | undefined {

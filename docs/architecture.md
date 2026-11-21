@@ -2,7 +2,7 @@
 
 Radiant wraps native HTML in React components. The browser provides behavior: button activation, radio grouping, modal focus. Radiant adds composition, state, and styling. Applications provide content and logic.
 
-Component APIs live in the [component guides](https://github.com/cognitap/radiant-docs). Cross-family topics live in [theming](theming.md), [motion](motion.md), and [accessibility](accessibility.md). Generative UI boundaries and the A2UI renderer engine live in [ADR 0002](adr/0002-generative-ui-scope.md) and [ADR 0003](adr/0003-a2ui-renderer-engine.md).
+Component APIs live in the [component guides](https://github.com/cognitap/radiant-docs). Cross-family topics live in [theming](theming.md), [motion](motion.md), and [accessibility](accessibility.md). [ADR 0002](adr/0002-generative-ui-scope.md) and [ADR 0003](adr/0003-a2ui-renderer-engine.md) cover generative UI scope and the A2UI engine.
 
 ## Package entries
 
@@ -25,7 +25,7 @@ Component APIs live in the [component guides](https://github.com/cognitap/radian
 
 ## Composition
 
-Each native element or behavior has one base family. Higher-level components compose that family instead of rendering raw elements or duplicating its behavior. `Stack` is the one-dimensional layout, spaced by the spacing scale.
+Each native element or behavior has one base family. Higher-level components compose it instead of rendering raw elements or duplicating its behavior. `Stack` is the one-dimensional layout, spaced by the spacing scale.
 
 `Button` owns `<button>` actions and `Link` owns `<a>` navigation, even when a link looks like a button. Triggers, close buttons, and action items in other families build on `Button`, and navigation items build on `Link`.
 
@@ -50,7 +50,7 @@ Each state value has one owner for the life of a mount. Pass `x` to control it o
 
 ## Events
 
-For click and keydown, `composeAction` checks disabled and pending first, then calls the caller's handler, then the library action. `preventDefault()` in the caller's handler cancels the library action. Native `change`, `toggle`, and `blur` report what has already happened and cannot be cancelled.
+For click and keydown, `composeAction` checks disabled and pending first, then calls the caller's handler, then the library action. `preventDefault()` in the caller's handler cancels the library action. Native `change`, `toggle`, and `blur` report what already happened and cannot be cancelled.
 
 ## Forms
 
@@ -73,7 +73,7 @@ Custom controls submit through a native form element:
 
 Resolve the locale in the app and use the same value for `<html {...getLocaleAttributes(locale)}>` and `<LocaleProvider locale={locale} scope="document">` inside the body. The helper runs on the server. Document scope renders no wrapper. The default subtree scope renders a `div` that sets native `lang` and script-derived `dir` for an explicit locale.
 
-Omitting the locale inherits formatting and matching from the closest provider. Native markup still supplies language and direction. Formatting and matching fall back to `en-US` when no configured or supported locale matches. A component's explicit `locale` overrides its formatting. Popups carry their anchor's language and direction across a portal, with explicit content attributes taking precedence.
+Omitting the locale inherits formatting and matching from the closest provider. Native markup still supplies language and direction. Formatting and matching fall back to `en-US` when no configured or supported locale matches. A component's explicit `locale` overrides its formatting. Popups carry their anchor's language and direction across a portal; explicit content attributes win.
 
 `NumberField` localizes its display and parsing. `NumberFormatter` preserves server text when browser locale data differs during hydration. Select and Menu use locale-aware prefix search. Combobox, Autocomplete and their composed families use locale-aware substring search. Built-in matching ignores case and distinguishes accents. Caller filters and text props still apply.
 
@@ -96,9 +96,11 @@ Custom styling and rendering must keep:
 
 ## Model-facing catalog
 
-Radiant separates its human React API from its model-facing contract in `@cognitap/radiant/catalog`. Human applications compose sub-parts such as `SelectItem`, pass `className`, `style`, `render`, and refs, and wire native form and ARIA relationships. Models target a smaller, intent-driven catalog: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
+`@cognitap/radiant/catalog` is the model-facing contract. In React, applications compose sub-parts, pass `className`, `style`, `render`, and refs, and wire form and ARIA relationships. Models target a smaller, intent-driven catalog: one `Choice` entry with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, semantic spacing (`tight | normal | airy`), JSON Schemas, slot constraints, state bindings, and action shapes.
 
-Catalog entries never expose `className`, `style`, `render`, DOM event handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; protocol adapters such as A2UI generate their basic and extension catalog schemas from it, and applications add custom entries through `extendCatalog` without shadowing Radiant names. Entry `guidance` (use, avoid, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET` and renders `llms.txt`; renaming A2UI projections supply their own.
+Catalog entries never expose `className`, `style`, `render`, DOM handlers, or raw ARIA attributes. The catalog module has no React, DOM, or wire-protocol dependencies; A2UI generates its basic and extension catalogs from it. Entry `guidance` (use, avoid, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET` and renders `llms.txt`; renaming A2UI projections supply their own.
+
+`extendCatalog` adds app entries but no Radiant names. `createA2uiExtensionEntry` derives A2UI schema and guidance; `createA2uiExtensionRegistry(catalog, { catalogId, entries })` extends `radiantA2uiExtensionRegistry` with them and their instructions. Adapters use `readA2uiValue`, `writeA2uiBinding`, `runA2uiAction` and [public tokens](theming.md#public-tokens).
 
 ## A2UI renderer and registry
 

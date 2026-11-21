@@ -74,6 +74,26 @@ export function Save() {
 }
 ```
 
+## Public tokens
+
+Components built outside Radiant, such as an app's catalog entries, read only the names in `PUBLIC_THEME_TOKENS`. Every theme and mode sets them, and they change only in a breaking release. The `PublicThemeToken` type lists the same names, and `themeTokenVar(token, fallback?)` returns `var(<token>)` for an inline style.
+
+| Group      | Tokens                                                                                                                                                                                                    |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Color      | `--rad-color-` `surface`, `foreground`, `muted-foreground`, `border`, `focus`, `invalid`, `disabled-background`, `disabled-border`, and `accent`, `neutral`, `warning`, `danger` with their `-foreground` |
+| Typography | `--rad-typography-` `family`, `body-size`, `small-size`, `heading-size`, `body-weight`, `label-weight`, `heading-weight`                                                                                  |
+| Control    | `--rad-control-` `radius`, `border-width`, `border-style`                                                                                                                                                 |
+| Surface    | `--rad-surface-` `canvas`, `radius`, `border-width`, `border-style`, `padding`, `gap`, `shadow`                                                                                                           |
+| Other      | `--rad-focus-` `width`, `offset`, `style`; `--rad-motion-color-duration`; `--rad-spacing-` `tight`, `normal`, `airy`; `--rad-state-disabled-opacity`                                                      |
+
+`--rad-surface-canvas` is the page background that `ThemeScope` paints; `--rad-color-surface` fills cards, fields, and popups on it. Component override and internal names are outside this contract. SVG presentation attributes may not resolve `var()`, so set `fill` and `stroke` in `style`:
+
+```tsx
+import { themeTokenVar } from '@cognitap/radiant'
+
+;<polyline style={{ fill: 'none', stroke: themeTokenVar('--rad-color-accent') }} />
+```
+
 ## Roles
 
 Each part reads one token role.
