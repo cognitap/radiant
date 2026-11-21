@@ -335,4 +335,46 @@ test('wire message cloning detaches nested values and isMessagePrefix matches id
   editedEarlier[1].updateDataModel.value.note = 'Changed earlier'
   assert.equal(isMessagePrefix(baseHistory, editedEarlier), false)
   assert.equal(isMessagePrefix(withSuffix, baseHistory), false)
+
+  // Deep JSON (> 64 levels) detaches and compares structurally across full depth
+  const buildDeep = (depth, leaf) => {
+    let current = { leaf }
+    for (let i = 0; i < depth; i++) current = { nested: current }
+    return current
+  }
+  const deepA = {
+    version: A2UI_PROTOCOL_VERSION,
+    updateDataModel: { surfaceId: 's_history', path: '/deep', value: buildDeep(75, 'ok') }
+  }
+  const deepB = cloneMessageValue(deepA)
+  assert.equal(isMessagePrefix([deepA], [deepB]), true)
+  let cursor = deepB.updateDataModel.value
+  for (let i = 0; i < 75; i++) cursor = cursor.nested
+  cursor.leaf = 'changed'
+  assert.equal(isMessagePrefix([deepA], [deepB]), false)
+  let origCursor = deepA.updateDataModel.value
+  for (let i = 0; i < 75; i++) origCursor = origCursor.nested
+  assert.equal(origCursor.leaf, 'ok')
+
+  // Cloning preserves own JSON keys named "__proto__" on both structuredClone and fallback paths
+  const withProto = JSON.parse('{"__proto__":{"role":"admin"},"ok":true}')
+  const clonedProto = cloneMessageValue(withProto)
+  assert.equal(Object.hasOwn(clonedProto, '__proto__'), true)
+  assert.deepEqual(clonedProto['__proto__'], { role: 'admin' })
+  assert.notEqual(clonedProto['__proto__'], withProto['__proto__'])
+  assert.equal(
+    isMessagePrefix(
+      [{ version: A2UI_PROTOCOL_VERSION, updateDataModel: { surfaceId: 's', value: withProto } }],
+      [{ version: A2UI_PROTOCOL_VERSION, updateDataModel: { surfaceId: 's', value: clonedProto } }]
+    ),
+    true
+  )
+
+  const withProtoAndFn = Object.assign(JSON.parse('{"__proto__":{"flag":1}}'), {
+    fn: () => {}
+  })
+  const fallbackClone = cloneMessageValue(withProtoAndFn)
+  assert.equal(Object.hasOwn(fallbackClone, '__proto__'), true)
+  assert.deepEqual(fallbackClone['__proto__'], { flag: 1 })
+  assert.notEqual(fallbackClone['__proto__'], withProtoAndFn['__proto__'])
 })

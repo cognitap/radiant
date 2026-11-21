@@ -2,42 +2,65 @@ import { isPlainRecord } from '../catalog/coerce.js'
 import type { MotionProfile } from '../motion/config.js'
 import type { A2uiMessage } from './sanitize.js'
 
-const MAX_COMPARE_DEPTH = 64
+const FOCUSABLE_SELECTOR =
+  'a[href],area[href],button,input,select,textarea,summary,[tabindex],[contenteditable]:not([contenteditable="false"])'
+const DEFAULT_ENTRY_EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 
-export const A2UI_NODE_ATTR = 'data-a2ui-node'
+export const A2UI_NODE_ENTRY_ANIMATION_ID = 'radiant-a2ui-entry'
 
-/** Deep-clones wire message objects and arrays so live state cannot mutate stored history. */
-export function cloneMessageValue<T>(value: T, depth = 0): T {
-  if (depth >= MAX_COMPARE_DEPTH || !value || typeof value !== 'object') return value
+function cloneFallback<T>(value: T, seen = new WeakMap<object, unknown>()): T {
+  if (!value || typeof value !== 'object') return value
+  if (seen.has(value)) return seen.get(value) as T
   if (Array.isArray(value)) {
-    return value.map(item => cloneMessageValue(item, depth + 1)) as unknown as T
+    const next: unknown[] = []
+    seen.set(value, next)
+    for (let i = 0; i < value.length; i++) next[i] = cloneFallback(value[i], seen)
+    return next as unknown as T
   }
   if (!isPlainRecord(value)) return value
   const next: Record<string, unknown> = {}
-  for (const [key, entry] of Object.entries(value)) {
-    next[key] = cloneMessageValue(entry, depth + 1)
+  seen.set(value, next)
+  for (const key of Object.keys(value)) {
+    Object.defineProperty(next, key, {
+      value: cloneFallback(value[key], seen),
+      enumerable: true,
+      writable: true,
+      configurable: true
+    })
   }
   return next as T
 }
 
-function sameMessageValue(a: unknown, b: unknown, depth = 0): boolean {
-  if (Object.is(a, b)) return true
-  if (depth >= MAX_COMPARE_DEPTH || !a || !b || typeof a !== 'object' || typeof b !== 'object') {
-    return false
+/** Deep-clones wire messages so live state cannot mutate caller or stored history. */
+export function cloneMessageValue<T>(value: T): T {
+  if (!value || typeof value !== 'object') return value
+  try {
+    return structuredClone(value)
+  } catch {
+    return cloneFallback(value)
   }
-  if (Array.isArray(a) || Array.isArray(b)) {
-    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false
-    for (let i = 0; i < a.length; i++) {
-      if (!sameMessageValue(a[i], b[i], depth + 1)) return false
+}
+
+function sameMessageValue(a: unknown, b: unknown): boolean {
+  const stack: [unknown, unknown][] = [[a, b]]
+  while (stack.length > 0) {
+    const [left, right] = stack.pop()!
+    if (Object.is(left, right)) continue
+    if (!left || !right || typeof left !== 'object' || typeof right !== 'object') return false
+    if (Array.isArray(left) || Array.isArray(right)) {
+      if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
+        return false
+      }
+      for (let i = 0; i < left.length; i++) stack.push([left[i], right[i]])
+      continue
     }
-    return true
-  }
-  if (!isPlainRecord(a) || !isPlainRecord(b)) return false
-  const keysA = Object.keys(a)
-  const keysB = Object.keys(b)
-  if (keysA.length !== keysB.length) return false
-  for (const key of keysA) {
-    if (!Object.hasOwn(b, key) || !sameMessageValue(a[key], b[key], depth + 1)) return false
+    if (!isPlainRecord(left) || !isPlainRecord(right)) return false
+    const keys = Object.keys(left)
+    if (keys.length !== Object.keys(right).length) return false
+    for (const key of keys) {
+      if (!Object.hasOwn(right, key)) return false
+      stack.push([left[key], right[key]])
+    }
   }
   return true
 }
@@ -67,12 +90,19 @@ export function createMicrotaskCoalescer(run: () => void): () => void {
   }
 }
 
-const FOCUSABLE_SELECTOR =
-  'a[href],area[href],button,input,select,textarea,summary,[tabindex],[contenteditable]:not([contenteditable="false"])'
+export function isHtmlElement(node: unknown): node is HTMLElement {
+  const win =
+    node instanceof Object && 'ownerDocument' in node
+      ? (node as Element).ownerDocument?.defaultView
+      : null
+  return Boolean(win && node instanceof win.HTMLElement)
+}
 
-function isHtmlElement(node: Element | null): node is HTMLElement {
-  const win = node?.ownerDocument.defaultView
-  return Boolean(node && win && node instanceof win.HTMLElement)
+export type NodeHost = {
+  readonly nodeId: string
+  readonly instanceId: string
+  readonly element: HTMLElement
+  readonly isContainer: boolean
 }
 
 function isFocusableWithin(
@@ -84,38 +114,51 @@ function isFocusableWithin(
   if (element.tabIndex < 0 && !(allowProgrammatic && element.hasAttribute('tabindex'))) return false
   if (element.tagName === 'INPUT' && (element as HTMLInputElement).type === 'hidden') return false
   if (element.matches(':disabled') || element.getAttribute('aria-disabled') === 'true') return false
-  if (element.closest('[hidden],[inert]')) return false
-  if (element.getClientRects().length === 0) return false
+  if (element.closest('[hidden],[inert]') || element.getClientRects().length === 0) return false
   const win = element.ownerDocument.defaultView
-  if (win && win.getComputedStyle(element).visibility === 'hidden') return false
-  return true
+  return !win || win.getComputedStyle(element).visibility !== 'hidden'
 }
 
-function getFocusableElements(root: HTMLElement): HTMLElement[] {
-  return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(element =>
-    isFocusableWithin(element, root)
-  )
-}
-
-function findNodeHost(root: HTMLElement, instanceId: string): HTMLElement | null {
-  for (const element of root.querySelectorAll<HTMLElement>(`[${A2UI_NODE_ATTR}]`)) {
-    if (element.getAttribute(A2UI_NODE_ATTR) === instanceId) return element
+function queryFocusable(
+  scope: HTMLElement,
+  root: HTMLElement,
+  allowProgrammatic = false
+): HTMLElement[] {
+  const results = scope !== root && isFocusableWithin(scope, root, allowProgrammatic) ? [scope] : []
+  for (const element of scope.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)) {
+    if (isFocusableWithin(element, root, allowProgrammatic)) results.push(element)
   }
-  return null
+  return results
 }
 
-function getHostControls(host: HTMLElement, root: HTMLElement): HTMLElement[] {
-  const controls: HTMLElement[] = []
-  if (isFocusableWithin(host, root, true)) controls.push(host)
-  for (const element of host.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)) {
-    if (isFocusableWithin(element, root, true)) controls.push(element)
+function findOwningHost(
+  active: HTMLElement,
+  hosts: ReadonlyMap<string, NodeHost>
+): NodeHost | null {
+  let owner: NodeHost | null = null
+  for (const host of hosts.values()) {
+    if (host.isContainer || !host.element.isConnected || !host.element.contains(active)) continue
+    if (!owner || owner.element.contains(host.element)) owner = host
   }
-  return controls
+  return owner
+}
+
+function findUniqueHostByInstance(
+  hosts: ReadonlyMap<string, NodeHost>,
+  instanceId: string
+): NodeHost | null {
+  let match: NodeHost | null = null
+  for (const host of hosts.values()) {
+    if (host.instanceId !== instanceId || !host.element.isConnected) continue
+    if (match) return null
+    match = host
+  }
+  return match
 }
 
 export type FocusSnapshot = {
   readonly active: HTMLElement
-  readonly instanceId: string | null
+  readonly restoreInstanceId: string | null
   readonly controlIndex: number
   readonly after: readonly HTMLElement[]
   readonly before: readonly HTMLElement[]
@@ -125,27 +168,30 @@ export type FocusSnapshot = {
   readonly scrollLeft: number
 }
 
-/** Captures the active control, its owning rendered instance, and surrounding tabbable order. */
-export function captureFocusSnapshot(root: HTMLElement | null): FocusSnapshot | null {
-  if (!root || !root.isConnected) return null
+/** Captures the active control, unambiguous owning instance, and surrounding tabbable order. */
+export function captureFocusSnapshot(
+  root: HTMLElement | null,
+  hosts: ReadonlyMap<string, NodeHost>
+): FocusSnapshot | null {
+  if (!root?.isConnected) return null
   const active = root.ownerDocument.activeElement
   if (!isHtmlElement(active) || !root.contains(active) || active === root) return null
 
   const after: HTMLElement[] = []
   const before: HTMLElement[] = []
-  for (const candidate of getFocusableElements(root)) {
+  for (const candidate of queryFocusable(root, root)) {
     if (candidate === active) continue
-    const position = active.compareDocumentPosition(candidate)
-    if (position & active.DOCUMENT_POSITION_FOLLOWING) after.push(candidate)
-    else if (position & active.DOCUMENT_POSITION_PRECEDING) before.push(candidate)
+    const pos = active.compareDocumentPosition(candidate)
+    if (pos & active.DOCUMENT_POSITION_FOLLOWING) after.push(candidate)
+    else if (pos & active.DOCUMENT_POSITION_PRECEDING) before.push(candidate)
   }
   before.reverse()
 
-  const owner = active.closest<HTMLElement>(`[${A2UI_NODE_ATTR}]`)
-  const ownedInSurface = owner && root.contains(owner) ? owner : null
-  const instanceId = ownedInSurface?.getAttribute(A2UI_NODE_ATTR) ?? null
-  const controlIndex = ownedInSurface
-    ? Math.max(0, getHostControls(ownedInSurface, root).indexOf(active))
+  const owner = findOwningHost(active, hosts)
+  const restoreInstanceId =
+    owner && findUniqueHostByInstance(hosts, owner.instanceId) === owner ? owner.instanceId : null
+  const controlIndex = owner
+    ? Math.max(0, queryFocusable(owner.element, root, true).indexOf(active))
     : 0
 
   let selectionStart: number | null = null
@@ -156,13 +202,13 @@ export function captureFocusSnapshot(root: HTMLElement | null): FocusSnapshot | 
       selectionStart = input.selectionStart
       selectionEnd = input.selectionEnd
     } catch {
-      // Non-text input types (such as range, checkbox, or radio) do not expose selection ranges.
+      // Non-text inputs do not expose selection ranges.
     }
   }
 
   return {
     active,
-    instanceId,
+    restoreInstanceId,
     controlIndex,
     after,
     before,
@@ -181,8 +227,10 @@ function restoreControlState(target: HTMLElement, snapshot: FocusSnapshot): void
     snapshot.selectionEnd !== null
   ) {
     try {
-      const input = target as HTMLInputElement | HTMLTextAreaElement
-      input.setSelectionRange(snapshot.selectionStart, snapshot.selectionEnd)
+      ;(target as HTMLInputElement | HTMLTextAreaElement).setSelectionRange(
+        snapshot.selectionStart,
+        snapshot.selectionEnd
+      )
     } catch {
       // Ignore inputs that disallow setting a selection range.
     }
@@ -192,8 +240,12 @@ function restoreControlState(target: HTMLElement, snapshot: FocusSnapshot): void
 }
 
 /** Restores focus synchronously in an active document using the order documented in architecture.md. */
-export function restoreFocusFallback(root: HTMLElement | null, snapshot: FocusSnapshot): void {
-  if (!root || !root.isConnected) return
+export function restoreFocusFallback(
+  root: HTMLElement | null,
+  snapshot: FocusSnapshot,
+  hosts: ReadonlyMap<string, NodeHost>
+): void {
+  if (!root?.isConnected) return
   const doc = root.ownerDocument
   if (typeof doc.hasFocus === 'function' && !doc.hasFocus()) return
   const current = doc.activeElement
@@ -204,10 +256,10 @@ export function restoreFocusFallback(root: HTMLElement | null, snapshot: FocusSn
     return
   }
 
-  if (snapshot.instanceId) {
-    const movedHost = findNodeHost(root, snapshot.instanceId)
+  if (snapshot.restoreInstanceId) {
+    const movedHost = findUniqueHostByInstance(hosts, snapshot.restoreInstanceId)
     if (movedHost) {
-      const controls = getHostControls(movedHost, root)
+      const controls = queryFocusable(movedHost.element, root, true)
       const movedTarget = controls[snapshot.controlIndex] ?? controls[0]
       if (movedTarget) {
         restoreControlState(movedTarget, snapshot)
@@ -219,78 +271,17 @@ export function restoreFocusFallback(root: HTMLElement | null, snapshot: FocusSn
   const target =
     snapshot.after.find(element => isFocusableWithin(element, root)) ??
     snapshot.before.find(element => isFocusableWithin(element, root)) ??
-    getFocusableElements(root)[0] ??
+    queryFocusable(root, root)[0] ??
     root
 
   target.focus({ preventScroll: true })
 }
 
-export const A2UI_NODE_ENTRY_ANIMATION_ID = 'radiant-a2ui-entry'
-
-const DEFAULT_ENTRY_EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
-
-/** Resolves entry targets for newly added rendered model instances in a single surface pass. */
-export function collectNewNodeEntryTargets(
-  root: HTMLElement,
-  pendingInstanceIds: ReadonlySet<string>,
-  seenElements: WeakSet<Element>
-): HTMLElement[] {
-  if (pendingInstanceIds.size === 0) return []
-  const targets: HTMLElement[] = []
-  const matchedIds = new Set<string>()
-  const containers: HTMLElement[] = [root]
-
-  for (const element of root.querySelectorAll<HTMLElement>(`[${A2UI_NODE_ATTR}]`)) {
-    const instanceId = element.getAttribute(A2UI_NODE_ATTR)
-    if (!instanceId) continue
-    if (element.getAttribute('data-slot') === 'a2ui-column') {
-      containers.push(element)
-      if (pendingInstanceIds.has(instanceId)) matchedIds.add(instanceId)
-      continue
-    }
-    if (pendingInstanceIds.has(instanceId)) {
-      matchedIds.add(instanceId)
-      if (!seenElements.has(element)) targets.push(element)
-    }
-  }
-
-  if (matchedIds.size < pendingInstanceIds.size) {
-    for (const container of containers) {
-      for (const child of Array.from(container.children)) {
-        if (
-          isHtmlElement(child) &&
-          !child.hasAttribute(A2UI_NODE_ATTR) &&
-          !seenElements.has(child)
-        ) {
-          targets.push(child)
-        }
-      }
-    }
-  }
-
-  return targets
-}
-
-/** Marks `root` and every current descendant element as seen. */
-export function markTreeSeen(root: Element, seenElements: WeakSet<Element>): void {
-  seenElements.add(root)
-  for (const descendant of root.querySelectorAll('*')) {
-    seenElements.add(descendant)
-  }
-}
-
 function parseDurationMs(value: string): number | undefined {
-  const trimmed = value.trim()
-  if (!trimmed) return undefined
-  if (trimmed.endsWith('ms')) {
-    const parsed = Number.parseFloat(trimmed.slice(0, -2))
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined
-  }
-  if (trimmed.endsWith('s')) {
-    const parsed = Number.parseFloat(trimmed.slice(0, -1))
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed * 1000 : undefined
-  }
-  return undefined
+  const match = /^(\d+(?:\.\d+)?)(ms|s)$/.exec(value.trim())
+  if (!match) return undefined
+  const num = Number.parseFloat(match[1]!)
+  return Number.isFinite(num) ? (match[2] === 's' ? num * 1000 : num) : undefined
 }
 
 /** Runs entry motion once on a newly mounted node host, ignoring invalid easing values safely. */
@@ -300,8 +291,7 @@ export function animateNodeEntry(
 ): Animation | undefined {
   if (profile.mode === 'off') return undefined
   const win = element.ownerDocument.defaultView
-  if (!win) return undefined
-  if (win.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined
+  if (!win || win.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined
   if (typeof element.animate !== 'function') return undefined
 
   const styles = win.getComputedStyle(element)

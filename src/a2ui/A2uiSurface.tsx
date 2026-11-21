@@ -1,8 +1,12 @@
 'use client'
 
 import {
+  cloneElement,
   Component,
+  Fragment,
+  isValidElement,
   memo,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -10,7 +14,8 @@ import {
   useState,
   useSyncExternalStore,
   type ErrorInfo,
-  type ReactNode
+  type ReactNode,
+  type Ref
 } from 'react'
 import type { ComponentApi, FunctionImplementation } from '@a2ui/web_core/catalog'
 import { MessageProcessor, type ProcessableMessage } from '@a2ui/web_core/processing'
@@ -27,6 +32,7 @@ import { isPlainRecord } from '../catalog/coerce.js'
 import { focusRingClass } from '../components/shared/focusStyles.js'
 import type { MotionProfile } from '../motion/config.js'
 import { MotionProfileContext } from '../motion/context.js'
+import { useComposedRefs } from '../react/useComposedRefs.js'
 import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import {
   COERCED_NOOP_ACTION_NAME,
@@ -38,16 +44,15 @@ import { radiantA2uiRegistry } from './entries.js'
 import type { A2uiRegistry, A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import {
-  A2UI_NODE_ATTR,
   animateNodeEntry,
   captureFocusSnapshot,
   cloneMessageValue,
-  collectNewNodeEntryTargets,
   createMicrotaskCoalescer,
+  isHtmlElement,
   isMessagePrefix,
-  markTreeSeen,
   restoreFocusFallback,
-  type FocusSnapshot
+  type FocusSnapshot,
+  type NodeHost
 } from './surfaceRuntime.js'
 
 /**
@@ -70,102 +75,83 @@ export type A2uiSurfaceProps = {
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
 }
 
-type SurfaceDomRuntime = {
-  readonly setSurfaceElement: (element: HTMLDivElement | null) => void
-  readonly setMotionProfile: (profile: MotionProfile) => void
-  readonly captureFocus: () => void
-  readonly onNodeMount: (instanceId: string) => void
-  readonly onNodeUnmount: (instanceId: string) => void
-  readonly onNodeCommit: () => void
-  readonly onSurfaceRebuild: () => void
-}
-
-function createSurfaceDomRuntime(initialMotionProfile: MotionProfile): SurfaceDomRuntime {
-  const seenElements = new WeakSet<Element>()
-  const seenInstanceIds = new Set<string>()
-  const mountedCounts = new Map<string, number>()
-  const pendingNewInstanceIds = new Set<string>()
-  const pendingRemovedInstanceIds = new Set<string>()
+function createSurfaceDomRuntime(initialMotionProfile: MotionProfile) {
+  const hosts = new Map<string, NodeHost>()
+  const committedInstances = new Set<string>()
+  const pendingMounts = new Set<string>()
+  const unmountedInstances = new Set<string>()
   let surfaceElement: HTMLDivElement | null = null
   let motionProfile = initialMotionProfile
   let pendingFocus: FocusSnapshot | null = null
 
-  function flushFocus() {
-    if (!pendingFocus) return
-    const snapshot = pendingFocus
-    pendingFocus = null
-    restoreFocusFallback(surfaceElement, snapshot)
-  }
-
   function flushBatch() {
-    for (const instanceId of pendingRemovedInstanceIds) {
-      if ((mountedCounts.get(instanceId) ?? 0) === 0) seenInstanceIds.delete(instanceId)
+    if (pendingFocus) {
+      const snapshot = pendingFocus
+      pendingFocus = null
+      restoreFocusFallback(surfaceElement, snapshot, hosts)
     }
-    pendingRemovedInstanceIds.clear()
-
-    if (!surfaceElement || !surfaceElement.isConnected) return
-    if (pendingNewInstanceIds.size > 0) {
-      const targets = collectNewNodeEntryTargets(
-        surfaceElement,
-        pendingNewInstanceIds,
-        seenElements
-      )
-      pendingNewInstanceIds.clear()
-      markTreeSeen(surfaceElement, seenElements)
-      for (const target of targets) animateNodeEntry(target, motionProfile)
-      return
+    if (surfaceElement?.isConnected && pendingMounts.size > 0) {
+      for (const nodeId of pendingMounts) {
+        const host = hosts.get(nodeId)
+        if (!host || host.isContainer || !host.element.isConnected) continue
+        if (committedInstances.has(host.instanceId) && unmountedInstances.has(host.instanceId)) {
+          continue
+        }
+        animateNodeEntry(host.element, motionProfile)
+      }
+      pendingMounts.clear()
     }
-    markTreeSeen(surfaceElement, seenElements)
+    unmountedInstances.clear()
+    committedInstances.clear()
+    for (const host of hosts.values()) committedInstances.add(host.instanceId)
   }
 
-  const scheduleFocusFlush = createMicrotaskCoalescer(flushFocus)
   const scheduleBatchFlush = createMicrotaskCoalescer(flushBatch)
 
   function captureFocus() {
-    if (!pendingFocus) pendingFocus = captureFocusSnapshot(surfaceElement)
-    if (pendingFocus) scheduleFocusFlush()
+    if (!pendingFocus) pendingFocus = captureFocusSnapshot(surfaceElement, hosts)
+    if (pendingFocus) scheduleBatchFlush()
   }
 
   return {
-    setSurfaceElement(element) {
+    setSurfaceElement(element: HTMLDivElement | null) {
       surfaceElement = element
     },
-    setMotionProfile(nextProfile) {
+    setMotionProfile(nextProfile: MotionProfile) {
       motionProfile = nextProfile
     },
-    captureFocus,
-    onNodeMount(instanceId) {
-      mountedCounts.set(instanceId, (mountedCounts.get(instanceId) ?? 0) + 1)
-      pendingRemovedInstanceIds.delete(instanceId)
-      if (!seenInstanceIds.has(instanceId)) {
-        seenInstanceIds.add(instanceId)
-        pendingNewInstanceIds.add(instanceId)
+    setNodeHost(nodeId: string, instanceId: string, element: unknown) {
+      if (isHtmlElement(element)) {
+        const prev = hosts.get(nodeId)
+        hosts.set(nodeId, { nodeId, instanceId, element, isContainer: prev?.isContainer ?? false })
+      } else {
+        hosts.delete(nodeId)
       }
+    },
+    captureFocus,
+    onNodeMount(nodeId: string) {
+      pendingMounts.add(nodeId)
       scheduleBatchFlush()
     },
-    onNodeUnmount(instanceId) {
-      const next = (mountedCounts.get(instanceId) ?? 1) - 1
-      if (next <= 0) {
-        mountedCounts.delete(instanceId)
-        pendingRemovedInstanceIds.add(instanceId)
-      } else {
-        mountedCounts.set(instanceId, next)
-      }
+    onNodeUnmount(nodeId: string, instanceId: string) {
+      pendingMounts.delete(nodeId)
+      unmountedInstances.add(instanceId)
       captureFocus()
       scheduleBatchFlush()
     },
-    onNodeCommit() {
-      flushFocus()
-      scheduleBatchFlush()
+    setNodeContainer(nodeId: string, isContainer: boolean) {
+      const host = hosts.get(nodeId)
+      if (host && host.isContainer !== isContainer) hosts.set(nodeId, { ...host, isContainer })
     },
     onSurfaceRebuild() {
-      seenInstanceIds.clear()
-      mountedCounts.clear()
-      pendingNewInstanceIds.clear()
-      pendingRemovedInstanceIds.clear()
+      committedInstances.clear()
+      pendingMounts.clear()
+      unmountedInstances.clear()
     }
   }
 }
+
+type SurfaceDomRuntime = ReturnType<typeof createSurfaceDomRuntime>
 
 function useSignalValue<T>(signal: Signal<T> | undefined): T | undefined {
   return useSyncExternalStore(
@@ -193,6 +179,7 @@ type BoundaryProps = {
   readonly node: ComponentNode
   readonly resetToken: unknown
   readonly onDiagnostic: (diagnostic: CatalogDiagnostic) => void
+  readonly onFallbackRef?: Ref<HTMLElement>
   readonly children: ReactNode
 }
 
@@ -233,9 +220,9 @@ class A2uiNodeErrorBoundary extends Component<
     const text = boundaryFallbackText(this.props.node, this.props.resetToken)
     return text ? (
       <span
+        ref={this.props.onFallbackRef}
         data-slot="a2ui-fallback"
         data-node-id={this.props.node.componentId}
-        {...{ [A2UI_NODE_ATTR]: this.props.node.instanceId }}
       >
         {text}
       </span>
@@ -263,22 +250,48 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   const entry = resolved ? getRegistryEntry(registry, node.type) : undefined
   const active = Boolean(entry)
 
+  let hasChildNodes = false
+  const rendered =
+    props && entry
+      ? entry.adapter(props, {
+          node,
+          inline,
+          renderNode(child: ComponentNode, options?: A2uiRenderOptions) {
+            if (!options?.inline) hasChildNodes = true
+            return (
+              <A2uiNodeRenderer
+                key={child.id}
+                node={child}
+                registry={registry}
+                inline={options?.inline ?? false}
+                onDiagnostic={onDiagnostic}
+                runtime={runtime}
+              />
+            )
+          }
+        })
+      : null
+
+  const isContainer = node.type === 'Column' || hasChildNodes
+  const setHostRef = useCallback(
+    (element: HTMLElement | null) => runtime.setNodeHost(node.id, node.instanceId, element),
+    [node.id, node.instanceId, runtime]
+  )
+  const hostElement =
+    !inline && isValidElement<{ ref?: Ref<HTMLElement> }>(rendered) && rendered.type !== Fragment
+      ? rendered
+      : null
+  const composedRef = useComposedRefs(setHostRef, hostElement?.props.ref)
+
   useLayoutEffect(() => {
-    if (!active) return
-    if (!inline) {
-      runtime.onNodeMount(node.instanceId)
-    }
-    return () => {
-      if (!inline) {
-        runtime.onNodeUnmount(node.instanceId)
-      }
-    }
+    if (!active || inline) return
+    runtime.onNodeMount(node.id)
+    return () => runtime.onNodeUnmount(node.id, node.instanceId)
   }, [active, inline, node.id, node.instanceId, runtime])
 
   useLayoutEffect(() => {
-    if (!active) return
-    runtime.onNodeCommit()
-  }, [active, props, runtime])
+    if (active && !inline) runtime.setNodeContainer(node.id, isContainer)
+  }, [active, inline, isContainer, node.id, props, runtime])
 
   if (!props || !entry) return null
 
@@ -288,40 +301,12 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
       node={node}
       resetToken={props}
       onDiagnostic={onDiagnostic}
+      onFallbackRef={inline ? undefined : setHostRef}
     >
-      {entry.adapter(props, {
-        node,
-        inline,
-        renderNode(child: ComponentNode, options?: A2uiRenderOptions) {
-          return (
-            <A2uiNodeRenderer
-              key={child.id}
-              node={child}
-              registry={registry}
-              inline={options?.inline ?? false}
-              onDiagnostic={onDiagnostic}
-              runtime={runtime}
-            />
-          )
-        }
-      })}
+      {hostElement ? cloneElement(hostElement, { ref: composedRef }) : rendered}
     </A2uiNodeErrorBoundary>
   )
 })
-
-type SurfaceStore = {
-  readonly subscribe: (listener: () => void) => () => void
-  readonly getSnapshot: () => ComponentNode | undefined
-  readonly reportDiagnostic: (diagnostic: CatalogDiagnostic) => void
-  readonly sync: (
-    surfaceId: string,
-    registry: A2uiRegistry,
-    messages: readonly A2uiMessage[],
-    onAction: ((action: A2uiActionPayload) => void) | undefined,
-    onDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined
-  ) => void
-  readonly dispose: () => void
-}
 
 function createSurfaceStore(
   initialSurfaceId: string,
@@ -330,10 +315,10 @@ function createSurfaceStore(
   initialOnAction: ((action: A2uiActionPayload) => void) | undefined,
   initialOnDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined,
   runtime: SurfaceDomRuntime
-): SurfaceStore {
+) {
   let surfaceId = initialSurfaceId
   let registry = initialRegistry
-  let processedMessages: readonly A2uiMessage[] = []
+  let processedMessages: A2uiMessage[] = []
   let reported: readonly [string, A2uiRegistry, readonly A2uiMessage[]] | undefined
   let actionHandler = initialOnAction
   let diagnosticHandler = initialOnDiagnostic
@@ -344,10 +329,8 @@ function createSurfaceStore(
   const pendingDiagnostics: CatalogDiagnostic[] = []
   const listeners = new Set<() => void>()
 
-  function notify() {
-    for (const listener of listeners) {
-      listener()
-    }
+  const notify = () => {
+    for (const listener of listeners) listener()
   }
 
   function flushDiagnostics() {
@@ -392,9 +375,7 @@ function createSurfaceStore(
     const detached = batch.map(message => cloneMessageValue(message))
     const { messages: coerced, diagnostics } = coerceA2uiMessages(detached, targetRegistry)
     if (record && diagnostics.length > 0) pendingDiagnostics.push(...diagnostics)
-    if (coerced.length > 0) {
-      target.processMessages(coerced as readonly ProcessableMessage[])
-    }
+    if (coerced.length > 0) target.processMessages(coerced as readonly ProcessableMessage[])
   }
 
   function buildEngine(
@@ -414,9 +395,8 @@ function createSurfaceStore(
       reported[1] === nextRegistry &&
       reported[2].length === wireSnapshot.length &&
       isMessagePrefix(reported[2], wireSnapshot)
-    const webCoreCatalog = nextRegistry.toWebCoreCatalog()
     processor = new MessageProcessor(
-      [webCoreCatalog],
+      [nextRegistry.toWebCoreCatalog()],
       action => {
         if (action.name === COERCED_NOOP_ACTION_NAME) return
         const state = processor?.getSurface(action.surfaceId)?.dataModel.get('/')
@@ -445,11 +425,9 @@ function createSurfaceStore(
   buildEngine(initialSurfaceId, initialRegistry, initialMessages)
 
   return {
-    subscribe(listener) {
+    subscribe(listener: () => void) {
       listeners.add(listener)
-      if (listeners.size === 1) {
-        bindRootSignal()
-      }
+      if (listeners.size === 1) bindRootSignal()
       return () => {
         listeners.delete(listener)
         if (listeners.size === 0) {
@@ -461,10 +439,16 @@ function createSurfaceStore(
     getSnapshot() {
       return resolver ? peekValue(resolver.rootNode) : undefined
     },
-    reportDiagnostic(diagnostic) {
+    reportDiagnostic(diagnostic: CatalogDiagnostic) {
       diagnosticHandler?.(diagnostic)
     },
-    sync(nextSurfaceId, nextRegistry, nextMessages, nextOnAction, nextOnDiagnostic) {
+    sync(
+      nextSurfaceId: string,
+      nextRegistry: A2uiRegistry,
+      nextMessages: readonly A2uiMessage[],
+      nextOnAction: ((action: A2uiActionPayload) => void) | undefined,
+      nextOnDiagnostic: ((diagnostic: CatalogDiagnostic) => void) | undefined
+    ) {
       actionHandler = nextOnAction
       diagnosticHandler = nextOnDiagnostic
       if (!diagnosticHandler) pendingDiagnostics.length = 0
@@ -488,9 +472,8 @@ function createSurfaceStore(
           .map(message => cloneMessageValue(message))
         if (delta.length > 0) {
           processBatch(processor, nextRegistry, delta, Boolean(diagnosticHandler))
+          processedMessages.push(...delta)
         }
-        processedMessages = [...processedMessages, ...delta]
-        reported = [nextSurfaceId, nextRegistry, processedMessages]
         if (!resolver || resolver.disposed) {
           resolver = makeResolver(processor.getSurface(nextSurfaceId))
           bindRootSignal()
@@ -532,9 +515,7 @@ export function A2uiSurface({
 
   useLayoutEffect(() => {
     runtime.setSurfaceElement(surfaceRef.current)
-    return () => {
-      runtime.setSurfaceElement(null)
-    }
+    return () => runtime.setSurfaceElement(null)
   }, [runtime])
 
   useLayoutEffect(() => {
@@ -545,17 +526,9 @@ export function A2uiSurface({
     store.sync(surfaceId, registry, messages, onAction, onDiagnostic)
   }, [store, surfaceId, registry, messages, onAction, onDiagnostic])
 
-  useEffect(() => {
-    return () => {
-      store.dispose()
-    }
-  }, [store])
+  useEffect(() => () => store.dispose(), [store])
 
   const rootNode = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
-
-  useLayoutEffect(() => {
-    runtime.onNodeCommit()
-  }, [rootNode, runtime])
 
   return (
     <div

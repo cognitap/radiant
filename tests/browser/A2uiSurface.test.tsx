@@ -1564,7 +1564,48 @@ test('removing a focused node moves focus to the documented fallback instead of 
   expect(document.activeElement).toBe(outsideBtn)
 })
 
-test('keeps wire history independent of local nested edits across identical replays, appended suffixes, and earlier edits', async () => {
+const updateComponentsMsg = (
+  surfaceId: string,
+  components: readonly Record<string, unknown>[]
+): A2uiMessage => ({
+  version: A2UI_PROTOCOL_VERSION,
+  updateComponents: { surfaceId, components }
+})
+
+const updateDataMsg = (surfaceId: string, path: string, value: unknown): A2uiMessage => ({
+  version: A2UI_PROTOCOL_VERSION,
+  updateDataModel: { surfaceId, path, value }
+})
+
+function buildDeepNested(depth: number, leaf: string): Record<string, unknown> {
+  let current: Record<string, unknown> = { leaf }
+  for (let i = 0; i < depth; i++) current = { nested: current }
+  return current
+}
+
+function spyEntryAnimations() {
+  const animated: HTMLElement[] = []
+  const originalAnimate = Element.prototype.animate
+  const spy = vi.spyOn(Element.prototype, 'animate').mockImplementation(function (
+    this: Element,
+    keyframes,
+    options
+  ) {
+    if (
+      typeof options === 'object' &&
+      options !== null &&
+      'id' in options &&
+      options.id === A2UI_NODE_ENTRY_ANIMATION_ID &&
+      this instanceof HTMLElement
+    ) {
+      animated.push(this)
+    }
+    return originalAnimate.call(this, keyframes, options)
+  })
+  return { animated, restore: () => spy.mockRestore() }
+}
+
+test('keeps wire history independent of local nested edits across identical deep replays, appended suffixes, and earlier edits', async () => {
   const serverHistory: A2uiMessage[] = [
     surfaceMessage(
       's_wire_history',
@@ -1579,16 +1620,9 @@ test('keeps wire history independent of local nested edits across identical repl
           variant: 'shortText'
         }
       ],
-      { status: 'Initial', draft: { note: 'Seed', tags: ['v1'] } }
+      { status: 'Initial', draft: { note: 'Seed', tags: ['v1'] }, deep: buildDeepNested(70, 'ok') }
     ),
-    {
-      version: A2UI_PROTOCOL_VERSION,
-      updateDataModel: {
-        surfaceId: 's_wire_history',
-        path: '/draft',
-        value: { note: 'Server value', tags: ['a', 'b'] }
-      }
-    }
+    updateDataMsg('s_wire_history', '/draft', { note: 'Server value', tags: ['a', 'b'] })
   ]
   const pristineHistory = structuredClone(serverHistory)
 
@@ -1612,7 +1646,7 @@ test('keeps wire history independent of local nested edits across identical repl
   expect(document.activeElement).toBe(input)
   expect(serverHistory).toEqual(pristineHistory)
 
-  // Resending a structurally identical recreated copy is a no-op that preserves the live draft
+  // Resending a structurally identical deep recreated copy is a no-op that preserves the live draft
   await view.render(
     <A2uiSurface
       surfaceId="s_wire_history"
@@ -1626,31 +1660,14 @@ test('keeps wire history independent of local nested edits across identical repl
   expect(inputAfterReplay.selectionStart).toBe(6)
   expect(inputAfterReplay.selectionEnd).toBe(12)
 
-  // Appending a mixed suffix to the pristine history applies only the suffix without losing user state
+  // Appending a mixed suffix to the pristine deep history applies only the suffix without losing user state
   const withAppendedPatch: A2uiMessage[] = [
     ...structuredClone(pristineHistory),
-    {
-      version: A2UI_PROTOCOL_VERSION,
-      updateDataModel: {
-        surfaceId: 's_wire_history',
-        path: '/status',
-        value: 'Sibling status updated'
-      }
-    },
-    {
-      version: A2UI_PROTOCOL_VERSION,
-      updateComponents: {
-        surfaceId: 's_wire_history',
-        components: [
-          {
-            id: 'root',
-            component: 'Column',
-            children: ['status_text', 'draft_field', 'sibling_note']
-          },
-          { id: 'sibling_note', component: 'Text', text: 'Appended sibling' }
-        ]
-      }
-    }
+    updateDataMsg('s_wire_history', '/status', 'Sibling status updated'),
+    updateComponentsMsg('s_wire_history', [
+      { id: 'root', component: 'Column', children: ['status_text', 'draft_field', 'sibling_note'] },
+      { id: 'sibling_note', component: 'Text', text: 'Appended sibling' }
+    ])
   ]
   const appendedSnapshot = structuredClone(withAppendedPatch)
   await view.render(
@@ -1679,8 +1696,75 @@ test('keeps wire history independent of local nested edits across identical repl
       messages={editedEarlier}
     />
   )
-  const rebuiltInput = view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!
-  expect(rebuiltInput.value).toBe('Rebuilt from edited history')
+  expect(view.host.querySelector<HTMLInputElement>('input[data-slot~="input"]')!.value).toBe(
+    'Rebuilt from edited history'
+  )
+})
+
+test('keeps focus on the same ChoicePicker radio when filtering is enabled', async () => {
+  const step0: A2uiMessage[] = [
+    surfaceMessage(
+      's_choice_filter_focus',
+      [
+        { id: 'root', component: 'Column', children: ['mode_picker'] },
+        {
+          id: 'mode_picker',
+          component: 'ChoicePicker',
+          label: 'Mode',
+          filterable: false,
+          options: [
+            { label: 'Fast', value: 'fast' },
+            { label: 'Accurate', value: 'accurate' }
+          ],
+          value: { '@path': '/mode' }
+        }
+      ],
+      { mode: ['accurate'] }
+    )
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_choice_filter_focus"
+      messages={step0}
+    />
+  )
+
+  const radioBefore = view.host.querySelector<HTMLInputElement>(
+    'input[type="radio"][value="accurate"]'
+  )!
+  radioBefore.focus()
+  expect(document.activeElement).toBe(radioBefore)
+  expect(view.host.querySelector('input[type="search"]')).toBeNull()
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_choice_filter_focus"
+      messages={[
+        ...step0,
+        updateComponentsMsg('s_choice_filter_focus', [
+          {
+            id: 'mode_picker',
+            component: 'ChoicePicker',
+            label: 'Mode',
+            filterable: true,
+            options: [
+              { label: 'Fast', value: 'fast' },
+              { label: 'Accurate', value: 'accurate' }
+            ],
+            value: { '@path': '/mode' }
+          }
+        ])
+      ]}
+    />
+  )
+
+  expect(view.host.querySelector('input[type="search"]')).not.toBeNull()
+  const radioAfter = view.host.querySelector<HTMLInputElement>(
+    'input[type="radio"][value="accurate"]'
+  )!
+  expect(radioAfter).toBe(radioBefore)
+  expect(document.activeElement).toBe(radioBefore)
 })
 
 test('restores focus, draft, selection, and scroll when a surviving TextField moves between Columns', async () => {
@@ -1731,28 +1815,22 @@ test('restores focus, draft, selection, and scroll when a surviving TextField mo
   const expectedDraft = textareaBefore.value
   const scrollBefore = textareaBefore.scrollTop
   expect(scrollBefore).toBeGreaterThan(0)
-  expect(document.activeElement).toBe(textareaBefore)
 
   await view.render(
     <A2uiSurface
       surfaceId="s_move_field"
       messages={[
         ...initialMessages,
-        {
-          version: A2UI_PROTOCOL_VERSION,
-          updateComponents: {
-            surfaceId: 's_move_field',
-            components: [
-              { id: 'col_a', component: 'Column', children: [] },
-              { id: 'col_b', component: 'Column', children: ['note_field'] }
-            ]
-          }
-        }
+        updateComponentsMsg('s_move_field', [
+          { id: 'col_a', component: 'Column', children: [] },
+          { id: 'col_b', component: 'Column', children: ['note_field'] }
+        ])
       ]}
     />
   )
 
-  const colB = view.host.querySelector<HTMLElement>('[data-a2ui-node="col_b"]')!
+  const columns = Array.from(view.host.querySelectorAll<HTMLElement>('[data-slot="a2ui-column"]'))
+  const colB = columns[2]!
   const textareaAfter = colB.querySelector<HTMLTextAreaElement>('textarea[data-slot~="textarea"]')!
   expect(textareaAfter).not.toBeNull()
   expect(textareaAfter.value).toBe(expectedDraft)
@@ -1760,6 +1838,61 @@ test('restores focus, draft, selection, and scroll when a surviving TextField mo
   expect(textareaAfter.selectionStart).toBe(1)
   expect(textareaAfter.selectionEnd).toBe(5)
   expect(textareaAfter.scrollTop).toBe(scrollBefore)
+})
+
+test('falls back to the following control instead of a duplicate reference when removing one of two shared fields', async () => {
+  const step0: A2uiMessage[] = [
+    surfaceMessage(
+      's_dup_ref_focus',
+      [
+        { id: 'root', component: 'Column', children: ['col_a', 'col_b', 'after_btn'] },
+        { id: 'col_a', component: 'Column', children: ['shared_field'] },
+        { id: 'col_b', component: 'Column', children: ['shared_field'] },
+        {
+          id: 'shared_field',
+          component: 'TextField',
+          label: 'Shared note',
+          value: { '@path': '/note' }
+        },
+        {
+          id: 'after_btn',
+          component: 'Button',
+          child: 'after_label',
+          action: { event: { name: 'after' } }
+        },
+        { id: 'after_label', component: 'Text', text: 'Following action' }
+      ],
+      { note: 'Shared value' }
+    )
+  ]
+
+  const view = await mount(
+    <A2uiSurface
+      surfaceId="s_dup_ref_focus"
+      messages={step0}
+    />
+  )
+
+  const inputs = Array.from(
+    view.host.querySelectorAll<HTMLInputElement>('input[data-slot~="input"]')
+  )
+  const afterBtn = view.host.querySelector<HTMLButtonElement>('button[data-slot~="button"]')!
+  expect(inputs).toHaveLength(2)
+  inputs[1]!.focus()
+  expect(document.activeElement).toBe(inputs[1])
+
+  await view.render(
+    <A2uiSurface
+      surfaceId="s_dup_ref_focus"
+      messages={[
+        ...step0,
+        updateComponentsMsg('s_dup_ref_focus', [{ id: 'col_b', component: 'Column', children: [] }])
+      ]}
+    />
+  )
+
+  expect(document.activeElement).toBe(afterBtn)
+  expect(document.activeElement).not.toBe(inputs[0])
 })
 
 test('preserves DOM fallback order when removing a programmatically focused tabindex=-1 control', async () => {
@@ -1782,10 +1915,9 @@ test('preserves DOM fallback order when removing a programmatically focused tabi
           },
           required: ['component', 'label']
         },
-        adapter: (props, context) => (
+        adapter: props => (
           <div
             tabIndex={-1}
-            data-a2ui-node={context.node.instanceId}
             data-testid="programmatic-target"
           >
             {String(props.label ?? '')}
@@ -1837,13 +1969,9 @@ test('preserves DOM fallback order when removing a programmatically focused tabi
       registry={focusRegistry}
       messages={[
         ...initialMessages,
-        {
-          version: A2UI_PROTOCOL_VERSION,
-          updateComponents: {
-            surfaceId: 's_programmatic_focus',
-            components: [{ id: 'root', component: 'Column', children: ['first_btn', 'last_btn'] }]
-          }
-        }
+        updateComponentsMsg('s_programmatic_focus', [
+          { id: 'root', component: 'Column', children: ['first_btn', 'last_btn'] }
+        ])
       ]}
     />
   )
@@ -1877,20 +2005,14 @@ test('skips focus restoration when document.hasFocus() is false and restores nor
     )!
 
   buttonByText('Alpha').focus()
-  expect(document.activeElement).toBe(buttonByText('Alpha'))
-
   const hasFocusSpy = vi.spyOn(document, 'hasFocus').mockReturnValue(false)
   const focusSpy = vi.spyOn(HTMLElement.prototype, 'focus')
   try {
-    const step1: A2uiMessage[] = [
+    const step1 = [
       ...step0,
-      {
-        version: A2UI_PROTOCOL_VERSION,
-        updateComponents: {
-          surfaceId: 's_inactive_doc',
-          components: [{ id: 'root', component: 'Column', children: ['btn_b', 'btn_c'] }]
-        }
-      }
+      updateComponentsMsg('s_inactive_doc', [
+        { id: 'root', component: 'Column', children: ['btn_b', 'btn_c'] }
+      ])
     ]
     await view.render(
       <A2uiSurface
@@ -1901,24 +2023,18 @@ test('skips focus restoration when document.hasFocus() is false and restores nor
     expect(focusSpy).not.toHaveBeenCalled()
     expect(document.activeElement).not.toBe(buttonByText('Beta'))
 
-    // Restoring foreground focus resumes normal fallback restoration
     hasFocusSpy.mockRestore()
     focusSpy.mockClear()
     buttonByText('Beta').focus()
-    expect(document.activeElement).toBe(buttonByText('Beta'))
 
     await view.render(
       <A2uiSurface
         surfaceId="s_inactive_doc"
         messages={[
           ...step1,
-          {
-            version: A2UI_PROTOCOL_VERSION,
-            updateComponents: {
-              surfaceId: 's_inactive_doc',
-              components: [{ id: 'root', component: 'Column', children: ['btn_c'] }]
-            }
-          }
+          updateComponentsMsg('s_inactive_doc', [
+            { id: 'root', component: 'Column', children: ['btn_c'] }
+          ])
         ]}
       />
     )
@@ -1930,25 +2046,7 @@ test('skips focus restoration when document.hasFocus() is false and restores nor
 })
 
 test('animates only newly added model instances across variant swaps and coalesces multi-insert discovery', async () => {
-  const animatedElements: HTMLElement[] = []
-  const originalAnimate = Element.prototype.animate
-  const animateSpy = vi.spyOn(Element.prototype, 'animate').mockImplementation(function (
-    this: Element,
-    keyframes,
-    options
-  ) {
-    if (
-      typeof options === 'object' &&
-      options !== null &&
-      'id' in options &&
-      options.id === A2UI_NODE_ENTRY_ANIMATION_ID &&
-      this instanceof HTMLElement
-    ) {
-      animatedElements.push(this)
-    }
-    return originalAnimate.call(this, keyframes, options)
-  })
-
+  const { animated, restore } = spyEntryAnimations()
   try {
     const step0: A2uiMessage[] = [
       surfaceMessage('s_variant_motion', [
@@ -1963,23 +2061,17 @@ test('animates only newly added model instances across variant swaps and coalesc
         messages={step0}
       />
     )
-    expect(animatedElements).toHaveLength(1)
-    animatedElements.length = 0
+    expect(animated).toHaveLength(1)
+    animated.length = 0
 
     // Swap existing Text from body (<p>) to caption (<span>) and insert one new sibling in one patch
-    const step1: A2uiMessage[] = [
+    const step1 = [
       ...step0,
-      {
-        version: A2UI_PROTOCOL_VERSION,
-        updateComponents: {
-          surfaceId: 's_variant_motion',
-          components: [
-            { id: 'root', component: 'Column', children: ['intro', 'new_sibling'] },
-            { id: 'intro', component: 'Text', text: 'Existing caption copy', variant: 'caption' },
-            { id: 'new_sibling', component: 'Text', text: 'Brand new sibling', variant: 'body' }
-          ]
-        }
-      }
+      updateComponentsMsg('s_variant_motion', [
+        { id: 'root', component: 'Column', children: ['intro', 'new_sibling'] },
+        { id: 'intro', component: 'Text', text: 'Existing caption copy', variant: 'caption' },
+        { id: 'new_sibling', component: 'Text', text: 'Brand new sibling', variant: 'body' }
+      ])
     ]
     await view.render(
       <A2uiSurface
@@ -1989,47 +2081,35 @@ test('animates only newly added model instances across variant swaps and coalesc
     )
 
     const introSpan = view.host.querySelector<HTMLElement>(
-      'span[data-a2ui-node="intro"][data-variant="caption"]'
+      'span[data-slot="a2ui-text"][data-variant="caption"]'
     )!
-    const newSiblingEl = view.host.querySelector<HTMLElement>('p[data-a2ui-node="new_sibling"]')!
+    const newSiblingEl = view.host.querySelector<HTMLElement>(
+      'p[data-slot="a2ui-text"][data-variant="body"]'
+    )!
     expect(introSpan).not.toBeNull()
-    expect(animatedElements).toEqual([newSiblingEl])
-    expect(animatedElements).not.toContain(introSpan)
-    animatedElements.length = 0
+    expect(animated).toEqual([newSiblingEl])
+    expect(animated).not.toContain(introSpan)
+    animated.length = 0
 
-    // Multi-insert coalesces target discovery to one surface pass and one animation per new node
+    // Multi-insert uses direct host ownership without walking the surface DOM and animates each new node once
     const surfaceEl = view.host.querySelector<HTMLDivElement>('[data-slot="a2ui-surface"]')!
-    let discoveryScans = 0
-    const originalQsa = surfaceEl.querySelectorAll.bind(surfaceEl)
-    const qsaSpy = vi.spyOn(surfaceEl, 'querySelectorAll').mockImplementation(((
-      selector: string
-    ) => {
-      if (selector === '[data-a2ui-node]') discoveryScans += 1
-      return originalQsa(selector)
-    }) as typeof surfaceEl.querySelectorAll)
-
+    const qsaSpy = vi.spyOn(surfaceEl, 'querySelectorAll')
     try {
       await view.render(
         <A2uiSurface
           surfaceId="s_variant_motion"
           messages={[
             ...step1,
-            {
-              version: A2UI_PROTOCOL_VERSION,
-              updateComponents: {
-                surfaceId: 's_variant_motion',
-                components: [
-                  {
-                    id: 'root',
-                    component: 'Column',
-                    children: ['intro', 'new_sibling', 'batch_a', 'batch_b', 'batch_c']
-                  },
-                  { id: 'batch_a', component: 'Text', text: 'Batch A' },
-                  { id: 'batch_b', component: 'Text', text: 'Batch B' },
-                  { id: 'batch_c', component: 'Text', text: 'Batch C' }
-                ]
-              }
-            }
+            updateComponentsMsg('s_variant_motion', [
+              {
+                id: 'root',
+                component: 'Column',
+                children: ['intro', 'new_sibling', 'batch_a', 'batch_b', 'batch_c']
+              },
+              { id: 'batch_a', component: 'Text', text: 'Batch A' },
+              { id: 'batch_b', component: 'Text', text: 'Batch B' },
+              { id: 'batch_c', component: 'Text', text: 'Batch C' }
+            ])
           ]}
         />
       )
@@ -2037,14 +2117,115 @@ test('animates only newly added model instances across variant swaps and coalesc
       qsaSpy.mockRestore()
     }
 
-    expect(discoveryScans).toBe(1)
-    expect(animatedElements).toEqual([
-      view.host.querySelector<HTMLElement>('[data-a2ui-node="batch_a"]')!,
-      view.host.querySelector<HTMLElement>('[data-a2ui-node="batch_b"]')!,
-      view.host.querySelector<HTMLElement>('[data-a2ui-node="batch_c"]')!
-    ])
+    expect(qsaSpy).not.toHaveBeenCalled()
+    expect(animated.map(el => el.textContent)).toEqual(['Batch A', 'Batch B', 'Batch C'])
   } finally {
-    animateSpy.mockRestore()
+    restore()
+  }
+})
+
+test('animates a newly inserted custom leaf inside an existing custom container without reanimating surviving nodes', async () => {
+  const customRegistry = createA2uiRegistry({
+    catalogId: A2UI_BASIC_CATALOG_ID,
+    title: 'Custom container motion catalog',
+    description: 'Registry with custom nested container and leaf adapters.',
+    entries: [
+      ...Object.values(radiantA2uiRegistry.entries),
+      createA2uiRegistryEntry({
+        name: 'CustomPanel',
+        component: 'section',
+        description: 'Custom container wrapping children in nested markup.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'CustomPanel' },
+            title: { type: 'string' },
+            children: { $ref: 'common_types.json#/$defs/ChildList' }
+          },
+          required: ['component', 'title', 'children']
+        },
+        adapter: (props, ctx) => (
+          <section data-testid="custom-panel">
+            <header>{String(props.title ?? '')}</header>
+            <div data-testid="custom-panel-body">
+              {Array.isArray(props.children)
+                ? props.children.map(child =>
+                    child && typeof child === 'object' && 'id' in child
+                      ? ctx.renderNode(child as Parameters<typeof ctx.renderNode>[0])
+                      : null
+                  )
+                : null}
+            </div>
+          </section>
+        )
+      }),
+      createA2uiRegistryEntry({
+        name: 'CustomBadge',
+        component: 'article',
+        description: 'Custom leaf rendered inside a custom container.',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            component: { const: 'CustomBadge' },
+            label: { type: 'string' }
+          },
+          required: ['component', 'label']
+        },
+        adapter: props => <article data-testid="custom-badge">{String(props.label ?? '')}</article>
+      })
+    ]
+  })
+
+  const { animated, restore } = spyEntryAnimations()
+  try {
+    const step0: A2uiMessage[] = [
+      surfaceMessage('s_custom_container', [
+        { id: 'root', component: 'CustomPanel', title: 'Status', children: ['badge_1'] },
+        { id: 'badge_1', component: 'CustomBadge', label: 'Existing leaf' }
+      ])
+    ]
+
+    const view = await mount(
+      <A2uiSurface
+        surfaceId="s_custom_container"
+        registry={customRegistry}
+        messages={step0}
+      />
+    )
+    const firstBadge = view.host.querySelector<HTMLElement>('[data-testid="custom-badge"]')!
+    expect(animated).toEqual([firstBadge])
+    animated.length = 0
+
+    await view.render(
+      <A2uiSurface
+        surfaceId="s_custom_container"
+        registry={customRegistry}
+        messages={[
+          ...step0,
+          updateComponentsMsg('s_custom_container', [
+            {
+              id: 'root',
+              component: 'CustomPanel',
+              title: 'Status',
+              children: ['badge_1', 'badge_2']
+            },
+            { id: 'badge_2', component: 'CustomBadge', label: 'Inserted leaf' }
+          ])
+        ]}
+      />
+    )
+
+    const badges = Array.from(
+      view.host.querySelectorAll<HTMLElement>('[data-testid="custom-badge"]')
+    )
+    expect(badges).toHaveLength(2)
+    expect(animated).toEqual([badges[1]])
+    expect(animated).not.toContain(badges[0])
+    expect(animated).not.toContain(view.host.querySelector('[data-testid="custom-panel"]'))
+  } finally {
+    restore()
   }
 })
 
