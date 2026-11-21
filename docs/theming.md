@@ -98,7 +98,7 @@ Shared geometry:
 
 ## Spacing scale
 
-`tokens.spacing.tight`, `normal`, and `airy` (`--rad-spacing-tight`, and so on) are the semantic gap steps that the model-facing catalog names. `normal` equals `surface.gap`. Role-named tokens (`labelGap`, `fieldGap`, `surface.gap`, `surface.padding`) stay independent and keep owning today's layout.
+`tokens.spacing.tight`, `normal`, and `airy` (`--rad-spacing-tight`, and so on) are the semantic gap steps that the model-facing catalog names for layout `gap` props. `normal` defaults to the same 1rem as `surface.gap` but does not follow it. Role-named tokens (`labelGap`, `fieldGap`, `surface.gap`, `surface.padding`) stay independent and keep owning today's layout.
 
 Padding and density keep their own steps, so `normal` is today's value and `airy` cell padding is not a layout gap:
 
@@ -106,6 +106,8 @@ Padding and density keep their own steps, so `normal` is today's value and `airy
 | ----------------- | ------------------------------------------- | -------------------------------- | --------------------------------------------------------------- |
 | `Card` `padding`  | `card.padding`, then `surface.padding`      | Two thirds / four thirds of it   | `card.paddingTight`, `card.paddingAiry`                         |
 | `Table` `density` | `table.paddingInline`, `table.paddingBlock` | Two thirds / four thirds of each | `table.paddingInlineTight`, `table.paddingBlockAiry`, and so on |
+
+The derived steps scale a single length. When a base padding is a shorthand such as `1rem 2rem`, set both step overrides. Step overrides resolve on the `Card` or `Table` element, so a theme step override wins over a base override set on one instance.
 
 ## Presets
 
