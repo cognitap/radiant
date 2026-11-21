@@ -241,6 +241,9 @@
   --rad-motion-press-shift-x: 0px;
   --rad-motion-press-shift-y: 0px;
   --rad-motion-hover-lift: 0px;
+  --rad-spacing-tight: 0.5rem;
+  --rad-spacing-normal: 1rem;
+  --rad-spacing-airy: 1.5rem;
   --rad-spacing-label-gap: 0.5rem;
   --rad-spacing-field-gap: 0.375rem;
   --rad-spacing-group-gap: 0.75rem;

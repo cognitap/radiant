@@ -8,6 +8,7 @@
 - Add `@cognitap/radiant/a2ui` with `A2uiSurface`, the A2UI 1.0 component registry, and generated `catalog.json` for rendering A2UI surfaces with Radiant components.
 - Coerce invalid, missing, forbidden, and mixed controlled/uncontrolled props at the A2UI boundary, isolate failing nodes inside per-node text-fallback error boundaries, and report structured diagnostics via `onDiagnostic` and `summarizeCatalogDiagnostics`.
 - Add the protocol-independent `CatalogActionEvent` contract (`{ action, surfaceId, nodeId, state }`) in `@cognitap/radiant/catalog`, bind `CheckBox`, `ChoicePicker`, and `Slider` to client-local surface state in `@cognitap/radiant/a2ui`, and deliver immutable state snapshots on named outbound actions.
+- Add the themeable `tight | normal | airy` spacing scale (`--rad-spacing-tight`, `-normal`, `-airy`), `Card` `padding` and `Table` `density` steps with per-step component overrides, and the `Spacing` type.
 - Merge incremental A2UI surface patches by stable node ID against detached wire history to preserve local state, focus, scroll position, and drags, animate newly added rendered instances once, and restore lost focus in active documents.
 
 ## 0.0.91

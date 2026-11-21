@@ -859,8 +859,13 @@ const cardProps: CardProps = {
   'aria-labelledby': 'ship',
   ref: createRef<HTMLDivElement>(),
   style: { '--rad-card-padding': '1rem' },
-  'data-slot': 'product'
+  'data-slot': 'product',
+  padding: 'airy'
 }
+const cardPaddingStep: Radiant.Spacing = 'tight'
+createElement(Card, { padding: cardPaddingStep })
+// @ts-expect-error Card padding is a step of the theme spacing scale, not a length.
+createElement(Card, { padding: '1rem' })
 const cardTitleProps: CardTitleProps = {
   id: 'ship',
   level: 3,

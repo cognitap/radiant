@@ -4,26 +4,39 @@ import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import type { Spacing } from '../../presentation.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
 
-const cardVariants = cva([
-  colorMotionClass,
-  'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
-  'box-border grid w-full min-w-0 gap-[var(--rad-card-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
-  'rounded-[var(--rad-card-radius,var(--rad-surface-radius,0.75rem))]',
-  '[corner-shape:var(--rad-card-corner-shape,var(--rad-surface-corner-shape,round))]',
-  '[border-width:var(--rad-card-border-width,var(--rad-surface-border-width,1px))]',
-  '[border-style:var(--rad-card-border-style,var(--rad-surface-border-style,solid))]',
-  '[border-color:var(--rad-card-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
-  'bg-[var(--rad-card-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  '[color:var(--rad-card-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
-  'p-[var(--rad-card-padding,var(--rad-surface-padding,1.5rem))]',
-  '[box-shadow:var(--rad-card-shadow,var(--rad-surface-shadow,0_1px_2px_0_rgb(0_0_0/0.06)))]',
-  '[backdrop-filter:var(--rad-surface-backdrop-filter,none)]',
-  'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:shadow-none'
-])
+const cardVariants = cva(
+  [
+    colorMotionClass,
+    'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
+    'box-border grid w-full min-w-0 gap-[var(--rad-card-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
+    'rounded-[var(--rad-card-radius,var(--rad-surface-radius,0.75rem))]',
+    '[corner-shape:var(--rad-card-corner-shape,var(--rad-surface-corner-shape,round))]',
+    '[border-width:var(--rad-card-border-width,var(--rad-surface-border-width,1px))]',
+    '[border-style:var(--rad-card-border-style,var(--rad-surface-border-style,solid))]',
+    '[border-color:var(--rad-card-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
+    'bg-[var(--rad-card-background,var(--rad-color-surface,oklch(1_0_0)))]',
+    '[color:var(--rad-card-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))]',
+    '[box-shadow:var(--rad-card-shadow,var(--rad-surface-shadow,0_1px_2px_0_rgb(0_0_0/0.06)))]',
+    '[backdrop-filter:var(--rad-surface-backdrop-filter,none)]',
+    'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:shadow-none'
+  ],
+  {
+    variants: {
+      padding: {
+        tight:
+          'p-[var(--rad-card-padding-tight,calc(var(--rad-card-padding,var(--rad-surface-padding,1.5rem))*2/3))]',
+        normal: 'p-[var(--rad-card-padding,var(--rad-surface-padding,1.5rem))]',
+        airy: 'p-[var(--rad-card-padding-airy,calc(var(--rad-card-padding,var(--rad-surface-padding,1.5rem))*4/3))]'
+      }
+    },
+    defaultVariants: { padding: 'normal' }
+  }
+)
 
 const cardHeaderVariants = cva([
   'grid min-w-0 gap-[var(--rad-card-header-gap,var(--rad-spacing-header-gap,0.375rem))]'
@@ -61,7 +74,10 @@ type CardPartProps<Host extends 'div' | 'h2' | 'p'> = Omit<ComponentProps<Host>,
 }
 
 /** Passive div host. Compose native actions, form state and dedicated motion wrappers explicitly. */
-export type CardProps = CardPartProps<'div'>
+export type CardProps = CardPartProps<'div'> & {
+  /** Step of the card padding scale; `normal` keeps `--rad-card-padding`. */
+  padding?: Spacing
+}
 
 export type CardHeaderProps = CardPartProps<'div'>
 
@@ -76,11 +92,11 @@ export type CardContentProps = CardPartProps<'div'>
 
 export type CardFooterProps = CardPartProps<'div'>
 
-export function Card({ className, ...props }: CardProps) {
+export function Card({ padding, className, ...props }: CardProps) {
   return (
     <div
       {...props}
-      className={cn(cardVariants(), className)}
+      className={cn(cardVariants({ padding }), className)}
       data-slot={joinIds('card', props['data-slot'])}
     />
   )

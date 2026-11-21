@@ -7,6 +7,8 @@ type ActionPresentation = VariantProps<typeof actionVariants>
 export type ButtonVariant = NonNullable<ActionPresentation['variant']>
 export type Tone = NonNullable<ActionPresentation['tone']>
 export type ControlSize = 'small' | 'medium' | 'large'
+/** Steps of the theme spacing scale: `tight`, `normal` (the default) and `airy`. */
+export type Spacing = 'tight' | 'normal' | 'airy'
 export type Orientation = 'horizontal' | 'vertical'
 
 export type PartStyle = { className?: string; style?: ThemeStyle }

@@ -175,7 +175,11 @@ export interface SharedTokens {
     pressShiftY: string
     hoverLift: string
   }
+  /** `tight`, `normal` and `airy` form the semantic gap scale; the role-named gaps stay independent. */
   spacing: {
+    tight: string
+    normal: string
+    airy: string
     labelGap: string
     fieldGap: string
     groupGap: string
@@ -360,6 +364,9 @@ const light: SharedTokens = {
     hoverLift: '0px'
   },
   spacing: {
+    tight: '0.5rem',
+    normal: '1rem',
+    airy: '1.5rem',
     labelGap: '0.5rem',
     fieldGap: '0.375rem',
     groupGap: '0.75rem',

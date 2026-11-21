@@ -111,6 +111,28 @@ export const WithForm: Story = {
   )
 }
 
+export const Padding: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The theme decides how much space each `padding` step is; `normal` is the default.'
+      }
+    }
+  },
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: '24rem' }}>
+      {(['tight', 'normal', 'airy'] as const).map(padding => (
+        <Card
+          key={padding}
+          padding={padding}
+        >
+          <CardTitle level={3}>{padding}</CardTitle>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
 export const Customisation: Story = {
   render: () => (
     <Card
