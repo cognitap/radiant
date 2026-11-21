@@ -10,7 +10,17 @@ const config: StorybookConfig = {
   viteFinal(config) {
     return mergeConfig(config, {
       plugins: [tailwindcss()],
-      optimizeDeps: { include: ['@tanstack/react-form', 'cn', 'cn/config', 'react-dom'] }
+      optimizeDeps: {
+        include: [
+          '@tanstack/react-form',
+          'cn',
+          'cn/config',
+          'react-dom',
+          '@a2ui/web_core',
+          '@a2ui/web_core/errors',
+          '@a2ui/web_core/expressions'
+        ]
+      }
     })
   },
   core: {

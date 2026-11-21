@@ -200,19 +200,25 @@ function StreamedSurfaceDemo({
   )
 }
 
-function InputsAndChecksDemo() {
-  const [messages, setMessages] = useState<readonly A2uiMessage[]>(tripRequestFixtureMessages)
+function InputsAndChecksDemo({
+  surfaceId,
+  messages: initialMessages
+}: {
+  surfaceId: string
+  messages: readonly A2uiMessage[]
+}) {
+  const [messages, setMessages] = useState<readonly A2uiMessage[]>(initialMessages)
   const [context, setContext] = useState<string | null>(null)
   // Stands in for the agent: it reads the action context and replies with failed checks.
   const handleAction = useCallback((event: A2uiActionPayload) => {
     setContext(JSON.stringify(event.context))
-    setMessages([...tripRequestFixtureMessages, ...tripRequestRejectionMessages])
+    setMessages(previous => [...previous, ...tripRequestRejectionMessages])
   }, [])
 
   return (
     <div className="grid max-w-md gap-4">
       <A2uiSurface
-        surfaceId={TRIP_SURFACE_ID}
+        surfaceId={surfaceId}
         messages={messages}
         onAction={handleAction}
       />
@@ -358,7 +364,12 @@ export const InputsAndChecks: Story = {
     surfaceId: TRIP_SURFACE_ID,
     messages: tripRequestFixtureMessages
   },
-  render: () => <InputsAndChecksDemo />,
+  render: args => (
+    <InputsAndChecksDemo
+      surfaceId={args.surfaceId}
+      messages={args.messages}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const date = canvas.getByLabelText('Departure date')
@@ -371,11 +382,11 @@ export const InputsAndChecks: Story = {
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Wi-Fi' }))
     await userEvent.click(canvas.getByRole('button', { name: 'Request trip' }))
 
-    await expect(canvas.getByTestId('a2ui-action-context')).toHaveTextContent(
-      '"traveler":"Ada","departureDate":"2026-03-14"'
-    )
-    await expect(canvas.getByText('Choose a date with seats left.')).toBeVisible()
+    const context = canvas.getByTestId('a2ui-action-context')
+    await expect(context).toHaveTextContent('"traveler":"Ada"')
+    await expect(context).toHaveTextContent('"departureDate":"2026-03-14"')
+    await expect(canvas.getByText('Only March 20 has seats left.')).toBeVisible()
     await expect(date).toHaveAttribute('aria-invalid', 'true')
-    await expect(date).toHaveAccessibleDescription('Choose a date with seats left.')
+    await expect(date).toHaveAccessibleDescription('Only March 20 has seats left.')
   }
 }

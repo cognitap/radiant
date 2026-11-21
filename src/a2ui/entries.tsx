@@ -40,6 +40,12 @@ import {
   type A2uiBoundValue,
   type A2uiRejectedUrl
 } from './media.js'
+import {
+  fromNativeDateTime,
+  toNativeBound,
+  toNativeDateTime,
+  type DateTimeInputType
+} from './dateTimeValue.js'
 
 function unwrapDisplayText(value: unknown): string {
   const raw = value instanceof ResolvedBinding ? value.value : value
@@ -651,22 +657,6 @@ const audioPlayerEntry = createA2uiRegistryEntry({
   }
 })
 
-type DateTimeInputType = 'date' | 'time' | 'datetime-local'
-
-/** Trims an ISO 8601 value to what the native input type accepts, without shifting time zones. */
-function toNativeDateTime(value: string, type: DateTimeInputType): string {
-  const [datePart = '', timePart = ''] = value.includes('T')
-    ? value.split('T')
-    : value.includes(':')
-      ? ['', value]
-      : [value, '']
-  const date = /^\d{4}-\d{2}-\d{2}/.test(datePart) ? datePart.slice(0, 10) : ''
-  const time = /^\d{2}:\d{2}/.test(timePart) ? timePart.slice(0, 5) : ''
-  if (type === 'date') return date
-  if (type === 'time') return time
-  return date && time ? `${date}T${time}` : ''
-}
-
 const dateTimeInputEntry = createA2uiRegistryEntry({
   name: 'DateTimeInput',
   accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
@@ -679,7 +669,9 @@ const dateTimeInputEntry = createA2uiRegistryEntry({
     const enableTime = unwrapBoolean(props.enableTime) === true
     const type: DateTimeInputType =
       enableDate && enableTime ? 'datetime-local' : enableTime ? 'time' : 'date'
-    const bound = (raw: unknown) => toNativeDateTime(unwrapString(raw) ?? '', type) || undefined
+    const current = unwrapString(props.value) ?? ''
+    const bound = (raw: unknown, edge: 'min' | 'max') =>
+      toNativeBound(unwrapString(raw) ?? '', type, edge)
 
     return (
       <Field
@@ -689,10 +681,12 @@ const dateTimeInputEntry = createA2uiRegistryEntry({
       >
         <Input
           type={type}
-          value={toNativeDateTime(unwrapString(props.value) ?? '', type)}
-          min={bound(props.min)}
-          max={bound(props.max)}
-          onChange={event => writeBinding(props.value, event.currentTarget.value)}
+          value={toNativeDateTime(current, type)}
+          min={bound(props.min, 'min')}
+          max={bound(props.max, 'max')}
+          onChange={event =>
+            writeBinding(props.value, fromNativeDateTime(event.currentTarget.value, type, current))
+          }
         />
       </Field>
     )

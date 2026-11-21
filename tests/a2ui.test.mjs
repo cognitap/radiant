@@ -38,6 +38,16 @@ test('generated A2UI catalog JSON matches radiantA2uiRegistry and loads into @a2
     'TextField',
     'Video'
   ])
+  // Basic-catalog functions load too; openUrl is left to the host
+  const functionNames = [...parsed.functions.keys()]
+  assert.ok(functionNames.includes('required') && functionNames.includes('email'))
+  assert.ok(!functionNames.includes('openUrl'))
+  assert.deepEqual(
+    onDisk.$defs.anyFunction.oneOf.map(ref => ref.$ref),
+    Object.keys(onDisk.functions).map(name => `#/functions/${name}`)
+  )
+  const executable = radiantA2uiRegistry.toWebCoreCatalog('de-DE')
+  assert.deepEqual([...executable.functions.keys()].sort(), [...functionNames].sort())
 })
 
 test('createA2uiRegistryEntry rejects forbidden host styling, render, handler, and ARIA props', () => {

@@ -20,6 +20,7 @@ export const tripRequestFixtureMessages: readonly A2uiMessage[] = [
       dataModel: {
         trip: {
           traveler: '',
+          email: 'ada@example.com',
           departureDate: '',
           departureTime: '',
           returnAt: '',
@@ -45,6 +46,7 @@ export const tripRequestFixtureMessages: readonly A2uiMessage[] = [
           component: 'Column',
           children: [
             'traveler_field',
+            'email_field',
             'departure_date',
             'departure_time',
             'return_at',
@@ -61,6 +63,16 @@ export const tripRequestFixtureMessages: readonly A2uiMessage[] = [
           label: 'Traveler name',
           value: { '@path': '/trip/traveler' },
           checks: check('traveler', 'Enter the name shown on the passport.')
+        },
+        {
+          id: 'email_field',
+          component: 'TextField',
+          label: 'Contact email',
+          value: { '@path': '/trip/email' },
+          checks: [
+            { condition: { '@call': 'required', args: { value: { '@path': '/trip/email' } } } },
+            { condition: { '@call': 'email', args: { value: { '@path': '/trip/email' } } } }
+          ]
         },
         {
           id: 'departure_date',
@@ -140,6 +152,7 @@ export const tripRequestFixtureMessages: readonly A2uiMessage[] = [
               name: 'request_trip',
               context: {
                 traveler: { '@path': '/trip/traveler' },
+                email: { '@path': '/trip/email' },
                 departureDate: { '@path': '/trip/departureDate' },
                 departureTime: { '@path': '/trip/departureTime' },
                 returnAt: { '@path': '/trip/returnAt' },
@@ -157,7 +170,10 @@ export const tripRequestFixtureMessages: readonly A2uiMessage[] = [
   }
 ]
 
-/** The agent's reply to `request_trip`: every check fails, so each input shows its message. */
+/**
+ * The agent's reply to `request_trip`: every flag check fails, so each input shows its message.
+ * The departure date gets a `{ valid, message }` result whose message replaces the check's own.
+ */
 export const tripRequestRejectionMessages: readonly A2uiMessage[] = [
   {
     version: A2UI_PROTOCOL_VERSION,
@@ -166,7 +182,7 @@ export const tripRequestRejectionMessages: readonly A2uiMessage[] = [
       path: '/validity',
       value: {
         traveler: false,
-        departureDate: false,
+        departureDate: { valid: false, message: 'Only March 20 has seats left.' },
         departureTime: false,
         returnAt: false,
         cabin: false,

@@ -7,7 +7,8 @@
 - Add `Stack`, a one-dimensional flex layout with `orientation`, `gap` from the theme spacing scale, `align`, `justify`, and `wrap`.
 - Breaking: catalog entries, including `extendCatalog` entries, require `guidance` (`{ whenToUse, whenNotToUse, examples: [string, string] }`) within `CATALOG_GUIDANCE_TOKEN_BUDGET`, with props written as `` `prop: value` `` spans the entry accepts; before, `guidance` was optional with optional examples. `@cognitap/radiant/catalog` adds `renderCatalogGuidance`, `renderCatalogInstructions`, `describeCatalogEntry` and `estimateCatalogTokens`. Generated A2UI catalogs carry wire-correct guidance in each description and per-catalog `instructions`.
 - Render A2UI `Icon`, `Image`, `Video`, and `AudioPlayer` with native elements and controls, map icon names and check media URLs through `A2uiMediaProvider` (`icons`, `urlPolicy`; `lucideA2uiIcons` from `@cognitap/radiant/a2ui/lucide` for the optional `lucide-react` peer), add the `imageAltRule` and `mediaNameRule` accessibility rules, and pass an optional `reportDiagnostic` to registry adapters.
-- Render the A2UI `DateTimeInput` as a native `date`, `time`, or `datetime-local` Radiant `Input` bound to the data model, with failed `checks` shown as its `Field` error.
+- Render the A2UI `DateTimeInput` as a native `date`, `time`, or `datetime-local` Radiant `Input` bound to the data model, with failed `checks` shown as its `Field` error; zoned values show in local time and save in UTC.
+- Run the A2UI basic-catalog functions (`required`, `email`, `regex`, `length`, `numeric`, `and`, `or`, `not`, and formatting) in `checks` and bindings, formatting in the `LocaleProvider` locale, and list them in `catalog.json`; `openUrl` is omitted so navigation stays with the host.
 
 ## 0.0.92
 

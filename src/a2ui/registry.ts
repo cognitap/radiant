@@ -18,6 +18,7 @@ import {
   type A2uiJsonSchema
 } from './catalogGenerator.js'
 import type { A2uiAccessibilityRule } from './accessibilityRules.js'
+import { a2uiBasicFunctionSchemas, createA2uiBasicFunctions } from './basicFunctions.js'
 
 const ENTRY_NAME_PATTERN = /^[A-Z][A-Za-z0-9]*$/
 
@@ -81,7 +82,8 @@ export type A2uiRegistry = {
   readonly instructions?: string
   readonly entries: Readonly<Record<string, A2uiRegistryEntry>>
   toCatalogJson(): A2uiCatalogDocument
-  toWebCoreCatalog(): WebCoreCatalog<ComponentApi, FunctionImplementation>
+  /** The executable catalog, with basic functions that format in `locale`. */
+  toWebCoreCatalog(locale?: string): WebCoreCatalog<ComponentApi, FunctionImplementation>
 }
 
 function findForbiddenInA2uiSchema(schema: A2uiJsonSchema, path: string): readonly string[] {
@@ -188,6 +190,7 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
         description: renameEntryReferences(entry.description, names)
       }
     }
+    const fns = a2uiBasicFunctionSchemas()
     return {
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       $id: input.catalogId,
@@ -197,13 +200,13 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
       description: input.description,
       ...(input.instructions === undefined ? {} : { instructions: input.instructions }),
       components,
-      functions: {},
+      functions: fns.functions,
       $defs: {
         anyComponent: {
           oneOf: Object.keys(components).map(name => ({ $ref: `#/components/${name}` })),
           discriminator: { propertyName: 'component' }
         },
-        anyFunction: { not: {} },
+        anyFunction: fns.anyFunction,
         Weight: {
           type: 'number',
           description:
@@ -213,7 +216,7 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
     }
   }
 
-  let cachedCatalog: WebCoreCatalog<ComponentApi, FunctionImplementation> | undefined
+  const cachedCatalogs = new Map<string, WebCoreCatalog<ComponentApi, FunctionImplementation>>()
 
   return Object.freeze({
     catalogId: input.catalogId,
@@ -224,22 +227,25 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
     toCatalogJson(): A2uiCatalogDocument {
       return buildDocument()
     },
-    toWebCoreCatalog(): WebCoreCatalog<ComponentApi, FunctionImplementation> {
-      if (!cachedCatalog) {
+    toWebCoreCatalog(locale?: string): WebCoreCatalog<ComponentApi, FunctionImplementation> {
+      const key = locale ?? ''
+      let catalog = cachedCatalogs.get(key)
+      if (!catalog) {
         const parsed = WebCoreCatalog.fromJson(buildDocument(), A2UI_PROTOCOL_VERSION)
-        cachedCatalog = new WebCoreCatalog<ComponentApi, FunctionImplementation>(
+        catalog = new WebCoreCatalog<ComponentApi, FunctionImplementation>(
           parsed.id,
           A2UI_PROTOCOL_VERSION,
           [...parsed.components.values()],
-          [],
+          createA2uiBasicFunctions(locale),
           {
             defs: parsed.defs,
             title: parsed.title,
             description: parsed.description
           }
         )
+        cachedCatalogs.set(key, catalog)
       }
-      return cachedCatalog
+      return catalog
     }
   })
 }
