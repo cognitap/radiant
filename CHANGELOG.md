@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.94
+
 - Add `A2UI_BASIC_CATALOG_REVISION` to `@cognitap/radiant/a2ui`, pinning the `@a2ui/web_core` release and specification basic catalog that Radiant's A2UI rendering was tested against and naming that release in the `catalog.json` description; the official basic `catalogId` is unchanged.
 - Render the A2UI `Row`, `Column`, `List`, `Card`, `Divider`, `Tabs`, and `Modal` with Radiant `Stack`, `Card`, `Separator`, `Tabs`, and `Dialog`: `Row` and `Column` translate `justify` and `align` (unknown values fall back to the defaults) and box each child, growing it by `weight`; a templated `List` renders one item per data entry with paths relative to it; `Tabs` follow their panel components when reordered; and `Modal` opens a native dialog from its Button `trigger`, named by the trigger text. Escape and backdrop clicks close a `Modal`; the new `A2uiSurface` `labels.modalClose` adds a close button with host-supplied text. `validateA2uiAccessibility` flags untitled tabs and a `Modal` without a Button trigger or trigger text. Row and List hosts carry `data-slot` `stack a2ui-row` and `stack a2ui-list`.
 - Breaking: the A2UI `Column` gap reads `--rad-spacing-normal` instead of `--rad-surface-gap` (both 1rem by default), and its `data-slot` changes from `a2ui-column` to `stack a2ui-column`, so exact `[data-slot="a2ui-column"]` selectors no longer match; use `[data-slot~="a2ui-column"]`.
