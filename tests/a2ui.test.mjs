@@ -460,6 +460,8 @@ test('the extension registry extends the basic registry and publishes its own ca
     entries: [{ ...radiantA2uiRegistry.entries.Text, name: 'Note' }]
   })
   assert.equal(app.instructions, extension.instructions)
+  assert.equal(app.entries.Row, extension.entries.Row)
+  assert.equal(app.toCatalogJson().components.Row.properties.wrap.default, false)
   assert.deepEqual(
     a2uiWebCoreCatalogs(app).map(catalog => [catalog.id, catalog.functions.has('required')]),
     [
@@ -507,6 +509,48 @@ test('extension coercion scopes components to the catalog their surface names', 
   )
   assert.equal(ext.messages[0].createSurface.components[0].controlSize, 'medium')
   assert.ok(ext.diagnostics.some(d => d.prop === 'controlSize' && d.kind === 'coerced'))
+})
+
+test('the extension catalog overrides the basic Row with wrap, scoped to its own catalog', async () => {
+  const { radiantA2uiExtensionRegistry: extension, RADIANT_A2UI_EXTENSION_CATALOG_ID } =
+    await import('../dist/library/a2ui/index.js')
+  const { createOverridingA2uiRegistry } = await import('../dist/library/a2ui/registry.js')
+  assert.equal(radiantA2uiRegistry.toCatalogJson().components.Row.properties.wrap, undefined)
+  assert.equal(extension.toCatalogJson().components.Row.properties.wrap.default, false)
+  assert.notEqual(extension.entries.Row, radiantA2uiRegistry.entries.Row)
+  assert.equal(extension.entries.Column, radiantA2uiRegistry.entries.Column)
+
+  const row = catalogId => ({
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: 's',
+      catalogId,
+      components: [{ id: 'root', component: 'Row', wrap: true, children: [] }]
+    }
+  })
+  const basic = coerceA2uiMessages([row(radiantA2uiRegistry.catalogId)], extension)
+  assert.equal(basic.messages[0].createSurface.components[0].wrap, undefined)
+  assert.ok(basic.diagnostics.some(d => d.prop === 'wrap' && d.kind === 'stripped'))
+  const ext = coerceA2uiMessages([row(RADIANT_A2UI_EXTENSION_CATALOG_ID)], extension)
+  assert.equal(ext.messages[0].createSurface.components[0].wrap, true)
+
+  const base = { catalogId: 'example/x', title: 'X', description: 'X.', extends: extension }
+  const note = { ...radiantA2uiRegistry.entries.Text, name: 'Note' }
+  assert.throws(
+    () => createOverridingA2uiRegistry({ ...base, entries: [note] }, ['Missing']),
+    /override "Missing" names no entry/
+  )
+  assert.throws(
+    () => createOverridingA2uiRegistry({ ...base, entries: [note] }, ['Text']),
+    /overrides Text without an entry/
+  )
+  const text = radiantA2uiRegistry.entries.Text
+  assert.throws(
+    () => createOverridingA2uiRegistry({ ...base, entries: [text, text] }, ['Text']),
+    /Duplicate A2UI registry entry "Text"/
+  )
+  const overridden = createOverridingA2uiRegistry({ ...base, entries: [text] }, ['Text'])
+  assert.equal(overridden.entries.Text.adapter, text.adapter)
 })
 
 test('components naming an unknown catalog degrade, and accessibility follows the surface catalog', async () => {

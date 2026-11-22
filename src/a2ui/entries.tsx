@@ -199,13 +199,18 @@ function A2uiFlexChild({
   )
 }
 
-function flexEntry(name: 'Row' | 'Column', orientation: Orientation) {
+/** A Row or Column entry. Coercion strips `wrap` unless `schema` defines it. */
+export function flexEntry(
+  name: 'Row' | 'Column',
+  orientation: Orientation,
+  schema: A2uiJsonSchema = basicSchema(name)
+) {
   return createA2uiRegistryEntry({
     name,
     accessibility: [],
     component: Stack,
-    schema: basicSchema(name),
-    description: basicDescription(name),
+    schema,
+    description: schema.description as string,
     adapter(props, context) {
       // A prose surface's root Column is the reading flow; prose rhythm replaces the gap.
       const flow = name === 'Column' && context.flow === 'root'
@@ -217,6 +222,7 @@ function flexEntry(name: 'Row' | 'Column', orientation: Orientation) {
           orientation={orientation}
           justify={translate(STACK_JUSTIFY, props.justify, 'start')}
           align={translate(STACK_ALIGN, props.align, 'stretch')}
+          wrap={props.wrap === true}
         >
           {readChildNodes(props.children).map(child => (
             <A2uiFlexChild

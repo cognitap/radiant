@@ -35,16 +35,18 @@ import { Switch } from '../components/Switch/Switch.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { radiantCatalog } from '../catalog/index.js'
 import {
+  A2UI_EXTENSION_OVERRIDE_NAMES,
   a2uiExtensionInstructions,
   generateA2uiCatalogs,
   RADIANT_A2UI_EXTENSION_CATALOG_ID,
   type A2uiJsonSchema
 } from './catalogGenerator.js'
-import { createA2uiRegistry, createA2uiRegistryEntry } from './registry.js'
+import { createA2uiRegistryEntry, createOverridingA2uiRegistry } from './registry.js'
 import { isA2uiChildNode } from './adapterValues.js'
 import type { A2uiAccessibilityRule } from './accessibilityRules.js'
 import { controlLabelRule } from './accessibilityRules.js'
 import {
+  flexEntry,
   radiantA2uiRegistry,
   readValidationError,
   resolveControlLabel,
@@ -494,6 +496,7 @@ const stageEntry = createA2uiRegistryEntry({
 })
 
 const extensionEntries = [
+  flexEntry('Row', 'horizontal', extensionSchema('Row')),
   selectEntry,
   comboboxEntry,
   radioGroupEntry,
@@ -505,23 +508,26 @@ const extensionEntries = [
 ]
 
 /**
- * Radiant's A2UI extension registry: the basic catalog plus Radiant form controls, feedback and
- * data display.
+ * Radiant's A2UI extension registry: the basic catalog, with a Row that can wrap, plus Radiant
+ * form controls, feedback and data display.
  * Surfaces may name either catalog. Generated catalog JSON (`src/a2ui/extension-catalog.json`).
  */
-export const radiantA2uiExtensionRegistry = createA2uiRegistry({
-  catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
-  title: 'Radiant A2UI 1.0 Extension Catalog',
-  description:
-    'The A2UI basic catalog plus Radiant form controls, feedback and data display, generated from @cognitap/radiant/catalog.',
-  instructions: [
-    radiantA2uiRegistry.instructions,
-    a2uiExtensionInstructions(
-      Object.fromEntries(extensionEntries.map(entry => [entry.name, entry.schema]))
-    )
-  ]
-    .filter(Boolean)
-    .join('\n'),
-  extends: radiantA2uiRegistry,
-  entries: extensionEntries
-})
+export const radiantA2uiExtensionRegistry = createOverridingA2uiRegistry(
+  {
+    catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+    title: 'Radiant A2UI 1.0 Extension Catalog',
+    description:
+      'The A2UI basic catalog plus Radiant form controls, feedback and data display, generated from @cognitap/radiant/catalog.',
+    instructions: [
+      radiantA2uiRegistry.instructions,
+      a2uiExtensionInstructions(
+        Object.fromEntries(extensionEntries.map(entry => [entry.name, entry.schema]))
+      )
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    extends: radiantA2uiRegistry,
+    entries: extensionEntries
+  },
+  A2UI_EXTENSION_OVERRIDE_NAMES
+)

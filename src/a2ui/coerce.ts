@@ -414,7 +414,10 @@ function coerceComponentList(
   return output
 }
 
-/** Sanitizes and coerces incoming A2UI 1.0 messages against the active registry. */
+/**
+ * Sanitizes and coerces incoming A2UI 1.0 messages against the active registry.
+ * Update-only batches without `surfaceCatalogOf` are coerced against the top registry.
+ */
 export function coerceA2uiMessages(
   messages: readonly A2uiMessage[],
   registry: A2uiRegistry,

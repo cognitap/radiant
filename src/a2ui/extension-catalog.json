@@ -538,7 +538,7 @@
       ]
     },
     "Row": {
-      "description": "Arranges child elements horizontally with semantic spacing and alignment.\nUse: A few peers side by side: actions, a label and value, or cards.\nAvoid: Stacked content (Column) or repeated data (List).\nExamples: Cancel and Save buttons, `justify: end`; two Card summaries, `justify: spaceBetween`.",
+      "description": "Arranges child elements horizontally with semantic spacing and alignment.\nUse: A few peers side by side: actions, a label and value, or cards; set `wrap` when they may not fit.\nAvoid: Stacked content (Column) or repeated data (List).\nExamples: Cancel and Save buttons, `justify: end`; six filter Buttons, `wrap: true`.",
       "type": "object",
       "properties": {
         "component": {
@@ -567,6 +567,11 @@
           "enum": ["start", "center", "end", "stretch"],
           "default": "stretch",
           "description": "Cross-axis alignment of children."
+        },
+        "wrap": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allows children to wrap onto multiple lines when space is narrow."
         },
         "weight": {
           "$ref": "#/$defs/Weight"

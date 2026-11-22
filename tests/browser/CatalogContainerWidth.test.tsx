@@ -1,6 +1,7 @@
 import { act, type ReactNode } from 'react'
 import { expect, test } from 'vitest'
 import {
+  A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
   A2uiSurface,
   RADIANT_A2UI_EXTENSION_CATALOG_ID,
@@ -122,13 +123,14 @@ const LONG_WORD =
 
 const surface = (
   components: readonly Record<string, unknown>[],
-  dataModel: Record<string, unknown> = {}
+  dataModel: Record<string, unknown> = {},
+  catalogId = RADIANT_A2UI_EXTENSION_CATALOG_ID
 ): readonly A2uiMessage[] => [
   {
     version: A2UI_PROTOCOL_VERSION,
     createSurface: {
       surfaceId: STRESS_SURFACE_ID,
-      catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+      catalogId,
       dataModel,
       components
     }
@@ -147,9 +149,14 @@ const words = [
   'Weather',
   'Contacts'
 ]
+const wrappingButtonRow = [
+  { id: 'root', component: 'Row', wrap: true, children: words.map((_, index) => `b${index}`) },
+  ...words.flatMap((word, index) => button(`b${index}`, word))
+]
 
 /** Instances with more, longer content than the fixtures: the shapes that overflow first. */
 const stressCases: Record<string, readonly A2uiMessage[]> = {
+  'Row of six Buttons with wrap': surface(wrappingButtonRow),
   'Tabs with six tabs': surface([
     {
       id: 'root',
@@ -495,6 +502,41 @@ test('a label and Badge Row stays on one line at 360px', async () => {
   expect(status!.left).toBeGreaterThan(label!.right)
   expect(status!.right).toBeCloseTo(row.right, 0)
   expect(label!.width).toBeLessThan(360 - status!.width)
+})
+
+test('an extension catalog Row with wrap puts six Buttons on more than one line at 360px', async () => {
+  const { host } = await mount(
+    <div style={{ width: '360px' }}>
+      <A2uiSurface
+        surfaceId={STRESS_SURFACE_ID}
+        messages={surface(wrappingButtonRow)}
+      />
+    </div>
+  )
+  const tops = [...host.querySelectorAll<HTMLElement>('[data-slot="a2ui-flex-item"]')].map(
+    item => item.getBoundingClientRect().top
+  )
+  expect(tops).toHaveLength(6)
+  expect(new Set(tops).size).toBeGreaterThan(1)
+})
+
+test('a basic catalog Row ignores wrap and keeps six Buttons on one line', async () => {
+  const diagnostics: string[] = []
+  const { host } = await mount(
+    <div style={{ width: '360px' }}>
+      <A2uiSurface
+        surfaceId={STRESS_SURFACE_ID}
+        messages={surface(wrappingButtonRow, {}, A2UI_BASIC_CATALOG_ID)}
+        onDiagnostic={diagnostic => diagnostics.push(`${diagnostic.kind} ${diagnostic.prop}`)}
+      />
+    </div>
+  )
+  const tops = [...host.querySelectorAll<HTMLElement>('[data-slot="a2ui-flex-item"]')].map(
+    item => item.getBoundingClientRect().top
+  )
+  expect(tops).toHaveLength(6)
+  expect(new Set(tops).size).toBe(1)
+  expect(diagnostics).toContain('stripped wrap')
 })
 
 const longTitle = `Ridge loop ${LONG_WORD}`

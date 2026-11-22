@@ -13,13 +13,17 @@ const check = process.argv.includes('--check')
 
 // Each registry entry must carry the description generated for its own A2UI projection.
 const generated = generateA2uiCatalogs(radiantCatalog)
-const drifted = Object.values(radiantA2uiExtensionRegistry.entries)
-  .filter(entry => {
-    const source =
-      generated.basic.components[entry.name] ?? generated.extension.components[entry.name]
+const drifted = [
+  ...Object.values(radiantA2uiRegistry.entries).map(entry => [entry, generated.basic] as const),
+  ...Object.values(radiantA2uiExtensionRegistry.entries).map(
+    entry => [entry, generated.extension] as const
+  )
+]
+  .filter(([entry, document]) => {
+    const source = document.components[entry.name] ?? generated.basic.components[entry.name]
     return entry.description !== source?.description
   })
-  .map(entry => entry.name)
+  .map(([entry]) => entry.name)
 if (drifted.length) {
   throw new Error(
     `A2UI registry descriptions must come from the generated catalog (basicDescription): ${drifted.join(', ')}.`
