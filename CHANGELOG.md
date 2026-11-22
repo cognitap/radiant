@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- An invalid grouped `Field` (`RadioGroup`, `CheckboxGroup`, `Rating`, `ColorPicker`, `Fieldset`, and A2UI `ChoicePicker`, chips included) puts `aria-invalid` and its error on each control inside, so screen readers announce the error on focus; the `<fieldset>` keeps its description and caller `aria-describedby`, and keeps `aria-invalid` and the error only while some control inside lacks them, such as one in a nested `Field`. A plain `Input`, `Select`, or other Radiant control placed directly in a group now turns invalid and reads the group error. A caller `aria-invalid` on a group now also marks its controls and paints it invalid.
+
 ## 0.0.96
 
 - Add `seriesPalette(palette)` to `@cognitap/radiant/color` and the root: light and dark `tokens.series` solids for a `recommendColorPalette` result, moved in lightness only where the palette's surface, canvas, or foreground needs it, with `checks` and `pass` for the series contrast and color-vision targets (types `SeriesPalette`, `SeriesPaletteCheck`, `SeriesSolids`, and `SeriesVision`).

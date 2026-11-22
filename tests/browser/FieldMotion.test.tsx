@@ -217,7 +217,7 @@ test('live reduced motion settles an in-flight Field layout and never delays err
   expect(layout.isAnimating()).toBe(true)
 })
 
-test('Field adapters hydrate with stable IDs; group metadata stays on the fieldset', async () => {
+test('Field adapters hydrate with stable IDs; a mixed group keeps its error and help on the fieldset', async () => {
   const states = new Map<string, FieldState | null>()
   function Probe({ name }: { name: string }) {
     states.set(name, useField())
@@ -283,14 +283,13 @@ test('Field adapters hydrate with stable IDs; group metadata stays on the fields
   const checkbox = host.querySelector<HTMLInputElement>('[type=checkbox]')!
   expect(fieldset.querySelector(':scope > legend')?.textContent).toBe('Channels*')
   expect(fieldset.getAttribute('aria-invalid')).toBe('true')
-  expect(
-    fieldset
-      .getAttribute('aria-describedby')!
-      .split(' ')
-      .every(id => document.getElementById(id))
-  ).toBe(true)
+  expect(fieldset).toHaveAccessibleDescription('Group help Choose one')
   expect(checkbox.required).toBe(false)
-  expect(checkbox.getAttribute('aria-invalid')).toBe(null)
+  expect(checkbox.getAttribute('aria-invalid')).toBe('true')
+  expect(checkbox).toHaveAccessibleDescription('Choose one')
+  const address = host.querySelector<HTMLInputElement>('[name=address]')!
+  expect(address.hasAttribute('aria-invalid')).toBe(false)
+  expect(address).toHaveAccessibleDescription('Native adapter help')
   expect(new FormData(host.querySelector('form')!).getAll('channel')).toEqual(['email'])
   await act(async () => root.render(tree(true)))
   for (const input of host.querySelectorAll('input')) expect(input.matches(':disabled')).toBe(true)

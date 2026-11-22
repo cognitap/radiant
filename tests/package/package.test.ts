@@ -303,7 +303,7 @@ test('an empty error clears the invalid state', () => {
     createElement(Field, { layout: 'group', label: 'Plan', error: '', 'aria-invalid': 'grammar' })
   )
   assert.match(external, /aria-invalid="grammar"/)
-  assert.doesNotMatch(external, /\sdata-invalid=/)
+  assert.match(external, /\sdata-invalid=""/)
 })
 
 test('native children are left untouched; controlId and adapters own their relationships', () => {
@@ -526,17 +526,22 @@ test('Field protects owned relationships across the native control families', ()
   }
 })
 
-test('an input inside a group keeps its own description', () => {
-  const html = renderToStaticMarkup(
-    createElement(
-      Field,
-      { layout: 'group', label: 'Plan', description: 'Pick one' },
-      createElement(Input, { name: 'plan' })
+test('an input inside a group leaves help on the fieldset and carries only an error', () => {
+  const field = (error?: string) =>
+    renderToStaticMarkup(
+      createElement(
+        Field,
+        { layout: 'group', label: 'Plan', description: 'Pick one', error },
+        createElement(Input, { name: 'plan' })
+      )
     )
-  )
-  assert.match(html, /^<fieldset\b/)
-  assert.doesNotMatch(html, /<input\b[^>]*\saria-describedby=/)
-  assert.doesNotMatch(html, /<input\b[^>]*\saria-invalid=/)
+  const valid = field()
+  assert.match(valid, /^<fieldset\b[^>]*\saria-describedby="[^"]*-description"/)
+  assert.doesNotMatch(valid, /<input\b[^>]*\saria-describedby=/)
+  assert.doesNotMatch(valid, /<input\b[^>]*\saria-invalid=/)
+  const invalid = field('Required')
+  assert.match(invalid, /<input\b[^>]*\saria-invalid="true"/)
+  assert.match(invalid, /<input\b[^>]*\saria-describedby="[^" ]*-error"/)
 })
 
 test('checkboxes preserve name, value, and checked state', () => {
@@ -658,6 +663,23 @@ test('a required RadioGroup keeps native option labels and validity', () => {
   assert.match(group, /data-slot="radio-label"/)
   assert.match(group, /<input\b[^>]*\srequired=""/)
   assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
+  const invalid = renderToStaticMarkup(
+    createElement(
+      RadioGroup,
+      { label: 'Plan', description: 'Choose one', error: 'Pick a plan' },
+      createElement(Radio, { label: 'Pro', value: 'pro' })
+    )
+  )
+  // Final server markup: the radio, not the fieldset, carries the invalid state and error.
+  assert.match(invalid, /^<fieldset\b[^>]*\saria-describedby="[^" ]*-description"/)
+  assert.doesNotMatch(invalid, /<fieldset\b[^>]*\saria-invalid=/)
+  assert.match(invalid, /<input\b[^>]*\saria-invalid="true"/)
+  assert.match(invalid, /<input\b[^>]*\saria-describedby="[^" ]*-error"/)
+  const empty = renderToStaticMarkup(
+    createElement(RadioGroup, { label: 'Plan', error: 'No plans available' })
+  )
+  assert.match(empty, /^<fieldset\b[^>]*\saria-describedby="[^" ]*-error"/)
+  assert.match(empty, /^<fieldset\b[^>]*\saria-invalid="true"/)
 })
 
 test('a dialog stays closed in server markup and names itself from its title', () => {

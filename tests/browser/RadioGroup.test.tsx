@@ -164,7 +164,7 @@ test('a root form reaches every radio, so a group outside its form still submits
   expect(new FormData(form).get('plan')).toBe('free')
 })
 
-test('only an invalid group paints its radios invalid', async () => {
+test('only an invalid group paints and marks its radios invalid', async () => {
   const host = await mount(
     <div data-invalid="">
       <RadioGroup
@@ -188,5 +188,84 @@ test('only an invalid group paints its radios invalid', async () => {
     radio => getComputedStyle(radio).borderTopColor
   )
   expect(invalid).not.toBe(valid)
-  expect(host.querySelector('[value="invalid"]')!.hasAttribute('aria-invalid')).toBe(false)
+  expect(host.querySelector('[value="invalid"]')!.getAttribute('aria-invalid')).toBe('true')
+  expect(host.querySelector('[value="valid"]')!.hasAttribute('aria-invalid')).toBe(false)
+})
+
+test('each radio carries the group error before its own ids; the fieldset keeps help and caller ids', async () => {
+  const host = await mount(
+    <form>
+      <p id="group-note">Group note</p>
+      <p id="option-note">Option note</p>
+      <RadioGroup
+        label="Plan"
+        description="Billed monthly"
+        error="Choose a plan"
+        aria-describedby="group-note"
+        required
+      >
+        <Radio
+          label="Pro"
+          description="For teams"
+          aria-describedby="option-note"
+          value="pro"
+        />
+        <Radio
+          label="Free"
+          value="free"
+        />
+      </RadioGroup>
+      <RadioGroup
+        label="Marked"
+        aria-invalid
+      >
+        <Radio
+          label="Marked"
+          value="marked"
+        />
+      </RadioGroup>
+    </form>,
+    true
+  )
+  const [group] = host.querySelectorAll('fieldset')
+  const [pro, free, marked] = [...host.querySelectorAll('input')]
+  const text = (radio: Element) =>
+    radio
+      .getAttribute('aria-describedby')!
+      .split(' ')
+      .map(id => document.getElementById(id)!.textContent)
+  expect(group!.hasAttribute('aria-invalid')).toBe(false)
+  expect(text(group!)).toEqual(['Billed monthly', 'Group note'])
+  for (const radio of [pro, free, marked]) expect(radio!.getAttribute('aria-invalid')).toBe('true')
+  expect(text(pro!)).toEqual(['Choose a plan', 'For teams', 'Option note'])
+  expect(text(free!)).toEqual(['Choose a plan'])
+  expect(marked!.hasAttribute('aria-describedby')).toBe(false)
+  expect(pro!.required && free!.required).toBe(true)
+  expect(pro!.validity.valueMissing).toBe(true)
+  expect(host.querySelector('form')!.checkValidity()).toBe(false)
+})
+
+test('a valid group keeps help on the fieldset; an empty invalid group keeps its error there', async () => {
+  const host = await mount(
+    <>
+      <RadioGroup
+        label="Plan"
+        description="Billed monthly"
+      >
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+      </RadioGroup>
+      <RadioGroup
+        label="Empty"
+        error="No plans available"
+      />
+    </>
+  )
+  const [valid, empty] = host.querySelectorAll('fieldset')
+  expect(valid).toHaveAccessibleDescription('Billed monthly')
+  expect(host.querySelector('input')!.hasAttribute('aria-describedby')).toBe(false)
+  expect(empty!.getAttribute('aria-invalid')).toBe('true')
+  expect(empty).toHaveAccessibleDescription('No plans available')
 })

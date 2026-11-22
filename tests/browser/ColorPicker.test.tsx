@@ -85,3 +85,23 @@ test('browser sampling is optional and commits the sampled color', async () => {
     else Reflect.deleteProperty(window, 'EyeDropper')
   }
 })
+
+test('an invalid picker marks each channel slider and links its error there, not on the fieldset', async () => {
+  const { host } = await mount(
+    <ColorPicker
+      label="Accent"
+      error="Pick a darker color"
+      defaultValue="oklch(50% 0.12 240)"
+    />
+  )
+  const group = host.querySelector('fieldset')!
+  const sliders = [...host.querySelectorAll('input[type="range"]')]
+  expect(group.hasAttribute('aria-invalid')).toBe(false)
+  expect(group.hasAttribute('aria-describedby')).toBe(false)
+  expect(sliders).toHaveLength(4)
+  for (const slider of sliders) {
+    expect(slider).toHaveAttribute('aria-invalid', 'true')
+    expect(slider).toHaveAccessibleDescription('Pick a darker color')
+  }
+  expect(host.querySelectorAll('[data-slot~="field"][data-invalid]')).toHaveLength(1)
+})

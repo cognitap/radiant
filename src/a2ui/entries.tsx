@@ -21,7 +21,12 @@ import { Card } from '../components/Card/Card.js'
 import { Checkbox } from '../components/Checkbox/Checkbox.js'
 import { CheckboxGroup } from '../components/CheckboxGroup/CheckboxGroup.js'
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../components/Dialog/Dialog.js'
-import { Field } from '../components/Field/Field.js'
+import {
+  Field,
+  OwnedControls,
+  useFieldGroupControl,
+  WithoutField
+} from '../components/Field/Field.js'
 import { Input } from '../components/Input/Input.js'
 import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
 import { Separator } from '../components/Separator/Separator.js'
@@ -706,42 +711,44 @@ function A2uiChoicePicker({
 
   if (chips) {
     const items = visible.map(o => (
-      <ToggleGroupItem
+      <ChoiceChip
         key={o.value}
         value={o.value}
       >
         {o.label}
-      </ToggleGroupItem>
+      </ChoiceChip>
     ))
     return (
-      <Field
-        ref={ref as Ref<HTMLFieldSetElement>}
-        layout="group"
-        label={label}
-        error={error}
-        parts={parts}
-      >
-        {filterInput}
-        {multiple ? (
-          <ToggleGroup
-            type="multiple"
-            aria-label={label}
-            value={[...selected]}
-            onValueChange={onSelect}
-          >
-            {items}
-          </ToggleGroup>
-        ) : (
-          <ToggleGroup
-            type="single"
-            aria-label={label}
-            value={selected[0] ?? null}
-            onValueChange={next => onSelect(next ? [next] : [])}
-          >
-            {items}
-          </ToggleGroup>
-        )}
-      </Field>
+      <OwnedControls owns={visible.length > 0}>
+        <Field
+          ref={ref as Ref<HTMLFieldSetElement>}
+          layout="group"
+          label={label}
+          error={error}
+          parts={parts}
+        >
+          <WithoutField>{filterInput}</WithoutField>
+          {multiple ? (
+            <ToggleGroup
+              type="multiple"
+              aria-label={label}
+              value={[...selected]}
+              onValueChange={onSelect}
+            >
+              {items}
+            </ToggleGroup>
+          ) : (
+            <ToggleGroup
+              type="single"
+              aria-label={label}
+              value={selected[0] ?? null}
+              onValueChange={next => onSelect(next ? [next] : [])}
+            >
+              {items}
+            </ToggleGroup>
+          )}
+        </Field>
+      </OwnedControls>
     )
   }
 
@@ -781,6 +788,18 @@ function A2uiChoicePicker({
       {filterInput}
       {group}
     </div>
+  )
+}
+
+// Chips are buttons, so each one carries the group's invalid state and error itself.
+function ChoiceChip({ value, children }: { value: string; children: ReactNode }) {
+  return (
+    <ToggleGroupItem
+      {...useFieldGroupControl()}
+      value={value}
+    >
+      {children}
+    </ToggleGroupItem>
   )
 }
 
