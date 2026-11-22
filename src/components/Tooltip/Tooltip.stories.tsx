@@ -36,7 +36,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Supplementary descriptions for Button triggers. Focus opens immediately; mouse/pen hover waits openDelay (500ms). Content is a noninteractive span with role=tooltip, described by the trigger. Escape dismisses without moving focus and suppresses reopening until the interaction ends. The pointer can cross the gap and hover the description. Touch does not open a tooltip; essential information must remain visible. Use Popover for interactive content. anchor points the tooltip at an SVG element or rect; the caller then owns open and aria-describedby. Local portals preserve theme and modal ancestry; placement and optional motion reuse the popup foundation.'
+          'Supplementary descriptions for Button triggers. Focus opens immediately; mouse/pen hover waits openDelay (500ms). Content is a noninteractive span with role=tooltip, described by the trigger. Escape dismisses without moving focus and suppresses reopening until the interaction ends. The pointer can cross the gap and hover the description. Touch does not open a tooltip; essential information must remain visible. Use Popover for interactive content. anchor points the tooltip at an SVG element or rect; without a trigger, spread useTooltip().anchorProps on the anchor for delays, description and dismissal. Local portals preserve theme and modal ancestry; placement and optional motion reuse the popup foundation.'
       }
     }
   }

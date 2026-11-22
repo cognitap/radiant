@@ -72,7 +72,8 @@ export type {
   TooltipTriggerProps,
   TooltipContentProps,
   TooltipPortalProps,
-  TooltipRenderProps
+  TooltipRenderProps,
+  TooltipAnchorProps
 } from './components/Tooltip/Tooltip.js'
 export {
   Popover,

@@ -17,7 +17,6 @@ import { joinIds } from '../../internal/ids.js'
 import { composeAction } from '../../internal/events.js'
 import {
   anchorElement,
-  assertAnchor,
   htmlParent,
   type PopoverSide,
   type PopoverAlign,
@@ -28,6 +27,7 @@ import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
 import { useHoverSurface } from '../../react/useHoverSurface.js'
 import { usePopoverSurface } from '../../react/usePopoverSurface.js'
+import { usePortalMarker } from '../../react/usePortalMarker.js'
 import { useTransitionHost } from '../../motion/host.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
@@ -40,7 +40,22 @@ export type TooltipProps = StateOwner<'open', boolean> & {
   anchor?: PopoverAnchor | null
   children?: ReactNode
 }
-export type TooltipState = { open: boolean; setOpen: (open: boolean) => void; contentId: string }
+type PointerLike = { pointerType: string }
+/** Spread onto a custom anchor so it opens, describes and closes like a trigger. */
+export type TooltipAnchorProps = {
+  'aria-describedby': string
+  onPointerEnter: (event: PointerLike) => void
+  onPointerLeave: (event: PointerLike) => void
+  onPointerDown: (event: PointerLike) => void
+  onFocus: () => void
+  onBlur: () => void
+}
+export type TooltipState = {
+  open: boolean
+  setOpen: (open: boolean) => void
+  contentId: string
+  anchorProps: TooltipAnchorProps
+}
 type Context = TooltipState & {
   anchor?: PopoverAnchor | null
   trigger: HTMLButtonElement | null
@@ -72,7 +87,6 @@ export function Tooltip({
 }: TooltipProps) {
   if (![openDelay, closeDelay].every(n => Number.isFinite(n) && n >= 0))
     throw new TypeError('Tooltip delays must be finite, nonnegative numbers.')
-  assertAnchor(anchor, 'Tooltip')
   const state = useControllableState({
     name: 'Tooltip',
     value: open,
@@ -89,14 +103,30 @@ export function Tooltip({
     open: state.value,
     request: state.request,
     openDelay,
-    closeDelay
+    closeDelay,
+    anchor
   })
+  const anchorProps: TooltipAnchorProps = {
+    'aria-describedby': contentId,
+    onPointerEnter: event => {
+      if (event.pointerType !== 'touch') enter()
+    },
+    onPointerLeave: event => {
+      if (event.pointerType !== 'touch') leave()
+    },
+    onPointerDown: event => {
+      if (event.pointerType === 'touch') touch()
+    },
+    onFocus: () => enter(true),
+    onBlur: () => leave(true)
+  }
   return (
     <TooltipContext.Provider
       value={{
         open: state.value,
         setOpen: state.request,
         contentId,
+        anchorProps,
         anchor,
         trigger,
         setTrigger,
@@ -169,7 +199,16 @@ export function TooltipTrigger({
 }
 export function TooltipPortal({ children }: TooltipPortalProps) {
   const tip = useTooltipContext()
-  const container = tip.trigger?.parentElement ?? htmlParent(anchorElement(tip.anchor))
+  const element = anchorElement(tip.anchor)
+  const { host, marker } = usePortalMarker(!!tip.anchor && !element)
+  const container = tip.trigger?.parentElement ?? htmlParent(element) ?? host
+  if (tip.anchor && !element)
+    return (
+      <>
+        {marker}
+        {container && createPortal(children, container)}
+      </>
+    )
   return container ? createPortal(children, container) : children
 }
 export function TooltipContent({

@@ -149,16 +149,19 @@ const seats = [
   { id: 'a3', x: 128, label: 'Seat A3', note: 'Aisle seat, near the exit.' }
 ]
 
+type Anchored = { id: string; node: SVGRectElement }
+
 function Seats({
-  activeId,
+  active,
   onActive,
-  setAnchor
+  defaultSeat
 }: {
-  activeId?: string
-  onActive: (id?: string) => void
-  setAnchor: (node: SVGRectElement | null) => void
+  active?: Anchored
+  onActive: (next: Anchored) => void
+  defaultSeat?: string
 }) {
-  const tip = useTooltip()
+  // Without a trigger, the anchor spreads anchorProps for delays, description and dismissal.
+  const { anchorProps } = useTooltip()!
   return (
     <svg
       viewBox="0 0 176 64"
@@ -169,7 +172,9 @@ function Seats({
       {seats.map(seat => (
         <rect
           key={seat.id}
-          ref={seat.id === activeId ? setAnchor : undefined}
+          ref={node => {
+            if (node && seat.id === defaultSeat && !active) onActive({ id: seat.id, node })
+          }}
           x={seat.x}
           y={12}
           width={40}
@@ -178,12 +183,17 @@ function Seats({
           tabIndex={0}
           role="img"
           aria-label={seat.label}
-          aria-describedby={seat.id === activeId ? tip?.contentId : undefined}
+          {...anchorProps}
+          aria-describedby={seat.id === active?.id ? anchorProps['aria-describedby'] : undefined}
           className="fill-[var(--rad-color-neutral)] hover:fill-[var(--rad-color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--rad-color-focus)]"
-          onPointerEnter={() => onActive(seat.id)}
-          onPointerLeave={() => onActive()}
-          onFocus={() => onActive(seat.id)}
-          onBlur={() => onActive()}
+          onPointerEnter={event => {
+            onActive({ id: seat.id, node: event.currentTarget })
+            anchorProps.onPointerEnter(event)
+          }}
+          onFocus={event => {
+            onActive({ id: seat.id, node: event.currentTarget })
+            anchorProps.onFocus()
+          }}
         />
       ))}
     </svg>
@@ -191,24 +201,20 @@ function Seats({
 }
 
 export function TooltipSvgAnchorExample({ defaultSeat }: { defaultSeat?: string }) {
-  const [activeId, setActiveId] = useState(defaultSeat)
-  const [anchor, setAnchor] = useState<SVGRectElement | null>(null)
+  const [active, setActive] = useState<Anchored>()
   return (
     <div>
       <Tooltip
-        open={!!activeId}
-        onOpenChange={next => {
-          if (!next) setActiveId(undefined)
-        }}
-        anchor={anchor}
+        defaultOpen={!!defaultSeat}
+        anchor={active?.node}
       >
         <Seats
-          activeId={activeId}
-          onActive={setActiveId}
-          setAnchor={setAnchor}
+          active={active}
+          onActive={setActive}
+          defaultSeat={defaultSeat}
         />
         <TooltipPortal>
-          <TooltipContent>{seats.find(seat => seat.id === activeId)?.note}</TooltipContent>
+          <TooltipContent>{seats.find(seat => seat.id === active?.id)?.note}</TooltipContent>
         </TooltipPortal>
       </Tooltip>
     </div>

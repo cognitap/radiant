@@ -6,6 +6,7 @@ import {
   PopoverContent,
   PopoverClose,
   PopoverPortal,
+  usePopover,
   Field,
   Input,
   Button,
@@ -156,6 +157,48 @@ const regions = [
   { id: 'south', label: 'South depot', d: 'M8 88h120v72H8z', stock: 'Stock: 310 parcels.' }
 ]
 
+function DepotMap({
+  activeId,
+  onActive,
+  setAnchor
+}: {
+  activeId?: string
+  onActive: (id?: string) => void
+  setAnchor: (node: SVGPathElement | null) => void
+}) {
+  // Without a trigger, each region owns its button role, expanded state and keyboard activation.
+  const popover = usePopover()
+  const toggle = (id: string) => onActive(id === activeId ? undefined : id)
+  return (
+    <svg
+      viewBox="0 0 240 168"
+      className="block w-full max-w-80"
+      role="group"
+      aria-label="Depots"
+    >
+      {regions.map(item => (
+        <path
+          key={item.id}
+          ref={item.id === activeId ? setAnchor : undefined}
+          d={item.d}
+          role="button"
+          tabIndex={0}
+          aria-label={item.label}
+          aria-expanded={item.id === activeId}
+          aria-controls={popover?.contentId}
+          className="cursor-pointer fill-[var(--rad-color-neutral)] stroke-[var(--rad-color-border)] hover:fill-[var(--rad-color-accent)] aria-expanded:fill-[var(--rad-color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--rad-color-focus)]"
+          onClick={() => toggle(item.id)}
+          onKeyDown={event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return
+            event.preventDefault()
+            toggle(item.id)
+          }}
+        />
+      ))}
+    </svg>
+  )
+}
+
 export function SvgAnchorPopover({ defaultRegion }: { defaultRegion?: string }) {
   const [activeId, setActiveId] = useState(defaultRegion)
   // The ref follows the active region, so the anchor is always the shape on screen.
@@ -163,31 +206,6 @@ export function SvgAnchorPopover({ defaultRegion }: { defaultRegion?: string }) 
   const region = regions.find(item => item.id === activeId)
   return (
     <div className="grid gap-2">
-      <svg
-        viewBox="0 0 240 168"
-        className="block w-full max-w-80"
-        role="group"
-        aria-label="Depots"
-      >
-        {regions.map(item => (
-          <path
-            key={item.id}
-            ref={item.id === activeId ? setAnchor : undefined}
-            d={item.d}
-            role="button"
-            tabIndex={0}
-            aria-label={item.label}
-            aria-expanded={item.id === activeId}
-            className="cursor-pointer fill-[var(--rad-color-neutral)] stroke-[var(--rad-color-border)] hover:fill-[var(--rad-color-accent)] aria-expanded:fill-[var(--rad-color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--rad-color-focus)]"
-            onClick={() => setActiveId(item.id)}
-            onKeyDown={event => {
-              if (event.key !== 'Enter' && event.key !== ' ') return
-              event.preventDefault()
-              setActiveId(item.id)
-            }}
-          />
-        ))}
-      </svg>
       <Popover
         open={!!region}
         onOpenChange={next => {
@@ -195,6 +213,11 @@ export function SvgAnchorPopover({ defaultRegion }: { defaultRegion?: string }) 
         }}
         anchor={anchor}
       >
+        <DepotMap
+          activeId={activeId}
+          onActive={setActiveId}
+          setAnchor={setAnchor}
+        />
         <PopoverPortal>
           <PopoverContent
             side="right"

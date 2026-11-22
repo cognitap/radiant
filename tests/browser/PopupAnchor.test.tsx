@@ -19,6 +19,7 @@ import {
   defineTheme,
   type PopoverAnchor,
   type PopoverAnchorRect,
+  useTooltip,
   type PopoverContentProps
 } from '../../src/index.js'
 import '../../.storybook/styles.css'
@@ -159,7 +160,6 @@ test('rect anchors flip near viewport edges and align logically in right-to-left
   expect(rtl.getAttribute('dir')).toBe('rtl')
   expect(rtl.dataset.side).toBe('bottom')
   near(rtl.getBoundingClientRect().right, rect.x + rect.width)
-  expect(() => Tooltip({ anchor: { x: 0, y: 0, width: -1, height: 0 } })).toThrow(TypeError)
 })
 
 test('rects, getters and SVG transforms reposition on change, scroll and resize', async () => {
@@ -330,4 +330,178 @@ test('Tooltip and HoverCard follow SVG and rect anchors with theme and direction
   expect(card.getAttribute('dir')).toBe('rtl')
   near(card.getBoundingClientRect().right, 520)
   near(card.getBoundingClientRect().top, 328)
+})
+
+test('flipped rects are normalized and non-finite rects keep the last placement or stay hidden', async () => {
+  const { host, render } = await mount(
+    <Popover
+      defaultOpen
+      anchor={new DOMRect(140, 120, -40, -20)}
+    >
+      <Panel />
+    </Popover>
+  )
+  const panel = panelOf(host)
+  near(panel.getBoundingClientRect().left, 100)
+  near(panel.getBoundingClientRect().top, 128)
+  await render(
+    <Popover
+      defaultOpen
+      anchor={{ x: Number.NaN, y: 0, width: 0, height: 0 }}
+    >
+      <Panel />
+    </Popover>
+  )
+  expect(shown(panel)).toBe(true)
+  near(panel.getBoundingClientRect().left, 100)
+  let box = { x: Infinity, y: 40, width: 0, height: 0 }
+  await render(
+    <Popover
+      key="getter"
+      defaultOpen
+      anchor={() => box}
+    >
+      <Panel />
+    </Popover>
+  )
+  const pending = panelOf(host)
+  expect(getComputedStyle(pending).visibility).toBe('hidden')
+  box = { x: 60, y: 40, width: 0, height: 0 }
+  await act(async () => window.dispatchEvent(new Event('resize')))
+  await frame()
+  expect(getComputedStyle(pending).visibility).toBe('visible')
+  near(pending.getBoundingClientRect().left, 60)
+})
+
+test('a rect-anchored Tooltip rendered inside SVG mounts as HTML in the surrounding theme', async () => {
+  const theme = defineTheme({
+    id: 'anchor-svg-proof',
+    name: 'Anchor SVG proof',
+    components: { tooltip: { padding: '3px' } }
+  })
+  const { host } = await mount(
+    <ThemeScope theme={theme}>
+      <div data-testid="chart">
+        <svg
+          width={200}
+          height={100}
+        >
+          <Tooltip
+            defaultOpen
+            anchor={{ x: 200, y: 300, width: 10, height: 10 }}
+          >
+            <TooltipPortal>
+              <TooltipContent motion="off">Peak</TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+        </svg>
+      </div>
+    </ThemeScope>
+  )
+  const tip = host.querySelector<HTMLElement>('[role=tooltip]')!
+  expect(tip.namespaceURI).toBe('http://www.w3.org/1999/xhtml')
+  expect(tip.parentElement).toBe(host.querySelector('[data-testid=chart]'))
+  expect(shown(tip)).toBe(true)
+  expect(getComputedStyle(tip).padding).toBe('3px')
+  near(tip.getBoundingClientRect().bottom, 292)
+})
+
+test('focus captured before opening survives anchor changes and ignores focus inside the popup', async () => {
+  function Switching() {
+    const [open, setOpen] = useState(false)
+    const [anchors, setAnchors] = useState<HTMLElement[]>([])
+    const [index, setIndex] = useState(0)
+    return (
+      <>
+        <Button onClick={() => setOpen(true)}>Before</Button>
+        <div
+          ref={node =>
+            void (node && !anchors.length && setAnchors([...node.children] as HTMLElement[]))
+          }
+        >
+          <span>One</span>
+          <span>Two</span>
+        </div>
+        <Popover
+          open={open}
+          onOpenChange={setOpen}
+          anchor={anchors[index]}
+        >
+          <PopoverPortal>
+            <PopoverContent
+              role="dialog"
+              aria-label="Switching"
+              motion="off"
+            >
+              <Button onClick={() => setIndex(1)}>Move</Button>
+            </PopoverContent>
+          </PopoverPortal>
+        </Popover>
+      </>
+    )
+  }
+  const { host } = await mount(<Switching />)
+  await userEvent.click(host.querySelector('button')!)
+  const move = [...host.querySelectorAll('button')].find(b => b.textContent === 'Move')!
+  await act(async () => move.focus())
+  await userEvent.click(move)
+  await act(async () => move.focus())
+  await userEvent.keyboard('{Escape}')
+  expect(document.activeElement?.textContent).toBe('Before')
+})
+
+test('trigger-less Tooltip anchors use anchorProps for delays, description and closing', async () => {
+  function Hovered() {
+    const [anchor, setAnchor] = useState<SVGRectElement | null>(null)
+    return (
+      <Tooltip
+        anchor={anchor}
+        openDelay={40}
+        closeDelay={40}
+      >
+        <Shape setAnchor={setAnchor} />
+        <TooltipPortal>
+          <TooltipContent motion="off">Seat</TooltipContent>
+        </TooltipPortal>
+      </Tooltip>
+    )
+  }
+  function Shape({ setAnchor }: { setAnchor: (node: SVGRectElement | null) => void }) {
+    const { anchorProps } = useTooltip()!
+    return (
+      <svg
+        width={200}
+        height={100}
+      >
+        <rect
+          ref={setAnchor}
+          x={20}
+          y={20}
+          width={40}
+          height={40}
+          tabIndex={0}
+          aria-label="A1"
+          {...anchorProps}
+        />
+      </svg>
+    )
+  }
+  const { host } = await mount(
+    <>
+      <Hovered />
+      <button type="button">Away</button>
+    </>
+  )
+  const rect = host.querySelector('rect')!
+  const tip = host.querySelector<HTMLElement>('[role=tooltip]')!
+  expect(rect.getAttribute('aria-describedby')).toBe(tip.id)
+  await userEvent.hover(rect)
+  expect(shown(tip)).toBe(false)
+  await expect.poll(() => shown(tip)).toBe(true)
+  await userEvent.hover(host.querySelector('button')!)
+  await expect.poll(() => shown(tip)).toBe(false)
+  await act(async () => rect.focus())
+  expect(shown(tip)).toBe(true)
+  await userEvent.keyboard('{Escape}')
+  expect(shown(tip)).toBe(false)
 })

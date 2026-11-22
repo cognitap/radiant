@@ -17,7 +17,6 @@ import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
 import {
   anchorElement,
-  assertAnchor,
   htmlParent,
   type PopoverSide,
   type PopoverAlign,
@@ -28,6 +27,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
 import { usePopoverSurface } from '../../react/usePopoverSurface.js'
+import { usePortalMarker } from '../../react/usePortalMarker.js'
 import { useTransitionHost } from '../../motion/host.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
@@ -82,7 +82,6 @@ export function PopoverRoot({
   anchor,
   anchorPoint
 }: PopoverProps & { anchorPoint?: { x: number; y: number } }) {
-  assertAnchor(anchor, 'Popover')
   const state = useControllableState({
     name: 'Popover',
     value: open,
@@ -198,13 +197,21 @@ export function PopoverCloseRoot({
 export function PopoverPortal({ children }: PopoverPortalProps) {
   const popover = usePopoverContext()
   const element = anchorElement(popover.anchor)
-  // A rect anchor has no node of its own, so its popup stays where it renders.
-  if (popover.anchor && !element) return children
+  const { host, marker } = usePortalMarker(!!popover.anchor && !element)
   // Rich surfaces cannot be inserted into a link's phrasing-only parent (p, span, label).
-  const container = (popover.trigger?.parentElement ?? htmlParent(element))?.closest<HTMLElement>(
+  const container = (
+    popover.trigger?.parentElement ??
+    htmlParent(element) ??
+    host
+  )?.closest<HTMLElement>(
     'div, section, article, aside, main, nav, form, dialog, [popover], li, dd, td, th, fieldset, figure, body'
   )
-  return container ? createPortal(children, container) : null
+  return (
+    <>
+      {marker}
+      {container && createPortal(children, container)}
+    </>
+  )
 }
 
 const surfaceClass = [

@@ -8,12 +8,20 @@ export type PopoverAnchor = Element | PopoverAnchorRect | (() => PopoverAnchorRe
 export function anchorElement(anchor: PopoverAnchor | null | undefined): Element | null {
   return anchor && typeof anchor === 'object' && 'nodeType' in anchor ? anchor : null
 }
-export function assertAnchor(anchor: PopoverAnchor | null | undefined, name: string) {
-  if (!anchor || typeof anchor === 'function' || anchorElement(anchor)) return
-  const { x, y, width, height } = anchor as PopoverAnchorRect
-  if (![x, y, width, height].every(Number.isFinite) || width < 0 || height < 0)
-    throw new TypeError(`${name} anchor rects need finite coordinates and nonnegative sizes.`)
+/** Reads an anchor as a normalized box; null while a rect holds a non-finite value. */
+export function readAnchor(anchor: PopoverAnchor | null | undefined): PopoverAnchorRect | null {
+  const value = typeof anchor === 'function' ? anchor() : anchor
+  if (!value) return null
+  const box = 'nodeType' in value ? value.getBoundingClientRect() : value
+  let { x, y, width, height } = box
+  if (![x, y, width, height].every(Number.isFinite)) return null
+  // A flipped selection reports a negative size; measure it from its other corner.
+  if (width < 0) [x, width] = [x + width, -width]
+  if (height < 0) [y, height] = [y + height, -height]
+  return { x, y, width, height }
 }
+export const sameBox = (a: PopoverAnchorRect | null, b: PopoverAnchorRect | null) =>
+  !!a && !!b && a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height
 /** The nearest HTML ancestor, so popups never mount inside SVG content. */
 export function htmlParent(element: Element | null | undefined) {
   for (let node = element?.parentElement; node; node = node.parentElement)

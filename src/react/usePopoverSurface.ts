@@ -4,6 +4,8 @@ import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import {
   anchorElement,
   positionPopover,
+  readAnchor,
+  sameBox,
   type PopoverAlign,
   type PopoverAnchor,
   type PopoverAnchorRect,
@@ -12,6 +14,8 @@ import {
 import { observeAnchorLocale, syncPopupLocale } from '../internal/popupLocale.js'
 
 const SVG = 'http://www.w3.org/2000/svg'
+const frameAttributes = ['transform', 'viewBox', 'x', 'y', 'width', 'height']
+const shapeAttributes = ['cx', 'cy', 'r', 'rx', 'ry', 'd', 'points', 'x1', 'y1', 'x2', 'y2']
 // Each document owns its layers; imports never inspect a browser global.
 const layers = new WeakMap<Document, HTMLElement[]>()
 
@@ -36,7 +40,9 @@ export function usePopoverSurface<Node extends HTMLElement>(
   }
 ) {
   const latest = useRef({ ...options, open, close })
-  const reposition = useRef(() => {})
+  const reposition = useRef((_ifMoved?: boolean) => {})
+  // undefined until an open session records where focus was before it.
+  const previousFocus = useRef<Element | null | undefined>(undefined)
   const ancestorClosing = useRef(false)
   const [generation, setGeneration] = useState(0)
   useLayoutEffect(() => {
@@ -85,7 +91,7 @@ export function usePopoverSurface<Node extends HTMLElement>(
     const doc = node.ownerDocument
     const win = doc.defaultView!
     const shouldRestore = () => restoreFocus.current
-    const previous = doc.activeElement
+    if (previousFocus.current === undefined) previousFocus.current = doc.activeElement
     const focusable = (target: Element | null) =>
       target &&
       'focus' in target &&
@@ -94,22 +100,36 @@ export function usePopoverSurface<Node extends HTMLElement>(
         ? (target as HTMLElement)
         : null
     // Trigger first, then a focusable anchor, then whatever held focus before opening.
-    const focusTarget = () =>
-      latest.current.returnFocusRef?.current ??
-      trigger ??
-      focusable(element) ??
-      (previous && 'focus' in previous ? (previous as HTMLElement) : null)
+    const focusTarget = () => {
+      const previous = previousFocus.current
+      return (
+        latest.current.returnFocusRef?.current ??
+        trigger ??
+        focusable(element) ??
+        (previous && 'focus' in previous && !node.contains(previous)
+          ? (previous as HTMLElement)
+          : null)
+      )
+    }
     const anchorRect = () => {
       const { anchorPoint, anchor } = latest.current
       if (anchorPoint) return { x: anchorPoint.x, y: anchorPoint.y, width: 0, height: 0 }
-      const value = typeof anchor === 'function' ? anchor() : anchor
-      return !value || 'nodeType' in value ? (element ?? host).getBoundingClientRect() : value
+      return anchor ? readAnchor(anchor) : readAnchor(host)
     }
-    const place = () => {
+    let placed: ReturnType<typeof anchorRect> = null
+    const place = (ifMoved = false) => {
       if (!node.isConnected || !node.matches(':popover-open')) return
+      const box = anchorRect()
+      // A non-finite rect keeps the last placement, or stays hidden until one is valid.
+      if (!box) {
+        if (!placed) node.style.visibility = 'hidden'
+        return
+      }
+      if (ifMoved && sameBox(box, placed)) return
+      if (!placed) node.style.removeProperty('visibility')
+      placed = box
       const rtl = syncPopupLocale(host, node, latest.current)
       const { side, align, sideOffset, collisionPadding } = latest.current
-      const box = anchorRect()
       const viewport = win.visualViewport
       const view = {
         top: viewport?.offsetTop ?? 0,
@@ -229,6 +249,17 @@ export function usePopoverSurface<Node extends HTMLElement>(
     observer.observe(node)
     mutations.observe(node, { childList: true, subtree: true, characterData: true })
     observeAnchorLocale(mutations, host)
+    const locale = ['class', 'style', 'dir', 'lang']
+    // Pan and zoom rewrite an ancestor group or nested drawing; shapes move by their own attributes.
+    for (
+      let parent = element?.parentElement;
+      parent?.namespaceURI === SVG;
+      parent = parent.parentElement
+    )
+      mutations.observe(parent, {
+        attributes: true,
+        attributeFilter: [...locale, ...frameAttributes]
+      })
     for (const target of new Set([trigger, element])) {
       if (!target) continue
       observer.observe(target)
@@ -238,18 +269,10 @@ export function usePopoverSurface<Node extends HTMLElement>(
         subtree: true,
         characterData: true,
         attributes: true,
-        attributeFilter: ['class', 'style', 'dir', 'lang']
+        attributeFilter:
+          target.namespaceURI === SVG ? [...locale, ...frameAttributes, ...shapeAttributes] : locale
       })
     }
-    // Pan and zoom usually rewrite attributes or the viewBox somewhere in the drawing.
-    let drawing: Element | null = null
-    for (let node = element; node?.namespaceURI === SVG; node = node.parentElement) drawing = node
-    if (drawing)
-      mutations.observe(drawing, {
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['transform', 'viewBox', 'x', 'y', 'width', 'height', 'cx', 'cy', 'r', 'd']
-      })
 
     node.addEventListener('toggle', toggle)
     doc.addEventListener('pointerdown', outside, true)
@@ -281,12 +304,16 @@ export function usePopoverSurface<Node extends HTMLElement>(
       if (shouldRestore() && node.contains(doc.activeElement) && returnTarget?.isConnected)
         returnTarget.focus({ preventScroll: true })
       if (node.matches(':popover-open')) node.hidePopover()
+      node.style.removeProperty('visibility')
       reposition.current = () => {}
     }
   }, [nodeRef, trigger, element, anchored, open, generation, restoreFocus])
-  // Getters and elements can move without a prop change, so each render places them again.
   useLayoutEffect(() => {
-    if (anchor && !rect) reposition.current()
+    if (!open) previousFocus.current = undefined
+  }, [open])
+  // Getters and elements can move without a prop change, so each render rechecks their box.
+  useLayoutEffect(() => {
+    if (anchor && !rect) reposition.current(true)
   })
   useLayoutEffect(
     () => reposition.current(),

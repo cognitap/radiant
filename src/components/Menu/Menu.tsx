@@ -55,7 +55,12 @@ export type MenuPortalProps = { children?: ReactNode }
 export type MenuTriggerProps = WithoutToggle<DistributiveOmit<ButtonProps, 'id' | 'aria-haspopup'>>
 export type MenuContentProps = Omit<
   PopoverContentProps,
-  'role' | 'aria-labelledby' | 'aria-orientation' | 'tabIndex' | 'initialFocusRef'
+  | 'role'
+  | 'aria-labelledby'
+  | 'aria-orientation'
+  | 'tabIndex'
+  | 'initialFocusRef'
+  | 'returnFocusRef'
 >
 export type MenuItemProps = WithoutToggle<
   DistributiveOmit<
@@ -305,6 +310,7 @@ export function MenuContentRoot({
       ref={host}
       onFocusOutside={onFocusOutside}
       initialFocusRef={undefined}
+      returnFocusRef={undefined}
       role="menu"
       aria-orientation="vertical"
       aria-labelledby={menu.triggerId}

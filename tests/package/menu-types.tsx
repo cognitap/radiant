@@ -53,7 +53,9 @@ void anchoredMenu
 const role: MenuContentProps = { role: 'listbox' }
 // @ts-expect-error Menu owns item roles.
 const item: MenuItemProps = { role: 'link' }
-void [mixed, role, item]
+// @ts-expect-error Menus return focus to their trigger.
+const returning: MenuContentProps = { returnFocusRef: createRef<HTMLButtonElement>() }
+void [mixed, role, item, returning]
 
 // @ts-expect-error A trigger that opens a menu is not a toggle.
 export const pressedMenuTrigger: MenuTriggerProps = { defaultPressed: true }
