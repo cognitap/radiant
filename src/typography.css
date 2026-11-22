@@ -10,7 +10,6 @@
     font-weight: var(--rad-typography-roles-prose-body-weight);
     line-height: var(--rad-typography-roles-prose-body-line-height);
     letter-spacing: var(--rad-typography-roles-prose-body-letter-spacing);
-    max-inline-size: var(--rad-typography-roles-prose-body-measure);
     overflow-wrap: anywhere;
   }
   :where([data-rad-text='prose-title']),
@@ -219,32 +218,190 @@
     overflow-wrap: anywhere;
   }
   :where([data-rad-prose])
-    > :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
-      :where([data-rad-not-prose], [data-slot])
+    > :where(
+      :where(
+        :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+          :where([data-rad-not-prose], [data-slot])
+        ),
+        [data-rad-text]:not([data-rad-not-prose])
+      ),
+      :has(
+        > :where(
+          :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+            :where([data-rad-not-prose], [data-slot])
+          ),
+          [data-rad-text]:not([data-rad-not-prose])
+        ):only-child
+      )
     ) {
     margin-block: 0;
   }
   :where([data-rad-prose])
-    > :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
-      :where([data-rad-not-prose], [data-slot])
+    > :where(
+      :where(
+        :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+          :where([data-rad-not-prose], [data-slot])
+        ),
+        [data-rad-text]:not([data-rad-not-prose])
+      ),
+      :has(
+        > :where(
+          :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+            :where([data-rad-not-prose], [data-slot])
+          ),
+          [data-rad-text]:not([data-rad-not-prose])
+        ):only-child
+      )
     )
-    + :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
-      :where([data-rad-not-prose], [data-slot])
+    + :where(
+      :where(
+        :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+          :where([data-rad-not-prose], [data-slot])
+        ),
+        [data-rad-text]:not([data-rad-not-prose])
+      ),
+      :has(
+        > :where(
+          :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+            :where([data-rad-not-prose], [data-slot])
+          ),
+          [data-rad-text]:not([data-rad-not-prose])
+        ):only-child
+      )
     ) {
     margin-block-start: var(--rad-typography-flow-paragraph);
   }
   :where([data-rad-prose])
-    > :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
-      :where([data-rad-not-prose], [data-slot])
+    > :where(
+      :where(
+        :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+          :where([data-rad-not-prose], [data-slot])
+        ),
+        [data-rad-text]:not([data-rad-not-prose])
+      ),
+      :has(
+        > :where(
+          :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+            :where([data-rad-not-prose], [data-slot])
+          ),
+          [data-rad-text]:not([data-rad-not-prose])
+        ):only-child
+      )
     )
+    + :where(
+      :not(
+        :where(
+          :where(
+            :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+              :where([data-rad-not-prose], [data-slot])
+            ),
+            [data-rad-text]:not([data-rad-not-prose])
+          ),
+          :has(
+            > :where(
+              :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+                :where([data-rad-not-prose], [data-slot])
+              ),
+              [data-rad-text]:not([data-rad-not-prose])
+            ):only-child
+          )
+        ),
+        template
+      )
+    ),
+  :where([data-rad-prose])
+    > :where(
+      :not(
+        :where(
+          :where(
+            :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+              :where([data-rad-not-prose], [data-slot])
+            ),
+            [data-rad-text]:not([data-rad-not-prose])
+          ),
+          :has(
+            > :where(
+              :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+                :where([data-rad-not-prose], [data-slot])
+              ),
+              [data-rad-text]:not([data-rad-not-prose])
+            ):only-child
+          )
+        ),
+        template
+      )
+    )
+    + :where(
+      :where(
+        :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+          :where([data-rad-not-prose], [data-slot])
+        ),
+        [data-rad-text]:not([data-rad-not-prose])
+      ),
+      :has(
+        > :where(
+          :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+            :where([data-rad-not-prose], [data-slot])
+          ),
+          [data-rad-text]:not([data-rad-not-prose])
+        ):only-child
+      )
+    ) {
+    margin-block-start: var(--rad-typography-flow-component);
+  }
+  :where([data-rad-prose])
+    > :where(
+      :not(
+        :where(
+          :where(
+            :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+              :where([data-rad-not-prose], [data-slot])
+            ),
+            [data-rad-text]:not([data-rad-not-prose])
+          ),
+          :has(
+            > :where(
+              :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+                :where([data-rad-not-prose], [data-slot])
+              ),
+              [data-rad-text]:not([data-rad-not-prose])
+            ):only-child
+          )
+        ),
+        template
+      )
+    )
+    + :where(
+      :not(
+        :where(
+          :where(
+            :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+              :where([data-rad-not-prose], [data-slot])
+            ),
+            [data-rad-text]:not([data-rad-not-prose])
+          ),
+          :has(
+            > :where(
+              :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
+                :where([data-rad-not-prose], [data-slot])
+              ),
+              [data-rad-text]:not([data-rad-not-prose])
+            ):only-child
+          )
+        ),
+        template
+      )
+    ) {
+    margin-block-start: var(--rad-typography-flow-component-gap);
+  }
+  :where([data-rad-prose])
+    > *
     + :where(h1, h2, h3, h4, h5, h6):not(:where([data-rad-not-prose], [data-slot])) {
     margin-block-start: var(--rad-typography-flow-heading-before);
   }
   :where([data-rad-prose])
     > :where(h1, h2, h3, h4, h5, h6):not(:where([data-rad-not-prose], [data-slot]))
-    + :where(p, ul, ol, figure, blockquote, pre, h1, h2, h3, h4, h5, h6):not(
-      :where([data-rad-not-prose], [data-slot])
-    ) {
+    + * {
     margin-block-start: var(--rad-typography-flow-heading-after);
   }
   :where([data-rad-prose]) > :where(ul, ol):not(:where([data-rad-not-prose], [data-slot])) {

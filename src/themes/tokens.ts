@@ -95,7 +95,9 @@ export function typographyTokens(
     flow: {
       paragraph: `${decimal(flow)}em`,
       headingBefore: `${decimal(flow * 1.6)}em`,
-      headingAfter: `${decimal(flow * 0.5)}em`
+      headingAfter: `${decimal(flow * 0.5)}em`,
+      component: 'var(--rad-spacing-airy)',
+      componentGap: 'var(--rad-spacing-normal)'
     }
   }
 }

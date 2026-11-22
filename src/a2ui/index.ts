@@ -6,6 +6,7 @@ export { radiantA2uiExtensionRegistry } from './extensionEntries.js'
 export { createA2uiRegistry, createA2uiRegistryEntry, findA2uiRegistry } from './registry.js'
 export type {
   A2uiAdapterContext,
+  A2uiFlow,
   A2uiComponentAdapter,
   A2uiComponentReference,
   A2uiRegistry,

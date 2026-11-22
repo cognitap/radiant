@@ -22,13 +22,21 @@ import { a2uiBasicFunctionSchemas, createA2uiBasicFunctions } from './basicFunct
 
 const ENTRY_NAME_PATTERN = /^[A-Z][A-Za-z0-9]*$/
 
+/**
+ * Place in a `prose` surface's reading flow: `root` for the surface's root node, `block` for each
+ * child of a root Column.
+ */
+export type A2uiFlow = 'root' | 'block'
+
 export type A2uiRenderOptions = {
   readonly inline?: boolean
+  readonly flow?: A2uiFlow
 }
 
 export type A2uiAdapterContext = {
   readonly node: ComponentNode
   readonly inline: boolean
+  readonly flow?: A2uiFlow
   readonly renderNode: (child: ComponentNode, options?: A2uiRenderOptions) => ReactNode
   /** Reports a diagnostic to the surface's `onDiagnostic`. Call it from an effect, not during render. */
   readonly reportDiagnostic?: (diagnostic: CatalogDiagnostic) => void

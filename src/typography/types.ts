@@ -74,6 +74,10 @@ export interface TypographyTokens {
     readonly paragraph: string
     readonly headingBefore: string
     readonly headingAfter: string
+    /** Between text and a component, in either order. */
+    readonly component: string
+    /** Between two adjacent components. */
+    readonly componentGap: string
   }
 }
 export interface TypographyResult {

@@ -10,6 +10,7 @@ import {
   AccordionTrigger
 } from '../components/Accordion/Accordion.js'
 import { Alert, AlertDescription, AlertTitle } from '../components/Alert/Alert.js'
+import { useHeadingLevel } from '../react/useHeadingLevel.js'
 import { Badge } from '../components/Badge/Badge.js'
 import { Progress } from '../components/Progress/Progress.js'
 import {
@@ -90,6 +91,10 @@ const textRule = (id: string, prop: string): A2uiAccessibilityRule => ({
   id
 })
 
+function A2uiAlertTitle({ children }: { readonly children: ReactNode }) {
+  return <AlertTitle level={useHeadingLevel()}>{children}</AlertTitle>
+}
+
 const alertEntry = createA2uiRegistryEntry({
   name: 'Alert',
   accessibility: [textRule('alert-title', 'title')],
@@ -104,7 +109,7 @@ const alertEntry = createA2uiRegistryEntry({
         tone={pick(props.tone, TONES, 'neutral')}
         announce={pick(props.announce, ANNOUNCE, 'off')}
       >
-        <AlertTitle>{text(props.title)}</AlertTitle>
+        <A2uiAlertTitle>{text(props.title)}</A2uiAlertTitle>
         {description ? <AlertDescription>{description}</AlertDescription> : null}
         {actions.length > 0 ? (
           <div

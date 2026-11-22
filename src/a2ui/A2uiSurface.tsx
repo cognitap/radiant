@@ -36,6 +36,8 @@ import type { MotionProfile } from '../motion/config.js'
 import { MotionProfileContext } from '../motion/context.js'
 import { useComposedRefs } from '../react/useComposedRefs.js'
 import { useLocale } from '../react/useLocale.js'
+import { clampHeadingLevel, HeadingLevelProvider } from '../react/useHeadingLevel.js'
+import type { HeadingLevel } from '../internal/headings.js'
 import { warnA2uiAccessibility } from './accessibility.js'
 import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import {
@@ -54,7 +56,12 @@ import {
   supersededBy,
   updatesSurface
 } from './protocolErrors.js'
-import { a2uiWebCoreCatalogs, type A2uiRegistry, type A2uiRenderOptions } from './registry.js'
+import {
+  a2uiWebCoreCatalogs,
+  type A2uiFlow,
+  type A2uiRegistry,
+  type A2uiRenderOptions
+} from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import { useSignalValue } from './useSignalValue.js'
 import {
@@ -102,6 +109,13 @@ export type A2uiSurfaceProps = {
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
   /** Host-supplied text for controls the agent cannot describe; `notifications` gives Toast a viewport. */
   readonly labels?: A2uiSurfaceLabels
+  /**
+   * Level of the surface's top headings, so they fit the host outline; nested headings go one
+   * deeper, up to 6. Defaults to an enclosing `HeadingLevelProvider`.
+   */
+  readonly headingLevel?: HeadingLevel
+  /** Renders a root Column as a prose flow: prose text, reading width, and rhythm tokens. */
+  readonly prose?: boolean
 }
 
 function isVisibleHost(element: HTMLElement): boolean {
@@ -287,6 +301,7 @@ type A2uiNodeRendererProps = {
   readonly node: ComponentNode
   readonly registry: A2uiRegistry
   readonly inline: boolean
+  readonly flow?: A2uiFlow
   readonly onDiagnostic: (diagnostic: CatalogDiagnostic) => void
   readonly runtime: SurfaceDomRuntime
 }
@@ -297,6 +312,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   node,
   registry,
   inline,
+  flow,
   onDiagnostic,
   runtime
 }: A2uiNodeRendererProps): ReactNode {
@@ -311,6 +327,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
       ? entry.adapter(props, {
           node,
           inline,
+          flow,
           reportDiagnostic: onDiagnostic,
           renderNode(child: ComponentNode, options?: A2uiRenderOptions) {
             if (!options?.inline) hasChildNodes = true
@@ -320,6 +337,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
                 node={child}
                 registry={registry}
                 inline={options?.inline ?? false}
+                flow={options?.flow}
                 onDiagnostic={onDiagnostic}
                 runtime={runtime}
               />
@@ -749,7 +767,9 @@ export function A2uiSurface({
   registry = radiantA2uiExtensionRegistry,
   onAction,
   onDiagnostic,
-  labels
+  labels,
+  headingLevel,
+  prose = false
 }: A2uiSurfaceProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const motionProfile = useContext(MotionProfileContext)
@@ -800,16 +820,20 @@ export function A2uiSurface({
       aria-busy={waiting || placeholders > 0 ? true : undefined}
       data-slot="a2ui-surface"
       data-surface-id={surfaceId}
+      data-rad-type-container={prose ? '' : undefined}
     >
       {rootNode ? (
         <A2uiLabelsContext.Provider value={labelValue}>
-          <A2uiNodeRenderer
-            node={rootNode}
-            registry={registry}
-            inline={false}
-            onDiagnostic={store.reportDiagnostic}
-            runtime={runtime}
-          />
+          <A2uiHeadingScope level={headingLevel}>
+            <A2uiNodeRenderer
+              node={rootNode}
+              registry={registry}
+              inline={false}
+              flow={prose ? 'root' : undefined}
+              onDiagnostic={store.reportDiagnostic}
+              runtime={runtime}
+            />
+          </A2uiHeadingScope>
         </A2uiLabelsContext.Provider>
       ) : waiting ? (
         <A2uiPlaceholder
@@ -848,6 +872,20 @@ function A2uiToastScope({
         {notifications ? <ToastViewport aria-label={notifications} /> : null}
       </A2uiToastHostContext.Provider>
     </ToastQueueProvider>
+  )
+}
+
+function A2uiHeadingScope({
+  level,
+  children
+}: {
+  readonly level: HeadingLevel | undefined
+  readonly children: ReactNode
+}) {
+  return level === undefined ? (
+    children
+  ) : (
+    <HeadingLevelProvider level={clampHeadingLevel(level)}>{children}</HeadingLevelProvider>
   )
 }
 

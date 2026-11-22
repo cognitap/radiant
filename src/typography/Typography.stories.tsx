@@ -1,5 +1,15 @@
 import { TypographyComponents } from '../../.storybook/examples/TypographyComponents.js'
-import { ThemeScope, defineTheme, generateTypography } from '../index.js'
+import {
+  Stage,
+  StageBody,
+  StageDescription,
+  StageHeader,
+  StageTitle,
+  ThemeScope,
+  defineTheme,
+  generateTypography
+} from '../index.js'
+import { LineChart } from '../charts/index.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { typographyRoles } from '../index.js'
 
@@ -83,6 +93,58 @@ export const Prose: Story = {
         configuration.
       </p>
     </article>
+  )
+}
+
+function ProseFlow({ width }: { width: number }) {
+  return (
+    <article
+      data-rad-prose=""
+      data-rad-type-container=""
+      aria-label={`Prose at ${width}px`}
+      style={{ inlineSize: `${width}px`, maxInlineSize: '100%' }}
+    >
+      <h2>Your first month of study</h2>
+      <p>
+        Sessions doubled after the second week. Text keeps a reading measure while the chart and the
+        widget below span the column.
+      </p>
+      <LineChart
+        label="Completed sessions"
+        data={[
+          { key: 'one', label: 'Week 1', values: { sessions: 6 } },
+          { key: 'two', label: 'Week 2', values: { sessions: 12 } },
+          { key: 'three', label: 'Week 3', values: { sessions: 14 } }
+        ]}
+        series={[{ key: 'sessions', label: 'Sessions' }]}
+      />
+      <Stage>
+        <StageHeader>
+          <StageTitle level={3}>Next session</StageTitle>
+          <StageDescription>Twenty minutes on fractions.</StageDescription>
+        </StageHeader>
+        <StageBody aspectRatio={3}>
+          <p data-rad-text="ui-body">The exercise loads here.</p>
+        </StageBody>
+      </Stage>
+      <ul>
+        <li>Review the two missed cards.</li>
+        <li>Try one harder problem.</li>
+      </ul>
+      <p>
+        Rhythm tokens set every gap above: text to text, text to component, and component to
+        component.
+      </p>
+    </article>
+  )
+}
+
+export const ProseLayer: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'start' }}>
+      <ProseFlow width={360} />
+      <ProseFlow width={720} />
+    </div>
   )
 }
 

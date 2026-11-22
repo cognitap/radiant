@@ -274,6 +274,11 @@ export {
   type LocaleProviderProps
 } from './components/LocaleProvider/LocaleProvider.js'
 export { getLocaleAttributes } from './internal/locale.js'
+export {
+  HeadingLevelProvider,
+  useHeadingLevel,
+  type HeadingLevelProviderProps
+} from './react/useHeadingLevel.js'
 export type { ButtonProps, ButtonRenderProps, ButtonVariant } from './components/Button/Button.js'
 export { generateTypography, typographyPresets, typographyRoles } from './typography/index.js'
 export type * from './typography/types.js'
