@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.102
+
 - `Reveal` adds optional playback: `playback` with `playLabel` and `pauseLabel` adds a play and pause toggle, timed by `interval` (1000–60000 ms, default 5000; `RevealItem.interval` overrides it) and wrapping with `loop`. The catalog and A2UI `Reveal` add `playback`, `interval` and `loop`; `A2uiSurface` `labels` gains `revealPlay` and `revealPause`.
 - Add `DragAndDrop`, named `DragAndDropContainer`s whose `DragAndDropItem`s move by dragging a handle (pointer or touch), by tapping an item and then a container, or with the keyboard (Space or Enter picks up and drops, Left and Right change container and mirror in right-to-left text, Up, Down, Home and End reorder within one, Escape cancels). The value maps container values to item values (`value`, `defaultValue`, `onValueChange`) and submits as one JSON object. A container with `capacity` refuses more items and says why through `fullText`; every announcement names the source and destination containers. Themes style it through `components.dragAndDrop`. The canonical and A2UI extension catalogs add `DragAndDrop` (a new `object` binding type), which takes text from the new `A2uiSurface` `labels.dragDrop*` and shows static containers with a `defaulted` diagnostic without them.
 
