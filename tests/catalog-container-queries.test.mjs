@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, relative, resolve } from 'node:path'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { dirname, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 
@@ -24,27 +24,50 @@ function catalogModules() {
   return [...seen]
 }
 
+/** Component source outside the catalog walk, such as Cascader. Stories are examples. */
+function componentModules() {
+  return readdirSync(resolve(root, 'src/components'), { recursive: true })
+    .filter(file => /\.tsx?$/.test(file) && !file.endsWith('.stories.tsx'))
+    .map(file => resolve(root, 'src/components', file))
+}
+
+// Files that still use viewport variants. AppShell keeps its page breakpoint until it moves to a
+// container query; the self-check below fails once a listed file no longer needs its exclusion.
+const knownExclusions = ['src/components/AppShell/AppShell.tsx']
+
 // Viewport breakpoint variants such as `sm:`, `max-md:` or `min-[40rem]:`; container variants
 // start with `@` and stay allowed.
 const viewportVariant = /(?<![\w@/[-])(?:max-)?(?:sm|md|lg|xl|2xl):(?=[\w[!-])/g
 const minMaxVariant = /(?<![\w@/[-])(?:min|max)-\[[^\]\s]+\]:/g
 const widthMediaQuery = /@media[^{'"`]*width/g
 
-test('catalog families respond to their container, not the viewport', () => {
-  const modules = catalogModules()
+test('component families respond to their container, not the viewport', () => {
+  const modules = [...new Set([...catalogModules(), ...componentModules()])]
   assert.ok(
     modules.some(file => file.endsWith('src/components/Stage/Stage.tsx')),
     'the module walk should reach the catalog families'
   )
+  assert.ok(modules.some(file => file.endsWith('src/components/Cascader/CascaderColumn.tsx')))
   const violations = []
+  const excluded = new Set()
   for (const file of modules) {
+    const path = relative(root, file).split(sep).join('/')
     const text = readFileSync(file, 'utf8')
     for (const pattern of [viewportVariant, minMaxVariant, widthMediaQuery]) {
       for (const match of text.matchAll(pattern)) {
+        if (knownExclusions.includes(path)) {
+          excluded.add(path)
+          continue
+        }
         const line = text.slice(0, match.index).split('\n').length
-        violations.push(`${relative(root, file)}:${line} ${match[0]}`)
+        violations.push(`${path}:${line} ${match[0]}`)
       }
     }
   }
   assert.deepEqual(violations, [])
+  assert.deepEqual(
+    knownExclusions.filter(path => !excluded.has(path)),
+    [],
+    'remove exclusions for files that no longer use viewport variants'
+  )
 })

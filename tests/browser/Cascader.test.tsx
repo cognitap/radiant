@@ -1,5 +1,6 @@
 import { act } from 'react'
 import { expect, test, vi } from 'vitest'
+import { page } from 'vitest/browser'
 import { Cascader, Field, LocaleProvider, type TreeItem } from '../../src/index.js'
 import { click, key, mount, shown } from './familyHarness.js'
 
@@ -213,4 +214,59 @@ test('empty async branches stay branches and let users return without committing
   expect(columns()[1]).toHaveFocus()
   expect(change).not.toHaveBeenCalled()
   expect(loadEmpty).toHaveBeenCalledTimes(1)
+})
+
+function fitsViewport(popup: HTMLElement) {
+  const rect = popup.getBoundingClientRect()
+  expect(rect.left).toBeGreaterThanOrEqual(0)
+  expect(rect.right).toBeLessThanOrEqual(innerWidth)
+  expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(innerWidth)
+}
+
+const optionPadding = (popup: HTMLElement) =>
+  getComputedStyle(popup.querySelector<HTMLElement>('[data-value="ottawa"]')!).paddingInlineStart
+
+test('a Cascader in a narrow panel opens wide columns past the panel on a wide viewport', async () => {
+  expect(innerWidth).toBeGreaterThanOrEqual(1280)
+  const { host } = await mount(
+    <section style={{ width: 360 }}>
+      <Cascader
+        aria-label="Destination"
+        items={destinations}
+        columnLabels={['Country', 'Region', 'City']}
+        defaultValue="ottawa"
+      />
+    </section>
+  )
+  const { trigger, popup, columns } = picker(host)
+  await click(trigger)
+  expect(columns()).toHaveLength(3)
+  await expect.poll(() => popup.getBoundingClientRect().width).toBeGreaterThan(360)
+  fitsViewport(popup)
+  const viewport = popup.querySelector<HTMLElement>('[data-slot~="select-viewport"]')!
+  expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth)
+  expect(optionPadding(popup)).not.toBe('8px')
+})
+
+test('columns compact when the viewport itself is narrow', async () => {
+  const size = [innerWidth, innerHeight]
+  await page.viewport(360, 800)
+  try {
+    const { host } = await mount(
+      <Cascader
+        aria-label="Destination"
+        items={destinations}
+        columnLabels={['Country', 'Region', 'City']}
+        defaultValue="ottawa"
+      />
+    )
+    const { trigger, popup, columns } = picker(host)
+    await click(trigger)
+    expect(columns()).toHaveLength(3)
+    await expect.poll(() => popup.getBoundingClientRect().width).toBeLessThanOrEqual(360)
+    fitsViewport(popup)
+    expect(optionPadding(popup)).toBe('8px')
+  } finally {
+    await page.viewport(size[0], size[1])
+  }
 })

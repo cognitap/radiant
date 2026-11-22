@@ -242,7 +242,7 @@ export function Cascader({
           position="popper"
           width="content"
           data-slot="cascader-content"
-          className={parts?.content?.className}
+          className={cn('[--_rad-cascader-column-width:12rem]', parts?.content?.className)}
           style={parts?.content?.style}
           onKeyDown={event => {
             if (event.defaultPrevented) return

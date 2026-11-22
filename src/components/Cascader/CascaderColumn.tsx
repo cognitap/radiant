@@ -101,11 +101,11 @@ export function CascaderColumn({
   }
 
   return (
-    <div className="w-48 min-w-28 flex-1 border-e border-[var(--rad-color-border)] last:border-e-0 sm:min-w-44">
+    <div className="@container/cascader-column [contain-intrinsic-inline-size:var(--_rad-cascader-column-width)] w-[length:var(--_rad-cascader-column-width)] min-w-28 flex-1 border-e border-[var(--rad-color-border)] last:border-e-0">
       {heading && (
         <div
           id={id + '-heading'}
-          className="px-2 py-1.5 text-xs font-semibold [color:var(--rad-color-muted-foreground)] sm:px-3"
+          className="px-2 py-1.5 text-xs font-semibold [color:var(--rad-color-muted-foreground)] @min-[10rem]/cascader-column:px-3"
         >
           {heading}
         </div>
@@ -154,7 +154,7 @@ export function CascaderColumn({
                 data-active={item.value === active?.value ? '' : undefined}
                 className={cn(
                   selectItemClass,
-                  'max-sm:gap-1 max-sm:px-2 not-data-disabled:cursor-pointer not-data-disabled:hover:bg-[var(--rad-color-neutral)] group-focus-visible/cascader:data-active:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/cascader:data-active:outline-offset-[-2px] group-focus-visible/cascader:forced-colors:data-active:outline-[Highlight]'
+                  '@max-[10rem]/cascader-column:gap-1 @max-[10rem]/cascader-column:px-2 not-data-disabled:cursor-pointer not-data-disabled:hover:bg-[var(--rad-color-neutral)] group-focus-visible/cascader:data-active:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/cascader:data-active:outline-offset-[-2px] group-focus-visible/cascader:forced-colors:data-active:outline-[Highlight]'
                 )}
               >
                 {item.item.icon && (
@@ -188,7 +188,7 @@ export function CascaderColumn({
             className={cn(
               selectItemClass,
               failed ? 'cursor-pointer underline' : '[color:var(--rad-color-muted-foreground)]',
-              'max-sm:px-2 group-focus-visible/cascader:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/cascader:outline-offset-[-2px]'
+              '@max-[10rem]/cascader-column:px-2 group-focus-visible/cascader:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/cascader:outline-offset-[-2px]'
             )}
           >
             {status}
