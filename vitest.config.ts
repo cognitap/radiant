@@ -102,12 +102,13 @@ export default defineConfig({
               contextOptions: { locale: 'en-US', timezoneId: 'UTC' }
             }),
             headless: true,
-            // Light and dark at 360px and 720px sit side by side in one screenshot.
+            // Light and dark at 360px and 720px sit side by side; each is its own screenshot.
             instances: [{ browser: 'chromium', viewport: { width: 2200, height: 1600 } }],
             expect: {
               toMatchScreenshot: {
-                // Ignore anti-aliasing noise; a changed token or layout moves far more pixels.
-                comparatorOptions: { threshold: 0.2, allowedMismatchedPixelRatio: 0.001 }
+                // Both sides render on the same pinned Chromium and runner image, so any
+                // colour shift past anti-aliasing tolerance, on even a few pixels, fails.
+                comparatorOptions: { threshold: 0.08, allowedMismatchedPixels: 4 }
               }
             }
           }

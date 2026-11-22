@@ -164,7 +164,8 @@ jobs:
 
   visual:
     name: Visual matrix
-    runs-on: ubuntu-latest
+    # Baselines are only valid for the image that rendered them; bump with a baseline refresh.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Check out repository

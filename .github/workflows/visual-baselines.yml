@@ -1,21 +1,27 @@
 name: Visual baselines
 
 # Renders the visual matrix on the CI platform and uploads every screenshot as the approved set.
-# Run it on a branch, or add the `visual-baselines` label to a pull request (the label works
-# before this file reaches main). Review the images, then commit them; see CONTRIBUTING.md.
+# Add the `visual-baselines` label to a pull request to render its merge with main, again on
+# every push while the label stays. Running it by hand renders the branch as it is, so rebase
+# on main first. Review the images, then commit them; see CONTRIBUTING.md.
 on:
   workflow_dispatch:
   pull_request:
-    types: [labeled]
+    types: [labeled, synchronize]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   baselines:
     name: Render visual baselines
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'visual-baselines' }}
-    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'visual-baselines') }}
+    # Keep in step with the visual job in ci.yml.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Check out repository

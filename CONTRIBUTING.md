@@ -58,13 +58,14 @@ Put new tests in the matching suite:
 
 ## Visual matrix
 
-`pnpm test:visual` renders all-pairs combinations of each component's enum and boolean props, plus nested containers, in light and dark at 360px and 720px. Screenshots differ by platform, so only the Linux images in `tests/visual/__screenshots__/` are committed. A local run compares against images from your own earlier run; the first run creates them.
+`pnpm test:visual` renders all-pairs combinations of each component's enum and boolean props, plus nested containers, in light and dark at 360px and 720px. Screenshots differ by platform, so only the Linux images in `tests/visual/__screenshots__/` are committed. Locally the first run fails every case while it records your own references; later runs compare against them.
 
-When CI reports a visual change, download the `visual-diffs` artifact and review each reference, actual and diff image. If the change is intended, approve it:
+When CI reports a visual change, download the `visual-diffs` artifact and review each reference, actual and diff image. To approve an intended change, label the pull request `visual-baselines`; the workflow renders the merge with `main` on every push while the label stays. Running it by hand renders the branch as is, so rebase on `main` first.
 
 ```sh
-gh workflow run visual-baselines.yml --ref <branch>   # or label the pull request visual-baselines
+gh workflow run visual-baselines.yml --ref <branch>
+rm -r tests/visual/__screenshots__
 gh run download <run-id> --name visual-baselines --dir tests/visual/__screenshots__
 ```
 
-Delete `tests/visual/__screenshots__/` before the download so removed cases go too, then commit the images. If a combination cannot look right, remove it from the catalog rather than from the matrix.
+Commit only the `.png` files, especially from a fork's run. Adding an enum value reshuffles that component's pairwise cases, so expect many of its images to change. When several pull requests touch visuals, rebase and rerun the visual job just before merging. If a combination cannot look right, remove it from the catalog rather than from the matrix.

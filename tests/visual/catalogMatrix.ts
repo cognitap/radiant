@@ -10,7 +10,9 @@ type Schema = {
   readonly enum?: readonly unknown[]
   readonly type?: unknown
   readonly properties?: Record<string, Schema>
+  readonly items?: Schema
   readonly allOf?: readonly Schema[]
+  readonly anyOf?: readonly Schema[]
 }
 
 /** A minimal valid instance: the root's required content, the nodes it references, and data. */
@@ -29,9 +31,6 @@ export type VisualCase = {
 
 /** Props that change what assistive technology hears, not what the page shows. */
 const NON_VISUAL = new Set(['announce', 'decorative'])
-
-/** Components drawn in a fixed viewport outside the surface, which an element screenshot misses. */
-const OUT_OF_FRAME = new Set(['Toast'])
 
 const IMAGE_URL = `data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#4f7cac"/><circle cx="240" cy="60" r="28" fill="#f4d35e"/></svg>'
@@ -55,7 +54,16 @@ const threeIds = ['one', 'two', 'three']
  * schema enumerates, so a new enum value is covered as soon as the catalog has it.
  */
 const seeds: Record<string, Seed> = {
-  Column: { root: { children: threeIds }, nodes: three },
+  Column: {
+    root: { children: threeIds, weight: 1 },
+    nodes: three,
+    // A taller sibling stretches the Column so `justify` has free space to distribute.
+    context: [
+      { id: 'root', component: 'Row', align: 'stretch', children: ['subject', 'tall'] },
+      { id: 'tall', component: 'Column', children: ['t1', 't2', 't3', 't4', 't5', 't6'] },
+      ...[1, 2, 3, 4, 5, 6].map(n => text(`t${n}`, `Line ${n}`))
+    ]
+  },
   Row: { root: { children: threeIds }, nodes: three },
   List: { root: { children: threeIds }, nodes: three },
   Grid: { root: { children: threeIds }, nodes: three },
@@ -63,7 +71,9 @@ const seeds: Record<string, Seed> = {
   Text: { root: { text: 'Bring water and a warm layer.' } },
   Icon: { root: { name: 'star', accessibility: { label: 'Favorite' } } },
   Image: { root: { url: IMAGE_URL, description: 'A lake under a yellow sun' } },
-  Video: { root: { url: 'data:video/mp4;base64,', accessibility: { label: 'Trail walk' } } },
+  Video: {
+    root: { url: 'data:video/mp4;base64,', posterUrl: IMAGE_URL, accessibility: { label: 'Walk' } }
+  },
   AudioPlayer: { root: { url: 'data:audio/mpeg;base64,', accessibility: { label: 'Briefing' } } },
   Divider: {
     root: {},
@@ -141,7 +151,13 @@ const seeds: Record<string, Seed> = {
     nodes: button('retry', 'Retry now')
   },
   Toast: {
-    root: { title: 'Draft saved', open: { '@path': '/open' }, actionLabel: 'Undo', action: noop },
+    root: {
+      title: 'Draft saved',
+      open: { '@path': '/open' },
+      duration: 30000,
+      actionLabel: 'Undo',
+      action: noop
+    },
     dataModel: { open: true }
   },
   Badge: { root: { text: 'Shipped' } },
@@ -247,15 +263,43 @@ function properties(schema: Schema): Record<string, Schema> {
   )
 }
 
-/** Every enum and boolean prop a component's schema allows, as matrix axes. */
+const values = (prop: Schema): readonly unknown[] | undefined =>
+  prop.enum ?? (prop.type === 'boolean' ? [false, true] : undefined)
+
+/** The object schema of a prop's array items, including an array inside `anyOf`. */
+const itemSchema = (prop: Schema): Schema | undefined =>
+  [prop, ...(prop.anyOf ?? [])].find(option => option.items?.properties)?.items
+
+/**
+ * Every enum and boolean prop a component's schema allows, as matrix axes. A prop of array items,
+ * such as `columns[].align`, applies its value to every item the seed provides.
+ */
 export function axesFor(schema: Schema): Axis[] {
   return Object.entries(properties(schema))
     .filter(([name]) => name !== 'component' && !NON_VISUAL.has(name))
     .flatMap(([name, prop]): Axis[] => {
-      if (prop.enum) return [{ name, values: prop.enum }]
-      if (prop.type === 'boolean') return [{ name, values: [false, true] }]
-      return []
+      const own = values(prop)
+      if (own) return [{ name, values: own }]
+      return Object.entries(itemSchema(prop)?.properties ?? {}).flatMap(([item, sub]) => {
+        const nested = values(sub)
+        return nested && !NON_VISUAL.has(item)
+          ? [{ name: `${name}[].${item}`, values: nested }]
+          : []
+      })
     })
+}
+
+/** Applies a combination to a seed's root props, writing `prop[].item` into each array item. */
+function apply(root: Record<string, unknown>, combination: Record<string, unknown>) {
+  const next: Record<string, unknown> = { ...root }
+  for (const [axis, value] of Object.entries(combination)) {
+    const [prop, item] = axis.split('[].') as [string, string | undefined]
+    const current = next[prop]
+    if (item === undefined) next[prop] = value
+    else if (Array.isArray(current))
+      next[prop] = current.map((entry: Record<string, unknown>) => ({ ...entry, [item]: value }))
+  }
+  return next
 }
 
 const surface = (nodes: readonly Node[], dataModel: Record<string, unknown> = {}) => [
@@ -279,19 +323,29 @@ const label = (combination: Record<string, unknown>) =>
 export const unseeded = () =>
   Object.keys(extensionCatalog.components).filter(name => !(name in seeds))
 
+/** Item axes, such as `Table.columns[].align`, whose seed has no literal array to vary. */
+export const uncoveredItemAxes = () =>
+  Object.entries(extensionCatalog.components as Record<string, Schema>).flatMap(
+    ([component, schema]) =>
+      axesFor(schema)
+        .filter(axis => axis.name.includes('[].'))
+        .filter(axis => !Array.isArray(seeds[component]?.root[axis.name.split('[].')[0]!]))
+        .map(axis => `${component}.${axis.name}`)
+  )
+
 /** Pairwise variant cases for every catalog component, then the nesting cases. */
 export function visualCases(): VisualCase[] {
   const components = extensionCatalog.components as Record<string, Schema>
   const variants = Object.entries(components).flatMap(([component, schema]) => {
     const seed = seeds[component]
-    if (!seed || OUT_OF_FRAME.has(component)) return []
+    if (!seed) return []
     const id = seed.context ? 'subject' : 'root'
     return allPairs(axesFor(schema)).map(combination => ({
       name: `${component}/${label(combination)}`,
       messages: surface(
         [
           ...(seed.context ?? []),
-          { id, component, ...seed.root, ...combination },
+          { id, component, ...apply(seed.root, combination) },
           ...(seed.nodes ?? [])
         ],
         seed.dataModel
