@@ -191,10 +191,10 @@ export interface SharedTokens {
   series: Record<SeriesIndex, SeriesTokens>
 }
 
-type SeriesIndex = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
+export type SeriesIndex = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
 
 /** `solid` marks and fills on the surface; `soft` and `border` frame a tag that holds `text`. */
-interface SeriesTokens {
+export interface SeriesTokens {
   solid: string
   soft: string
   border: string
@@ -265,19 +265,13 @@ export type PartialTree<T> = {
 export type ThemeTokens = PartialTree<SharedTokens>
 export type ThemeVariableValues = Record<`--rad-${string}`, string | number>
 
-// Series 1 to 6 keep the original chart palette, so they follow each theme's role colours.
-const seriesSolids = [
-  'color-mix(in oklab, var(--rad-color-accent) 55%, var(--rad-color-foreground))',
-  'color-mix(in oklab, var(--rad-color-focus) 65%, var(--rad-color-foreground))',
-  'color-mix(in oklab, var(--rad-color-warning) 45%, var(--rad-color-foreground))',
-  'color-mix(in oklab, var(--rad-color-danger) 65%, var(--rad-color-foreground))',
-  'var(--rad-color-foreground)',
-  'var(--rad-color-muted-foreground)'
-]
-
-function seriesTokens(extra: readonly [string, string]): SharedTokens['series'] {
+/**
+ * Blue, orange, emerald, pink, sky, amber, violet and red at colour-wall family hues, with
+ * lightness and chroma chosen so every pair stays apart under simulated colour-vision deficiencies.
+ */
+function seriesTokens(solids: readonly string[]): SharedTokens['series'] {
   const series = {} as SharedTokens['series']
-  for (const [index, solid] of [...seriesSolids, ...extra].entries()) {
+  for (const [index, solid] of solids.entries()) {
     const name = String(index + 1) as SeriesIndex
     const own = `var(--rad-series-${name}-solid)`
     series[name] = {
@@ -411,7 +405,16 @@ const light: SharedTokens = {
     footerGap: '0.5rem'
   },
   state: { disabledOpacity: 0.5 },
-  series: seriesTokens(['oklch(0.62 0.18 340)', 'oklch(0.54 0.18 260)'])
+  series: seriesTokens([
+    'oklch(0.42 0.12 255)',
+    'oklch(0.52 0.12 55)',
+    'oklch(0.6 0.12 165)',
+    'oklch(0.39 0.12 340)',
+    'oklch(0.51 0.1 230)',
+    'oklch(0.62 0.12 80)',
+    'oklch(0.58 0.25 295)',
+    'oklch(0.43 0.16 25)'
+  ])
 }
 
 const dark: SharedTokens = {
@@ -442,7 +445,16 @@ const dark: SharedTokens = {
     overlayShadow: '0 24px 64px -16px rgb(0 0 0 / 0.6)',
     backdrop: 'rgb(0 0 0 / 0.65)'
   },
-  series: seriesTokens(['oklch(0.66 0.16 340)', 'oklch(0.66 0.16 260)'])
+  series: seriesTokens([
+    'oklch(0.74 0.11 255)',
+    'oklch(0.77 0.14 55)',
+    'oklch(0.93 0.11 165)',
+    'oklch(0.66 0.1 340)',
+    'oklch(0.83 0.1 230)',
+    'oklch(0.88 0.11 80)',
+    'oklch(0.67 0.19 295)',
+    'oklch(0.68 0.16 25)'
+  ])
 }
 
 /** Immutable at runtime as well as in declarations: defaults are shared by every theme. */

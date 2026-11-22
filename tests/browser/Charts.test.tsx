@@ -166,19 +166,14 @@ test('theme mode and generated palette changes resolve series colors through the
   const dark = getComputedStyle(host.querySelector('svg path')!).stroke
   expect(dark).not.toBe(light)
 })
-test('series 1 to 6 keep the role mixes charts drew before the series tokens', async () => {
-  const before = [
-      'color-mix(in oklab,var(--rad-color-accent) 55%,var(--rad-color-foreground))',
-      'color-mix(in oklab,var(--rad-color-focus) 65%,var(--rad-color-foreground))',
-      'color-mix(in oklab,var(--rad-color-warning) 45%,var(--rad-color-foreground))',
-      'color-mix(in oklab,var(--rad-color-danger) 65%,var(--rad-color-foreground))',
-      'var(--rad-color-foreground)',
-      'var(--rad-color-muted-foreground)'
-    ],
-    six = before.map((_, index) => ({ key: `s${index}`, label: `Series ${index + 1}` })),
+test('chart series resolve to the series tokens in every preset and mode', async () => {
+  const eight = Array.from({ length: 8 }, (_, index) => ({
+      key: `s${index}`,
+      label: `Series ${index + 1}`
+    })),
     rows = data.map(row => ({
       ...row,
-      values: Object.fromEntries(six.map((item, index) => [item.key, index + 1]))
+      values: Object.fromEntries(eight.map((item, index) => [item.key, index + 1]))
     }))
   for (const theme of themes)
     for (const mode of ['light', 'dark'] as const) {
@@ -189,13 +184,13 @@ test('series 1 to 6 keep the role mixes charts drew before the series tokens', a
         >
           <Sample
             data={rows}
-            series={six}
+            series={eight}
           />
-          {before.map(color => (
+          {eight.map((_, index) => (
             <i
-              key={color}
-              data-before
-              style={{ color }}
+              key={index}
+              data-token
+              style={{ color: `var(--rad-series-${index + 1}-solid)` }}
             />
           ))}
         </ThemeScope>
@@ -204,11 +199,12 @@ test('series 1 to 6 keep the role mixes charts drew before the series tokens', a
         host.querySelectorAll('svg path[stroke]'),
         path => getComputedStyle(path).stroke
       )
-      const expected = Array.from(
-        host.querySelectorAll('[data-before]'),
+      const tokens = Array.from(
+        host.querySelectorAll('[data-token]'),
         node => getComputedStyle(node).color
       )
-      expect(strokes, `${theme.id}/${mode}`).toEqual(expected)
+      expect(new Set(tokens).size, `${theme.id}/${mode}`).toBe(8)
+      expect(strokes, `${theme.id}/${mode}`).toEqual(tokens)
     }
 })
 test('empty, missing and all-zero data have readable alternatives without phantom values', async () => {

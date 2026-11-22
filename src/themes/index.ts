@@ -8,6 +8,7 @@ export type {
   ThemeStyle,
   ThemeTokens
 } from './types.js'
+export type { SeriesIndex, SeriesTokens } from './tokens.js'
 export { defineTheme } from './defineTheme.js'
 export { updateThemeAppearance } from './updateThemeAppearance.js'
 export type { ThemeAppearanceSettings, ThemeGeometrySettings } from './updateThemeAppearance.js'

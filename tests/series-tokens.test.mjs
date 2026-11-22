@@ -26,41 +26,85 @@ function linearToOklab([r, g, b]) {
   ]
 }
 
-const hexToLinear = value => {
+const toEncoded = n => (n <= 0.0031308 ? 12.92 * n : 1.055 * n ** (1 / 2.4) - 0.055)
+const hexChannels = value => {
   const hex = value.slice(1)
-  const digits = hex.length === 3 ? [...hex].map(d => d + d).join('') : hex.slice(0, 6)
-  return [0, 2, 4].map(i => toLinear(parseInt(digits.slice(i, i + 2), 16) / 255))
+  const digits = hex.length <= 4 ? [...hex].map(d => d + d).join('') : hex
+  const channels = [0, 2, 4, 6].map(i => parseInt(digits.slice(i, i + 2) || 'ff', 16) / 255)
+  return { rgb: channels.slice(0, 3), alpha: channels[3] }
+}
+
+/** Composites encoded sRGB over the opaque backdrop, as browsers paint, and returns Oklab. */
+function flatten(rgb, alpha, backdrop) {
+  const behind = alpha < 1 ? hexChannels(backdrop).rgb : rgb
+  return linearToOklab(rgb.map((channel, i) => toLinear(channel * alpha + behind[i] * (1 - alpha))))
+}
+
+function splitTopLevel(text) {
+  const parts = ['']
+  let depth = 0
+  for (const character of text) {
+    if (character === '(') depth++
+    if (character === ')') depth--
+    if (character === ',' && depth === 0) parts.push('')
+    else parts[parts.length - 1] += character
+  }
+  return parts.map(part => part.trim())
 }
 
 /**
- * Resolves hex, `rgb()`, `oklch()`, `var()` and two-stop `color-mix(in oklab, …)` to Oklab.
- * A translucent colour is flattened onto `backdrop`, one opaque colour behind the surface.
+ * Resolves hex (with alpha), `rgb()`, `oklch()` (with alpha or `none`), `transparent`,
+ * `var()` and nested two-stop `color-mix(in oklab, …)` to Oklab. A translucent colour is
+ * flattened onto `backdrop`, the opaque hex colour behind it.
  */
 function resolve(values, text, backdrop, depth = 0) {
   assert.ok(depth < 20, `cyclic value: ${text}`)
   const value = String(text).trim()
   const reference = /^var\((--[\w-]+)\)$/.exec(value)
   if (reference) return resolve(values, values[reference[1]], backdrop, depth + 1)
-  if (value.startsWith('#')) return linearToOklab(hexToLinear(value))
+  if (value === 'transparent') return flatten([0, 0, 0], 0, backdrop)
+  if (value.startsWith('#')) {
+    const { rgb, alpha } = hexChannels(value)
+    return flatten(rgb, alpha, backdrop)
+  }
   const rgb = /^rgb\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:\/\s*([\d.]+))?\s*\)$/.exec(value)
   if (rgb) {
     const alpha = rgb[4] === undefined ? 1 : Number(rgb[4])
-    const behind = hexToLinear(backdrop)
-    return linearToOklab(
-      rgb.slice(1, 4).map((channel, i) => toLinear(channel / 255) * alpha + behind[i] * (1 - alpha))
+    return flatten(
+      rgb.slice(1, 4).map(channel => channel / 255),
+      alpha,
+      backdrop
     )
   }
-  const oklch = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)$/.exec(value)
+  const oklch =
+    /^oklch\(\s*([\d.]+|none)\s+([\d.]+|none)\s+([\d.]+|none)\s*(?:\/\s*([\d.]+%?))?\s*\)$/.exec(
+      value
+    )
   if (oklch) {
-    const [L, C, h] = oklch.slice(1).map(Number)
+    const [L, C, h] = oklch.slice(1, 4).map(channel => (channel === 'none' ? 0 : Number(channel)))
+    const alphaText = oklch[4] ?? '1'
+    const alpha = alphaText.endsWith('%') ? parseFloat(alphaText) / 100 : Number(alphaText)
     const angle = (h * Math.PI) / 180
-    return linearToOklab(oklabToLinear([L, C * Math.cos(angle), C * Math.sin(angle)]))
+    const linear = oklabToLinear([L, C * Math.cos(angle), C * Math.sin(angle)])
+    return flatten(linear.map(toEncoded), alpha, backdrop)
   }
-  const mix = /^color-mix\(\s*in oklab\s*,\s*(.+?)\s+([\d.]+)%\s*,\s*(.+)\)$/.exec(value)
+  const mix = /^color-mix\((.*)\)$/s.exec(value)
   assert.ok(mix, `unsupported color value: ${value}`)
-  const [first, second] = [mix[1], mix[3]].map(part => resolve(values, part, backdrop, depth + 1))
-  const weight = Number(mix[2]) / 100
-  return first.map((channel, i) => channel * weight + second[i] * (1 - weight))
+  const [space, ...stops] = splitTopLevel(mix[1])
+  assert.equal(space, 'in oklab', `unsupported color-mix space: ${value}`)
+  assert.equal(stops.length, 2, `color-mix needs two stops: ${value}`)
+  const parsed = stops.map(stop => {
+    const weight = /\s+([\d.]+)%$/.exec(stop)
+    return {
+      color: resolve(values, weight ? stop.slice(0, weight.index) : stop, backdrop, depth + 1),
+      weight: weight ? Number(weight[1]) / 100 : undefined
+    }
+  })
+  const first = parsed[0].weight ?? (parsed[1].weight === undefined ? 0.5 : 1 - parsed[1].weight)
+  const second = parsed[1].weight ?? 1 - first
+  return parsed[0].color.map(
+    (channel, i) => (channel * first + parsed[1].color[i] * second) / (first + second)
+  )
 }
 
 const luminance = lab => {
@@ -107,47 +151,64 @@ const simulate = (lab, matrix) => {
 const distance = (x, y) => Math.hypot(...x.map((channel, i) => channel - y[i]))
 
 const series = Array.from({ length: 8 }, (_, index) => index + 1)
+const pairs = series.flatMap(a => series.filter(b => b > a).map(b => [a, b]))
+const visions = [['typical vision', null], ...Object.entries(deficiencies)]
+
+// Behind a translucent surface, and for charts placed on the canvas itself, every opaque
+// canvas colour counts: gradient stops and the base. One-pixel grid lines are ignored.
+function backdropsOf(canvas) {
+  const value = String(canvas)
+  return /gradient\(/.test(value) ? value.match(/#[\da-f]{3,8}\b/gi) : [value]
+}
+
 const cases = [...new Set([defaultTheme, ...themes])].flatMap(theme =>
   ['light', 'dark'].flatMap(mode => {
     const values = theme.modes[mode]
-    const backdrops = String(values['--rad-surface-canvas']).match(/#[\da-f]{3,8}\b/gi) ?? [
-      '#808080'
-    ]
-    return backdrops.map(backdrop => ({
-      name: `${theme.id}/${mode} on ${backdrop}`,
-      color: token => resolve(values, values[token], backdrop)
-    }))
+    return backdropsOf(values['--rad-surface-canvas']).map(canvas => {
+      const backdrop = canvas.startsWith('#') ? canvas : '#ffffff'
+      return {
+        theme: theme.id,
+        mode,
+        name: `${theme.id}/${mode} on ${canvas}`,
+        canvas: resolve(values, canvas, backdrop),
+        color: token => resolve(values, values[token], backdrop)
+      }
+    })
   })
 )
 
-test('series text reaches 4.5:1 on its soft fill and solids reach 3:1 on the surface', () => {
-  for (const { name, color } of cases) {
+test('series text reaches 4.5:1 on soft, and solids 3:1 on the surface and the canvas', () => {
+  for (const { name, canvas, color } of cases) {
     const surface = color('--rad-color-surface')
     for (const n of series) {
-      const part = name => color(`--rad-series-${n}-${name}`)
-      const text = contrast(part('text'), part('soft'))
-      const solid = contrast(part('solid'), surface)
-      assert.ok(text >= 4.5, `${name} series ${n} text on soft is ${text.toFixed(2)}:1`)
-      assert.ok(solid >= 3, `${name} series ${n} solid on surface is ${solid.toFixed(2)}:1`)
+      const part = variant => color(`--rad-series-${n}-${variant}`)
+      const ratios = {
+        'text on soft': [contrast(part('text'), part('soft')), 4.5],
+        'solid on surface': [contrast(part('solid'), surface), 3],
+        'solid on canvas': [contrast(part('solid'), canvas), 3]
+      }
+      for (const [pair, [ratio, target]] of Object.entries(ratios))
+        assert.ok(ratio >= target, `${name} series ${n} ${pair} is ${ratio.toFixed(2)}:1`)
     }
   }
 })
 
-// Series 1 to 6 reuse each theme's role colours, so only series 7 and 8 are held apart here.
-test('series 7 and 8 stay apart from every series under simulated colour-vision deficiencies', () => {
-  const minimum = 0.06
-  for (const { name, color } of cases) {
-    const solids = series.map(n => color(`--rad-series-${n}-solid`))
-    for (const [deficiency, matrix] of [['typical', null], ...Object.entries(deficiencies)]) {
+// Glass light keeps its solids dark enough for 3:1 on its brightest gradient stop, which
+// leaves less room between them.
+const minimumGap = ({ theme, mode }) => (theme === 'glass' && mode === 'light' ? 0.06 : 0.08)
+
+test('every pair of series solids stays apart under simulated colour-vision deficiencies', () => {
+  for (const testCase of cases) {
+    const solids = series.map(n => testCase.color(`--rad-series-${n}-solid`))
+    for (const [vision, matrix] of visions) {
       const seen = matrix ? solids.map(solid => simulate(solid, matrix)) : solids
-      for (const own of [6, 7])
-        for (let other = 0; other < own; other++) {
-          const gap = distance(seen[own], seen[other])
-          assert.ok(
-            gap >= minimum,
-            `${name} ${deficiency}: series ${own + 1} and ${other + 1} are ${gap.toFixed(3)} apart`
-          )
-        }
+      for (const [a, b] of pairs) {
+        const gap = distance(seen[a - 1], seen[b - 1])
+        assert.ok(
+          gap >= minimumGap(testCase),
+          `${testCase.name} ${vision}: series ${a} and ${b} are ${gap.toFixed(3)} apart in Oklab`
+        )
+      }
     }
   }
 })

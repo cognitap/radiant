@@ -133,9 +133,11 @@ The derived steps scale a single length. When a base padding is a shorthand such
 
 ## Series colors
 
-`tokens.series['1']` to `['8']` are categorical colors for anything that tells concepts apart by color, such as chart series or highlighted terms. Give a concept one series number and use it in every family. Each series has `solid` for marks on `--rad-color-surface` (3:1 or more), and `soft`, `border`, and `text` for a tag or highlight (`text` on `soft` 4.5:1 or more).
+`tokens.series['1']` to `['8']` (the `series` theme-document section) are categorical colors for anything that tells concepts apart by color, such as chart series or highlighted terms. Give a concept one series number and use it in every family. Each series has `solid` for marks, and `soft`, `border`, and `text` for a tag or highlight. `soft`, `border`, and `text` mix `solid` with `--rad-color-surface` or `--rad-color-foreground`, so a theme can set `solid` alone.
 
-Series 1 to 6 mix the theme's `accent`, `focus`, `warning`, and `danger` with `foreground`, then use `foreground` and `muted-foreground`, so they follow the theme. Series 7 and 8 are fixed magenta and blue, picked to stay apart from series 1 to 6 under simulated protanopia, deuteranopia, and tritanopia. `soft`, `border`, and `text` mix `solid` with the surface or foreground, so a theme can set `solid` alone. Series 1 and 2 match when `accent` and `focus` do, so charts also vary the line dash. `components.chart.series1` to `series8` override a chart only.
+The defaults are blue, orange, emerald, pink, sky, amber, violet, and red at the color wall's family hues, with lightness as a second cue. They do not follow role colors such as `accent` or `danger`, so a series carries no status meaning. In every preset and mode, `solid` reaches 3:1 on both the surface and the canvas, `text` on `soft` reaches 4.5:1, and every pair of solids stays apart under simulated protanopia, deuteranopia, and tritanopia. `glass` sets darker light-mode solids for its bright canvas. Bar and pie charts tell series apart by color alone, so keep custom solids as distinct.
+
+Series tokens resolve where `ThemeScope` or `:root` declares them, so overriding a role color on an inner element does not recolor them. `components.chart.series1` to `series8` override a chart only.
 
 ## Presets
 

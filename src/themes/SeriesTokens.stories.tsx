@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The eight categorical series tokens in the global theme and mode. Each series keeps one colour across every family that reads it: chart marks use `solid`, and tags or highlighted text use `text` on `soft` inside `border`.'
+          'The eight categorical series tokens in the global theme and mode. Each series keeps one color across every family that reads it: chart marks use `solid`, and tags or highlighted text use `text` on `soft` inside `border`.'
       }
     }
   }

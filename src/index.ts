@@ -254,6 +254,8 @@ export {
 } from './themes/index.js'
 export type {
   PublicThemeToken,
+  SeriesIndex,
+  SeriesTokens,
   SharedTokens,
   ThemeAppearanceSettings,
   ThemeGeometrySettings,
