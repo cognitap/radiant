@@ -164,6 +164,9 @@ jobs:
 
   visual:
     name: Visual matrix
+    # While a pull request carries the visual-baselines label its images are being re-rendered, so
+    # comparing against the old ones would only fail. Remove the label after committing them.
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'visual-baselines') }}
     # Baselines are only valid for the image that rendered them; bump with a baseline refresh.
     runs-on: ubuntu-24.04
     timeout-minutes: 20
