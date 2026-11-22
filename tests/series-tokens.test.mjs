@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { defaultTheme } from '../dist/library/index.js'
+import {
+  compileThemeDocument,
+  defaultTheme,
+  generateColorWall,
+  recommendColorPalette,
+  seriesPalette,
+  themeDocumentFromDefinition,
+  updateThemeAppearance
+} from '../dist/library/index.js'
 import { themes } from '../dist/library/examples/index.js'
 
 // Linear sRGB and Oklab: https://bottosson.github.io/posts/oklab/
@@ -161,7 +169,87 @@ function backdropsOf(canvas) {
   return /gradient\(/.test(value) ? value.match(/#[\da-f]{3,8}\b/gi) : [value]
 }
 
-const cases = [...new Set([defaultTheme, ...themes])].flatMap(theme =>
+// Themes generated from the colour wall, with its neutral or any hue family as the neutral,
+// take their series from seriesPalette. A vivid brand palette as the neutral is not covered.
+const brands = [
+  '#7c3aed',
+  '#0ea5e9',
+  '#16a34a',
+  '#dc2626',
+  '#f59e0b',
+  '#ffff00',
+  '#db2777',
+  '#111111'
+]
+const palettes = ['classic', 'balanced', 'expressive'].flatMap(wallPreset =>
+  brands.flatMap(brand => {
+    const wall = generateColorWall({ brand, wallPreset })
+    return wall.color.palettes
+      .filter(({ id }) => id !== 'brand')
+      .map(({ id: neutral }) => ({
+        id: `${wallPreset} wall from ${brand} with ${neutral} neutral`,
+        palette: recommendColorPalette(wall, { working: { neutral } })
+      }))
+  })
+)
+const themeFrom = palette => {
+  const series = seriesPalette(palette)
+  return compileThemeDocument(
+    updateThemeAppearance(
+      themeDocumentFromDefinition({
+        id: 'wall',
+        name: 'Wall',
+        modes: {
+          light: { tokens: { series: series.light } },
+          dark: { tokens: { series: series.dark } }
+        }
+      }),
+      { palette }
+    )
+  )
+}
+// A compiled theme per preset checks the shortcut below; the expressive one moves its dark solids.
+const compiled = ['classic', 'balanced', 'expressive'].map(wallPreset => ({
+  ...themeFrom(
+    recommendColorPalette(generateColorWall({ brand: '#7c3aed', wallPreset }), {
+      working: { neutral: 'lime' }
+    })
+  ),
+  id: `compiled ${wallPreset} wall`
+}))
+// The rest set only the series, surface, canvas and foreground values the checks read, once per
+// distinct set of those colours.
+const seriesKeys = Object.keys(defaultTheme.modes.light).filter(key =>
+  key.startsWith('--rad-series-')
+)
+const seen = new Set()
+const generated = palettes.flatMap(({ id, palette }) => {
+  const key = ['light', 'dark']
+    .map(mode =>
+      [
+        palette.color.modes[mode].surface,
+        palette.color.modes[mode].foreground,
+        palette.surface.modes[mode].canvas
+      ].join()
+    )
+    .join()
+  if (seen.has(key)) return []
+  seen.add(key)
+  const series = seriesPalette(palette)
+  assert.ok(series.pass, `${id} series checks fail`)
+  const values = mode => ({
+    ...Object.fromEntries(seriesKeys.map(key => [key, defaultTheme.modes[mode][key]])),
+    ...Object.fromEntries(
+      Object.entries(series[mode]).map(([n, { solid }]) => [`--rad-series-${n}-solid`, solid])
+    ),
+    '--rad-color-surface': palette.color.modes[mode].surface,
+    '--rad-color-foreground': palette.color.modes[mode].foreground,
+    '--rad-surface-canvas': palette.surface.modes[mode].canvas
+  })
+  return [{ id, modes: { light: values('light'), dark: values('dark') } }]
+})
+
+const cases = [...new Set([defaultTheme, ...themes]), ...compiled, ...generated].flatMap(theme =>
   ['light', 'dark'].flatMap(mode => {
     const values = theme.modes[mode]
     return backdropsOf(values['--rad-surface-canvas']).map(canvas => {
@@ -211,4 +299,28 @@ test('every pair of series solids stays apart under simulated colour-vision defi
       }
     }
   }
+})
+
+test('seriesPalette reports, without throwing, palettes it cannot fit', () => {
+  const brandNeutral = seriesPalette(
+    recommendColorPalette(generateColorWall({ brand: '#84cc16' }), {
+      working: { neutral: 'brand' }
+    })
+  )
+  assert.equal(brandNeutral.pass, false)
+  assert.equal(brandNeutral.checks.dark.pass, false)
+  assert.ok(brandNeutral.checks.dark.distance.distance < brandNeutral.checks.dark.distance.minimum)
+  const darkForeground = seriesPalette({
+    color: {
+      modes: {
+        light: { surface: '#FFFFFF', foreground: '#18181B' },
+        dark: { surface: '#18181B', foreground: '#444444' }
+      }
+    },
+    surface: { modes: { light: { canvas: '#F4F4F5' }, dark: { canvas: '#09090B' } } }
+  })
+  assert.equal(darkForeground.checks.light.pass, true)
+  assert.equal(darkForeground.checks.dark.pass, false)
+  assert.equal(darkForeground.checks.dark.contrast.pair, 'text on soft')
+  assert.ok(darkForeground.checks.dark.contrast.ratio < 4.5)
 })
