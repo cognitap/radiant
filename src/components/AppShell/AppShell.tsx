@@ -54,6 +54,7 @@ export type AppShellState = {
 type Binding = AppShellState & {
   sidebarId: string
   root: RefObject<HTMLDivElement | null>
+  hidden: RefObject<HTMLElement | null>
   drawerId: string
   labelId: string
   motion: 'inherit' | 'off'
@@ -100,6 +101,7 @@ export function AppShell({
   ref,
   className,
   onFocusCapture,
+  onBlurCapture,
   ...props
 }: AppShellProps) {
   const collapse = useControllableState({
@@ -127,6 +129,7 @@ export function AppShell({
     id = useId(),
     latestOpen = useRef(drawer.request),
     focused = useRef<HTMLElement | null>(null),
+    hidden = useRef<HTMLElement | null>(null),
     previous = useRef(collapse.value)
   useLayoutEffect(() => {
     latestOpen.current = drawer.request
@@ -134,14 +137,23 @@ export function AppShell({
   useEffect(() => {
     const node = root.current
     if (!node) return
-    const query = node.ownerDocument.defaultView!.matchMedia('(width < 40rem)')
-    setMobile(query.matches)
-    const change = () => {
-      setMobile(query.matches)
-      if (!query.matches) latestOpen.current(false)
+    const doc = node.ownerDocument,
+      view = doc.defaultView!
+    let narrow: boolean | undefined
+    // Matches the sidebar slot's style breakpoint: the shell's own content width under 40rem.
+    const measure = (width: number) => {
+      const next = width < 40 * parseFloat(view.getComputedStyle(doc.documentElement).fontSize)
+      if (next === narrow) return
+      if (narrow && !next) latestOpen.current(false)
+      narrow = next
+      setMobile(next)
     }
-    query.addEventListener('change', change)
-    return () => query.removeEventListener('change', change)
+    measure(node.clientWidth)
+    const observer = new view.ResizeObserver(([entry]) =>
+      measure(entry!.contentBoxSize[0]?.inlineSize ?? entry!.contentRect.width)
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
   }, [])
   useLayoutEffect(() => {
     const node = root.current,
@@ -158,6 +170,9 @@ export function AppShell({
       toggleFocus(node)
     previous.current = collapse.value
   })
+  useLayoutEffect(() => {
+    hidden.current = null
+  }, [mobile])
   const setCollapsed = (next: boolean) => {
     if (typeof next !== 'boolean')
       throw new TypeError('AppShell collapsed requests must be boolean.')
@@ -184,6 +199,7 @@ export function AppShell({
           sidebarId: `${id}-sidebar`,
           labelId: `${id}-sidebar-label`,
           root,
+          hidden,
           motion
         }}
       >
@@ -198,12 +214,20 @@ export function AppShell({
           }
           data-motion={motion}
           className={cn(
-            'relative grid h-dvh min-h-0 min-w-0 grid-cols-[var(--_rad-shell-sidebar)_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] [--_rad-shell-sidebar:var(--rad-sidebar-width,16rem)] data-collapsed:[--_rad-shell-sidebar:var(--rad-sidebar-collapsed-width,5rem)] max-[40rem]:grid-cols-[0_minmax(0,1fr)] bg-[var(--rad-app-shell-background,var(--rad-color-surface,white))] text-[var(--rad-app-shell-color,var(--rad-color-foreground,black))]',
+            '@container/app-shell [contain-intrinsic-inline-size:64rem] relative grid h-dvh min-h-0 min-w-0 grid-cols-[auto_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] [--_rad-shell-sidebar:var(--rad-sidebar-width,16rem)] data-collapsed:[--_rad-shell-sidebar:var(--rad-sidebar-collapsed-width,5rem)] bg-[var(--rad-app-shell-background,var(--rad-color-surface,white))] text-[var(--rad-app-shell-color,var(--rad-color-foreground,black))]',
             className
           )}
           onFocusCapture={event => {
             onFocusCapture?.(event)
             focused.current = event.target
+            hidden.current = null
+          }}
+          onBlurCapture={event => {
+            onBlurCapture?.(event)
+            // The shell's width query can hide the sidebar before the drawer takes it: remember
+            // focus lost that way so the sidebar can restore it.
+            hidden.current =
+              !event.relatedTarget && !event.target.checkVisibility() ? event.target : null
           }}
         >
           {props.children}
@@ -338,8 +362,13 @@ export function Sidebar({
     const doc = target.ownerDocument,
       view = doc.defaultView!,
       active = doc.activeElement,
+      lost = shell.hidden.current,
       held =
-        active instanceof doc.defaultView!.HTMLElement && container.contains(active) ? active : null
+        active instanceof doc.defaultView!.HTMLElement && container.contains(active)
+          ? active
+          : (!active || active === doc.body) && lost && container.contains(lost)
+            ? lost
+            : null
     if (container.parentElement === target) return
     target.append(container)
     if (held && shell.mobile && !shell.open)
@@ -356,7 +385,7 @@ export function Sidebar({
           held.focus({ preventScroll: true })
       })
     return () => view.cancelAnimationFrame(frame)
-  }, [container, shell.mobile, shell.open])
+  }, [container, shell.mobile, shell.open, shell.hidden])
   const navigation = (
     <nav
       {...props}
@@ -395,7 +424,7 @@ export function Sidebar({
         ref={desktop}
         data-slot="sidebar-slot"
         data-rad-layout-slot={shell.mobile ? undefined : ''}
-        className="col-start-1 row-start-2 min-h-0 min-w-0 max-[40rem]:hidden"
+        className="col-start-1 row-start-2 min-h-0 w-[var(--_rad-shell-sidebar)] min-w-0 @max-[40rem]/app-shell:hidden"
       >
         {!container && (
           <div

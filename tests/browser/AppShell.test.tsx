@@ -46,7 +46,7 @@ function Sample({
       {...props}
       {...collapseOwner}
       {...openOwner}
-      style={{ height: '400px', width: '600px', maxWidth: '100%', ...props.style }}
+      style={{ height: '400px', width: '720px', maxWidth: '100%', ...props.style }}
     >
       <AppShellSkipLink>Skip to workspace</AppShellSkipLink>
       <AppShellHeader>
@@ -209,7 +209,7 @@ test('visually hidden content scrolls with Main and Sidebar instead of escaping 
     </>
   )
   const { host } = await mount(
-    <AppShell style={{ height: '400px', width: '600px' }}>
+    <AppShell style={{ height: '400px', width: '720px' }}>
       <AppShellHeader>Workspace</AppShellHeader>
       <Sidebar label="Projects">{hidden('Sidebar status')}</Sidebar>
       <AppShellMain>{hidden('Main status')}</AppShellMain>
@@ -231,7 +231,7 @@ test('Main and Sidebar draw the ScrollArea thumb color on a clear track, and for
     <AppShell
       style={{
         height: '400px',
-        width: '600px',
+        width: '720px',
         ['--rad-scroll-area-thumb-color' as string]: 'rgb(200, 0, 0)'
       }}
     >
@@ -496,7 +496,7 @@ test('useAppShell reads layout state and its requests reach the same owners as t
     <AppShell
       mainId="workspace"
       onCollapsedChange={collapses}
-      style={{ height: '400px', width: '600px' }}
+      style={{ height: '400px', width: '720px' }}
     >
       <AppShellSkipLink>Skip</AppShellSkipLink>
       <AppShellHeader>
@@ -523,4 +523,46 @@ test('useAppShell reads layout state and its requests reach the same owners as t
   expect(toggle(host).getAttribute('aria-expanded')).toBe('false')
   expect(nav(host).getAttribute('data-state')).toBe('closed')
   expect(seen.at(-1)).toMatchObject({ collapsed: true })
+})
+
+test('the shell collapses to its mobile layout by its own width inside a wide viewport', async () => {
+  expect(window.innerWidth).toBeGreaterThan(1000)
+  const { host } = await mount(
+    <div>
+      <div
+        data-narrow
+        style={{ width: '480px' }}
+      >
+        <Sample style={{ width: '100%' }} />
+      </div>
+      <div data-wide>
+        <Sample style={{ width: 'auto' }} />
+      </div>
+    </div>
+  )
+  await pause(60)
+  const narrow = host.querySelector<HTMLElement>('[data-narrow]')!,
+    wide = host.querySelector<HTMLElement>('[data-wide]')!,
+    shell = (box: HTMLElement) => box.querySelector<HTMLElement>('[data-slot~="app-shell"]')!,
+    slot = (box: HTMLElement) => box.querySelector<HTMLElement>('[data-slot~="sidebar-slot"]')!
+  expect(shell(narrow).getBoundingClientRect().width).toBeCloseTo(480)
+  expect(shell(narrow).getAttribute('data-mobile')).toBe('')
+  expect(getComputedStyle(slot(narrow)).display).toBe('none')
+  expect(main(narrow).getBoundingClientRect().width).toBeCloseTo(480)
+  expect(toggle(narrow).getAttribute('aria-haspopup')).toBe('dialog')
+  expect(nav(narrow).closest('dialog')?.open).toBe(false)
+  await act(async () => toggle(narrow).click())
+  await pause(60)
+  const dialog = nav(narrow).closest('dialog')!
+  expect(dialog.open).toBe(true)
+  expect(dialog.textContent).toContain('Close navigation')
+  await act(async () => dialog.close())
+  await pause(60)
+  expect(dialog.open).toBe(false)
+
+  expect(shell(wide).getBoundingClientRect().width).toBeCloseTo(wide.getBoundingClientRect().width)
+  expect(shell(wide).hasAttribute('data-mobile')).toBe(false)
+  expect(nav(wide).closest('dialog')).toBeNull()
+  expect(nav(wide).getBoundingClientRect().width).toBeCloseTo(256)
+  expect(toggle(wide).getAttribute('aria-haspopup')).toBeNull()
 })
