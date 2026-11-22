@@ -636,7 +636,7 @@ function insideList(list: HTMLElement, tab: HTMLElement) {
   return rect.left >= box.left + left - 1 && rect.right <= box.right - right + 1
 }
 
-test('six tabs in a 360px column fade the edge that hides more tabs, and nothing when they fit', async () => {
+test('six tabs in a 360px column fade the edge that hides more tabs, but not in forced colors or when they fit', async () => {
   const { host, render } = await mount(
     <div style={{ width: 360 }}>
       <TabsOverflowExample />
@@ -656,7 +656,7 @@ test('six tabs in a 360px column fade the edge that hides more tabs, and nothing
   await expect.poll(() => overflow(list)).toMatchObject({ start: true, end: true })
 
   await commands.emulatePreferences({ forcedColors: 'active', reducedMotion: 'no-preference' })
-  expect(overflow(list).mask).not.toBe('none')
+  expect(overflow(list)).toEqual({ start: true, end: true, mask: 'none' })
 
   await render(
     <div style={{ width: 360 }}>
@@ -709,25 +709,66 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
   }
 }
 
-test('a selected tab past the edge scrolls into view on mount without moving the page', async () => {
+test('tabbing into a tab under the fade scrolls it clear', async () => {
   const { host } = await mount(
     <div style={{ width: 360 }}>
-      <Tabs defaultValue="six">
-        <TabsList aria-label="Months">
-          {['one', 'two', 'three', 'four', 'five', 'six'].map(value => (
-            <TabsTrigger
-              key={value}
-              value={value}
-            >
-              Month {value}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <button type="button">Before</button>
+      <TabsOverflowExample />
     </div>
   )
   const { list, tabs } = parts(host)
+  list.scrollLeft = 4
+  await expect.poll(() => overflow(list)).toMatchObject({ start: true, end: true })
+  expect(tabs[0].getBoundingClientRect().left).toBeGreaterThanOrEqual(
+    list.getBoundingClientRect().left
+  )
+  expect(insideList(list, tabs[0])).toBe(false)
+  await act(async () => host.querySelector('button')!.focus())
+  await act(async () => userEvent.tab())
+  expect(document.activeElement).toBe(tabs[0])
+  await expect.poll(() => insideList(list, tabs[0])).toBe(true)
+})
+
+test('revealing a selected tab never scrolls the page or a scrollable ancestor', async () => {
+  function Fixture({ value }: { value: string }) {
+    return (
+      <div
+        data-ancestor
+        style={{ width: 360, overflowX: 'auto' }}
+      >
+        <div style={{ height: 2000 }} />
+        <div style={{ width: 360 }}>
+          <Tabs value={value}>
+            <TabsList aria-label="Months">
+              {['one', 'two', 'three', 'four', 'five', 'six'].map(item => (
+                <TabsTrigger
+                  key={item}
+                  value={item}
+                >
+                  Month {item}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+        <div style={{ width: 1200, height: 1 }} />
+      </div>
+    )
+  }
+  const { host, render } = await mount(<Fixture value="six" />)
+  const ancestor = host.querySelector<HTMLElement>('[data-ancestor]')!
+  const { list, tabs } = parts(host)
+  expect(ancestor.scrollWidth).toBeGreaterThan(ancestor.clientWidth)
   expect(insideList(list, tabs[5])).toBe(true)
   expect(overflow(list)).toMatchObject({ start: true, end: false })
-  expect(window.scrollY).toBe(0)
+  expect([window.scrollX, window.scrollY, ancestor.scrollLeft]).toEqual([0, 0, 0])
+  await render(<Fixture value="one" />)
+  await expect.poll(() => insideList(list, tabs[0])).toBe(true)
+  expect([window.scrollX, window.scrollY, ancestor.scrollLeft]).toEqual([0, 0, 0])
+  await act(async () => {
+    tabs[0].focus({ preventScroll: true })
+    await userEvent.keyboard('{End}')
+  })
+  await expect.poll(() => insideList(list, tabs[5])).toBe(true)
+  expect([window.scrollX, window.scrollY, ancestor.scrollLeft]).toEqual([0, 0, 0])
 })

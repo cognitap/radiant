@@ -27,8 +27,9 @@ const rootClass =
 const listClass =
   '[--_rad-tabs-list-radius:var(--rad-tabs-list-radius,var(--rad-control-radius,0.5rem))] [--_rad-tabs-trigger-radius:max(0px,calc(var(--_rad-tabs-list-radius)-var(--rad-tabs-list-padding,0.25rem)-var(--rad-control-track-border-width,0px)))] inline-flex min-w-0 max-w-full gap-[var(--rad-tabs-list-gap,0.25rem)] rounded-[var(--_rad-tabs-list-radius)] [corner-shape:var(--rad-tabs-corner-shape,var(--rad-control-corner-shape,round))] bg-[var(--rad-tabs-list-background,var(--rad-control-track-background,var(--rad-color-neutral,oklch(0.955_0.004_286))))] [border:var(--rad-control-track-border-width,0px)_var(--rad-control-border-style,solid)_var(--rad-color-border,oklch(0.885_0.005_286))] [box-shadow:var(--rad-control-track-shadow,none)] p-[var(--rad-tabs-list-padding,0.25rem)] data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:overflow-x-auto data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch'
 // A horizontal list fades the logical edge that hides more tabs; scroll padding keeps a revealed tab clear of the fade.
+// The mask also clips an outer track box-shadow (--rad-control-track-shadow) while the list overflows. Forced colors keep system scrollbars as the cue.
 const overflowClass =
-  '[--_rad-tabs-fade-start:0px] [--_rad-tabs-fade-end:100%] [--_rad-tabs-end:right] rtl:[--_rad-tabs-end:left] data-[orientation=horizontal]:[scroll-padding-inline:1.5rem] data-overflow-start:[--_rad-tabs-fade-start:1.5rem] data-overflow-end:[--_rad-tabs-fade-end:calc(100%-1.5rem)] data-overflow-start:[mask-image:linear-gradient(to_var(--_rad-tabs-end),transparent,#000_var(--_rad-tabs-fade-start),#000_var(--_rad-tabs-fade-end),transparent)] data-overflow-end:[mask-image:linear-gradient(to_var(--_rad-tabs-end),transparent,#000_var(--_rad-tabs-fade-start),#000_var(--_rad-tabs-fade-end),transparent)]'
+  '[--_rad-tabs-fade:1.5rem] [--_rad-tabs-fade-start:0px] [--_rad-tabs-fade-end:100%] [--_rad-tabs-end:right] rtl:[--_rad-tabs-end:left] data-[orientation=horizontal]:[scroll-padding-inline:var(--_rad-tabs-fade)] data-overflow-start:[--_rad-tabs-fade-start:var(--_rad-tabs-fade)] data-overflow-end:[--_rad-tabs-fade-end:calc(100%_-_var(--_rad-tabs-fade))] not-forced-colors:[&:is([data-overflow-start],[data-overflow-end])]:[mask-image:linear-gradient(to_var(--_rad-tabs-end),transparent,#000_var(--_rad-tabs-fade-start),#000_var(--_rad-tabs-fade-end),transparent)]'
 const triggerClass = [
   'box-border inline-flex min-w-0 shrink-0 cursor-pointer select-none items-center justify-center [border-style:var(--rad-control-border-style,solid)] text-center',
   'min-h-[var(--rad-tabs-trigger-height,var(--_rad-control-height))]',
@@ -244,6 +245,8 @@ function markOverflow(list: HTMLDivElement, horizontal: boolean) {
   list.toggleAttribute('data-overflow-start', hidden > 1 && offset > 1)
   list.toggleAttribute('data-overflow-end', hidden > 1 && offset < hidden - 1)
 }
+// Lists whose arrow-key handler reveals the tab it focuses.
+const keyboardMoves = new WeakSet<HTMLElement>()
 // Scrolls only the list, so a selected tab off the list's edge never moves the page.
 function revealTab(list: HTMLDivElement, tab: HTMLElement, smooth: boolean) {
   const style = list.ownerDocument.defaultView?.getComputedStyle(list)
@@ -258,7 +261,12 @@ function revealTab(list: HTMLDivElement, tab: HTMLElement, smooth: boolean) {
       list.clientWidth -
       (parseFloat(style?.scrollPaddingRight ?? '') || 0))
   const left = before < 0 ? before : after > 0 ? Math.min(after, before) : 0
-  if (left) list.scrollBy({ left, behavior: smooth && !reducedMotion(list) ? 'smooth' : 'instant' })
+  // A target offset, not a delta, lets a keyboard reveal and the selection reveal that follows agree.
+  if (left)
+    list.scrollTo({
+      left: list.scrollLeft + left,
+      behavior: smooth && !reducedMotion(list) ? 'smooth' : 'instant'
+    })
 }
 
 export function TabsList({ ref, className, onFocus, onBlur, onKeyDown, ...props }: TabsListProps) {
@@ -337,7 +345,11 @@ export function TabsList({ ref, className, onFocus, onBlur, onKeyDown, ...props 
         data-orientation={tabs.orientation}
         onFocus={event => {
           onFocus?.(event)
-          syncTabStops(event.currentTarget, tabs.value)
+          const list = event.currentTarget
+          syncTabStops(list, tabs.value)
+          const tab = (event.target as Element).closest<HTMLElement>('[role=tab]')
+          if (horizontal && !keyboardMoves.has(list) && tab?.closest('[role=tablist]') === list)
+            revealTab(list, tab, false)
         }}
         onBlur={event => {
           onBlur?.(event)
@@ -370,12 +382,18 @@ export function TabsList({ ref, className, onFocus, onBlur, onKeyDown, ...props 
             }
             event.preventDefault()
             const target = items[next]
-            target?.focus({ preventScroll: true })
-            target?.scrollIntoView({
-              block: 'nearest',
-              inline: 'nearest',
-              behavior: reducedMotion(list) ? 'instant' : 'smooth'
-            })
+            if (!target) return
+            if (!horizontal) {
+              target.focus()
+              return
+            }
+            keyboardMoves.add(list)
+            try {
+              target.focus({ preventScroll: true })
+            } finally {
+              keyboardMoves.delete(list)
+            }
+            revealTab(list, target, true)
           },
           () => tabs.disabled
         )}

@@ -6,6 +6,7 @@
 
 - `Cascader` columns switch to compact padding by their own width instead of the viewport width. Columns shrink to fit a popup narrowed by a small viewport, and keep wide padding on a wide screen however many levels are open.
 - A horizontal `TabsList` whose tabs overflow fades the logical edge that hides more tabs and marks it with `data-overflow-start` or `data-overflow-end`, so the A2UI `Tabs` shows it too. Arrow keys, Home, End and a new selection scroll the tab clear of the fade, smoothly unless reduced motion is on.
+- A horizontal `TabsList` whose tabs overflow fades the logical edge that hides more tabs and marks it with `data-overflow-start` or `data-overflow-end`, so the A2UI `Tabs` shows it too; forced colors keep the system scrollbar instead. Focus, arrow keys, Home, End and a new selection scroll only the list to bring the tab clear of the fade, smoothly unless reduced motion is on.
 
 ## 0.0.97
 
