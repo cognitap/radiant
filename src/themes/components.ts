@@ -745,7 +745,8 @@ export const componentRegistry = {
     titleWeight: 'weight',
     descriptionColor: 'css',
     descriptionSize: 'css'
-  }
+  },
+  grid: { minItemWidth: 'css' }
 } as const
 
 type ValueKind = 'css' | 'weight' | 'number' | 'opacity'

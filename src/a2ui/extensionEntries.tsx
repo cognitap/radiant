@@ -55,6 +55,7 @@ import {
   writeBinding
 } from './entries.js'
 import { feedbackEntries } from './feedbackEntries.js'
+import { layoutIntentEntries } from './layoutIntentEntries.js'
 
 const extensionCatalog = generateA2uiCatalogs(radiantCatalog).extension
 
@@ -499,7 +500,8 @@ const extensionEntries = [
   switchEntry,
   textareaEntry,
   stageEntry,
-  ...feedbackEntries
+  ...feedbackEntries,
+  ...layoutIntentEntries
 ]
 
 /**

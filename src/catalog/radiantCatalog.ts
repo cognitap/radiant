@@ -1178,6 +1178,167 @@ export const radiantCatalog: Catalog = defineCatalog({
       },
       bindings: {},
       actions: {}
+    },
+
+    Split: {
+      name: 'Split',
+      category: 'layout',
+      description:
+        'Places a main area beside a secondary area, stacking them when space is narrow.',
+      guidance: {
+        whenToUse:
+          'Main content with supporting content; set `side` and `ratio` instead of widths.',
+        whenNotToUse: 'Equal peers (Grid) or options weighed against each other (Compare).',
+        examples: [
+          'article with a summary Card, `side: end`',
+          'filters beside results, `side: start`, `ratio: main`'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          side: {
+            type: 'string',
+            enum: ['start', 'end'],
+            default: 'end',
+            description: 'Side the secondary area takes when both fit.'
+          },
+          ratio: {
+            type: 'string',
+            enum: ['balanced', 'main'],
+            default: 'main',
+            description: 'Equal widths, or two thirds for the main area.'
+          },
+          gap: spacingSchema
+        }
+      },
+      slots: {
+        main: { description: 'Primary content.', cardinality: 'single', required: true },
+        secondary: {
+          description: 'Supporting content, such as filters or a summary.',
+          cardinality: 'single',
+          required: true
+        }
+      },
+      bindings: {},
+      actions: {}
+    },
+
+    Grid: {
+      name: 'Grid',
+      category: 'layout',
+      description: 'Lays out equal items in as many columns as fit, up to a maximum.',
+      guidance: {
+        whenToUse:
+          'Equal items such as cards or tiles; set `maxColumns` and Radiant fits the columns to the width.',
+        whenNotToUse: 'Areas of different weight (Split) or one line of peers (Row).',
+        examples: ['course cards, `maxColumns: 3`', 'photo tiles, `maxColumns: 4`, `gap: tight`']
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          maxColumns: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 6,
+            default: 3,
+            description: 'Most columns shown; fewer appear when space is narrow.'
+          },
+          gap: spacingSchema
+        }
+      },
+      slots: {
+        children: {
+          description: 'Ordered equal items.',
+          cardinality: 'many',
+          required: true,
+          templated: true
+        }
+      },
+      bindings: {},
+      actions: {}
+    },
+
+    Compare: {
+      name: 'Compare',
+      category: 'layout',
+      description:
+        'Shows two to four options side by side with aligned rows, stacking when narrow.',
+      guidance: {
+        whenToUse: 'Two to four options weighed side by side; each of `children` is a CompareItem.',
+        whenNotToUse: 'Records with shared fields (Table) or equal items (Grid).',
+        examples: [
+          'three plans with prices and a Choose Button each',
+          'two laptops with specs in each body'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: { gap: spacingSchema }
+      },
+      slots: {
+        children: {
+          description: 'Two to four CompareItem options.',
+          cardinality: 'many',
+          required: true,
+          allowedEntries: ['CompareItem']
+        }
+      },
+      bindings: {},
+      actions: {}
+    },
+
+    CompareItem: {
+      name: 'CompareItem',
+      category: 'layout',
+      description: 'One option in a Compare, with rows that line up with the other options.',
+      guidance: {
+        whenToUse:
+          'Each option in a Compare: `header` names it, `body` describes it, `footer` holds its action.',
+        whenNotToUse: 'Content outside a Compare (Card).',
+        examples: [
+          'plan name and price in `header`, a Button in `footer`',
+          'method name in `header`, trade-offs in `body`'
+        ]
+      },
+      propsSchema: { type: 'object', additionalProperties: false, properties: {} },
+      slots: {
+        header: { description: 'Names the option.', cardinality: 'single', required: true },
+        body: { description: 'Describes the option.', cardinality: 'single' },
+        footer: { description: 'Optional action or note.', cardinality: 'single' }
+      },
+      bindings: {},
+      actions: {}
+    },
+
+    Reveal: {
+      name: 'Reveal',
+      category: 'layout',
+      description:
+        'Shows content one step at a time with previous and next controls labelled by the host.',
+      guidance: {
+        whenToUse: 'Content read one part at a time, such as recipe or setup `steps`.',
+        whenNotToUse:
+          'Content needed at once (Column) or sections opened in any order (Accordion).',
+        examples: ['four recipe steps', 'setup instructions in three parts, `gap: airy`']
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: { gap: spacingSchema }
+      },
+      slots: {
+        steps: {
+          description: 'Ordered steps, one shown at a time.',
+          cardinality: 'many',
+          required: true
+        }
+      },
+      bindings: {},
+      actions: {}
     }
   }
 })

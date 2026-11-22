@@ -826,9 +826,12 @@ export function A2uiSurface({
   const modalClose = labels?.modalClose
   const toastClose = labels?.toastClose
   const notifications = labels?.notifications?.trim()
+  const revealPrevious = labels?.revealPrevious
+  const revealNext = labels?.revealNext
+  const revealPosition = labels?.revealPosition
   const labelValue = useMemo(
-    () => ({ modalClose, notifications, toastClose }),
-    [modalClose, notifications, toastClose]
+    () => ({ modalClose, notifications, toastClose, revealPrevious, revealNext, revealPosition }),
+    [modalClose, notifications, toastClose, revealPrevious, revealNext, revealPosition]
   )
   const surface = (
     <div

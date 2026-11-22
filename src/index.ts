@@ -950,3 +950,33 @@ export type {
   RingProgressProps,
   RingProgressSegment
 } from './components/RingProgress/RingProgress.js'
+
+export { Split, SplitMain, SplitSecondary } from './components/Split/Split.js'
+export type {
+  SplitMainProps,
+  SplitProps,
+  SplitRatio,
+  SplitSecondaryProps,
+  SplitSide
+} from './components/Split/Split.js'
+
+export { Grid } from './components/Grid/Grid.js'
+export type { GridColumns, GridProps } from './components/Grid/Grid.js'
+
+export {
+  Compare,
+  CompareItem,
+  CompareItemBody,
+  CompareItemFooter,
+  CompareItemHeader
+} from './components/Compare/Compare.js'
+export type {
+  CompareItemBodyProps,
+  CompareItemFooterProps,
+  CompareItemHeaderProps,
+  CompareItemProps,
+  CompareProps
+} from './components/Compare/Compare.js'
+
+export { Reveal } from './components/Reveal/Reveal.js'
+export type { RevealItem, RevealProps } from './components/Reveal/Reveal.js'
