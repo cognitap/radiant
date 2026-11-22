@@ -15,25 +15,40 @@ import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Butt
 import { cn } from 'cn'
 import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
-import type { PopoverSide, PopoverAlign } from '../../internal/popover.js'
+import {
+  anchorElement,
+  htmlParent,
+  type PopoverSide,
+  type PopoverAlign,
+  type PopoverAnchor
+} from '../../internal/popover.js'
 import type { WithoutToggle } from '../../internal/types.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
 import { usePopoverSurface } from '../../react/usePopoverSurface.js'
+import { usePortalMarker } from '../../react/usePortalMarker.js'
 import { useTransitionHost } from '../../motion/host.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
-export type { PopoverSide, PopoverAlign } from '../../internal/popover.js'
+export type {
+  PopoverSide,
+  PopoverAlign,
+  PopoverAnchor,
+  PopoverAnchorRect
+} from '../../internal/popover.js'
 import { focusRingClass } from '../shared/focusStyles.js'
 export type PopoverProps = StateOwner<'open', boolean> & {
   onOpenChange?: (open: boolean) => void
+  /** Positions against this element or rect instead of the trigger. */
+  anchor?: PopoverAnchor | null
   children?: ReactNode
 }
 export type PopoverState = { open: boolean; setOpen: (open: boolean) => void; contentId: string }
 type Context = PopoverState & {
   anchorPoint?: { x: number; y: number }
+  anchor?: PopoverAnchor | null
   trigger: HTMLElement | null
   setTrigger: (node: HTMLElement | null) => void
   content: RefObject<HTMLDivElement | null>
@@ -64,6 +79,7 @@ export function PopoverRoot({
   defaultOpen,
   onOpenChange,
   children,
+  anchor,
   anchorPoint
 }: PopoverProps & { anchorPoint?: { x: number; y: number } }) {
   const state = useControllableState({
@@ -92,6 +108,7 @@ export function PopoverRoot({
         setOpen,
         contentId,
         anchorPoint,
+        anchor,
         trigger,
         setTrigger,
         content,
@@ -117,6 +134,8 @@ export type PopoverContentProps = Omit<ComponentProps<'div'>, 'style' | 'popover
   collisionPadding?: number
   /** Keep focus on the opener by default; optionally focus a descendant on each open. */
   initialFocusRef?: RefObject<HTMLElement | null>
+  /** Where focus lands on close; defaults to the trigger, a focusable anchor, then the prior focus. */
+  returnFocusRef?: RefObject<HTMLElement | SVGElement | null>
   motion?: 'inherit' | 'off'
 }
 
@@ -177,11 +196,22 @@ export function PopoverCloseRoot({
 /** The local portal preserves theme, native form ownership and modal ancestry. */
 export function PopoverPortal({ children }: PopoverPortalProps) {
   const popover = usePopoverContext()
+  const element = anchorElement(popover.anchor)
+  const { host, marker } = usePortalMarker(!!popover.anchor && !element)
   // Rich surfaces cannot be inserted into a link's phrasing-only parent (p, span, label).
-  const container = popover.trigger?.parentElement?.closest<HTMLElement>(
+  const container = (
+    popover.trigger?.parentElement ??
+    htmlParent(element) ??
+    host
+  )?.closest<HTMLElement>(
     'div, section, article, aside, main, nav, form, dialog, [popover], li, dd, td, th, fieldset, figure, body'
   )
-  return container ? createPortal(children, container) : null
+  return (
+    <>
+      {marker}
+      {container && createPortal(children, container)}
+    </>
+  )
 }
 
 const surfaceClass = [
@@ -221,10 +251,7 @@ export function PopoverContentRoot({
   initialFocusRef,
   motion = 'inherit',
   ...props
-}: PopoverContentProps & {
-  onFocusOutside?: () => void
-  returnFocusRef?: RefObject<HTMLElement | null>
-}) {
+}: PopoverContentProps & { onFocusOutside?: () => void }) {
   const popover = usePopoverContext()
   if (![sideOffset, collisionPadding].every(value => Number.isFinite(value) && value >= 0))
     throw new TypeError('Popover offsets and padding must be finite, nonnegative numbers.')
@@ -250,7 +277,8 @@ export function PopoverContentRoot({
       onFocusOutside,
       lang: props.lang,
       dir: props.dir,
-      anchorPoint: popover.anchorPoint
+      anchorPoint: popover.anchorPoint,
+      anchor: popover.anchor
     }
   )
   return (

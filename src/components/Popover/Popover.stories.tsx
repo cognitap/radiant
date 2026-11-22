@@ -2,7 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   PopoverExample,
   DeliveryTimePopover,
-  PinnablePopover
+  PinnablePopover,
+  SvgAnchorPopover,
+  RectAnchorPopover
 } from '../../../.storybook/examples/PopoverExamples.js'
 import {
   Popover,
@@ -30,7 +32,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Nonmodal anchored content with native top-layer rendering. Popover owns open/defaultOpen; Trigger and Close compose Button. Content stays a div and takes its own role, accessible name, relationships, native props, style and ref. A popover alone supplies no menu/listbox behavior. Opening retains trigger focus; initialFocusRef can focus a descendant. Native source navigation puts content after the trigger in Tab order; Tab can leave and dismiss without a focus trap. Escape and Close restore focus when it is inside; outside pointer/focus dismissal preserves the new target. A controlled owner may refuse close, including native hide. Local portals preserve theme, forms and modal ancestry. Placement flips and shifts within the visual viewport; start/end follow RTL on top/bottom sides. Content exposes effective data-side/data-align and open/closed data-state. components.popover and --rad-popover-* variables customize the shared surface. Optional MotionProvider entry feedback honors reduced/off motion; close never waits for an animation.'
+          'Nonmodal anchored content with native top-layer rendering. Popover owns open/defaultOpen; Trigger and Close compose Button. Content stays a div and takes its own role, accessible name, relationships, native props, style and ref. A popover alone supplies no menu/listbox behavior. Opening retains trigger focus; initialFocusRef can focus a descendant. Native source navigation puts content after the trigger in Tab order; Tab can leave and dismiss without a focus trap. Escape and Close restore focus when it is inside; outside pointer/focus dismissal preserves the new target. A controlled owner may refuse close, including native hide. Local portals preserve theme, forms and modal ancestry. anchor positions against an SVG or HTML element, a viewport rect or a rect getter instead of the trigger; without a trigger the anchor owns its role, aria-expanded, aria-controls (usePopover().contentId) and keyboard activation. Focus returns to returnFocusRef, the trigger, a focusable anchor, then the prior focus; give non-focusable anchors a returnFocusRef. Rect anchors portal to the nearest HTML ancestor, even inside SVG. Placement flips and shifts within the visual viewport; start/end follow RTL on top/bottom sides. Content exposes effective data-side/data-align and open/closed data-state. components.popover and --rad-popover-* variables customize the shared surface. Optional MotionProvider entry feedback honors reduced/off motion; close never waits for an animation.'
       }
     }
   }
@@ -58,6 +60,14 @@ export const Placement: Story = {
       />
     </div>
   )
+}
+export const SvgAnchor: Story = {
+  render: (_, { viewMode }) => (
+    <SvgAnchorPopover defaultRegion={viewMode === 'docs' ? undefined : 'east'} />
+  )
+}
+export const RectAnchor: Story = {
+  render: (_, { viewMode }) => <RectAnchorPopover defaultOpen={viewMode !== 'docs'} />
 }
 export const Nested: Story = {
   render: (_, { viewMode }) => (

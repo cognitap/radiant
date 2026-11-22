@@ -42,7 +42,7 @@ import { matchSelectText } from '../../internal/select.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useLocaleMatcher } from '../../react/useLocale.js'
 
-export type MenuProps = PopoverProps
+export type MenuProps = DistributiveOmit<PopoverProps, 'anchor'>
 export type MenuState = PopoverState
 /** Rows keep Button's host but none of its action presentation. */
 export type MenuRenderProps = Omit<ButtonRenderProps, 'data-variant' | 'data-control-size'> & {
@@ -55,7 +55,12 @@ export type MenuPortalProps = { children?: ReactNode }
 export type MenuTriggerProps = WithoutToggle<DistributiveOmit<ButtonProps, 'id' | 'aria-haspopup'>>
 export type MenuContentProps = Omit<
   PopoverContentProps,
-  'role' | 'aria-labelledby' | 'aria-orientation' | 'tabIndex' | 'initialFocusRef'
+  | 'role'
+  | 'aria-labelledby'
+  | 'aria-orientation'
+  | 'tabIndex'
+  | 'initialFocusRef'
+  | 'returnFocusRef'
 >
 export type MenuItemProps = WithoutToggle<
   DistributiveOmit<
@@ -305,6 +310,7 @@ export function MenuContentRoot({
       ref={host}
       onFocusOutside={onFocusOutside}
       initialFocusRef={undefined}
+      returnFocusRef={undefined}
       role="menu"
       aria-orientation="vertical"
       aria-labelledby={menu.triggerId}

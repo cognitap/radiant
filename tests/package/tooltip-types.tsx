@@ -10,6 +10,8 @@ import {
   type TooltipRenderProps,
   type TooltipState
 } from '@cognitap/radiant'
+const anchoredTip: TooltipProps = { open: true, anchor: () => new DOMRect(0, 0, 4, 4) }
+void anchoredTip
 h(
   Tooltip,
   { openDelay: 300 },

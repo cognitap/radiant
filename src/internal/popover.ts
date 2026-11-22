@@ -1,5 +1,33 @@
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
+/** A viewport-relative box, such as a `DOMRect`. */
+export type PopoverAnchorRect = { x: number; y: number; width: number; height: number }
+/** An element (HTML or SVG), a viewport rect, or a getter read on each placement. */
+export type PopoverAnchor = Element | PopoverAnchorRect | (() => PopoverAnchorRect)
+
+export function anchorElement(anchor: PopoverAnchor | null | undefined): Element | null {
+  return anchor && typeof anchor === 'object' && 'nodeType' in anchor ? anchor : null
+}
+/** Reads an anchor as a normalized box; null while a rect holds a non-finite value. */
+export function readAnchor(anchor: PopoverAnchor | null | undefined): PopoverAnchorRect | null {
+  const value = typeof anchor === 'function' ? anchor() : anchor
+  if (!value) return null
+  const box = 'nodeType' in value ? value.getBoundingClientRect() : value
+  let { x, y, width, height } = box
+  if (![x, y, width, height].every(Number.isFinite)) return null
+  // A flipped selection reports a negative size; measure it from its other corner.
+  if (width < 0) [x, width] = [x + width, -width]
+  if (height < 0) [y, height] = [y + height, -height]
+  return { x, y, width, height }
+}
+export const sameBox = (a: PopoverAnchorRect | null, b: PopoverAnchorRect | null) =>
+  !!a && !!b && a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height
+/** The nearest HTML ancestor, so popups never mount inside SVG content. */
+export function htmlParent(element: Element | null | undefined) {
+  for (let node = element?.parentElement; node; node = node.parentElement)
+    if (node.namespaceURI === 'http://www.w3.org/1999/xhtml') return node
+  return null
+}
 
 type Rect = {
   top: number

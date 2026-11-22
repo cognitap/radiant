@@ -15,7 +15,9 @@ import {
   type PopoverCloseProps,
   type PopoverPortalProps,
   type PopoverSide,
-  type PopoverAlign
+  type PopoverAlign,
+  type PopoverAnchor,
+  type PopoverAnchorRect
 } from '@cognitap/radiant'
 
 const render = (props: PopoverRenderProps) => <button {...props} />
@@ -57,6 +59,18 @@ defineTheme({
 
 // @ts-expect-error Popover has one open-state owner.
 const mixed: PopoverProps = { open: false, defaultOpen: true }
+const rect: PopoverAnchorRect = new DOMRect(10, 20, 0, 0)
+const anchors: PopoverAnchor[] = [
+  document.createElementNS('http://www.w3.org/2000/svg', 'circle'),
+  rect,
+  () => rect
+]
+const anchored: PopoverProps = { anchor: anchors[0], defaultOpen: true }
+const returning: PopoverContentProps = { returnFocusRef: createRef<SVGPathElement>() }
+void [anchored, returning]
+// @ts-expect-error A rect anchor needs a size.
+const pointOnly: PopoverAnchor = { x: 0, y: 0 }
+void pointOnly
 // @ts-expect-error The state root has no DOM host.
 const styled: PopoverProps = { className: 'p-4' }
 // @ts-expect-error Popover is nonmodal.

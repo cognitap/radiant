@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, type RefObject } from 'react'
+import { readAnchor, type PopoverAnchor } from '../internal/popover.js'
 
 /** Shared hover/focus timing, dismissal suppression and a bridge across the placement gap. */
 export function useHoverSurface({
@@ -10,8 +11,10 @@ export function useHoverSurface({
   request,
   openDelay,
   focusDelay = 0,
-  closeDelay
+  closeDelay,
+  anchor
 }: {
+  anchor?: PopoverAnchor | null
   trigger: HTMLElement | null
   content: RefObject<HTMLElement | null>
   open: boolean
@@ -43,7 +46,7 @@ export function useHoverSurface({
   const schedule = useCallback(
     (next: boolean, delay: number) => {
       clear()
-      const view = trigger?.ownerDocument.defaultView
+      const view = (trigger ?? content.current)?.ownerDocument.defaultView
       if (!view) return
       timer.current = {
         view,
@@ -53,7 +56,7 @@ export function useHoverSurface({
         }, delay)
       }
     },
-    [trigger]
+    [trigger, content]
   )
   const setOpen = (next: boolean) => {
     clear()
@@ -82,7 +85,8 @@ export function useHoverSurface({
     schedule(false, closeDelay)
   }
   useEffect(() => {
-    if (!trigger || !open) return
+    const doc = (trigger ?? content.current)?.ownerDocument
+    if (!doc || !open || (!trigger && !anchor)) return
     const move = (event: PointerEvent) => {
       if (
         event.pointerType === 'touch' ||
@@ -93,19 +97,21 @@ export function useHoverSurface({
         return
       const panel = content.current
       if (!panel) return
-      const a = trigger.getBoundingClientRect(),
+      // The bridge spans the anchor (or trigger) and the panel, so the pointer can cross the gap.
+      const a = readAnchor(anchor ?? trigger),
         b = panel.getBoundingClientRect()
+      if (!a) return
       const within =
-        event.clientX >= Math.min(a.left, b.left) &&
-        event.clientX <= Math.max(a.right, b.right) &&
-        event.clientY >= Math.min(a.top, b.top) &&
-        event.clientY <= Math.max(a.bottom, b.bottom)
+        event.clientX >= Math.min(a.x, b.left) &&
+        event.clientX <= Math.max(a.x + a.width, b.right) &&
+        event.clientY >= Math.min(a.y, b.top) &&
+        event.clientY <= Math.max(a.y + a.height, b.bottom)
       if (within) clear()
       else if (!timer.current) schedule(false, closeDelay)
     }
-    trigger.ownerDocument.addEventListener('pointermove', move)
-    return () => trigger.ownerDocument.removeEventListener('pointermove', move)
-  }, [trigger, content, open, closeDelay, schedule])
+    doc.addEventListener('pointermove', move)
+    return () => doc.removeEventListener('pointermove', move)
+  }, [trigger, anchor, content, open, closeDelay, schedule])
   return {
     cancel: (reset = false) => {
       clear()

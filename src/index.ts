@@ -72,7 +72,8 @@ export type {
   TooltipTriggerProps,
   TooltipContentProps,
   TooltipPortalProps,
-  TooltipRenderProps
+  TooltipRenderProps,
+  TooltipAnchorProps
 } from './components/Tooltip/Tooltip.js'
 export {
   Popover,
@@ -91,7 +92,9 @@ export type {
   PopoverPortalProps,
   PopoverRenderProps,
   PopoverSide,
-  PopoverAlign
+  PopoverAlign,
+  PopoverAnchor,
+  PopoverAnchorRect
 } from './components/Popover/Popover.js'
 export { Link } from './components/Link/Link.js'
 export type { LinkProps, LinkRenderProps, LinkVariant } from './components/Link/Link.js'

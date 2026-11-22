@@ -3,13 +3,13 @@ function parent(element: Element): Element | null {
   return element.assignedSlot ?? element.parentElement ?? (root as ShadowRoot).host ?? null
 }
 
-export function observeAnchorLocale(observer: MutationObserver, anchor: HTMLElement) {
+export function observeAnchorLocale(observer: MutationObserver, anchor: Element) {
   for (let element: Element | null = anchor; element; element = parent(element))
     observer.observe(element, { attributeFilter: ['lang', 'dir', 'class', 'style'] })
 }
 
 export function syncPopupLocale(
-  anchor: HTMLElement,
+  anchor: Element,
   popup: HTMLElement,
   { lang, dir }: { lang?: string; dir?: string }
 ) {

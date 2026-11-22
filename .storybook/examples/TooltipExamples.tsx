@@ -1,3 +1,4 @@
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- SVG shapes take ARIA roles. */
 import { useState } from 'react'
 import {
   Switch,
@@ -5,6 +6,7 @@ import {
   TooltipTrigger,
   TooltipPortal,
   TooltipContent,
+  useTooltip,
   type TooltipProps,
   type TooltipContentProps
 } from '../../src/index.js'
@@ -137,6 +139,84 @@ export function TooltipControlledExample() {
         </TooltipPortal>
       </Tooltip>
       <output>The tooltip is {open ? 'open' : 'closed'}.</output>
+    </div>
+  )
+}
+
+const seats = [
+  { id: 'a1', x: 16, label: 'Seat A1', note: 'Window seat, extra legroom.' },
+  { id: 'a2', x: 72, label: 'Seat A2', note: 'Middle seat.' },
+  { id: 'a3', x: 128, label: 'Seat A3', note: 'Aisle seat, near the exit.' }
+]
+
+type Anchored = { id: string; node: SVGRectElement }
+
+function Seats({
+  active,
+  onActive,
+  defaultSeat
+}: {
+  active?: Anchored
+  onActive: (next: Anchored) => void
+  defaultSeat?: string
+}) {
+  // Without a trigger, the anchor spreads anchorProps for delays, description and dismissal.
+  const { anchorProps } = useTooltip()!
+  return (
+    <svg
+      viewBox="0 0 176 64"
+      className="block w-full max-w-64"
+      role="group"
+      aria-label="Seats"
+    >
+      {seats.map(seat => (
+        <rect
+          key={seat.id}
+          ref={node => {
+            if (node && seat.id === defaultSeat && !active) onActive({ id: seat.id, node })
+          }}
+          x={seat.x}
+          y={12}
+          width={40}
+          height={40}
+          rx={6}
+          tabIndex={0}
+          role="img"
+          aria-label={seat.label}
+          {...anchorProps}
+          aria-describedby={seat.id === active?.id ? anchorProps['aria-describedby'] : undefined}
+          className="fill-[var(--rad-color-neutral)] hover:fill-[var(--rad-color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--rad-color-focus)]"
+          onPointerEnter={event => {
+            onActive({ id: seat.id, node: event.currentTarget })
+            anchorProps.onPointerEnter(event)
+          }}
+          onFocus={event => {
+            onActive({ id: seat.id, node: event.currentTarget })
+            anchorProps.onFocus()
+          }}
+        />
+      ))}
+    </svg>
+  )
+}
+
+export function TooltipSvgAnchorExample({ defaultSeat }: { defaultSeat?: string }) {
+  const [active, setActive] = useState<Anchored>()
+  return (
+    <div>
+      <Tooltip
+        defaultOpen={!!defaultSeat}
+        anchor={active?.node}
+      >
+        <Seats
+          active={active}
+          onActive={setActive}
+          defaultSeat={defaultSeat}
+        />
+        <TooltipPortal>
+          <TooltipContent>{seats.find(seat => seat.id === active?.id)?.note}</TooltipContent>
+        </TooltipPortal>
+      </Tooltip>
     </div>
   )
 }
