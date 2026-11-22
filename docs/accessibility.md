@@ -19,6 +19,10 @@ Every `createA2uiRegistryEntry` call declares `accessibility` rules, or `[]` for
 
 The `A2UI/Conformance` stories replay every basic-catalog fixture in every theme and mode, failing on axe violations, error or fallback diagnostics, and `validateA2uiAccessibility` errors. Only fixtures that break the rules on purpose skip axe.
 
+## Right-to-left
+
+Horizontal arrow navigation, drag/pointer geometry, disclosure/branch chevron mirroring, logical alignment/positioning, horizontal and vertical scrolling, reading order, nested overrides, and SSR hydration are verified across overlays (`Popover`, `Tooltip`, `HoverCard`, `ContextMenu`, `Menu`, `Drawer`, `Toast`, `Tour`, `Select`, `Combobox`, `MultiSelect`, `Cascader`, `TreeSelect`), navigation (`Tabs`, `Toolbar`, `ToggleGroup`, `Menubar`, `NavigationMenu`, `Breadcrumb`, `Pagination`, `NavLink`, `AppShell`, `Stepper`, `Timeline`, `Tree`), controls (`Slider`, `RangeSlider`, `Rating`, `Calendar`, `DateField`, `DatePicker`, `DateRangePicker`, `TimeInput`, `ColorPicker`, `ColorInput`, `Switch`, `Checkbox`, `Radio`, `OTPField`, `TagsInput`, `NumberField`, `PasswordInput`, `FileInput`, `ButtonGroup`, `InputGroup`), and layout/data families (`Collapsible`, `Accordion`, `ScrollArea`, `Carousel`, `Resizable`, `DataTable`, `Indicator`, `CodeBlock`, `Charts`).
+
 ## Manual targets
 
 | Platform | Setup                                                                 |

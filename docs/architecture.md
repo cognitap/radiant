@@ -24,7 +24,7 @@ Component APIs live in the [component guides](https://github.com/cognitap/radian
 
 ## Composition
 
-Each native element or behavior has one base family. Higher-level components compose it instead of rendering raw elements or duplicating its behavior. `Stack` is the one-dimensional layout, spaced by the spacing scale.
+Each native element or behavior has one base family. Higher-level components compose it rather than duplicate it. `Stack` is the one-dimensional layout, spaced by the spacing scale.
 
 `Button` owns `<button>` actions and `Link` owns `<a>` navigation, even when a link looks like a button. Triggers, close buttons, and action items in other families build on `Button`, and navigation items build on `Link`.
 
@@ -78,10 +78,9 @@ Omitting the locale inherits formatting and matching from the closest provider. 
 
 ### Right-to-left (RTL)
 
-Direction-sensitive behavior reads computed CSS direction from the host or anchor, so components follow `LocaleProvider`, document `dir`, nested subtree overrides, and direct control `dir` props without separate RTL props. Logical CSS properties (`inset-inline-*`, `padding-inline-*`, `border-inline-*`, `rounded-s-*`/`rounded-e-*`, `text-start`) drive alignment, borders, indicators, and `ToastViewport` placement.
+Direction-sensitive behavior reads computed CSS direction from the host or anchor, so components follow `LocaleProvider` and any `dir` without RTL props. Logical CSS properties drive alignment, borders, indicators, and `ToastViewport` placement.
 
-- **Verified coverage:** Horizontal arrow navigation, drag/pointer geometry, disclosure/branch chevron mirroring, logical alignment/positioning, horizontal and vertical scrolling, reading order, nested overrides, and SSR hydration are verified across overlays, navigation, controls, and layout and data families.
-- **Intentional exceptions and limitations:** `TimeInput` keeps numeric `hour:minute[:second]` segments left-to-right while placing `dayPeriod` in the ambient flow. `CodeBlockViewport` defaults to `dir="ltr"` for source code and accepts an explicit `dir` override. `Popover`, `Tooltip`, and `HoverCard` keep physical `side` values (`'left' | 'right'`) while `align` (`'start' | 'end'`), `MenuSubContent`, `Drawer` (`'start' | 'end'`), and `Indicator` resolve logically. `Charts` preserve left-to-right SVG plot geometry while reversing horizontal keyboard stepping in RTL. Caller-supplied icons and `BreadcrumbSeparator` content are not mirrored automatically.
+[Accessibility](accessibility.md#right-to-left) lists verified families. Exceptions: `TimeInput` keeps numeric `hour:minute[:second]` segments left-to-right while placing `dayPeriod` in the ambient flow. `CodeBlockViewport` defaults to `dir="ltr"` for source code. `Popover`, `Tooltip`, and `HoverCard` keep physical `side` values while `align`, `MenuSubContent`, `Drawer`, and `Indicator` resolve logically. `Charts` preserve left-to-right SVG plot geometry while reversing horizontal keyboard stepping in RTL. Caller icons and `BreadcrumbSeparator` content are not mirrored.
 
 ## Customization limits
 
@@ -95,34 +94,34 @@ Custom styling and rendering must keep:
 
 ## Agent layer
 
-Agents compose interfaces from Radiant. Radiant never calls a model and needs no API key; the application owns prompts, model calls, storage, and what actions do ([ADR 0002](adr/0002-generative-ui-scope.md), [ADR 0003](adr/0003-a2ui-renderer-engine.md)). Its entries stay apart from the core, so React-only apps load no protocol code.
+Agents compose interfaces from Radiant. Radiant never calls a model and needs no API key; the application owns prompts, model calls, storage, and what actions do ([ADR 0002](adr/0002-generative-ui-scope.md), [ADR 0003](adr/0003-a2ui-renderer-engine.md)). The agent entries keep `@a2ui/web_core` out of the core entry, so React-only apps load no protocol code.
 
 ### Catalog
 
-`@cognitap/radiant/catalog` is the canonical contract. It has no React, DOM, or wire-protocol dependencies, so servers load it to build prompts and protocol catalogs are generated from it.
+`@cognitap/radiant/catalog` is the canonical contract, free of React, DOM, and wire-protocol code, so servers can load it and protocol catalogs are generated from it.
 
-Entries never expose `className`, `style`, `render`, refs, DOM handlers, or raw ARIA, whose contracts a model cannot keep. One entry covers one intent, such as `Choice` with `presentation: 'list' | 'segmented' | 'chips' | 'cards' | 'dropdown'`, with JSON Schemas, slot constraints, state bindings, and action shapes. `extendCatalog` adds app entries but never shadows a Radiant name.
+Entries never expose `className`, `style`, `render`, refs, DOM handlers, or raw ARIA, whose contracts a model cannot keep. One entry covers one intent, such as `Choice` with a `presentation`, with JSON Schemas, slot constraints, state bindings, and action shapes. `extendCatalog` adds app entries but never shadows a Radiant name.
 
-Entry `guidance` (use, avoid, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET`, so the catalog fits a prompt. `renderCatalogGuidance` renders it (the docs site's `llms.txt`), `renderCatalogInstructions` the design rules, and `describeCatalogEntry` one entry.
+Entry `guidance` (use, avoid, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET`, so the catalog fits a prompt. `renderCatalogGuidance` renders it for non-A2UI adapters (the docs site's `llms.txt`), `renderCatalogInstructions` the design rules, and `describeCatalogEntry` one entry. A2UI renames entries and props and supplies its own guidance, so A2UI agents get only `toCatalogJson()`.
 
 ### Registries
 
 `@cognitap/radiant/a2ui` renders A2UI 1.0. Each `createA2uiRegistryEntry` pairs a Radiant component with a JSON schema (forbidden host props rejected), an adapter, and accessibility rules. `radiantA2uiRegistry` implements the basic catalog at `A2UI_BASIC_CATALOG_REVISION`; `radiantA2uiExtensionRegistry`, the default, adds form, feedback, data, and layout components. `createA2uiRegistry({ extends })` inherits a base registry; `findA2uiRegistry` finds one by catalog ID. `pnpm catalog:check` keeps the generated `catalog.json` and `extension-catalog.json` in sync.
 
-Apps add components: `createA2uiExtensionEntry` derives schema and guidance from an `extendCatalog` entry, and `createA2uiExtensionRegistry(catalog, { catalogId, entries })` extends the default registry. Adapters use `readA2uiValue`, `writeA2uiBinding`, and `runA2uiAction`, and style only with [public tokens](theming.md#public-tokens) so they follow every theme.
+Apps add components: `createA2uiExtensionEntry` derives schema and guidance from an `extendCatalog` entry, and `createA2uiExtensionRegistry(catalog, { catalogId, entries })` extends the default registry. Adapters use `readA2uiValue`, `writeA2uiBinding`, `runA2uiAction`, and `isA2uiChildNode`, and style only with [public tokens](theming.md#public-tokens) so they follow every theme.
 
 ### Surface
 
-`A2uiSurface` treats messages as untrusted and never throws on them; the React core still throws on contract violations. It coerces invalid, forbidden, or mixed controlled/uncontrolled props, degrades unknown components to text, and isolates failing nodes in error boundaries, reporting each to `onDiagnostic` (errors carry a `code`). Controls bind to surface state; named actions reach `onAction` as `{ action, surfaceId, nodeId, state }`, and the app decides what they do.
+`A2uiSurface` treats messages as untrusted and never throws on them, unlike the React core. At render it coerces invalid, forbidden, or mixed controlled/uncontrolled props (servers can run `coerceA2uiMessages` first), degrades unknown components to text, and isolates failing nodes in error boundaries, reporting each to `onDiagnostic` (errors carry a `code`). Controls bind to surface state; named actions reach `onAction` as `{ action, surfaceId, nodeId, state }`, and the app decides what they do. It never runs `openUrl`, so navigation stays with the host.
 
 The host's `ThemeScope` owns appearance, so the surface strips agent theme hints: a model cannot restyle the app or break its contrast. `headingLevel`, `prose`, and `labels` fit the surface into the host page.
 
-Components stream in any order: missing ones become `aria-hidden` Skeletons, and the surface sets `aria-busy` until none remain. Updates sent before `createSurface` wait. Replays and appended patches keep the engine and surviving controls' state, focus, and scroll; edits to applied history rebuild it. Lost focus returns to the nearest surviving control or the surface root, never `document.body`. Deleted or failed surfaces render nothing.
+Components stream in any order: missing ones become `aria-hidden` Skeletons, and the surface sets `aria-busy` until none remain. Updates sent before `createSurface` wait. Identical replays and appended patches keep the engine and surviving controls (state, focus, scroll, drags); edits to applied history rebuild it. In an active document, focus lost in a patch returns to its moved control, the nearest surviving tabbable control, or the surface root (`tabIndex={-1}`), never `document.body`. Deleted or failed surfaces render nothing.
 
-`A2uiMediaProvider` supplies `icons` (`/a2ui/lucide` maps `lucide-react`) and `urlPolicy`; also set CSP `img-src` and `media-src`.
+`A2uiMediaProvider` supplies `icons` (`/a2ui/lucide` maps `lucide-react`) and `urlPolicy`. Unmapped icons report `UNKNOWN_ICON`; media URLs outside http(s), blob, or data, or rejected by `urlPolicy`, report `UNSAFE_URL` and never load. Also set CSP `img-src` and `media-src`.
 
-### Validator
+### Accessibility check
 
-`validateA2uiAccessibility` needs no DOM, so servers reject or fix a surface before storing it, not after a user sees it. [Accessibility](accessibility.md#a2ui-surfaces) owns the rules.
+`validateA2uiAccessibility` checks accessibility rules, not schemas. It needs no DOM, so servers reject or fix a surface before storing it. [Accessibility](accessibility.md#a2ui-surfaces) owns the rules.
 
 When a contract changes, update the component's stories and the compile checks in [tests/package](../tests/package).

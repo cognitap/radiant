@@ -3,14 +3,15 @@
 > [!WARNING]  
 > Radiant is under heavy development. Things _will_ change and things _will_ break. Use at your own risk.
 
-React components built on native HTML elements, with shared themes, for your
-app and for the interfaces your agents compose. Published as
+Radiant is the component library agents compose interfaces from: React
+components on native HTML elements, with shared themes. Published as
 [`@cognitap/radiant`](https://www.npmjs.com/package/@cognitap/radiant) under the
 [MIT license](LICENSE). Radiant is experimental during 0.x.
 
 Radiant never calls a model and needs no API key. Your agent writes
-[A2UI](https://a2ui.org) messages; Radiant supplies the catalog it picks from, a
-validator for your server and a renderer for the browser:
+[A2UI](https://a2ui.org) messages from the catalog that
+`radiantA2uiExtensionRegistry.toCatalogJson()` describes, and Radiant renders
+them in the browser:
 
 ```tsx
 'use client'
@@ -28,17 +29,22 @@ export function AgentReply({ messages }: { messages: A2uiMessage[] }) {
 }
 ```
 
-Check each surface on the server before storing it:
+Run the accessibility check on the server before storing a surface. Props are
+coerced to the schema at render, or earlier with `coerceA2uiMessages`.
 
 ```ts
 import { validateA2uiAccessibility } from '@cognitap/radiant/a2ui'
 
-const { errors, messages: fixed } = validateA2uiAccessibility(messages, { fix: true })
+const { errors, messages: fixed } = validateA2uiAccessibility(messages, {
+  fix: true
+})
 ```
 
-`@cognitap/radiant/catalog` renders the catalog as prompt text, and apps add
-their own components to it. The same families, covering actions, forms,
-overlays, navigation, feedback, layout and data display, work directly in React. Charts ship at `@cognitap/radiant/charts`.
+Apps add their own components to the catalog, and
+`@cognitap/radiant/catalog` holds its protocol-independent form for other
+adapters. The same families, covering actions, forms, overlays, navigation,
+feedback, layout and data display, work directly in React. Charts ship at
+`@cognitap/radiant/charts`.
 
 ## Install
 
