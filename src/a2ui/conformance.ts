@@ -7,6 +7,7 @@ import * as profileFixtures from './fixtures.js'
 import * as inputFixtures from './inputFixtures.js'
 import * as layoutFixtures from './layoutFixtures.js'
 import * as mediaFixtures from './mediaFixtures.js'
+import * as stageFixtures from './stageFixtures.js'
 
 /**
  * How strictly a fixture is gated: `accessible` fixtures must render without error or fallback
@@ -38,7 +39,8 @@ const FIXTURE_MODULES: Readonly<Record<string, Readonly<Record<string, unknown>>
   'layoutFixtures.ts': layoutFixtures,
   'mediaFixtures.ts': mediaFixtures,
   'extensionFixtures.ts': extensionFixtures,
-  'appExtensionFixtures.tsx': appExtensionFixtures
+  'appExtensionFixtures.tsx': appExtensionFixtures,
+  'stageFixtures.ts': stageFixtures
 }
 
 /** Fixture files in `src/a2ui/` that the conformance suite reads. */

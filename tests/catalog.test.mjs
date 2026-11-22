@@ -376,6 +376,7 @@ test('A2UI catalogs are generated deterministically and stay free of forbidden p
     'Progress',
     'RadioGroup',
     'Select',
+    'Stage',
     'Switch',
     'Table',
     'Textarea',

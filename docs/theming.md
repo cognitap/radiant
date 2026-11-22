@@ -105,7 +105,7 @@ Each part reads one token role.
 | Indicator | `control.indicator`                          | `Checkbox` and `Radio` boxes, `Switch` track, `Switch` and `Slider` thumbs                                            |
 | Track     | `control.track`                              | `ToggleGroup` and `Tabs` lists, `Progress`, `Meter`, `Skeleton`, `Slider` and `ScrollArea` rails, `Menubar`           |
 | Selected  | `control.selected`                           | Pressed toggles, `ToggleGroup` indicator, active tab, `NavLink`, current page, chosen option, open menu               |
-| Surface   | `surface`                                    | `Card`, `Alert`, `Collapsible`, `Accordion`, `TableContainer`, `EmptyState`, `CodeBlock`, `Sidebar`                   |
+| Surface   | `surface`                                    | `Card`, `Stage`, `Alert`, `Collapsible`, `Accordion`, `TableContainer`, `EmptyState`, `CodeBlock`, `Sidebar`          |
 | Overlay   | `surface.overlay*`, `surface.backdropFilter` | `Popover`, `HoverCard`, `Menu`, listboxes, `Tooltip`, `Dialog`, `Drawer`, `NavigationMenu` viewport                   |
 | Item      | `control.item`                               | Highlighted rows in menus, listboxes, and `Command`                                                                   |
 
@@ -125,6 +125,7 @@ Padding and density keep their own steps, so `normal` is today's value and `airy
 | Prop              | `normal`                                    | `tight` / `airy` default         | Step overrides                                                  |
 | ----------------- | ------------------------------------------- | -------------------------------- | --------------------------------------------------------------- |
 | `Card` `padding`  | `card.padding`, then `surface.padding`      | Two thirds / four thirds of it   | `card.paddingTight`, `card.paddingAiry`                         |
+| `Stage` `padding` | `stage.padding`, then `surface.padding`     | Two thirds / four thirds of it   | None                                                            |
 | `Table` `density` | `table.paddingInline`, `table.paddingBlock` | Two thirds / four thirds of each | `table.paddingInlineTight`, `table.paddingBlockAiry`, and so on |
 
 The derived steps scale a single length. When a base padding is a shorthand such as `1rem 2rem`, set both step overrides. Step overrides resolve on the `Card` or `Table` element, so a theme step override wins over a base override set on one instance.

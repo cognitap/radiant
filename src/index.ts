@@ -469,6 +469,26 @@ export type { AspectRatioProps } from './components/AspectRatio/AspectRatio.js'
 export { Stack } from './components/Stack/Stack.js'
 export type { StackProps, StackAlign, StackJustify } from './components/Stack/Stack.js'
 
+export {
+  Stage,
+  StageActions,
+  StageBody,
+  StageDescription,
+  StageFooter,
+  StageHeader,
+  StageTitle
+} from './components/Stage/Stage.js'
+export type {
+  StageActionsProps,
+  StageBodyProps,
+  StageDescriptionProps,
+  StageFooterProps,
+  StageHeaderProps,
+  StageHeadingLevel,
+  StageProps,
+  StageTitleProps
+} from './components/Stage/Stage.js'
+
 export { ScrollArea } from './components/ScrollArea/ScrollArea.js'
 export type {
   ScrollAreaProps,
