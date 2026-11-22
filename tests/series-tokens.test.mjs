@@ -181,30 +181,75 @@ const brands = [
   '#db2777',
   '#111111'
 ]
-const generated = ['classic', 'balanced', 'expressive'].flatMap(wallPreset =>
+const palettes = ['classic', 'balanced', 'expressive'].flatMap(wallPreset =>
   brands.flatMap(brand => {
     const wall = generateColorWall({ brand, wallPreset })
-    const neutrals = wall.color.palettes.map(({ id }) => id).filter(id => id !== 'brand')
-    return neutrals.map(neutral => {
-      const palette = recommendColorPalette(wall, { working: { neutral } }),
-        series = seriesPalette(palette),
-        document = themeDocumentFromDefinition({
-          id: 'wall',
-          name: 'Wall',
-          modes: {
-            light: { tokens: { series: series.light } },
-            dark: { tokens: { series: series.dark } }
-          }
-        })
-      return {
-        ...compileThemeDocument(updateThemeAppearance(document, { palette })),
-        id: `${wallPreset} wall from ${brand} with ${neutral} neutral`
-      }
-    })
+    return wall.color.palettes
+      .filter(({ id }) => id !== 'brand')
+      .map(({ id: neutral }) => ({
+        id: `${wallPreset} wall from ${brand} with ${neutral} neutral`,
+        palette: recommendColorPalette(wall, { working: { neutral } })
+      }))
   })
 )
+const themeFrom = palette => {
+  const series = seriesPalette(palette)
+  return compileThemeDocument(
+    updateThemeAppearance(
+      themeDocumentFromDefinition({
+        id: 'wall',
+        name: 'Wall',
+        modes: {
+          light: { tokens: { series: series.light } },
+          dark: { tokens: { series: series.dark } }
+        }
+      }),
+      { palette }
+    )
+  )
+}
+// A compiled theme per preset checks the shortcut below; the expressive one moves its dark solids.
+const compiled = ['classic', 'balanced', 'expressive'].map(wallPreset => ({
+  ...themeFrom(
+    recommendColorPalette(generateColorWall({ brand: '#7c3aed', wallPreset }), {
+      working: { neutral: 'lime' }
+    })
+  ),
+  id: `compiled ${wallPreset} wall`
+}))
+// The rest set only the series, surface, canvas and foreground values the checks read, once per
+// distinct set of those colours.
+const seriesKeys = Object.keys(defaultTheme.modes.light).filter(key =>
+  key.startsWith('--rad-series-')
+)
+const seen = new Set()
+const generated = palettes.flatMap(({ id, palette }) => {
+  const key = ['light', 'dark']
+    .map(mode =>
+      [
+        palette.color.modes[mode].surface,
+        palette.color.modes[mode].foreground,
+        palette.surface.modes[mode].canvas
+      ].join()
+    )
+    .join()
+  if (seen.has(key)) return []
+  seen.add(key)
+  const series = seriesPalette(palette)
+  assert.ok(series.pass, `${id} series checks fail`)
+  const values = mode => ({
+    ...Object.fromEntries(seriesKeys.map(key => [key, defaultTheme.modes[mode][key]])),
+    ...Object.fromEntries(
+      Object.entries(series[mode]).map(([n, { solid }]) => [`--rad-series-${n}-solid`, solid])
+    ),
+    '--rad-color-surface': palette.color.modes[mode].surface,
+    '--rad-color-foreground': palette.color.modes[mode].foreground,
+    '--rad-surface-canvas': palette.surface.modes[mode].canvas
+  })
+  return [{ id, modes: { light: values('light'), dark: values('dark') } }]
+})
 
-const cases = [...new Set([defaultTheme, ...themes]), ...generated].flatMap(theme =>
+const cases = [...new Set([defaultTheme, ...themes]), ...compiled, ...generated].flatMap(theme =>
   ['light', 'dark'].flatMap(mode => {
     const values = theme.modes[mode]
     return backdropsOf(values['--rad-surface-canvas']).map(canvas => {
@@ -254,4 +299,28 @@ test('every pair of series solids stays apart under simulated colour-vision defi
       }
     }
   }
+})
+
+test('seriesPalette reports, without throwing, palettes it cannot fit', () => {
+  const brandNeutral = seriesPalette(
+    recommendColorPalette(generateColorWall({ brand: '#84cc16' }), {
+      working: { neutral: 'brand' }
+    })
+  )
+  assert.equal(brandNeutral.pass, false)
+  assert.equal(brandNeutral.checks.dark.pass, false)
+  assert.ok(brandNeutral.checks.dark.distance.distance < brandNeutral.checks.dark.distance.minimum)
+  const darkForeground = seriesPalette({
+    color: {
+      modes: {
+        light: { surface: '#FFFFFF', foreground: '#18181B' },
+        dark: { surface: '#18181B', foreground: '#444444' }
+      }
+    },
+    surface: { modes: { light: { canvas: '#F4F4F5' }, dark: { canvas: '#09090B' } } }
+  })
+  assert.equal(darkForeground.checks.light.pass, true)
+  assert.equal(darkForeground.checks.dark.pass, false)
+  assert.equal(darkForeground.checks.dark.contrast.pair, 'text on soft')
+  assert.ok(darkForeground.checks.dark.contrast.ratio < 4.5)
 })

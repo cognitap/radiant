@@ -10,4 +10,9 @@ export type {
   WorkingPaletteRole
 } from './recommendColorPalette.js'
 export { seriesPalette } from './seriesPalette.js'
-export type { SeriesSolids } from './seriesPalette.js'
+export type {
+  SeriesSolids,
+  SeriesPalette,
+  SeriesPaletteCheck,
+  SeriesVision
+} from './seriesPalette.js'

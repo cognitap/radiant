@@ -139,12 +139,12 @@ The defaults are blue, orange, emerald, pink, sky, amber, violet, and red at the
 
 Series tokens resolve where `ThemeScope` or `:root` declares them, so overriding a role color on an inner element does not recolor them. `components.chart.series1` to `series8` override a chart only.
 
-A theme generated from the color wall sets its series from `seriesPalette(palette)`, which returns `{ light, dark }` solids for `tokens.series` in each mode. It keeps the default hues and moves all eight lightnesses by one shared step only when the palette's surface, canvas, or foreground would miss a target, so the guarantees above hold with the wall's neutral or any hue family as `neutral`. A vivid brand palette as `neutral` is not covered.
+A theme generated from the color wall sets its series from `seriesPalette(palette)`, which returns `{ light, dark }` solids for `tokens.series` in each mode, plus `checks` and `pass`. It keeps the default solids when they meet the targets above on the palette's surface, canvas, and foreground. Otherwise it tries up to 40 lightness steps of 0.005, moving all eight solids together or each only as far as it needs, and takes the first that meets every target. With the wall's neutral or any hue family as `neutral`, one always does. When none does, as with some vivid brand palettes as `neutral`, it returns the closest attempt with `pass: false`, and `checks.light` and `checks.dark` name the weakest contrast and the closest pair.
 
 ```ts
 const palette = recommendColorPalette(generateColorWall({ brand: '#7c3aed' }))
 const { light, dark } = seriesPalette(palette)
-const document = updateThemeAppearance(
+const themeDocument = updateThemeAppearance(
   themeDocumentFromDefinition({
     id: 'brand',
     name: 'Brand',

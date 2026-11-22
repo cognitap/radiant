@@ -306,7 +306,12 @@ export type {
 export { generateColorWall, colorCalibrationPresets } from './color/index.js'
 export type { ColorWall, ColorWallInput, ColorCalibrationPreset } from './color/index.js'
 export { recommendColorPalette, seriesPalette } from './color/index.js'
-export type { SeriesSolids } from './color/index.js'
+export type {
+  SeriesSolids,
+  SeriesPalette,
+  SeriesPaletteCheck,
+  SeriesVision
+} from './color/index.js'
 export type {
   ColorPalette,
   ColorPaletteOptions,
