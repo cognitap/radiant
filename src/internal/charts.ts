@@ -33,8 +33,8 @@ export function validateChart(
     )
       throw new TypeError(`Chart ${name} needs unique nonempty keys and nonempty labels.`)
   }
-  if (!series.length || series.length > 6 || (pie && series.length !== 1))
-    throw new TypeError(pie ? 'PieChart needs one series.' : 'Charts need one to six series.')
+  if (!series.length || series.length > 8 || (pie && series.length !== 1))
+    throw new TypeError(pie ? 'PieChart needs one series.' : 'Charts need one to eight series.')
   for (const row of data)
     for (const item of series) {
       const value = row.values[item.key]

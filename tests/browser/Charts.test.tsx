@@ -11,6 +11,7 @@ import {
   type ChartProps
 } from '../../src/charts/index.js'
 import { ThemeScope, defineTheme } from '../../src/index.js'
+import { themes } from '../../src/examples/index.js'
 import { generateColorWall, recommendColorPalette } from '../../src/color/index.js'
 import { mount, click, key } from './familyHarness.js'
 const data = [
@@ -164,6 +165,51 @@ test('theme mode and generated palette changes resolve series colors through the
   )
   const dark = getComputedStyle(host.querySelector('svg path')!).stroke
   expect(dark).not.toBe(light)
+})
+test('series 1 to 6 keep the role mixes charts drew before the series tokens', async () => {
+  const before = [
+      'color-mix(in oklab,var(--rad-color-accent) 55%,var(--rad-color-foreground))',
+      'color-mix(in oklab,var(--rad-color-focus) 65%,var(--rad-color-foreground))',
+      'color-mix(in oklab,var(--rad-color-warning) 45%,var(--rad-color-foreground))',
+      'color-mix(in oklab,var(--rad-color-danger) 65%,var(--rad-color-foreground))',
+      'var(--rad-color-foreground)',
+      'var(--rad-color-muted-foreground)'
+    ],
+    six = before.map((_, index) => ({ key: `s${index}`, label: `Series ${index + 1}` })),
+    rows = data.map(row => ({
+      ...row,
+      values: Object.fromEntries(six.map((item, index) => [item.key, index + 1]))
+    }))
+  for (const theme of themes)
+    for (const mode of ['light', 'dark'] as const) {
+      const { host } = await mount(
+        <ThemeScope
+          theme={theme}
+          mode={mode}
+        >
+          <Sample
+            data={rows}
+            series={six}
+          />
+          {before.map(color => (
+            <i
+              key={color}
+              data-before
+              style={{ color }}
+            />
+          ))}
+        </ThemeScope>
+      )
+      const strokes = Array.from(
+        host.querySelectorAll('svg path[stroke]'),
+        path => getComputedStyle(path).stroke
+      )
+      const expected = Array.from(
+        host.querySelectorAll('[data-before]'),
+        node => getComputedStyle(node).color
+      )
+      expect(strokes, `${theme.id}/${mode}`).toEqual(expected)
+    }
 })
 test('empty, missing and all-zero data have readable alternatives without phantom values', async () => {
   const empty = await mount(<Sample data={[]} />)

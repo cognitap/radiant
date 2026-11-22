@@ -178,7 +178,9 @@ export const componentRegistry = {
     series3: 'css',
     series4: 'css',
     series5: 'css',
-    series6: 'css'
+    series6: 'css',
+    series7: 'css',
+    series8: 'css'
   },
   form: { gap: 'css' },
   carousel: { gap: 'css', slideGap: 'css', radius: 'css' },

@@ -54,6 +54,6 @@ test('palette colors map deterministically without adding a charting-engine depe
   )
   assert.throws(
     () => renderToStaticMarkup(h(LineChart, { label: 'Invalid', data, series: [] })),
-    /one to six/
+    /one to eight/
   )
 })

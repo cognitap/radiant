@@ -61,16 +61,12 @@ export type LineChartProps = ChartProps
 export type BarChartProps = ChartProps
 export type AreaChartProps = ChartProps
 export type PieChartProps = Omit<ChartProps, 'series'> & { series: readonly [ChartSeries] }
-const colors = [
-  'var(--rad-chart-series1,color-mix(in oklab,var(--rad-color-accent) 55%,var(--rad-color-foreground)))',
-  'var(--rad-chart-series2,color-mix(in oklab,var(--rad-color-focus) 65%,var(--rad-color-foreground)))',
-  'var(--rad-chart-series3,color-mix(in oklab,var(--rad-color-warning) 45%,var(--rad-color-foreground)))',
-  'var(--rad-chart-series4,color-mix(in oklab,var(--rad-color-danger) 65%,var(--rad-color-foreground)))',
-  'var(--rad-chart-series5,var(--rad-color-foreground))',
-  'var(--rad-chart-series6,var(--rad-color-muted-foreground))'
-]
+const colors = Array.from(
+  { length: 8 },
+  (_, index) => `var(--rad-chart-series${index + 1},var(--rad-series-${index + 1}-solid))`
+)
 const color = (index: number) => colors[index % colors.length]!
-const dashes = ['', '8 4', '2 4', '10 3 2 3', '4 3', '12 6']
+const dashes = ['', '8 4', '2 4', '10 3 2 3', '4 3', '12 6', '6 2 2 2', '1 3']
 const format = (value: number) => String(value)
 const pointClass = [
   'box-border inline-flex size-6 cursor-pointer select-none items-center justify-center rounded-full border-0 bg-transparent p-0 [color:inherit] hover:bg-[color-mix(in_oklch,currentColor_8%,transparent)] forced-colors:text-[CanvasText]',
