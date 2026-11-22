@@ -126,6 +126,21 @@ export const glassDefinition: ThemeDefinition = {
   },
   components: { button: { backdrop: blur } },
   modes: {
+    // Darker series keep 3:1 against the bright canvas gradient stops.
+    light: {
+      tokens: {
+        series: {
+          '1': { solid: 'oklch(0.5 0.16 255)' },
+          '2': { solid: 'oklch(0.44 0.1 55)' },
+          '3': { solid: 'oklch(0.46 0.08 165)' },
+          '4': { solid: 'oklch(0.53 0.16 340)' },
+          '5': { solid: 'oklch(0.38 0.07 230)' },
+          '6': { solid: 'oklch(0.51 0.1 80)' },
+          '7': { solid: 'oklch(0.42 0.14 295)' },
+          '8': { solid: 'oklch(0.38 0.11 25)' }
+        }
+      }
+    },
     dark: {
       tokens: {
         color: {

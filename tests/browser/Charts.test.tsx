@@ -11,6 +11,7 @@ import {
   type ChartProps
 } from '../../src/charts/index.js'
 import { ThemeScope, defineTheme } from '../../src/index.js'
+import { themes } from '../../src/examples/index.js'
 import { generateColorWall, recommendColorPalette } from '../../src/color/index.js'
 import { mount, click, key } from './familyHarness.js'
 const data = [
@@ -164,6 +165,47 @@ test('theme mode and generated palette changes resolve series colors through the
   )
   const dark = getComputedStyle(host.querySelector('svg path')!).stroke
   expect(dark).not.toBe(light)
+})
+test('chart series resolve to the series tokens in every preset and mode', async () => {
+  const eight = Array.from({ length: 8 }, (_, index) => ({
+      key: `s${index}`,
+      label: `Series ${index + 1}`
+    })),
+    rows = data.map(row => ({
+      ...row,
+      values: Object.fromEntries(eight.map((item, index) => [item.key, index + 1]))
+    }))
+  for (const theme of themes)
+    for (const mode of ['light', 'dark'] as const) {
+      const { host } = await mount(
+        <ThemeScope
+          theme={theme}
+          mode={mode}
+        >
+          <Sample
+            data={rows}
+            series={eight}
+          />
+          {eight.map((_, index) => (
+            <i
+              key={index}
+              data-token
+              style={{ color: `var(--rad-series-${index + 1}-solid)` }}
+            />
+          ))}
+        </ThemeScope>
+      )
+      const strokes = Array.from(
+        host.querySelectorAll('svg path[stroke]'),
+        path => getComputedStyle(path).stroke
+      )
+      const tokens = Array.from(
+        host.querySelectorAll('[data-token]'),
+        node => getComputedStyle(node).color
+      )
+      expect(new Set(tokens).size, `${theme.id}/${mode}`).toBe(8)
+      expect(strokes, `${theme.id}/${mode}`).toEqual(tokens)
+    }
 })
 test('empty, missing and all-zero data have readable alternatives without phantom values', async () => {
   const empty = await mount(<Sample data={[]} />)
