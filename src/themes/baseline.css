@@ -250,6 +250,120 @@
   --rad-spacing-header-gap: 0.375rem;
   --rad-spacing-footer-gap: 0.5rem;
   --rad-state-disabled-opacity: 0.5;
+  --rad-series-1-solid: color-mix(
+    in oklab,
+    var(--rad-color-accent) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-1-soft: color-mix(in oklab, var(--rad-series-1-solid) 14%, var(--rad-color-surface));
+  --rad-series-1-border: color-mix(
+    in oklab,
+    var(--rad-series-1-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-1-text: color-mix(
+    in oklab,
+    var(--rad-series-1-solid) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-2-solid: color-mix(
+    in oklab,
+    var(--rad-color-focus) 65%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-2-soft: color-mix(in oklab, var(--rad-series-2-solid) 14%, var(--rad-color-surface));
+  --rad-series-2-border: color-mix(
+    in oklab,
+    var(--rad-series-2-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-2-text: color-mix(
+    in oklab,
+    var(--rad-series-2-solid) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-3-solid: color-mix(
+    in oklab,
+    var(--rad-color-warning) 45%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-3-soft: color-mix(in oklab, var(--rad-series-3-solid) 14%, var(--rad-color-surface));
+  --rad-series-3-border: color-mix(
+    in oklab,
+    var(--rad-series-3-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-3-text: color-mix(
+    in oklab,
+    var(--rad-series-3-solid) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-4-solid: color-mix(
+    in oklab,
+    var(--rad-color-danger) 65%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-4-soft: color-mix(in oklab, var(--rad-series-4-solid) 14%, var(--rad-color-surface));
+  --rad-series-4-border: color-mix(
+    in oklab,
+    var(--rad-series-4-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-4-text: color-mix(
+    in oklab,
+    var(--rad-series-4-solid) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-5-solid: var(--rad-color-foreground);
+  --rad-series-5-soft: color-mix(in oklab, var(--rad-series-5-solid) 14%, var(--rad-color-surface));
+  --rad-series-5-border: color-mix(
+    in oklab,
+    var(--rad-series-5-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-5-text: color-mix(
+    in oklab,
+    var(--rad-series-5-solid) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-6-solid: var(--rad-color-muted-foreground);
+  --rad-series-6-soft: color-mix(in oklab, var(--rad-series-6-solid) 14%, var(--rad-color-surface));
+  --rad-series-6-border: color-mix(
+    in oklab,
+    var(--rad-series-6-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-6-text: color-mix(
+    in oklab,
+    var(--rad-series-6-solid) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-7-solid: var(--_rad-light, oklch(0.62 0.18 340))
+    var(--_rad-dark, oklch(0.66 0.16 340));
+  --rad-series-7-soft: color-mix(in oklab, var(--rad-series-7-solid) 14%, var(--rad-color-surface));
+  --rad-series-7-border: color-mix(
+    in oklab,
+    var(--rad-series-7-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-7-text: color-mix(
+    in oklab,
+    var(--rad-series-7-solid) 55%,
+    var(--rad-color-foreground)
+  );
+  --rad-series-8-solid: var(--_rad-light, oklch(0.54 0.18 260))
+    var(--_rad-dark, oklch(0.66 0.16 260));
+  --rad-series-8-soft: color-mix(in oklab, var(--rad-series-8-solid) 14%, var(--rad-color-surface));
+  --rad-series-8-border: color-mix(
+    in oklab,
+    var(--rad-series-8-solid) 55%,
+    var(--rad-color-surface)
+  );
+  --rad-series-8-text: color-mix(
+    in oklab,
+    var(--rad-series-8-solid) 55%,
+    var(--rad-color-foreground)
+  );
 }
 
 @media (prefers-color-scheme: dark) {

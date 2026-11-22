@@ -85,6 +85,7 @@ Components built outside Radiant, such as an app's catalog entries, read only th
 | Control    | `--rad-control-` `radius`, `border-width`, `border-style`                                                                                                                                                 |
 | Surface    | `--rad-surface-` `canvas`, `radius`, `border-width`, `border-style`, `padding`, `gap`, `shadow`                                                                                                           |
 | Other      | `--rad-focus-` `width`, `offset`, `style`; `--rad-motion-color-duration`; `--rad-spacing-` `tight`, `normal`, `airy`; `--rad-state-disabled-opacity`                                                      |
+| Series     | `--rad-series-1-` to `--rad-series-8-` `solid`, `soft`, `border`, `text`                                                                                                                                  |
 
 `--rad-surface-canvas` is the page background that `ThemeScope` paints; `--rad-color-surface` fills cards, fields, and popups on it. Component override and internal names are outside this contract. SVG presentation attributes may not resolve `var()`, so set `fill` and `stroke` in `style`:
 
@@ -129,6 +130,12 @@ Padding and density keep their own steps, so `normal` is today's value and `airy
 | `Table` `density` | `table.paddingInline`, `table.paddingBlock` | Two thirds / four thirds of each | `table.paddingInlineTight`, `table.paddingBlockAiry`, and so on |
 
 The derived steps scale a single length. When a base padding is a shorthand such as `1rem 2rem`, set both step overrides. Step overrides resolve on the `Card` or `Table` element, so a theme step override wins over a base override set on one instance.
+
+## Series colors
+
+`tokens.series['1']` to `['8']` are categorical colors for anything that tells concepts apart by color, such as chart series or highlighted terms. Give a concept one series number and use it in every family. Each series has `solid` for marks on `--rad-color-surface` (3:1 or more), and `soft`, `border`, and `text` for a tag or highlight (`text` on `soft` 4.5:1 or more).
+
+Series 1 to 6 mix the theme's `accent`, `focus`, `warning`, and `danger` with `foreground`, then use `foreground` and `muted-foreground`, so they follow the theme. Series 7 and 8 are fixed magenta and blue, picked to stay apart from series 1 to 6 under simulated protanopia, deuteranopia, and tritanopia. `soft`, `border`, and `text` mix `solid` with the surface or foreground, so a theme can set `solid` alone. Series 1 and 2 match when `accent` and `focus` do, so charts also vary the line dash. `components.chart.series1` to `series8` override a chart only.
 
 ## Presets
 
