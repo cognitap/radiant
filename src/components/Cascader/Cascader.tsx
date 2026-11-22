@@ -242,11 +242,8 @@ export function Cascader({
           position="popper"
           width="content"
           data-slot="cascader-content"
-          className={cn(
-            '@container/cascader [contain-intrinsic-inline-size:calc(var(--_rad-cascader-columns)*12rem)]',
-            parts?.content?.className
-          )}
-          style={{ '--_rad-cascader-columns': trail.length + 1, ...parts?.content?.style }}
+          className={cn('[--_rad-cascader-column-width:12rem]', parts?.content?.className)}
+          style={parts?.content?.style}
           onKeyDown={event => {
             if (event.defaultPrevented) return
             if (event.key === 'Escape' || (event.key === 'Tab' && event.shiftKey)) {

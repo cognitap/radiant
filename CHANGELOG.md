@@ -4,7 +4,7 @@
 
 ## Unreleased
 
-- `Cascader` columns size to the popup, which stays within the element around the trigger, instead of to the viewport. Before, a Cascader in a narrow panel on a wide screen got wide columns and its popup overflowed the panel; now the columns shrink to fit and use compact padding below 24rem.
+- `Cascader` columns switch to compact padding by their own width instead of the viewport width. Columns shrink to fit a popup narrowed by a small viewport, and keep wide padding on a wide screen however many levels are open.
 
 ## 0.0.97
 

@@ -79,17 +79,10 @@ export function SelectPopup({
       wasOpen.current = false
       return
     }
-    // A content-sized popup also stays within the element around its trigger.
-    let surrounding = width === 'content' ? trigger.parentElement : null
-    while (surrounding && /^(inline|contents)/.test(win.getComputedStyle(surrounding).display))
-      surrounding = surrounding.parentElement
     const seedWidth = () => {
       const available = Math.max(
         0,
-        Math.min(
-          (win.visualViewport?.width ?? win.innerWidth) - 2 * Math.max(0, collisionPadding),
-          surrounding?.clientWidth || Infinity
-        )
+        (win.visualViewport?.width ?? win.innerWidth) - 2 * Math.max(0, collisionPadding)
       )
       const anchor = `${Math.min(trigger.getBoundingClientRect().width, available)}px`
       const widthProperty =
@@ -191,7 +184,6 @@ export function SelectPopup({
     observeAnchorLocale(mutations, trigger)
     observer.observe(trigger)
     observer.observe(node)
-    if (surrounding) observer.observe(surrounding)
     doc.addEventListener('pointerdown', outside, true)
     doc.addEventListener('focusin', focusOut)
     doc.addEventListener('scroll', scroll, true)
