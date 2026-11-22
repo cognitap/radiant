@@ -275,6 +275,176 @@ test('every ChoicePicker style puts the invalid state and error on each option, 
   expect(filter.hasAttribute('aria-describedby')).toBe(false)
 })
 
+test('every ChoicePicker style puts its filter inside the group, after the label and before the options', async () => {
+  const styles = {
+    Single: { variant: 'mutuallyExclusive' },
+    Multiple: { variant: 'multipleSelection' },
+    SingleChips: { variant: 'mutuallyExclusive', displayStyle: 'chips' },
+    MultipleChips: { variant: 'multipleSelection', displayStyle: 'chips' }
+  }
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_choice_filter"
+      messages={[
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          createSurface: {
+            surfaceId: 's_choice_filter',
+            catalogId: A2UI_BASIC_CATALOG_ID,
+            dataModel: {
+              ok: false,
+              Single: ['economy'],
+              Multiple: ['economy'],
+              SingleChips: ['economy'],
+              MultipleChips: ['economy']
+            },
+            components: [
+              { id: 'root', component: 'Column', children: Object.keys(styles) },
+              ...Object.entries(styles).map(([id, extra]) => ({
+                id,
+                component: 'ChoicePicker',
+                label: id,
+                filterable: true,
+                options: [
+                  { label: 'Economy', value: 'economy' },
+                  { label: 'Business', value: 'business' }
+                ],
+                value: { '@path': `/${id}` },
+                checks: [{ condition: { '@path': '/ok' }, message: `${id} is required.` }],
+                ...extra
+              }))
+            ]
+          }
+        }
+      ]}
+    />
+  )
+  const groups = [...host.querySelectorAll('fieldset')]
+  expect(groups).toHaveLength(4)
+  for (const group of groups) {
+    const name = group.querySelector('legend')!.textContent!
+    const filter = group.querySelector<HTMLInputElement>('input[type="search"]')!
+    expect(filter, name).toHaveAccessibleName(`Filter ${name}`)
+    const options = () => [
+      ...group.querySelectorAll<HTMLElement>('input[type="radio"], input[type="checkbox"], button')
+    ]
+    const chosen = () =>
+      options()
+        .filter(o => (o instanceof HTMLInputElement ? o.checked : o.ariaPressed === 'true'))
+        .map(o => o.textContent || o.closest('label')!.textContent)
+    const legend = group.querySelector('legend')!
+    expect(
+      legend.compareDocumentPosition(filter) & Node.DOCUMENT_POSITION_FOLLOWING,
+      name
+    ).toBeTruthy()
+    expect(
+      filter.compareDocumentPosition(options()[0]!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      name
+    ).toBeTruthy()
+    expect(filter.hasAttribute('aria-invalid'), name).toBe(false)
+    expect(filter.hasAttribute('aria-describedby'), name).toBe(false)
+    expect(group.hasAttribute('aria-invalid'), name).toBe(false)
+
+    await act(async () => userEvent.type(filter, 'bus'))
+    expect(options(), name).toHaveLength(1)
+    expect(options()[0], name).toHaveAttribute('aria-invalid', 'true')
+    expect(filter.hasAttribute('aria-invalid'), name).toBe(false)
+    await act(async () => userEvent.click(options()[0]!))
+    await act(async () => userEvent.clear(filter))
+    expect(options(), name).toHaveLength(2)
+    expect(chosen(), name).toEqual(
+      name.startsWith('Multiple') ? ['Economy', 'Business'] : ['Business']
+    )
+
+    // With every option filtered out, the fieldset carries the invalid state and error itself.
+    await act(async () => userEvent.type(filter, 'zzz'))
+    expect(options(), name).toHaveLength(0)
+    expect(group, name).toHaveAttribute('aria-invalid', 'true')
+    expect(group, name).toHaveAccessibleDescription(`${name} is required.`)
+    expect(filter.hasAttribute('aria-invalid'), name).toBe(false)
+    await act(async () => userEvent.clear(filter))
+  }
+})
+
+test('ChoicePicker radios keep native arrow keys, one name per picker, and Tab into the filtered options', async () => {
+  const onAction = vi.fn<(event: A2uiActionPayload) => void>()
+  const picker = (id: string) => ({
+    id,
+    component: 'ChoicePicker',
+    label: id,
+    filterable: true,
+    options: [
+      { label: 'Fast', value: 'fast' },
+      { label: 'Accurate', value: 'accurate' },
+      { label: 'Balanced', value: 'balanced' },
+      { label: 'Lean', value: 'lean' }
+    ],
+    value: { '@path': `/${id}` }
+  })
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_choice_radios"
+      onAction={onAction}
+      messages={[
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          createSurface: {
+            surfaceId: 's_choice_radios',
+            catalogId: A2UI_BASIC_CATALOG_ID,
+            dataModel: { Mode: ['fast'], Other: [] },
+            components: [
+              { id: 'root', component: 'Column', children: ['Mode', 'Other', 'send'] },
+              picker('Mode'),
+              picker('Other'),
+              {
+                id: 'send',
+                component: 'Button',
+                child: 'send_text',
+                action: { event: { name: 'send' } }
+              },
+              { id: 'send_text', component: 'Text', text: 'Send' }
+            ]
+          }
+        }
+      ]}
+    />
+  )
+  const [mode, other] = [...host.querySelectorAll('fieldset')]
+  const radios = (group: Element) => [
+    ...group.querySelectorAll<HTMLInputElement>('input[type="radio"]')
+  ]
+  const modeNames = new Set(radios(mode!).map(r => r.name))
+  const otherNames = new Set(radios(other!).map(r => r.name))
+  expect(modeNames.size).toBe(1)
+  expect(otherNames.size).toBe(1)
+  expect([...modeNames][0]).not.toBe('')
+  expect([...modeNames][0]).not.toBe([...otherNames][0])
+
+  const [fast, accurate] = radios(mode!)
+  expect(fast!.checked).toBe(true)
+  await act(async () => {
+    fast!.focus()
+    await userEvent.keyboard('{ArrowDown}')
+  })
+  expect(accurate!.checked).toBe(true)
+  expect(document.activeElement).toBe(accurate)
+  await act(async () =>
+    userEvent.click([...host.querySelectorAll('button')].find(b => b.textContent === 'Send')!)
+  )
+  expect(onAction.mock.calls[0]![0].state).toMatchObject({ Mode: ['accurate'] })
+
+  // Filtering out the selected radio leaves no checked radio, so Tab reaches the first visible one.
+  const filter = mode!.querySelector<HTMLInputElement>('input[type="search"]')!
+  await act(async () => {
+    filter.focus()
+    await userEvent.type(filter, 'n')
+  })
+  const visible = radios(mode!)
+  expect(visible.map(r => r.value)).toEqual(['balanced', 'lean'])
+  await act(async () => userEvent.tab())
+  expect(document.activeElement).toBe(visible[0])
+})
+
 test('every input in the trip fixture passes accessibility validation', () => {
   expect(validateA2uiAccessibility(tripRequestFixtureMessages).errors).toEqual([])
   const unlabeled = validateA2uiAccessibility([
