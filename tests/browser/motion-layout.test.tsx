@@ -102,10 +102,12 @@ test('intrinsic text changes and responsive reflow are measured together; scroll
   await until(() => layout.isAnimating())
   const oldWidth = layout.get(slots[0]!)!.width
   root.style.gridTemplateColumns = 'repeat(1, 296px)'
-  await until(() => layout.get(slots[0]!)!.width > oldWidth + 1)
+  // Sample while the spring is still moving; a slow frame can otherwise land after it settles.
+  await until(
+    () => layout.get(slots[0]!)!.width > oldWidth + 1 && layout.getVelocity(slots[0]!)!.width > 1
+  )
   const current = layout.get(slots[0]!)!
   const widthVelocity = layout.getVelocity(slots[0]!)!.width
-  expect(widthVelocity).toBeGreaterThan(1)
   root.style.gridTemplateColumns = 'repeat(2, 140px)'
   layout.measure()
   expect(layout.get(slots[0]!)).toEqual(current)
