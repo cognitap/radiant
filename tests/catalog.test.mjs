@@ -410,7 +410,10 @@ test('A2UI projection keeps the constraints of props that are also bindable', ()
     progressValue.anyOf.slice(1).map(branch => branch.$ref),
     ['common_types.json#/$defs/DataBinding', 'common_types.json#/$defs/FunctionCall']
   )
-  assert.equal(wireProps(extension.components.Alert).title.type, 'string')
+  assert.deepEqual(wireProps(extension.components.Alert).title.anyOf[0], {
+    type: 'string',
+    minLength: 1
+  })
   assert.equal(wireProps(basic.components.Text).text.$ref, 'common_types.json#/$defs/DynamicString')
 })
 

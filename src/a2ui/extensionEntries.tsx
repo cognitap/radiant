@@ -54,6 +54,7 @@ import {
   unwrapString,
   writeBinding
 } from './entries.js'
+import { feedbackEntries } from './feedbackEntries.js'
 
 const extensionCatalog = generateA2uiCatalogs(radiantCatalog).extension
 
@@ -497,18 +498,20 @@ const extensionEntries = [
   radioGroupEntry,
   switchEntry,
   textareaEntry,
-  stageEntry
+  stageEntry,
+  ...feedbackEntries
 ]
 
 /**
- * Radiant's A2UI extension registry: the basic catalog plus Radiant form controls.
+ * Radiant's A2UI extension registry: the basic catalog plus Radiant form controls, feedback and
+ * data display.
  * Surfaces may name either catalog. Generated catalog JSON (`src/a2ui/extension-catalog.json`).
  */
 export const radiantA2uiExtensionRegistry = createA2uiRegistry({
   catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
   title: 'Radiant A2UI 1.0 Extension Catalog',
   description:
-    'The A2UI basic catalog plus Radiant form controls, generated from @cognitap/radiant/catalog.',
+    'The A2UI basic catalog plus Radiant form controls, feedback and data display, generated from @cognitap/radiant/catalog.',
   instructions: [
     radiantA2uiRegistry.instructions,
     a2uiExtensionInstructions(

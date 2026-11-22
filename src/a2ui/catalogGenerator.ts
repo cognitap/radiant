@@ -88,6 +88,8 @@ type ExtensionProjection = {
   readonly props?: Readonly<Record<string, A2uiJsonSchema>>
   /** Require the bound value, as the basic inputs do; coercion defaults a missing one. */
   readonly requireBindings?: boolean
+  /** Wire props from `props` that are also required. */
+  readonly required?: readonly string[]
 }
 
 const prop = (
@@ -612,12 +614,44 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
     props: { required: REQUIRED_MARK },
     requireBindings: true
   },
-  { a2uiName: 'Alert', sourceEntry: 'Alert' },
-  { a2uiName: 'Badge', sourceEntry: 'Badge' },
-  { a2uiName: 'Progress', sourceEntry: 'Progress' },
+  { a2uiName: 'Alert', sourceEntry: 'Alert', bindable: ['title', 'description'] },
+  { a2uiName: 'Badge', sourceEntry: 'Badge', bindable: ['text'] },
+  { a2uiName: 'Progress', sourceEntry: 'Progress', bindable: ['label'] },
   { a2uiName: 'Accordion', sourceEntry: 'Accordion' },
-  { a2uiName: 'Table', sourceEntry: 'Table' },
-  { a2uiName: 'Toast', sourceEntry: 'Toast' },
+  {
+    a2uiName: 'Table',
+    sourceEntry: 'Table',
+    guidance: {
+      whenToUse:
+        'Records compared across fields. Each of `rows` is a Row with one child per `columns` entry; a template repeats it per data item, and cells bind item-relative paths.',
+      whenNotToUse: 'Layout, or items without shared fields (List).',
+      examples: [
+        'invoices, `rows` templated over a data path, `align: end` on amount',
+        'team members with role and status Badge cells'
+      ]
+    },
+    description: 'Tabular records with agent-defined columns, backed by Radiant Table.',
+    omit: ['columns.field', 'data'],
+    bindable: ['caption']
+  },
+  {
+    a2uiName: 'Toast',
+    sourceEntry: 'Toast',
+    guidance: {
+      whenToUse:
+        'Confirming an action the user just took. Bind `open`; the host sets it true in reply to the action, and dismissal writes false.',
+      whenNotToUse: 'Messages that must stay (Alert) or decisions before continuing (Modal).',
+      examples: ['Draft saved, `open` bound to a data path', 'Message deleted, `actionLabel: Undo`']
+    },
+    bindable: ['title', 'description'],
+    props: {
+      open: {
+        $ref: `${COMMON}DynamicBoolean`,
+        description: 'Shows the toast while true; dismissal writes false.'
+      }
+    },
+    required: ['open']
+  },
   { a2uiName: 'Stage', sourceEntry: 'Stage' }
 ]
 
@@ -847,6 +881,7 @@ function projectExtension(
   for (const [wireName, schema] of Object.entries(projection.props ?? {})) {
     properties[wireName] = structuredClone(schema)
   }
+  required.push(...(projection.required ?? []))
   for (const [slotName, slotConstraint] of Object.entries(entry.slots)) {
     properties[slotName] = slotSchema(slotConstraint)
     if (slotConstraint.required) required.push(slotName)

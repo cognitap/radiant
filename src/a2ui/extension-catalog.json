@@ -4,8 +4,8 @@
   "catalogId": "https://radiant-docs.pages.dev/a2ui/v1_0/extension_catalog.json",
   "protocolVersion": "1.0",
   "title": "Radiant A2UI 1.0 Extension Catalog",
-  "description": "The A2UI basic catalog plus Radiant form controls, generated from @cognitap/radiant/catalog.",
-  "instructions": "Pick each component by intent; the host theme owns appearance.\n- Button runs actions and never navigates. Leave navigation to the host.\n- Bind input values to surface state; named actions receive a snapshot of that state.\n- Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.\n- Control size (small, medium, large) scales controls; keep one size within a group.\n- Spacing (tight, normal, airy) is semantic; never request pixel values.",
+  "description": "The A2UI basic catalog plus Radiant form controls, feedback and data display, generated from @cognitap/radiant/catalog.",
+  "instructions": "Pick each component by intent; the host theme owns appearance.\n- Button runs actions and never navigates. Leave navigation to the host.\n- Bind input values to surface state; named actions receive a snapshot of that state.\n- Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.\n- Tone is the semantic color role (accent, neutral, warning, danger): accent for primary intent, success or confirmation, neutral for information and secondary actions, warning for a problem the user can still avoid, danger for a failure or a destructive action. Tone only sets color; state the meaning in text.\n- Control size (small, medium, large) scales controls; keep one size within a group.\n- Spacing (tight, normal, airy) is semantic; never request pixel values.",
   "components": {
     "Column": {
       "description": "Arranges child elements vertically with semantic spacing and alignment.\nUse: Stacking sections, form fields or a card body top to bottom.\nAvoid: Side-by-side peers (Row) or data-driven repeats (List).\nExamples: form fields followed by a submit Button; heading and paragraph, `align: start`.",
@@ -1121,6 +1121,339 @@
         }
       },
       "required": ["component", "title", "child"]
+    },
+    "Alert": {
+      "description": "Displays inline status or contextual feedback with optional live announcement.\nUse: A message that must stay in the page, with optional follow-up `actions`.\nAvoid: Confirming what the user just did (Toast) or an error tied to one field.\nExamples: Connection interrupted, `tone: warning`; Payment failed, `tone: danger`, `announce: assertive`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Alert"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Primary alert heading."
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Optional supporting detail."
+        },
+        "tone": {
+          "type": "string",
+          "enum": ["accent", "neutral", "warning", "danger"],
+          "default": "neutral",
+          "description": "Semantic palette intent."
+        },
+        "announce": {
+          "type": "string",
+          "enum": ["off", "polite", "assertive"],
+          "default": "off",
+          "description": "Live-region urgency independent of visual tone."
+        },
+        "actions": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Optional follow-up actions inside the alert."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "title"]
+    },
+    "Badge": {
+      "description": "Shows compact passive status or category text.\nUse: Short passive text labeling a status, count or category.\nAvoid: Anything clickable (Button) or updates that must be announced (Alert).\nExamples: Needs review, `tone: warning`; 3 new, `tone: accent`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Badge"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Short badge label."
+        },
+        "tone": {
+          "type": "string",
+          "enum": ["accent", "neutral", "warning", "danger"],
+          "default": "neutral",
+          "description": "Semantic palette intent."
+        },
+        "decorative": {
+          "type": "boolean",
+          "default": false,
+          "description": "Hides redundant badges when adjacent text already states the value."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "text"]
+    },
+    "Progress": {
+      "description": "Shows determinate or indeterminate task completion progress.\nUse: A task advancing toward completion; `value: null` when the amount is unknown.\nAvoid: Measured levels such as storage, or a static percentage in text.\nExamples: upload, `value: 40`, `max: 100`; preparing export, `value: null`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Progress"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Visible or accessible task label."
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Completed amount, or null when progress is indeterminate."
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 100,
+          "description": "Total completion target."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "label"]
+    },
+    "Accordion": {
+      "description": "Organizes collapsible sections that disclose details on demand.\nUse: Sections opened on demand, such as FAQs or details read in sequence.\nAvoid: Switching views where one is always shown (Tabs) or a single short note.\nExamples: FAQ with one section open at a time; order details, `selection: multiple`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Accordion"
+        },
+        "selection": {
+          "type": "string",
+          "enum": ["single", "multiple"],
+          "default": "single",
+          "description": "Whether one or multiple sections may stay open simultaneously."
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Ordered collapsible section headers.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "title"],
+            "properties": {
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stable section identifier."
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Section trigger heading."
+              },
+              "disabled": {
+                "type": "boolean",
+                "default": false,
+                "description": "Prevents expanding or collapsing this section."
+              }
+            }
+          }
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicStringList",
+          "description": "Open section value or values stored in local surface state."
+        },
+        "panels": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Content node rendered for each accordion section."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "items", "panels"]
+    },
+    "Table": {
+      "description": "Tabular records with agent-defined columns, backed by Radiant Table.\nUse: Records compared across fields. Each of `rows` is a Row with one child per `columns` entry; a template repeats it per data item, and cells bind item-relative paths.\nAvoid: Layout, or items without shared fields (List).\nExamples: invoices, `rows` templated over a data path, `align: end` on amount; team members with role and status Badge cells.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Table"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Accessible table caption."
+        },
+        "density": {
+          "type": "string",
+          "enum": ["tight", "normal", "airy"],
+          "default": "normal",
+          "description": "Semantic spacing scale owned by Radiant."
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Ordered table column headers.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label"],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Column header label."
+              },
+              "align": {
+                "type": "string",
+                "enum": ["start", "center", "end"],
+                "default": "start",
+                "description": "Logical horizontal alignment for column cells."
+              }
+            }
+          }
+        },
+        "rows": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Row template or explicit row entries rendered per data record."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "caption", "columns", "rows"]
+    },
+    "Toast": {
+      "description": "Displays a transient notification triggered by an action rather than static layout.\nUse: Confirming an action the user just took. Bind `open`; the host sets it true in reply to the action, and dismissal writes false.\nAvoid: Messages that must stay (Alert) or decisions before continuing (Modal).\nExamples: Draft saved, `open` bound to a data path; Message deleted, `actionLabel: Undo`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Toast"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Primary notification heading."
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Optional supporting detail."
+        },
+        "tone": {
+          "type": "string",
+          "enum": ["accent", "neutral", "warning", "danger"],
+          "default": "neutral",
+          "description": "Semantic palette intent."
+        },
+        "announce": {
+          "type": "string",
+          "enum": ["off", "polite", "assertive"],
+          "default": "polite",
+          "description": "Live-region urgency for screen readers."
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 30000,
+          "description": "Auto-dismiss timeout in milliseconds."
+        },
+        "actionLabel": {
+          "type": "string",
+          "description": "Optional label for a single follow-up button inside the toast."
+        },
+        "open": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean",
+          "description": "Shows the toast while true; dismissal writes false."
+        },
+        "action": {
+          "$ref": "common_types.json#/$defs/Action",
+          "description": "Optional outbound action triggered by the toast follow-up button."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "title", "open"]
     }
   },
   "functions": {
@@ -1573,6 +1906,24 @@
         },
         {
           "$ref": "#/components/Stage"
+        },
+        {
+          "$ref": "#/components/Alert"
+        },
+        {
+          "$ref": "#/components/Badge"
+        },
+        {
+          "$ref": "#/components/Progress"
+        },
+        {
+          "$ref": "#/components/Accordion"
+        },
+        {
+          "$ref": "#/components/Table"
+        },
+        {
+          "$ref": "#/components/Toast"
         }
       ],
       "discriminator": {

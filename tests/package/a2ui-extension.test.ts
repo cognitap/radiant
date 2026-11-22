@@ -309,7 +309,10 @@ test('the host catalog document carries the app entry with generated schema and 
     assert.ok(lines.includes(line), `instructions keep ${line}`)
   }
   assert.equal(new Set(lines).size, lines.length, 'instructions repeat no rule')
-  assert.ok(!radiantA2uiExtensionRegistry.instructions!.includes(tone), 'tone comes from Gauge')
+  assert.ok(
+    radiantA2uiExtensionRegistry.instructions!.includes(tone),
+    'feedback entries bring tone, so Gauge adds no second copy'
+  )
   assert.ok(
     (document.$defs.anyComponent as { oneOf: { $ref: string }[] }).oneOf.some(
       ref => ref.$ref === '#/components/Gauge'

@@ -57,7 +57,12 @@ import {
 import { a2uiWebCoreCatalogs, type A2uiRegistry, type A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import { useSignalValue } from './useSignalValue.js'
-import { A2uiLabelsContext, type A2uiSurfaceLabels } from './surfaceContext.js'
+import { ToastProvider, ToastViewport } from '../components/Toast/Toast.js'
+import {
+  A2uiLabelsContext,
+  A2uiToastHostContext,
+  type A2uiSurfaceLabels
+} from './surfaceContext.js'
 import {
   animateNodeEntry,
   captureFocusSnapshot,
@@ -91,7 +96,7 @@ export type A2uiSurfaceProps = {
    * catalog or protocol errors (`kind: 'error'` with a `code`).
    */
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
-  /** Host-supplied text for controls the agent cannot describe, such as `modalClose`. */
+  /** Host-supplied text for controls the agent cannot describe; `notifications` gives Toast a viewport. */
   readonly labels?: A2uiSurfaceLabels
 }
 
@@ -777,7 +782,17 @@ export function A2uiSurface({
   )
   const waiting = !rootNode && phase !== 'closed'
   const modalClose = labels?.modalClose
-  const labelValue = useMemo(() => ({ modalClose }), [modalClose])
+  const toastClose = labels?.toastClose
+  const notifications = labels?.notifications?.trim()
+  const labelValue = useMemo(
+    () => ({ modalClose, notifications, toastClose }),
+    [modalClose, notifications, toastClose]
+  )
+  const [toastViewport, setToastViewport] = useState<HTMLElement | null>(null)
+  const toastHost = useMemo(
+    () => ({ available: Boolean(notifications), element: toastViewport }),
+    [notifications, toastViewport]
+  )
 
   return (
     <div
@@ -790,13 +805,31 @@ export function A2uiSurface({
     >
       {rootNode ? (
         <A2uiLabelsContext.Provider value={labelValue}>
-          <A2uiNodeRenderer
-            node={rootNode}
-            registry={registry}
-            inline={false}
-            onDiagnostic={store.reportDiagnostic}
-            runtime={runtime}
-          />
+          <A2uiToastHostContext.Provider value={toastHost}>
+            {notifications ? (
+              <ToastProvider>
+                <A2uiNodeRenderer
+                  node={rootNode}
+                  registry={registry}
+                  inline={false}
+                  onDiagnostic={store.reportDiagnostic}
+                  runtime={runtime}
+                />
+                <ToastViewport
+                  ref={setToastViewport}
+                  aria-label={notifications}
+                />
+              </ToastProvider>
+            ) : (
+              <A2uiNodeRenderer
+                node={rootNode}
+                registry={registry}
+                inline={false}
+                onDiagnostic={store.reportDiagnostic}
+                runtime={runtime}
+              />
+            )}
+          </A2uiToastHostContext.Provider>
         </A2uiLabelsContext.Provider>
       ) : waiting ? (
         <A2uiPlaceholder
