@@ -45,6 +45,7 @@ import {
   radioGroupFixtureMessages,
   selectFixtureMessages,
   sortableListFixtureMessages,
+  dragAndDropFixtureMessages,
   switchFixtureMessages,
   textareaFixtureMessages
 } from '../../src/a2ui/extensionFixtures.js'
@@ -126,6 +127,7 @@ const PROJECTIONS: Readonly<Record<string, readonly string[]>> = {
   AnnotatedText: ['AnnotatedText'],
   Matrix: ['Matrix'],
   SortableList: ['SortableList'],
+  DragAndDrop: ['DragAndDrop'],
   RegionStage: ['RegionStage'],
   RelationGraph: ['RelationGraph']
 }
@@ -354,6 +356,7 @@ const fixtures: Record<string, readonly A2uiMessage[]> = {
   'Compare fixture': compareFixtureMessages,
   'Reveal fixture': revealFixtureMessages,
   'SortableList fixture': sortableListFixtureMessages,
+  'DragAndDrop fixture': dragAndDropFixtureMessages,
   'Icon fixture': iconFixtureMessages,
   'Image fixture': imageFixtureMessages,
   'Video fixture': videoFixtureMessages,

@@ -51,6 +51,22 @@ export type A2uiSurfaceLabels = {
   readonly sortableCancel?: A2uiSortableText
   /** Optional name for each SortableList handle, such as `Move {item}`; the item text by default. */
   readonly sortableHandle?: string | ((item: string) => string)
+  /** Describes each DragAndDrop handle: how to pick up, move, drop and cancel by keyboard. */
+  readonly dragDropInstructions?: string
+  /**
+   * DragAndDrop announcements, such as `Moved {item} from {from} to {to}` with container names and
+   * `{position}` (from 1) and `{count}` in `{to}`, or functions of the move. Without the first
+   * five, or without `dragDropFull` when a container sets `capacity`, a DragAndDrop shows its
+   * containers without moving and reports a `defaulted` diagnostic.
+   */
+  readonly dragDropPickUp?: A2uiDragDropText
+  readonly dragDropMove?: A2uiDragDropText
+  readonly dragDropDrop?: A2uiDragDropText
+  readonly dragDropCancel?: A2uiDragDropText
+  /** Why a full container refuses an item, such as `{to} is full`. */
+  readonly dragDropFull?: A2uiDragDropText
+  /** Optional name for each DragAndDrop handle, such as `Move {item}`; the item text by default. */
+  readonly dragDropHandle?: string | ((item: string) => string)
   /** Name of each AudioPlayer's toggle while paused. */
   readonly audioPlay?: string
   /** Name of each AudioPlayer's toggle while playing. */
@@ -80,6 +96,11 @@ export type A2uiSurfaceLabels = {
   /** What a RelationGraph node announces for an edge from another node, such as `from {node}`. */
   readonly relationIncoming?: string | ((node: string, label?: string) => string)
 }
+
+/** A DragAndDrop announcement template or function; keep a function's identity stable. */
+export type A2uiDragDropText =
+  | string
+  | ((move: { item: string; from: string; to: string; index: number; count: number }) => string)
 
 /** A SortableList announcement template or function; keep a function's identity stable. */
 export type A2uiSortableText = string | ((item: string, index: number, count: number) => string)

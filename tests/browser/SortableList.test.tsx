@@ -200,6 +200,20 @@ test('items that stream in join the end of the order', async () => {
   ).toEqual(['corn', 'rice', 'beans', 'squash'])
 })
 
+test('a reorder keeps values whose items have not streamed in yet', async () => {
+  const change = vi.fn()
+  const { host } = await mount(
+    <List
+      defaultValue={['corn', 'squash', 'rice']}
+      only={['rice', 'corn']}
+      onValueChange={change}
+    />
+  )
+  await act(async () => handle(host, 'Rice').focus())
+  await key(' {Home} ')
+  expect(change).toHaveBeenCalledExactlyOnceWith(['rice', 'corn', 'squash'])
+})
+
 test('pointer and touch drags drop at the pointer and cancel restores', async () => {
   const change = vi.fn()
   const { host } = await mount(

@@ -34,6 +34,13 @@ const labels = {
   sortableMove: '{item}, position {position} of {count}.',
   sortableDrop: 'Dropped {item} at position {position} of {count}.',
   sortableCancel: 'Cancelled. {item} is back at position {position} of {count}.',
+  dragDropInstructions:
+    'Press Space to pick up. Left and Right change folder, Up and Down move, Space drops and Escape cancels.',
+  dragDropPickUp: 'Picked up {item} in {from}.',
+  dragDropMove: '{item}, {to}, position {position} of {count}.',
+  dragDropDrop: 'Moved {item} from {from} to {to}.',
+  dragDropCancel: 'Cancelled. {item} is back in {to}.',
+  dragDropFull: '{to} is full.',
   audioPlay: 'Play',
   audioPause: 'Pause',
   audioSeek: 'Seek',

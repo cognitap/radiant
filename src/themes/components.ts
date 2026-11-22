@@ -749,6 +749,22 @@ export const componentRegistry = {
     labelSize: 'css',
     spanRadius: 'css'
   },
+  dragAndDrop: {
+    containerRadius: 'css',
+    containerPadding: 'css',
+    containerBorderWidth: 'css',
+    containerBorderColor: 'css',
+    containerBackground: 'css',
+    labelWeight: 'weight',
+    itemRadius: 'css',
+    itemBackground: 'css',
+    itemBorderColor: 'css',
+    handleColor: 'css',
+    markerColor: 'css',
+    targetBorderColor: 'css',
+    fullBorderColor: 'css',
+    fullColor: 'css'
+  },
   regionStage: {
     gap: 'css',
     radius: 'css',

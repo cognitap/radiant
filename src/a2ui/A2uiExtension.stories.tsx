@@ -3,6 +3,7 @@ import { expect, within } from 'storybook/test'
 import { A2uiSurface } from './A2uiSurface.js'
 import {
   comboboxFixtureMessages,
+  dragAndDropFixtureMessages,
   EXTENSION_SURFACE_ID,
   radioGroupFixtureMessages,
   selectFixtureMessages,
@@ -174,5 +175,28 @@ export const RelationGraph: Story = {
     const canvas = within(canvasElement)
     await expect(await canvas.findByRole('group', { name: 'Release pipeline' })).toBeVisible()
     await expect(canvas.getByRole('listitem', { name: 'Deploy' })).toBeVisible()
+  }
+}
+
+export const DragAndDrop: Story = {
+  args: {
+    messages: dragAndDropFixtureMessages,
+    labels: {
+      dragDropInstructions:
+        'Press Space to pick up. Left and Right change folder, Up and Down move, Space drops and Escape cancels.',
+      dragDropPickUp: 'Picked up {item} in {from}.',
+      dragDropMove: '{item}, {to}, position {position} of {count}.',
+      dragDropDrop: 'Moved {item} from {from} to {to}.',
+      dragDropCancel: 'Cancelled. {item} is back in {to}.',
+      dragDropFull: '{to} is full.'
+    }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByRole('group', { name: 'Work' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Invoice.pdf' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    )
   }
 }

@@ -97,7 +97,13 @@ export type CatalogSlotConstraint = {
   readonly childProps?: Readonly<Record<string, CatalogJsonSchema>>
 }
 
-export type CatalogBindingValueType = 'string' | 'number' | 'boolean' | 'string[]' | 'object[]'
+export type CatalogBindingValueType =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'string[]'
+  | 'object'
+  | 'object[]'
 export type CatalogBindingDirection = 'read' | 'two-way'
 
 export type CatalogStateBinding = {

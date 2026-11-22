@@ -1780,6 +1780,75 @@ export const radiantCatalog: Catalog = defineCatalog({
         }
       },
       actions: {}
+    },
+
+    DragAndDrop: {
+      name: 'DragAndDrop',
+      category: 'input',
+      description:
+        'Named containers the user moves items between by dragging, tapping or the keyboard; where each item sits is the value.',
+      guidance: {
+        whenToUse:
+          'The user sorts known `items` into a few named `containers`, such as tasks by status; `capacity` caps a container.',
+        whenNotToUse: 'Ordering one list (SortableList) or picking some items (Choice).',
+        examples: [
+          'tasks in To do, Doing and Done, Doing with `capacity: 3`',
+          'files sorted into folders, value bound to a data path'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'containers', 'items'],
+        properties: {
+          label: { type: 'string', minLength: 1, description: 'Visible label of the whole set.' },
+          description: { type: 'string', description: 'Optional helper text.' },
+          containers: {
+            type: 'array',
+            minItems: 1,
+            description: 'Containers in reading order; items not in the value start in the first.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['value', 'label'],
+              properties: {
+                value: { type: 'string', minLength: 1, description: 'Stable container value.' },
+                label: { type: 'string', minLength: 1, description: 'Visible container name.' },
+                capacity: {
+                  type: 'integer',
+                  minimum: 0,
+                  description: 'Most items the user may move in.'
+                }
+              }
+            }
+          },
+          items: {
+            type: 'array',
+            minItems: 1,
+            description: 'Movable items; the bound value places them.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['value', 'label'],
+              properties: {
+                value: { type: 'string', minLength: 1, description: 'Stable item value.' },
+                label: { type: 'string', minLength: 1, description: 'Visible item text.' }
+              }
+            }
+          },
+          disabled: { type: 'boolean', default: false, description: 'Prevents moving.' },
+          controlSize: controlSizeSchema
+        }
+      },
+      slots: {},
+      bindings: {
+        value: {
+          description: 'Item values by container value, in order, bound to surface state.',
+          valueType: 'object',
+          direction: 'two-way'
+        }
+      },
+      actions: {}
     }
   }
 })

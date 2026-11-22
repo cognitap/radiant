@@ -122,6 +122,18 @@ const seeds: Record<string, Seed> = {
     root: { label: 'Drinks by preference', items: options, value: { '@path': '/value' } },
     dataModel: { value: ['coffee', 'tea', 'water'] }
   },
+  DragAndDrop: {
+    root: {
+      label: 'Sort drinks',
+      containers: [
+        { value: 'hot', label: 'Hot' },
+        { value: 'cold', label: 'Cold', capacity: 2 }
+      ],
+      items: options,
+      value: { '@path': '/value' }
+    },
+    dataModel: { value: { hot: ['coffee', 'tea'], cold: ['water'] } }
+  },
   Slider: {
     root: { label: 'Volume', value: { '@path': '/value' }, max: 10 },
     dataModel: { value: 4 }

@@ -699,6 +699,12 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
     bindable: ['items'],
     requireBindings: true
   },
+  {
+    a2uiName: 'DragAndDrop',
+    sourceEntry: 'DragAndDrop',
+    bindable: ['items'],
+    requireBindings: true
+  },
   { a2uiName: 'RegionStage', sourceEntry: 'RegionStage' },
   { a2uiName: 'RelationGraph', sourceEntry: 'RelationGraph' }
 ]
@@ -730,6 +736,7 @@ const DYNAMIC_REF_BY_BINDING_TYPE: Record<CatalogBindingValueType, string> = {
   number: `${COMMON}DynamicNumber`,
   boolean: `${COMMON}DynamicBoolean`,
   'string[]': `${COMMON}DynamicStringList`,
+  object: `${COMMON}DynamicValue`,
   'object[]': `${COMMON}DynamicValue`
 }
 
