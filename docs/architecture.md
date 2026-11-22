@@ -53,7 +53,7 @@ For click and keydown, `composeAction` checks disabled and pending first, then c
 
 ## Forms
 
-`Field` gives Radiant controls label and description IDs, `disabled`, and `required` through context; plain HTML controls receive `children(controlProps)`. A group renders a `<fieldset>` and puts `aria-invalid`, help, and error on each control.
+`Field` gives Radiant controls label and description IDs, `disabled`, and `required` through context; plain HTML controls receive `children(controlProps)`. A group's `<fieldset>` keeps help; its controls get `aria-invalid` and the error.
 
 Custom controls submit through a native form element:
 

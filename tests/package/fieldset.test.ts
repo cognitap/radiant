@@ -29,7 +29,7 @@ test('Fieldset composes Field with a native legend and group-owned descriptions 
   assert.match(html, /<legend[^>]*class="[^"]*italic/)
   assert.match(html, />Shipping address<\/legend>/)
   assert.match(html, /aria-describedby="[^"]*-description [^"]*-error external"/)
-  assert.doesNotMatch(html, /aria-invalid/)
+  assert.match(html, /aria-invalid="true"/)
   assert.match(html, /role="alert"/)
   assert.match(html, /<label[^>]*for="[^"]+"[^>]*>Street<\/label>/)
   assert.match(html, /<input[^>]*disabled=""/)

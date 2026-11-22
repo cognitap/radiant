@@ -1,10 +1,11 @@
 'use client'
 
-import { createContext, useCallback, useContext, useId, useLayoutEffect, useState } from 'react'
+import { createContext, useContext, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { ComponentProps, ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
+import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { PartStyle } from '../../presentation.js'
 
@@ -108,16 +109,20 @@ type FieldGroup = FieldOwn &
 export type FieldProps = FieldControl | FieldGroup
 
 const FieldContext = createContext<FieldState | null>(null)
-// A group Field counts the controls that carry its relationships, so its fieldset drops them.
-const GroupMemberContext = createContext<(() => () => void) | null>(null)
+// Set by families whose group Field renders every control itself, so server markup is final.
+const OwnedControlsContext = createContext(false)
 
 /** Private boundary for non-form composites nested inside a Field. */
 export function WithoutField({ children }: { children?: ReactNode }) {
-  return (
-    <FieldContext.Provider value={null}>
-      <GroupMemberContext.Provider value={null}>{children}</GroupMemberContext.Provider>
-    </FieldContext.Provider>
-  )
+  return <FieldContext.Provider value={null}>{children}</FieldContext.Provider>
+}
+
+/**
+ * Private: wrap a group Field whose own controls all carry its invalid state and error, so its
+ * fieldset keeps only help. Pass false while the group renders no control.
+ */
+export function OwnedControls({ owns, children }: { owns: boolean; children?: ReactNode }) {
+  return <OwnedControlsContext.Provider value={owns}>{children}</OwnedControlsContext.Provider>
 }
 
 /** Nearest Field metadata, or null. Groups have no single target: controlProps is null. */
@@ -126,19 +131,34 @@ export function useField(): FieldState | null {
 }
 
 /**
- * Private: a control directly inside a group Field carries the group's invalid state, help
- * and error, since ARIA groups support no aria-invalid and readers announce their
- * descriptions inconsistently.
+ * Private: a control directly inside an invalid group Field carries the invalid state and
+ * error, since ARIA groups support no aria-invalid. Help stays on the fieldset.
  */
 export function useFieldGroupControl() {
   const field = useField()
-  const register = useContext(GroupMemberContext)
-  useLayoutEffect(() => register?.(), [register])
-  const group = field?.layout === 'group' ? field : null
+  const invalid = field?.layout === 'group' && field.invalid
   return {
-    'aria-invalid': group?.invalid || undefined,
-    'aria-describedby': group?.describedBy
+    'aria-invalid': invalid || undefined,
+    'aria-describedby': invalid ? field.errorId : undefined
   }
+}
+
+const focusable =
+  'input:not([type=hidden]),select,textarea,button,[contenteditable],[tabindex]:not([tabindex="-1"])'
+
+/** Whether every focusable control in a generic group already carries its error. */
+function coversGroup(root: HTMLElement, errorId: string | undefined) {
+  const controls = [...root.querySelectorAll<HTMLElement>(focusable)].filter(
+    node => node.tabIndex >= 0 && !node.closest('[aria-hidden=true],legend')
+  )
+  return (
+    controls.length > 0 &&
+    controls.every(
+      node =>
+        node.getAttribute('aria-invalid') === 'true' &&
+        (!errorId || !!node.getAttribute('aria-describedby')?.split(' ').includes(errorId))
+    )
+  )
 }
 
 /** Private native-control adapter; Field keeps its owned relationships. */
@@ -208,11 +228,10 @@ export function Field(props: FieldProps) {
   const hasError = hasContent(error)
   const invalid =
     hasError || (ariaInvalid != null && ariaInvalid !== false && ariaInvalid !== 'false')
-  const [members, setMembers] = useState(0)
-  const register = useCallback(() => {
-    setMembers(count => count + 1)
-    return () => setMembers(count => count - 1)
-  }, [])
+  const owns = useContext(OwnedControlsContext)
+  const groupNode = useRef<HTMLFieldSetElement>(null)
+  const groupRef = useComposedRefs(groupNode, rest.layout === 'group' ? rest.ref : undefined)
+  const [covered, setCovered] = useState(false)
   const descriptionId = hasContent(description) ? `${generatedId}-description` : undefined
   const errorId = hasError ? `${generatedId}-error` : undefined
   const describedBy = joinIds(descriptionId, errorId)
@@ -252,9 +271,31 @@ export function Field(props: FieldProps) {
       {requiredIndicator}
     </span>
   )
+  // A generic group keeps its invalid state and error until every control it holds carries them.
+  useLayoutEffect(() => {
+    const node = groupNode.current
+    if (layout !== 'group' || owns || !node || !invalid) {
+      setCovered(false)
+      return
+    }
+    const check = () => setCovered(coversGroup(node, errorId))
+    check()
+    const observer = new MutationObserver(check)
+    observer.observe(node, {
+      subtree: true,
+      childList: true,
+      attributeFilter: ['aria-invalid', 'aria-describedby', 'aria-hidden', 'tabindex']
+    })
+    return () => observer.disconnect()
+  }, [layout, owns, invalid, errorId])
+  const controlsCarryError = owns || covered
   const rootProps = {
     'aria-describedby':
-      layout === 'group' ? joinIds(members ? undefined : describedBy, ariaDescribedBy) : undefined,
+      layout === 'group'
+        ? joinIds(descriptionId, controlsCarryError ? undefined : errorId, ariaDescribedBy)
+        : undefined,
+    'aria-invalid':
+      layout === 'group' && invalid && !controlsCarryError ? hasError || ariaInvalid : undefined,
     className: cn(fieldVariants({ layout }), className),
     'data-disabled': disabled ? '' : undefined,
     'data-invalid': invalid ? '' : undefined,
@@ -322,6 +363,7 @@ export function Field(props: FieldProps) {
       <fieldset
         {...nativeProps}
         {...rootProps}
+        ref={groupRef}
         disabled={disabled || undefined}
       >
         {body}
@@ -340,9 +382,7 @@ export function Field(props: FieldProps) {
   }
   return (
     <FieldContext.Provider value={state}>
-      <GroupMemberContext.Provider value={layout === 'group' ? register : null}>
-        {root}
-      </GroupMemberContext.Provider>
+      <OwnedControlsContext.Provider value={false}>{root}</OwnedControlsContext.Provider>
     </FieldContext.Provider>
   )
 }

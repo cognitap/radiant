@@ -11,7 +11,7 @@ import {
   type ReactNode
 } from 'react'
 import { Checkbox, type CheckboxProps } from '../Checkbox/Checkbox.js'
-import { Field, type FieldProps } from '../Field/Field.js'
+import { Field, OwnedControls, type FieldProps } from '../Field/Field.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from '../../react/useNativeOwner.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { cn } from 'cn'
@@ -209,78 +209,80 @@ export function CheckboxGroup({
     }
   }
   return (
-    <Field
-      {...{ ...props, role: undefined }}
-      layout="group"
-      required={required}
-      form={form}
-      ref={hostRef}
-      data-slot={joinIds('checkbox-group', props['data-slot'])}
-      className={cn(
-        'max-w-full [gap:var(--rad-fieldset-gap,var(--rad-spacing-group-gap,0.75rem))]',
-        className
-      )}
-      parts={{
-        ...fieldParts,
-        label: { ...fieldParts.label, className: cn('max-w-full', fieldParts.label?.className) }
-      }}
-      data-control-size={controlSize}
-    >
-      {selectAll ? (
-        <Checkbox
-          {...selectAll}
-          {...nativeOption}
-          name={undefined}
-          value={undefined}
-          ref={allRef}
-          form={form}
-          controlSize={selectAll.controlSize ?? controlSize}
-          disabled={selectAll.disabled || aggregate.empty}
-          checked={aggregate.all}
-          indeterminate={aggregate.mixed}
-          aria-checked={aggregate.mixed ? 'mixed' : aggregate.all}
-          aria-controls={joinIds(ids.join(' '), selectAll['aria-controls'])}
-          onChange={changeAll}
-        />
-      ) : null}
-      <div
-        data-slot="checkbox-group-options"
-        style={optionsPart?.style}
+    <OwnedControls owns={items.length > 0 || !!selectAll}>
+      <Field
+        {...{ ...props, role: undefined }}
+        layout="group"
+        required={required}
+        form={form}
+        ref={hostRef}
+        data-slot={joinIds('checkbox-group', props['data-slot'])}
         className={cn(
-          'grid min-w-0 justify-items-start gap-[var(--rad-checkbox-group-gap,var(--rad-spacing-group-gap,0.75rem))]',
-          optionsPart?.className
+          'max-w-full [gap:var(--rad-fieldset-gap,var(--rad-spacing-group-gap,0.75rem))]',
+          className
         )}
+        parts={{
+          ...fieldParts,
+          label: { ...fieldParts.label, className: cn('max-w-full', fieldParts.label?.className) }
+        }}
+        data-control-size={controlSize}
       >
-        {items.map((item, index) => (
-          <Option
-            key={item.value}
-            item={item}
-            id={ids[index]!}
-            name={name}
+        {selectAll ? (
+          <Checkbox
+            {...selectAll}
+            {...nativeOption}
+            name={undefined}
+            value={undefined}
+            ref={allRef}
             form={form}
-            controlSize={controlSize}
-            register={register}
-            owner={
-              controlled
-                ? { checked: current.includes(item.value) }
-                : { defaultChecked: initial.includes(item.value) }
-            }
-            onChange={event => {
-              if (event.currentTarget.matches(':disabled')) {
-                event.currentTarget.checked = current.includes(item.value)
-                return
-              }
-              if (controlled) {
-                const next = new Set(current)
-                if (event.currentTarget.checked) next.add(item.value)
-                else next.delete(item.value)
-                request([...next])
-              }
-            }}
+            controlSize={selectAll.controlSize ?? controlSize}
+            disabled={selectAll.disabled || aggregate.empty}
+            checked={aggregate.all}
+            indeterminate={aggregate.mixed}
+            aria-checked={aggregate.mixed ? 'mixed' : aggregate.all}
+            aria-controls={joinIds(ids.join(' '), selectAll['aria-controls'])}
+            onChange={changeAll}
           />
-        ))}
-      </div>
-    </Field>
+        ) : null}
+        <div
+          data-slot="checkbox-group-options"
+          style={optionsPart?.style}
+          className={cn(
+            'grid min-w-0 justify-items-start gap-[var(--rad-checkbox-group-gap,var(--rad-spacing-group-gap,0.75rem))]',
+            optionsPart?.className
+          )}
+        >
+          {items.map((item, index) => (
+            <Option
+              key={item.value}
+              item={item}
+              id={ids[index]!}
+              name={name}
+              form={form}
+              controlSize={controlSize}
+              register={register}
+              owner={
+                controlled
+                  ? { checked: current.includes(item.value) }
+                  : { defaultChecked: initial.includes(item.value) }
+              }
+              onChange={event => {
+                if (event.currentTarget.matches(':disabled')) {
+                  event.currentTarget.checked = current.includes(item.value)
+                  return
+                }
+                if (controlled) {
+                  const next = new Set(current)
+                  if (event.currentTarget.checked) next.add(item.value)
+                  else next.delete(item.value)
+                  request([...next])
+                }
+              }}
+            />
+          ))}
+        </div>
+      </Field>
+    </OwnedControls>
   )
 }
 function Option({

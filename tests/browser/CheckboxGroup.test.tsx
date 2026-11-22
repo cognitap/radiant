@@ -48,11 +48,11 @@ test('native checkbox edits before hydration are adopted silently, with stable h
   expect(
     controlled.every(id => document.getElementById(id)?.matches('input[type="checkbox"]'))
   ).toBe(true)
-  expect(root.current!.hasAttribute('aria-describedby')).toBe(false)
+  expect(
+    document.getElementById(root.current!.getAttribute('aria-describedby')!)!.textContent
+  ).toBe('Choose delivery channels')
   for (const box of host.querySelectorAll('input'))
-    expect(document.getElementById(box.getAttribute('aria-describedby')!)!.textContent).toBe(
-      'Choose delivery channels'
-    )
+    expect(box.hasAttribute('aria-describedby')).toBe(false)
 })
 test('select all skips disabled options; native form values and immediate reset retain the original defaults', async () => {
   const changes: string[][] = []
@@ -290,7 +290,7 @@ test('an invalid group paints and marks each of its options invalid', async () =
   expect(parent.getAttribute('aria-invalid')).toBe('true')
   expect(host.querySelector('[value="valid"]')!.hasAttribute('aria-invalid')).toBe(false)
 })
-test('each option carries the group error and help with its own ids; the fieldset keeps only caller ids', async () => {
+test('each option carries the group error before its own ids; the fieldset keeps help and caller ids', async () => {
   const { host } = await mount(
     <>
       <p id="group-note">Group note</p>
@@ -313,11 +313,11 @@ test('each option carries the group error and help with its own ids; the fieldse
       .split(' ')
       .map(id => document.getElementById(id)!.textContent)
   expect(group.hasAttribute('aria-invalid')).toBe(false)
-  expect(group.getAttribute('aria-describedby')).toBe('group-note')
+  expect(text(group)).toEqual(['Pick any', 'Group note'])
   expect(email!.getAttribute('aria-invalid')).toBe('true')
   expect(sms!.getAttribute('aria-invalid')).toBe('true')
-  expect(text(email!)).toEqual(['Pick any', 'Choose a channel', 'Option note'])
-  expect(text(sms!)).toEqual(['Pick any', 'Choose a channel'])
+  expect(text(email!)).toEqual(['Choose a channel', 'Option note'])
+  expect(text(sms!)).toEqual(['Choose a channel'])
   expect(email!.validity.customError).toBe(true)
   expect(email!.required).toBe(false)
 })

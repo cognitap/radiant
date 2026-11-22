@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Children,
   createContext,
   useCallback,
   useContext,
@@ -16,7 +17,7 @@ import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from '../../react/useNativeOwner.js'
 import { controlBorderClass, controlMetrics, indicatorPressClass } from '../shared/controlStyles.js'
-import { Field, useFieldControl } from '../Field/Field.js'
+import { Field, OwnedControls, useFieldControl } from '../Field/Field.js'
 import type { FieldProps } from '../Field/Field.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize, ControlParts, PartStyle } from '../../presentation.js'
@@ -135,37 +136,39 @@ export function RadioGroup({
   const [initialDefault] = useState(defaultValue)
   const { options: optionsPart, ...fieldParts } = parts ?? {}
   return (
-    <Field
-      {...fieldProps}
-      data-slot={joinIds('radio-group', fieldProps['data-slot'])}
-      parts={fieldParts}
-      data-control-size={controlSize}
-      layout="group"
-      required={required}
-      form={form}
-    >
-      <RadioGroupContext.Provider
-        value={{
-          name: name ?? generatedName,
-          form,
-          value,
-          defaultValue: initialDefault,
-          controlled,
-          required,
-          controlSize,
-          onChange,
-          onValueChange
-        }}
+    <OwnedControls owns={Children.toArray(children).length > 0}>
+      <Field
+        {...fieldProps}
+        data-slot={joinIds('radio-group', fieldProps['data-slot'])}
+        parts={fieldParts}
+        data-control-size={controlSize}
+        layout="group"
+        required={required}
+        form={form}
       >
-        <div
-          className={cn(optionsClass, optionsPart?.className)}
-          style={optionsPart?.style}
-          data-slot="radio-group-options"
+        <RadioGroupContext.Provider
+          value={{
+            name: name ?? generatedName,
+            form,
+            value,
+            defaultValue: initialDefault,
+            controlled,
+            required,
+            controlSize,
+            onChange,
+            onValueChange
+          }}
         >
-          {children}
-        </div>
-      </RadioGroupContext.Provider>
-    </Field>
+          <div
+            className={cn(optionsClass, optionsPart?.className)}
+            style={optionsPart?.style}
+            data-slot="radio-group-options"
+          >
+            {children}
+          </div>
+        </RadioGroupContext.Provider>
+      </Field>
+    </OwnedControls>
   )
 }
 

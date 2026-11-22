@@ -103,4 +103,5 @@ test('an invalid picker marks each channel slider and links its error there, not
     expect(slider).toHaveAttribute('aria-invalid', 'true')
     expect(slider).toHaveAccessibleDescription('Pick a darker color')
   }
+  expect(host.querySelectorAll('[data-slot~="field"][data-invalid]')).toHaveLength(1)
 })

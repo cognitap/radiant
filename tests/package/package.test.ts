@@ -302,7 +302,7 @@ test('an empty error clears the invalid state', () => {
   const external = renderToStaticMarkup(
     createElement(Field, { layout: 'group', label: 'Plan', error: '', 'aria-invalid': 'grammar' })
   )
-  assert.doesNotMatch(external, /aria-invalid/)
+  assert.match(external, /aria-invalid="grammar"/)
   assert.match(external, /\sdata-invalid=""/)
 })
 
@@ -360,7 +360,7 @@ test('a group uses a fieldset and does not label each control', () => {
   assert.equal(ids.at(-1), 'hint')
   assert.match(html, /<legend\b/)
   assert.match(html, /\sdisabled=""/)
-  assert.doesNotMatch(html, /aria-invalid/)
+  assert.match(html, /aria-invalid="true"/)
   assert.doesNotMatch(html, /<fieldset\b[^>]*\saria-required=/)
   assert.match(html, /aria-describedby="[^"]+"/)
   assert.match(html, /\sdata-layout="group"/)
@@ -526,18 +526,22 @@ test('Field protects owned relationships across the native control families', ()
   }
 })
 
-test('an input inside a group carries the group invalid state, help, and error', () => {
-  const html = renderToStaticMarkup(
-    createElement(
-      Field,
-      { layout: 'group', label: 'Plan', description: 'Pick one', error: 'Required' },
-      createElement(Input, { name: 'plan' })
+test('an input inside a group leaves help on the fieldset and carries only an error', () => {
+  const field = (error?: string) =>
+    renderToStaticMarkup(
+      createElement(
+        Field,
+        { layout: 'group', label: 'Plan', description: 'Pick one', error },
+        createElement(Input, { name: 'plan' })
+      )
     )
-  )
-  assert.match(html, /^<fieldset\b/)
-  assert.doesNotMatch(html, /<fieldset\b[^>]*\saria-invalid=/)
-  assert.match(html, /<input\b[^>]*\saria-invalid="true"/)
-  assert.match(html, /<input\b[^>]*\saria-describedby="[^"]*-description [^"]*-error"/)
+  const valid = field()
+  assert.match(valid, /^<fieldset\b[^>]*\saria-describedby="[^"]*-description"/)
+  assert.doesNotMatch(valid, /<input\b[^>]*\saria-describedby=/)
+  assert.doesNotMatch(valid, /<input\b[^>]*\saria-invalid=/)
+  const invalid = field('Required')
+  assert.match(invalid, /<input\b[^>]*\saria-invalid="true"/)
+  assert.match(invalid, /<input\b[^>]*\saria-describedby="[^" ]*-error"/)
 })
 
 test('checkboxes preserve name, value, and checked state', () => {
@@ -570,8 +574,7 @@ test('checkboxes keep their own identity in a Field group', () => {
   )
   assert.match(group, /^<fieldset\b/)
   assert.match(group, /data-slot="checkbox-label"/)
-  assert.match(group, /<input\b[^>]*\saria-describedby="[^"]*-description"/)
-  assert.doesNotMatch(group, /<input\b[^>]*\saria-invalid=/)
+  assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
 })
 
 for (const [Control, slot] of [
@@ -659,7 +662,24 @@ test('a required RadioGroup keeps native option labels and validity', () => {
   assert.doesNotMatch(group, /<fieldset\b[^>]*\saria-required=/)
   assert.match(group, /data-slot="radio-label"/)
   assert.match(group, /<input\b[^>]*\srequired=""/)
-  assert.match(group, /<input\b[^>]*\saria-describedby="[^"]*-description"/)
+  assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
+  const invalid = renderToStaticMarkup(
+    createElement(
+      RadioGroup,
+      { label: 'Plan', description: 'Choose one', error: 'Pick a plan' },
+      createElement(Radio, { label: 'Pro', value: 'pro' })
+    )
+  )
+  // Final server markup: the radio, not the fieldset, carries the invalid state and error.
+  assert.match(invalid, /^<fieldset\b[^>]*\saria-describedby="[^" ]*-description"/)
+  assert.doesNotMatch(invalid, /<fieldset\b[^>]*\saria-invalid=/)
+  assert.match(invalid, /<input\b[^>]*\saria-invalid="true"/)
+  assert.match(invalid, /<input\b[^>]*\saria-describedby="[^" ]*-error"/)
+  const empty = renderToStaticMarkup(
+    createElement(RadioGroup, { label: 'Plan', error: 'No plans available' })
+  )
+  assert.match(empty, /^<fieldset\b[^>]*\saria-describedby="[^" ]*-error"/)
+  assert.match(empty, /^<fieldset\b[^>]*\saria-invalid="true"/)
 })
 
 test('a dialog stays closed in server markup and names itself from its title', () => {

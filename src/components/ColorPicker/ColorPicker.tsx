@@ -15,7 +15,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { Button } from '../Button/Button.js'
-import { Field, useFieldGroupControl, type FieldProps } from '../Field/Field.js'
+import { Field, OwnedControls, useFieldGroupControl, type FieldProps } from '../Field/Field.js'
 import { Slider } from '../Slider/Slider.js'
 import { ColorArea } from './ColorArea.js'
 
@@ -168,127 +168,141 @@ export function ColorPicker({
         key={control.key}
         label={strings[control.key]}
       >
-        <Slider
-          data-slot={`color-picker-${control.key}`}
-          controlSize={controlSize}
-          min={0}
-          max={control.max}
-          step={control.step}
-          value={control.value}
-          aria-valuetext={control.text}
-          onValueChange={next => commit({ ...color, [control.channel]: next })}
-          className={cn('min-w-0', 'track' in control && gradientClass, parts?.slider?.className)}
-          style={
-            {
-              ...('track' in control ? { '--_rad-picker-track': control.track } : {}),
-              ...parts?.slider?.style
-            } as ThemeStyle
-          }
-        />
+        {relations => (
+          <Slider
+            {...relations}
+            data-slot={`color-picker-${control.key}`}
+            controlSize={controlSize}
+            min={0}
+            max={control.max}
+            step={control.step}
+            value={control.value}
+            aria-valuetext={control.text}
+            onValueChange={next => commit({ ...color, [control.channel]: next })}
+            className={cn('min-w-0', 'track' in control && gradientClass, parts?.slider?.className)}
+            style={
+              {
+                ...('track' in control ? { '--_rad-picker-track': control.track } : {}),
+                ...parts?.slider?.style
+              } as ThemeStyle
+            }
+          />
+        )}
       </ChannelField>
     )
   }
 
   return (
-    <Field
-      {...props}
-      ref={hostRef}
-      layout="group"
-      disabled={disabled}
-      data-slot={joinIds('color-picker', slot)}
-      className={cn('w-full max-w-xs min-w-0 gap-y-3', className)}
-    >
-      <fieldset
-        aria-label={strings.area}
-        className="grid min-w-0 gap-2"
+    <OwnedControls owns>
+      <Field
+        {...props}
+        ref={hostRef}
+        layout="group"
+        disabled={disabled}
+        data-slot={joinIds('color-picker', slot)}
+        className={cn('w-full max-w-xs min-w-0 gap-y-3', className)}
       >
-        <ColorArea
-          color={color}
-          maxChroma={maxChroma}
-          disabled={disabled}
-          part={parts?.area}
-          onChange={commit}
-        />
-        <div className="grid min-w-0 grid-cols-2 gap-x-3">
-          {controls.slice(0, 2).map(renderControl)}
-        </div>
-      </fieldset>
-      <div className="grid min-w-0 grid-cols-2 gap-x-3">{controls.slice(2).map(renderControl)}</div>
-      {swatches?.length ? (
         <fieldset
-          aria-label={strings.swatches}
-          className="flex flex-wrap gap-1"
-          data-slot="color-picker-swatches"
+          aria-label={strings.area}
+          className="grid min-w-0 gap-2"
         >
-          {swatches.map(({ color: sample, label }, index) => {
-            const shade = parseColor(sample)
-            const swatchValue = shade ? formatColor(shade, format) : null
-            if (!shade) throw new TypeError('ColorPicker swatches must be valid colors.')
-            return (
-              <Button
-                key={index}
-                aria-label={label}
-                aria-pressed={swatchValue === serialized}
-                variant="outline"
-                tone="neutral"
-                controlSize="small"
-                iconOnly
-                data-slot="color-picker-swatch"
-                className={cn('px-1', parts?.swatch?.className)}
-                style={parts?.swatch?.style}
-                onClick={() => commit(shade)}
-              >
-                <span
-                  aria-hidden="true"
-                  className="size-5 rounded-[var(--rad-control-radius,0.25rem)] forced-color-adjust-none"
-                  style={{
-                    background: `linear-gradient(${formatColor(shade, 'oklch')},${formatColor(shade, 'oklch')}),${checker}`
-                  }}
-                />
-              </Button>
-            )
-          })}
+          <ColorArea
+            color={color}
+            maxChroma={maxChroma}
+            disabled={disabled}
+            part={parts?.area}
+            onChange={commit}
+          />
+          <div className="grid min-w-0 grid-cols-2 gap-x-3">
+            {controls.slice(0, 2).map(renderControl)}
+          </div>
         </fieldset>
-      ) : null}
-      <output
-        data-slot="color-picker-value"
-        className={cn(
-          'text-xs tabular-nums [color:var(--rad-color-muted-foreground)] [overflow-wrap:anywhere]',
-          parts?.output?.className
-        )}
-        style={parts?.output?.style}
-        aria-live="off"
-      >
-        {serialized}
-      </output>
-      {eye && (
-        <Button
-          variant="outline"
-          tone="neutral"
-          controlSize="small"
-          pending={sampling}
-          onClick={sample}
+        <div className="grid min-w-0 grid-cols-2 gap-x-3">
+          {controls.slice(2).map(renderControl)}
+        </div>
+        {swatches?.length ? (
+          <fieldset
+            aria-label={strings.swatches}
+            className="flex flex-wrap gap-1"
+            data-slot="color-picker-swatches"
+          >
+            {swatches.map(({ color: sample, label }, index) => {
+              const shade = parseColor(sample)
+              const swatchValue = shade ? formatColor(shade, format) : null
+              if (!shade) throw new TypeError('ColorPicker swatches must be valid colors.')
+              return (
+                <Button
+                  key={index}
+                  aria-label={label}
+                  aria-pressed={swatchValue === serialized}
+                  variant="outline"
+                  tone="neutral"
+                  controlSize="small"
+                  iconOnly
+                  data-slot="color-picker-swatch"
+                  className={cn('px-1', parts?.swatch?.className)}
+                  style={parts?.swatch?.style}
+                  onClick={() => commit(shade)}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="size-5 rounded-[var(--rad-control-radius,0.25rem)] forced-color-adjust-none"
+                    style={{
+                      background: `linear-gradient(${formatColor(shade, 'oklch')},${formatColor(shade, 'oklch')}),${checker}`
+                    }}
+                  />
+                </Button>
+              )
+            })}
+          </fieldset>
+        ) : null}
+        <output
+          data-slot="color-picker-value"
+          className={cn(
+            'text-xs tabular-nums [color:var(--rad-color-muted-foreground)] [overflow-wrap:anywhere]',
+            parts?.output?.className
+          )}
+          style={parts?.output?.style}
+          aria-live="off"
         >
-          {strings.eyedropper}
-        </Button>
-      )}
-      {error && (
-        <output className="text-sm [color:var(--rad-color-invalid)]">
-          {strings.samplingError}
+          {serialized}
         </output>
-      )}
-    </Field>
+        {eye && (
+          <Button
+            variant="outline"
+            tone="neutral"
+            controlSize="small"
+            pending={sampling}
+            onClick={sample}
+          >
+            {strings.eyedropper}
+          </Button>
+        )}
+        {error && (
+          <output className="text-sm [color:var(--rad-color-invalid)]">
+            {strings.samplingError}
+          </output>
+        )}
+      </Field>
+    </OwnedControls>
   )
 }
 
-function ChannelField({ label, children }: { label: string; children: ReactNode }) {
+// The group's invalid state reaches each slider, not the channel Field, so labels stay calm.
+function ChannelField({
+  label,
+  children
+}: {
+  label: string
+  children: (relations: ReturnType<typeof useFieldGroupControl>) => ReactNode
+}) {
+  const relations = useFieldGroupControl()
   return (
     <Field
-      {...useFieldGroupControl()}
       label={label}
       className="gap-y-0"
     >
-      {children}
+      {children(relations)}
     </Field>
   )
 }

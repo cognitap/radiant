@@ -192,7 +192,7 @@ test('only an invalid group paints and marks its radios invalid', async () => {
   expect(host.querySelector('[value="valid"]')!.hasAttribute('aria-invalid')).toBe(false)
 })
 
-test('each radio carries the group error and help with its own ids; the fieldset keeps only caller ids', async () => {
+test('each radio carries the group error before its own ids; the fieldset keeps help and caller ids', async () => {
   const host = await mount(
     <form>
       <p id="group-note">Group note</p>
@@ -235,12 +235,37 @@ test('each radio carries the group error and help with its own ids; the fieldset
       .split(' ')
       .map(id => document.getElementById(id)!.textContent)
   expect(group!.hasAttribute('aria-invalid')).toBe(false)
-  expect(group!.getAttribute('aria-describedby')).toBe('group-note')
+  expect(text(group!)).toEqual(['Billed monthly', 'Group note'])
   for (const radio of [pro, free, marked]) expect(radio!.getAttribute('aria-invalid')).toBe('true')
-  expect(text(pro!)).toEqual(['Billed monthly', 'Choose a plan', 'For teams', 'Option note'])
-  expect(text(free!)).toEqual(['Billed monthly', 'Choose a plan'])
+  expect(text(pro!)).toEqual(['Choose a plan', 'For teams', 'Option note'])
+  expect(text(free!)).toEqual(['Choose a plan'])
   expect(marked!.hasAttribute('aria-describedby')).toBe(false)
   expect(pro!.required && free!.required).toBe(true)
   expect(pro!.validity.valueMissing).toBe(true)
   expect(host.querySelector('form')!.checkValidity()).toBe(false)
+})
+
+test('a valid group keeps help on the fieldset; an empty invalid group keeps its error there', async () => {
+  const host = await mount(
+    <>
+      <RadioGroup
+        label="Plan"
+        description="Billed monthly"
+      >
+        <Radio
+          label="Pro"
+          value="pro"
+        />
+      </RadioGroup>
+      <RadioGroup
+        label="Empty"
+        error="No plans available"
+      />
+    </>
+  )
+  const [valid, empty] = host.querySelectorAll('fieldset')
+  expect(valid).toHaveAccessibleDescription('Billed monthly')
+  expect(host.querySelector('input')!.hasAttribute('aria-describedby')).toBe(false)
+  expect(empty!.getAttribute('aria-invalid')).toBe('true')
+  expect(empty).toHaveAccessibleDescription('No plans available')
 })

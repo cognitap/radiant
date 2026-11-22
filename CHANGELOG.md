@@ -4,7 +4,7 @@
 
 ## Unreleased
 
-- A grouped `Field` (`RadioGroup`, `CheckboxGroup`, `Rating`, `ColorPicker`, `Fieldset`, and A2UI `ChoicePicker`, chips included) puts `aria-invalid` and its description and error on each control inside instead of the `<fieldset>`, so screen readers announce the error on focus. A caller `aria-invalid` on the group now marks its controls too, and caller `aria-describedby` stays on the fieldset.
+- An invalid grouped `Field` (`RadioGroup`, `CheckboxGroup`, `Rating`, `ColorPicker`, `Fieldset`, and A2UI `ChoicePicker`, chips included) puts `aria-invalid` and its error on each control inside, so screen readers announce the error on focus; the `<fieldset>` keeps its description and caller `aria-describedby`, and keeps `aria-invalid` and the error only while some control inside lacks them, such as one in a nested `Field`. A plain `Input`, `Select`, or other Radiant control placed directly in a group now turns invalid and reads the group error. A caller `aria-invalid` on a group now also marks its controls and paints it invalid.
 
 ## 0.0.96
 
