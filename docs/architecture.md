@@ -53,7 +53,7 @@ For click and keydown, `composeAction` checks disabled and pending first, then c
 
 ## Forms
 
-`Field` provides label and description IDs, passes `disabled` and `required` down, and renders a `<fieldset>` for control groups. Radiant controls read it from context. Plain HTML controls receive `children(controlProps)`.
+`Field` gives Radiant controls label and description IDs, `disabled`, and `required` through context; plain HTML controls receive `children(controlProps)`. A group renders a `<fieldset>` and puts `aria-invalid`, help, and error on each control.
 
 Custom controls submit through a native form element:
 
@@ -66,7 +66,7 @@ Custom controls submit through a native form element:
 | `NumberField`              | Raw number, separate from the localized display   |
 | `OTPField`                 | Whole code, from one input                        |
 
-`Form` runs native validation and async submission. The application owns values, rules, messages, and persistence. Reset restores uncontrolled controls, clears form errors, and aborts a pending submission. Widget state such as the active tab is not form state and survives reset.
+`Form` runs native validation and async submission. The application owns values, rules, messages, and persistence. Reset restores uncontrolled controls, clears form errors, and aborts a pending submission. Widget state, such as the active tab, survives reset.
 
 ## Localization
 

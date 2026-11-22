@@ -54,3 +54,19 @@ test('RTL renders in inline direction and a read-only rating exposes only score 
   expect(groups[1].querySelector('input')).toBeNull()
   expect(groups[1].querySelector('.sr-only')).toHaveTextContent('4 out of 5')
 })
+
+test('an invalid rating marks every radio and describes it with the error', async () => {
+  const { host } = await mount(
+    <Rating
+      label="Delivery"
+      max={3}
+      error="Rate the delivery"
+    />
+  )
+  const radios = [...host.querySelectorAll('input')]
+  expect(host.querySelector('fieldset')!.hasAttribute('aria-invalid')).toBe(false)
+  for (const radio of radios) {
+    expect(radio).toHaveAttribute('aria-invalid', 'true')
+    expect(radio).toHaveAccessibleDescription('Rate the delivery')
+  }
+})

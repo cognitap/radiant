@@ -212,6 +212,69 @@ test('failed checks show their message as a Field error referenced by the invali
   }
 })
 
+test('every ChoicePicker style puts the invalid state and error on each option, not the group', async () => {
+  const picker = (id: string, extra: Record<string, unknown>) => ({
+    id,
+    component: 'ChoicePicker',
+    label: id,
+    options: [
+      { label: 'Economy', value: 'economy' },
+      { label: 'Business', value: 'business' }
+    ],
+    value: [],
+    checks: [{ condition: { '@path': '/ok' }, message: `${id} is required.` }],
+    ...extra
+  })
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="s_choice"
+      messages={[
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          createSurface: {
+            surfaceId: 's_choice',
+            catalogId: A2UI_BASIC_CATALOG_ID,
+            dataModel: { ok: false },
+            components: [
+              {
+                id: 'root',
+                component: 'Column',
+                children: ['Single', 'Multiple', 'SingleChips', 'MultipleChips']
+              },
+              picker('Single', { variant: 'mutuallyExclusive' }),
+              picker('Multiple', { variant: 'multipleSelection' }),
+              picker('SingleChips', { variant: 'mutuallyExclusive', displayStyle: 'chips' }),
+              picker('MultipleChips', {
+                variant: 'multipleSelection',
+                displayStyle: 'chips',
+                filterable: true
+              })
+            ]
+          }
+        }
+      ]}
+    />
+  )
+  const groups = [...host.querySelectorAll('fieldset')]
+  expect(groups).toHaveLength(4)
+  for (const group of groups) {
+    const name = group.querySelector('legend')!.textContent
+    const options = [
+      ...group.querySelectorAll('input[type="radio"], input[type="checkbox"], button')
+    ]
+    expect(options, name!).toHaveLength(2)
+    expect(group.hasAttribute('aria-invalid'), name!).toBe(false)
+    expect(group.hasAttribute('aria-describedby'), name!).toBe(false)
+    for (const option of options) {
+      expect(option, name!).toHaveAttribute('aria-invalid', 'true')
+      expect(option, name!).toHaveAccessibleDescription(`${name} is required.`)
+    }
+  }
+  const filter = host.querySelector('input[type="search"]')!
+  expect(filter.hasAttribute('aria-invalid')).toBe(false)
+  expect(filter.hasAttribute('aria-describedby')).toBe(false)
+})
+
 test('every input in the trip fixture passes accessibility validation', () => {
   expect(validateA2uiAccessibility(tripRequestFixtureMessages).errors).toEqual([])
   const unlabeled = validateA2uiAccessibility([

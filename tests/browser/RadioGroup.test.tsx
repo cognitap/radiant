@@ -164,7 +164,7 @@ test('a root form reaches every radio, so a group outside its form still submits
   expect(new FormData(form).get('plan')).toBe('free')
 })
 
-test('only an invalid group paints its radios invalid', async () => {
+test('only an invalid group paints and marks its radios invalid', async () => {
   const host = await mount(
     <div data-invalid="">
       <RadioGroup
@@ -188,5 +188,59 @@ test('only an invalid group paints its radios invalid', async () => {
     radio => getComputedStyle(radio).borderTopColor
   )
   expect(invalid).not.toBe(valid)
-  expect(host.querySelector('[value="invalid"]')!.hasAttribute('aria-invalid')).toBe(false)
+  expect(host.querySelector('[value="invalid"]')!.getAttribute('aria-invalid')).toBe('true')
+  expect(host.querySelector('[value="valid"]')!.hasAttribute('aria-invalid')).toBe(false)
+})
+
+test('each radio carries the group error and help with its own ids; the fieldset keeps only caller ids', async () => {
+  const host = await mount(
+    <form>
+      <p id="group-note">Group note</p>
+      <p id="option-note">Option note</p>
+      <RadioGroup
+        label="Plan"
+        description="Billed monthly"
+        error="Choose a plan"
+        aria-describedby="group-note"
+        required
+      >
+        <Radio
+          label="Pro"
+          description="For teams"
+          aria-describedby="option-note"
+          value="pro"
+        />
+        <Radio
+          label="Free"
+          value="free"
+        />
+      </RadioGroup>
+      <RadioGroup
+        label="Marked"
+        aria-invalid
+      >
+        <Radio
+          label="Marked"
+          value="marked"
+        />
+      </RadioGroup>
+    </form>,
+    true
+  )
+  const [group] = host.querySelectorAll('fieldset')
+  const [pro, free, marked] = [...host.querySelectorAll('input')]
+  const text = (radio: Element) =>
+    radio
+      .getAttribute('aria-describedby')!
+      .split(' ')
+      .map(id => document.getElementById(id)!.textContent)
+  expect(group!.hasAttribute('aria-invalid')).toBe(false)
+  expect(group!.getAttribute('aria-describedby')).toBe('group-note')
+  for (const radio of [pro, free, marked]) expect(radio!.getAttribute('aria-invalid')).toBe('true')
+  expect(text(pro!)).toEqual(['Billed monthly', 'Choose a plan', 'For teams', 'Option note'])
+  expect(text(free!)).toEqual(['Billed monthly', 'Choose a plan'])
+  expect(marked!.hasAttribute('aria-describedby')).toBe(false)
+  expect(pro!.required && free!.required).toBe(true)
+  expect(pro!.validity.valueMissing).toBe(true)
+  expect(host.querySelector('form')!.checkValidity()).toBe(false)
 })

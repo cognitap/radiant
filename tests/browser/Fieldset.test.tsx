@@ -52,12 +52,38 @@ test('a hydrated fieldset retains its native host, independent field labels and 
     .split(' ')
     .map(id => document.getElementById(id)!.textContent)
   expect(texts).toEqual(['Destination details', 'Check destination', 'Extra group help'])
-  expect(group.getAttribute('aria-invalid')).toBe('true')
+  expect(group.hasAttribute('aria-invalid')).toBe(false)
+  expect(input.hasAttribute('aria-invalid')).toBe(false)
   expect(input.labels![0]!.textContent).toBe('Street')
   expect(document.getElementById(input.getAttribute('aria-describedby')!)!.textContent).toBe(
     'Street help'
   )
   expect(host.querySelectorAll('[role="alert"]').length).toBe(1)
+})
+test('a control placed directly in a fieldset carries its error and help; nested fields keep their own', async () => {
+  const { host } = await mount(
+    <Fieldset
+      legend="Terms"
+      description="Required to continue"
+      error="Accept the terms"
+    >
+      <Checkbox
+        value="terms"
+        label="I accept"
+      />
+      <Field label="Initials">
+        <Input name="initials" />
+      </Field>
+    </Fieldset>
+  )
+  const group = host.querySelector('fieldset')!,
+    [box, input] = [...host.querySelectorAll('input')]
+  expect(group.hasAttribute('aria-invalid')).toBe(false)
+  expect(group.hasAttribute('aria-describedby')).toBe(false)
+  expect(box).toHaveAttribute('aria-invalid', 'true')
+  expect(box).toHaveAccessibleDescription('Required to continue Accept the terms')
+  expect(input!.hasAttribute('aria-invalid')).toBe(false)
+  expect(input!.hasAttribute('aria-describedby')).toBe(false)
 })
 test('native disabled grouping skips every body control and form entry; unlock and reset preserve individual ownership', async () => {
   function App() {

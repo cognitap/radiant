@@ -21,7 +21,7 @@ import { Card } from '../components/Card/Card.js'
 import { Checkbox } from '../components/Checkbox/Checkbox.js'
 import { CheckboxGroup } from '../components/CheckboxGroup/CheckboxGroup.js'
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../components/Dialog/Dialog.js'
-import { Field } from '../components/Field/Field.js'
+import { Field, useFieldGroupControl, WithoutField } from '../components/Field/Field.js'
 import { Input } from '../components/Input/Input.js'
 import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
 import { Separator } from '../components/Separator/Separator.js'
@@ -706,12 +706,12 @@ function A2uiChoicePicker({
 
   if (chips) {
     const items = visible.map(o => (
-      <ToggleGroupItem
+      <ChoiceChip
         key={o.value}
         value={o.value}
       >
         {o.label}
-      </ToggleGroupItem>
+      </ChoiceChip>
     ))
     return (
       <Field
@@ -721,7 +721,7 @@ function A2uiChoicePicker({
         error={error}
         parts={parts}
       >
-        {filterInput}
+        <WithoutField>{filterInput}</WithoutField>
         {multiple ? (
           <ToggleGroup
             type="multiple"
@@ -781,6 +781,18 @@ function A2uiChoicePicker({
       {filterInput}
       {group}
     </div>
+  )
+}
+
+// Chips are buttons, so each one carries the group's invalid state and error itself.
+function ChoiceChip({ value, children }: { value: string; children: ReactNode }) {
+  return (
+    <ToggleGroupItem
+      {...useFieldGroupControl()}
+      value={value}
+    >
+      {children}
+    </ToggleGroupItem>
   )
 }
 

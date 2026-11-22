@@ -48,9 +48,11 @@ test('native checkbox edits before hydration are adopted silently, with stable h
   expect(
     controlled.every(id => document.getElementById(id)?.matches('input[type="checkbox"]'))
   ).toBe(true)
-  expect(
-    document.getElementById(root.current!.getAttribute('aria-describedby')!)!.textContent
-  ).toBe('Choose delivery channels')
+  expect(root.current!.hasAttribute('aria-describedby')).toBe(false)
+  for (const box of host.querySelectorAll('input'))
+    expect(document.getElementById(box.getAttribute('aria-describedby')!)!.textContent).toBe(
+      'Choose delivery channels'
+    )
 })
 test('select all skips disabled options; native form values and immediate reset retain the original defaults', async () => {
   const changes: string[][] = []
@@ -251,7 +253,7 @@ test('required blocks native submission until an enabled option is checked', asy
   await render(tree({ value: [], disabled: true }))
   expect(form.checkValidity()).toBe(true)
 })
-test('an invalid group paints its options like invalid radios without marking each option invalid', async () => {
+test('an invalid group paints and marks each of its options invalid', async () => {
   const { host } = await mount(
     <>
       <CheckboxGroup
@@ -284,5 +286,38 @@ test('an invalid group paints its options like invalid radios without marking ea
   expect(border('invalid')).toBe(border('marked'))
   expect(getComputedStyle(parent).borderTopColor).toBe(border('marked'))
   expect(border('outside')).toBe(border('valid'))
-  expect(host.querySelector('[value="invalid"]')!.hasAttribute('aria-invalid')).toBe(false)
+  expect(host.querySelector('[value="invalid"]')!.getAttribute('aria-invalid')).toBe('true')
+  expect(parent.getAttribute('aria-invalid')).toBe('true')
+  expect(host.querySelector('[value="valid"]')!.hasAttribute('aria-invalid')).toBe(false)
+})
+test('each option carries the group error and help with its own ids; the fieldset keeps only caller ids', async () => {
+  const { host } = await mount(
+    <>
+      <p id="group-note">Group note</p>
+      <p id="option-note">Option note</p>
+      <CheckboxGroup
+        label="Channels"
+        description="Pick any"
+        error="Choose a channel"
+        aria-describedby="group-note"
+        required
+        items={[{ ...items[0]!, 'aria-describedby': 'option-note' }, items[1]!]}
+      />
+    </>
+  )
+  const group = host.querySelector('fieldset')!
+  const [email, sms] = [...host.querySelectorAll<HTMLInputElement>('input')]
+  const text = (box: Element) =>
+    box
+      .getAttribute('aria-describedby')!
+      .split(' ')
+      .map(id => document.getElementById(id)!.textContent)
+  expect(group.hasAttribute('aria-invalid')).toBe(false)
+  expect(group.getAttribute('aria-describedby')).toBe('group-note')
+  expect(email!.getAttribute('aria-invalid')).toBe('true')
+  expect(sms!.getAttribute('aria-invalid')).toBe('true')
+  expect(text(email!)).toEqual(['Pick any', 'Choose a channel', 'Option note'])
+  expect(text(sms!)).toEqual(['Pick any', 'Choose a channel'])
+  expect(email!.validity.customError).toBe(true)
+  expect(email!.required).toBe(false)
 })

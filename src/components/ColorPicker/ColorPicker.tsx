@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from 'cn'
 import {
   formatColor,
@@ -15,7 +15,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { Button } from '../Button/Button.js'
-import { Field, type FieldProps } from '../Field/Field.js'
+import { Field, useFieldGroupControl, type FieldProps } from '../Field/Field.js'
 import { Slider } from '../Slider/Slider.js'
 import { ColorArea } from './ColorArea.js'
 
@@ -164,10 +164,9 @@ export function ColorPicker({
 
   function renderControl(control: (typeof controls)[number]) {
     return (
-      <Field
+      <ChannelField
         key={control.key}
         label={strings[control.key]}
-        className="gap-y-0"
       >
         <Slider
           data-slot={`color-picker-${control.key}`}
@@ -186,7 +185,7 @@ export function ColorPicker({
             } as ThemeStyle
           }
         />
-      </Field>
+      </ChannelField>
     )
   }
 
@@ -278,6 +277,18 @@ export function ColorPicker({
           {strings.samplingError}
         </output>
       )}
+    </Field>
+  )
+}
+
+function ChannelField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Field
+      {...useFieldGroupControl()}
+      label={label}
+      className="gap-y-0"
+    >
+      {children}
     </Field>
   )
 }

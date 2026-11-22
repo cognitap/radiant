@@ -36,7 +36,7 @@ Horizontal arrow navigation, drag/pointer geometry, disclosure/branch chevron mi
 
 Open Storybook (`pnpm storybook`) and check the affected stories in each theme and mode.
 
-- **Keyboard and screen reader.** Tab through actions, fields, disclosures, and dialogs, first with the screen reader off and then on. Check names, roles, and states (`disabled`, `aria-busy`, `aria-invalid`, `aria-expanded`, checked, mixed), error and description announcements, modal focus containment, Escape, and focus restoration.
+- **Keyboard and screen reader.** Tab through actions, fields, disclosures, and dialogs, first with the screen reader off and then on. Check names, roles, and states (`disabled`, `aria-busy`, `aria-invalid`, `aria-expanded`, checked, mixed), error and description announcements (on each option of an invalid group), modal focus containment, Escape, and focus restoration.
 - **Contrast.** Check rest, hover, press, focus, invalid, pending, selected, and disabled states against their real backgrounds, especially Glass gradients. Normal text needs 4.5:1. Large text, control boundaries, state indicators, and focus outlines need 3:1 against adjacent colors. Keep non-color cues.
 - **Zoom and spacing.** Check 200% text resize and 400% browser zoom at a 1280 px viewport (320 px effective width), and WCAG text spacing (line height 1.5, paragraph spacing 2 em, letter spacing 0.12 em, word spacing 0.16 em). Look for clipped text, two-axis scrolling, and sticky or overlay elements hiding focus.
 - **Pointer.** Targets need 24 × 24 px, or 24 px between target centers. Releasing outside a control cancels activation.
