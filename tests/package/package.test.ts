@@ -302,8 +302,8 @@ test('an empty error clears the invalid state', () => {
   const external = renderToStaticMarkup(
     createElement(Field, { layout: 'group', label: 'Plan', error: '', 'aria-invalid': 'grammar' })
   )
-  assert.match(external, /aria-invalid="grammar"/)
-  assert.doesNotMatch(external, /\sdata-invalid=/)
+  assert.doesNotMatch(external, /aria-invalid/)
+  assert.match(external, /\sdata-invalid=""/)
 })
 
 test('native children are left untouched; controlId and adapters own their relationships', () => {
@@ -360,7 +360,7 @@ test('a group uses a fieldset and does not label each control', () => {
   assert.equal(ids.at(-1), 'hint')
   assert.match(html, /<legend\b/)
   assert.match(html, /\sdisabled=""/)
-  assert.match(html, /aria-invalid="true"/)
+  assert.doesNotMatch(html, /aria-invalid/)
   assert.doesNotMatch(html, /<fieldset\b[^>]*\saria-required=/)
   assert.match(html, /aria-describedby="[^"]+"/)
   assert.match(html, /\sdata-layout="group"/)
@@ -526,17 +526,18 @@ test('Field protects owned relationships across the native control families', ()
   }
 })
 
-test('an input inside a group keeps its own description', () => {
+test('an input inside a group carries the group invalid state, help, and error', () => {
   const html = renderToStaticMarkup(
     createElement(
       Field,
-      { layout: 'group', label: 'Plan', description: 'Pick one' },
+      { layout: 'group', label: 'Plan', description: 'Pick one', error: 'Required' },
       createElement(Input, { name: 'plan' })
     )
   )
   assert.match(html, /^<fieldset\b/)
-  assert.doesNotMatch(html, /<input\b[^>]*\saria-describedby=/)
-  assert.doesNotMatch(html, /<input\b[^>]*\saria-invalid=/)
+  assert.doesNotMatch(html, /<fieldset\b[^>]*\saria-invalid=/)
+  assert.match(html, /<input\b[^>]*\saria-invalid="true"/)
+  assert.match(html, /<input\b[^>]*\saria-describedby="[^"]*-description [^"]*-error"/)
 })
 
 test('checkboxes preserve name, value, and checked state', () => {
@@ -569,7 +570,8 @@ test('checkboxes keep their own identity in a Field group', () => {
   )
   assert.match(group, /^<fieldset\b/)
   assert.match(group, /data-slot="checkbox-label"/)
-  assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
+  assert.match(group, /<input\b[^>]*\saria-describedby="[^"]*-description"/)
+  assert.doesNotMatch(group, /<input\b[^>]*\saria-invalid=/)
 })
 
 for (const [Control, slot] of [
@@ -657,7 +659,7 @@ test('a required RadioGroup keeps native option labels and validity', () => {
   assert.doesNotMatch(group, /<fieldset\b[^>]*\saria-required=/)
   assert.match(group, /data-slot="radio-label"/)
   assert.match(group, /<input\b[^>]*\srequired=""/)
-  assert.doesNotMatch(group, /<input\b[^>]*\saria-describedby=/)
+  assert.match(group, /<input\b[^>]*\saria-describedby="[^"]*-description"/)
 })
 
 test('a dialog stays closed in server markup and names itself from its title', () => {
