@@ -1934,6 +1934,100 @@
         }
       },
       "required": ["component", "label", "columns", "rows"]
+    },
+    "RegionStage": {
+      "description": "A drawing that pans and zooms, with named regions to select and pins with callouts.\nUse: Choosing or pointing at areas of a plan or diagram drawn as SVG `regions` in one `viewBox`; `pins` mark points with a short callout.\nAvoid: Options without a spatial layout (ChoicePicker) or plotted data (charts).\nExamples: office floor plan, rooms as `regions`, `selection: multiple`; machine diagram with `pins` at parts that need service.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "RegionStage"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Accessible name of the drawing."
+        },
+        "viewBox": {
+          "type": "string",
+          "minLength": 1,
+          "description": "SVG viewBox, `minX minY width height`, that regions and pins use."
+        },
+        "regions": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Selectable areas in reading order, which is also keyboard order.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "label", "path"],
+            "properties": {
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stable region value."
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Region name."
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "description": "SVG path data in viewBox units."
+              },
+              "series": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8,
+                "description": "Categorical color from 1 to 8; one number per concept."
+              }
+            }
+          }
+        },
+        "pins": {
+          "type": "array",
+          "description": "Points with a callout; they follow the regions in keyboard order.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "y", "label"],
+            "properties": {
+              "x": {
+                "type": "number",
+                "description": "Horizontal position in viewBox units."
+              },
+              "y": {
+                "type": "number",
+                "description": "Vertical position in viewBox units."
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Pin name."
+              },
+              "text": {
+                "type": "string",
+                "description": "Callout text."
+              }
+            }
+          }
+        },
+        "selection": {
+          "type": "string",
+          "enum": ["single", "multiple"],
+          "default": "single",
+          "description": "Whether one or several regions can be selected."
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicStringList",
+          "description": "Selected region values bound to surface state."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "label", "viewBox", "regions"]
     }
   },
   "functions": {
@@ -2428,6 +2522,9 @@
         },
         {
           "$ref": "#/components/Matrix"
+        },
+        {
+          "$ref": "#/components/RegionStage"
         }
       ],
       "discriminator": {

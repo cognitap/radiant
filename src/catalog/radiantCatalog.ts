@@ -1307,6 +1307,85 @@ export const radiantCatalog: Catalog = defineCatalog({
       actions: {}
     },
 
+    RegionStage: {
+      name: 'RegionStage',
+      category: 'data',
+      description:
+        'A drawing that pans and zooms, with named regions to select and pins with callouts.',
+      guidance: {
+        whenToUse:
+          'Choosing or pointing at areas of a plan or diagram drawn as SVG `regions` in one `viewBox`; `pins` mark points with a short callout.',
+        whenNotToUse: 'Options without a spatial layout (Choice) or plotted data (charts).',
+        examples: [
+          'office floor plan, rooms as `regions`, `selection: multiple`',
+          'machine diagram with `pins` at parts that need service'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'viewBox', 'regions'],
+        properties: {
+          label: { type: 'string', minLength: 1, description: 'Accessible name of the drawing.' },
+          viewBox: {
+            type: 'string',
+            minLength: 1,
+            description: 'SVG viewBox, `minX minY width height`, that regions and pins use.'
+          },
+          regions: {
+            type: 'array',
+            minItems: 1,
+            description: 'Selectable areas in reading order, which is also keyboard order.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['value', 'label', 'path'],
+              properties: {
+                value: { type: 'string', minLength: 1, description: 'Stable region value.' },
+                label: { type: 'string', minLength: 1, description: 'Region name.' },
+                path: {
+                  type: 'string',
+                  minLength: 1,
+                  description: 'SVG path data in viewBox units.'
+                },
+                series: seriesSchema
+              }
+            }
+          },
+          pins: {
+            type: 'array',
+            description: 'Points with a callout; they follow the regions in keyboard order.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['x', 'y', 'label'],
+              properties: {
+                x: { type: 'number', description: 'Horizontal position in viewBox units.' },
+                y: { type: 'number', description: 'Vertical position in viewBox units.' },
+                label: { type: 'string', minLength: 1, description: 'Pin name.' },
+                text: { type: 'string', description: 'Callout text.' }
+              }
+            }
+          },
+          selection: {
+            type: 'string',
+            enum: ['single', 'multiple'],
+            default: 'single',
+            description: 'Whether one or several regions can be selected.'
+          }
+        }
+      },
+      slots: {},
+      bindings: {
+        value: {
+          description: 'Selected region values bound to surface state.',
+          valueType: 'string[]',
+          direction: 'two-way'
+        }
+      },
+      actions: {}
+    },
+
     Toast: {
       name: 'Toast',
       category: 'feedback',

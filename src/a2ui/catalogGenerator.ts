@@ -698,7 +698,8 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
     sourceEntry: 'SortableList',
     bindable: ['items'],
     requireBindings: true
-  }
+  },
+  { a2uiName: 'RegionStage', sourceEntry: 'RegionStage' }
 ]
 
 /**

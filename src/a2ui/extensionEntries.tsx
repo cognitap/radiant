@@ -66,6 +66,7 @@ import { feedbackEntries } from './feedbackEntries.js'
 import { layoutIntentEntries } from './layoutIntentEntries.js'
 import { annotatedTextEntries } from './annotatedTextEntries.js'
 import { matrixEntry } from './matrixEntry.js'
+import { regionStageEntries } from './regionStageEntries.js'
 import { useA2uiLabels, type A2uiSortableText } from './surfaceContext.js'
 
 const extensionCatalog = generateA2uiCatalogs(radiantCatalog).extension
@@ -639,7 +640,8 @@ const extensionEntries = [
   ...feedbackEntries,
   ...layoutIntentEntries,
   ...annotatedTextEntries,
-  matrixEntry
+  matrixEntry,
+  ...regionStageEntries
 ]
 
 /**

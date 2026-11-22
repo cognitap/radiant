@@ -5,6 +5,7 @@
 ## Unreleased
 
 - Add `AudioPlayer`, a styled player for short clips on a native `<audio>` element: a play/pause toggle (`playLabel`, `pauseLabel`), a `Slider` scrubber (`seekLabel`) and locale-aware time. `compact` keeps only the toggle and requires an accessible name; inside an `AudioPlayerGroup`, one player plays at a time. Themes style it through `components.audioPlayer`. A2UI `AudioPlayer` renders it when `A2uiSurface` `labels` set `audioPlay`, `audioPause` and `audioSeek` (plus optional `audioError`); otherwise it keeps native controls and reports a `defaulted` diagnostic.
+- Add `RegionStage`, a pan-and-zoom SVG drawing in its own `viewBox` with `RegionStageControls`, selectable `RegionStageRegion` shapes in series colors (`type`, `value`, `onValueChange`) and `RegionStagePin` markers with Popover callouts. Themes style it through `components.regionStage`. The canonical and A2UI extension catalogs add `RegionStage`; its zoom buttons take names from the new `A2uiSurface` `labels.zoomIn`, `zoomOut` and `zoomReset`, and render only when all three are set.
 
 ## 0.0.99
 
