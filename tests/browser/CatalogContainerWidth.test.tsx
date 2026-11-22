@@ -158,9 +158,10 @@ const stressCases: Record<string, readonly A2uiMessage[]> = {
     },
     ...words.map((title, index) => text(`panel_${index}`, title))
   ]),
-  'Row of six buttons': surface([
-    { id: 'root', component: 'Row', children: words.map((_, index) => `action_${index}`) },
-    ...words.flatMap((title, index) => button(`action_${index}`, title))
+  'Row of a label and an unbroken Badge': surface([
+    { id: 'root', component: 'Row', children: ['label', 'badge'] },
+    text('label', 'Source'),
+    { id: 'badge', component: 'Badge', text: LONG_WORD }
   ]),
   'Text, Badge and Alert with an unbroken URL': surface([
     { id: 'root', component: 'Column', children: ['url', 'badge', 'alert'] },
@@ -286,9 +287,14 @@ const stressCases: Record<string, readonly A2uiMessage[]> = {
     ],
     { choice: [], select: 'long', on: false }
   ),
-  'Card holding a Row of buttons': surface([
+  'Card holding a horizontal List of buttons': surface([
     { id: 'root', component: 'Card', child: 'actions' },
-    { id: 'actions', component: 'Row', children: ['save', 'share', 'archive'] },
+    {
+      id: 'actions',
+      component: 'List',
+      direction: 'horizontal',
+      children: ['save', 'share', 'archive']
+    },
     ...button('save', 'Save itinerary'),
     ...button('share', 'Share with group'),
     ...button('archive', 'Archive trip')
@@ -360,14 +366,20 @@ test('every canonical catalog entry renders through some covered A2UI component'
  * Intentional scroll regions, such as a Table container or a tab list, name themselves with a
  * slot; clipped text must show an ellipsis; a visually hidden form host is one pixel wide.
  */
+const SCROLL_REGIONS =
+  '[data-slot~="table-container"], [data-slot~="tabs-list"], [data-slot~="scroll-area"], [data-slot~="chart-plot"]'
+
 function containment(element: HTMLElement): 'scroll' | 'ellipsis' | 'hidden' | 'leak' | null {
   const style = getComputedStyle(element)
   if (style.overflowX === 'visible') return null
   if (element.scrollWidth <= element.clientWidth + 1) return 'hidden'
   if (style.overflowX === 'auto' || style.overflowX === 'scroll')
-    return element.hasAttribute('data-slot') ? 'scroll' : 'leak'
-  if (style.textOverflow === 'ellipsis' || element.clientWidth <= 1) return 'ellipsis'
-  return 'leak'
+    return element.matches(SCROLL_REGIONS) ? 'scroll' : 'leak'
+  if (element.clientWidth <= 1) return 'hidden'
+  const inlineOnly = [...element.children].every(child =>
+    getComputedStyle(child).display.startsWith('inline')
+  )
+  return style.textOverflow === 'ellipsis' && inlineOnly ? 'ellipsis' : 'leak'
 }
 
 /** Top-layer and fixed elements are placed against the viewport, not the column. */
@@ -391,6 +403,11 @@ function findLeaks(frame: HTMLElement) {
   const visit = (element: Element) => {
     if (outsideFlow(element)) return
     const rect = element.getBoundingClientRect()
+    // Overflow on the start side, such as end-justified content wider than its box, does not
+    // add scroll width, so each box must also sit inside its parent.
+    const parent = element.parentElement!.getBoundingClientRect()
+    if (rect.width > 0 && (rect.left < parent.left - 1 || rect.right > parent.right + 1))
+      leaks.push(`${describe(element)} escapes its parent`)
     if (rect.width > 0 && (rect.left < bounds.left - 1 || rect.right > bounds.right + 1))
       leaks.push(
         `${describe(element)} spans ${Math.round(rect.left - bounds.left)}..${Math.round(rect.right - bounds.left)}`
@@ -408,143 +425,229 @@ function findLeaks(frame: HTMLElement) {
   return leaks
 }
 
-/** Mounts each tree in a frame, resizes it through every width and collects what leaks. */
-async function measure(trees: Record<string, ReactNode>) {
-  const failures: Record<string, string[]> = {}
-  for (const [name, tree] of Object.entries(trees)) {
-    const { host } = await mount(
-      <div
-        data-testid="frame"
-        style={{ width: `${WIDTHS[0]}px` }}
-      >
-        {tree}
-      </div>
-    )
-    const frame = host.querySelector<HTMLElement>('[data-testid="frame"]')!
-    for (const width of WIDTHS) {
-      frame.style.width = `${width}px`
-      await act(async () => {
-        await new Promise(requestAnimationFrame)
-      })
-      const leaks = findLeaks(frame)
-      if (leaks.length) failures[`${name} @ ${width}px`] = leaks
-    }
-  }
-  return failures
+/** Mounts a tree in a frame of the given width and lists what leaks out of it. */
+async function measure(tree: ReactNode, width: number) {
+  const { host } = await mount(
+    <div
+      data-testid="frame"
+      style={{ width: `${width}px` }}
+    >
+      {tree}
+    </div>
+  )
+  await act(async () => {
+    await new Promise(requestAnimationFrame)
+  })
+  const leaks = findLeaks(host.querySelector<HTMLElement>('[data-testid="frame"]')!)
+  return leaks
 }
 
-test('every catalog entry fits 360, 560 and 960 pixel containers without horizontal overflow', async () => {
-  const trees = Object.fromEntries(
-    Object.entries(fixtures).map(([name, messages]) => [
-      name,
+test.for(Object.keys(fixtures).flatMap(name => WIDTHS.map(width => [name, width] as const)))(
+  '%s fits a %ipx container without horizontal overflow',
+  async ([name, width]) => {
+    const messages = fixtures[name]!
+    const leaks = await measure(
       <A2uiSurface
-        key={name}
         surfaceId={createSurfaceOf(messages).surfaceId}
         messages={messages}
         registry={radiantA2uiExtensionRegistry}
         labels={{ notifications: 'Notifications' }}
+      />,
+      width
+    )
+    expect(leaks).toEqual([])
+  }
+)
+
+test('a label and Badge Row stays on one line at 360px', async () => {
+  const { host } = await mount(
+    <div style={{ width: '360px' }}>
+      <A2uiSurface
+        surfaceId={STRESS_SURFACE_ID}
+        messages={surface([
+          {
+            id: 'root',
+            component: 'Row',
+            justify: 'spaceBetween',
+            align: 'center',
+            children: ['label', 'status']
+          },
+          text('label', 'Order 1042 for the three day ridge loop with a guide and two nights'),
+          { id: 'status', component: 'Badge', text: 'Shipped' }
+        ])}
       />
-    ])
+    </div>
   )
-  expect(await measure(trees)).toEqual({})
+  const row = host.querySelector<HTMLElement>('[data-slot~="a2ui-row"]')!.getBoundingClientRect()
+  const [label, status] = [
+    ...host.querySelectorAll<HTMLElement>('[data-slot="a2ui-flex-item"]')
+  ].map(item => item.getBoundingClientRect())
+  expect(status!.left).toBeGreaterThan(label!.right)
+  expect(status!.right).toBeCloseTo(row.right, 0)
+  expect(label!.width).toBeLessThan(360 - status!.width)
 })
 
-test('the React families behind catalog entries fit the same containers', async () => {
-  const longTitle = `Ridge loop ${LONG_WORD}`
-  expect(
-    await measure({
-      'Stage with four actions': (
-        <Stage>
-          <StageHeader>
-            <StageTitle>{longTitle}</StageTitle>
-            <StageDescription>{LONG_WORD}</StageDescription>
-            <StageActions>
-              {words.slice(0, 4).map(word => (
-                <Button key={word}>{word}</Button>
-              ))}
-            </StageActions>
-          </StageHeader>
-          <StageBody>{LONG_WORD}</StageBody>
-          <StageFooter>
-            <Button>{longTitle}</Button>
-          </StageFooter>
-        </Stage>
-      ),
-      'Segmented ToggleGroup with eight items': (
-        <ToggleGroup
-          aria-label="Interests"
-          variant="segmented"
-          defaultValue={null}
+const longTitle = `Ridge loop ${LONG_WORD}`
+const WIDE_ACTION = 'Stage with a wide search action'
+
+/** The React families behind catalog entries, with the content that overflows them first. */
+const families: Record<string, ReactNode> = {
+  'Stage with four actions': (
+    <Stage>
+      <StageHeader>
+        <StageTitle>{longTitle}</StageTitle>
+        <StageDescription>{LONG_WORD}</StageDescription>
+        <StageActions>
+          {words.slice(0, 4).map(word => (
+            <Button key={word}>{word}</Button>
+          ))}
+        </StageActions>
+      </StageHeader>
+      <StageBody>{LONG_WORD}</StageBody>
+      <StageFooter>
+        <Button>{longTitle}</Button>
+      </StageFooter>
+    </Stage>
+  ),
+  'Segmented ToggleGroup with eight items': (
+    <ToggleGroup
+      aria-label="Interests"
+      variant="segmented"
+      defaultValue={null}
+    >
+      {[...words, 'Photography', 'Birdwatching'].map(word => (
+        <ToggleGroupItem
+          key={word}
+          value={word}
         >
-          {[...words, 'Photography', 'Birdwatching'].map(word => (
-            <ToggleGroupItem
-              key={word}
-              value={word}
-            >
-              {word}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      ),
-      'Tabs with six triggers': (
-        <Tabs defaultValue={words[0]}>
-          <TabsList aria-label="Trip">
-            {words.map(word => (
-              <TabsTrigger
-                key={word}
-                value={word}
-              >
-                {word}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {words.map(word => (
-            <TabsContent
-              key={word}
-              value={word}
-            >
-              {LONG_WORD}
-            </TabsContent>
-          ))}
-        </Tabs>
-      ),
-      'Card with a footer of actions': (
-        <Card>
-          <CardHeader>
-            <CardTitle>{longTitle}</CardTitle>
-          </CardHeader>
-          <CardContent>{LONG_WORD}</CardContent>
-          <CardFooter>
-            {words.map(word => (
-              <Button key={word}>{word}</Button>
-            ))}
-          </CardFooter>
-        </Card>
-      ),
-      'Split, Grid and Compare': (
-        <Stack>
-          <Split>
-            <SplitMain>{LONG_WORD}</SplitMain>
-            <SplitSecondary>{LONG_WORD}</SplitSecondary>
-          </Split>
-          <Grid maxColumns={4}>
-            {words.map(word => (
-              <Card key={word}>{word}</Card>
-            ))}
-          </Grid>
-          <Compare>
-            {words.slice(0, 4).map(word => (
-              <CompareItem key={word}>
-                <CompareItemHeader>{word}</CompareItemHeader>
-                <CompareItemBody>{LONG_WORD}</CompareItemBody>
-                <CompareItemFooter>
-                  <Button>Choose</Button>
-                </CompareItemFooter>
-              </CompareItem>
-            ))}
-          </Compare>
-        </Stack>
-      )
-    })
-  ).toEqual({})
+          {word}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  ),
+  'Tabs with six triggers': (
+    <Tabs defaultValue={words[0]}>
+      <TabsList aria-label="Trip">
+        {words.map(word => (
+          <TabsTrigger
+            key={word}
+            value={word}
+          >
+            {word}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {words.map(word => (
+        <TabsContent
+          key={word}
+          value={word}
+        >
+          {LONG_WORD}
+        </TabsContent>
+      ))}
+    </Tabs>
+  ),
+  'Card with a footer of actions': (
+    <Card>
+      <CardHeader>
+        <CardTitle>{longTitle}</CardTitle>
+      </CardHeader>
+      <CardContent>{LONG_WORD}</CardContent>
+      <CardFooter>
+        {words.map(word => (
+          <Button key={word}>{word}</Button>
+        ))}
+      </CardFooter>
+    </Card>
+  ),
+  'Split, Grid and Compare': (
+    <Stack>
+      <Split>
+        <SplitMain>{LONG_WORD}</SplitMain>
+        <SplitSecondary>{LONG_WORD}</SplitSecondary>
+      </Split>
+      <Grid maxColumns={4}>
+        {words.map(word => (
+          <Card key={word}>{word}</Card>
+        ))}
+      </Grid>
+      <Compare>
+        {words.slice(0, 4).map(word => (
+          <CompareItem key={word}>
+            <CompareItemHeader>{word}</CompareItemHeader>
+            <CompareItemBody>{LONG_WORD}</CompareItemBody>
+            <CompareItemFooter>
+              <Button>Choose</Button>
+            </CompareItemFooter>
+          </CompareItem>
+        ))}
+      </Compare>
+    </Stack>
+  ),
+  [WIDE_ACTION]: (
+    <Stage>
+      <StageHeader>
+        <StageTitle>Trips</StageTitle>
+        <StageActions>
+          <input
+            aria-label="Search trips"
+            style={{ minInlineSize: '20rem' }}
+          />
+          <Button>New trip</Button>
+        </StageActions>
+      </StageHeader>
+      <StageBody>{LONG_WORD}</StageBody>
+    </Stage>
+  )
+}
+
+test.for(
+  Object.keys(families).flatMap(name =>
+    [...WIDTHS, 512]
+      // A 20rem search box cannot fit a 360px Stage; the case covers the widths beside 30rem.
+      .filter(width => width > 360 || name !== WIDE_ACTION)
+      .map(width => [name, width] as const)
+  )
+)('React %s fits a %ipx container without horizontal overflow', async ([name, width]) => {
+  expect(await measure(families[name], width)).toEqual([])
+})
+
+test('a Badge in a crowded Row of Cards keeps short words whole at 360px', async () => {
+  const { host } = await mount(
+    <div style={{ width: '360px' }}>
+      <A2uiSurface
+        surfaceId={STRESS_SURFACE_ID}
+        messages={surface([
+          { id: 'root', component: 'Row', children: ['first', 'second'] },
+          ...['first', 'second'].flatMap(id => [
+            { id, component: 'Card', child: `${id}_row` },
+            { id: `${id}_row`, component: 'Row', children: [`${id}_title`, `${id}_status`] },
+            text(`${id}_title`, `Ticket ${id} about the broken ridge loop trail sign`),
+            { id: `${id}_status`, component: 'Badge', text: 'Open' }
+          ])
+        ])}
+      />
+    </div>
+  )
+  const badges = [...host.querySelectorAll<HTMLElement>('[data-slot~="badge"]')]
+  expect(badges).toHaveLength(2)
+  for (const badge of badges) {
+    const range = document.createRange()
+    range.selectNodeContents(badge)
+    const lines = new Set([...range.getClientRects()].map(rect => Math.round(rect.top)))
+    expect(lines.size).toBe(1)
+  }
+})
+
+test('a Modal trigger keeps its own width instead of stretching across the column', async () => {
+  const { host } = await mount(
+    <div style={{ width: '560px' }}>
+      <A2uiSurface
+        surfaceId={createSurfaceOf(modalFixtureMessages).surfaceId}
+        messages={modalFixtureMessages}
+      />
+    </div>
+  )
+  const trigger = host.querySelector<HTMLElement>('[data-slot~="dialog-trigger"]')!
+  expect(trigger.getBoundingClientRect().width).toBeLessThan(280)
 })
