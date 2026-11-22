@@ -106,7 +106,7 @@ Entry `guidance` (use, avoid, two examples) fits `CATALOG_GUIDANCE_TOKEN_BUDGET`
 
 ### Registries
 
-`@cognitap/radiant/a2ui` renders A2UI 1.0. Each `createA2uiRegistryEntry` pairs a Radiant component with a JSON schema (forbidden host props rejected), an adapter, and accessibility rules. `radiantA2uiRegistry` implements the basic catalog at `A2UI_BASIC_CATALOG_REVISION`; `radiantA2uiExtensionRegistry`, the default, adds form, feedback, data, and layout components. `createA2uiRegistry({ extends })` inherits a base registry; `findA2uiRegistry` finds one by catalog ID. `pnpm catalog:check` keeps the generated `catalog.json` and `extension-catalog.json` in sync.
+`@cognitap/radiant/a2ui` renders A2UI 1.0. Each `createA2uiRegistryEntry` pairs a Radiant component with a JSON schema (forbidden host props rejected), an adapter, and accessibility rules. `radiantA2uiRegistry` implements the basic catalog at `A2UI_BASIC_CATALOG_REVISION`; `radiantA2uiExtensionRegistry`, the default, adds form, feedback, data, and layout components, and a `Row` with `wrap`. `createA2uiRegistry({ extends })` inherits a base registry; `findA2uiRegistry` finds one by catalog ID. `pnpm catalog:check` keeps the generated `catalog.json` and `extension-catalog.json` in sync.
 
 Apps add components: `createA2uiExtensionEntry` derives schema and guidance from an `extendCatalog` entry, and `createA2uiExtensionRegistry(catalog, { catalogId, entries })` extends the default registry. Adapters use `readA2uiValue`, `writeA2uiBinding`, `runA2uiAction`, and `isA2uiChildNode`, and style only with [public tokens](theming.md#public-tokens) so they follow every theme.
 

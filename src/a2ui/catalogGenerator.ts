@@ -38,6 +38,7 @@ export type A2uiCatalogDocument = {
   readonly $defs: Readonly<Record<string, A2uiJsonSchema>>
 }
 
+/** The extension document's `Row` supersedes the basic one, adding `wrap`. */
 export type GeneratedA2uiCatalogs = {
   readonly basic: A2uiCatalogDocument
   readonly extension: A2uiCatalogDocument
@@ -188,6 +189,25 @@ const JUSTIFY_VALUES = {
   stretch: 'stretch'
 }
 
+const ROW_PROJECTION: BasicProjection = {
+  a2uiName: 'Row',
+  sourceEntry: 'Row',
+  guidance: {
+    whenToUse: 'A few peers side by side: actions, a label and value, or cards.',
+    whenNotToUse: 'Stacked content (Column) or repeated data (List).',
+    examples: [
+      'Cancel and Save buttons, `justify: end`',
+      'two Card summaries, `justify: spaceBetween`'
+    ]
+  },
+  required: ['children'],
+  props: {
+    children: slot('children'),
+    justify: prop('justify', { values: JUSTIFY_VALUES }),
+    align: prop('align')
+  }
+}
+
 // Each component matches the A2UI 1.0 basic catalog; tests/catalog.test.mjs checks it against the spec copy.
 const BASIC_PROJECTIONS: readonly BasicProjection[] = [
   {
@@ -283,24 +303,7 @@ const BASIC_PROJECTIONS: readonly BasicProjection[] = [
     required: ['url'],
     props: { url: binding('url'), description: dynamicProp('description') }
   },
-  {
-    a2uiName: 'Row',
-    sourceEntry: 'Row',
-    guidance: {
-      whenToUse: 'A few peers side by side: actions, a label and value, or cards.',
-      whenNotToUse: 'Stacked content (Column) or repeated data (List).',
-      examples: [
-        'Cancel and Save buttons, `justify: end`',
-        'two Card summaries, `justify: spaceBetween`'
-      ]
-    },
-    required: ['children'],
-    props: {
-      children: slot('children'),
-      justify: prop('justify', { values: JUSTIFY_VALUES }),
-      align: prop('align')
-    }
-  },
+  ROW_PROJECTION,
   {
     a2uiName: 'Column',
     sourceEntry: 'Column',
@@ -689,6 +692,28 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
   { a2uiName: 'CompareItem', sourceEntry: 'CompareItem' },
   { a2uiName: 'Reveal', sourceEntry: 'Reveal' }
 ]
+
+/**
+ * Basic components the extension catalog replaces with a superset under the same name, for
+ * canonical props the A2UI specification lacks. Surfaces on the basic catalog keep the spec shape.
+ */
+const EXTENSION_OVERRIDES: readonly BasicProjection[] = [
+  {
+    ...ROW_PROJECTION,
+    guidance: {
+      ...ROW_PROJECTION.guidance!,
+      whenToUse:
+        'A few peers side by side: actions, a label and value, or cards; set `wrap` when they may not fit.',
+      examples: ['Cancel and Save buttons, `justify: end`', 'six filter Buttons, `wrap: true`']
+    },
+    props: { ...ROW_PROJECTION.props, wrap: prop('wrap') }
+  }
+]
+
+/** Basic components the Radiant extension registry overrides with `createOverridingA2uiRegistry`. */
+export const A2UI_EXTENSION_OVERRIDE_NAMES: readonly string[] = EXTENSION_OVERRIDES.map(
+  projection => projection.a2uiName
+)
 
 const DYNAMIC_REF_BY_BINDING_TYPE: Record<CatalogBindingValueType, string> = {
   string: `${COMMON}DynamicString`,
@@ -1091,6 +1116,10 @@ function generateUncached(catalog: Catalog): GeneratedA2uiCatalogs {
   for (const projection of BASIC_PROJECTIONS) {
     const entry = sourceFor(projection.a2uiName, projection.sourceEntry)
     basicComponents[projection.a2uiName] = projectBasic(entry, projection, basicNames)
+  }
+  for (const projection of EXTENSION_OVERRIDES) {
+    const entry = sourceFor(projection.a2uiName, projection.sourceEntry)
+    extensionComponents[projection.a2uiName] = projectBasic(entry, projection, alongsideNames)
   }
   for (const projection of EXTENSION_PROJECTIONS) {
     const entry = sourceFor(projection.a2uiName, projection.sourceEntry)

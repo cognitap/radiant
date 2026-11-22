@@ -188,6 +188,20 @@ export function createA2uiRegistryEntry(input: A2uiRegistryEntryInput): A2uiRegi
  * document and its executable `@a2ui/web_core` catalog from the same entry list.
  */
 export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
+  return createOverridingA2uiRegistry(input, [])
+}
+
+/**
+ * Radiant-only `createA2uiRegistry` whose `overrides` entries replace the base entries of those
+ * names within this catalog, so apps cannot shadow a Radiant name. The base catalog keeps its own
+ * entry; coercion strips props it lacks, since the surface renders with this registry's adapter.
+ * That is safe only if an override adapter renders base-shaped props exactly like the base adapter,
+ * so every prop an override adds must default to the base behaviour.
+ */
+export function createOverridingA2uiRegistry(
+  input: A2uiRegistryInput,
+  overrides: readonly string[]
+): A2uiRegistry {
   if (typeof input.catalogId !== 'string' || !input.catalogId.trim()) {
     throw new TypeError('A2UI registry requires a non-empty catalogId.')
   }
@@ -210,14 +224,23 @@ export function createA2uiRegistry(input: A2uiRegistryInput): A2uiRegistry {
 
   const instructions = input.instructions ?? base?.instructions
   const entryMap: Record<string, A2uiRegistryEntry> = { ...base?.entries }
+  const pending = new Set(overrides)
+  for (const name of pending) {
+    if (!base || !Object.hasOwn(base.entries, name)) {
+      throw new TypeError(`A2UI registry override "${name}" names no entry of its base registry.`)
+    }
+  }
   for (const entry of input.entries) {
-    if (Object.hasOwn(entryMap, entry.name)) {
+    if (Object.hasOwn(entryMap, entry.name) && !pending.delete(entry.name)) {
       throw new TypeError(
         `Duplicate A2UI registry entry "${entry.name}"; an entry cannot shadow another entry's name.`
       )
     }
     const validated = createA2uiRegistryEntry(entry)
     entryMap[validated.name] = validated
+  }
+  if (pending.size > 0) {
+    throw new TypeError(`A2UI registry overrides ${[...pending].join(', ')} without an entry.`)
   }
   const frozenEntries = Object.freeze(entryMap)
 
