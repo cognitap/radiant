@@ -44,7 +44,7 @@ const stageVariants = cva(
 
 const stageHeaderVariants = cva([
   'grid min-w-0 items-start gap-x-[var(--rad-stage-gap,var(--rad-surface-gap,1rem))] gap-y-[var(--rad-stage-header-gap,var(--rad-spacing-header-gap,0.375rem))]',
-  '@min-[30rem]/stage:has-[>[data-slot~=stage-actions]]:grid-cols-[minmax(0,1fr)_auto]'
+  '@min-[30rem]/stage:has-[>[data-slot~=stage-actions]]:grid-cols-[minmax(min(12rem,100%),1fr)_auto]'
 ])
 
 const stageTitleVariants = cva([

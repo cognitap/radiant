@@ -75,7 +75,7 @@ export function CompareItemHeader({ className, ...props }: CompareItemHeaderProp
     <div
       {...props}
       data-slot={joinIds('compare-item-header', props['data-slot'])}
-      className={cn('row-start-1 min-w-0', className)}
+      className={cn('row-start-1 min-w-0 break-words', className)}
     />
   )
 }
@@ -85,7 +85,7 @@ export function CompareItemBody({ className, ...props }: CompareItemBodyProps) {
     <div
       {...props}
       data-slot={joinIds('compare-item-body', props['data-slot'])}
-      className={cn('row-start-2 min-w-0', className)}
+      className={cn('row-start-2 min-w-0 break-words', className)}
     />
   )
 }
@@ -95,7 +95,7 @@ export function CompareItemFooter({ className, ...props }: CompareItemFooterProp
     <div
       {...props}
       data-slot={joinIds('compare-item-footer', props['data-slot'])}
-      className={cn('row-start-3 min-w-0', className)}
+      className={cn('row-start-3 min-w-0 break-words', className)}
     />
   )
 }

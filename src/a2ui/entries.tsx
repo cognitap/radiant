@@ -206,6 +206,8 @@ function flexEntry(name: 'Row' | 'Column', orientation: Orientation) {
           orientation={orientation}
           justify={translate(STACK_JUSTIFY, props.justify, 'start')}
           align={translate(STACK_ALIGN, props.align, 'stretch')}
+          // The wire Row has no wrap prop; wrapping keeps a narrow column from overflowing.
+          wrap={orientation === 'horizontal'}
         >
           {readChildNodes(props.children).map(child => (
             <A2uiFlexChild
@@ -232,14 +234,16 @@ const listEntry = createA2uiRegistryEntry({
   schema: basicSchema('List'),
   description: basicDescription('List'),
   adapter(props, context) {
+    const orientation = translate(ORIENTATION, props.direction, 'vertical')
     // Stack renders a div host, so list semantics come from roles.
     return (
       <Stack
         data-slot="a2ui-list"
         // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
         role="list"
-        orientation={translate(ORIENTATION, props.direction, 'vertical')}
+        orientation={orientation}
         align={translate(STACK_ALIGN, props.align, 'stretch')}
+        wrap={orientation === 'horizontal'}
       >
         {readChildNodes(props.children).map(child => (
           <div

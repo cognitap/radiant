@@ -135,6 +135,7 @@ export function Button({
     'data-control-size': controlSize,
     className: cn(
       actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }),
+      'max-w-full',
       'aria-pressed:inset-ring-2 aria-pressed:inset-ring-[color:var(--rad-control-selected-border-color,currentColor)] forced-colors:aria-pressed:underline forced-colors:aria-pressed:decoration-double',
       spatial && springPressClass,
       motionOff && !callerOwnsScale && offPressClass,
@@ -149,7 +150,7 @@ export function Button({
       <>
         <span
           className={cn(
-            'inline-flex items-center gap-[0.5em] [&_svg]:shrink-0',
+            'inline-flex min-w-0 items-center gap-[0.5em] break-words [&_svg]:shrink-0',
             pending && 'opacity-0 motion-reduce:opacity-100'
           )}
         >

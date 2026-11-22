@@ -5,6 +5,10 @@
 ## Unreleased
 
 - An invalid grouped `Field` (`RadioGroup`, `CheckboxGroup`, `Rating`, `ColorPicker`, `Fieldset`, and A2UI `ChoicePicker`, chips included) puts `aria-invalid` and its error on each control inside, so screen readers announce the error on focus; the `<fieldset>` keeps its description and caller `aria-describedby`, and keeps `aria-invalid` and the error only while some control inside lacks them, such as one in a nested `Field`. A plain `Input`, `Select`, or other Radiant control placed directly in a group now turns invalid and reads the group error. A caller `aria-invalid` on a group now also marks its controls and paints it invalid.
+- A2UI `Row` and horizontal `List` wrap their children onto more lines when they do not fit, instead of overflowing a narrow column.
+- `Button` is never wider than its container: a label too long for it wraps inside the button.
+- `StageTitle` keeps at least 12rem beside `StageActions`; before, many actions could squeeze the title to a few pixels.
+- `CompareItemHeader`, `CompareItemBody`, and `CompareItemFooter` break long words instead of overflowing their column.
 
 ## 0.0.96
 
