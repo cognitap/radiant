@@ -10,7 +10,7 @@ import {
   type ChartProps
 } from '@cognitap/radiant/charts'
 import { defineTheme } from '@cognitap/radiant'
-import { generateColorWall, recommendColorPalette } from '@cognitap/radiant/color'
+import { generateColorWall, recommendColorPalette, seriesPalette } from '@cognitap/radiant/color'
 const data: ChartDatum[] = [
     { key: 'one', label: 'Round 1', values: { sessions: 12 } },
     { key: 'two', label: 'Round 2', values: { sessions: 24 } }
@@ -53,14 +53,16 @@ export const charts = (
     />
   </>
 )
-const palette = chartPalette(recommendColorPalette(generateColorWall({ brand: '#7c3aed' })))
+const generated = recommendColorPalette(generateColorWall({ brand: '#7c3aed' })),
+  palette = seriesPalette(generated)
+export const legacySeries8: string = chartPalette(generated).dark.series8
 export const theme = defineTheme({
   id: 'charts',
   name: 'Charts',
   components: { chart: { height: '20rem', strokeWidth: '3', gap: '1rem' } },
   modes: {
-    light: { components: { chart: palette.light } },
-    dark: { components: { chart: palette.dark } }
+    light: { tokens: { series: palette.light } },
+    dark: { tokens: { series: palette.dark } }
   }
 })
 export const unnamed = (

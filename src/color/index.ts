@@ -9,3 +9,5 @@ export type {
   PaletteContrastCheck,
   WorkingPaletteRole
 } from './recommendColorPalette.js'
+export { seriesPalette } from './seriesPalette.js'
+export type { SeriesSolids } from './seriesPalette.js'

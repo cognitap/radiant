@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { defaultTheme } from '../dist/library/index.js'
+import {
+  compileThemeDocument,
+  defaultTheme,
+  generateColorWall,
+  recommendColorPalette,
+  seriesPalette,
+  themeDocumentFromDefinition,
+  updateThemeAppearance
+} from '../dist/library/index.js'
 import { themes } from '../dist/library/examples/index.js'
 
 // Linear sRGB and Oklab: https://bottosson.github.io/posts/oklab/
@@ -161,7 +169,42 @@ function backdropsOf(canvas) {
   return /gradient\(/.test(value) ? value.match(/#[\da-f]{3,8}\b/gi) : [value]
 }
 
-const cases = [...new Set([defaultTheme, ...themes])].flatMap(theme =>
+// Themes generated from the colour wall, with its neutral or any hue family as the neutral,
+// take their series from seriesPalette. A vivid brand palette as the neutral is not covered.
+const brands = [
+  '#7c3aed',
+  '#0ea5e9',
+  '#16a34a',
+  '#dc2626',
+  '#f59e0b',
+  '#ffff00',
+  '#db2777',
+  '#111111'
+]
+const generated = ['classic', 'balanced', 'expressive'].flatMap(wallPreset =>
+  brands.flatMap(brand => {
+    const wall = generateColorWall({ brand, wallPreset })
+    const neutrals = wall.color.palettes.map(({ id }) => id).filter(id => id !== 'brand')
+    return neutrals.map(neutral => {
+      const palette = recommendColorPalette(wall, { working: { neutral } }),
+        series = seriesPalette(palette),
+        document = themeDocumentFromDefinition({
+          id: 'wall',
+          name: 'Wall',
+          modes: {
+            light: { tokens: { series: series.light } },
+            dark: { tokens: { series: series.dark } }
+          }
+        })
+      return {
+        ...compileThemeDocument(updateThemeAppearance(document, { palette })),
+        id: `${wallPreset} wall from ${brand} with ${neutral} neutral`
+      }
+    })
+  })
+)
+
+const cases = [...new Set([defaultTheme, ...themes]), ...generated].flatMap(theme =>
   ['light', 'dark'].flatMap(mode => {
     const values = theme.modes[mode]
     return backdropsOf(values['--rad-surface-canvas']).map(canvas => {

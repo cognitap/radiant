@@ -11,7 +11,7 @@ import {
   ChartDataTable,
   chartPalette
 } from '@cognitap/radiant/charts'
-import { generateColorWall, recommendColorPalette } from '@cognitap/radiant/color'
+import { generateColorWall, recommendColorPalette, seriesPalette } from '@cognitap/radiant/color'
 const data = [
     { key: 'one', label: 'Round 1', values: { sessions: 12 } },
     { key: 'two', label: 'Round 2', values: { sessions: 24 } }
@@ -34,12 +34,17 @@ test('the optional Charts entry renders labeled figures, real Tooltip Buttons an
   const table = renderToStaticMarkup(h(ChartDataTable, { label: 'Counts', data, series }))
   assert.match(table, /data-slot="table chart-data-table"/)
 })
-test('palette colors map deterministically without adding a charting-engine dependency', () => {
+test('the deprecated chart palette repeats the series palette without adding a charting-engine dependency', () => {
   const palette = recommendColorPalette(generateColorWall({ brand: '#7c3aed' })),
     first = chartPalette(palette),
-    second = chartPalette(palette)
-  assert.deepEqual(first, second)
-  assert.equal(Object.keys(first.light).length, 6)
+    solids = seriesPalette(palette)
+  assert.deepEqual(first, chartPalette(palette))
+  for (const mode of ['light', 'dark'] as const)
+    for (let n = 1; n <= 8; n++)
+      assert.equal(
+        first[mode][`series${n}` as keyof (typeof first)[typeof mode]],
+        solids[mode][String(n) as keyof (typeof solids)[typeof mode]].solid
+      )
   assert.notDeepEqual(first.light, first.dark)
   assert.throws(
     () =>

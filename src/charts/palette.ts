@@ -1,21 +1,18 @@
 import type { ColorPalette } from '../color/recommendColorPalette.js'
-export function chartPalette(palette: ColorPalette) {
-  const roles = ['primary', 'support', 'success', 'warning', 'danger', 'neutral'] as const
+import { seriesPalette } from '../color/seriesPalette.js'
+type ChartSeriesColors = Record<`series${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}`, string>
+/**
+ * @deprecated Charts read the series tokens. Set `seriesPalette(palette)` as `tokens.series` in
+ * each mode instead, so tags and highlights share the chart colours.
+ */
+export function chartPalette(palette: ColorPalette): {
+  light: ChartSeriesColors
+  dark: ChartSeriesColors
+} {
+  const series = seriesPalette(palette)
   const mode = (mode: 'light' | 'dark') =>
     Object.fromEntries(
-      roles.map((role, index) => [
-        `series${index + 1}`,
-        role === 'neutral'
-          ? palette.working[role][mode].foreground
-          : palette.working[role][mode].background
-      ])
-    ) as {
-      series1: string
-      series2: string
-      series3: string
-      series4: string
-      series5: string
-      series6: string
-    }
+      Object.entries(series[mode]).map(([name, { solid }]) => [`series${name}`, solid])
+    ) as ChartSeriesColors
   return { light: mode('light'), dark: mode('dark') }
 }

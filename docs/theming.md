@@ -139,6 +139,23 @@ The defaults are blue, orange, emerald, pink, sky, amber, violet, and red at the
 
 Series tokens resolve where `ThemeScope` or `:root` declares them, so overriding a role color on an inner element does not recolor them. `components.chart.series1` to `series8` override a chart only.
 
+A theme generated from the color wall sets its series from `seriesPalette(palette)`, which returns `{ light, dark }` solids for `tokens.series` in each mode. It keeps the default hues and moves all eight lightnesses by one shared step only when the palette's surface, canvas, or foreground would miss a target, so the guarantees above hold with the wall's neutral or any hue family as `neutral`. A vivid brand palette as `neutral` is not covered.
+
+```ts
+const palette = recommendColorPalette(generateColorWall({ brand: '#7c3aed' }))
+const { light, dark } = seriesPalette(palette)
+const document = updateThemeAppearance(
+  themeDocumentFromDefinition({
+    id: 'brand',
+    name: 'Brand',
+    modes: { light: { tokens: { series: light } }, dark: { tokens: { series: dark } } }
+  }),
+  { palette }
+)
+```
+
+`chartPalette(palette)` from `@cognitap/radiant/charts` is deprecated. It returns the same solids as `series1` to `series8` chart overrides, which leave tags and highlights on other colors; set `tokens.series` instead.
+
 ## Presets
 
 `defaultTheme` ships in `@cognitap/radiant`. Example themes in `@cognitap/radiant/examples` are `radiant`, `soft`, `sharp`, `glass`, `jelly`, `ticket`, `neon`, and `editorial`, also collected in the `themes` and `themeDefinitions` arrays. Themes name font families and do not download them. Load those families in the app, or they fall back to system fonts.
@@ -155,7 +172,8 @@ Series tokens resolve where `ThemeScope` or `:root` declares them, so overriding
 
 ## Color
 
-`@cognitap/radiant/color` exports two pure functions:
+`@cognitap/radiant/color` exports three pure functions:
 
 - `generateColorWall({ brand, wallPreset })` builds 18 palettes of 11 shades (`50` to `950`) from a six-digit hex brand color.
 - `recommendColorPalette(wall, options)` maps `brand`, `support`, `neutral`, `success`, `warning`, and `danger` to light and dark color tokens. `checks` require 4.5:1 for text and 3:1 for borders, focus rings, and checked fills.
+- `seriesPalette(palette)` returns series solids for that palette (see [Series colors](#series-colors)).

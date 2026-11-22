@@ -7,12 +7,11 @@ import {
   AreaChart,
   PieChart,
   ChartDataTable,
-  chartPalette,
   type ChartProps
 } from '../../src/charts/index.js'
 import { ThemeScope, defineTheme } from '../../src/index.js'
 import { themes } from '../../src/examples/index.js'
-import { generateColorWall, recommendColorPalette } from '../../src/color/index.js'
+import { generateColorWall, recommendColorPalette, seriesPalette } from '../../src/color/index.js'
 import { mount, click, key } from './familyHarness.js'
 const data = [
     { key: 'one', label: 'Round 1', values: { completed: 12, scheduled: 18 } },
@@ -135,14 +134,18 @@ test('RTL point navigation, reduced motion and forced colors retain the value in
   expect(getComputedStyle(host.querySelector('svg path')!).stroke).not.toBe('none')
   expect(host.querySelector('table')).not.toBeNull()
 })
-test('theme mode and generated palette changes resolve series colors through the existing palette system', async () => {
-  const palette = chartPalette(recommendColorPalette(generateColorWall({ brand: '#7c3aed' }))),
+test('theme mode and generated series palette changes resolve chart colors through the series tokens', async () => {
+  const palette = seriesPalette(
+      recommendColorPalette(generateColorWall({ brand: '#7c3aed' }), {
+        working: { neutral: 'lime' }
+      })
+    ),
     theme = defineTheme({
       id: 'chart-colors',
       name: 'Chart colors',
       modes: {
-        light: { components: { chart: palette.light } },
-        dark: { components: { chart: palette.dark } }
+        light: { tokens: { series: palette.light } },
+        dark: { tokens: { series: palette.dark } }
       }
     })
   const { host, render } = await mount(
@@ -163,8 +166,13 @@ test('theme mode and generated palette changes resolve series colors through the
       <Sample />
     </ThemeScope>
   )
-  const dark = getComputedStyle(host.querySelector('svg path')!).stroke
+  const dark = getComputedStyle(host.querySelector('svg path')!).stroke,
+    probe = document.createElement('span')
   expect(dark).not.toBe(light)
+  probe.style.color = palette.dark['1'].solid
+  host.append(probe)
+  expect(dark).toBe(getComputedStyle(probe).color)
+  probe.remove()
 })
 test('chart series resolve to the series tokens in every preset and mode', async () => {
   const eight = Array.from({ length: 8 }, (_, index) => ({

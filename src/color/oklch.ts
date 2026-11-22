@@ -34,7 +34,7 @@ export function rgbToOklch(red: number, green: number, blue: number): Omit<Oklch
   return { L, C, h: C < 1e-6 ? 0 : wrapHue((Math.atan2(bAxis, a) * 180) / Math.PI) }
 }
 
-function linearRgb(L: number, C: number, h: number): Triple {
+export function linearRgb(L: number, C: number, h: number): Triple {
   const angle = (h * Math.PI) / 180
   const a = C * Math.cos(angle),
     b = C * Math.sin(angle)
