@@ -2,6 +2,8 @@ import { Children, isValidElement, type ComponentProps, type ReactNode } from 'r
 import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
 import type { HeadingLevel } from '../../internal/headings.js'
+import type { StateOwner } from '../../react/useNativeOwner.js'
+import { ExpandableStage } from './StageExpand.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { Spacing } from '../../presentation.js'
@@ -92,10 +94,20 @@ type StagePartProps<Host extends 'div' | 'h2' | 'p'> = Omit<ComponentProps<Host>
  * Passive div host and inline-size container; its parts lay out by the Stage's own width.
  * In a box that sizes to its content, Stage takes 20rem.
  */
-export type StageProps = StagePartProps<'div'> & {
-  /** Step of the stage padding scale; `normal` keeps `--rad-stage-padding`. */
-  padding?: Spacing
-}
+export type StageProps = StagePartProps<'div'> &
+  StateOwner<'open', boolean> & {
+    /** Step of the stage padding scale; `normal` keeps `--rad-stage-padding`. */
+    padding?: Spacing
+    /**
+     * Lets the Stage expand into a modal view without remounting its parts. Keep it set for the
+     * life of the mount; `open` has no effect without it.
+     */
+    expandTo?: 'dialog' | 'panel'
+    /** Panel edge, in reading direction. */
+    side?: 'start' | 'end'
+    /** A change request. The controlled owner may decline it; prop syncs do not notify. */
+    onOpenChange?: (open: boolean) => void
+  }
 
 /** Div host for the title, description and actions. */
 export type StageHeaderProps = StagePartProps<'div'>
@@ -125,29 +137,49 @@ export type StageBodyProps = StagePartProps<'div'> & {
 /** Div host for app content after the body. */
 export type StageFooterProps = StagePartProps<'div'>
 
-export function Stage({ padding, className, children, ...props }: StageProps) {
+export function Stage({
+  padding,
+  expandTo,
+  side = 'end',
+  open,
+  defaultOpen,
+  onOpenChange,
+  className,
+  children,
+  ...props
+}: StageProps) {
   const title = findTitle(children)
+  const parts = title
+    ? Children.map(children, child =>
+        isValidElement(child) && child.type === StageHeader ? (
+          child
+        ) : (
+          <HeadingLevelNest
+            level={title.level}
+            fallback={2}
+          >
+            {child}
+          </HeadingLevelNest>
+        )
+      )
+    : children
+  const host = {
+    ...props,
+    className: cn(stageVariants({ padding }), className),
+    'data-slot': joinIds('stage', props['data-slot'])
+  }
+  if (expandTo === undefined) return <div {...host}>{parts}</div>
   return (
-    <div
-      {...props}
-      className={cn(stageVariants({ padding }), className)}
-      data-slot={joinIds('stage', props['data-slot'])}
+    <ExpandableStage
+      host={host}
+      expandTo={expandTo}
+      side={side}
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
     >
-      {title
-        ? Children.map(children, child =>
-            isValidElement(child) && child.type === StageHeader ? (
-              child
-            ) : (
-              <HeadingLevelNest
-                level={title.level}
-                fallback={2}
-              >
-                {child}
-              </HeadingLevelNest>
-            )
-          )
-        : children}
-    </div>
+      {parts}
+    </ExpandableStage>
   )
 }
 

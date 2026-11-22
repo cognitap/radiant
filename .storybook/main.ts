@@ -18,7 +18,8 @@ const config: StorybookConfig = {
           'react-dom',
           '@a2ui/web_core',
           '@a2ui/web_core/errors',
-          '@a2ui/web_core/expressions'
+          '@a2ui/web_core/expressions',
+          'lucide-react'
         ]
       }
     })

@@ -7,6 +7,7 @@ import {
   StageActions,
   StageBody,
   StageDescription,
+  StageExpand,
   StageFooter,
   StageHeader,
   StageTitle
@@ -46,5 +47,36 @@ test('Stage renders a size-container div with named parts on the server', () => 
   assert.throws(
     () => renderToStaticMarkup(h(StageBody, { aspectRatio: 0 })),
     /AspectRatio ratio must be a finite number greater than zero/
+  )
+})
+
+test('an expandable Stage renders its parts in a closed dialog on the server', () => {
+  const html = renderToStaticMarkup(
+    h(
+      Stage,
+      { expandTo: 'panel', side: 'start' },
+      h(
+        StageHeader,
+        null,
+        h(StageTitle, { id: 'route' }, 'Route'),
+        h(StageActions, null, h(StageExpand, { expandLabel: 'Expand', collapseLabel: 'Collapse' }))
+      )
+    )
+  )
+  assert.match(
+    html,
+    /^<div class="[^"]*" data-slot="stage" data-state="closed"><dialog role="generic" class=/
+  )
+  assert.doesNotMatch(html, /<dialog[^>]*\sopen(?=[\s>=])/)
+  assert.match(html, /<h2 id="route"/)
+  assert.match(
+    html,
+    /<button aria-label="Expand" aria-haspopup="dialog" data-slot="button stage-expand" data-state="closed"/
+  )
+  assert.doesNotMatch(html, / expandTo=| side=| expandLabel=| collapseLabel=/)
+  assert.throws(
+    () =>
+      renderToStaticMarkup(h(StageExpand, { expandLabel: 'Expand', collapseLabel: 'Collapse' })),
+    /StageExpand must render inside a Stage with expandTo/
   )
 })

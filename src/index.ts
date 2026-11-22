@@ -494,6 +494,8 @@ export {
   StageHeader,
   StageTitle
 } from './components/Stage/Stage.js'
+export { StageExpand } from './components/Stage/StageExpand.js'
+export type { StageExpandProps } from './components/Stage/StageExpand.js'
 export type {
   StageActionsProps,
   StageBodyProps,
