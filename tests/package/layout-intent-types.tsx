@@ -58,3 +58,23 @@ const items: readonly RevealItem[] = [{ value: 'one', children: 'One' }]
   items={items}
   positionLabel={() => ''}
 />
+;<Reveal
+  items={items}
+  previousLabel="Back"
+  nextLabel="Next"
+  positionLabel={() => ''}
+  playback
+  playLabel="Play"
+  pauseLabel="Pause"
+  interval={4000}
+  loop
+/>
+// @ts-expect-error Playback has no English fallback for its toggle names.
+;<Reveal
+  items={items}
+  previousLabel="Back"
+  nextLabel="Next"
+  positionLabel={() => ''}
+  playback
+  playLabel="Play"
+/>

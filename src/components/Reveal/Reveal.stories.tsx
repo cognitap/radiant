@@ -55,6 +55,23 @@ export const Widths: Story = {
   )
 }
 
+export const AutoPlay: Story = {
+  args: { playback: true, playLabel: 'Play steps', pauseLabel: 'Pause steps', interval: 4000 },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Play moves through the steps on a timer until the last one. Playback waits while the pointer or focus is inside, and is not offered under reduced motion.'
+      }
+    }
+  },
+  render: args => (
+    <div style={{ width: '360px', maxWidth: '100%' }}>
+      <Reveal {...args} />
+    </div>
+  )
+}
+
 function ControlledReveal() {
   const [value, setValue] = useState('name')
   return (

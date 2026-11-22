@@ -411,6 +411,10 @@ test('A2UI catalogs are generated deterministically and stay free of forbidden p
     assert.ok(ext[name].allOf[1].required.includes('items'))
   }
   assert.ok(wireProps(ext.RadioGroup).options.items.properties.description)
+  const reveal = wireProps(ext.Reveal)
+  assert.equal(reveal.playback.default, false)
+  assert.equal(reveal.loop.default, false)
+  assert.deepEqual([reveal.interval.minimum, reveal.interval.default], [1000, 5000])
 })
 
 test('A2UI projection keeps the constraints of props that are also bindable', () => {

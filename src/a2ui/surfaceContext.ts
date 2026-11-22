@@ -24,6 +24,13 @@ export type A2uiSurfaceLabels = {
    * either button label, a Reveal shows every step in order and reports a `defaulted` diagnostic.
    */
   readonly revealPosition?: string | ((index: number, count: number) => string)
+  /** Name of each Reveal's playback toggle while paused. */
+  readonly revealPlay?: string
+  /**
+   * Name of each Reveal's playback toggle while playing. Without it or `revealPlay`, a
+   * `playback` Reveal offers no playback and reports a `defaulted` diagnostic.
+   */
+  readonly revealPause?: string
   /**
    * Name and placeholder of a filterable ChoicePicker's filter input, such as `Filter {label}`
    * with the picker's label, or a function of that label; keep a function's identity stable.

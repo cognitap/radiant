@@ -1022,7 +1022,7 @@ export type {
 } from './components/Compare/Compare.js'
 
 export { Reveal } from './components/Reveal/Reveal.js'
-export type { RevealItem, RevealProps } from './components/Reveal/Reveal.js'
+export type { RevealItem, RevealPlayback, RevealProps } from './components/Reveal/Reveal.js'
 
 export {
   Matrix,
