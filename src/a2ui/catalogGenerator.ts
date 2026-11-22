@@ -612,12 +612,76 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
     props: { required: REQUIRED_MARK },
     requireBindings: true
   },
-  { a2uiName: 'Alert', sourceEntry: 'Alert' },
-  { a2uiName: 'Badge', sourceEntry: 'Badge' },
-  { a2uiName: 'Progress', sourceEntry: 'Progress' },
-  { a2uiName: 'Accordion', sourceEntry: 'Accordion' },
-  { a2uiName: 'Table', sourceEntry: 'Table' },
-  { a2uiName: 'Toast', sourceEntry: 'Toast' },
+  { a2uiName: 'Alert', sourceEntry: 'Alert', bindable: ['title', 'description'] },
+  { a2uiName: 'Badge', sourceEntry: 'Badge', bindable: ['text'] },
+  { a2uiName: 'Progress', sourceEntry: 'Progress', bindable: ['label'] },
+  {
+    a2uiName: 'Accordion',
+    sourceEntry: 'Accordion',
+    guidance: {
+      whenToUse:
+        'Sections opened on demand, such as FAQs; each of the `items` names the `panel` it discloses.',
+      whenNotToUse: 'Switching views where one is always shown (Tabs) or a single short note.',
+      examples: ['FAQ with one section open at a time', 'order details, `selection: multiple`']
+    },
+    omit: ['panels'],
+    props: {
+      items: {
+        type: 'array',
+        minItems: 1,
+        description: 'Ordered sections, each with a distinct value and the panel it discloses.',
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['value', 'title', 'panel'],
+          properties: {
+            value: { type: 'string', minLength: 1, description: 'Stable section identifier.' },
+            title: { $ref: `${COMMON}DynamicString`, description: 'Section trigger heading.' },
+            panel: { $ref: `${COMMON}Child`, description: 'Content shown when the section opens.' },
+            disabled: {
+              type: 'boolean',
+              default: false,
+              description: 'Prevents expanding or collapsing this section.'
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    a2uiName: 'Table',
+    sourceEntry: 'Table',
+    guidance: {
+      whenToUse:
+        'Records compared across fields. Each of `rows` is a Row with one child per `columns` entry; a template repeats it per data item, and cells bind item-relative paths.',
+      whenNotToUse: 'Layout, or items without shared fields (List).',
+      examples: [
+        'invoices, `rows` templated over a data path, `align: end` on amount',
+        'team members with role and status Badge cells'
+      ]
+    },
+    description:
+      'Tabular records with agent-defined columns, backed by Radiant Table. Templated rows are keyed by item index.',
+    omit: ['columns.field', 'data'],
+    bindable: ['caption']
+  },
+  {
+    a2uiName: 'Toast',
+    sourceEntry: 'Toast',
+    guidance: {
+      whenToUse:
+        'Confirming an action the user just took. Bind `open` to a data path, never a literal; the host sets it true in reply, writing false first to show it again.',
+      whenNotToUse: 'Messages that must stay (Alert) or decisions before continuing (Modal).',
+      examples: ['Draft saved, `open` bound to a data path', 'Message deleted, `actionLabel: Undo`']
+    },
+    bindable: ['title', 'description'],
+    props: {
+      open: {
+        $ref: `${COMMON}DataBinding`,
+        description: 'Data path that shows the toast while true; dismissal writes false.'
+      }
+    }
+  },
   { a2uiName: 'Stage', sourceEntry: 'Stage' }
 ]
 
@@ -848,6 +912,7 @@ function projectExtension(
     properties[wireName] = structuredClone(schema)
   }
   for (const [slotName, slotConstraint] of Object.entries(entry.slots)) {
+    if (omit.has(slotName)) continue
     properties[slotName] = slotSchema(slotConstraint)
     if (slotConstraint.required) required.push(slotName)
   }

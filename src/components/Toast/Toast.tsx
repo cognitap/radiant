@@ -73,6 +73,8 @@ type Queue = {
   register(id: string): () => void
   publish(id: string, text: string, urgency: ToastAnnouncement, view: Window): void
   clear(id: string): void
+  viewport: HTMLElement | null
+  registerViewport(node: HTMLElement): () => void
 }
 const QueueContext = createContext<Queue | null>(null)
 const ToastContext = createContext<ToastState | null>(null)
@@ -80,6 +82,11 @@ function useQueue() {
   const value = useContext(QueueContext)
   if (!value) throw new Error('Toast and ToastViewport must render inside ToastProvider.')
   return value
+}
+/** Internal: the enclosing ToastProvider's mounted viewport, or null outside a provider. */
+export function useToastQueueViewport(): { readonly viewport: HTMLElement | null } | null {
+  const queue = useContext(QueueContext)
+  return queue ? { viewport: queue.viewport } : null
 }
 export function useToast(): ToastState | null {
   return useContext(ToastContext)
@@ -91,9 +98,31 @@ function useToastContext() {
 }
 
 /** One visible toast at a time. Declarative open roots wait in registration order. */
-export function ToastProvider({ duration = 0, children }: ToastProviderProps) {
+export function ToastProvider(props: ToastProviderProps) {
+  return (
+    <ToastQueueProvider
+      {...props}
+      announcers
+    />
+  )
+}
+
+/**
+ * Internal: ToastProvider whose live announcers render only while `announcers` is true, so a
+ * caller can mount the queue before it has a named viewport without remounting its children.
+ */
+export function ToastQueueProvider({
+  duration = 0,
+  announcers,
+  children
+}: ToastProviderProps & { announcers: boolean }) {
   validateToastDuration(duration)
   const [queue, setQueue] = useState<string[]>([])
+  const [viewport, setViewport] = useState<HTMLElement | null>(null)
+  const registerViewport = useCallback((node: HTMLElement) => {
+    setViewport(node)
+    return () => setViewport(current => (current === node ? null : current))
+  }, [])
   const [live, setLive] = useState({ polite: '', assertive: '' })
   const current = useRef<{
     id: string
@@ -142,21 +171,27 @@ export function ToastProvider({ duration = 0, children }: ToastProviderProps) {
     []
   )
   return (
-    <QueueContext.Provider value={{ duration, queue, register, publish, clear }}>
+    <QueueContext.Provider
+      value={{ duration, queue, register, publish, clear, viewport, registerViewport }}
+    >
       {children}
-      <output
-        className="sr-only"
-        data-slot="toast-announcer"
-      >
-        {live.polite}
-      </output>
-      <div
-        className="sr-only"
-        data-slot="toast-announcer"
-        role="alert"
-      >
-        {live.assertive}
-      </div>
+      {announcers ? (
+        <output
+          className="sr-only"
+          data-slot="toast-announcer"
+        >
+          {live.polite}
+        </output>
+      ) : null}
+      {announcers ? (
+        <div
+          className="sr-only"
+          data-slot="toast-announcer"
+          role="alert"
+        >
+          {live.assertive}
+        </div>
+      ) : null}
     </QueueContext.Provider>
   )
 }
@@ -364,10 +399,14 @@ export function ToastClose({ onClick, ...props }: ToastCloseProps) {
 }
 export function ToastViewport({ hotkey = true, ref, className, ...props }: ToastViewportProps) {
   requireAccessibleName('ToastViewport', props)
-  useQueue()
+  const { registerViewport } = useQueue()
   const nativeProps = { ...props, role: undefined }
   const nodeRef = useRef<HTMLElement>(null)
   const host = useComposedRefs(nodeRef, ref)
+  useLayoutEffect(
+    () => (nodeRef.current ? registerViewport(nodeRef.current) : undefined),
+    [registerViewport]
+  )
   useEffect(() => {
     const node = nodeRef.current
     if (!node || !hotkey) return

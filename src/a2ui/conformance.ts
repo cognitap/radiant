@@ -3,6 +3,7 @@ import { A2UI_BASIC_CATALOG_ID, generateA2uiCatalogs } from './catalogGenerator.
 import type { A2uiMessage } from './sanitize.js'
 import * as appExtensionFixtures from './appExtensionFixtures.js'
 import * as extensionFixtures from './extensionFixtures.js'
+import * as feedbackFixtures from './feedbackFixtures.js'
 import * as profileFixtures from './fixtures.js'
 import * as inputFixtures from './inputFixtures.js'
 import * as layoutFixtures from './layoutFixtures.js'
@@ -40,7 +41,8 @@ const FIXTURE_MODULES: Readonly<Record<string, Readonly<Record<string, unknown>>
   'mediaFixtures.ts': mediaFixtures,
   'extensionFixtures.ts': extensionFixtures,
   'appExtensionFixtures.tsx': appExtensionFixtures,
-  'stageFixtures.ts': stageFixtures
+  'stageFixtures.ts': stageFixtures,
+  'feedbackFixtures.ts': feedbackFixtures
 }
 
 /** Fixture files in `src/a2ui/` that the conformance suite reads. */

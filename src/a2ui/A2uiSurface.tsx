@@ -57,7 +57,16 @@ import {
 import { a2uiWebCoreCatalogs, type A2uiRegistry, type A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import { useSignalValue } from './useSignalValue.js'
-import { A2uiLabelsContext, type A2uiSurfaceLabels } from './surfaceContext.js'
+import {
+  ToastQueueProvider,
+  ToastViewport,
+  useToastQueueViewport
+} from '../components/Toast/Toast.js'
+import {
+  A2uiLabelsContext,
+  A2uiToastHostContext,
+  type A2uiSurfaceLabels
+} from './surfaceContext.js'
 import {
   animateNodeEntry,
   captureFocusSnapshot,
@@ -91,7 +100,7 @@ export type A2uiSurfaceProps = {
    * catalog or protocol errors (`kind: 'error'` with a `code`).
    */
   readonly onDiagnostic?: (diagnostic: CatalogDiagnostic) => void
-  /** Host-supplied text for controls the agent cannot describe, such as `modalClose`. */
+  /** Host-supplied text for controls the agent cannot describe; `notifications` gives Toast a viewport. */
   readonly labels?: A2uiSurfaceLabels
 }
 
@@ -777,9 +786,13 @@ export function A2uiSurface({
   )
   const waiting = !rootNode && phase !== 'closed'
   const modalClose = labels?.modalClose
-  const labelValue = useMemo(() => ({ modalClose }), [modalClose])
-
-  return (
+  const toastClose = labels?.toastClose
+  const notifications = labels?.notifications?.trim()
+  const labelValue = useMemo(
+    () => ({ modalClose, notifications, toastClose }),
+    [modalClose, notifications, toastClose]
+  )
+  const surface = (
     <div
       ref={surfaceRef}
       tabIndex={-1}
@@ -806,4 +819,37 @@ export function A2uiSurface({
       ) : null}
     </div>
   )
+
+  return <A2uiToastScope notifications={notifications}>{surface}</A2uiToastScope>
 }
+
+/**
+ * Gives a surface's Toast nodes a queue and viewport: a host ToastProvider's when one encloses
+ * the surface, else the surface's own. The queue mounts unconditionally, so a label arriving
+ * later keeps the tree; the viewport and announcers render beside the surface only with a label.
+ */
+function A2uiToastScope({
+  notifications,
+  children
+}: {
+  readonly notifications: string | undefined
+  readonly children: ReactNode
+}) {
+  const outer = useToastQueueViewport()
+  if (outer) {
+    return (
+      <A2uiToastHostContext.Provider value={HOST_TOASTS}>{children}</A2uiToastHostContext.Provider>
+    )
+  }
+  return (
+    <ToastQueueProvider announcers={Boolean(notifications)}>
+      <A2uiToastHostContext.Provider value={notifications ? HOST_TOASTS : NO_TOASTS}>
+        {children}
+        {notifications ? <ToastViewport aria-label={notifications} /> : null}
+      </A2uiToastHostContext.Provider>
+    </ToastQueueProvider>
+  )
+}
+
+const HOST_TOASTS = { available: true }
+const NO_TOASTS = { available: false }
