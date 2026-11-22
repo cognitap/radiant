@@ -144,6 +144,8 @@ test('the expanded view is a modal dialog named by the Stage title that traps fo
   expect(view.open).toBe(true)
   const title = host.querySelector('[data-slot~="stage-title"]')!
   expect(view.getAttribute('aria-labelledby')).toBe(title.id)
+  expect(view.hasAttribute('role')).toBe(false)
+  expect(parts(host).toggle.getAttribute('aria-haspopup')).toBe('dialog')
   expect(document.querySelector(':modal')).toBe(view)
   toggle.focus()
   // The rest of the page is inert: past the last control, focus leaves the page, then returns.
@@ -212,11 +214,64 @@ test('the expanded view springs open and reduced motion skips the spring', async
   expect(Number(view.style.scale)).toBeLessThan(1)
   await expect.poll(() => Number(view.style.scale) > 0.99).toBe(true)
   await click(toggle)
-  await commands.emulatePreferences({ reducedMotion: 'reduce' })
-  await frame()
+  // The view closes at once; a copy outside the Stage keeps its frame while it shrinks away.
+  const ghost = document.querySelector<HTMLElement>('[data-rad-motion-exit]')!
+  expect(ghost.parentElement).toBe(document.body)
+  const frameStyle = getComputedStyle(ghost)
+  expect(frameStyle.backgroundColor).toBe(getComputedStyle(parts(host).stage).backgroundColor)
+  expect(frameStyle.borderTopWidth).toBe('1px')
+  expect(frameStyle.paddingTop).toBe(getComputedStyle(parts(host).stage).paddingTop)
+  try {
+    await commands.emulatePreferences({ reducedMotion: 'reduce' })
+    await frame()
+    await click(toggle)
+    expect(view.style.scale).toBe('1')
+    expect(view.open).toBe(true)
+  } finally {
+    await commands.emulatePreferences({ reducedMotion: 'no-preference' })
+  }
+})
+
+test('collapsed parts keep the theme text color and the closed view is not a dialog', async () => {
+  const { host } = await mount(expandable({ style: { color: 'rgb(200, 0, 0)' } }))
+  const { view, toggle } = parts(host)
+  const title = host.querySelector('[data-slot~="stage-title"]')!
+  expect(getComputedStyle(title).color).toBe('rgb(200, 0, 0)')
+  expect(view.getAttribute('role')).toBe('generic')
+  expect(view.hasAttribute('aria-labelledby')).toBe(false)
   await click(toggle)
-  expect(view.style.scale).toBe('1')
-  expect(view.open).toBe(true)
+  expect(getComputedStyle(title).color).toBe('rgb(200, 0, 0)')
+  await click(toggle)
+  expect(view.getAttribute('role')).toBe('generic')
+  expect(view.hasAttribute('aria-labelledby')).toBe(false)
+  expect(view.getAttribute('style') ?? '').toBe('')
+})
+
+test('the view names itself by the title present when it opens', async () => {
+  const titled = (text: string, id?: string) => (
+    <Stage expandTo="dialog">
+      <StageHeader>
+        <StageTitle
+          key={text}
+          id={id}
+        >
+          {text}
+        </StageTitle>
+        <StageActions>
+          <StageExpand
+            expandLabel="Expand"
+            collapseLabel="Collapse"
+          />
+        </StageActions>
+      </StageHeader>
+    </Stage>
+  )
+  const { host, render } = await mount(titled('First'))
+  const { view, toggle } = parts(host)
+  await render(titled('Second', 'second'))
+  await click(toggle)
+  expect(view.getAttribute('aria-labelledby')).toBe('second')
+  expect(document.getElementById('second')!.textContent).toBe('Second')
 })
 
 test('server markup hydrates in StrictMode and StageExpand requires its labels and an expandable Stage', async () => {

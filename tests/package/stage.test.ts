@@ -54,7 +54,7 @@ test('an expandable Stage renders its parts in a closed dialog on the server', (
   const html = renderToStaticMarkup(
     h(
       Stage,
-      { expandTo: 'panel', side: 'start', defaultOpen: true },
+      { expandTo: 'panel', side: 'start' },
       h(
         StageHeader,
         null,
@@ -63,12 +63,15 @@ test('an expandable Stage renders its parts in a closed dialog on the server', (
       )
     )
   )
-  assert.match(html, /^<div class="[^"]*" data-slot="stage" data-state="open"><dialog class=/)
+  assert.match(
+    html,
+    /^<div class="[^"]*" data-slot="stage" data-state="closed"><dialog role="generic" class=/
+  )
   assert.doesNotMatch(html, /<dialog[^>]*\sopen(?=[\s>=])/)
   assert.match(html, /<h2 id="route"/)
   assert.match(
     html,
-    /<button aria-label="Collapse" data-slot="button stage-expand" data-state="open"/
+    /<button aria-label="Expand" aria-haspopup="dialog" data-slot="button stage-expand" data-state="closed"/
   )
   assert.doesNotMatch(html, / expandTo=| side=| expandLabel=| collapseLabel=/)
   assert.throws(

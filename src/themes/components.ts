@@ -745,7 +745,8 @@ export const componentRegistry = {
     titleWeight: 'weight',
     descriptionColor: 'css',
     descriptionSize: 'css',
-    expandedWidth: 'css'
+    expandedWidth: 'css',
+    panelWidth: 'css'
   },
   grid: { minItemWidth: 'css' }
 } as const
