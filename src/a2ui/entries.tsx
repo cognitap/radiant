@@ -16,6 +16,7 @@ import {
   type ComponentNode,
   type NodeAction
 } from '@a2ui/web_core/resolution'
+import { cn } from 'cn'
 import { Button, type ButtonVariant } from '../components/Button/Button.js'
 import { Card } from '../components/Card/Card.js'
 import { Checkbox } from '../components/Checkbox/Checkbox.js'
@@ -28,6 +29,12 @@ import {
 } from '../components/Field/Field.js'
 import { Input } from '../components/Input/Input.js'
 import { Radio } from '../components/RadioGroup/RadioGroup.js'
+import {
+  checkboxGroupClass,
+  checkboxGroupLabelClass,
+  checkboxOptionsClass,
+  radioOptionsClass
+} from '../components/shared/groupStyles.js'
 import { Separator } from '../components/Separator/Separator.js'
 import { Slider } from '../components/Slider/Slider.js'
 import { Stack, type StackAlign, type StackJustify } from '../components/Stack/Stack.js'
@@ -705,7 +712,8 @@ function A2uiChoicePicker({
     filterable && needle ? options.filter(o => o.label.toLowerCase().includes(needle)) : options
   // Toggles keep selections the filter hides.
   const toggle = (value: string, checked: boolean) =>
-    onSelect(checked ? [...selected, value] : selected.filter(v => v !== value))
+    onSelect(checked ? [...new Set([...selected, value])] : selected.filter(v => v !== value))
+  const checkboxes = multiple && !chips
 
   let choices: ReactNode
   if (chips) {
@@ -740,11 +748,7 @@ function A2uiChoicePicker({
     choices = (
       <div
         data-slot={multiple ? 'checkbox-group-options' : 'radio-group-options'}
-        className={
-          multiple
-            ? 'grid min-w-0 justify-items-start gap-[var(--rad-checkbox-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
-            : 'grid min-w-0 justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
-        }
+        className={multiple ? checkboxOptionsClass : radioOptionsClass}
       >
         {visible.map(o =>
           multiple ? (
@@ -777,7 +781,15 @@ function A2uiChoicePicker({
         layout="group"
         label={label}
         error={error}
-        parts={srOnly ? SR_ONLY_LABEL_PARTS : undefined}
+        className={checkboxes ? checkboxGroupClass : undefined}
+        parts={{
+          label: {
+            className: cn(
+              checkboxes && checkboxGroupLabelClass,
+              srOnly && SR_ONLY_LABEL_PARTS.label.className
+            )
+          }
+        }}
         data-slot="a2ui-choice-picker"
       >
         <WithoutField>

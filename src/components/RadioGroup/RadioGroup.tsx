@@ -22,6 +22,7 @@ import type { FieldProps } from '../Field/Field.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize, ControlParts, PartStyle } from '../../presentation.js'
 import { focusRingClass } from '../shared/focusStyles.js'
+import { radioOptionsClass } from '../shared/groupStyles.js'
 
 const radioVariants = cva([
   controlBorderClass,
@@ -60,9 +61,6 @@ const labelClass =
 
 const descriptionClass =
   'ms-[calc(var(--rad-radio-size,var(--_rad-control-indicator-size))+var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem)))] min-w-0 break-words [color:var(--rad-radio-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] text-[length:var(--rad-radio-description-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] forced-colors:text-[CanvasText] font-[family-name:var(--rad-typography-roles-ui-supporting-family,system-ui,sans-serif)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)] tracking-[var(--rad-typography-roles-ui-supporting-letter-spacing,0em)] font-[number:var(--rad-typography-roles-ui-supporting-weight,400)]'
-
-const optionsClass =
-  'grid justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
 
 type RadioGroupContextValue = {
   name: string
@@ -160,7 +158,7 @@ export function RadioGroup({
           }}
         >
           <div
-            className={cn(optionsClass, optionsPart?.className)}
+            className={cn(radioOptionsClass, optionsPart?.className)}
             style={optionsPart?.style}
             data-slot="radio-group-options"
           >

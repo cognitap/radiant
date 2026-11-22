@@ -15,6 +15,11 @@ import { Field, OwnedControls, type FieldProps } from '../Field/Field.js'
 import { useNativeOwner, type ValueOwner, type CheckedOwner } from '../../react/useNativeOwner.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { cn } from 'cn'
+import {
+  checkboxGroupClass,
+  checkboxGroupLabelClass,
+  checkboxOptionsClass
+} from '../shared/groupStyles.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'
 type OptionPresentation = Omit<
@@ -217,13 +222,13 @@ export function CheckboxGroup({
         form={form}
         ref={hostRef}
         data-slot={joinIds('checkbox-group', props['data-slot'])}
-        className={cn(
-          'max-w-full [gap:var(--rad-fieldset-gap,var(--rad-spacing-group-gap,0.75rem))]',
-          className
-        )}
+        className={cn(checkboxGroupClass, className)}
         parts={{
           ...fieldParts,
-          label: { ...fieldParts.label, className: cn('max-w-full', fieldParts.label?.className) }
+          label: {
+            ...fieldParts.label,
+            className: cn(checkboxGroupLabelClass, fieldParts.label?.className)
+          }
         }}
         data-control-size={controlSize}
       >
@@ -247,10 +252,7 @@ export function CheckboxGroup({
         <div
           data-slot="checkbox-group-options"
           style={optionsPart?.style}
-          className={cn(
-            'grid min-w-0 justify-items-start gap-[var(--rad-checkbox-group-gap,var(--rad-spacing-group-gap,0.75rem))]',
-            optionsPart?.className
-          )}
+          className={cn(checkboxOptionsClass, optionsPart?.className)}
         >
           {items.map((item, index) => (
             <Option
