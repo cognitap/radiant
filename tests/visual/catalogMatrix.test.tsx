@@ -25,7 +25,13 @@ const labels = {
   revealPrevious: 'Previous',
   revealNext: 'Next',
   revealPosition: 'Step {index} of {count}',
-  filter: 'Filter {label}'
+  filter: 'Filter {label}',
+  sortableInstructions:
+    'Press Space to pick up. Use the arrow keys to move, Space to drop and Escape to cancel.',
+  sortablePickUp: 'Picked up {item}, position {position} of {count}.',
+  sortableMove: '{item}, position {position} of {count}.',
+  sortableDrop: 'Dropped {item} at position {position} of {count}.',
+  sortableCancel: 'Cancelled. {item} is back at position {position} of {count}.'
 }
 const mounted: { host: HTMLElement; root: Root }[] = []
 

@@ -1562,6 +1562,52 @@ export const radiantCatalog: Catalog = defineCatalog({
       },
       bindings: {},
       actions: {}
+    },
+
+    SortableList: {
+      name: 'SortableList',
+      category: 'input',
+      description:
+        'An ordered list the user reorders by dragging or with the keyboard; the order is the value.',
+      guidance: {
+        whenToUse: 'The user ranks or sequences a few known `items`, such as priorities.',
+        whenNotToUse: 'Choosing some items (Choice) or a fixed order the user only reads (List).',
+        examples: ['rank three trip priorities', 'playlist order bound to a data path']
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'items'],
+        properties: {
+          label: { type: 'string', minLength: 1, description: 'Visible list label.' },
+          description: { type: 'string', description: 'Optional helper text.' },
+          items: {
+            type: 'array',
+            minItems: 1,
+            description: 'Items in their starting order; the bound value reorders them.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['value', 'label'],
+              properties: {
+                value: { type: 'string', minLength: 1, description: 'Stable item value.' },
+                label: { type: 'string', minLength: 1, description: 'Visible item text.' }
+              }
+            }
+          },
+          disabled: { type: 'boolean', default: false, description: 'Prevents reordering.' },
+          controlSize: controlSizeSchema
+        }
+      },
+      slots: {},
+      bindings: {
+        value: {
+          description: 'Item values in their current order, bound to surface state.',
+          valueType: 'string[]',
+          direction: 'two-way'
+        }
+      },
+      actions: {}
     }
   }
 })

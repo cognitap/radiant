@@ -10,6 +10,7 @@ import {
   validateA2uiAccessibility,
   type A2uiActionPayload,
   type A2uiMessage,
+  type A2uiSurfaceLabels,
   type CatalogDiagnostic
 } from '../../src/a2ui/index.js'
 import {
@@ -17,11 +18,12 @@ import {
   EXTENSION_SURFACE_ID,
   radioGroupFixtureMessages,
   selectFixtureMessages,
+  sortableListFixtureMessages,
   switchFixtureMessages,
   textareaFixtureMessages
 } from '../../src/a2ui/extensionFixtures.js'
 import { a2uiWebCoreCatalogs } from '../../src/a2ui/registry.js'
-import { mount } from './familyHarness.js'
+import { key, mount } from './familyHarness.js'
 
 const click = (target: Element) =>
   act(async () => {
@@ -57,7 +59,7 @@ function withControl(
   return copy
 }
 
-async function render(messages: readonly A2uiMessage[]) {
+async function render(messages: readonly A2uiMessage[], labels?: A2uiSurfaceLabels) {
   const diagnostics: CatalogDiagnostic[] = []
   const onAction = vi.fn<(event: A2uiActionPayload) => void>()
   const view = await mount(
@@ -66,6 +68,7 @@ async function render(messages: readonly A2uiMessage[]) {
       messages={messages}
       onAction={onAction}
       onDiagnostic={d => diagnostics.push(d)}
+      labels={labels}
     />
   )
   return { ...view, diagnostics, onAction }
@@ -400,4 +403,121 @@ test('the AnnotatedText label rule accepts a bound label and flags a missing one
   expect(rules({ path: '/title' })).not.toContain('annotated-text-label')
   expect(rules('Review')).not.toContain('annotated-text-label')
   expect(rules(' ')).toContain('annotated-text-label')
+})
+
+const sortableLabels: A2uiSurfaceLabels = {
+  sortableInstructions: 'Space picks up, arrows move, Space drops, Escape cancels.',
+  sortablePickUp: 'Picked up {item}, {position} of {count}.',
+  sortableMove: (item, index, count) => `${item}: ${index + 1} of ${count}.`,
+  sortableDrop: 'Dropped {item} at {position} of {count}.',
+  sortableCancel: 'Cancelled {item}.'
+}
+const stops = (host: HTMLElement) =>
+  Array.from(host.querySelectorAll('[data-slot~="sortable-list-item-content"]'), n => n.textContent)
+
+test('SortableList follows its bound order and writes reorders back', async () => {
+  const { host, onAction } = await render(sortableListFixtureMessages, sortableLabels)
+  const list = host.querySelector('ol[data-slot~="sortable-list"]')!
+  const legend = host.querySelector('legend')!
+  expect(legend.textContent).toContain('Order of stops')
+  expect(list.getAttribute('aria-labelledby')).toBe(legend.id)
+  expect(stops(host)).toEqual(['Market', 'Museum', 'Park'])
+  const park = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('[data-slot~="sortable-list-handle"]')
+  ).at(-1)!
+  await act(async () => park.focus())
+  await key(' {Home} ')
+  expect(stops(host)).toEqual(['Park', 'Market', 'Museum'])
+  await expect
+    .poll(() => host.querySelector('[data-slot="sortable-list-status"]')!.textContent, {
+      timeout: 2_000
+    })
+    .toBe('Dropped Park at 1 of 3.')
+  await save(host)
+  expect(onAction.mock.calls.at(-1)?.[0].action).toBe('save_settings')
+  expect(onAction.mock.calls.at(-1)?.[0].context).toEqual({ value: ['park', 'market', 'museum'] })
+})
+
+test('SortableList appends streamed items and shows a static list without host labels', async () => {
+  const { host, render: rerender } = await render(sortableListFixtureMessages, sortableLabels)
+  await rerender(
+    <A2uiSurface
+      surfaceId={EXTENSION_SURFACE_ID}
+      labels={sortableLabels}
+      messages={[
+        ...sortableListFixtureMessages,
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          updateDataModel: {
+            surfaceId: EXTENSION_SURFACE_ID,
+            path: '/stops',
+            value: [
+              { value: 'museum', label: 'Museum' },
+              { value: 'cafe', label: 'Cafe' },
+              { value: 'market', label: 'Market' },
+              { value: 'park', label: 'Park' }
+            ]
+          }
+        }
+      ]}
+    />
+  )
+  expect(stops(host)).toEqual(['Market', 'Museum', 'Park', 'Cafe'])
+
+  const plain = await render(sortableListFixtureMessages)
+  expect(plain.host.querySelector('[data-slot~="sortable-list-handle"]')).toBeNull()
+  expect(
+    Array.from(
+      plain.host.querySelectorAll('[data-slot="a2ui-sortable-list"] li'),
+      n => n.textContent
+    )
+  ).toEqual(['Market', 'Museum', 'Park'])
+  await vi.waitFor(() =>
+    expect(plain.diagnostics).toContainEqual(
+      expect.objectContaining({ kind: 'defaulted', component: 'SortableList', nodeId: 'control' })
+    )
+  )
+})
+
+test('SortableList drops repeated and unknown bound values and fills templates once', async () => {
+  const { host } = await render(
+    withControl(sortableListFixtureMessages, {}, { route: ['park', 'park', 'zoo', 'market'] }),
+    {
+      ...sortableLabels,
+      sortablePickUp: 'Picked up {item} at {position}/{count}.',
+      sortableHandle: 'Move {item}'
+    }
+  )
+  expect(stops(host)).toEqual(['Park', 'Market', 'Museum'])
+  expect(host.querySelectorAll('[data-slot~="sortable-list-item"]')).toHaveLength(3)
+  const handles = Array.from(
+    host.querySelectorAll<HTMLButtonElement>('[data-slot~="sortable-list-handle"]')
+  )
+  expect(handles.map(node => node.getAttribute('aria-label'))).toEqual([
+    'Move Park',
+    'Move Market',
+    'Move Museum'
+  ])
+  await act(async () => handles[0]!.focus())
+  await key(' ')
+  await act(async () => {
+    await vi.waitFor(
+      () =>
+        expect(host.querySelector('[data-slot="sortable-list-status"]')!.textContent).toBe(
+          'Picked up Park at 1/3.'
+        ),
+      { timeout: 2_000 }
+    )
+  })
+  await key('{Escape}')
+
+  const plain = await render(
+    withControl(sortableListFixtureMessages, {}, { route: ['park', 'park', 'zoo'] })
+  )
+  expect(
+    Array.from(
+      plain.host.querySelectorAll('[data-slot="a2ui-sortable-list"] li'),
+      node => node.textContent
+    )
+  ).toEqual(['Park', 'Museum', 'Market'])
 })

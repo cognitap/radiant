@@ -1014,3 +1014,10 @@ export type {
   MatrixRowProps,
   MatrixValue
 } from './components/Matrix/Matrix.js'
+
+export { SortableList, SortableListItem } from './components/SortableList/SortableList.js'
+export type {
+  SortableListItemProps,
+  SortableListProps,
+  SortableListText
+} from './components/SortableList/SortableList.js'

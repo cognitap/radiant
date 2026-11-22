@@ -830,6 +830,12 @@ export function A2uiSurface({
   const revealNext = labels?.revealNext
   const revealPosition = labels?.revealPosition
   const filter = labels?.filter
+  const sortableInstructions = labels?.sortableInstructions
+  const sortablePickUp = labels?.sortablePickUp
+  const sortableMove = labels?.sortableMove
+  const sortableDrop = labels?.sortableDrop
+  const sortableCancel = labels?.sortableCancel
+  const sortableHandle = labels?.sortableHandle
   const labelValue = useMemo(
     () => ({
       modalClose,
@@ -838,9 +844,29 @@ export function A2uiSurface({
       revealPrevious,
       revealNext,
       revealPosition,
-      filter
+      filter,
+      sortableInstructions,
+      sortablePickUp,
+      sortableMove,
+      sortableDrop,
+      sortableCancel,
+      sortableHandle
     }),
-    [modalClose, notifications, toastClose, revealPrevious, revealNext, revealPosition, filter]
+    [
+      modalClose,
+      notifications,
+      toastClose,
+      revealPrevious,
+      revealNext,
+      revealPosition,
+      filter,
+      sortableInstructions,
+      sortablePickUp,
+      sortableMove,
+      sortableDrop,
+      sortableCancel,
+      sortableHandle
+    ]
   )
   const surface = (
     <div

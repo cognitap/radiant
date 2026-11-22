@@ -126,3 +126,23 @@ export const textareaFixtureMessages = surface(
   },
   '/bio'
 )
+
+/** SortableList whose `items` and order come from the data model. */
+export const sortableListFixtureMessages = surface(
+  {
+    stops: [
+      { value: 'museum', label: 'Museum' },
+      { value: 'market', label: 'Market' },
+      { value: 'park', label: 'Park' }
+    ],
+    route: ['market', 'museum', 'park']
+  },
+  {
+    component: 'SortableList',
+    label: 'Order of stops',
+    description: 'Drag a stop or use its handle with the keyboard.',
+    items: { '@path': '/stops' },
+    value: { '@path': '/route' }
+  },
+  '/route'
+)
