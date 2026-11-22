@@ -105,6 +105,8 @@ for (const mode of ['light', 'dark'] as const) {
     await commands.emulatePreferences({ colorScheme: mode })
     await mount(
       <>
+        {/* Colors read here are the theme's, so they must not land mid-transition. */}
+        <style>{'[data-case], [data-case] * { transition: none !important; }'}</style>
         <ThemeScope
           theme={brand}
           mode="system"
@@ -140,25 +142,29 @@ for (const mode of ['light', 'dark'] as const) {
       host.querySelector<HTMLInputElement>(`[data-case=${name}] input`)!
     const light = 'rgb(10, 50, 90)'
     const dark = 'rgb(200, 220, 240)'
-    expect(getComputedStyle(button('parent')).backgroundColor).toBe(mode === 'light' ? light : dark)
+    const background = (name: string) => getComputedStyle(button(name)).backgroundColor
+    await expect.poll(() => background('parent')).toBe(mode === 'light' ? light : dark)
     expect(getComputedStyle(button('inherited')).borderRadius).toBe('23px')
     expect(getComputedStyle(input('inherited')).borderRadius).toBe('19px')
-    expect(getComputedStyle(button('mode')).backgroundColor).toBe(mode === 'light' ? dark : light)
+    await expect.poll(() => background('mode')).toBe(mode === 'light' ? dark : light)
     expect(getComputedStyle(input('mode')).borderRadius).toBe('19px')
     for (const element of ['button', 'input']) {
       const reset = host.querySelector(`[data-case=reset] ${element}`)!
       const sibling = host.querySelector(`[data-case=sibling] ${element}`)!
       for (const property of ['border-radius', 'background-color', 'box-shadow']) {
-        expect(getComputedStyle(reset).getPropertyValue(property)).toBe(
-          getComputedStyle(sibling).getPropertyValue(property)
-        )
+        await expect
+          .poll(() => {
+            const [own, other] = [reset, sibling].map(node =>
+              getComputedStyle(node).getPropertyValue(property)
+            )
+            return own === other ? 'equal' : `${own} vs ${other}`
+          })
+          .toBe('equal')
       }
     }
     await commands.emulatePreferences({ colorScheme: mode === 'light' ? 'dark' : 'light' })
-    await expect
-      .poll(() => getComputedStyle(button('parent')).backgroundColor)
-      .toBe(mode === 'light' ? dark : light)
-    expect(getComputedStyle(button('mode')).backgroundColor).toBe(mode === 'light' ? dark : light)
+    await expect.poll(() => background('parent')).toBe(mode === 'light' ? dark : light)
+    await expect.poll(() => background('mode')).toBe(mode === 'light' ? dark : light)
   })
 
   for (const theme of themes) {
@@ -327,7 +333,7 @@ test('a keyboard-focused menu item is highlighted as strongly as a listbox optio
   await expect.element(item).toHaveFocus()
   const accent = getComputedStyle(host.querySelector('[data-test=accent]')!)
   await expect.poll(() => getComputedStyle(item).backgroundColor).toBe(accent.backgroundColor)
-  expect(getComputedStyle(item).color).toBe(accent.color)
+  await expect.poll(() => getComputedStyle(item).color).toBe(accent.color)
 })
 
 test('a server-rendered scope hydrates onto one div and releases its ref', async () => {

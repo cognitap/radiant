@@ -426,11 +426,21 @@ function findLeaks(frame: HTMLElement) {
 }
 
 /** Mounts a tree in a frame of the given width and lists what leaks out of it. */
-async function measure(tree: ReactNode, width: number) {
+async function measure(tree: ReactNode, width: number, font?: string) {
+  const fonts = font
+    ? Object.fromEntries(
+        [
+          '--rad-control-action-font-family',
+          ...['body', 'label', 'title', 'supporting'].map(
+            role => `--rad-typography-roles-ui-${role}-family`
+          )
+        ].map(name => [name, font])
+      )
+    : {}
   const { host } = await mount(
     <div
       data-testid="frame"
-      style={{ width: `${width}px` }}
+      style={{ width: `${width}px`, ...fonts }}
     >
       {tree}
     </div>
@@ -611,6 +621,14 @@ test.for(
 )('React %s fits a %ipx container without horizontal overflow', async ([name, width]) => {
   expect(await measure(families[name], width)).toEqual([])
 })
+
+// Wide faces such as Linux's DejaVu Sans make long words wider than the default fonts here do.
+test.for(Object.keys(families).filter(name => name !== WIDE_ACTION))(
+  'React %s fits a 360px container in a wide font',
+  async name => {
+    expect(await measure(families[name], 360, "Verdana, 'DejaVu Sans', sans-serif")).toEqual([])
+  }
+)
 
 test('a Badge in a crowded Row of Cards keeps short words whole at 360px', async () => {
   const { host } = await mount(
