@@ -300,3 +300,31 @@ test('server markup hydrates in StrictMode and StageExpand requires its labels a
     )
   ).rejects.toThrow('StageExpand requires aria-label or aria-labelledby.')
 })
+
+test('headings inside an expandable Stage nest under its title', async () => {
+  const { host } = await mount(
+    <Stage expandTo="dialog">
+      <StageHeader>
+        <StageTitle>Outer</StageTitle>
+        <StageActions>
+          <StageExpand
+            expandLabel="Expand"
+            collapseLabel="Collapse"
+          />
+        </StageActions>
+      </StageHeader>
+      <StageBody>
+        <Stage>
+          <StageHeader>
+            <StageTitle>Inner</StageTitle>
+          </StageHeader>
+        </Stage>
+      </StageBody>
+    </Stage>
+  )
+  const [outer, inner] = host.querySelectorAll('[data-slot~="stage-title"]')
+  expect([outer!.localName, inner!.localName]).toEqual(['h2', 'h3'])
+  await click(parts(host).toggle)
+  expect(parts(host).view.getAttribute('aria-labelledby')).toBe(outer!.id)
+  expect(inner!.localName).toBe('h3')
+})
