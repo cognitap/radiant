@@ -119,7 +119,8 @@
     "theme:generate": "node scripts/generate-theme-css.ts",
     "theme:check": "node scripts/generate-theme-css.ts --check",
     "watch:theme": "node scripts/generate-theme-css.ts --watch",
-    "test:browser": "pnpm theme:generate && vitest run"
+    "test:browser": "pnpm theme:generate && vitest run",
+    "test:visual": "pnpm theme:generate && vitest run --project=visual"
   },
   "dependencies": {
     "@a2ui/web_core": "0.15.0",

@@ -1,0 +1,3 @@
+# Committed baselines come from CI on Linux; local runs keep their own per platform.
+__screenshots__/**/*-darwin.png
+__screenshots__/**/*-win32.png

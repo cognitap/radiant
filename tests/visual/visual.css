@@ -1,0 +1,8 @@
+/* No web fonts: the matrix must render the same with or without network access. */
+@import 'tailwindcss';
+@import '../../src/styles.css';
+
+/* Chromium's native loading spinner never settles; the frame and controls around it still count. */
+video::-webkit-media-controls-loading-panel {
+  display: none !important;
+}
