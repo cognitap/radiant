@@ -146,3 +146,28 @@ export const sortableListFixtureMessages = surface(
   },
   '/route'
 )
+
+/** DragAndDrop sorting files into folders, one of which holds two, bound to the data model. */
+export const dragAndDropFixtureMessages = surface(
+  {
+    files: [
+      { value: 'invoice', label: 'Invoice.pdf' },
+      { value: 'photo', label: 'Beach.jpg' },
+      { value: 'notes', label: 'Notes.txt' }
+    ],
+    folders: { inbox: ['invoice', 'photo', 'notes'], work: [], personal: [] }
+  },
+  {
+    component: 'DragAndDrop',
+    label: 'Sort files',
+    description: 'Drag a file or use its handle with the keyboard.',
+    containers: [
+      { value: 'inbox', label: 'Inbox' },
+      { value: 'work', label: 'Work', capacity: 2 },
+      { value: 'personal', label: 'Personal' }
+    ],
+    items: { '@path': '/files' },
+    value: { '@path': '/folders' }
+  },
+  '/folders'
+)

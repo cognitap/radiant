@@ -20,7 +20,14 @@ import {
 
 const ENTRY_NAME_PATTERN = /^[A-Z][A-Za-z0-9]*$/
 const VALID_CATEGORIES = new Set<string>(CATALOG_CATEGORIES)
-const VALID_BINDING_TYPES = new Set(['string', 'number', 'boolean', 'string[]', 'object[]'])
+const VALID_BINDING_TYPES = new Set([
+  'string',
+  'number',
+  'boolean',
+  'string[]',
+  'object',
+  'object[]'
+])
 const VALID_BINDING_DIRECTIONS = new Set(['read', 'two-way'])
 const VALID_ACTION_SCOPES = new Set(['outbound', 'client'])
 const VALID_SLOT_CARDINALITIES = new Set(['single', 'many'])

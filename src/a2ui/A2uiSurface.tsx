@@ -838,6 +838,13 @@ export function A2uiSurface({
   const sortableDrop = labels?.sortableDrop
   const sortableCancel = labels?.sortableCancel
   const sortableHandle = labels?.sortableHandle
+  const dragDropInstructions = labels?.dragDropInstructions
+  const dragDropPickUp = labels?.dragDropPickUp
+  const dragDropMove = labels?.dragDropMove
+  const dragDropDrop = labels?.dragDropDrop
+  const dragDropCancel = labels?.dragDropCancel
+  const dragDropFull = labels?.dragDropFull
+  const dragDropHandle = labels?.dragDropHandle
   const audioPlay = labels?.audioPlay
   const audioPause = labels?.audioPause
   const audioSeek = labels?.audioSeek
@@ -864,6 +871,13 @@ export function A2uiSurface({
       sortableDrop,
       sortableCancel,
       sortableHandle,
+      dragDropInstructions,
+      dragDropPickUp,
+      dragDropMove,
+      dragDropDrop,
+      dragDropCancel,
+      dragDropFull,
+      dragDropHandle,
       audioPlay,
       audioPause,
       audioSeek,
@@ -890,6 +904,13 @@ export function A2uiSurface({
       sortableDrop,
       sortableCancel,
       sortableHandle,
+      dragDropInstructions,
+      dragDropPickUp,
+      dragDropMove,
+      dragDropDrop,
+      dragDropCancel,
+      dragDropFull,
+      dragDropHandle,
       audioPlay,
       audioPause,
       audioSeek,

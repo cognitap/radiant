@@ -25,14 +25,24 @@ import { joinIds } from '../../internal/ids.js'
 import { requireAccessibleName } from '../../internal/accessibleName.js'
 import { useField } from '../Field/Field.js'
 import { sameSelection } from '../../internal/selection.js'
-import { arrangeOrder, dropIndex, moveItem } from '../../internal/sortable.js'
+import {
+  arrangeOrder,
+  autoscroll,
+  capturePointer,
+  dropIndex,
+  glideHome,
+  moveItem,
+  scrollerOf
+} from '../../internal/sortable.js'
 import { useTransitionHost } from '../../motion/host.js'
 import { useArrayFormBridge } from '../../react/useArrayFormBridge.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useControllableState } from '../../react/useControllableState.js'
+import { useLiveAnnouncer } from '../../react/useLiveAnnouncer.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize, PartStyle, Spacing } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import { GripIcon } from '../shared/GripIcon.js'
 import { pickLayoutClass, spacingGapClasses } from '../shared/layoutStyles.js'
 
 /** Announcement text for an item's name, its zero-based index and the item count. */
@@ -110,11 +120,7 @@ type ListContext = {
 }
 const Context = createContext<ListContext | null>(null)
 
-/** Lets the focus re-announcement settle before a move is read. */
-const ANNOUNCE_DELAY = 500
 const DRAG_THRESHOLD = 3
-/** Autoscroll speed, in pixels per second, with the pointer one zone into an edge. */
-const SCROLL_SPEED = 600
 
 type PointerDrag = {
   pointerId: number
@@ -128,17 +134,6 @@ type PointerDrag = {
   cleanup(): void
 }
 type Settled = { item: string; from: number; requested: boolean }
-
-/** The nearest ancestor that scrolls vertically, or the document's scroller. */
-function scrollerOf(node: HTMLElement) {
-  const view = node.ownerDocument.defaultView!
-  for (let parent = node.parentElement; parent; parent = parent.parentElement) {
-    const overflow = view.getComputedStyle(parent).overflowY
-    if (/auto|scroll|overlay/.test(overflow) && parent.scrollHeight > parent.clientHeight)
-      return parent
-  }
-  return node.ownerDocument.scrollingElement as HTMLElement | null
-}
 
 export function SortableList({
   value,
@@ -207,9 +202,8 @@ export function SortableList({
   const order = grab ? moveItem(committed, grab.value, grab.index) : committed
   const instructionsId = useId()
   const list = useRef<HTMLOListElement>(null)
-  const status = useRef<HTMLSpanElement>(null)
+  const { ref: status, announce } = useLiveAnnouncer()
   const nodes = useRef(new Map<string, Nodes>())
-  const timer = useRef<number | undefined>(undefined)
   const pending = useRef<string[] | null>(null)
   const refocus = useRef<string | null>(null)
   const settled = useRef<Settled | null>(null)
@@ -226,20 +220,12 @@ export function SortableList({
       ?.item?.querySelector('[data-slot~="sortable-list-item-content"]')
       ?.textContent?.trim() ||
     item
-  const announce = (message: string) => {
-    const node = status.current
-    if (!node) return
-    const view = node.ownerDocument.defaultView!
-    view.clearTimeout(timer.current)
-    node.textContent = ''
-    timer.current = view.setTimeout(() => {
-      node.textContent = message
-    }, ANNOUNCE_DELAY)
-  }
   const request = (next: string[]) => {
     if (sameSelection(next, committed)) return
     pending.current = next
-    owner.request(next)
+    // Values without an item yet, such as ones still streaming in, stay after the known ones.
+    const unknown = owner.value.filter(item => !byValue.has(item))
+    owner.request([...next, ...new Set(unknown)])
     queueMicrotask(() => {
       pending.current = null
     })
@@ -433,64 +419,33 @@ export function SortableList({
         return
       // A new grab finishes any glide still running from the last drop.
       if (pointer) setPointer(null)
-      const doc = handle.ownerDocument,
-        view = doc.defaultView!
       const pointerId = event.pointerId
-      let frame: number | undefined, last: number | undefined
-      const loop = (time: number) => {
-        const state = drag.current
-        if (!state || state.pointerId !== pointerId) return
-        const elapsed = Math.min(50, last === undefined ? 16 : time - last)
-        last = time
-        const scroller = scrollerOf(list.current ?? handle)
-        const slot = nodes.current.get(state.value)?.slot
-        if (scroller && slot) {
-          const page = scroller === doc.scrollingElement
-          const box = page ? { top: 0, bottom: view.innerHeight } : scroller.getBoundingClientRect()
-          const zone = Math.min(slot.offsetHeight, (box.bottom - box.top) / 3)
-          const into =
-            state.y < box.top + zone
-              ? state.y - box.top - zone
-              : state.y > box.bottom - zone
-                ? state.y - box.bottom + zone
-                : 0
-          const speed = Math.max(-2, Math.min(2, into / zone)) * SCROLL_SPEED
-          if (speed) scroller.scrollTop += (speed * elapsed) / 1000
+      const session = capturePointer(handle, pointerId, {
+        move(next) {
+          const state = drag.current
+          if (!state) return
+          state.y = next.clientY
+          if (state.started || Math.abs(state.y - state.startY) < DRAG_THRESHOLD) return
+          state.started = true
+          state.slotTop = nodes.current.get(item)?.slot?.getBoundingClientRect().top ?? 0
+          setPointer({ value: item, phase: 'drag' })
+          session.frames()
+        },
+        frame(elapsed) {
+          const state = drag.current
+          if (!state) return
+          const scroller = scrollerOf(list.current ?? handle)
+          const slot = nodes.current.get(state.value)?.slot
+          if (scroller && slot) autoscroll(scroller, state.y, slot.offsetHeight, elapsed)
+          latest.current.track()
+        },
+        release: commit => latest.current.finishPointer(commit),
+        escape(next) {
+          if (!drag.current?.started) return
+          next.preventDefault()
+          latest.current.finishPointer(false)
         }
-        latest.current.track()
-        frame = view.requestAnimationFrame(loop)
-      }
-      const move = (next: PointerEvent) => {
-        const state = drag.current
-        if (!state || next.pointerId !== pointerId) return
-        state.y = next.clientY
-        if (state.started || Math.abs(state.y - state.startY) < DRAG_THRESHOLD) return
-        state.started = true
-        state.slotTop = nodes.current.get(item)?.slot?.getBoundingClientRect().top ?? 0
-        setPointer({ value: item, phase: 'drag' })
-        frame = view.requestAnimationFrame(loop)
-      }
-      const up = (next: PointerEvent) => {
-        if (next.pointerId === pointerId) latest.current.finishPointer(true)
-      }
-      const cancel = (next: PointerEvent) => {
-        if (next.pointerId === pointerId) latest.current.finishPointer(false)
-      }
-      const escape = (next: KeyboardEvent) => {
-        if (next.key !== 'Escape' || !drag.current?.started) return
-        next.preventDefault()
-        latest.current.finishPointer(false)
-      }
-      try {
-        handle.setPointerCapture(pointerId)
-      } catch {
-        /* Document listeners still see the release. */
-      }
-      doc.addEventListener('pointermove', move)
-      doc.addEventListener('pointerup', up)
-      doc.addEventListener('pointercancel', cancel)
-      doc.addEventListener('keydown', escape)
-      handle.addEventListener('lostpointercapture', cancel)
+      })
       drag.current = {
         pointerId,
         value: item,
@@ -500,15 +455,7 @@ export function SortableList({
         origin: committed.indexOf(item),
         index: committed.indexOf(item),
         started: false,
-        cleanup() {
-          if (frame !== undefined) view.cancelAnimationFrame(frame)
-          doc.removeEventListener('pointermove', move)
-          doc.removeEventListener('pointerup', up)
-          doc.removeEventListener('pointercancel', cancel)
-          doc.removeEventListener('keydown', escape)
-          handle.removeEventListener('lostpointercapture', cancel)
-          if (handle.hasPointerCapture(pointerId)) handle.releasePointerCapture(pointerId)
-        }
+        cleanup: session.cleanup
       }
     }
   }
@@ -541,47 +488,19 @@ export function SortableList({
     const item = nodes.current.get(pointer.value)?.item
     const done = () => setPointer(current => (current === pointer ? null : current))
     if (!item) return done()
-    const view = item.ownerDocument.defaultView!
-    const clear = () => {
-      item.style.removeProperty('transition')
-      item.style.removeProperty('translate')
-    }
-    item.style.removeProperty('translate')
-    const offset = releaseFrom.current - item.getBoundingClientRect().top
-    if (
-      motion === 'off' ||
-      motionOff ||
-      Math.abs(offset) < 0.5 ||
-      view.matchMedia('(prefers-reduced-motion: reduce)').matches
+    return glideHome(
+      item,
+      { y: releaseFrom.current },
+      'translate var(--rad-sortable-list-release-duration,var(--rad-motion-release-duration,160ms)) var(--rad-motion-release-ease,ease-out)',
+      motion === 'off' || motionOff,
+      done
     )
-      return done()
-    item.style.transition = 'none'
-    item.style.translate = `0px ${offset}px`
-    item.getBoundingClientRect()
-    item.style.transition =
-      'translate var(--rad-sortable-list-release-duration,var(--rad-motion-release-duration,160ms)) var(--rad-motion-release-ease,ease-out)'
-    item.style.translate = '0px 0px'
-    let fallback = 0
-    const end = () => {
-      view.clearTimeout(fallback)
-      item.removeEventListener('transitionend', end)
-      clear()
-      done()
-    }
-    item.addEventListener('transitionend', end)
-    fallback = view.setTimeout(end, 1000)
-    return () => {
-      view.clearTimeout(fallback)
-      item.removeEventListener('transitionend', end)
-      clear()
-    }
   }, [pointer, motion, motionOff])
 
   useEffect(
     () => () => {
       drag.current?.cleanup()
       drag.current = null
-      status.current?.ownerDocument.defaultView?.clearTimeout(timer.current)
     },
     []
   )
@@ -765,42 +684,7 @@ export function SortableListItem({
             onBlur={() => list.blur(value)}
             onPointerDown={event => list.pointerDown(value, event)}
           >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-            >
-              <circle
-                cx="5.5"
-                cy="3.5"
-                r="1.25"
-              />
-              <circle
-                cx="10.5"
-                cy="3.5"
-                r="1.25"
-              />
-              <circle
-                cx="5.5"
-                cy="8"
-                r="1.25"
-              />
-              <circle
-                cx="10.5"
-                cy="8"
-                r="1.25"
-              />
-              <circle
-                cx="5.5"
-                cy="12.5"
-                r="1.25"
-              />
-              <circle
-                cx="10.5"
-                cy="12.5"
-                r="1.25"
-              />
-            </svg>
+            <GripIcon />
           </Button>
           <div
             id={contentId}

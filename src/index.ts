@@ -1053,3 +1053,17 @@ export type {
   SortableListProps,
   SortableListText
 } from './components/SortableList/SortableList.js'
+
+export {
+  DragAndDrop,
+  DragAndDropContainer,
+  DragAndDropItem
+} from './components/DragAndDrop/DragAndDrop.js'
+export type {
+  DragAndDropContainerProps,
+  DragAndDropItemProps,
+  DragAndDropMove,
+  DragAndDropProps,
+  DragAndDropText,
+  DragAndDropValue
+} from './components/DragAndDrop/DragAndDrop.js'

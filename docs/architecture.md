@@ -63,6 +63,7 @@ Custom controls submit through a native form element:
 | `Combobox`                                 | Committed key, from a hidden input                |
 | `Autocomplete`                             | Input text, including text not in the list        |
 | `MultiSelect`, `TagsInput`, `SortableList` | One named value per item                          |
+| `DragAndDrop`                              | Container contents as one JSON object             |
 | `NumberField`                              | Raw number, separate from the localized display   |
 | `OTPField`                                 | Whole code, from one input                        |
 

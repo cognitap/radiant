@@ -33,6 +33,14 @@ import {
 } from '../components/Stage/Stage.js'
 import { SortableList, SortableListItem } from '../components/SortableList/SortableList.js'
 import { arrangeOrder } from '../internal/sortable.js'
+import {
+  DragAndDrop,
+  DragAndDropContainer,
+  DragAndDropItem,
+  type DragAndDropMove,
+  type DragAndDropValue
+} from '../components/DragAndDrop/DragAndDrop.js'
+import { arrangeContainers } from '../internal/dragAndDrop.js'
 import { Switch } from '../components/Switch/Switch.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { radiantCatalog } from '../catalog/index.js'
@@ -67,7 +75,7 @@ import { layoutIntentEntries } from './layoutIntentEntries.js'
 import { annotatedTextEntries } from './annotatedTextEntries.js'
 import { matrixEntry } from './matrixEntry.js'
 import { regionStageEntries } from './regionStageEntries.js'
-import { useA2uiLabels, type A2uiSortableText } from './surfaceContext.js'
+import { useA2uiLabels, type A2uiDragDropText, type A2uiSortableText } from './surfaceContext.js'
 import { relationGraphEntries } from './relationGraphEntries.js'
 
 const extensionCatalog = generateA2uiCatalogs(radiantCatalog).extension
@@ -629,6 +637,203 @@ const stageEntry = createA2uiRegistryEntry({
   }
 })
 
+/** A template's `{item}`, `{from}`, `{to}`, `{position}` (from 1) and `{count}`, or a function. */
+function dragDropText(label: A2uiDragDropText | undefined) {
+  if (typeof label === 'function') return label
+  if (typeof label !== 'string' || !label.trim()) return undefined
+  // One pass, so a name written like a placeholder stays as written.
+  return (move: DragAndDropMove) =>
+    label.replace(/\{(item|from|to|position|count)\}/g, (_match, key: string) =>
+      key === 'position'
+        ? String(move.index + 1)
+        : key === 'count'
+          ? String(move.count)
+          : move[key as 'item' | 'from' | 'to']
+    )
+}
+
+type DragDropContainer = ExtensionOption & { readonly capacity?: number }
+
+/** Containers like options, keeping a whole, non-negative `capacity`. */
+function readContainers(value: unknown): DragDropContainer[] {
+  const raw = value instanceof ResolvedBinding ? value.value : value
+  const capacities = new Map<string, number>()
+  if (Array.isArray(raw))
+    for (const item of raw) {
+      const record = item as Record<string, unknown> | null
+      const capacity = record?.capacity
+      if (
+        typeof capacity === 'number' &&
+        Number.isInteger(capacity) &&
+        capacity >= 0 &&
+        typeof record?.value === 'string' &&
+        !capacities.has(record.value)
+      )
+        capacities.set(record.value, capacity)
+    }
+  return readOptions(value).map(option =>
+    capacities.has(option.value) ? { ...option, capacity: capacities.get(option.value)! } : option
+  )
+}
+
+/** Item values by container from the bound value; anything else reads as empty. */
+function readPlacement(value: unknown): DragAndDropValue {
+  const raw = value instanceof ResolvedBinding ? value.value : value
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const placement: DragAndDropValue = {}
+  for (const [key, items] of Object.entries(raw))
+    if (Array.isArray(items))
+      placement[key] = items.filter((item): item is string => typeof item === 'string')
+  return placement
+}
+
+/** DragAndDrop with the host's announcements; without them the containers show their items. */
+function A2uiDragAndDrop({
+  containers,
+  items,
+  value,
+  controlSize,
+  onMove,
+  nodeId,
+  report
+}: {
+  containers: readonly DragDropContainer[]
+  items: readonly ExtensionOption[]
+  value: DragAndDropValue
+  controlSize: ControlSize
+  onMove: (next: DragAndDropValue) => void
+  nodeId: string
+  report: A2uiAdapterContext['reportDiagnostic']
+}) {
+  const labels = useA2uiLabels()
+  const instructionsText = labels.dragDropInstructions?.trim()
+  const pickUpText = dragDropText(labels.dragDropPickUp)
+  const moveText = dragDropText(labels.dragDropMove)
+  const dropText = dragDropText(labels.dragDropDrop)
+  const cancelText = dragDropText(labels.dragDropCancel)
+  const fullText = dragDropText(labels.dragDropFull)
+  const handle = labels.dragDropHandle
+  const handleText =
+    typeof handle === 'function' ? handle : typeof handle === 'string' ? handle.trim() : ''
+  const handleLabel = handleText
+    ? (item: string) =>
+        typeof handleText === 'function'
+          ? handleText(item)
+          : handleText.replace(/\{item\}/g, () => item)
+    : undefined
+  const capped = containers.some(container => container.capacity !== undefined)
+  const labelled = Boolean(
+    instructionsText && pickUpText && moveText && dropText && cancelText && (fullText || !capped)
+  )
+  useEffect(() => {
+    if (labelled) return
+    report?.({
+      kind: 'defaulted',
+      nodeId,
+      component: 'DragAndDrop',
+      prop: 'items',
+      received: null,
+      used: 'static containers',
+      reason:
+        'A2uiSurface labels lack a drag-and-drop instruction or announcement; items are shown without moving.'
+    })
+  }, [labelled, nodeId, report])
+  if (!containers.length) return null
+  if (!labelled) {
+    const placement = arrangeContainers(
+      value,
+      containers.map(container => container.value),
+      items.map(item => item.value)
+    )
+    return (
+      <div
+        data-slot="a2ui-drag-and-drop"
+        className="grid min-w-0 gap-[var(--rad-spacing-normal,1rem)]"
+      >
+        {containers.map(container => (
+          <div
+            key={container.value}
+            data-slot="a2ui-drag-and-drop-container"
+            className="grid min-w-0 gap-[var(--rad-spacing-tight,0.5rem)]"
+          >
+            <div className="min-w-0 break-words font-[number:var(--rad-typography-roles-ui-label-weight,600)]">
+              {container.label}
+            </div>
+            <ul className="m-0 grid min-w-0 gap-[var(--rad-spacing-tight,0.5rem)] ps-[1.5rem]">
+              {placement[container.value]!.map(item => (
+                <li
+                  key={item}
+                  className="min-w-0 break-words"
+                >
+                  {items.find(option => option.value === item)!.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )
+  }
+  return (
+    <DragAndDrop
+      data-slot="a2ui-drag-and-drop"
+      value={value}
+      onValueChange={onMove}
+      controlSize={controlSize}
+      instructionsText={instructionsText!}
+      pickUpText={pickUpText!}
+      moveText={moveText!}
+      dropText={dropText!}
+      cancelText={cancelText!}
+      fullText={fullText}
+      handleLabel={handleLabel}
+    >
+      {containers.map(container => (
+        <DragAndDropContainer
+          key={container.value}
+          value={container.value}
+          label={container.label}
+          capacity={container.capacity}
+        />
+      ))}
+      {items.map(item => (
+        <DragAndDropItem
+          key={item.value}
+          value={item.value}
+        >
+          {item.label}
+        </DragAndDropItem>
+      ))}
+    </DragAndDrop>
+  )
+}
+
+const dragAndDropEntry = createA2uiRegistryEntry({
+  name: 'DragAndDrop',
+  accessibility: [controlLabelRule({ fixFrom: ['accessibility.label'] })],
+  component: [Field, DragAndDrop, DragAndDropContainer, DragAndDropItem],
+  schema: extensionSchema('DragAndDrop'),
+  description: extensionSchema('DragAndDrop').description as string,
+  adapter(props, context) {
+    return (
+      <Field
+        {...fieldProps(props, context.node.componentId)}
+        layout="group"
+      >
+        <A2uiDragAndDrop
+          containers={readContainers(props.containers)}
+          items={readOptions(props.items)}
+          value={readPlacement(props.value)}
+          controlSize={readControlSize(props)}
+          onMove={next => writeBinding(props.value, next)}
+          nodeId={context.node.componentId}
+          report={context.reportDiagnostic}
+        />
+      </Field>
+    )
+  }
+})
+
 const extensionEntries = [
   flexEntry('Row', 'horizontal', extensionSchema('Row')),
   selectEntry,
@@ -637,6 +842,7 @@ const extensionEntries = [
   switchEntry,
   textareaEntry,
   sortableListEntry,
+  dragAndDropEntry,
   stageEntry,
   ...feedbackEntries,
   ...layoutIntentEntries,
