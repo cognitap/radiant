@@ -691,7 +691,8 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
   { a2uiName: 'Compare', sourceEntry: 'Compare' },
   { a2uiName: 'CompareItem', sourceEntry: 'CompareItem' },
   { a2uiName: 'Reveal', sourceEntry: 'Reveal' },
-  { a2uiName: 'AnnotatedText', sourceEntry: 'AnnotatedText' }
+  { a2uiName: 'AnnotatedText', sourceEntry: 'AnnotatedText' },
+  { a2uiName: 'Matrix', sourceEntry: 'Matrix' }
 ]
 
 /**

@@ -43,7 +43,8 @@ function readPath(component: A2uiComponentRecord, path: string): unknown {
   return current
 }
 
-const describe = (component: A2uiComponentRecord) =>
+/** Names a component in rule messages, such as `Matrix "seats"`. */
+export const describe = (component: A2uiComponentRecord) =>
   `${String(component.component)} "${String(component.id)}"`
 
 export type ControlLabelRuleOptions = {

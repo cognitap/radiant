@@ -991,3 +991,26 @@ export type {
 
 export { Reveal } from './components/Reveal/Reveal.js'
 export type { RevealItem, RevealProps } from './components/Reveal/Reveal.js'
+
+export {
+  Matrix,
+  MatrixCell,
+  MatrixColumnHeader,
+  MatrixCorner,
+  MatrixMarker,
+  MatrixRegion,
+  MatrixRow,
+  MatrixRowHeader
+} from './components/Matrix/Matrix.js'
+export type {
+  MatrixCellProps,
+  MatrixCellState,
+  MatrixColumnHeaderProps,
+  MatrixCornerProps,
+  MatrixMarkerProps,
+  MatrixProps,
+  MatrixRegionProps,
+  MatrixRowHeaderProps,
+  MatrixRowProps,
+  MatrixValue
+} from './components/Matrix/Matrix.js'

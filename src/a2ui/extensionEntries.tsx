@@ -59,6 +59,7 @@ import {
 import { feedbackEntries } from './feedbackEntries.js'
 import { layoutIntentEntries } from './layoutIntentEntries.js'
 import { annotatedTextEntries } from './annotatedTextEntries.js'
+import { matrixEntry } from './matrixEntry.js'
 
 const extensionCatalog = generateA2uiCatalogs(radiantCatalog).extension
 
@@ -506,7 +507,8 @@ const extensionEntries = [
   stageEntry,
   ...feedbackEntries,
   ...layoutIntentEntries,
-  ...annotatedTextEntries
+  ...annotatedTextEntries,
+  matrixEntry
 ]
 
 /**

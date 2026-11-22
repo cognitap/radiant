@@ -9,6 +9,11 @@ import {
   switchFixtureMessages,
   textareaFixtureMessages
 } from './extensionFixtures.js'
+import {
+  MATRIX_SURFACE_ID,
+  matrixFixtureMessages,
+  matrixHeatmapFixtureMessages
+} from './matrixFixtures.js'
 import { STAGE_SURFACE_ID, stageFixtureMessages } from './stageFixtures.js'
 import { ANNOTATED_TEXT_SURFACE_ID, annotatedTextFixtureMessages } from './annotatedTextFixtures.js'
 
@@ -89,5 +94,29 @@ export const AnnotatedText: Story = {
     await expect(canvas.getByRole('listitem', { name: 'attempts' })).toHaveAccessibleDescription(
       'argument. Statement. Call. Unchecked. attempts → retry: passed to'
     )
+  }
+}
+
+export const Matrix: Story = {
+  args: { surfaceId: MATRIX_SURFACE_ID, messages: matrixFixtureMessages },
+  play: async ({ canvasElement, userEvent }) => {
+    const canvas = within(canvasElement)
+    const grid = await canvas.findByRole('grid', { name: 'Seats' })
+    await expect(within(grid).getByRole('gridcell', { name: 'B2' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    )
+    const seat = within(grid).getByRole('gridcell', { name: 'C1' })
+    await userEvent.click(seat)
+    await expect(seat).toHaveAttribute('aria-selected', 'true')
+  }
+}
+
+export const MatrixHeatmap: Story = {
+  args: { surfaceId: MATRIX_SURFACE_ID, messages: matrixHeatmapFixtureMessages },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const grid = await canvas.findByRole('grid', { name: 'Busy hours' })
+    await expect(within(grid).getByRole('gridcell', { name: 'Peak' })).toBeVisible()
   }
 }

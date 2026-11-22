@@ -79,6 +79,10 @@ import {
 } from '../../src/a2ui/mediaFixtures.js'
 import { stageFixtureMessages } from '../../src/a2ui/stageFixtures.js'
 import { annotatedTextFixtureMessages } from '../../src/a2ui/annotatedTextFixtures.js'
+import {
+  matrixFixtureMessages,
+  matrixHeatmapFixtureMessages
+} from '../../src/a2ui/matrixFixtures.js'
 import { mount } from './familyHarness.js'
 
 const WIDTHS = [360, 560, 960] as const
@@ -116,7 +120,8 @@ const PROJECTIONS: Readonly<Record<string, readonly string[]>> = {
   Compare: ['Compare'],
   CompareItem: ['CompareItem'],
   Reveal: ['Reveal'],
-  AnnotatedText: ['AnnotatedText']
+  AnnotatedText: ['AnnotatedText'],
+  Matrix: ['Matrix']
 }
 
 const STRESS_SURFACE_ID = 'container_width'
@@ -348,6 +353,8 @@ const fixtures: Record<string, readonly A2uiMessage[]> = {
   'Audio fixture': audioPlayerFixtureMessages,
   'Stage fixture': stageFixtureMessages,
   'AnnotatedText fixture': annotatedTextFixtureMessages,
+  'Matrix fixture': matrixFixtureMessages,
+  'Matrix heatmap fixture': matrixHeatmapFixtureMessages,
   ...stressCases
 }
 
@@ -377,7 +384,7 @@ test('every canonical catalog entry renders through some covered A2UI component'
  * slot; clipped text must show an ellipsis; a visually hidden form host is one pixel wide.
  */
 const SCROLL_REGIONS =
-  '[data-slot~="table-container"], [data-slot~="tabs-list"], [data-slot~="scroll-area"], [data-slot~="chart-plot"]'
+  '[data-slot~="table-container"], [data-slot~="tabs-list"], [data-slot~="scroll-area"], [data-slot~="chart-plot"], [data-slot~="matrix"]'
 
 function containment(element: HTMLElement): 'scroll' | 'ellipsis' | 'hidden' | 'leak' | null {
   const style = getComputedStyle(element)

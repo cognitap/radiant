@@ -227,6 +227,21 @@ const seeds: Record<string, Seed> = {
   CompareItem: {
     root: { header: 'name', body: 'detail', footer: 'choose' },
     nodes: [text('name', 'Plus'), text('detail', 'Offline lessons.'), ...button('choose', 'Choose')]
+  },
+  Matrix: {
+    root: {
+      label: 'Seats',
+      columns: [{ label: '1' }, { label: '2' }, { label: '3' }],
+      rows: (['A', 'B'] as const).map(row => ({
+        label: row,
+        cells: [1, 2, 3].map(seat => ({
+          text: `${row}${seat}`,
+          value: `${row}${seat}`,
+          ...(seat === 2 ? { series: 2, marker: { text: '1' } } : {})
+        }))
+      })),
+      regions: [{ row: 1, column: 3, rowSpan: 2, label: 'Aisle' }]
+    }
   }
 }
 
