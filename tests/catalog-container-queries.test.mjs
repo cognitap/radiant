@@ -31,9 +31,9 @@ function componentModules() {
     .map(file => resolve(root, 'src/components', file))
 }
 
-// Files that still use viewport variants. AppShell keeps its page breakpoint until it moves to a
-// container query; the self-check below fails once a listed file no longer needs its exclusion.
-const knownExclusions = ['src/components/AppShell/AppShell.tsx']
+// Files that still use viewport variants; the self-check below fails once a listed file no longer
+// needs its exclusion.
+const knownExclusions = []
 
 // Viewport breakpoint variants such as `sm:`, `max-md:` or `min-[40rem]:`; container variants
 // start with `@` and stay allowed.
