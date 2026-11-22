@@ -102,6 +102,61 @@ for (const layout of ['tree', 'layered', 'circular'] as RelationGraphLayout[])
       }
     })
 
+// Two parents each send a labelled edge into one child, beside unlabelled edges into another.
+const services = {
+  'aria-label': 'Services',
+  layout: 'layered',
+  connectionText,
+  nodes: [
+    { id: 'web', label: 'Web app' },
+    { id: 'legacy', label: 'Legacy export' },
+    { id: 'gateway', label: 'API gateway' },
+    { id: 'orders', label: 'Orders' },
+    { id: 'billing', label: 'Billing' },
+    { id: 'queue', label: 'Queue' },
+    { id: 'database', label: 'Database' }
+  ],
+  edges: [
+    { from: 'web', to: 'gateway', label: 'calls' },
+    { from: 'gateway', to: 'orders' },
+    { from: 'gateway', to: 'billing' },
+    { from: 'orders', to: 'queue', label: 'enqueues' },
+    { from: 'billing', to: 'queue', label: 'publishes' },
+    { from: 'orders', to: 'database' },
+    { from: 'billing', to: 'database' },
+    { from: 'legacy', to: 'database' }
+  ]
+} satisfies RelationGraphProps
+const converging = {
+  'aria-label': 'Converging',
+  layout: 'layered',
+  connectionText,
+  nodes: [
+    { id: 'a', label: 'API' },
+    { id: 'b', label: 'Jobs' },
+    { id: 'c', label: 'Queue' }
+  ],
+  edges: [
+    { from: 'a', to: 'c', label: 'publishes' },
+    { from: 'b', to: 'c', label: 'enqueues' }
+  ]
+} satisfies RelationGraphProps
+
+for (const graph of [converging, services])
+  for (const width of [360, 720])
+    test(`labels of edges into one node from different parents stay apart (${graph['aria-label']}, ${width}px)`, async () => {
+      const { host } = await mount(
+        <div style={{ width }}>
+          <RelationGraph {...graph} />
+        </div>
+      )
+      const labels = parts(host, 'relation-graph-edge-label').map(box)
+      expect(labels).toHaveLength(graph.edges.filter(edge => edge.label).length)
+      expect(overlapping(labels)).toBe(0)
+      for (const node of parts(host, 'relation-graph-node'))
+        expect(overlapping([...labels, box(node)])).toBe(0)
+    })
+
 test('layered layout puts each edge target below its source except edges closing a cycle', async () => {
   const { host } = await mount(
     <RelationGraph
