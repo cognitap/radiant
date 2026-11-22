@@ -34,7 +34,10 @@ const labels = {
   sortableCancel: 'Cancelled. {item} is back at position {position} of {count}.',
   audioPlay: 'Play',
   audioPause: 'Pause',
-  audioSeek: 'Seek'
+  audioSeek: 'Seek',
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
+  zoomReset: 'Reset view'
 }
 const mounted: { host: HTMLElement; root: Root }[] = []
 

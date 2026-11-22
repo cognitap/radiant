@@ -17,6 +17,7 @@ import {
 } from './matrixFixtures.js'
 import { STAGE_SURFACE_ID, stageFixtureMessages } from './stageFixtures.js'
 import { ANNOTATED_TEXT_SURFACE_ID, annotatedTextFixtureMessages } from './annotatedTextFixtures.js'
+import { REGION_STAGE_SURFACE_ID, regionStageFixtureMessages } from './regionStageFixtures.js'
 
 const meta = {
   title: 'A2UI/Extension',
@@ -146,5 +147,22 @@ export const MatrixHeatmap: Story = {
     const canvas = within(canvasElement)
     const grid = await canvas.findByRole('grid', { name: 'Busy hours' })
     await expect(within(grid).getByRole('gridcell', { name: 'Peak' })).toBeVisible()
+  }
+}
+
+export const RegionStage: Story = {
+  args: {
+    surfaceId: REGION_STAGE_SURFACE_ID,
+    messages: regionStageFixtureMessages,
+    labels: { zoomIn: 'Zoom in', zoomOut: 'Zoom out', zoomReset: 'Reset view' }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByRole('group', { name: 'Rooms to book' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Studio' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+    await expect(canvas.getByRole('button', { name: 'Zoom in' })).toBeVisible()
   }
 }

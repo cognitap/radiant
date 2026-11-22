@@ -502,6 +502,22 @@ export type {
 } from './components/AnnotatedText/AnnotatedText.js'
 
 export {
+  RegionStage,
+  RegionStageControls,
+  RegionStagePin,
+  RegionStageRegion,
+  RegionStageViewport
+} from './components/RegionStage/RegionStage.js'
+export type {
+  RegionStageControlsProps,
+  RegionStagePinProps,
+  RegionStageProps,
+  RegionStageRegionProps,
+  RegionStageSeries,
+  RegionStageViewportProps
+} from './components/RegionStage/RegionStage.js'
+
+export {
   Stage,
   StageActions,
   StageBody,

@@ -217,6 +217,19 @@ const seeds: Record<string, Seed> = {
       ]
     }
   },
+  RegionStage: {
+    root: {
+      label: 'Floor plan',
+      viewBox: '0 0 400 240',
+      value: ['kitchen'],
+      regions: [
+        { value: 'lobby', label: 'Lobby', path: 'M10 10h140v100H10z', series: 1 },
+        { value: 'kitchen', label: 'Kitchen', path: 'M160 10h230v100H160z', series: 2 },
+        { value: 'storage', label: 'Storage', path: 'M10 120h380v110H10z' }
+      ],
+      pins: [{ x: 150, y: 60, label: 'Fire exit' }]
+    }
+  },
   Split: {
     root: { main: 'main', secondary: 'aside' },
     nodes: [text('main', 'Main column content.'), text('aside', 'Aside')]

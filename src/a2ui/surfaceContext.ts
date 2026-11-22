@@ -55,6 +55,14 @@ export type A2uiSurfaceLabels = {
   readonly audioSeek?: string
   /** Shown and announced when an AudioPlayer's media fails; without it the failure has no text. */
   readonly audioError?: string
+  /**
+   * Names of each RegionStage's zoom in, zoom out and reset buttons. Without all three, a
+   * RegionStage shows no buttons, still pans and zooms by pointer, wheel and keys, and reports
+   * a `defaulted` diagnostic.
+   */
+  readonly zoomIn?: string
+  readonly zoomOut?: string
+  readonly zoomReset?: string
 }
 
 /** A SortableList announcement template or function; keep a function's identity stable. */

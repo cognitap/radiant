@@ -84,6 +84,7 @@ import {
   matrixFixtureMessages,
   matrixHeatmapFixtureMessages
 } from '../../src/a2ui/matrixFixtures.js'
+import { regionStageFixtureMessages } from '../../src/a2ui/regionStageFixtures.js'
 import { mount } from './familyHarness.js'
 
 const WIDTHS = [360, 560, 960] as const
@@ -123,7 +124,8 @@ const PROJECTIONS: Readonly<Record<string, readonly string[]>> = {
   Reveal: ['Reveal'],
   AnnotatedText: ['AnnotatedText'],
   Matrix: ['Matrix'],
-  SortableList: ['SortableList']
+  SortableList: ['SortableList'],
+  RegionStage: ['RegionStage']
 }
 
 const STRESS_SURFACE_ID = 'container_width'
@@ -358,6 +360,7 @@ const fixtures: Record<string, readonly A2uiMessage[]> = {
   'AnnotatedText fixture': annotatedTextFixtureMessages,
   'Matrix fixture': matrixFixtureMessages,
   'Matrix heatmap fixture': matrixHeatmapFixtureMessages,
+  'RegionStage fixture': regionStageFixtureMessages,
   ...stressCases
 }
 

@@ -12,6 +12,7 @@ import * as matrixFixtures from './matrixFixtures.js'
 import * as mediaFixtures from './mediaFixtures.js'
 import * as stageFixtures from './stageFixtures.js'
 import * as annotatedTextFixtures from './annotatedTextFixtures.js'
+import * as regionStageFixtures from './regionStageFixtures.js'
 
 /**
  * How strictly a fixture is gated: `accessible` fixtures must render without error or fallback
@@ -46,6 +47,7 @@ const FIXTURE_MODULES: Readonly<Record<string, Readonly<Record<string, unknown>>
   'appExtensionFixtures.tsx': appExtensionFixtures,
   'stageFixtures.ts': stageFixtures,
   'annotatedTextFixtures.ts': annotatedTextFixtures,
+  'regionStageFixtures.ts': regionStageFixtures,
   'feedbackFixtures.ts': feedbackFixtures,
   'layoutIntentFixtures.ts': layoutIntentFixtures,
   'matrixFixtures.ts': matrixFixtures

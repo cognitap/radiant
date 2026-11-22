@@ -749,6 +749,18 @@ export const componentRegistry = {
     labelSize: 'css',
     spanRadius: 'css'
   },
+  regionStage: {
+    gap: 'css',
+    radius: 'css',
+    borderWidth: 'css',
+    borderColor: 'css',
+    background: 'css',
+    regionFill: 'css',
+    regionStroke: 'css',
+    selectedFill: 'css',
+    pinColor: 'css',
+    pinRing: 'css'
+  },
   stage: {
     radius: 'css',
     cornerShape: 'css',

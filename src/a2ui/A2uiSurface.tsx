@@ -840,6 +840,9 @@ export function A2uiSurface({
   const audioPause = labels?.audioPause
   const audioSeek = labels?.audioSeek
   const audioError = labels?.audioError
+  const zoomIn = labels?.zoomIn
+  const zoomOut = labels?.zoomOut
+  const zoomReset = labels?.zoomReset
   const labelValue = useMemo(
     () => ({
       modalClose,
@@ -858,7 +861,10 @@ export function A2uiSurface({
       audioPlay,
       audioPause,
       audioSeek,
-      audioError
+      audioError,
+      zoomIn,
+      zoomOut,
+      zoomReset
     }),
     [
       modalClose,
@@ -877,7 +883,10 @@ export function A2uiSurface({
       audioPlay,
       audioPause,
       audioSeek,
-      audioError
+      audioError,
+      zoomIn,
+      zoomOut,
+      zoomReset
     ]
   )
   const surface = (
