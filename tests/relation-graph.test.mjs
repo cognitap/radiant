@@ -150,6 +150,46 @@ test('edge labels stay clear of each other and of nodes when edges fan out', () 
   }
 })
 
+test('edge labels in random layered graphs stay clear of each other and of nodes', () => {
+  for (let trial = 0; trial < 300; trial++) {
+    const { nodes: list, edges: plain } = random(trial + 11, 1 + (trial % 28))
+    const edges = plain.map((edge, at) => ({ ...edge, label: 'e'.repeat(1 + ((at * 7) % 12)) }))
+    const geometry = layoutRelationGraph('layered', list, edges)
+    const boxes = edges.map((_, at) => labelBox(geometry, edges, at))
+    assert.equal(overlaps(boxes), false, `${trial} labels overlap`)
+    for (const label of boxes)
+      for (const node of geometry.nodes) assert.equal(intersect(label, node), false, `${trial}`)
+  }
+})
+
+test('labels of edges from different parents into one child stay apart', () => {
+  const list = nodes([
+    'Web app',
+    'Legacy export',
+    'API gateway',
+    'Orders',
+    'Billing',
+    'Queue',
+    'Database'
+  ])
+  const edges = [
+    { from: 'Web app', to: 'API gateway', label: 'calls' },
+    { from: 'API gateway', to: 'Orders' },
+    { from: 'API gateway', to: 'Billing' },
+    { from: 'Orders', to: 'Queue', label: 'enqueues' },
+    { from: 'Billing', to: 'Queue', label: 'publishes' },
+    { from: 'Orders', to: 'Database' },
+    { from: 'Billing', to: 'Database' },
+    { from: 'Legacy export', to: 'Database' }
+  ]
+  const geometry = layoutRelationGraph('layered', list, edges)
+  const boxes = [0, 3, 4].map(at => labelBox(geometry, edges, at))
+  assert.equal(overlaps(boxes), false)
+  for (const label of boxes)
+    for (const node of geometry.nodes) assert.equal(intersect(label, node), false)
+  assert.deepEqual(geometry, layoutRelationGraph('layered', list, edges))
+})
+
 test('tree edges outside the tree curve around nodes in between', () => {
   const list = nodes(['root', 'a', 'b', 'c'])
   const edges = [

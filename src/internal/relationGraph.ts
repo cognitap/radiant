@@ -233,7 +233,12 @@ type Placed = {
  * parent sits centered over them. Trees sit side by side, wrapping to a new row past a target
  * width.
  */
-function layoutTree(graph: Graph, sizes: Size[], edges: readonly RelationGraphEdge[]): Placed {
+function layoutTree(
+  graph: Graph,
+  sizes: Size[],
+  edges: readonly RelationGraphEdge[],
+  gapY: number
+): Placed {
   const parent: number[] = Array.from({ length: graph.count }, () => -1)
   const depth: number[] = Array.from({ length: graph.count }, () => 0)
   const rootOf: number[] = Array.from({ length: graph.count }, () => -1)
@@ -310,7 +315,7 @@ function layoutTree(graph: Graph, sizes: Size[], edges: readonly RelationGraphEd
     let y = top
     rows.forEach((height, row) => {
       rowTop[row] = y
-      y += height + GAP_Y
+      y += height + gapY
     })
     let cursor = 0
     for (const root of band) {
@@ -354,7 +359,12 @@ function crossings(layers: number[][], down: number[][], position: number[]) {
  * that skips layers passes through its own placeholder in each layer between, and barycentric
  * sweeps order each layer, keeping the order with the fewest crossings.
  */
-function layoutLayered(graph: Graph, sizes: Size[], edges: readonly RelationGraphEdge[]): Placed {
+function layoutLayered(
+  graph: Graph,
+  sizes: Size[],
+  edges: readonly RelationGraphEdge[],
+  gapY: number
+): Placed {
   const state = Array.from({ length: graph.count }, () => 0)
   const reversed = new Set<string>()
   for (let root = 0; root < graph.count; root++) {
@@ -477,7 +487,7 @@ function layoutLayered(graph: Graph, sizes: Size[], edges: readonly RelationGrap
       centers[vertex] = { x: x + widths[vertex]! / 2, y: top + rowHeight[l]! / 2 }
       x += widths[vertex]! + GAP_X
     }
-    top += rowHeight[l]! + GAP_Y
+    top += rowHeight[l]! + gapY
   })
   const chains = new Map<number, Point[]>()
   chainOf.forEach((chain, at) => {
@@ -532,7 +542,17 @@ type Command =
   | { type: 'L'; p: Point }
   | { type: 'Q'; c: Point; p: Point }
   | { type: 'C'; c1: Point; c2: Point; p: Point }
-type Route = { start: Point; commands: Command[]; label: Point; tip: Point; from: Point }
+type Route = {
+  start: Point
+  commands: Command[]
+  label: Point
+  tip: Point
+  from: Point
+  /** The label's center at a fraction of the way along the edge. */
+  along: (t: number) => Point
+  /** The fraction where the label sits first. */
+  t: number
+}
 
 /** Ends a route at the base of its arrowhead and returns the head pointing from `from` to `tip`. */
 function arrowhead(route: Route) {
@@ -554,6 +574,83 @@ const lerp = (a: Point, b: Point, t: number) => ({
   y: a.y + (b.y - a.y) * t
 })
 const quad = (a: Point, c: Point, b: Point, t: number) => lerp(lerp(a, c, t), lerp(c, b, t), t)
+const cubic = (a: Point, c1: Point, c2: Point, b: Point, t: number) =>
+  lerp(quad(a, c1, c2, t), quad(c1, c2, b, t), t)
+
+const segments = (points: readonly Point[]) =>
+  points.slice(1).map((p, at) => Math.hypot(p.x - points[at]!.x, p.y - points[at]!.y))
+const polylineLength = (points: readonly Point[]) =>
+  segments(points).reduce((sum, length) => sum + length, 0)
+
+/** The point a fraction of the way along a polyline, by length. */
+function polyline(points: readonly Point[], t: number) {
+  const lengths = segments(points)
+  let left = t * polylineLength(points)
+  for (let at = 0; at < lengths.length; at++) {
+    if (left <= lengths[at]! || at === lengths.length - 1)
+      return lerp(points[at]!, points[at + 1]!, lengths[at] ? Math.min(1, left / lengths[at]!) : 0)
+    left -= lengths[at]!
+  }
+  return points[0]!
+}
+
+const LABEL_GAP = 2
+// Labels slide along their edge in these steps, staying this far from either end.
+const SLIDE_STEP = 0.05
+const SLIDE_RANGE = [0.15, 0.85] as const
+const NUDGE_STEP = 6
+const NUDGES = 60
+
+/**
+ * Moves each edge label, in edge order, to the nearest spot along its edge where its estimated
+ * box clears every node and every label placed before it. A label with no clear spot on its edge
+ * moves off it in growing steps. Returns how many edges other than loops had no clear spot.
+ */
+function separateLabels(
+  routes: Route[],
+  centers: readonly Point[],
+  sizes: readonly Size[],
+  edges: readonly RelationGraphEdge[],
+  loops: ReadonlySet<number>
+) {
+  const placed: { at: Point; width: number }[] = []
+  const clear = (at: Point, width: number) =>
+    centers.every(
+      (c, i) =>
+        Math.abs(at.x - c.x) >= (width + sizes[i]!.width) / 2 + LABEL_GAP ||
+        Math.abs(at.y - c.y) >= (LABEL_HEIGHT + sizes[i]!.height) / 2 + LABEL_GAP
+    ) &&
+    placed.every(
+      other =>
+        Math.abs(at.x - other.at.x) >= (width + other.width) / 2 + LABEL_GAP ||
+        Math.abs(at.y - other.at.y) >= LABEL_HEIGHT + LABEL_GAP
+    )
+  let detached = 0
+  routes.forEach((route, index) => {
+    const width = labelWidth(edges[index]!.label)
+    if (!width) return
+    const slides = [route.label]
+    for (let k = 1; k * SLIDE_STEP <= 1; k++)
+      for (const t of [route.t - k * SLIDE_STEP, route.t + k * SLIDE_STEP])
+        if (t >= SLIDE_RANGE[0] - 1e-9 && t <= SLIDE_RANGE[1] + 1e-9) slides.push(route.along(t))
+    let at = slides.find(point => clear(point, width))
+    if (!at) {
+      if (!loops.has(index)) detached++
+      for (let k = 1; k <= NUDGES && !at; k++)
+        at = [
+          { x: k * NUDGE_STEP, y: 0 },
+          { x: -k * NUDGE_STEP, y: 0 },
+          { x: 0, y: k * NUDGE_STEP },
+          { x: 0, y: -k * NUDGE_STEP }
+        ]
+          .map(shift => ({ x: route.label.x + shift.x, y: route.label.y + shift.y }))
+          .find(point => clear(point, width))
+    }
+    route.label = at ?? route.label
+    placed.push({ at: route.label, width })
+  })
+  return detached
+}
 
 /** Rows of node indexes grouped by their centers' height, each sorted from the inline start. */
 function rowsOf(centers: readonly Point[]) {
@@ -575,11 +672,29 @@ export function layoutRelationGraph(
 ): RelationGraphGeometry {
   const graph = toGraph(nodes, edges)
   const sizes = nodes.map(node => nodeSize(node.label))
+  const loops = new Set(graph.ends.flatMap(({ from, to }, at) => (from === to ? [at] : [])))
+  // Rows move apart, up to twice as far, while some label finds no clear spot along its edge.
+  for (let gapY = GAP_Y; ; gapY += GAP_Y / 2) {
+    const { centers, routes } = routeEdges(layout, graph, sizes, edges, gapY)
+    const detached = separateLabels(routes, centers, sizes, edges, loops)
+    if (!detached || layout === 'circular' || gapY >= GAP_Y * 2)
+      return fit(layout, nodes, edges, sizes, centers, routes)
+  }
+}
+
+/** Places the nodes and routes every edge with its label at its first spot. */
+function routeEdges(
+  layout: RelationGraphLayout,
+  graph: Graph,
+  sizes: Size[],
+  edges: readonly RelationGraphEdge[],
+  gapY: number
+) {
   const placed =
     layout === 'tree'
-      ? layoutTree(graph, sizes, edges)
+      ? layoutTree(graph, sizes, edges, gapY)
       : layout === 'layered'
-        ? layoutLayered(graph, sizes, edges)
+        ? layoutLayered(graph, sizes, edges, gapY)
         : layoutCircular(graph, sizes)
   const { centers } = placed
   const inside = (p: Point, skip: readonly number[]) =>
@@ -610,24 +725,36 @@ export function layoutRelationGraph(
       const tip = { x: right, y: a.y + size.height / 4 }
       const c1 = { x: right + reach, y: a.y - size.height / 2 - nth * 8 }
       const c2 = { x: right + reach, y: a.y + size.height / 2 + nth * 8 }
+      // The label sits beside the loop, outside it.
+      const along = (t: number) => {
+        const p = cubic(start, c1, c2, tip, t)
+        return { x: p.x + labelWidth(edges[at]!.label) / 2, y: p.y }
+      }
       return {
         start,
         commands: [{ type: 'C', c1, c2, p: tip }],
         tip,
         from: c2,
-        label: { x: right + reach * 0.75 + labelWidth(edges[at]!.label) / 2, y: a.y }
+        label: along(0.5),
+        along,
+        t: 0.5
       }
     }
     const chain = placed.chains?.get(at)
     if (chain && chain.length > 2) {
       const start = exit(a, sizes[from]!, chain[1]!)
       const tip = exit(b, sizes[to]!, chain[chain.length - 2]!)
+      const points = [start, ...chain.slice(1, -1), tip]
+      const total = polylineLength(points)
+      const host = chain[chain.length - 2]!
       return {
         start,
-        commands: [...chain.slice(1, -1), tip].map(p => ({ type: 'L', p })),
+        commands: points.slice(1).map(p => ({ type: 'L', p })),
         tip,
-        from: chain[chain.length - 2]!,
-        label: chain[chain.length - 2]!
+        from: host,
+        label: host,
+        along: (t: number) => polyline(points, t),
+        t: total ? 1 - Math.hypot(tip.x - host.x, tip.y - host.y) / total : 0.5
       }
     }
     const group = groups.get(`${Math.min(from, to)}:${Math.max(from, to)}`)!
@@ -658,13 +785,16 @@ export function layoutRelationGraph(
     if (!offset) {
       const start = exit(a, sizes[from]!, b),
         tip = exit(b, sizes[to]!, a)
+      // Three quarters along, so labels on edges that fan out stay apart.
+      const t = layout === 'circular' ? 0.5 : 0.75
       return {
         start,
         commands: [{ type: 'L', p: tip }],
         tip,
         from: start,
-        // Three quarters along, so labels on edges that fan out stay apart.
-        label: layout === 'circular' ? lerp(start, tip, 0.5) : lerp(start, tip, 0.75)
+        label: lerp(start, tip, t),
+        along: (t: number) => lerp(start, tip, t),
+        t
       }
     }
     const { start, control, tip } = curve(offset)
@@ -673,10 +803,23 @@ export function layoutRelationGraph(
       commands: [{ type: 'Q', c: control, p: tip }],
       tip,
       from: control,
-      label: quad(start, control, tip, 0.5)
+      label: quad(start, control, tip, 0.5),
+      along: (t: number) => quad(start, control, tip, t),
+      t: 0.5
     }
   })
-  // Fit the canvas around the nodes and everything the edges reach.
+  return { centers, routes }
+}
+
+/** Fits the canvas around the nodes and everything the edges reach, and writes the geometry. */
+function fit(
+  layout: RelationGraphLayout,
+  nodes: readonly RelationGraphNode[],
+  edges: readonly RelationGraphEdge[],
+  sizes: readonly Size[],
+  centers: readonly Point[],
+  routes: readonly Route[]
+): RelationGraphGeometry {
   const xs: number[] = [],
     ys: number[] = []
   centers.forEach((c, i) => {

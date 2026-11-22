@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- `RelationGraph` keeps edge labels clear of each other and of nodes: a label that would overlap slides along its own edge, and `tree` and `layered` rows move further apart when no spot along the edge is clear. Before, labels of edges from different parents into one node could sit on top of each other in `layered` graphs.
+
 ## 0.0.100
 
 - Add `AudioPlayer`, a styled player for short clips on a native `<audio>` element: a play/pause toggle (`playLabel`, `pauseLabel`), a `Slider` scrubber (`seekLabel`) and locale-aware time. `compact` keeps only the toggle and requires an accessible name; inside an `AudioPlayerGroup`, one player plays at a time. Themes style it through `components.audioPlayer`. A2UI `AudioPlayer` renders it when `A2uiSurface` `labels` set `audioPlay`, `audioPause` and `audioSeek` (plus optional `audioError`); otherwise it keeps native controls and reports a `defaulted` diagnostic.
