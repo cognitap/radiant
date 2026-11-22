@@ -12,7 +12,10 @@ import {
   defineTheme,
   useTabs
 } from '../../src/index.js'
-import { TabsWorkspaceExample } from '../../.storybook/examples/TabsExamples.js'
+import {
+  TabsOverflowExample,
+  TabsWorkspaceExample
+} from '../../.storybook/examples/TabsExamples.js'
 import '../../.storybook/styles.css'
 
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
@@ -614,3 +617,117 @@ for (const controlSize of ['small', 'medium', 'large'] as const) {
     expect(tabs[2].getAttribute('aria-selected')).toBe('true')
   })
 }
+
+function overflow(list: HTMLElement) {
+  return {
+    start: list.hasAttribute('data-overflow-start'),
+    end: list.hasAttribute('data-overflow-end'),
+    mask: getComputedStyle(list).maskImage
+  }
+}
+// Visible means inside the list and clear of any edge fade.
+function insideList(list: HTMLElement, tab: HTMLElement) {
+  const box = list.getBoundingClientRect()
+  const rect = tab.getBoundingClientRect()
+  const rtl = getComputedStyle(list).direction === 'rtl'
+  const fade = (side: 'start' | 'end') => (list.hasAttribute(`data-overflow-${side}`) ? 24 : 0)
+  const left = fade(rtl ? 'end' : 'start')
+  const right = fade(rtl ? 'start' : 'end')
+  return rect.left >= box.left + left - 1 && rect.right <= box.right - right + 1
+}
+
+test('six tabs in a 360px column fade the edge that hides more tabs, and nothing when they fit', async () => {
+  const { host, render } = await mount(
+    <div style={{ width: 360 }}>
+      <TabsOverflowExample />
+    </div>
+  )
+  const { list, tabs } = parts(host)
+  expect(tabs).toHaveLength(6)
+  expect(list.getBoundingClientRect().width).toBeLessThanOrEqual(360)
+  expect(list.scrollWidth).toBeGreaterThan(list.clientWidth)
+  expect(insideList(list, tabs[5])).toBe(false)
+  expect(overflow(list)).toMatchObject({ start: false, end: true })
+  expect(overflow(list).mask).toContain('to right')
+
+  list.scrollLeft = list.scrollWidth
+  await expect.poll(() => overflow(list)).toMatchObject({ start: true, end: false })
+  list.scrollLeft = list.scrollWidth / 2 - list.clientWidth / 2
+  await expect.poll(() => overflow(list)).toMatchObject({ start: true, end: true })
+
+  await commands.emulatePreferences({ forcedColors: 'active', reducedMotion: 'no-preference' })
+  expect(overflow(list).mask).not.toBe('none')
+
+  await render(
+    <div style={{ width: 360 }}>
+      <TabsOverflowExample months={['January', 'February']} />
+    </div>
+  )
+  await expect.poll(() => overflow(list)).toEqual({ start: false, end: false, mask: 'none' })
+})
+
+test('rtl: the fade starts on the left edge and moves to the right after scrolling', async () => {
+  const { host } = await mount(
+    <div style={{ width: 360 }}>
+      <TabsOverflowExample dir="rtl" />
+    </div>
+  )
+  const { list, tabs } = parts(host)
+  expect(tabs[5].getBoundingClientRect().left).toBeLessThan(list.getBoundingClientRect().left)
+  expect(overflow(list)).toMatchObject({ start: false, end: true })
+  expect(overflow(list).mask).toContain('to left')
+  list.scrollLeft = -list.scrollWidth
+  await expect.poll(() => overflow(list)).toMatchObject({ start: true, end: false })
+})
+
+for (const reducedMotion of ['reduce', 'no-preference'] as const) {
+  for (const dir of ['ltr', 'rtl'] as const) {
+    test(`${dir}, ${reducedMotion} motion: arrows and End reach the last tab and scroll it into view`, async () => {
+      await commands.emulatePreferences({ forcedColors: 'none', reducedMotion })
+      const { host } = await mount(
+        <div style={{ width: 360 }}>
+          <TabsOverflowExample dir={dir} />
+        </div>
+      )
+      const { list, tabs } = parts(host)
+      const forward = dir === 'rtl' ? '{ArrowLeft}' : '{ArrowRight}'
+      await act(async () => tabs[0].focus())
+      for (const tab of tabs.slice(1)) {
+        await act(async () => userEvent.keyboard(forward))
+        expect(document.activeElement).toBe(tab)
+        await expect.poll(() => insideList(list, tab)).toBe(true)
+      }
+      expect(tabs[5].getAttribute('aria-selected')).toBe('true')
+      await expect.poll(() => overflow(list)).toMatchObject({ start: true, end: false })
+      await act(async () => userEvent.keyboard('{Home}'))
+      expect(document.activeElement).toBe(tabs[0])
+      await expect.poll(() => insideList(list, tabs[0])).toBe(true)
+      await act(async () => userEvent.keyboard('{End}'))
+      expect(document.activeElement).toBe(tabs[5])
+      await expect.poll(() => insideList(list, tabs[5])).toBe(true)
+    })
+  }
+}
+
+test('a selected tab past the edge scrolls into view on mount without moving the page', async () => {
+  const { host } = await mount(
+    <div style={{ width: 360 }}>
+      <Tabs defaultValue="six">
+        <TabsList aria-label="Months">
+          {['one', 'two', 'three', 'four', 'five', 'six'].map(value => (
+            <TabsTrigger
+              key={value}
+              value={value}
+            >
+              Month {value}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    </div>
+  )
+  const { list, tabs } = parts(host)
+  expect(insideList(list, tabs[5])).toBe(true)
+  expect(overflow(list)).toMatchObject({ start: true, end: false })
+  expect(window.scrollY).toBe(0)
+})

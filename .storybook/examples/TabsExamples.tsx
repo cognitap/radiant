@@ -61,12 +61,20 @@ export function TabsDisabledExample() {
   )
 }
 
-export function TabsOverflowExample() {
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August']
+const overflowMonths = ['January', 'February', 'March', 'April', 'May', 'June']
+
+export function TabsOverflowExample({
+  dir,
+  months = overflowMonths
+}: {
+  dir?: 'ltr' | 'rtl'
+  months?: string[]
+}) {
   return (
     <Tabs
-      defaultValue="January"
-      style={{ maxWidth: '20rem' }}
+      defaultValue={months[0]!}
+      dir={dir}
+      style={{ maxWidth: '22.5rem' }}
     >
       <TabsList aria-label="Monthly reports">
         {months.map(month => (
