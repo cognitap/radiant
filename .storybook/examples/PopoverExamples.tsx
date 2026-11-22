@@ -1,3 +1,4 @@
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- SVG shapes take ARIA roles, and popover content takes its caller-chosen dialog role. */
 import { useRef, useState } from 'react'
 import {
   Popover,
@@ -142,6 +143,142 @@ export function PinnablePopover() {
             >
               Done
             </Button>
+          </PopoverContent>
+        </PopoverPortal>
+      </Popover>
+    </div>
+  )
+}
+
+const regions = [
+  { id: 'north', label: 'North depot', d: 'M8 8h120v72H8z', stock: 'Stock: 1,240 parcels.' },
+  { id: 'east', label: 'East depot', d: 'M136 8h96v152h-96z', stock: 'Stock: 860 parcels.' },
+  { id: 'south', label: 'South depot', d: 'M8 88h120v72H8z', stock: 'Stock: 310 parcels.' }
+]
+
+export function SvgAnchorPopover({ defaultRegion }: { defaultRegion?: string }) {
+  const [activeId, setActiveId] = useState(defaultRegion)
+  // The ref follows the active region, so the anchor is always the shape on screen.
+  const [anchor, setAnchor] = useState<SVGPathElement | null>(null)
+  const region = regions.find(item => item.id === activeId)
+  return (
+    <div className="grid gap-2">
+      <svg
+        viewBox="0 0 240 168"
+        className="block w-full max-w-80"
+        role="group"
+        aria-label="Depots"
+      >
+        {regions.map(item => (
+          <path
+            key={item.id}
+            ref={item.id === activeId ? setAnchor : undefined}
+            d={item.d}
+            role="button"
+            tabIndex={0}
+            aria-label={item.label}
+            aria-expanded={item.id === activeId}
+            className="cursor-pointer fill-[var(--rad-color-neutral)] stroke-[var(--rad-color-border)] hover:fill-[var(--rad-color-accent)] aria-expanded:fill-[var(--rad-color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--rad-color-focus)]"
+            onClick={() => setActiveId(item.id)}
+            onKeyDown={event => {
+              if (event.key !== 'Enter' && event.key !== ' ') return
+              event.preventDefault()
+              setActiveId(item.id)
+            }}
+          />
+        ))}
+      </svg>
+      <Popover
+        open={!!region}
+        onOpenChange={next => {
+          if (!next) setActiveId(undefined)
+        }}
+        anchor={anchor}
+      >
+        <PopoverPortal>
+          <PopoverContent
+            side="right"
+            align="center"
+            role="dialog"
+            aria-label={region?.label}
+          >
+            <p className="m-0 font-semibold">{region?.label}</p>
+            <p className="m-0">{region?.stock}</p>
+            <PopoverClose
+              variant="outline"
+              tone="neutral"
+            >
+              Close
+            </PopoverClose>
+          </PopoverContent>
+        </PopoverPortal>
+      </Popover>
+    </div>
+  )
+}
+
+export function RectAnchorPopover({ defaultOpen = false }: { defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen)
+  const [pan, setPan] = useState(0)
+  const plot = useRef<HTMLDivElement>(null)
+  // The marker is drawn on a canvas-like surface, so the anchor is a measured rect.
+  const point = { x: 120 + pan, y: 64 }
+  return (
+    <div className="grid gap-3">
+      <div
+        ref={plot}
+        className="relative h-32 w-full max-w-80 overflow-hidden rounded-md border border-[var(--rad-color-border)]"
+      >
+        <span
+          aria-hidden
+          className="absolute size-3 -translate-1/2 rounded-full bg-[var(--rad-color-accent)]"
+          style={{ left: point.x, top: point.y }}
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          tone="neutral"
+          onClick={() => setPan(value => value - 40)}
+        >
+          Pan left
+        </Button>
+        <Button
+          variant="outline"
+          tone="neutral"
+          onClick={() => setPan(value => value + 40)}
+        >
+          Pan right
+        </Button>
+        <Button onClick={() => setOpen(true)}>Show reading</Button>
+      </div>
+      <Popover
+        open={open}
+        onOpenChange={setOpen}
+        anchor={() => {
+          const box = plot.current?.getBoundingClientRect()
+          return {
+            x: (box?.left ?? 0) + point.x,
+            y: (box?.top ?? 0) + point.y,
+            width: 0,
+            height: 0
+          }
+        }}
+      >
+        <PopoverPortal>
+          <PopoverContent
+            side="top"
+            align="center"
+            role="dialog"
+            aria-label="Reading"
+          >
+            <p className="m-0">Peak load: 82 parcels an hour.</p>
+            <PopoverClose
+              variant="outline"
+              tone="neutral"
+            >
+              Close
+            </PopoverClose>
           </PopoverContent>
         </PopoverPortal>
       </Popover>

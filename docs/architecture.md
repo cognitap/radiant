@@ -29,7 +29,7 @@ Each native element or behavior has one base family. Higher-level components com
 
 `Button` owns `<button>` actions and `Link` owns `<a>` navigation, even when a link looks like a button. Triggers, close buttons, and action items in other families build on `Button`, and navigation items build on `Link`.
 
-`Collapsible` owns `<details>` disclosures, `Dialog` owns modal `<dialog>` state and focus containment, and `Popover` owns the anchored popups of `Menu`, `ContextMenu`, `Menubar`, and `HoverCard`. `Select`, `Combobox`, and `Tooltip` render their own. All of these popups render inside the trigger's container with `popover="manual"`, so they enter the top layer and stay inside their theme and modal subtree.
+`Collapsible` owns `<details>` disclosures, `Dialog` owns modal `<dialog>` state and focus containment, and `Popover` owns the popups of `Menu`, `ContextMenu`, `Menubar`, and `HoverCard`; `Select`, `Combobox`, and `Tooltip` render their own. Each popup renders in its trigger's or `anchor` element's container with `popover="manual"`, entering the top layer inside its theme and modal subtree; rect anchors render in place.
 
 ## Hosts, parts, and styling
 

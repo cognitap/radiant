@@ -1,5 +1,25 @@
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
+/** A viewport-relative box, such as a `DOMRect`. */
+export type PopoverAnchorRect = { x: number; y: number; width: number; height: number }
+/** An element (HTML or SVG), a viewport rect, or a getter read on each placement. */
+export type PopoverAnchor = Element | PopoverAnchorRect | (() => PopoverAnchorRect)
+
+export function anchorElement(anchor: PopoverAnchor | null | undefined): Element | null {
+  return anchor && typeof anchor === 'object' && 'nodeType' in anchor ? anchor : null
+}
+export function assertAnchor(anchor: PopoverAnchor | null | undefined, name: string) {
+  if (!anchor || typeof anchor === 'function' || anchorElement(anchor)) return
+  const { x, y, width, height } = anchor as PopoverAnchorRect
+  if (![x, y, width, height].every(Number.isFinite) || width < 0 || height < 0)
+    throw new TypeError(`${name} anchor rects need finite coordinates and nonnegative sizes.`)
+}
+/** The nearest HTML ancestor, so popups never mount inside SVG content. */
+export function htmlParent(element: Element | null | undefined) {
+  for (let node = element?.parentElement; node; node = node.parentElement)
+    if (node.namespaceURI === 'http://www.w3.org/1999/xhtml') return node
+  return null
+}
 
 type Rect = {
   top: number

@@ -46,6 +46,9 @@ export function Probe() {
 }
 // @ts-expect-error Menu has one state owner.
 const mixed: MenuProps = { open: false, defaultOpen: true }
+// @ts-expect-error Menus anchor to their trigger.
+const anchoredMenu: MenuProps = { anchor: new DOMRect() }
+void anchoredMenu
 // @ts-expect-error Menu owns content semantics.
 const role: MenuContentProps = { role: 'listbox' }
 // @ts-expect-error Menu owns item roles.

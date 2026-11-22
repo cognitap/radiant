@@ -1,3 +1,4 @@
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- SVG shapes take ARIA roles. */
 import { useState } from 'react'
 import {
   Switch,
@@ -5,6 +6,7 @@ import {
   TooltipTrigger,
   TooltipPortal,
   TooltipContent,
+  useTooltip,
   type TooltipProps,
   type TooltipContentProps
 } from '../../src/index.js'
@@ -137,6 +139,78 @@ export function TooltipControlledExample() {
         </TooltipPortal>
       </Tooltip>
       <output>The tooltip is {open ? 'open' : 'closed'}.</output>
+    </div>
+  )
+}
+
+const seats = [
+  { id: 'a1', x: 16, label: 'Seat A1', note: 'Window seat, extra legroom.' },
+  { id: 'a2', x: 72, label: 'Seat A2', note: 'Middle seat.' },
+  { id: 'a3', x: 128, label: 'Seat A3', note: 'Aisle seat, near the exit.' }
+]
+
+function Seats({
+  activeId,
+  onActive,
+  setAnchor
+}: {
+  activeId?: string
+  onActive: (id?: string) => void
+  setAnchor: (node: SVGRectElement | null) => void
+}) {
+  const tip = useTooltip()
+  return (
+    <svg
+      viewBox="0 0 176 64"
+      className="block w-full max-w-64"
+      role="group"
+      aria-label="Seats"
+    >
+      {seats.map(seat => (
+        <rect
+          key={seat.id}
+          ref={seat.id === activeId ? setAnchor : undefined}
+          x={seat.x}
+          y={12}
+          width={40}
+          height={40}
+          rx={6}
+          tabIndex={0}
+          role="img"
+          aria-label={seat.label}
+          aria-describedby={seat.id === activeId ? tip?.contentId : undefined}
+          className="fill-[var(--rad-color-neutral)] hover:fill-[var(--rad-color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--rad-color-focus)]"
+          onPointerEnter={() => onActive(seat.id)}
+          onPointerLeave={() => onActive()}
+          onFocus={() => onActive(seat.id)}
+          onBlur={() => onActive()}
+        />
+      ))}
+    </svg>
+  )
+}
+
+export function TooltipSvgAnchorExample({ defaultSeat }: { defaultSeat?: string }) {
+  const [activeId, setActiveId] = useState(defaultSeat)
+  const [anchor, setAnchor] = useState<SVGRectElement | null>(null)
+  return (
+    <div>
+      <Tooltip
+        open={!!activeId}
+        onOpenChange={next => {
+          if (!next) setActiveId(undefined)
+        }}
+        anchor={anchor}
+      >
+        <Seats
+          activeId={activeId}
+          onActive={setActiveId}
+          setAnchor={setAnchor}
+        />
+        <TooltipPortal>
+          <TooltipContent>{seats.find(seat => seat.id === activeId)?.note}</TooltipContent>
+        </TooltipPortal>
+      </Tooltip>
     </div>
   )
 }

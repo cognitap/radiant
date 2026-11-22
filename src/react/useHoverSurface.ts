@@ -43,7 +43,7 @@ export function useHoverSurface({
   const schedule = useCallback(
     (next: boolean, delay: number) => {
       clear()
-      const view = trigger?.ownerDocument.defaultView
+      const view = (trigger ?? content.current)?.ownerDocument.defaultView
       if (!view) return
       timer.current = {
         view,
@@ -53,7 +53,7 @@ export function useHoverSurface({
         }, delay)
       }
     },
-    [trigger]
+    [trigger, content]
   )
   const setOpen = (next: boolean) => {
     clear()

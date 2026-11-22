@@ -42,7 +42,7 @@ import { matchSelectText } from '../../internal/select.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useLocaleMatcher } from '../../react/useLocale.js'
 
-export type MenuProps = PopoverProps
+export type MenuProps = DistributiveOmit<PopoverProps, 'anchor'>
 export type MenuState = PopoverState
 /** Rows keep Button's host but none of its action presentation. */
 export type MenuRenderProps = Omit<ButtonRenderProps, 'data-variant' | 'data-control-size'> & {

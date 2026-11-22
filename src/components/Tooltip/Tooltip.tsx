@@ -15,7 +15,14 @@ import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Butt
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { composeAction } from '../../internal/events.js'
-import type { PopoverSide, PopoverAlign } from '../../internal/popover.js'
+import {
+  anchorElement,
+  assertAnchor,
+  htmlParent,
+  type PopoverSide,
+  type PopoverAlign,
+  type PopoverAnchor
+} from '../../internal/popover.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import type { StateOwner } from '../../react/useNativeOwner.js'
@@ -29,10 +36,13 @@ export type TooltipProps = StateOwner<'open', boolean> & {
   onOpenChange?: (open: boolean) => void
   openDelay?: number
   closeDelay?: number
+  /** Positions against this element or rect instead of the trigger. */
+  anchor?: PopoverAnchor | null
   children?: ReactNode
 }
 export type TooltipState = { open: boolean; setOpen: (open: boolean) => void; contentId: string }
 type Context = TooltipState & {
+  anchor?: PopoverAnchor | null
   trigger: HTMLButtonElement | null
   setTrigger: (node: HTMLButtonElement | null) => void
   content: RefObject<HTMLSpanElement | null>
@@ -57,10 +67,12 @@ export function Tooltip({
   onOpenChange,
   openDelay = 500,
   closeDelay = 150,
+  anchor,
   children
 }: TooltipProps) {
   if (![openDelay, closeDelay].every(n => Number.isFinite(n) && n >= 0))
     throw new TypeError('Tooltip delays must be finite, nonnegative numbers.')
+  assertAnchor(anchor, 'Tooltip')
   const state = useControllableState({
     name: 'Tooltip',
     value: open,
@@ -85,6 +97,7 @@ export function Tooltip({
         open: state.value,
         setOpen: state.request,
         contentId,
+        anchor,
         trigger,
         setTrigger,
         content,
@@ -156,7 +169,8 @@ export function TooltipTrigger({
 }
 export function TooltipPortal({ children }: TooltipPortalProps) {
   const tip = useTooltipContext()
-  return tip.trigger?.parentElement ? createPortal(children, tip.trigger.parentElement) : children
+  const container = tip.trigger?.parentElement ?? htmlParent(anchorElement(tip.anchor))
+  return container ? createPortal(children, container) : children
 }
 export function TooltipContent({
   ref,
@@ -182,7 +196,8 @@ export function TooltipContent({
     sideOffset,
     collisionPadding,
     lang: props.lang,
-    dir: props.dir
+    dir: props.dir,
+    anchor: tip.anchor
   })
   return (
     <span
