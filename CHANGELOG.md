@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.101
+
 - `RelationGraph` keeps edge labels clear of each other and of nodes: a label that would overlap slides along its own edge, and `tree` and `layered` rows move further apart when no spot along the edge is clear. Before, labels of edges from different parents into one node could sit on top of each other in `layered` graphs.
 
 ## 0.0.100
