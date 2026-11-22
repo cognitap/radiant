@@ -60,7 +60,7 @@ Put new tests in the matching suite:
 
 `pnpm test:visual` renders all-pairs combinations of each component's enum and boolean props, plus nested containers, in light and dark at 360px and 720px. Screenshots differ by platform, so only the Linux images in `tests/visual/__screenshots__/` are committed. Locally the first run fails every case while it records your own references; later runs compare against them.
 
-When CI reports a visual change, download the `visual-diffs` artifact and review each reference, actual and diff image. To approve an intended change, label the pull request `visual-baselines`; the workflow renders the merge with `main` on every push while the label stays. Running it by hand renders the branch as is, so rebase on `main` first.
+When CI reports a visual change, download the `visual-diffs` artifact and review each reference, actual and diff image. To approve an intended change, label the pull request `visual-baselines`; the workflow renders the merge with `main` on every push while the label stays, and CI skips the comparison until you commit the images and remove the label. Running it by hand renders the branch as is, so rebase on `main` first.
 
 ```sh
 gh workflow run visual-baselines.yml --ref <branch>
