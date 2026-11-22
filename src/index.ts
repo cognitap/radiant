@@ -956,8 +956,7 @@ export type {
   SplitMainProps,
   SplitProps,
   SplitRatio,
-  SplitSecondaryProps,
-  SplitSide
+  SplitSecondaryProps
 } from './components/Split/Split.js'
 
 export { Grid } from './components/Grid/Grid.js'

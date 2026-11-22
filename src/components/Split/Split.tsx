@@ -5,8 +5,6 @@ import type { Spacing } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { pickLayoutClass, spacingGapClasses } from '../shared/layoutStyles.js'
 
-/** Inline side the secondary area takes once the Split is wide enough. */
-export type SplitSide = 'start' | 'end'
 /** Share of the width: `main` gives the main area two thirds, `balanced` halves it. */
 export type SplitRatio = 'balanced' | 'main'
 
@@ -17,11 +15,11 @@ type SplitPartProps = Omit<ComponentProps<'div'>, 'style'> & {
 
 /**
  * Div host and inline-size container. Its parts stack in source order until the Split is
- * 40rem wide, then sit side by side; in a box that sizes to its content, Split takes 20rem.
+ * 40rem wide, then sit side by side in that same order, so reading and focus order match what
+ * people see: put `SplitSecondary` first to show it at the start. In a box that sizes to its
+ * content, Split takes 20rem.
  */
 export type SplitProps = SplitPartProps & {
-  /** Side of the secondary area when side by side; `end` is the default. */
-  side?: SplitSide
   /** `main` (the default) or `balanced`. */
   ratio?: SplitRatio
   /** Space between the areas from the theme spacing scale. */
@@ -33,10 +31,6 @@ export type SplitMainProps = SplitPartProps
 /** Div host for supporting content, such as filters or a summary. */
 export type SplitSecondaryProps = SplitPartProps
 
-const sides: Record<SplitSide, string> = {
-  start: '[--_split-order:-1]',
-  end: '[--_split-order:1]'
-}
 const ratios: Record<SplitRatio, string> = {
   balanced: '[--_split-grow:1]',
   main: '[--_split-grow:2]'
@@ -45,20 +39,13 @@ const ratios: Record<SplitRatio, string> = {
 const partClass = 'box-border min-w-0 basis-full @min-[40rem]/split:basis-0'
 
 /** Main and secondary areas that stack in a narrow container and share a row in a wide one. */
-export function Split({
-  side = 'end',
-  ratio = 'main',
-  gap = 'normal',
-  className,
-  ...props
-}: SplitProps) {
+export function Split({ ratio = 'main', gap = 'normal', className, ...props }: SplitProps) {
   return (
     <div
       {...props}
       data-slot={joinIds('split', props['data-slot'])}
       className={cn(
         '@container/split [contain-intrinsic-inline-size:20rem] box-border flex w-full min-w-0 flex-wrap',
-        pickLayoutClass('Split', sides, 'side', side),
         pickLayoutClass('Split', ratios, 'ratio', ratio),
         pickLayoutClass('Split', spacingGapClasses, 'gap', gap),
         className
@@ -82,11 +69,7 @@ export function SplitSecondary({ className, ...props }: SplitSecondaryProps) {
     <div
       {...props}
       data-slot={joinIds('split-secondary', props['data-slot'])}
-      className={cn(
-        partClass,
-        '@min-[40rem]/split:grow @min-[40rem]/split:order-[var(--_split-order)]',
-        className
-      )}
+      className={cn(partClass, '@min-[40rem]/split:grow', className)}
     />
   )
 }

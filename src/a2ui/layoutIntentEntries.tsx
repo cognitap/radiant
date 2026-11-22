@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import type { ComponentNode } from '@a2ui/web_core/resolution'
 import {
   Compare,
@@ -19,7 +19,7 @@ import { generateA2uiCatalogs, type A2uiJsonSchema } from './catalogGenerator.js
 import { createA2uiRegistryEntry, type A2uiAdapterContext } from './registry.js'
 import type { A2uiAccessibilityRule } from './accessibilityRules.js'
 import { isA2uiChildNode } from './adapterValues.js'
-import { useA2uiLabels } from './surfaceContext.js'
+import { useA2uiLabels, type A2uiSurfaceLabels } from './surfaceContext.js'
 
 const components = generateA2uiCatalogs(radiantCatalog).extension.components
 
@@ -48,15 +48,18 @@ const splitEntry = createA2uiRegistryEntry({
   schema: schemaOf('Split'),
   description: schemaOf('Split').description,
   adapter(props, context) {
+    const main = <SplitMain key="main">{renderChild(props.main, context)}</SplitMain>
+    const secondary = (
+      <SplitSecondary key="secondary">{renderChild(props.secondary, context)}</SplitSecondary>
+    )
+    // Source order sets both the stacked and the side-by-side order, so reading order matches.
     return (
       <Split
         data-slot="a2ui-split"
-        side={props.side === 'start' ? 'start' : 'end'}
         ratio={props.ratio === 'balanced' ? 'balanced' : 'main'}
         gap={readGap(props)}
       >
-        <SplitMain>{renderChild(props.main, context)}</SplitMain>
-        <SplitSecondary>{renderChild(props.secondary, context)}</SplitSecondary>
+        {props.side === 'start' ? [secondary, main] : [main, secondary]}
       </Split>
     )
   }
@@ -81,10 +84,8 @@ const gridEntry = createA2uiRegistryEntry({
         maxColumns={readColumns(props.maxColumns)}
         gap={readGap(props)}
       >
-        {childList(props.children).map((child, index) => (
-          <div key={`${child.componentId}:${child.dataPath ?? index}`}>
-            {context.renderNode(child)}
-          </div>
+        {childList(props.children).map(child => (
+          <div key={child.instanceId}>{context.renderNode(child)}</div>
         ))}
       </Grid>
     )
@@ -93,6 +94,69 @@ const gridEntry = createA2uiRegistryEntry({
 
 const COMPARE_MAX_ITEMS = 4
 
+/**
+ * Compare that coerces its children: items past the fourth are dropped, a child that is not a
+ * CompareItem becomes one item's body, and fewer than two items stack without columns.
+ */
+function A2uiCompare({
+  items,
+  gap,
+  context
+}: {
+  items: readonly ComponentNode[]
+  gap: Spacing
+  context: A2uiAdapterContext
+}) {
+  const count = items.length
+  const nodeId = context.node.componentId
+  const report = context.reportDiagnostic
+  useEffect(() => {
+    if (count >= 2 && count <= COMPARE_MAX_ITEMS) return
+    report?.({
+      kind: 'coerced',
+      nodeId,
+      component: 'Compare',
+      prop: 'children',
+      received: count,
+      used: Math.min(count, COMPARE_MAX_ITEMS),
+      reason:
+        count < 2
+          ? 'Compare needs two to four items; fewer stack without columns.'
+          : 'Compare shows at most four items; the rest are dropped.'
+    })
+  }, [count, nodeId, report])
+  const rendered = items.slice(0, COMPARE_MAX_ITEMS).map(child => (
+    <Fragment key={child.instanceId}>
+      {child.type === 'CompareItem' ? (
+        context.renderNode(child)
+      ) : (
+        <CompareItem>
+          <CompareItemBody>{context.renderNode(child)}</CompareItemBody>
+        </CompareItem>
+      )}
+    </Fragment>
+  ))
+  if (count < 2)
+    return (
+      <Stack
+        data-slot="a2ui-compare"
+        gap={gap}
+      >
+        {items.map(child => (
+          <Fragment key={child.instanceId}>{context.renderNode(child)}</Fragment>
+        ))}
+      </Stack>
+    )
+  return (
+    <Compare
+      data-slot="a2ui-compare"
+      gap={gap}
+    >
+      {rendered}
+    </Compare>
+  )
+}
+
 const compareEntry = createA2uiRegistryEntry({
   name: 'Compare',
   accessibility: [],
@@ -100,26 +164,12 @@ const compareEntry = createA2uiRegistryEntry({
   schema: schemaOf('Compare'),
   description: schemaOf('Compare').description,
   adapter(props, context) {
-    // Extra items are dropped; a child that is not a CompareItem becomes one item's body.
     return (
-      <Compare
-        data-slot="a2ui-compare"
+      <A2uiCompare
+        items={childList(props.children)}
         gap={readGap(props)}
-      >
-        {childList(props.children)
-          .slice(0, COMPARE_MAX_ITEMS)
-          .map(child => (
-            <Fragment key={child.componentId}>
-              {child.type === 'CompareItem' ? (
-                context.renderNode(child)
-              ) : (
-                <CompareItem>
-                  <CompareItemBody>{context.renderNode(child)}</CompareItemBody>
-                </CompareItem>
-              )}
-            </Fragment>
-          ))}
-      </Compare>
+        context={context}
+      />
     )
   }
 })
@@ -159,6 +209,16 @@ const compareItemEntry = createA2uiRegistryEntry({
   }
 })
 
+/** Fills `{index}` (from 1) and `{count}` in a host position template. */
+function positionFrom(
+  label: A2uiSurfaceLabels['revealPosition']
+): ((index: number, count: number) => string) | undefined {
+  if (typeof label === 'function') return label
+  if (typeof label !== 'string' || !label.trim()) return undefined
+  return (index, count) =>
+    label.replaceAll('{index}', String(index + 1)).replaceAll('{count}', String(count))
+}
+
 /** Reveal with the host's control labels; without them every step shows in order. */
 function A2uiReveal({
   steps,
@@ -173,22 +233,33 @@ function A2uiReveal({
   const [chosen, setChosen] = useState<string | null>(null)
   const previousLabel = labels.revealPrevious?.trim()
   const nextLabel = labels.revealNext?.trim()
-  const positionLabel = labels.revealPosition
-  const values = steps.map(step => step.componentId)
-  if (
-    steps.length < 2 ||
-    new Set(values).size !== values.length ||
-    !previousLabel ||
-    !nextLabel ||
-    typeof positionLabel !== 'function'
-  ) {
+  const positionLabel = positionFrom(labels.revealPosition)
+  const labelled = Boolean(previousLabel && nextLabel && positionLabel)
+  const nodeId = context.node.componentId
+  const report = context.reportDiagnostic
+  useEffect(() => {
+    if (labelled) return
+    report?.({
+      kind: 'defaulted',
+      nodeId,
+      component: 'Reveal',
+      prop: 'steps',
+      received: null,
+      used: 'all steps',
+      reason:
+        'A2uiSurface labels lack revealPrevious, revealNext or revealPosition; every step is shown.'
+    })
+  }, [labelled, nodeId, report])
+  // Template instances share a component id, so steps are told apart by their instance id.
+  const values = steps.map(step => step.instanceId)
+  if (steps.length < 2 || !previousLabel || !nextLabel || !positionLabel) {
     return (
       <Stack
         data-slot="a2ui-reveal"
         gap={gap}
       >
         {steps.map(step => (
-          <Fragment key={step.componentId}>{context.renderNode(step)}</Fragment>
+          <Fragment key={step.instanceId}>{context.renderNode(step)}</Fragment>
         ))}
       </Stack>
     )
@@ -204,7 +275,7 @@ function A2uiReveal({
       value={chosen !== null && values.includes(chosen) ? chosen : values[0]!}
       onValueChange={setChosen}
       items={steps.map(step => ({
-        value: step.componentId,
+        value: step.instanceId,
         children: context.renderNode(step)
       }))}
     />

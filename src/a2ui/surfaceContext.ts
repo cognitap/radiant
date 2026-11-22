@@ -19,10 +19,11 @@ export type A2uiSurfaceLabels = {
   /** Text of each Reveal's next-step button. */
   readonly revealNext?: string
   /**
-   * Visible, announced Reveal position for a zero-based index, such as `Step 2 of 4`. Without
-   * it or either button label, a Reveal shows every step in order.
+   * Reveal position text, such as `Step {index} of {count}` with `{index}` counting from 1, or a
+   * function of the zero-based index and count; keep a function's identity stable. Without it or
+   * either button label, a Reveal shows every step in order and reports a `defaulted` diagnostic.
    */
-  readonly revealPosition?: (index: number, count: number) => string
+  readonly revealPosition?: string | ((index: number, count: number) => string)
 }
 
 const EMPTY_LABELS: A2uiSurfaceLabels = {}

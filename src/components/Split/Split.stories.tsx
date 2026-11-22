@@ -13,9 +13,8 @@ import {
 const meta = {
   title: 'Components/Split',
   component: Split,
-  args: { side: 'end', ratio: 'main', gap: 'normal' },
+  args: { ratio: 'main', gap: 'normal' },
   argTypes: {
-    side: { control: 'inline-radio', options: ['start', 'end'] },
     ratio: { control: 'inline-radio', options: ['balanced', 'main'] },
     gap: { control: 'inline-radio', options: ['tight', 'normal', 'airy'] }
   },
@@ -23,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A div with SplitMain and SplitSecondary parts. Split is an inline-size container: below 40rem the parts stack in source order; wider, they share a row, the secondary part on `side`, sized by `ratio`. Write the parts in reading order.'
+          'A div with SplitMain and SplitSecondary parts. Split is an inline-size container: below 40rem the parts stack; wider, they share a row sized by `ratio`. Both layouts keep source order, so put SplitSecondary first to show it at the start.'
       }
     }
   }
@@ -32,26 +31,38 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-function Trip({ width, ...props }: SplitProps & { width: string }) {
+const main = (
+  <SplitMain>
+    <Card>
+      <CardHeader>
+        <CardTitle>Itinerary</CardTitle>
+      </CardHeader>
+      <CardContent>Day one: ride from the station to the lake.</CardContent>
+    </Card>
+  </SplitMain>
+)
+const secondary = (
+  <SplitSecondary>
+    <Card>
+      <CardHeader>
+        <CardTitle>Summary</CardTitle>
+      </CardHeader>
+      <CardContent>Three days, 140 km.</CardContent>
+    </Card>
+  </SplitSecondary>
+)
+
+function Trip({
+  width,
+  secondaryFirst = false,
+  ...props
+}: SplitProps & { width: string; secondaryFirst?: boolean }) {
   return (
     <div style={{ width, maxWidth: '100%' }}>
       <Split {...props}>
-        <SplitMain>
-          <Card>
-            <CardHeader>
-              <CardTitle>Itinerary</CardTitle>
-            </CardHeader>
-            <CardContent>Day one: ride from the station to the lake.</CardContent>
-          </Card>
-        </SplitMain>
-        <SplitSecondary>
-          <Card>
-            <CardHeader>
-              <CardTitle>Summary</CardTitle>
-            </CardHeader>
-            <CardContent>Three days, 140 km.</CardContent>
-          </Card>
-        </SplitSecondary>
+        {secondaryFirst ? null : main}
+        {secondary}
+        {secondaryFirst ? main : null}
       </Split>
     </div>
   )
@@ -90,6 +101,12 @@ export const Widths: Story = {
 }
 
 export const SecondaryAtStart: Story = {
-  args: { side: 'start', ratio: 'balanced' },
-  render: Default.render
+  args: { ratio: 'balanced' },
+  render: args => (
+    <Trip
+      {...args}
+      width="720px"
+      secondaryFirst
+    />
+  )
 }

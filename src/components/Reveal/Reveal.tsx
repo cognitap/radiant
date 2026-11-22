@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef, type ComponentProps, type ReactNode } from 'react'
+import { useId, useLayoutEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { useControllableState } from '../../react/useControllableState.js'
@@ -14,7 +14,8 @@ export type RevealItem = { value: string; children: ReactNode }
 
 /**
  * Div host that shows one of `items` at a time with previous and next buttons. Hidden steps
- * stay mounted, so their state survives, and the position text is announced on each change.
+ * stay mounted, so their state survives. Each step is a group named by its position text, and
+ * the steps form a polite live region, so a newly shown step is announced once.
  */
 export type RevealProps = Omit<ComponentProps<'div'>, 'style' | 'children' | 'defaultValue'> &
   ValueOwner<string> & {
@@ -24,7 +25,10 @@ export type RevealProps = Omit<ComponentProps<'div'>, 'style' | 'children' | 'de
     previousLabel: string
     /** Text of the button that shows the next step. */
     nextLabel: string
-    /** Visible, announced position text, such as `Step 2 of 4`, for a zero-based index. */
+    /**
+     * Position text, such as `Step 2 of 4`, for a zero-based index: shown between the buttons and
+     * naming each step group.
+     */
     positionLabel: (index: number, count: number) => string
     /** Space between the step and its controls from the theme spacing scale. */
     gap?: Spacing
@@ -63,24 +67,36 @@ export function Reveal({
     initialValue: keys[0]!,
     onChange: onValueChange
   })
-  const index = keys.indexOf(owner.value)
-  if (index < 0) throw new TypeError('Reveal value must match an item.')
+  const found = keys.indexOf(owner.value)
+  // A removed step falls back to the first one unless the app owns the value.
+  if (found < 0 && owner.controlled) throw new TypeError('Reveal value must match an item.')
+  const index = Math.max(found, 0)
   const stepsId = useId()
   const previous = useRef<HTMLButtonElement>(null)
   const next = useRef<HTMLButtonElement>(null)
-  // When a button disables itself at either end, focus moves to the other one.
-  const refocus = useRef<'previous' | 'next' | null>(null)
-  useEffect(() => {
-    const target = refocus.current === 'previous' ? previous : next
-    if (refocus.current && target.current && !target.current.disabled) target.current.focus()
+  // When a button disables itself at either end, focus moves to the other one. React commits a
+  // click's update before the queued clear runs, so a change the app declines moves nothing.
+  const refocus = useRef<{ index: number; button: 'previous' | 'next' } | null>(null)
+  useLayoutEffect(() => {
+    const pending = refocus.current
     refocus.current = null
-  }, [index])
+    if (!pending || pending.index !== index) return
+    const button = (pending.button === 'previous' ? previous : next).current
+    if (button && !button.disabled) button.focus()
+  })
   const go = (direction: -1 | 1) => {
     const target = index + direction
     if (target < 0 || target >= keys.length) return
-    if (target === 0) refocus.current = 'next'
-    else if (target === keys.length - 1) refocus.current = 'previous'
+    refocus.current =
+      target === 0
+        ? { index: target, button: 'next' }
+        : target === keys.length - 1
+          ? { index: target, button: 'previous' }
+          : null
     owner.request(keys[target]!)
+    queueMicrotask(() => {
+      refocus.current = null
+    })
   }
   return (
     <div
@@ -95,11 +111,16 @@ export function Reveal({
       <div
         id={stepsId}
         data-slot="reveal-steps"
+        aria-live="polite"
         className="grid min-w-0"
       >
         {items.map((item, itemIndex) => (
           <div
             key={item.value}
+            // A fieldset would add form semantics; the role only names the step.
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+            role="group"
+            aria-label={positionLabel(itemIndex, keys.length)}
             data-slot="reveal-step"
             data-selected={itemIndex === index ? '' : undefined}
             hidden={itemIndex !== index}
@@ -130,8 +151,6 @@ export function Reveal({
         </Button>
         <output
           data-slot="reveal-position"
-          aria-live="polite"
-          aria-atomic="true"
           className={cn(
             '[color:var(--rad-color-muted-foreground,oklch(0.45_0.01_286))] tabular-nums',
             parts?.position?.className

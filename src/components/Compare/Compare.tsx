@@ -1,4 +1,4 @@
-import type { ComponentProps } from 'react'
+import { Children, isValidElement, type ComponentProps } from 'react'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import type { Spacing } from '../../presentation.js'
@@ -11,9 +11,10 @@ type ComparePartProps<Host extends 'ul' | 'li' | 'div'> = Omit<ComponentProps<Ho
 }
 
 /**
- * List host and inline-size container for two to four `CompareItem`s. Items stack until the
- * Compare is 32rem wide (48rem for four), then sit side by side with their headers, bodies and
- * footers on shared rows. In a box that sizes to its content, Compare takes 20rem.
+ * List host and inline-size container for two to four `CompareItem` children; other counts throw.
+ * Items stack until the Compare is 32rem wide (48rem for four), then sit side by side with their
+ * headers, bodies and footers on shared rows. In a box that sizes to its content, Compare takes
+ * 20rem.
  */
 export type CompareProps = ComparePartProps<'ul'> & {
   /** Space between items from the theme spacing scale. */
@@ -34,17 +35,24 @@ const sideBySide =
   '@min-[32rem]/compare:[&:not(:first-child:nth-last-child(4),:first-child:nth-last-child(4)~*)]:[grid-row:1/span_3] @min-[48rem]/compare:[grid-row:1/span_3]'
 
 /** Two to four options side by side with aligned rows, stacking when the container is narrow. */
-export function Compare({ gap = 'normal', className, ...props }: CompareProps) {
+export function Compare({ gap = 'normal', className, children, ...props }: CompareProps) {
+  const count = Children.toArray(children).filter(isValidElement).length
+  if (count < 2 || count > 4)
+    throw new TypeError(`Compare needs two to four CompareItem children; received ${count}.`)
   return (
     <ul
       {...props}
+      // oxlint-disable-next-line jsx-a11y/no-redundant-roles -- Safari drops list semantics when markers are hidden.
+      role="list"
       data-slot={joinIds('compare', props['data-slot'])}
       className={cn(
         '@container/compare [contain-intrinsic-inline-size:20rem] m-0 box-border grid w-full min-w-0 list-none auto-cols-[minmax(0,1fr)] p-0',
         pickLayoutClass('Compare', spacingGapClasses, 'gap', gap),
         className
       )}
-    />
+    >
+      {children}
+    </ul>
   )
 }
 

@@ -13,12 +13,10 @@ import {
   type GridColumns,
   type RevealItem,
   type SplitProps,
-  type SplitRatio,
-  type SplitSide
+  type SplitRatio
 } from '@cognitap/radiant'
-const side: SplitSide = 'start'
 const ratio: SplitRatio = 'balanced'
-const split: SplitProps = { side, ratio, gap: 'airy', ref: createRef<HTMLDivElement>() }
+const split: SplitProps = { ratio, gap: 'airy', ref: createRef<HTMLDivElement>() }
 ;<Split {...split}>
   <SplitMain>Main</SplitMain>
   <SplitSecondary>Aside</SplitSecondary>
@@ -34,6 +32,9 @@ const columns: GridColumns = 6
     <CompareItemBody>One learner.</CompareItemBody>
     <CompareItemFooter>Choose</CompareItemFooter>
   </CompareItem>
+  <CompareItem>
+    <CompareItemHeader>Plus</CompareItemHeader>
+  </CompareItem>
 </Compare>
 const items: readonly RevealItem[] = [{ value: 'one', children: 'One' }]
 ;<Reveal
@@ -46,8 +47,8 @@ const items: readonly RevealItem[] = [{ value: 'one', children: 'One' }]
 />
 // @ts-expect-error Split takes a ratio intent, not a width.
 ;<Split ratio="240px" />
-// @ts-expect-error The secondary side is logical.
-;<Split side="left" />
+// @ts-expect-error Source order places the parts, not a side prop.
+;<Split side="start" />
 // @ts-expect-error Grid shows at most six columns.
 ;<Grid maxColumns={7} />
 // @ts-expect-error Column caps are whole numbers.

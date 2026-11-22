@@ -1202,7 +1202,7 @@ export const radiantCatalog: Catalog = defineCatalog({
             type: 'string',
             enum: ['start', 'end'],
             default: 'end',
-            description: 'Side the secondary area takes when both fit.'
+            description: 'Side of the secondary area; at start it also comes first when stacked.'
           },
           ratio: {
             type: 'string',
