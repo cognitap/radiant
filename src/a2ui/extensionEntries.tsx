@@ -31,11 +31,6 @@ import {
   StageHeader,
   StageTitle
 } from '../components/Stage/Stage.js'
-import {
-  clampHeadingLevel,
-  HeadingLevelProvider,
-  useHeadingLevel
-} from '../react/useHeadingLevel.js'
 import { Switch } from '../components/Switch/Switch.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { radiantCatalog } from '../catalog/index.js'
@@ -441,7 +436,6 @@ function A2uiStage({
   footer: ReactNode
 }) {
   const titleId = useId()
-  const level = useHeadingLevel()
   return (
     <Stage
       data-slot="a2ui-stage"
@@ -453,23 +447,13 @@ function A2uiStage({
     >
       {title || description || actions ? (
         <StageHeader>
-          {title ? (
-            <StageTitle
-              id={titleId}
-              level={level}
-            >
-              {title}
-            </StageTitle>
-          ) : null}
+          {title ? <StageTitle id={titleId}>{title}</StageTitle> : null}
           {description ? <StageDescription>{description}</StageDescription> : null}
           {actions ? <StageActions>{actions}</StageActions> : null}
         </StageHeader>
       ) : null}
-      {/* Headings inside the widget sit one level below its title. */}
-      <HeadingLevelProvider level={clampHeadingLevel((level ?? 2) + 1)}>
-        <StageBody aspectRatio={aspectRatio}>{body}</StageBody>
-        {footer ? <StageFooter>{footer}</StageFooter> : null}
-      </HeadingLevelProvider>
+      <StageBody aspectRatio={aspectRatio}>{body}</StageBody>
+      {footer ? <StageFooter>{footer}</StageFooter> : null}
     </Stage>
   )
 }

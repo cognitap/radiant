@@ -797,6 +797,24 @@ export function A2uiSurface({
 
   useEffect(() => warnA2uiAccessibility(messages, registry), [messages, registry])
 
+  const rootType = useSyncExternalStore(
+    store.subscribe,
+    () => store.getSnapshot()?.type,
+    () => store.getSnapshot()?.type
+  )
+  useEffect(() => {
+    if (!prose || rootType === undefined || rootType === 'Column') return
+    store.reportDiagnostic({
+      kind: 'fallback',
+      nodeId: 'root',
+      component: rootType,
+      prop: 'prose',
+      received: rootType,
+      used: 'layout',
+      reason: 'Only a root Column becomes a prose flow; the surface keeps its layout.'
+    })
+  }, [prose, rootType, store])
+
   const rootNode = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
   const phase = useSyncExternalStore(store.subscribe, store.getPhase, store.getPhase)
   const placeholders = useSyncExternalStore(
@@ -821,6 +839,8 @@ export function A2uiSurface({
       data-slot="a2ui-surface"
       data-surface-id={surfaceId}
       data-rad-type-container={prose ? '' : undefined}
+      // A content-sized host would otherwise give the container no width.
+      style={prose ? { containIntrinsicInlineSize: '20rem' } : undefined}
     >
       {rootNode ? (
         <A2uiLabelsContext.Provider value={labelValue}>

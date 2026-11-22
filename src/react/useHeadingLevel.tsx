@@ -1,7 +1,7 @@
 'use client'
 
-import { createContext, useContext, type ReactNode } from 'react'
-import type { HeadingLevel } from '../internal/headings.js'
+import { createContext, useContext, type ComponentProps, type ReactNode } from 'react'
+import { headings, type HeadingLevel } from '../internal/headings.js'
 
 const HeadingLevelContext = createContext<HeadingLevel | undefined>(undefined)
 
@@ -27,4 +27,39 @@ export function useHeadingLevel(depth = 0): HeadingLevel | undefined {
 
 export function clampHeadingLevel(level: number): HeadingLevel {
   return Math.min(6, Math.max(1, Math.round(level))) as HeadingLevel
+}
+
+/** Heading at `level`, else the nearest provider's level, else `fallback`; static titles render it. */
+export function InheritedHeading({
+  level,
+  fallback,
+  ...props
+}: ComponentProps<'h2'> & {
+  readonly level?: HeadingLevel | undefined
+  readonly fallback: HeadingLevel
+}) {
+  const inherited = useHeadingLevel()
+  const Tag = headings[level ?? inherited ?? fallback]
+  return <Tag {...props} />
+}
+
+/**
+ * Places a section's content one level below its heading: below `level` when the heading's level
+ * is known, else below the provided level or `fallback`.
+ */
+export function HeadingLevelNest({
+  level,
+  fallback,
+  children
+}: {
+  readonly level?: HeadingLevel | undefined
+  readonly fallback: HeadingLevel
+  readonly children?: ReactNode
+}) {
+  const inherited = useHeadingLevel()
+  return (
+    <HeadingLevelContext.Provider value={clampHeadingLevel((level ?? inherited ?? fallback) + 1)}>
+      {children}
+    </HeadingLevelContext.Provider>
+  )
 }

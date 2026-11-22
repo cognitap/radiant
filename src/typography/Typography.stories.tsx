@@ -1,5 +1,6 @@
 import { TypographyComponents } from '../../.storybook/examples/TypographyComponents.js'
 import {
+  HeadingLevelProvider,
   Stage,
   StageBody,
   StageDescription,
@@ -105,28 +106,30 @@ function ProseFlow({ width }: { width: number }) {
       style={{ inlineSize: `${width}px`, maxInlineSize: '100%' }}
     >
       <h2>Your first month of study</h2>
-      <p>
-        Sessions doubled after the second week. Text keeps a reading measure while the chart and the
-        widget below span the column.
-      </p>
-      <LineChart
-        label="Completed sessions"
-        data={[
-          { key: 'one', label: 'Week 1', values: { sessions: 6 } },
-          { key: 'two', label: 'Week 2', values: { sessions: 12 } },
-          { key: 'three', label: 'Week 3', values: { sessions: 14 } }
-        ]}
-        series={[{ key: 'sessions', label: 'Sessions' }]}
-      />
-      <Stage>
-        <StageHeader>
-          <StageTitle level={3}>Next session</StageTitle>
-          <StageDescription>Twenty minutes on fractions.</StageDescription>
-        </StageHeader>
-        <StageBody aspectRatio={3}>
-          <p data-rad-text="ui-body">The exercise loads here.</p>
-        </StageBody>
-      </Stage>
+      <HeadingLevelProvider level={3}>
+        <p>
+          Sessions doubled after the second week. Text keeps a reading measure while the chart and
+          the widget below span the column.
+        </p>
+        <LineChart
+          label="Completed sessions"
+          data={[
+            { key: 'one', label: 'Week 1', values: { sessions: 6 } },
+            { key: 'two', label: 'Week 2', values: { sessions: 12 } },
+            { key: 'three', label: 'Week 3', values: { sessions: 14 } }
+          ]}
+          series={[{ key: 'sessions', label: 'Sessions' }]}
+        />
+        <Stage>
+          <StageHeader>
+            <StageTitle>Next session</StageTitle>
+            <StageDescription>Twenty minutes on fractions.</StageDescription>
+          </StageHeader>
+          <StageBody aspectRatio={3}>
+            <p data-rad-text="ui-body">The exercise loads here.</p>
+          </StageBody>
+        </Stage>
+      </HeadingLevelProvider>
       <ul>
         <li>Review the two missed cards.</li>
         <li>Try one harder problem.</li>

@@ -161,9 +161,11 @@ function readChildNodes(value: unknown): ComponentNode[] {
 /** Wraps a Row or Column child in a box that grows by the child's positive `weight`. */
 function A2uiFlexChild({
   node,
+  flow,
   children
 }: {
   readonly node: ComponentNode
+  readonly flow: boolean
   readonly children: ReactNode
 }) {
   const weight = useSignalValue(node.props)?.weight
@@ -171,6 +173,8 @@ function A2uiFlexChild({
   return (
     <div
       data-slot="a2ui-flex-item"
+      // In a prose flow, Text items space as text and everything else as a component.
+      data-rad-flow={flow && node.type === 'Text' ? 'text' : undefined}
       className="grid min-w-0"
       style={grows ? { flexGrow: weight, flexBasis: 0 } : undefined}
     >
@@ -202,6 +206,7 @@ function flexEntry(name: 'Row' | 'Column', orientation: Orientation) {
             <A2uiFlexChild
               key={child.id}
               node={child}
+              flow={flow}
             >
               {context.renderNode(child, flow ? { flow: 'block' } : undefined)}
             </A2uiFlexChild>
@@ -439,7 +444,7 @@ const textEntry = createA2uiRegistryEntry({
         </span>
       )
     }
-    if (context.flow) {
+    if (context.flow === 'block') {
       return (
         <p
           data-slot="a2ui-text"

@@ -39,7 +39,7 @@ export function Timeline({ className, ...props }: TimelineProps) {
       role="list"
       data-slot={joinIds('timeline', props['data-slot'])}
       className={cn(
-        'm-0 grid min-w-0 list-none p-0 text-start [color:var(--rad-color-foreground)] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] [--_rad-timeline-marker:var(--rad-timeline-marker-size,2rem)]',
+        'grid min-w-0 list-none p-0 text-start [color:var(--rad-color-foreground)] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)] [--_rad-timeline-marker:var(--rad-timeline-marker-size,2rem)]',
         className
       )}
     />

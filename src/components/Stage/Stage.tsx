@@ -1,11 +1,12 @@
-import type { ComponentProps } from 'react'
+import { Children, isValidElement, type ComponentProps, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
-import { headings as headingTag, type HeadingLevel } from '../../internal/headings.js'
+import type { HeadingLevel } from '../../internal/headings.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { Spacing } from '../../presentation.js'
 import { AspectRatio } from '../AspectRatio/AspectRatio.js'
+import { HeadingLevelNest, InheritedHeading } from '../../react/useHeadingLevel.js'
 
 const colorMotionClass =
   'transition-colors duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none'
@@ -100,7 +101,10 @@ export type StageProps = StagePartProps<'div'> & {
 export type StageHeaderProps = StagePartProps<'div'>
 
 export type StageTitleProps = StagePartProps<'h2'> & {
-  /** Semantic heading host; choose a level that fits the surrounding page outline. */
+  /**
+   * Semantic heading host; choose a level that fits the surrounding page outline. Defaults to
+   * `HeadingLevelProvider`'s level or 2.
+   */
   level?: StageHeadingLevel
 }
 
@@ -121,14 +125,42 @@ export type StageBodyProps = StagePartProps<'div'> & {
 /** Div host for app content after the body. */
 export type StageFooterProps = StagePartProps<'div'>
 
-export function Stage({ padding, className, ...props }: StageProps) {
+export function Stage({ padding, className, children, ...props }: StageProps) {
+  const title = findTitle(children)
   return (
     <div
       {...props}
       className={cn(stageVariants({ padding }), className)}
       data-slot={joinIds('stage', props['data-slot'])}
-    />
+    >
+      {title
+        ? Children.map(children, child =>
+            isValidElement(child) && child.type === StageHeader ? (
+              child
+            ) : (
+              <HeadingLevelNest
+                level={title.level}
+                fallback={2}
+              >
+                {child}
+              </HeadingLevelNest>
+            )
+          )
+        : children}
+    </div>
   )
+}
+
+/** A StageTitle directly inside a direct StageHeader moves the other parts one heading level down. */
+function findTitle(children: ReactNode): { level: StageHeadingLevel | undefined } | null {
+  for (const child of Children.toArray(children)) {
+    if (!isValidElement<StageHeaderProps>(child) || child.type !== StageHeader) continue
+    for (const part of Children.toArray(child.props.children)) {
+      if (isValidElement<StageTitleProps>(part) && part.type === StageTitle)
+        return { level: part.props.level }
+    }
+  }
+  return null
 }
 
 export function StageHeader({ className, ...props }: StageHeaderProps) {
@@ -141,16 +173,17 @@ export function StageHeader({ className, ...props }: StageHeaderProps) {
   )
 }
 
-export function StageTitle({ level = 2, className, children, ...props }: StageTitleProps) {
-  const Tag = headingTag[level]
+export function StageTitle({ level, className, children, ...props }: StageTitleProps) {
   return (
-    <Tag
+    <InheritedHeading
       {...props}
+      level={level}
+      fallback={2}
       className={cn(stageTitleVariants(), className)}
       data-slot={joinIds('stage-title', props['data-slot'])}
     >
       {children}
-    </Tag>
+    </InheritedHeading>
   )
 }
 

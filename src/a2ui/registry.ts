@@ -24,7 +24,8 @@ const ENTRY_NAME_PATTERN = /^[A-Z][A-Za-z0-9]*$/
 
 /**
  * Place in a `prose` surface's reading flow: `root` for the surface's root node, `block` for each
- * child of a root Column.
+ * child of a root Column. Pass it to `renderNode` only to forward the place to a wrapped node;
+ * children rendered without it are outside the flow.
  */
 export type A2uiFlow = 'root' | 'block'
 

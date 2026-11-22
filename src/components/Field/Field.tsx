@@ -22,7 +22,7 @@ const fieldVariants = cva(
     variants: {
       layout: {
         control: '',
-        group: 'm-0 border-0 p-0'
+        group: 'border-0 p-0'
       }
     },
     defaultVariants: { layout: 'control' }

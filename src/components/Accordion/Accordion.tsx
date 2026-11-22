@@ -13,7 +13,7 @@ import {
   type Selection
 } from '../../internal/selection.js'
 import { useControllableState } from '../../react/useControllableState.js'
-import { useHeadingLevel } from '../../react/useHeadingLevel.js'
+import { HeadingLevelNest, useHeadingLevel } from '../../react/useHeadingLevel.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../Collapsible/Collapsible.js'
 import type {
@@ -234,12 +234,15 @@ export function AccordionTrigger({
   )
 }
 
-export function AccordionContent(props: AccordionContentProps) {
+/** Headings inside sit one level below the provided trigger level (3 without a provider). */
+export function AccordionContent({ children, ...props }: AccordionContentProps) {
   useAccordionItemContext()
   return (
     <CollapsibleContent
       {...props}
       data-slot={joinIds('accordion-content', props['data-slot'])}
-    />
+    >
+      <HeadingLevelNest fallback={3}>{children}</HeadingLevelNest>
+    </CollapsibleContent>
   )
 }

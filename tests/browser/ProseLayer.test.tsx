@@ -8,9 +8,22 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Alert,
+  AlertTitle,
+  EmptyState,
+  EmptyStateTitle,
   HeadingLevelProvider,
+  Stage,
+  StageBody,
+  StageFooter,
+  StageHeader,
+  StageTitle,
+  Timeline,
+  TimelineItem,
   useHeadingLevel
 } from '../../src/index.js'
+import { LineChart } from '../../src/charts/index.js'
+import type { CatalogDiagnostic } from '../../src/catalog/index.js'
 import {
   A2UI_PROTOCOL_VERSION,
   A2uiSurface,
@@ -42,7 +55,9 @@ test('HeadingLevelProvider sets where client titles start and clamps deeper leve
       <Accordion>
         <AccordionItem value="a">
           <AccordionTrigger>Default trigger</AccordionTrigger>
-          <AccordionContent>Body</AccordionContent>
+          <AccordionContent>
+            <AlertTitle>Default panel</AlertTitle>
+          </AccordionContent>
         </AccordionItem>
       </Accordion>
       <HeadingLevelProvider level={4}>
@@ -58,7 +73,9 @@ test('HeadingLevelProvider sets where client titles start and clamps deeper leve
         <Accordion>
           <AccordionItem value="a">
             <AccordionTrigger>Inherited trigger</AccordionTrigger>
-            <AccordionContent>Body</AccordionContent>
+            <AccordionContent>
+              <AlertTitle>Inherited panel</AlertTitle>
+            </AccordionContent>
           </AccordionItem>
         </Accordion>
       </HeadingLevelProvider>
@@ -70,6 +87,56 @@ test('HeadingLevelProvider sets where client titles start and clamps deeper leve
   expect(tag(host, 'Nested')).toBe('H5')
   expect(tag(host, 'Clamped')).toBe('H6')
   expect(tag(host, 'Inherited trigger')).toBe('H4')
+  expect(tag(host, 'Default panel')).toBe('H4')
+  expect(tag(host, 'Inherited panel')).toBe('H5')
+})
+
+function ReactStage({ titled, level }: { titled: boolean; level?: 1 | 2 | 3 | 4 | 5 | 6 }) {
+  return (
+    <Stage>
+      <StageHeader>{titled ? <StageTitle level={level}>Map</StageTitle> : null}</StageHeader>
+      <StageBody>
+        <Alert>
+          <AlertTitle>{`Body ${titled}${level ?? ''}`}</AlertTitle>
+        </Alert>
+      </StageBody>
+      <StageFooter>
+        <EmptyState>
+          <EmptyStateTitle>{`Footer ${titled}${level ?? ''}`}</EmptyStateTitle>
+        </EmptyState>
+      </StageFooter>
+    </Stage>
+  )
+}
+
+test('static titles read the provider and titled Stages put their content one level deeper', async () => {
+  const { host } = await mount(
+    <>
+      <ReactStage titled />
+      <ReactStage titled={false} />
+      <ReactStage
+        titled
+        level={4}
+      />
+      <HeadingLevelProvider level={3}>
+        <section>
+          <StageTitle>Provided</StageTitle>
+          <ReactStage titled />
+        </section>
+      </HeadingLevelProvider>
+    </>
+  )
+  expect(tag(host, 'Map')).toBe('H2')
+  expect(tag(host, 'Body true')).toBe('H3')
+  expect(tag(host, 'Footer true')).toBe('H3')
+  expect(tag(host, 'Body false')).toBe('H2')
+  expect(tag(host, 'Footer false')).toBe('H2')
+  expect(tag(host, 'Body true4')).toBe('H5')
+  expect(tag(host, 'Provided')).toBe('H3')
+  expect(Array.from(host.querySelectorAll('section h4')).map(h => h.textContent)).toEqual([
+    'Body true',
+    'Footer true'
+  ])
 })
 
 const text = (id: string, value: string) => ({ id, component: 'Text', text: value })
@@ -152,6 +219,24 @@ async function proseHost(width: number) {
         <Card id="next-card">
           <CardContent>Component</CardContent>
         </Card>
+        <p id="before-chart">Before the chart.</p>
+        <LineChart
+          id="chart"
+          label="Sessions"
+          data={[
+            { key: 'one', label: 'Week 1', values: { sessions: 2 } },
+            { key: 'two', label: 'Week 2', values: { sessions: 4 } }
+          ]}
+          series={[{ key: 'sessions', label: 'Sessions' }]}
+        />
+        <Timeline id="timeline">
+          <TimelineItem
+            label="Started"
+            dateTime="2026-01-01"
+            time="Jan 1"
+          />
+        </Timeline>
+        <figure id="figure">A plain figure</figure>
         <p id="after">After the components.</p>
       </article>
     </div>
@@ -172,6 +257,11 @@ test('prose rhythm tokens space text and components and themes can override them
   )
   expect(px(node('card'), 'margin-block-start')).toBeCloseTo(airy)
   expect(px(node('next-card'), 'margin-block-start')).toBeCloseTo(normal)
+  expect(px(node('chart'), 'margin-block-start')).toBeCloseTo(airy)
+  expect(px(node('chart'), 'margin-block-end')).toBe(0)
+  expect(px(node('timeline'), 'margin-block-start')).toBeCloseTo(normal)
+  expect(px(node('figure'), 'margin-block-start')).toBeCloseTo(normal)
+  expect(px(node('figure'), 'margin-inline-start')).toBe(0)
   expect(px(node('after'), 'margin-block-start')).toBeCloseTo(airy)
   expect(px(node('first'), 'margin-block-start')).toBeCloseTo(
     0.625 * px(node('first'), 'font-size')
@@ -225,6 +315,8 @@ test('a prose A2UI surface turns its root Column into a prose flow at both width
     expect(column.hasAttribute('data-rad-prose')).toBe(true)
     expect(getComputedStyle(column).rowGap).toBe('0px')
     const [intro, more, stage, faq, outro] = Array.from(column.children) as HTMLElement[]
+    expect(intro!.getAttribute('data-rad-flow')).toBe('text')
+    expect(stage!.hasAttribute('data-rad-flow')).toBe(false)
     const paragraph = intro!.querySelector('p')!
     expect(paragraph.getAttribute('data-rad-text')).toBe('prose-body')
     expect(more!.querySelector('[data-rad-text="prose-body"]')).not.toBeNull()
@@ -242,4 +334,69 @@ test('a prose A2UI surface turns its root Column into a prose flow at both width
       Math.min(width, readingWidth(paragraph)) + 0.5
     )
   }
+})
+
+test('component roots keep zero margins outside prose', async () => {
+  const { host } = await mount(
+    <>
+      <LineChart
+        label="Sessions"
+        data={[{ key: 'one', label: 'Week 1', values: { sessions: 2 } }]}
+        series={[{ key: 'sessions', label: 'Sessions' }]}
+      />
+      <Timeline>
+        <TimelineItem
+          label="Started"
+          dateTime="2026-01-01"
+          time="Jan 1"
+        />
+      </Timeline>
+    </>
+  )
+  for (const element of [
+    host.querySelector('figure')!,
+    host.querySelector('[data-slot~="timeline"]')!
+  ]) {
+    const style = getComputedStyle(element)
+    expect([style.marginTop, style.marginBottom, style.marginLeft]).toEqual(['0px', '0px', '0px'])
+  }
+})
+
+test('a prose surface keeps a width in a content-sized host and reports a non-Column root', async () => {
+  const { host } = await mount(
+    <div style={{ display: 'inline-block' }}>
+      <A2uiSurface
+        surfaceId="flow"
+        messages={flowMessages}
+        prose
+      />
+    </div>
+  )
+  const surface = host.querySelector<HTMLElement>('[data-slot="a2ui-surface"]')!
+  expect(surface.getBoundingClientRect().width).toBeGreaterThan(200)
+
+  const diagnostics: CatalogDiagnostic[] = []
+  await mount(
+    <A2uiSurface
+      surfaceId="card"
+      prose
+      onDiagnostic={d => diagnostics.push(d)}
+      messages={[
+        {
+          version: A2UI_PROTOCOL_VERSION,
+          createSurface: {
+            surfaceId: 'card',
+            catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+            components: [
+              { id: 'root', component: 'Card', child: 'body' },
+              text('body', 'Inside a card.')
+            ]
+          }
+        }
+      ]}
+    />
+  )
+  expect(diagnostics).toContainEqual(
+    expect.objectContaining({ kind: 'fallback', component: 'Card', prop: 'prose' })
+  )
 })
