@@ -180,7 +180,12 @@ function A2uiFlexChild({
       data-slot="a2ui-flex-item"
       // In a prose flow, Text items space as text and everything else as a component.
       data-rad-flow={flow && node.type === 'Text' ? 'text' : undefined}
-      className="grid min-w-0"
+      // A Badge keeps short words whole while text beside it shrinks; a long one wraps within half the line.
+      className={
+        node.type === 'Badge' && !grows
+          ? 'grid min-w-0 max-w-[min(100%,max(50%,8rem))] shrink-0'
+          : 'grid min-w-0'
+      }
       style={grows ? { flexGrow: weight, flexBasis: 0 } : undefined}
     >
       {children}
@@ -232,14 +237,16 @@ const listEntry = createA2uiRegistryEntry({
   schema: basicSchema('List'),
   description: basicDescription('List'),
   adapter(props, context) {
+    const orientation = translate(ORIENTATION, props.direction, 'vertical')
     // Stack renders a div host, so list semantics come from roles.
     return (
       <Stack
         data-slot="a2ui-list"
         // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
         role="list"
-        orientation={translate(ORIENTATION, props.direction, 'vertical')}
+        orientation={orientation}
         align={translate(STACK_ALIGN, props.align, 'stretch')}
+        wrap={orientation === 'horizontal'}
       >
         {readChildNodes(props.children).map(child => (
           <div
@@ -379,7 +386,7 @@ function A2uiModal({
   return (
     <div
       data-slot="a2ui-modal-root"
-      className="grid min-w-0"
+      className="grid min-w-0 justify-items-start"
     >
       <Dialog>
         <A2uiModalTriggerContext.Provider value={triggerContext}>

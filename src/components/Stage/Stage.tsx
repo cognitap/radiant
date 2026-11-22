@@ -44,12 +44,13 @@ const stageVariants = cva(
 
 const stageHeaderVariants = cva([
   'grid min-w-0 items-start gap-x-[var(--rad-stage-gap,var(--rad-surface-gap,1rem))] gap-y-[var(--rad-stage-header-gap,var(--rad-spacing-header-gap,0.375rem))]',
-  '@min-[30rem]/stage:has-[>[data-slot~=stage-actions]]:grid-cols-[minmax(0,1fr)_auto]'
+  // From 30rem, actions sit beside a title of at least 12rem and wrap below it when they do not fit.
+  '@min-[30rem]/stage:flex @min-[30rem]/stage:flex-wrap'
 ])
 
 const stageTitleVariants = cva([
   colorMotionClass,
-  'm-0 min-w-0 break-words @min-[30rem]/stage:col-start-1',
+  'm-0 min-w-0 break-words @min-[30rem]/stage:flex-[1_1_12rem]',
   'font-[family-name:var(--rad-typography-roles-ui-title-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-title-letter-spacing,-0.015em)]',
   'text-[length:var(--rad-stage-title-size,var(--rad-typography-roles-ui-title-size,1.125rem))] leading-[var(--rad-typography-roles-ui-title-line-height,1.3)]',
   'font-[number:var(--rad-stage-title-weight,var(--rad-typography-roles-ui-title-weight,600))]',
@@ -58,7 +59,7 @@ const stageTitleVariants = cva([
 
 const stageDescriptionVariants = cva([
   colorMotionClass,
-  'm-0 min-w-0 break-words @min-[30rem]/stage:col-start-1',
+  'm-0 min-w-0 break-words @min-[30rem]/stage:order-1 @min-[30rem]/stage:basis-full',
   '[color:var(--rad-stage-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
   'font-[family-name:var(--rad-typography-roles-ui-supporting-family,system-ui,sans-serif)] font-[number:var(--rad-typography-roles-ui-supporting-weight,400)] tracking-[var(--rad-typography-roles-ui-supporting-letter-spacing,0em)]',
   'text-[length:var(--rad-stage-description-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)]',
@@ -67,7 +68,7 @@ const stageDescriptionVariants = cva([
 
 const stageActionsVariants = cva([
   'flex min-w-0 flex-wrap items-center gap-[var(--rad-stage-actions-gap,var(--rad-spacing-tight,0.5rem))]',
-  '@min-[30rem]/stage:col-start-2 @min-[30rem]/stage:row-start-1 @min-[30rem]/stage:justify-end'
+  '@min-[30rem]/stage:max-w-full @min-[30rem]/stage:justify-end'
 ])
 
 const stageBodyVariants = cva(['grid min-w-0 break-words'])

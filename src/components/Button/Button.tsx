@@ -1,7 +1,7 @@
 'use client'
 
 import type { ComponentProps, ReactElement } from 'react'
-import { Fragment, isValidElement } from 'react'
+import { Children, Fragment, isValidElement, type ReactNode } from 'react'
 import { callerOwnsPress, springPressClass, offPressClass } from '../../motion/pressPolicy.js'
 import { usePressHost } from '../../motion/host.js'
 import { actionVariants } from '../shared/actionStyles.js'
@@ -57,6 +57,30 @@ export type ButtonProps = Omit<ComponentProps<'button'>, 'style' | 'aria-pressed
     /** Requires MotionProvider. Off also suppresses legacy spatial transitions. */
     motion?: 'inherit' | 'off'
   }
+
+/**
+ * Puts each run of text children in one span, so the text is an item that can shrink with the
+ * button and wrap its words; an anonymous text item would keep its longest word as a minimum.
+ */
+function wrapText(children: ReactNode): ReactNode {
+  const items = Children.toArray(children)
+  if (!items.some(item => typeof item === 'string' || typeof item === 'number')) return children
+  const out: ReactNode[] = []
+  let run: (string | number)[] = []
+  const flush = () => {
+    if (run.length) out.push(<span key={`text-${out.length}`}>{run.join('')}</span>)
+    run = []
+  }
+  for (const item of items) {
+    if (typeof item === 'string' || typeof item === 'number') run.push(item)
+    else {
+      flush()
+      out.push(item)
+    }
+  }
+  flush()
+  return out
+}
 
 export function Button({
   render,
@@ -135,6 +159,7 @@ export function Button({
     'data-control-size': controlSize,
     className: cn(
       actionVariants({ variant, tone, controlSize, iconOnly, fullWidth }),
+      'max-w-full',
       'aria-pressed:inset-ring-2 aria-pressed:inset-ring-[color:var(--rad-control-selected-border-color,currentColor)] forced-colors:aria-pressed:underline forced-colors:aria-pressed:decoration-double',
       spatial && springPressClass,
       motionOff && !callerOwnsScale && offPressClass,
@@ -149,11 +174,11 @@ export function Button({
       <>
         <span
           className={cn(
-            'inline-flex items-center gap-[0.5em] [&_svg]:shrink-0',
+            'inline-flex min-w-0 items-center gap-[0.5em] break-words [&>*]:min-w-0 [&_svg]:shrink-0',
             pending && 'opacity-0 motion-reduce:opacity-100'
           )}
         >
-          {children}
+          {wrapText(children)}
         </span>
         {pending ? <PendingMark motion={motionOff ? 'off' : 'inherit'} /> : null}
       </>
