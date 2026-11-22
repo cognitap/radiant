@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add `AnnotatedText`, text split into `tokens` with tagged `spans`, labels stacked under tokens, and `arcs` between tokens. Spans may overlap and nest, each in its own lane and series color; arcs are measured from the token boxes and redrawn as the text wraps, resizes or changes direction. One token is in the tab order, arrow keys, Home and End move between tokens, and each token announces its text, labels, spans and arcs. Themes style it through `components.annotatedText`. The canonical catalog and A2UI extension catalog add `AnnotatedText` (`label`, `tokens`, `spans`, `arcs`), and `validateA2uiAccessibility` flags one without a label.
+
 ## 0.0.98
 
 - A2UI `ChoicePicker` takes its filter input's name and placeholder from the new `A2uiSurface` `labels.filter`, a `{label}` template or a function of the picker's label, instead of fixed English text. Without it, a `filterable` picker shows every option with no filter and reports a `defaulted` diagnostic.

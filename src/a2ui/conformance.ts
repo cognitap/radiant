@@ -10,6 +10,7 @@ import * as layoutFixtures from './layoutFixtures.js'
 import * as layoutIntentFixtures from './layoutIntentFixtures.js'
 import * as mediaFixtures from './mediaFixtures.js'
 import * as stageFixtures from './stageFixtures.js'
+import * as annotatedTextFixtures from './annotatedTextFixtures.js'
 
 /**
  * How strictly a fixture is gated: `accessible` fixtures must render without error or fallback
@@ -43,6 +44,7 @@ const FIXTURE_MODULES: Readonly<Record<string, Readonly<Record<string, unknown>>
   'extensionFixtures.ts': extensionFixtures,
   'appExtensionFixtures.tsx': appExtensionFixtures,
   'stageFixtures.ts': stageFixtures,
+  'annotatedTextFixtures.ts': annotatedTextFixtures,
   'feedbackFixtures.ts': feedbackFixtures,
   'layoutIntentFixtures.ts': layoutIntentFixtures
 }

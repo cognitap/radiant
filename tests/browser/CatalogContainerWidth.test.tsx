@@ -78,6 +78,7 @@ import {
   videoFixtureMessages
 } from '../../src/a2ui/mediaFixtures.js'
 import { stageFixtureMessages } from '../../src/a2ui/stageFixtures.js'
+import { annotatedTextFixtureMessages } from '../../src/a2ui/annotatedTextFixtures.js'
 import { mount } from './familyHarness.js'
 
 const WIDTHS = [360, 560, 960] as const
@@ -114,7 +115,8 @@ const PROJECTIONS: Readonly<Record<string, readonly string[]>> = {
   Grid: ['Grid'],
   Compare: ['Compare'],
   CompareItem: ['CompareItem'],
-  Reveal: ['Reveal']
+  Reveal: ['Reveal'],
+  AnnotatedText: ['AnnotatedText']
 }
 
 const STRESS_SURFACE_ID = 'container_width'
@@ -345,6 +347,7 @@ const fixtures: Record<string, readonly A2uiMessage[]> = {
   'Video fixture': videoFixtureMessages,
   'Audio fixture': audioPlayerFixtureMessages,
   'Stage fixture': stageFixtureMessages,
+  'AnnotatedText fixture': annotatedTextFixtureMessages,
   ...stressCases
 }
 

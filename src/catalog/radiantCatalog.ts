@@ -34,6 +34,13 @@ const controlSizeSchema: CatalogJsonSchema = {
   description: 'Shared interactive control size.'
 }
 
+const seriesSchema: CatalogJsonSchema = {
+  type: 'integer',
+  minimum: 1,
+  maximum: 8,
+  description: 'Categorical color from 1 to 8; one number per concept.'
+}
+
 const childWeightSchema: CatalogJsonSchema = {
   type: 'number',
   exclusiveMinimum: 0,
@@ -1081,6 +1088,86 @@ export const radiantCatalog: Catalog = defineCatalog({
           direction: 'read'
         }
       },
+      actions: {}
+    },
+
+    AnnotatedText: {
+      name: 'AnnotatedText',
+      category: 'data',
+      description:
+        'Text split into tokens with colored spans, labels under tokens, and arcs between tokens.',
+      guidance: {
+        whenToUse:
+          'Tags or relations on a short text, such as entities, roles or review notes; one `series` per concept. Keep to one or two lines of tokens.',
+        whenNotToUse: 'Running prose (Text) or records with shared fields (Table).',
+        examples: [
+          'code line with nested statement and call `spans` and an arc from argument to call',
+          'sentence with entity spans and a `labels` row under each token'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'tokens'],
+        properties: {
+          label: { type: 'string', minLength: 1, description: 'Accessible name of the text.' },
+          tokens: {
+            type: 'array',
+            minItems: 1,
+            description:
+              'Tokens in reading order; spans and arcs refer to them by zero-based index.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['text'],
+              properties: {
+                text: { type: 'string', minLength: 1, description: 'Token text.' },
+                labels: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Labels stacked under the token, in order.'
+                }
+              }
+            }
+          },
+          spans: {
+            type: 'array',
+            description: 'Tagged runs of tokens; they may overlap and nest.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['start', 'end', 'label', 'series'],
+              properties: {
+                start: { type: 'integer', minimum: 0, description: 'First token index.' },
+                end: {
+                  type: 'integer',
+                  minimum: 0,
+                  description: 'Last token index, at or after `start`.'
+                },
+                label: { type: 'string', minLength: 1, description: 'Span tag.' },
+                series: seriesSchema
+              }
+            }
+          },
+          arcs: {
+            type: 'array',
+            description: 'Links from one token to another.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['from', 'to'],
+              properties: {
+                from: { type: 'integer', minimum: 0, description: 'Source token index.' },
+                to: { type: 'integer', minimum: 0, description: 'Target token index, not `from`.' },
+                label: { type: 'string', description: 'Optional relation name.' },
+                series: seriesSchema
+              }
+            }
+          }
+        }
+      },
+      slots: {},
+      bindings: {},
       actions: {}
     },
 
