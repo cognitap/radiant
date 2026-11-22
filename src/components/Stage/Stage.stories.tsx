@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { StageProps } from '../../index.js'
 import {
   Button,
+  Input,
   Skeleton,
   Stage,
   StageActions,
   StageBody,
   StageDescription,
+  StageExpand,
   StageFooter,
   StageHeader,
   StageTitle
@@ -19,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A passive div frame for custom widgets with StageHeader, StageTitle, StageDescription, StageActions, StageBody and StageFooter parts. Stage is an inline-size container: below 30rem the actions sit under the title and footer items stack; wider, the actions sit beside the title and footer items share a row. StageBody `aspectRatio` holds the body size while content changes and clips taller content. Stage gives actions and footer no meaning; the app fills them.'
+          'A passive div frame for custom widgets with StageHeader, StageTitle, StageDescription, StageActions, StageBody and StageFooter parts. With `expandTo`, StageExpand moves the Stage into a modal dialog or docked panel without remounting the widget. Stage is an inline-size container: below 30rem the actions sit under the title and footer items stack; wider, the actions sit beside the title and footer items share a row. StageBody `aspectRatio` holds the body size while content changes and clips taller content. Stage gives actions and footer no meaning; the app fills them.'
       }
     }
   }
@@ -151,4 +154,91 @@ export const Padding: Story = {
       ))}
     </div>
   )
+}
+
+function ExpandIcon() {
+  return (
+    <svg
+      aria-hidden
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9" />
+    </svg>
+  )
+}
+
+function NotesStage({
+  expandTo,
+  ...owner
+}: Pick<StageProps, 'expandTo' | 'open' | 'onOpenChange'>) {
+  return (
+    <div style={{ width: '300px', maxWidth: '100%' }}>
+      <Stage
+        expandTo={expandTo}
+        {...(owner as object)}
+      >
+        <StageHeader>
+          <StageTitle level={3}>{expandTo === 'panel' ? 'Panel notes' : 'Dialog notes'}</StageTitle>
+          <StageDescription>Type, expand, and keep typing.</StageDescription>
+          <StageActions>
+            <StageExpand
+              variant="ghost"
+              expandLabel="Expand notes"
+              collapseLabel="Collapse notes"
+            >
+              <ExpandIcon />
+            </StageExpand>
+          </StageActions>
+        </StageHeader>
+        <StageBody>
+          <Input aria-label="Note" />
+        </StageBody>
+      </Stage>
+    </div>
+  )
+}
+
+export const Expand: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'StageExpand opens the same widget as a modal dialog or a docked panel. Typed text, focus and scroll survive; Escape collapses.'
+      }
+    }
+  },
+  render: () => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+      <NotesStage expandTo="dialog" />
+      <NotesStage expandTo="panel" />
+    </div>
+  )
+}
+
+function ControlledStage() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ display: 'grid', gap: '0.5rem', justifyItems: 'start' }}>
+      <Button
+        type="button"
+        onClick={() => setOpen(true)}
+      >
+        Open from outside
+      </Button>
+      <NotesStage
+        expandTo="dialog"
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </div>
+  )
+}
+
+export const Controlled: Story = {
+  render: () => <ControlledStage />
 }
