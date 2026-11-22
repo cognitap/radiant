@@ -31,8 +31,9 @@ Storybook runs at [http://localhost:6006](http://localhost:6006), where the tool
 | `pnpm check:library`     | Check generated theme CSS, formatting, lint, types and docs budgets, then build and run the Node and package tests.       |
 | `pnpm check:storybook`   | Build Storybook and run every story in the Radiant theme, light and dark.                                                 |
 | `pnpm check:conformance` | Run the A2UI conformance stories in every other theme and mode.                                                           |
+| `pnpm test:visual`       | Screenshot every catalog combination and compare it with the approved image.                                              |
 
-CI runs four jobs: `pnpm check:library`, `pnpm check:storybook`, `pnpm check:conformance`, and `pnpm test:browser --project=browser-platform`. `pnpm check` runs the first three.
+CI runs five jobs: `pnpm check:library`, `pnpm check:storybook`, `pnpm check:conformance`, `pnpm test:browser --project=browser-platform`, and `pnpm test:visual`. `pnpm check` runs the first three.
 
 Install the headless Chromium shell once before running browser tests:
 
@@ -53,3 +54,18 @@ Put new tests in the matching suite:
 - `tests/browser/*.test.tsx` tests interactive behavior, refs, and hydration in Chromium.
 - `tests/*.test.mjs` runs fast Node checks over source files, helpers, SSR output, and architecture rules.
 - `tests/package/package.test.ts` tests the packed package, including exports, compiled CSS, TypeScript resolution, and token contrast.
+- `tests/visual/catalogMatrix.ts` builds the visual matrix from `src/a2ui/extension-catalog.json`. A new component needs a seed there; new enum and boolean props join automatically.
+
+## Visual matrix
+
+`pnpm test:visual` renders all-pairs combinations of each component's enum and boolean props, plus nested containers, in light and dark at 360px and 720px. Screenshots differ by platform, so only the Linux images in `tests/visual/__screenshots__/` are committed. Locally the first run fails every case while it records your own references; later runs compare against them.
+
+When CI reports a visual change, download the `visual-diffs` artifact and review each reference, actual and diff image. To approve an intended change, label the pull request `visual-baselines`; the workflow renders the merge with `main` on every push while the label stays. Running it by hand renders the branch as is, so rebase on `main` first.
+
+```sh
+gh workflow run visual-baselines.yml --ref <branch>
+rm -r tests/visual/__screenshots__
+gh run download <run-id> --name visual-baselines --dir tests/visual/__screenshots__
+```
+
+Commit only the `.png` files, especially from a fork's run. Adding an enum value reshuffles that component's pairwise cases, so expect many of its images to change. When several pull requests touch visuals, rebase and rerun the visual job just before merging. If a combination cannot look right, remove it from the catalog rather than from the matrix.

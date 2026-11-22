@@ -85,6 +85,34 @@ export default defineConfig({
             instances: [{ browser: 'chromium', viewport: { width: 1280, height: 900 } }]
           }
         }
+      },
+      {
+        plugins: [tailwindcss()],
+        optimizeDeps: {
+          include: ['cn', 'react-dom', '@a2ui/web_core', '@a2ui/web_core/errors', 'lucide-react']
+        },
+        oxc: { jsx: { runtime: 'automatic' } },
+        test: {
+          name: 'visual',
+          include: ['tests/visual/**/*.test.tsx'],
+          browser: {
+            commands: { emulatePreferences },
+            enabled: true,
+            provider: playwright({
+              contextOptions: { locale: 'en-US', timezoneId: 'UTC' }
+            }),
+            headless: true,
+            // Light and dark at 360px and 720px sit side by side; each is its own screenshot.
+            instances: [{ browser: 'chromium', viewport: { width: 2200, height: 1600 } }],
+            expect: {
+              toMatchScreenshot: {
+                // Both sides render on the same pinned Chromium and runner image, so any
+                // colour shift past anti-aliasing tolerance, on even a few pixels, fails.
+                comparatorOptions: { threshold: 0.08, allowedMismatchedPixels: 4 }
+              }
+            }
+          }
+        }
       }
     ]
   }

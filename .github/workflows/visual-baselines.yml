@@ -1,0 +1,61 @@
+name: Visual baselines
+
+# Renders the visual matrix on the CI platform and uploads every screenshot as the approved set.
+# Add the `visual-baselines` label to a pull request to render its merge with main, again on
+# every push while the label stays. Running it by hand renders the branch as it is, so rebase
+# on main first. Review the images, then commit them; see CONTRIBUTING.md.
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baselines:
+    name: Render visual baselines
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'visual-baselines') }}
+    # Keep in step with the visual job in ci.yml.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned pnpm
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install headless Chromium
+        run: pnpm exec playwright install --only-shell chromium
+
+      - name: Render every case from scratch, dropping screenshots of removed cases
+        run: |
+          rm -rf tests/visual/__screenshots__
+          pnpm test:visual --update
+
+      - name: Upload the baselines
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: visual-baselines
+          path: tests/visual/__screenshots__/
+          if-no-files-found: error
+          retention-days: 14

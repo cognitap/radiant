@@ -161,3 +161,60 @@ jobs:
           path: output/browser/
           if-no-files-found: ignore
           retention-days: 14
+
+  visual:
+    name: Visual matrix
+    # Baselines are only valid for the image that rendered them; bump with a baseline refresh.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned pnpm
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install headless Chromium
+        run: pnpm exec playwright install --only-shell chromium
+
+      - name: Require Linux baselines
+        run: |
+          if ! compgen -G 'tests/visual/__screenshots__/*/*-linux.png' > /dev/null; then
+            echo '::error::No Linux visual baselines. Run the Visual baselines workflow on this branch and commit its artifact (CONTRIBUTING.md, Visual matrix).'
+            exit 1
+          fi
+
+      - name: Compare every catalog combination with its approved screenshot
+        run: pnpm test:visual
+
+      - name: Explain how to approve changes
+        if: ${{ failure() }}
+        run: |
+          {
+            echo '### Visual matrix failed'
+            echo 'Download the `visual-diffs` artifact to see each reference, actual and diff image.'
+            echo 'If the changes are intended, run the Visual baselines workflow on this branch and commit its artifact (CONTRIBUTING.md, Visual matrix).'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save visual results and diffs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: visual-diffs
+          path: output/browser/
+          if-no-files-found: ignore
+          retention-days: 14
