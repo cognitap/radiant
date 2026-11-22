@@ -1082,6 +1082,75 @@
         }
       ]
     },
+    "SortableList": {
+      "description": "An ordered list the user reorders by dragging or with the keyboard; the order is the value.\nUse: The user ranks or sequences a few known `items`, such as priorities.\nAvoid: Choosing some items (ChoicePicker) or a fixed order the user only reads (List).\nExamples: rank three trip priorities; playlist order bound to a data path.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "SortableList"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Visible list label."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional helper text."
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value", "label"],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Stable item value."
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Visible item text."
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "common_types.json#/$defs/DataBinding"
+            },
+            {
+              "$ref": "common_types.json#/$defs/FunctionCall"
+            }
+          ],
+          "description": "Items in their starting order; the bound value reorders them."
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prevents reordering."
+        },
+        "controlSize": {
+          "type": "string",
+          "enum": ["small", "medium", "large"],
+          "default": "medium",
+          "description": "Shared interactive control size."
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicStringList",
+          "description": "Item values in their current order, bound to surface state."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "label", "items", "value"]
+    },
     "Stage": {
       "description": "Frames one interactive widget with a titled header, actions, a body and a footer.\nUse: Placing an app widget, such as a map or editor, in its `child` with a `title`; set `aspectRatio` when its size is known.\nAvoid: Grouping static content (Card) or focused tasks (Modal).\nExamples: map with a zoom Button in `actions`, `aspectRatio: 1.5`; drawing canvas with Undo and Clear in `footer`.",
       "type": "object",
@@ -2314,6 +2383,9 @@
         },
         {
           "$ref": "#/components/Textarea"
+        },
+        {
+          "$ref": "#/components/SortableList"
         },
         {
           "$ref": "#/components/Stage"

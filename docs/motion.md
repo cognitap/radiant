@@ -60,6 +60,7 @@ Examples:
 | `Collapsible`, `Accordion`               | Animate height. Closed content is inert immediately                                   |
 | `Dialog`                                 | Springs open. The `<dialog>` closes immediately. An inert clone finishes the exit     |
 | `Select`                                 | Fade the popup in. Close immediately                                                  |
+| `SortableList`                           | Move items to their new places. A dropped item glides from the pointer                |
 | `RingProgress`                           | Follow changes to circular arc endpoints while the native reading updates immediately |
 
 The exit clone is skipped when the dialog has more than 500 descendants, or when it contains a nested dialog, media, a canvas, an embed, or a custom element. The clone stops after 2 seconds.

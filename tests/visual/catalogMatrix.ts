@@ -117,6 +117,10 @@ const seeds: Record<string, Seed> = {
     root: { label: 'Drinks', items: options, value: { '@path': '/value' }, placeholder: 'Search' },
     dataModel: { value: ['tea'] }
   },
+  SortableList: {
+    root: { label: 'Drinks by preference', items: options, value: { '@path': '/value' } },
+    dataModel: { value: ['coffee', 'tea', 'water'] }
+  },
   Slider: {
     root: { label: 'Volume', value: { '@path': '/value' }, max: 10 },
     dataModel: { value: 4 }

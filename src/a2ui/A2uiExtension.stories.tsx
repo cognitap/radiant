@@ -6,6 +6,7 @@ import {
   EXTENSION_SURFACE_ID,
   radioGroupFixtureMessages,
   selectFixtureMessages,
+  sortableListFixtureMessages,
   switchFixtureMessages,
   textareaFixtureMessages
 } from './extensionFixtures.js'
@@ -72,6 +73,33 @@ export const Textarea: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(await canvas.findByRole('textbox', { name: /Bio/ })).toHaveAttribute('rows', '3')
+  }
+}
+
+export const SortableList: Story = {
+  args: {
+    messages: sortableListFixtureMessages,
+    labels: {
+      sortableInstructions:
+        'Press Space to pick up. Use the arrow keys to move, Space to drop and Escape to cancel.',
+      sortablePickUp: 'Picked up {item}, position {position} of {count}.',
+      sortableMove: '{item}, position {position} of {count}.',
+      sortableDrop: 'Dropped {item} at position {position} of {count}.',
+      sortableCancel: 'Cancelled. {item} is back at position {position} of {count}.'
+    }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const list = await canvas.findByRole('list', { name: 'Order of stops' })
+    await expect(
+      within(list)
+        .getAllByRole('listitem')
+        .map(item => item.textContent)
+    ).toEqual(['Market', 'Museum', 'Park'])
+    await expect(canvas.getByRole('button', { name: 'Museum' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    )
   }
 }
 

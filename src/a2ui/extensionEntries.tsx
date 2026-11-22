@@ -31,6 +31,8 @@ import {
   StageHeader,
   StageTitle
 } from '../components/Stage/Stage.js'
+import { SortableList, SortableListItem } from '../components/SortableList/SortableList.js'
+import { arrangeOrder } from '../internal/sortable.js'
 import { Switch } from '../components/Switch/Switch.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { radiantCatalog } from '../catalog/index.js'
@@ -41,7 +43,11 @@ import {
   RADIANT_A2UI_EXTENSION_CATALOG_ID,
   type A2uiJsonSchema
 } from './catalogGenerator.js'
-import { createA2uiRegistryEntry, createOverridingA2uiRegistry } from './registry.js'
+import {
+  createA2uiRegistryEntry,
+  createOverridingA2uiRegistry,
+  type A2uiAdapterContext
+} from './registry.js'
 import { isA2uiChildNode } from './adapterValues.js'
 import type { A2uiAccessibilityRule } from './accessibilityRules.js'
 import { controlLabelRule } from './accessibilityRules.js'
@@ -60,6 +66,7 @@ import { feedbackEntries } from './feedbackEntries.js'
 import { layoutIntentEntries } from './layoutIntentEntries.js'
 import { annotatedTextEntries } from './annotatedTextEntries.js'
 import { matrixEntry } from './matrixEntry.js'
+import { useA2uiLabels, type A2uiSortableText } from './surfaceContext.js'
 
 const extensionCatalog = generateA2uiCatalogs(radiantCatalog).extension
 
@@ -407,6 +414,129 @@ const textareaEntry = createA2uiRegistryEntry({
   }
 })
 
+/** A template's `{item}`, `{position}` (from 1) and `{count}`, or the host's own function. */
+function sortableText(label: A2uiSortableText | undefined) {
+  if (typeof label === 'function') return label
+  if (typeof label !== 'string' || !label.trim()) return undefined
+  // One pass, so an item named like a placeholder stays as written.
+  return (item: string, index: number, count: number) =>
+    label.replace(/\{(item|position|count)\}/g, (_match, key: string) =>
+      key === 'item' ? item : String(key === 'position' ? index + 1 : count)
+    )
+}
+
+/** SortableList with the host's announcements; without them the items show in order. */
+function A2uiSortableList({
+  items,
+  value,
+  controlSize,
+  onReorder,
+  nodeId,
+  report
+}: {
+  items: readonly ExtensionOption[]
+  value: readonly string[]
+  controlSize: ControlSize
+  onReorder: (next: string[]) => void
+  nodeId: string
+  report: A2uiAdapterContext['reportDiagnostic']
+}) {
+  const labels = useA2uiLabels()
+  const instructionsText = labels.sortableInstructions?.trim()
+  const pickUpText = sortableText(labels.sortablePickUp)
+  const moveText = sortableText(labels.sortableMove)
+  const dropText = sortableText(labels.sortableDrop)
+  const cancelText = sortableText(labels.sortableCancel)
+  const handle = labels.sortableHandle
+  const handleText = typeof handle === 'function' ? handle : sortableText(handle)
+  const handleLabel = handleText ? (item: string) => handleText(item, 0, 0) : undefined
+  const labelled = Boolean(instructionsText && pickUpText && moveText && dropText && cancelText)
+  useEffect(() => {
+    if (labelled) return
+    report?.({
+      kind: 'defaulted',
+      nodeId,
+      component: 'SortableList',
+      prop: 'items',
+      received: null,
+      used: 'static order',
+      reason:
+        'A2uiSurface labels lack a sortable instruction or announcement; items are shown without reordering.'
+    })
+  }, [labelled, nodeId, report])
+  // Repeated or unknown values drop, and items missing from the value follow in item order.
+  const order = arrangeOrder(
+    value,
+    items.map(item => item.value)
+  )
+  const sorted = order.map(item => items.find(option => option.value === item)!)
+  if (!instructionsText || !pickUpText || !moveText || !dropText || !cancelText)
+    return (
+      <ol
+        data-slot="a2ui-sortable-list"
+        className="m-0 grid min-w-0 gap-[var(--rad-spacing-tight,0.5rem)] ps-[1.5rem]"
+      >
+        {sorted.map(item => (
+          <li
+            key={item.value}
+            className="min-w-0 break-words"
+          >
+            {item.label}
+          </li>
+        ))}
+      </ol>
+    )
+  return (
+    <SortableList
+      data-slot="a2ui-sortable-list"
+      value={order}
+      onValueChange={onReorder}
+      controlSize={controlSize}
+      instructionsText={instructionsText}
+      pickUpText={pickUpText}
+      moveText={moveText}
+      dropText={dropText}
+      cancelText={cancelText}
+      handleLabel={handleLabel}
+    >
+      {items.map(item => (
+        <SortableListItem
+          key={item.value}
+          value={item.value}
+        >
+          {item.label}
+        </SortableListItem>
+      ))}
+    </SortableList>
+  )
+}
+
+const sortableListEntry = createA2uiRegistryEntry({
+  name: 'SortableList',
+  accessibility: [controlLabelRule({ fixFrom: ['accessibility.label'] })],
+  component: [Field, SortableList, SortableListItem],
+  schema: extensionSchema('SortableList'),
+  description: extensionSchema('SortableList').description as string,
+  adapter(props, context) {
+    const raw = props.value instanceof ResolvedBinding ? props.value.value : props.value
+    return (
+      <Field
+        {...fieldProps(props, context.node.componentId)}
+        layout="group"
+      >
+        <A2uiSortableList
+          items={readOptions(props.items)}
+          value={Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string') : []}
+          controlSize={readControlSize(props)}
+          onReorder={next => writeBinding(props.value, next)}
+          nodeId={context.node.componentId}
+          report={context.reportDiagnostic}
+        />
+      </Field>
+    )
+  }
+})
+
 /** Requires a Stage to have a non-empty `title` that names its widget. */
 const stageTitleRule: A2uiAccessibilityRule = {
   id: 'stage-title',
@@ -504,6 +634,7 @@ const extensionEntries = [
   radioGroupEntry,
   switchEntry,
   textareaEntry,
+  sortableListEntry,
   stageEntry,
   ...feedbackEntries,
   ...layoutIntentEntries,

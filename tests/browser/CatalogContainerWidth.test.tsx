@@ -44,6 +44,7 @@ import {
   comboboxFixtureMessages,
   radioGroupFixtureMessages,
   selectFixtureMessages,
+  sortableListFixtureMessages,
   switchFixtureMessages,
   textareaFixtureMessages
 } from '../../src/a2ui/extensionFixtures.js'
@@ -121,7 +122,8 @@ const PROJECTIONS: Readonly<Record<string, readonly string[]>> = {
   CompareItem: ['CompareItem'],
   Reveal: ['Reveal'],
   AnnotatedText: ['AnnotatedText'],
-  Matrix: ['Matrix']
+  Matrix: ['Matrix'],
+  SortableList: ['SortableList']
 }
 
 const STRESS_SURFACE_ID = 'container_width'
@@ -347,6 +349,7 @@ const fixtures: Record<string, readonly A2uiMessage[]> = {
   'Grid fixture': gridFixtureMessages,
   'Compare fixture': compareFixtureMessages,
   'Reveal fixture': revealFixtureMessages,
+  'SortableList fixture': sortableListFixtureMessages,
   'Icon fixture': iconFixtureMessages,
   'Image fixture': imageFixtureMessages,
   'Video fixture': videoFixtureMessages,

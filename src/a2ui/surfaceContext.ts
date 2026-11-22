@@ -30,7 +30,24 @@ export type A2uiSurfaceLabels = {
    * Without it, filterable pickers show every option and report a `defaulted` diagnostic.
    */
   readonly filter?: string | ((label: string) => string)
+  /** Describes each SortableList handle: how to pick up, move, drop and cancel by keyboard. */
+  readonly sortableInstructions?: string
+  /**
+   * SortableList announcements, such as `{item}, position {position} of {count}` with
+   * `{position}` counting from 1, or functions of the item text, zero-based index and count.
+   * Without all five sortable labels, a SortableList shows its items in order without
+   * reordering and reports a `defaulted` diagnostic.
+   */
+  readonly sortablePickUp?: A2uiSortableText
+  readonly sortableMove?: A2uiSortableText
+  readonly sortableDrop?: A2uiSortableText
+  readonly sortableCancel?: A2uiSortableText
+  /** Optional name for each SortableList handle, such as `Move {item}`; the item text by default. */
+  readonly sortableHandle?: string | ((item: string) => string)
 }
+
+/** A SortableList announcement template or function; keep a function's identity stable. */
+export type A2uiSortableText = string | ((item: string, index: number, count: number) => string)
 
 const EMPTY_LABELS: A2uiSurfaceLabels = {}
 

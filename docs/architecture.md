@@ -57,14 +57,14 @@ For click and keydown, `composeAction` checks disabled and pending first, then c
 
 Custom controls submit through a native form element:
 
-| Component                  | Submitted value                                   |
-| -------------------------- | ------------------------------------------------- |
-| `Select`                   | Selected value, from a visually hidden `<select>` |
-| `Combobox`                 | Committed key, from a hidden input                |
-| `Autocomplete`             | Input text, including text not in the list        |
-| `MultiSelect`, `TagsInput` | One named value per item                          |
-| `NumberField`              | Raw number, separate from the localized display   |
-| `OTPField`                 | Whole code, from one input                        |
+| Component                                  | Submitted value                                   |
+| ------------------------------------------ | ------------------------------------------------- |
+| `Select`                                   | Selected value, from a visually hidden `<select>` |
+| `Combobox`                                 | Committed key, from a hidden input                |
+| `Autocomplete`                             | Input text, including text not in the list        |
+| `MultiSelect`, `TagsInput`, `SortableList` | One named value per item                          |
+| `NumberField`                              | Raw number, separate from the localized display   |
+| `OTPField`                                 | Whole code, from one input                        |
 
 `Form` runs native validation and async submission. The application owns values, rules, messages, and persistence. Reset restores uncontrolled controls, clears form errors, and aborts a pending submission. Widget state, such as the active tab, survives reset.
 
