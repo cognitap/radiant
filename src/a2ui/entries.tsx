@@ -38,6 +38,7 @@ import {
 } from '../components/shared/groupStyles.js'
 import { Separator } from '../components/Separator/Separator.js'
 import { Slider } from '../components/Slider/Slider.js'
+import { AudioPlayer } from '../components/AudioPlayer/AudioPlayer.js'
 import { Stack, type StackAlign, type StackJustify } from '../components/Stack/Stack.js'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/Tabs/Tabs.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
@@ -1035,10 +1036,27 @@ const videoEntry = createA2uiRegistryEntry({
   }
 })
 
+const nativeAudioReason =
+  'A2uiSurface labels lack audioPlay, audioPause or audioSeek; the native audio controls are shown.'
+
+function nativeAudioReporter(context: A2uiAdapterContext) {
+  const nodeId = context.node.componentId
+  return () =>
+    context.reportDiagnostic?.({
+      kind: 'defaulted',
+      nodeId,
+      component: 'AudioPlayer',
+      prop: 'controls',
+      received: null,
+      used: 'native',
+      reason: nativeAudioReason
+    })
+}
+
 const audioPlayerEntry = createA2uiRegistryEntry({
   name: 'AudioPlayer',
   accessibility: [mediaNameRule({ names: ['description', 'accessibility.label'] })],
-  component: A2uiAudioPlayer,
+  component: [A2uiAudioPlayer, AudioPlayer],
   schema: basicSchema('AudioPlayer'),
   description: basicDescription('AudioPlayer'),
   adapter(props, context) {
@@ -1048,6 +1066,7 @@ const audioPlayerEntry = createA2uiRegistryEntry({
         description={unwrapString(props.description)?.trim() || undefined}
         label={accessibleLabel(props)}
         onRejectedUrl={rejectedUrlReporter('AudioPlayer', context)}
+        onNativeControls={nativeAudioReporter(context)}
       />
     )
   }

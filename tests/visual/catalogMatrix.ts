@@ -1,5 +1,6 @@
 import extensionCatalog from '../../src/a2ui/extension-catalog.json'
 import { allPairs, type Axis } from './pairwise.js'
+import { toneDataUrl } from '../../src/a2ui/mediaFixtures.js'
 
 export const VISUAL_SURFACE_ID = 'visual_matrix'
 const CATALOG_ID = extensionCatalog.catalogId
@@ -74,7 +75,7 @@ const seeds: Record<string, Seed> = {
   Video: {
     root: { url: 'data:video/mp4;base64,', posterUrl: IMAGE_URL, accessibility: { label: 'Walk' } }
   },
-  AudioPlayer: { root: { url: 'data:audio/mpeg;base64,', accessibility: { label: 'Briefing' } } },
+  AudioPlayer: { root: { url: toneDataUrl(12), accessibility: { label: 'Briefing' } } },
   Divider: {
     root: {},
     context: [

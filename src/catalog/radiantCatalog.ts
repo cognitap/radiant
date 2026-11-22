@@ -278,7 +278,7 @@ export const radiantCatalog: Catalog = defineCatalog({
     AudioPlayer: {
       name: 'AudioPlayer',
       category: 'media',
-      description: 'Plays an audio track with native browser controls.',
+      description: 'Plays an audio track with play, pause, a scrubber and the time.',
       guidance: {
         whenToUse: 'An audio track with a visible `title`, such as a podcast or voice note.',
         whenNotToUse: 'Video (Video) or sounds tied to actions.',

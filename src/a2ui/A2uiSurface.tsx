@@ -836,6 +836,10 @@ export function A2uiSurface({
   const sortableDrop = labels?.sortableDrop
   const sortableCancel = labels?.sortableCancel
   const sortableHandle = labels?.sortableHandle
+  const audioPlay = labels?.audioPlay
+  const audioPause = labels?.audioPause
+  const audioSeek = labels?.audioSeek
+  const audioError = labels?.audioError
   const labelValue = useMemo(
     () => ({
       modalClose,
@@ -850,7 +854,11 @@ export function A2uiSurface({
       sortableMove,
       sortableDrop,
       sortableCancel,
-      sortableHandle
+      sortableHandle,
+      audioPlay,
+      audioPause,
+      audioSeek,
+      audioError
     }),
     [
       modalClose,
@@ -865,7 +873,11 @@ export function A2uiSurface({
       sortableMove,
       sortableDrop,
       sortableCancel,
-      sortableHandle
+      sortableHandle,
+      audioPlay,
+      audioPause,
+      audioSeek,
+      audioError
     ]
   )
   const surface = (

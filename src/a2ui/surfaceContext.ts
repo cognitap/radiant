@@ -44,6 +44,17 @@ export type A2uiSurfaceLabels = {
   readonly sortableCancel?: A2uiSortableText
   /** Optional name for each SortableList handle, such as `Move {item}`; the item text by default. */
   readonly sortableHandle?: string | ((item: string) => string)
+  /** Name of each AudioPlayer's toggle while paused. */
+  readonly audioPlay?: string
+  /** Name of each AudioPlayer's toggle while playing. */
+  readonly audioPause?: string
+  /**
+   * Name of each AudioPlayer's scrubber. Without it or either toggle name, AudioPlayers keep the
+   * browser's native controls and report a `defaulted` diagnostic.
+   */
+  readonly audioSeek?: string
+  /** Shown and announced when an AudioPlayer's media fails; without it the failure has no text. */
+  readonly audioError?: string
 }
 
 /** A SortableList announcement template or function; keep a function's identity stable. */

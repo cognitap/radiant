@@ -15,6 +15,8 @@ import {
 } from 'react'
 import { cn } from 'cn'
 import { useComposedRefs } from '../react/useComposedRefs.js'
+import { AudioPlayer } from '../components/AudioPlayer/AudioPlayer.js'
+import { useA2uiLabels } from './surfaceContext.js'
 
 /** An icon component from the host's icon set. Radiant sizes it and hides it from assistive technology. */
 export type A2uiIconComponent = ComponentType<{
@@ -297,18 +299,38 @@ export type A2uiAudioPlayerProps = MediaProps & {
   /** Visible caption; names the audio unless `label` is set. */
   readonly description?: string
   readonly label?: string
+  /** Called after render when the surface labels lack the player's control names. */
+  readonly onNativeControls?: () => void
 }
 
+/**
+ * Renders Radiant's `AudioPlayer` when the surface `labels` name its controls and the URL is
+ * usable, and the browser's native controls otherwise.
+ */
 export function A2uiAudioPlayer({
   ref,
   url,
   description,
   label,
-  onRejectedUrl
+  onRejectedUrl,
+  onNativeControls
 }: A2uiAudioPlayerProps) {
   const [base, element] = useDocumentBase()
   const src = useCheckedUrl(url, base, 'AudioPlayer', 'url', onRejectedUrl)
   const captionId = useId()
+  const labels = useA2uiLabels()
+  const playLabel = labels.audioPlay?.trim()
+  const pauseLabel = labels.audioPause?.trim()
+  const seekLabel = labels.audioSeek?.trim()
+  const styled = Boolean(playLabel && pauseLabel && seekLabel)
+  const reportNative = useRef(onNativeControls)
+  useLayoutEffect(() => {
+    reportNative.current = onNativeControls
+  })
+  useEffect(() => {
+    if (!styled) reportNative.current?.()
+  }, [styled])
+  const labelledBy = label || !description ? undefined : captionId
   return (
     <figure
       ref={useComposedRefs(element, ref)}
@@ -323,15 +345,27 @@ export function A2uiAudioPlayer({
           {description}
         </figcaption>
       ) : null}
-      {/* oxlint-disable-next-line jsx-a11y/media-has-caption -- A2UI 1.0 media has no caption tracks. */}
-      <audio
-        controls
-        preload="metadata"
-        src={src}
-        aria-label={label}
-        aria-labelledby={label || !description ? undefined : captionId}
-        className="block w-full"
-      />
+      {styled && src ? (
+        <AudioPlayer
+          src={src}
+          errorText={labels.audioError?.trim() || undefined}
+          playLabel={playLabel!}
+          pauseLabel={pauseLabel!}
+          seekLabel={seekLabel!}
+          aria-label={label}
+          aria-labelledby={labelledBy}
+        />
+      ) : (
+        // oxlint-disable-next-line jsx-a11y/media-has-caption -- A2UI 1.0 media has no caption tracks.
+        <audio
+          controls
+          preload="metadata"
+          src={src}
+          aria-label={label}
+          aria-labelledby={labelledBy}
+          className="block w-full"
+        />
+      )}
     </figure>
   )
 }

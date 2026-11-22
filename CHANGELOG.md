@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add `AudioPlayer`, a styled player for short clips on a native `<audio>` element: a play/pause toggle (`playLabel`, `pauseLabel`), a `Slider` scrubber (`seekLabel`) and locale-aware time. `compact` keeps only the toggle and requires an accessible name; inside an `AudioPlayerGroup`, one player plays at a time. Themes style it through `components.audioPlayer`. A2UI `AudioPlayer` renders it when `A2uiSurface` `labels` set `audioPlay`, `audioPause` and `audioSeek` (plus optional `audioError`); otherwise it keeps native controls and reports a `defaulted` diagnostic.
+
 ## 0.0.99
 
 - Add `AnnotatedText`, text split into `tokens` with tagged `spans`, labels stacked under tokens, and `arcs` between tokens. Spans may overlap and nest, each in its own lane and series color; arcs are measured from the token boxes and redrawn as the text wraps, resizes or changes direction. One token is in the tab order, arrow keys, Home and End move between tokens, and each token announces its text, labels, spans and arcs. Themes style it through `components.annotatedText`. The canonical catalog and A2UI extension catalog add `AnnotatedText` (`label`, `tokens`, `spans`, `arcs`), and `validateA2uiAccessibility` flags one without a label.

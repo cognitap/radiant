@@ -117,6 +117,12 @@ export {
   type RangeSliderProps,
   type RangeSliderValue
 } from './components/RangeSlider/RangeSlider.js'
+export { AudioPlayer, AudioPlayerGroup } from './components/AudioPlayer/AudioPlayer.js'
+export type {
+  AudioPlayerGroupProps,
+  AudioPlayerProps,
+  AudioPlayerState
+} from './components/AudioPlayer/AudioPlayer.js'
 export { Tabs, TabsList, TabsTrigger, TabsContent, useTabs } from './components/Tabs/Tabs.js'
 export type {
   TabsProps,

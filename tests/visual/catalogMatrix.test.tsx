@@ -31,7 +31,10 @@ const labels = {
   sortablePickUp: 'Picked up {item}, position {position} of {count}.',
   sortableMove: '{item}, position {position} of {count}.',
   sortableDrop: 'Dropped {item} at position {position} of {count}.',
-  sortableCancel: 'Cancelled. {item} is back at position {position} of {count}.'
+  sortableCancel: 'Cancelled. {item} is back at position {position} of {count}.',
+  audioPlay: 'Play',
+  audioPause: 'Pause',
+  audioSeek: 'Seek'
 }
 const mounted: { host: HTMLElement; root: Root }[] = []
 
