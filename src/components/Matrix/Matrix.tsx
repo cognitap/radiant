@@ -28,7 +28,7 @@ import { useControllableState } from '../../react/useControllableState.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { PartStyle } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
-import type { SeriesIndex } from '../../themes/tokens.js'
+import { isSeriesNumber, type SeriesNumber } from '../../internal/series.js'
 import { focusRingClass, focusRingInsetClass } from '../shared/focusStyles.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
@@ -91,7 +91,7 @@ export type MatrixCellProps = PartProps<'tabIndex' | 'aria-selected' | 'aria-dis
   value?: string
   state?: MatrixCellState
   /** Categorical color from the theme's series tokens. */
-  series?: SeriesIndex
+  series?: SeriesNumber
   /** Navigable but not selectable. */
   disabled?: boolean
   /** Replaces the announced contents, for cells that only hold markers. */
@@ -104,7 +104,7 @@ export type MatrixMarkerProps = Omit<ComponentProps<'span'>, 'style'> & {
   'data-slot'?: string
   /** `solid` fills the marker; `outline` draws a ring for an open or empty mark. */
   variant?: 'solid' | 'outline'
-  series?: SeriesIndex
+  series?: SeriesNumber
 }
 
 /**
@@ -118,7 +118,7 @@ export type MatrixRegionProps = Omit<PartProps<'children'>, 'aria-hidden'> & {
   rowSpan?: number
   columnSpan?: number
   label: ReactNode
-  series?: SeriesIndex
+  series?: SeriesNumber
   parts?: { label?: PartStyle }
 }
 
@@ -147,20 +147,19 @@ const ROW = '[data-slot~="matrix-row"]'
 const CELL = '[data-slot~="matrix-cell"]'
 
 // Complete class names per series, so the stylesheet keeps each one.
-const seriesClasses: Record<SeriesIndex, string> = {
-  '1': '[--_matrix-solid:var(--rad-series-1-solid)] [--_matrix-soft:var(--rad-series-1-soft)] [--_matrix-border:var(--rad-series-1-border)] [--_matrix-text:var(--rad-series-1-text)]',
-  '2': '[--_matrix-solid:var(--rad-series-2-solid)] [--_matrix-soft:var(--rad-series-2-soft)] [--_matrix-border:var(--rad-series-2-border)] [--_matrix-text:var(--rad-series-2-text)]',
-  '3': '[--_matrix-solid:var(--rad-series-3-solid)] [--_matrix-soft:var(--rad-series-3-soft)] [--_matrix-border:var(--rad-series-3-border)] [--_matrix-text:var(--rad-series-3-text)]',
-  '4': '[--_matrix-solid:var(--rad-series-4-solid)] [--_matrix-soft:var(--rad-series-4-soft)] [--_matrix-border:var(--rad-series-4-border)] [--_matrix-text:var(--rad-series-4-text)]',
-  '5': '[--_matrix-solid:var(--rad-series-5-solid)] [--_matrix-soft:var(--rad-series-5-soft)] [--_matrix-border:var(--rad-series-5-border)] [--_matrix-text:var(--rad-series-5-text)]',
-  '6': '[--_matrix-solid:var(--rad-series-6-solid)] [--_matrix-soft:var(--rad-series-6-soft)] [--_matrix-border:var(--rad-series-6-border)] [--_matrix-text:var(--rad-series-6-text)]',
-  '7': '[--_matrix-solid:var(--rad-series-7-solid)] [--_matrix-soft:var(--rad-series-7-soft)] [--_matrix-border:var(--rad-series-7-border)] [--_matrix-text:var(--rad-series-7-text)]',
-  '8': '[--_matrix-solid:var(--rad-series-8-solid)] [--_matrix-soft:var(--rad-series-8-soft)] [--_matrix-border:var(--rad-series-8-border)] [--_matrix-text:var(--rad-series-8-text)]'
+const seriesClasses: Record<SeriesNumber, string> = {
+  1: '[--_matrix-solid:var(--rad-series-1-solid)] [--_matrix-soft:var(--rad-series-1-soft)] [--_matrix-border:var(--rad-series-1-border)] [--_matrix-text:var(--rad-series-1-text)]',
+  2: '[--_matrix-solid:var(--rad-series-2-solid)] [--_matrix-soft:var(--rad-series-2-soft)] [--_matrix-border:var(--rad-series-2-border)] [--_matrix-text:var(--rad-series-2-text)]',
+  3: '[--_matrix-solid:var(--rad-series-3-solid)] [--_matrix-soft:var(--rad-series-3-soft)] [--_matrix-border:var(--rad-series-3-border)] [--_matrix-text:var(--rad-series-3-text)]',
+  4: '[--_matrix-solid:var(--rad-series-4-solid)] [--_matrix-soft:var(--rad-series-4-soft)] [--_matrix-border:var(--rad-series-4-border)] [--_matrix-text:var(--rad-series-4-text)]',
+  5: '[--_matrix-solid:var(--rad-series-5-solid)] [--_matrix-soft:var(--rad-series-5-soft)] [--_matrix-border:var(--rad-series-5-border)] [--_matrix-text:var(--rad-series-5-text)]',
+  6: '[--_matrix-solid:var(--rad-series-6-solid)] [--_matrix-soft:var(--rad-series-6-soft)] [--_matrix-border:var(--rad-series-6-border)] [--_matrix-text:var(--rad-series-6-text)]',
+  7: '[--_matrix-solid:var(--rad-series-7-solid)] [--_matrix-soft:var(--rad-series-7-soft)] [--_matrix-border:var(--rad-series-7-border)] [--_matrix-text:var(--rad-series-7-text)]',
+  8: '[--_matrix-solid:var(--rad-series-8-solid)] [--_matrix-soft:var(--rad-series-8-soft)] [--_matrix-border:var(--rad-series-8-border)] [--_matrix-text:var(--rad-series-8-text)]'
 }
-function seriesClass(family: string, series: SeriesIndex | undefined) {
+function seriesClass(family: string, series: SeriesNumber | undefined) {
   if (series === undefined) return undefined
-  if (!Object.hasOwn(seriesClasses, series))
-    throw new TypeError(`${family} series must be one of 1 to 8.`)
+  if (!isSeriesNumber(series)) throw new TypeError(`${family} series must be one of 1 to 8.`)
   return seriesClasses[series]
 }
 const STATES: readonly MatrixCellState[] = ['active', 'muted', 'highlighted']

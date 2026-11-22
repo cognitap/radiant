@@ -1847,7 +1847,7 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 8,
-                      "description": "Categorical color from the theme series, 1 to 8."
+                      "description": "Categorical color from 1 to 8; one number per concept."
                     },
                     "marker": {
                       "type": "object",
@@ -1920,7 +1920,7 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 8,
-                "description": "Categorical color from the theme series, 1 to 8."
+                "description": "Categorical color from 1 to 8; one number per concept."
               }
             }
           }

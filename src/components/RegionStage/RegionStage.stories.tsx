@@ -12,7 +12,7 @@ import {
   StageDescription,
   StageHeader,
   StageTitle,
-  type RegionStageSeries
+  type SeriesNumber
 } from '../../index.js'
 
 const meta = {
@@ -31,7 +31,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const rooms: { value: string; label: string; d: string; series?: RegionStageSeries }[] = [
+const rooms: { value: string; label: string; d: string; series?: SeriesNumber }[] = [
   { value: 'lobby', label: 'Lobby', d: 'M10 10h140v100H10z', series: 1 },
   { value: 'kitchen', label: 'Kitchen', d: 'M160 10h110v100H160z', series: 2 },
   { value: 'studio', label: 'Studio', d: 'M280 10h110v220H280z', series: 3 },

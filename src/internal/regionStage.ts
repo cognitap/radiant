@@ -1,10 +1,10 @@
+import { isSeriesNumber } from './series.js'
+
 /** A `viewBox` in the content's own coordinates. */
 export type RegionStageBox = { x: number; y: number; width: number; height: number }
 
 /** Zoom factor and offset in viewBox units: content maps through `translate(x y) scale(zoom)`. */
 export type RegionStageView = { zoom: number; x: number; y: number }
-
-export type RegionStageSeries = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 
 export const initialView: RegionStageView = { zoom: 1, x: 0, y: 0 }
 
@@ -31,10 +31,7 @@ export function validateMaxZoom(maxZoom: number) {
 }
 
 export function validateSeries(series: unknown) {
-  if (
-    series !== undefined &&
-    !(Number.isInteger(series) && Number(series) >= 1 && Number(series) <= 8)
-  )
+  if (series !== undefined && !isSeriesNumber(series))
     throw new TypeError('RegionStageRegion series must be an integer from 1 to 8.')
 }
 

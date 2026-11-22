@@ -1,5 +1,4 @@
-/** One of the eight categorical series colors. */
-export type AnnotatedTextSeries = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+import { isSeriesNumber as isSeries, type SeriesNumber } from './series.js'
 
 export type AnnotatedTextToken = {
   text: string
@@ -12,7 +11,7 @@ export type AnnotatedTextSpan = {
   start: number
   end: number
   label: string
-  series: AnnotatedTextSeries
+  series: SeriesNumber
 }
 
 /** A link from one token to another, drawn above the text with an arrowhead at `to`. */
@@ -20,13 +19,11 @@ export type AnnotatedTextArc = {
   from: number
   to: number
   label?: string
-  series?: AnnotatedTextSeries
+  series?: SeriesNumber
 }
 
 const isIndex = (value: unknown, count: number) =>
   Number.isInteger(value) && (value as number) >= 0 && (value as number) < count
-const isSeries = (value: unknown) =>
-  Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 8
 
 /** Throws a TypeError naming the first token, span or arc outside the contract. */
 export function validateAnnotatedText(

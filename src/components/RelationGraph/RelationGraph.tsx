@@ -15,8 +15,7 @@ import {
   type RelationGraphConnectionText,
   type RelationGraphEdge,
   type RelationGraphLayout,
-  type RelationGraphNode,
-  type RelationGraphSeries
+  type RelationGraphNode
 } from '../../internal/relationGraph.js'
 import {
   isItemOpen,
@@ -28,6 +27,7 @@ import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import type { SeriesNumber } from '../../internal/series.js'
 import { focusRingClass } from '../shared/focusStyles.js'
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 
@@ -37,8 +37,7 @@ export type {
   RelationGraphEdge,
   RelationGraphEmphasis,
   RelationGraphLayout,
-  RelationGraphNode,
-  RelationGraphSeries
+  RelationGraphNode
 } from '../../internal/relationGraph.js'
 
 type Base = Omit<
@@ -97,7 +96,7 @@ export type RelationGraphProps = Base &
   )
 
 // Each series sets private color slots that node and edge classes read.
-const seriesClass: Record<RelationGraphSeries, string> = {
+const seriesClass: Record<SeriesNumber, string> = {
   1: '[--_rg-solid:var(--rad-series-1-solid)] [--_rg-soft:var(--rad-series-1-soft)] [--_rg-border:var(--rad-series-1-border)] [--_rg-text:var(--rad-series-1-text)]',
   2: '[--_rg-solid:var(--rad-series-2-solid)] [--_rg-soft:var(--rad-series-2-soft)] [--_rg-border:var(--rad-series-2-border)] [--_rg-text:var(--rad-series-2-text)]',
   3: '[--_rg-solid:var(--rad-series-3-solid)] [--_rg-soft:var(--rad-series-3-soft)] [--_rg-border:var(--rad-series-3-border)] [--_rg-text:var(--rad-series-3-text)]',

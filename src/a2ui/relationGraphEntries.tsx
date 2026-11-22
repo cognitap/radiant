@@ -7,10 +7,10 @@ import {
   type RelationGraphEdge,
   type RelationGraphEmphasis,
   type RelationGraphLayout,
-  type RelationGraphNode,
-  type RelationGraphSeries
+  type RelationGraphNode
 } from '../components/RelationGraph/RelationGraph.js'
 import { radiantCatalog } from '../catalog/index.js'
+import { isSeriesNumber, type SeriesNumber } from '../internal/series.js'
 import { isPlainRecord } from '../catalog/coerce.js'
 import { generateA2uiCatalogs, type A2uiJsonSchema } from './catalogGenerator.js'
 import { createA2uiRegistryEntry, type A2uiAdapterContext } from './registry.js'
@@ -34,10 +34,8 @@ const list = (value: unknown): unknown[] => {
   const raw = readA2uiValue(value)
   return Array.isArray(raw) ? raw : []
 }
-const series = (value: unknown): RelationGraphSeries | undefined =>
-  Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 8
-    ? (value as RelationGraphSeries)
-    : undefined
+const series = (value: unknown): SeriesNumber | undefined =>
+  isSeriesNumber(value) ? value : undefined
 const emphasis = (value: unknown): RelationGraphEmphasis | undefined =>
   value === 'highlighted' || value === 'muted' ? value : undefined
 const LAYOUTS: readonly RelationGraphLayout[] = ['tree', 'layered', 'circular']

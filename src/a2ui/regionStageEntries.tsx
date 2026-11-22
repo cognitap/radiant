@@ -6,11 +6,11 @@ import {
   RegionStageControls,
   RegionStagePin,
   RegionStageRegion,
-  RegionStageViewport,
-  type RegionStageSeries
+  RegionStageViewport
 } from '../components/RegionStage/RegionStage.js'
 import { parseViewBox } from '../internal/regionStage.js'
 import { radiantCatalog } from '../catalog/index.js'
+import { isSeriesNumber, type SeriesNumber } from '../internal/series.js'
 import { isPlainRecord } from '../catalog/coerce.js'
 import { generateA2uiCatalogs, type A2uiJsonSchema } from './catalogGenerator.js'
 import { createA2uiRegistryEntry, type A2uiAdapterContext } from './registry.js'
@@ -25,7 +25,7 @@ if (!schema || typeof schema.description !== 'string')
   throw new TypeError('A2UI extension catalog generator did not emit "RegionStage".')
 
 type Props = Readonly<Record<string, unknown>>
-type Region = { value: string; label: string; path: string; series?: RegionStageSeries }
+type Region = { value: string; label: string; path: string; series?: SeriesNumber }
 type Pin = { x: number; y: number; label: string; text?: string }
 
 const text = (value: unknown) => {
@@ -56,10 +56,7 @@ export function readRegionStage(props: Props) {
       path = text(raw.path)
     if (!value || !label || !path || seen.has(value)) continue
     seen.add(value)
-    const series =
-      Number.isInteger(raw.series) && Number(raw.series) >= 1 && Number(raw.series) <= 8
-        ? (raw.series as RegionStageSeries)
-        : undefined
+    const series = isSeriesNumber(raw.series) ? raw.series : undefined
     regions.push({ value, label, path, ...(series ? { series } : {}) })
   }
   const pins: Pin[] = []

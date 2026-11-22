@@ -6,9 +6,12 @@ import {
   RegionStageRegion,
   RegionStageViewport,
   type RegionStageProps,
-  type RegionStageSeries
+  type SeriesNumber
 } from '@cognitap/radiant'
-const series: RegionStageSeries = 3
+const series: SeriesNumber = 3
+// @ts-expect-error Series are numbers, not token keys.
+const key: SeriesNumber = '3'
+void key
 const single: RegionStageProps = {
   'aria-label': 'Plan',
   value: null,

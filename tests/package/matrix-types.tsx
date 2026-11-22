@@ -30,7 +30,7 @@ const single: MatrixProps = {
     <MatrixCell
       value="a"
       state={state}
-      series="3"
+      series={3}
     >
       <MatrixMarker variant="outline">1</MatrixMarker>
     </MatrixCell>
@@ -62,7 +62,9 @@ const single: MatrixProps = {
 // @ts-expect-error Cell states are a closed set.
 ;<MatrixCell state="loud" />
 // @ts-expect-error Series run from 1 to 8.
-;<MatrixCell series="9" />
+;<MatrixCell series={9} />
+// @ts-expect-error Series are numbers, not token keys.
+;<MatrixCell series="3" />
 // @ts-expect-error A region needs its label.
 ;<MatrixRegion
   row={1}

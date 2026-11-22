@@ -13,7 +13,7 @@ import {
   MatrixRowHeader,
   type MatrixCellState
 } from '../components/Matrix/Matrix.js'
-import type { SeriesIndex } from '../themes/tokens.js'
+import { isSeriesNumber, type SeriesNumber } from '../internal/series.js'
 import { radiantCatalog } from '../catalog/index.js'
 import { isPlainRecord } from '../catalog/coerce.js'
 import { generateA2uiCatalogs, type A2uiJsonSchema } from './catalogGenerator.js'
@@ -32,7 +32,7 @@ type Cell = {
   text: string
   value: string | undefined
   state: MatrixCellState | undefined
-  series: SeriesIndex | undefined
+  series: SeriesNumber | undefined
   marker: { text: string; variant: 'solid' | 'outline' } | undefined
   description: string | undefined
   disabled: boolean
@@ -43,7 +43,7 @@ type Region = {
   rowSpan: number
   columnSpan: number
   label: string
-  series: SeriesIndex | undefined
+  series: SeriesNumber | undefined
 }
 
 const STATES: readonly string[] = ['active', 'muted', 'highlighted']
@@ -57,10 +57,8 @@ const records = (value: unknown) => {
   const raw = readA2uiValue(value)
   return Array.isArray(raw) ? raw.filter(isPlainRecord) : []
 }
-const series = (value: unknown): SeriesIndex | undefined =>
-  typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 8
-    ? (String(value) as SeriesIndex)
-    : undefined
+const series = (value: unknown): SeriesNumber | undefined =>
+  isSeriesNumber(value) ? value : undefined
 const count = (value: unknown, fallback: number) =>
   typeof value === 'number' && Number.isInteger(value) && value >= 1 ? value : fallback
 

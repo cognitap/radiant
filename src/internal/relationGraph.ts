@@ -1,5 +1,4 @@
-/** One of the eight categorical series colors. */
-export type RelationGraphSeries = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+import { isSeriesNumber as isSeries, type SeriesNumber } from './series.js'
 
 /** How nodes are placed: a tidy tree, layers along edge direction, or a circle in data order. */
 export type RelationGraphLayout = 'tree' | 'layered' | 'circular'
@@ -11,7 +10,7 @@ export type RelationGraphNode = {
   /** Unique id that edges and the selection refer to. */
   id: string
   label: string
-  series?: RelationGraphSeries
+  series?: SeriesNumber
   emphasis?: RelationGraphEmphasis
   /** Text announced after the node's connections, such as a state the emphasis shows. */
   description?: string
@@ -22,7 +21,7 @@ export type RelationGraphEdge = {
   from: string
   to: string
   label?: string
-  series?: RelationGraphSeries
+  series?: SeriesNumber
   emphasis?: RelationGraphEmphasis
   /** Text both of its nodes announce right after this connection, such as a state the emphasis shows. */
   description?: string
@@ -49,8 +48,6 @@ export const defaultConnectionText: RelationGraphConnectionText = ({ direction, 
 
 const LAYOUTS = new Set(['tree', 'layered', 'circular'])
 const EMPHASES = new Set(['highlighted', 'muted'])
-const isSeries = (value: unknown) =>
-  Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 8
 const nonEmpty = (value: unknown) => typeof value === 'string' && value.trim().length > 0
 
 /** Throws a TypeError naming the first node or edge outside the contract. */
