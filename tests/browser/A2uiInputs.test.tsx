@@ -15,6 +15,7 @@ import {
   tripRequestFixtureMessages,
   tripRequestRejectionMessages
 } from '../../src/a2ui/inputFixtures.js'
+import { LocaleProvider } from '../../src/components/LocaleProvider/LocaleProvider.js'
 import { mount } from './familyHarness.js'
 
 const labelled = (host: HTMLElement, label: string) => {
@@ -253,6 +254,7 @@ test('every ChoicePicker style puts the invalid state and error on each option, 
           }
         }
       ]}
+      labels={{ filter: 'Filter {label}' }}
     />
   )
   const groups = [...host.querySelectorAll('fieldset')]
@@ -285,6 +287,7 @@ test('every ChoicePicker style puts its filter inside the group, after the label
   const { host } = await mount(
     <A2uiSurface
       surfaceId="s_choice_filter"
+      labels={{ filter: 'Filter {label}' }}
       messages={[
         {
           version: A2UI_PROTOCOL_VERSION,
@@ -384,6 +387,7 @@ test('ChoicePicker radios keep native arrow keys, one name per picker, and Tab i
   const { host } = await mount(
     <A2uiSurface
       surfaceId="s_choice_radios"
+      labels={{ filter: 'Filter {label}' }}
       onAction={onAction}
       messages={[
         {
@@ -443,6 +447,67 @@ test('ChoicePicker radios keep native arrow keys, one name per picker, and Tab i
   expect(visible.map(r => r.value)).toEqual(['balanced', 'lean'])
   await act(async () => userEvent.tab())
   expect(document.activeElement).toBe(visible[0])
+})
+
+test('ChoicePicker filter text comes from host labels, and the filter is omitted without them', async () => {
+  const messages: A2uiMessage[] = [
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      createSurface: {
+        surfaceId: 's_choice_filter_label',
+        catalogId: A2UI_BASIC_CATALOG_ID,
+        components: [
+          {
+            id: 'root',
+            component: 'ChoicePicker',
+            label: 'Land',
+            filterable: true,
+            options: [
+              { label: 'Österreich', value: 'at' },
+              { label: 'Schweiz', value: 'ch' }
+            ],
+            value: []
+          }
+        ]
+      }
+    }
+  ]
+  const german = await mount(
+    <LocaleProvider locale="de-DE">
+      <A2uiSurface
+        surfaceId="s_choice_filter_label"
+        messages={messages}
+        labels={{ filter: label => `${label} filtern` }}
+      />
+    </LocaleProvider>
+  )
+  const filter = german.host.querySelector<HTMLInputElement>('input[type="search"]')!
+  expect(filter).toHaveAccessibleName('Land filtern')
+  expect(filter.placeholder).toBe('Land filtern')
+  await act(async () => {
+    await userEvent.type(filter, 'schw')
+  })
+  expect(german.host.querySelector('input[value="at"]')).toBeNull()
+  expect(german.host.querySelector('input[value="ch"]')).not.toBeNull()
+
+  const diagnostics: CatalogDiagnostic[] = []
+  const bare = await mount(
+    <A2uiSurface
+      surfaceId="s_choice_filter_label"
+      messages={messages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  expect(bare.host.querySelector('input[type="search"]')).toBeNull()
+  expect(bare.host.querySelectorAll('input[type="radio"]')).toHaveLength(2)
+  expect(diagnostics).toContainEqual(
+    expect.objectContaining({
+      kind: 'defaulted',
+      nodeId: 'root',
+      component: 'ChoicePicker',
+      prop: 'filterable'
+    })
+  )
 })
 
 test('every input in the trip fixture passes accessibility validation', () => {
