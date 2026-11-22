@@ -1,13 +1,8 @@
 'use client'
 
-import { useContext, useEffect, useId, useState, type ReactNode } from 'react'
+import { useContext, useEffect, useId, useMemo, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  isComponentNode,
-  isWritable,
-  ResolvedBinding,
-  type ComponentNode
-} from '@a2ui/web_core/resolution'
+import { isWritable, ResolvedBinding, type ComponentNode } from '@a2ui/web_core/resolution'
 import {
   Accordion,
   AccordionContent,
@@ -32,7 +27,8 @@ import {
   ToastAction,
   ToastClose,
   ToastDescription,
-  ToastTitle
+  ToastTitle,
+  useToastQueueViewport
 } from '../components/Toast/Toast.js'
 import type { Spacing, Tone } from '../presentation.js'
 import { radiantCatalog } from '../catalog/index.js'
@@ -40,7 +36,7 @@ import { isPlainRecord, type CatalogDiagnostic } from '../catalog/coerce.js'
 import { generateA2uiCatalogs, type A2uiJsonSchema } from './catalogGenerator.js'
 import { createA2uiRegistryEntry, type A2uiAdapterContext } from './registry.js'
 import { mediaNameRule, type A2uiAccessibilityRule } from './accessibilityRules.js'
-import { readA2uiValue, writeA2uiBinding } from './adapterValues.js'
+import { isA2uiChildNode, readA2uiValue, writeA2uiBinding } from './adapterValues.js'
 import { A2uiToastHostContext, useA2uiLabels } from './surfaceContext.js'
 import { useSignalValue } from './useSignalValue.js'
 
@@ -74,7 +70,7 @@ const ANNOUNCE = ['off', 'polite', 'assertive'] as const
 const DENSITIES: readonly Spacing[] = ['tight', 'normal', 'airy']
 
 const childNodes = (value: unknown): ComponentNode[] =>
-  Array.isArray(value) ? value.filter(child => isComponentNode(child)) : []
+  Array.isArray(value) ? value.filter(child => isA2uiChildNode(child)) : []
 
 /** Reports a diagnostic from an effect, once per distinct `key`. */
 function useDiagnostic(
@@ -154,12 +150,14 @@ const progressEntry = createA2uiRegistryEntry({
     const finite = typeof raw === 'number' && Number.isFinite(raw)
     const value = finite ? Math.min(max, Math.max(0, raw)) : null
     const label = text(props.label)
+    // A missing or null value is indeterminate; anything else that is not in range is reported.
+    const invalid = raw !== null && raw !== undefined && (!finite || value !== raw)
     return (
       <A2uiProgress
         label={label}
         value={value}
         max={max}
-        clamped={finite && value !== raw ? raw : undefined}
+        invalid={invalid ? { received: raw } : undefined}
         context={context}
       />
     )
@@ -170,25 +168,28 @@ function A2uiProgress({
   label,
   value,
   max,
-  clamped,
+  invalid,
   context
 }: {
   label: string
   value: number | null
   max: number
-  clamped: number | undefined
+  invalid: { readonly received: unknown } | undefined
   context: A2uiAdapterContext
 }) {
   const nodeId = context.node.componentId
   const id = useId()
-  useDiagnostic(context, clamped === undefined ? null : String(clamped), () => ({
+  useDiagnostic(context, invalid ? (JSON.stringify(invalid.received) ?? 'invalid') : null, () => ({
     kind: 'coerced',
     nodeId,
     component: 'Progress',
     prop: 'value',
-    received: clamped,
+    received: invalid?.received,
     used: value,
-    reason: 'Progress value must lie between zero and max.'
+    reason:
+      value === null
+        ? 'Progress value must be a number; it shows as indeterminate.'
+        : 'Progress value must lie between zero and max.'
   }))
   return (
     <div
@@ -205,8 +206,14 @@ function A2uiProgress({
   )
 }
 
-type AccordionItemSpec = { value: string; title: string; disabled: boolean }
+type AccordionItemSpec = {
+  value: string
+  title: string
+  disabled: boolean
+  panel: ComponentNode | undefined
+}
 
+/** Items from a literal list; malformed or repeated values drop (the validator reports them). */
 function readAccordionItems(value: unknown): AccordionItemSpec[] {
   if (!Array.isArray(value)) return []
   const seen = new Set<string>()
@@ -219,29 +226,29 @@ function readAccordionItems(value: unknown): AccordionItemSpec[] {
     items.push({
       value: itemValue,
       title: text(item.title) || itemValue,
-      disabled: item.disabled === true
+      disabled: readA2uiValue(item.disabled) === true,
+      panel: isA2uiChildNode(item.panel) ? item.panel : undefined
     })
   }
   return items
 }
 
-const accordionPanelsRule: A2uiAccessibilityRule = {
-  id: 'accordion-panels',
+const accordionItemsRule: A2uiAccessibilityRule = {
+  id: 'accordion-items',
   check(component) {
-    const items = Array.isArray(component.items) ? component.items : []
-    const untitled = items.findIndex(item => !isPlainRecord(item) || !text(item.title))
-    if (untitled >= 0) {
-      return {
-        prop: 'items',
-        message: `Accordion "${String(component.id)}" item ${untitled + 1} has no title.`
+    // Items bound to the data model are judged when they render.
+    if (!Array.isArray(component.items)) return undefined
+    const seen = new Set<string>()
+    for (const [index, item] of component.items.entries()) {
+      const where = `Accordion "${String(component.id)}" item ${index + 1}`
+      if (!isPlainRecord(item) || !text(item.title)) {
+        return { prop: 'items', message: `${where} has no title.` }
       }
-    }
-    const panels = component.panels
-    if (Array.isArray(panels) && panels.length !== items.length) {
-      return {
-        prop: 'panels',
-        message: `Accordion "${String(component.id)}" has ${items.length} items but ${panels.length} panels.`
+      const value = text(item.value)
+      if (seen.has(value)) {
+        return { prop: 'items', message: `${where} repeats the value "${value}".` }
       }
+      seen.add(value)
     }
     return undefined
   }
@@ -249,29 +256,27 @@ const accordionPanelsRule: A2uiAccessibilityRule = {
 
 const accordionEntry = createA2uiRegistryEntry({
   name: 'Accordion',
-  accessibility: [accordionPanelsRule],
+  accessibility: [accordionItemsRule],
   component: [Accordion, AccordionItem, AccordionTrigger, AccordionContent],
   schema: schemaOf('Accordion'),
   description: schemaOf('Accordion').description,
   adapter(props, context) {
-    const items = readAccordionItems(props.items)
-    const panels = childNodes(props.panels)
+    const items = readAccordionItems(readA2uiValue(props.items))
     const multiple = props.selection === 'multiple'
     const bound = props.value instanceof ResolvedBinding && isWritable(props.value)
     const raw = readA2uiValue(props.value)
     const open = (Array.isArray(raw) ? raw : typeof raw === 'string' ? [raw] : []).filter(
       (v): v is string => typeof v === 'string' && items.some(item => item.value === v)
     )
-    const sections = items.map((item, index) => (
+    // Each section is keyed by its value, so its panel stays with it when items reorder.
+    const sections = items.map(item => (
       <AccordionItem
         key={item.value}
         value={item.value}
         disabled={item.disabled}
       >
         <AccordionTrigger>{item.title}</AccordionTrigger>
-        <AccordionContent>
-          {panels[index] ? context.renderNode(panels[index]) : null}
-        </AccordionContent>
+        <AccordionContent>{item.panel ? context.renderNode(item.panel) : null}</AccordionContent>
       </AccordionItem>
     ))
     // Multiple and single selection keep separate owners; a change remounts.
@@ -394,25 +399,23 @@ function A2uiTableRow({
   )
 }
 
-const tableEntry = createA2uiRegistryEntry({
-  name: 'Table',
-  accessibility: [textRule('table-caption', 'caption'), tableCellsRule],
-  component: [TableContainer, Table, TableRow, TableCell],
-  schema: schemaOf('Table'),
-  description: schemaOf('Table').description,
-  adapter(props, context) {
-    const caption = text(props.caption)
-    const columns = readColumns(props.columns)
-    const rows = childNodes(props.rows)
-    const table = (
+function A2uiTable({ props, context }: { props: Props; context: A2uiAdapterContext }) {
+  const id = useId()
+  const caption = text(props.caption)
+  const columns = readColumns(props.columns)
+  const rows = childNodes(props.rows)
+  const headerIds = columns.map((_, index) => `${id}-h${index}`)
+  // The container stays mounted either way, so a caption arriving later keeps every row.
+  return (
+    <TableContainer aria-labelledby={caption ? `${id}-caption` : headerIds.join(' ')}>
       <Table density={pick(props.density, DENSITIES, 'normal')}>
-        <TableCaption>{caption}</TableCaption>
+        {caption ? <TableCaption id={`${id}-caption`}>{caption}</TableCaption> : null}
         <TableHead>
           <TableRow>
             {columns.map((column, index) => (
               <TableHeader
-                // oxlint-disable-next-line react/no-array-index-key
-                key={index}
+                key={headerIds[index]}
+                id={headerIds[index]}
                 className={ALIGN_CLASS[column.align]}
               >
                 {column.label}
@@ -431,46 +434,118 @@ const tableEntry = createA2uiRegistryEntry({
           ))}
         </TableBody>
       </Table>
+    </TableContainer>
+  )
+}
+
+const tableEntry = createA2uiRegistryEntry({
+  name: 'Table',
+  accessibility: [textRule('table-caption', 'caption'), tableCellsRule],
+  component: [TableContainer, Table, TableRow, TableCell],
+  schema: schemaOf('Table'),
+  description: schemaOf('Table').description,
+  adapter(props, context) {
+    return (
+      <A2uiTable
+        props={props}
+        context={context}
+      />
     )
-    return caption ? <TableContainer aria-label={caption}>{table}</TableContainer> : table
   }
 })
 
+const TOAST_DURATION_MS = 5000
+
+const isDataBinding = (value: unknown) =>
+  isPlainRecord(value) && (typeof value['@path'] === 'string' || typeof value.path === 'string')
+
+const toastOpenRule: A2uiAccessibilityRule = {
+  id: 'toast-open-bound',
+  check(component) {
+    if (isDataBinding(component.open)) return undefined
+    return {
+      prop: 'open',
+      message: `Toast "${String(component.id)}" needs \`open\` bound to a data path, not a literal or function call.`
+    }
+  }
+}
+
+/** Reads and writes the boolean behind a raw `{ '@path' }` binding in the node's data scope. */
+function useBoundFlag(node: ComponentNode, raw: unknown) {
+  const dataContext = node.context?.dataContext
+  const path = isDataBinding(raw)
+    ? String((raw as Record<string, unknown>)['@path'] ?? (raw as Record<string, unknown>).path)
+    : undefined
+  const signal = useMemo(
+    () => (dataContext && path !== undefined ? dataContext.resolveSignal<unknown>(raw) : undefined),
+    // The signal depends on the path, not on the binding object's identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataContext, path]
+  )
+  const value = useSignalValue(signal)
+  return {
+    bound: signal !== undefined,
+    value: value === true,
+    set: (next: boolean) => {
+      if (dataContext && path !== undefined) dataContext.set(path, next)
+    }
+  }
+}
+
 function A2uiToast({ props, context }: { props: Props; context: A2uiAdapterContext }) {
   const host = useContext(A2uiToastHostContext)
+  const viewport = useToastQueueViewport()?.viewport ?? null
   const closeText = useA2uiLabels().toastClose?.trim()
-  const bound = props.open instanceof ResolvedBinding && isWritable(props.open)
-  const [localOpen, setLocalOpen] = useState(readA2uiValue(props.open) === true)
-  const open = bound ? readA2uiValue(props.open) === true : localOpen
   const nodeId = context.node.componentId
-  useDiagnostic(context, host.available ? null : 'no-viewport', () => ({
-    kind: 'fallback',
-    nodeId,
-    component: 'Toast',
-    prop: 'open',
-    received: open,
-    used: false,
-    reason: 'A2uiSurface needs labels.notifications to name its toast viewport.'
-  }))
-  if (!host.element) return null
+  const title = text(props.title)
+  // `open` is a plain data binding on the wire; only a path can close again after it opens.
+  const open = useBoundFlag(context.node, props.open)
+  const bound = open.bound
+  const requested = open.value
+  const report = (prop: string, received: unknown, reason: string) => () =>
+    ({ kind: 'fallback', nodeId, component: 'Toast', prop, received, used: false, reason }) as const
+  useDiagnostic(
+    context,
+    host.available ? null : 'viewport',
+    report(
+      'open',
+      requested,
+      'Toast needs a viewport: A2uiSurface labels.notifications or a host ToastProvider.'
+    )
+  )
+  useDiagnostic(
+    context,
+    bound ? null : 'unbound',
+    report(
+      'open',
+      readA2uiValue(props.open),
+      'Toast open must be bound to a data path; it stays closed.'
+    )
+  )
+  useDiagnostic(
+    context,
+    requested && !title ? 'untitled' : null,
+    report('title', props.title, 'Toast title is empty; it stays closed until the title has text.')
+  )
+  if (!viewport) return null
   const description = text(props.description)
   const actionLabel = text(props.actionLabel)
   const action = typeof props.action === 'function' ? (props.action as () => unknown) : undefined
   const rawDuration = readA2uiValue(props.duration)
   const duration =
-    typeof rawDuration === 'number' && Number.isFinite(rawDuration) ? rawDuration : undefined
+    typeof rawDuration === 'number' && Number.isFinite(rawDuration)
+      ? rawDuration
+      : TOAST_DURATION_MS
   const toast: ReactNode = (
     <Toast
       data-a2ui-node={nodeId}
-      open={open}
-      onOpenChange={next => {
-        if (!writeA2uiBinding(props.open, next)) setLocalOpen(next)
-      }}
+      open={requested && Boolean(title)}
+      onOpenChange={open.set}
       tone={pick(props.tone, TONES, 'neutral')}
       announce={pick(props.announce, ANNOUNCE, 'polite')}
       duration={duration}
     >
-      <ToastTitle>{text(props.title)}</ToastTitle>
+      <ToastTitle>{title}</ToastTitle>
       {description ? <ToastDescription>{description}</ToastDescription> : null}
       {(actionLabel && action) || closeText ? (
         <div className="flex flex-wrap gap-2">
@@ -487,12 +562,12 @@ function A2uiToast({ props, context }: { props: Props; context: A2uiAdapterConte
       ) : null}
     </Toast>
   )
-  return createPortal(toast, host.element)
+  return createPortal(toast, viewport)
 }
 
 const toastEntry = createA2uiRegistryEntry({
   name: 'Toast',
-  accessibility: [textRule('toast-title', 'title')],
+  accessibility: [textRule('toast-title', 'title'), toastOpenRule],
   component: [Toast, ToastTitle, ToastDescription, ToastAction, ToastClose],
   schema: schemaOf('Toast'),
   description: schemaOf('Toast').description,

@@ -22,6 +22,7 @@ import {
   toastFixtureMessages,
   toastRaisedFixtureMessages
 } from '../../src/a2ui/feedbackFixtures.js'
+import { ToastProvider, ToastViewport } from '../../src/components/Toast/Toast.js'
 import { mount } from './familyHarness.js'
 
 const LABELS: A2uiSurfaceLabels = { notifications: 'Notifications', toastClose: 'Dismiss' }
@@ -33,21 +34,22 @@ async function render(
 ) {
   const diagnostics: CatalogDiagnostic[] = []
   const onAction = vi.fn<(event: A2uiActionPayload) => void>()
-  const surface = (next: readonly A2uiMessage[]) => (
+  const surface = (next: readonly A2uiMessage[], nextLabels: A2uiSurfaceLabels) => (
     <A2uiSurface
       surfaceId={surfaceId}
       messages={next}
-      labels={labels}
+      labels={nextLabels}
       onAction={onAction}
       onDiagnostic={d => diagnostics.push(d)}
     />
   )
-  const view = await mount(surface(messages))
+  const view = await mount(surface(messages, labels))
   return {
     ...view,
     diagnostics,
     onAction,
-    rerender: (next: readonly A2uiMessage[]) => view.render(surface(next))
+    rerender: (next: readonly A2uiMessage[], nextLabels: A2uiSurfaceLabels = labels) =>
+      view.render(surface(next, nextLabels))
   }
 }
 
@@ -291,11 +293,206 @@ test('feedback components declare validator rules for their names', () => {
   expect(missing('Alert', { title: ' ' })).toContain('alert-title')
   expect(missing('Progress', { label: '' })).toContain('progress-label')
   expect(missing('Badge', { text: '' })).toContain('badge-text')
-  expect(missing('Toast', { title: '', open: false })).toContain('toast-title')
+  expect(missing('Toast', { title: '', open: { '@path': '/t' } })).toContain('toast-title')
+  expect(missing('Toast', { title: 'Saved', open: true })).toContain('toast-open-bound')
+  expect(missing('Toast', { title: 'Saved', open: { '@path': '/t' } })).toEqual([])
   expect(missing('Table', { caption: '', columns: [{ label: 'A' }], rows: [] })).toContain(
     'table-caption'
   )
-  expect(missing('Accordion', { items: [{ value: 'a', title: 'A' }], panels: [] })).toContain(
-    'accordion-panels'
+  expect(
+    missing('Accordion', {
+      items: [
+        { value: 'a', title: 'A', panel: 'p' },
+        { value: 'a', title: 'B', panel: 'q' }
+      ]
+    })
+  ).toContain('accordion-items')
+  expect(missing('Accordion', { items: [{ value: 'a', title: '', panel: 'p' }] })).toContain(
+    'accordion-items'
+  )
+  expect(missing('Accordion', { items: { '@path': '/sections' } })).toEqual([])
+})
+
+const toastMessages = (patch: Record<string, unknown>, data: Record<string, unknown> = {}) => {
+  const copy = structuredClone(toastFixtureMessages) as A2uiMessage[]
+  const create = (
+    copy[0] as {
+      createSurface: { components: Record<string, unknown>[]; dataModel: Record<string, unknown> }
+    }
+  ).createSurface
+  Object.assign(
+    create.components.find(c => c.id === 'saved_toast')!,
+    patch
+  )
+  Object.assign(create.dataModel, data)
+  return copy
+}
+const raise = (path: string, value: unknown): A2uiMessage => ({
+  version: A2UI_PROTOCOL_VERSION,
+  updateDataModel: { surfaceId: TOAST_SURFACE_ID, path, value }
+})
+
+test('a literal open keeps the Toast closed and reports a fallback', async () => {
+  const { host, diagnostics } = await render(toastMessages({ open: true }), TOAST_SURFACE_ID)
+  expect(host.ownerDocument.querySelector('[data-slot~="toast"][data-state="open"]')).toBeNull()
+  await vi.waitFor(() =>
+    expect(diagnostics).toContainEqual(
+      expect.objectContaining({ kind: 'fallback', component: 'Toast', prop: 'open' })
+    )
+  )
+})
+
+test('a Toast whose bound title is empty stays closed until the title arrives', async () => {
+  const messages = toastMessages(
+    { title: { '@path': '/toasts/title' } },
+    { toasts: { saved: true, title: '' } }
+  )
+  const { host, diagnostics, rerender } = await render(messages, TOAST_SURFACE_ID)
+  const toast = () => host.ownerDocument.querySelector<HTMLElement>('[data-slot~="toast"]')
+  expect(toast()?.dataset.state ?? 'closed').toBe('closed')
+  await vi.waitFor(() =>
+    expect(diagnostics).toContainEqual(
+      expect.objectContaining({ kind: 'fallback', component: 'Toast', prop: 'title' })
+    )
+  )
+  await rerender([...messages, raise('/toasts/title', 'Draft saved')])
+  await vi.waitFor(() => expect(toast()!.dataset.state).toBe('open'))
+})
+
+test('the toast queue mounts unconditionally, so a notifications label arriving keeps the tree', async () => {
+  const { host, rerender } = await render(toastFixtureMessages, TOAST_SURFACE_ID, {})
+  expect(host.querySelector('[data-slot="toast-announcer"]')).toBeNull()
+  expect(host.querySelector('[role="status"], [role="alert"], output')).toBeNull()
+  const button = Array.from(host.querySelectorAll('button')).find(
+    b => b.textContent === 'Save draft'
+  )!
+  button.focus()
+  await rerender([...toastFixtureMessages, ...toastRaisedFixtureMessages], LABELS)
+  expect(button.isConnected).toBe(true)
+  expect(host.ownerDocument.activeElement).toBe(button)
+  await vi.waitFor(() =>
+    expect(host.querySelector<HTMLElement>('[data-slot~="toast"]')!.dataset.state).toBe('open')
+  )
+})
+
+test('the toast viewport and announcers sit outside the busy surface element', async () => {
+  const { host } = await render(toastFixtureMessages, TOAST_SURFACE_ID)
+  const surface = host.querySelector('[data-slot="a2ui-surface"]')!
+  expect(host.querySelector('[data-slot~="toast-viewport"]')).not.toBeNull()
+  expect(surface.querySelector('[data-slot~="toast-viewport"]')).toBeNull()
+  expect(host.querySelectorAll('[data-slot="toast-announcer"]')).toHaveLength(2)
+  expect(surface.querySelector('[data-slot="toast-announcer"]')).toBeNull()
+})
+
+test('surfaces inside a host ToastProvider share its queue and viewport', async () => {
+  const messages = [...toastFixtureMessages, ...toastRaisedFixtureMessages]
+  const second = JSON.parse(JSON.stringify(messages).replaceAll(TOAST_SURFACE_ID, 'second'))
+  const { host } = await mount(
+    <ToastProvider>
+      <A2uiSurface
+        surfaceId={TOAST_SURFACE_ID}
+        messages={messages}
+      />
+      <A2uiSurface
+        surfaceId="second"
+        messages={second}
+      />
+      <ToastViewport
+        aria-label="Host notifications"
+        data-slot="host-viewport"
+      />
+    </ToastProvider>
+  )
+  const viewports = host.querySelectorAll('[data-slot~="toast-viewport"]')
+  expect(viewports).toHaveLength(1)
+  await vi.waitFor(() =>
+    expect(viewports[0]!.querySelectorAll('[data-slot~="toast"]')).toHaveLength(2)
+  )
+  // One visible toast at a time; the second waits in the host queue.
+  expect(viewports[0]!.querySelectorAll('[data-slot~="toast"][data-state="open"]')).toHaveLength(1)
+})
+
+test('Accordion panels stay with their items when items reorder', async () => {
+  const { host, rerender } = await render(accordionFixtureMessages)
+  const reordered: A2uiMessage = {
+    version: A2UI_PROTOCOL_VERSION,
+    updateComponents: {
+      surfaceId: FEEDBACK_SURFACE_ID,
+      components: [
+        {
+          id: 'root',
+          component: 'Accordion',
+          selection: 'multiple',
+          items: [
+            { value: 'returns', title: 'Returns', panel: 'returns_text' },
+            { value: 'shipping', title: 'Shipping', panel: 'shipping_text' }
+          ],
+          value: { '@path': '/open' }
+        }
+      ]
+    }
+  }
+  await rerender([...accordionFixtureMessages, reordered])
+  const items = Array.from(host.querySelectorAll<HTMLDetailsElement>('details'))
+  expect(items.map(item => item.querySelector('summary')!.textContent)).toEqual([
+    'Returns',
+    'Shipping'
+  ])
+  expect(items[0]!.textContent).toContain('Return within 30 days.')
+  expect(items.map(item => item.open)).toEqual([false, true])
+})
+
+test('Table keeps its rows when a caption arrives and renders no empty caption', async () => {
+  const messages = withRoot(tableFixtureMessages, { caption: { '@path': '/caption' } })
+  const { host, rerender } = await render(messages)
+  const container = host.querySelector('[data-slot~="table-container"]')!
+  expect(host.querySelector('caption')).toBeNull()
+  expect(container.getAttribute('aria-labelledby')!.split(' ')).toHaveLength(4)
+  const firstRow = host.querySelector('tbody tr')!
+  await rerender([
+    ...messages,
+    {
+      version: A2UI_PROTOCOL_VERSION,
+      updateDataModel: { surfaceId: FEEDBACK_SURFACE_ID, path: '/caption', value: 'Invoices' }
+    }
+  ])
+  const caption = host.querySelector('caption')!
+  expect(caption.textContent).toBe('Invoices')
+  expect(container.getAttribute('aria-labelledby')).toBe(caption.id)
+  expect(host.querySelector('tbody tr')).toBe(firstRow)
+})
+
+test('Progress reports a bound value that is not a number', async () => {
+  const { host, diagnostics } = await render(
+    withRoot(progressFixtureMessages, { value: { '@path': '/upload/name' } }),
+    FEEDBACK_SURFACE_ID
+  )
+  expect(host.querySelector('progress')!.hasAttribute('value')).toBe(false)
+  expect(diagnostics.filter(d => d.component === 'Progress' && d.prop === 'value')).toEqual([])
+  const named = await render(
+    withRoot(
+      [...progressFixtureMessages].map(m => m),
+      { value: { '@path': '/upload/label' } }
+    ).map((m, i) =>
+      i === 0
+        ? (() => {
+            const c = structuredClone(m) as {
+              createSurface: { dataModel: Record<string, unknown> }
+            }
+            c.createSurface.dataModel.upload = { label: 'half' }
+            return c as A2uiMessage
+          })()
+        : m
+    )
+  )
+  await vi.waitFor(() =>
+    expect(named.diagnostics).toContainEqual(
+      expect.objectContaining({
+        component: 'Progress',
+        prop: 'value',
+        received: 'half',
+        used: null
+      })
+    )
   )
 })

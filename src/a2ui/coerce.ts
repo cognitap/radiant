@@ -193,6 +193,10 @@ const A2UI_REF_COERCERS: Record<
     }
     return failRef(ctx, value, [], 'ChildList')
   },
+  DataBinding: (value, ctx) =>
+    isPlainRecord(value) && (typeof value['@path'] === 'string' || typeof value.path === 'string')
+      ? { handled: true, value }
+      : failRef(ctx, value, undefined, 'DataBinding'),
   Action: (value, ctx) =>
     isPlainRecord(value) && ('event' in value || 'functionCall' in value)
       ? { handled: true, value }

@@ -57,7 +57,11 @@ import {
 import { a2uiWebCoreCatalogs, type A2uiRegistry, type A2uiRenderOptions } from './registry.js'
 import type { A2uiMessage } from './sanitize.js'
 import { useSignalValue } from './useSignalValue.js'
-import { ToastProvider, ToastViewport } from '../components/Toast/Toast.js'
+import {
+  ToastQueueProvider,
+  ToastViewport,
+  useToastQueueViewport
+} from '../components/Toast/Toast.js'
 import {
   A2uiLabelsContext,
   A2uiToastHostContext,
@@ -788,13 +792,7 @@ export function A2uiSurface({
     () => ({ modalClose, notifications, toastClose }),
     [modalClose, notifications, toastClose]
   )
-  const [toastViewport, setToastViewport] = useState<HTMLElement | null>(null)
-  const toastHost = useMemo(
-    () => ({ available: Boolean(notifications), element: toastViewport }),
-    [notifications, toastViewport]
-  )
-
-  return (
+  const surface = (
     <div
       ref={surfaceRef}
       tabIndex={-1}
@@ -805,31 +803,13 @@ export function A2uiSurface({
     >
       {rootNode ? (
         <A2uiLabelsContext.Provider value={labelValue}>
-          <A2uiToastHostContext.Provider value={toastHost}>
-            {notifications ? (
-              <ToastProvider>
-                <A2uiNodeRenderer
-                  node={rootNode}
-                  registry={registry}
-                  inline={false}
-                  onDiagnostic={store.reportDiagnostic}
-                  runtime={runtime}
-                />
-                <ToastViewport
-                  ref={setToastViewport}
-                  aria-label={notifications}
-                />
-              </ToastProvider>
-            ) : (
-              <A2uiNodeRenderer
-                node={rootNode}
-                registry={registry}
-                inline={false}
-                onDiagnostic={store.reportDiagnostic}
-                runtime={runtime}
-              />
-            )}
-          </A2uiToastHostContext.Provider>
+          <A2uiNodeRenderer
+            node={rootNode}
+            registry={registry}
+            inline={false}
+            onDiagnostic={store.reportDiagnostic}
+            runtime={runtime}
+          />
         </A2uiLabelsContext.Provider>
       ) : waiting ? (
         <A2uiPlaceholder
@@ -839,4 +819,37 @@ export function A2uiSurface({
       ) : null}
     </div>
   )
+
+  return <A2uiToastScope notifications={notifications}>{surface}</A2uiToastScope>
 }
+
+/**
+ * Gives a surface's Toast nodes a queue and viewport: a host ToastProvider's when one encloses
+ * the surface, else the surface's own. The queue mounts unconditionally, so a label arriving
+ * later keeps the tree; the viewport and announcers render beside the surface only with a label.
+ */
+function A2uiToastScope({
+  notifications,
+  children
+}: {
+  readonly notifications: string | undefined
+  readonly children: ReactNode
+}) {
+  const outer = useToastQueueViewport()
+  if (outer) {
+    return (
+      <A2uiToastHostContext.Provider value={HOST_TOASTS}>{children}</A2uiToastHostContext.Provider>
+    )
+  }
+  return (
+    <ToastQueueProvider announcers={Boolean(notifications)}>
+      <A2uiToastHostContext.Provider value={notifications ? HOST_TOASTS : NO_TOASTS}>
+        {children}
+        {notifications ? <ToastViewport aria-label={notifications} /> : null}
+      </A2uiToastHostContext.Provider>
+    </ToastQueueProvider>
+  )
+}
+
+const HOST_TOASTS = { available: true }
+const NO_TOASTS = { available: false }

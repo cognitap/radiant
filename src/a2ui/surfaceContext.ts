@@ -6,9 +6,13 @@ import { createContext, useContext } from 'react'
 export type A2uiSurfaceLabels = {
   /** Text of the close button inside each Modal; without it, Escape and backdrop clicks dismiss. */
   readonly modalClose?: string
-  /** Name of the surface's notification region; without it, Toast components render nothing. */
+  /**
+   * Name of the surface's own toast viewport. Inside a host `ToastProvider`, toasts use the
+   * host's viewport instead; with neither, Toast components render nothing. Toasts outside an
+   * open Modal stay inert while it is open.
+   */
   readonly notifications?: string
-  /** Text of the close button inside each Toast; without it, Escape and the timeout dismiss. */
+  /** Text of the close button inside each Toast; Escape and the timeout (5 s unless set) also dismiss. */
   readonly toastClose?: string
 }
 
@@ -27,14 +31,7 @@ export type A2uiModalTrigger = {
 
 export const A2uiModalTriggerContext = createContext<A2uiModalTrigger | null>(null)
 
-/** The surface's toast viewport, which `Toast` nodes portal into; null until it mounts. */
-export type A2uiToastHost = {
-  /** False when the host gave no `notifications` label, so the surface has no viewport. */
-  readonly available: boolean
-  readonly element: HTMLElement | null
-}
+/** Whether Toast nodes have a named viewport: a host ToastProvider's or the surface's own. */
+export type A2uiToastHost = { readonly available: boolean }
 
-export const A2uiToastHostContext = createContext<A2uiToastHost>({
-  available: false,
-  element: null
-})
+export const A2uiToastHostContext = createContext<A2uiToastHost>({ available: false })

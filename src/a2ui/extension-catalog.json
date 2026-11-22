@@ -1269,7 +1269,7 @@
       "required": ["component", "label"]
     },
     "Accordion": {
-      "description": "Organizes collapsible sections that disclose details on demand.\nUse: Sections opened on demand, such as FAQs or details read in sequence.\nAvoid: Switching views where one is always shown (Tabs) or a single short note.\nExamples: FAQ with one section open at a time; order details, `selection: multiple`.",
+      "description": "Organizes collapsible sections that disclose details on demand.\nUse: Sections opened on demand, such as FAQs; each of the `items` names the `panel` it discloses.\nAvoid: Switching views where one is always shown (Tabs) or a single short note.\nExamples: FAQ with one section open at a time; order details, `selection: multiple`.",
       "type": "object",
       "properties": {
         "component": {
@@ -1284,11 +1284,11 @@
         "items": {
           "type": "array",
           "minItems": 1,
-          "description": "Ordered collapsible section headers.",
+          "description": "Ordered sections, each with a distinct value and the panel it discloses.",
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["value", "title"],
+            "required": ["value", "title", "panel"],
             "properties": {
               "value": {
                 "type": "string",
@@ -1296,9 +1296,12 @@
                 "description": "Stable section identifier."
               },
               "title": {
-                "type": "string",
-                "minLength": 1,
+                "$ref": "common_types.json#/$defs/DynamicString",
                 "description": "Section trigger heading."
+              },
+              "panel": {
+                "$ref": "common_types.json#/$defs/Child",
+                "description": "Content shown when the section opens."
               },
               "disabled": {
                 "type": "boolean",
@@ -1312,18 +1315,14 @@
           "$ref": "common_types.json#/$defs/DynamicStringList",
           "description": "Open section value or values stored in local surface state."
         },
-        "panels": {
-          "$ref": "common_types.json#/$defs/ChildList",
-          "description": "Content node rendered for each accordion section."
-        },
         "weight": {
           "$ref": "#/$defs/Weight"
         }
       },
-      "required": ["component", "items", "panels"]
+      "required": ["component", "items"]
     },
     "Table": {
-      "description": "Tabular records with agent-defined columns, backed by Radiant Table.\nUse: Records compared across fields. Each of `rows` is a Row with one child per `columns` entry; a template repeats it per data item, and cells bind item-relative paths.\nAvoid: Layout, or items without shared fields (List).\nExamples: invoices, `rows` templated over a data path, `align: end` on amount; team members with role and status Badge cells.",
+      "description": "Tabular records with agent-defined columns, backed by Radiant Table. Templated rows are keyed by item index.\nUse: Records compared across fields. Each of `rows` is a Row with one child per `columns` entry; a template repeats it per data item, and cells bind item-relative paths.\nAvoid: Layout, or items without shared fields (List).\nExamples: invoices, `rows` templated over a data path, `align: end` on amount; team members with role and status Badge cells.",
       "type": "object",
       "properties": {
         "component": {
@@ -1384,7 +1383,7 @@
       "required": ["component", "caption", "columns", "rows"]
     },
     "Toast": {
-      "description": "Displays a transient notification triggered by an action rather than static layout.\nUse: Confirming an action the user just took. Bind `open`; the host sets it true in reply to the action, and dismissal writes false.\nAvoid: Messages that must stay (Alert) or decisions before continuing (Modal).\nExamples: Draft saved, `open` bound to a data path; Message deleted, `actionLabel: Undo`.",
+      "description": "Displays a transient notification triggered by an action rather than static layout.\nUse: Confirming an action the user just took. Bind `open` to a data path, never a literal; the host sets it true in reply, writing false first to show it again.\nAvoid: Messages that must stay (Alert) or decisions before continuing (Modal).\nExamples: Draft saved, `open` bound to a data path; Message deleted, `actionLabel: Undo`.",
       "type": "object",
       "properties": {
         "component": {
@@ -1442,8 +1441,8 @@
           "description": "Optional label for a single follow-up button inside the toast."
         },
         "open": {
-          "$ref": "common_types.json#/$defs/DynamicBoolean",
-          "description": "Shows the toast while true; dismissal writes false."
+          "$ref": "common_types.json#/$defs/DataBinding",
+          "description": "Data path that shows the toast while true; dismissal writes false."
         },
         "action": {
           "$ref": "common_types.json#/$defs/Action",
@@ -1453,7 +1452,7 @@
           "$ref": "#/$defs/Weight"
         }
       },
-      "required": ["component", "title", "open"]
+      "required": ["component", "title"]
     }
   },
   "functions": {

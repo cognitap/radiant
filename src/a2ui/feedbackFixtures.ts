@@ -61,17 +61,16 @@ export const progressFixtureMessages = surface(FEEDBACK_SURFACE_ID, { upload: { 
   }
 ])
 
-/** Accordion whose open sections are bound to the data model. */
+/** Accordion whose items name their panels and whose open sections are bound. */
 export const accordionFixtureMessages = surface(FEEDBACK_SURFACE_ID, { open: ['shipping'] }, [
   {
     id: 'root',
     component: 'Accordion',
     selection: 'multiple',
     items: [
-      { value: 'shipping', title: 'Shipping' },
-      { value: 'returns', title: 'Returns' }
+      { value: 'shipping', title: 'Shipping', panel: 'shipping_text' },
+      { value: 'returns', title: 'Returns', panel: 'returns_text' }
     ],
-    panels: ['shipping_text', 'returns_text'],
     value: { '@path': '/open' }
   },
   label('shipping_text', 'Ships within two days.'),
