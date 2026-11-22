@@ -5,6 +5,7 @@ import {
   A2UI_BASIC_CATALOG_ID,
   A2UI_PROTOCOL_VERSION,
   A2uiSurface,
+  RADIANT_A2UI_EXTENSION_CATALOG_ID,
   radiantA2uiRegistry,
   validateA2uiAccessibility,
   type A2uiActionPayload,
@@ -334,4 +335,69 @@ test('updates held before createSurface are coerced against the catalog it names
   expect(diagnostics.filter(d => d.kind === 'error').map(d => [d.code, d.component])).toEqual([
     ['UNKNOWN_COMPONENT_TYPE', 'Select']
   ])
+})
+
+const annotated = (props: Record<string, unknown>): A2uiMessage[] => [
+  {
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: EXTENSION_SURFACE_ID,
+      catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+      components: [{ id: 'root', component: 'AnnotatedText', ...props }]
+    }
+  }
+]
+
+test('AnnotatedText drops invalid data with one coerced report per prop and renumbers the rest', async () => {
+  const { host, diagnostics } = await render(
+    annotated({
+      label: 'Review',
+      tokens: [{ text: 'delay', labels: ['binding', ' ', ''] }, { text: ' ' }, { text: 'retry' }],
+      spans: [
+        { start: 0, end: 2, label: 'Statement', series: 1 },
+        { start: 1, end: 1, label: 'Blank', series: 2 },
+        { start: 2, end: 0, label: 'Backwards', series: 3 }
+      ],
+      arcs: [
+        { from: 0, to: 2, label: 'assigned from' },
+        { from: 2, to: 2 }
+      ]
+    })
+  )
+  const tokens = Array.from(host.querySelectorAll('[data-slot~="annotated-text-token"]'))
+  expect(tokens.map(token => token.getAttribute('aria-label'))).toEqual(['delay', 'retry'])
+  expect(tokens[0]!.querySelector('[data-slot~="annotated-text-description"]')!.textContent).toBe(
+    'binding. Statement. delay → retry: assigned from'
+  )
+  const coerced = diagnostics
+    .filter(d => d.component === 'AnnotatedText' && d.kind === 'coerced')
+    .map(({ prop, received, used }) => ({ prop, received, used }))
+  expect(coerced).toEqual([
+    { prop: 'tokens', received: 3, used: 2 },
+    { prop: 'tokens.labels', received: 3, used: 1 },
+    { prop: 'spans', received: 3, used: 1 },
+    { prop: 'arcs', received: 2, used: 1 }
+  ])
+})
+
+test('AnnotatedText without tokens reports a fallback and renders nothing', async () => {
+  const { host, diagnostics } = await render(
+    annotated({ label: 'Review', tokens: [{ text: ' ' }] })
+  )
+  expect(host.querySelector('[data-slot~="annotated-text"]')).toBeNull()
+  expect(
+    diagnostics.some(
+      d => d.component === 'AnnotatedText' && d.kind === 'fallback' && d.prop === 'tokens'
+    )
+  ).toBe(true)
+})
+
+test('the AnnotatedText label rule accepts a bound label and flags a missing one', () => {
+  const rules = (label: unknown) =>
+    validateA2uiAccessibility(annotated({ label, tokens: [{ text: 'a' }] })).errors.map(
+      error => error.rule
+    )
+  expect(rules({ path: '/title' })).not.toContain('annotated-text-label')
+  expect(rules('Review')).not.toContain('annotated-text-label')
+  expect(rules(' ')).toContain('annotated-text-label')
 })

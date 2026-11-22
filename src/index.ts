@@ -485,6 +485,16 @@ export type { AspectRatioProps } from './components/AspectRatio/AspectRatio.js'
 export { Stack } from './components/Stack/Stack.js'
 export type { StackProps, StackAlign, StackJustify } from './components/Stack/Stack.js'
 
+export { AnnotatedText } from './components/AnnotatedText/AnnotatedText.js'
+export type {
+  AnnotatedTextArc,
+  AnnotatedTextArcText,
+  AnnotatedTextProps,
+  AnnotatedTextSeries,
+  AnnotatedTextSpan,
+  AnnotatedTextToken
+} from './components/AnnotatedText/AnnotatedText.js'
+
 export {
   Stage,
   StageActions,

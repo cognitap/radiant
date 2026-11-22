@@ -371,6 +371,7 @@ test('A2UI catalogs are generated deterministically and stay free of forbidden p
   assert.deepEqual(Object.keys(first.extension.components).sort(), [
     'Accordion',
     'Alert',
+    'AnnotatedText',
     'Badge',
     'Combobox',
     'Compare',

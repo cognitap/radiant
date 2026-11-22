@@ -10,6 +10,7 @@ import {
   textareaFixtureMessages
 } from './extensionFixtures.js'
 import { STAGE_SURFACE_ID, stageFixtureMessages } from './stageFixtures.js'
+import { ANNOTATED_TEXT_SURFACE_ID, annotatedTextFixtureMessages } from './annotatedTextFixtures.js'
 
 const meta = {
   title: 'A2UI/Extension',
@@ -75,5 +76,18 @@ export const Stage: Story = {
     const canvas = within(canvasElement)
     await expect(await canvas.findByRole('heading', { name: 'Route map' })).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Share route' })).toBeVisible()
+  }
+}
+
+export const AnnotatedText: Story = {
+  args: { surfaceId: ANNOTATED_TEXT_SURFACE_ID, messages: annotatedTextFixtureMessages },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      await canvas.findByRole('group', { name: 'Review of the retry call' })
+    ).toBeVisible()
+    await expect(canvas.getByRole('listitem', { name: 'attempts' })).toHaveAccessibleDescription(
+      'argument. Statement. Call. Unchecked. attempts → retry: passed to'
+    )
   }
 }

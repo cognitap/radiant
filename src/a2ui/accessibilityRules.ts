@@ -28,7 +28,7 @@ const isDynamic = (v: unknown): boolean =>
   isPlainRecord(v) && ('@path' in v || 'path' in v || '@call' in v || 'call' in v)
 
 /** True when a value renders as non-empty text or is bound to surface state. */
-function hasText(value: unknown): boolean {
+export function hasText(value: unknown): boolean {
   if (isDynamic(value)) return true
   if (typeof value === 'string') return value.trim().length > 0
   return (typeof value === 'number' && Number.isFinite(value)) || typeof value === 'boolean'

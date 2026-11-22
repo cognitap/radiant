@@ -192,6 +192,26 @@ const seeds: Record<string, Seed> = {
       ]
     }
   },
+  AnnotatedText: {
+    root: {
+      label: 'Review',
+      tokens: [
+        { text: 'const', labels: ['keyword'] },
+        { text: 'delay', labels: ['binding'] },
+        { text: '=' },
+        { text: 'retry', labels: ['call'] },
+        { text: '(attempts)', labels: ['argument'] }
+      ],
+      spans: [
+        { start: 0, end: 4, label: 'Statement', series: 1 },
+        { start: 3, end: 4, label: 'Call', series: 2 }
+      ],
+      arcs: [
+        { from: 1, to: 3, label: 'assigned' },
+        { from: 4, to: 3, series: 2 }
+      ]
+    }
+  },
   Split: {
     root: { main: 'main', secondary: 'aside' },
     nodes: [text('main', 'Main column content.'), text('aside', 'Aside')]

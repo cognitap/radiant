@@ -727,6 +727,18 @@ export const componentRegistry = {
   },
   scrollArea: { size: 'css', radius: 'css', thumbColor: 'css', trackColor: 'css' },
   radioGroup: { gap: 'css' },
+  annotatedText: {
+    gap: 'css',
+    rowGap: 'css',
+    arcStep: 'css',
+    arcColor: 'css',
+    background: 'css',
+    tokenRadius: 'css',
+    textWeight: 'weight',
+    labelColor: 'css',
+    labelSize: 'css',
+    spanRadius: 'css'
+  },
   stage: {
     radius: 'css',
     cornerShape: 'css',
