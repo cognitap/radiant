@@ -426,7 +426,7 @@
       "required": ["component", "url"]
     },
     "AudioPlayer": {
-      "description": "Plays an audio track with native browser controls.\nUse: An audio track such as a podcast or voice note; `description` says what it is.\nAvoid: Video (Video) or sounds tied to actions.\nExamples: podcast episode with a `description`; pronunciation sample of one word.",
+      "description": "Plays an audio track with play, pause, a scrubber and the time.\nUse: An audio track such as a podcast or voice note; `description` says what it is.\nAvoid: Video (Video) or sounds tied to actions.\nExamples: podcast episode with a `description`; pronunciation sample of one word.",
       "type": "object",
       "properties": {
         "component": {

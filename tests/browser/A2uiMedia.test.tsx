@@ -1,3 +1,4 @@
+import { act } from 'react'
 import { expect, test, vi } from 'vitest'
 import { A2uiMediaProvider, A2uiSurface, type CatalogDiagnostic } from '../../src/a2ui/index.js'
 import { lucideA2uiIcons } from '../../src/a2ui/lucide.js'
@@ -9,6 +10,7 @@ import {
   MEDIA_IMAGE_URL,
   MEDIA_SURFACE_ID,
   MEDIA_VIDEO_URL,
+  toneDataUrl,
   videoFixtureMessages
 } from '../../src/a2ui/mediaFixtures.js'
 import { A2UI_BASIC_CATALOG_ID, A2UI_PROTOCOL_VERSION } from '../../src/a2ui/catalogGenerator.js'
@@ -395,4 +397,95 @@ test('a bound icon name follows the data model', async () => {
   expect(icon.hidden).toBe(false)
   expect(icon.getAttribute('aria-label')).toBe('Favorite')
   expect(icon.querySelector('svg')).not.toBeNull()
+})
+
+const audioLabels = { audioPlay: 'Play', audioPause: 'Pause', audioSeek: 'Seek' }
+
+test('maps AudioPlayer to the Radiant player when the surface labels name its controls', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const url = toneDataUrl(2)
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId={MEDIA_SURFACE_ID}
+      labels={audioLabels}
+      onDiagnostic={d => diagnostics.push(d)}
+      messages={surfaceOf([
+        column('captioned', 'labelled'),
+        { id: 'captioned', component: 'AudioPlayer', url, description: 'Morning birdsong' },
+        { id: 'labelled', component: 'AudioPlayer', url, accessibility: { label: 'Briefing' } }
+      ])}
+    />,
+    true
+  )
+  const [captioned, labelled] = Array.from(
+    host.querySelectorAll<HTMLElement>('figure[data-slot="a2ui-audio-player"]')
+  )
+  expect(host.querySelector('audio[controls]')).toBeNull()
+  const player = captioned!.querySelector<HTMLElement>('[data-slot~="audio-player"]')!
+  expect(player.getAttribute('aria-labelledby')).toBe(captioned!.querySelector('figcaption')!.id)
+  expect(player.querySelector('audio')!.getAttribute('src')).toBe(url)
+  expect(player.querySelector('button')!.getAttribute('aria-label')).toBe('Play')
+  expect(player.querySelector('input[type="range"]')!.getAttribute('aria-label')).toBe('Seek')
+  const named = labelled!.querySelector<HTMLElement>('[data-slot~="audio-player"]')!
+  expect(named.getAttribute('aria-label')).toBe('Briefing')
+  expect(named.hasAttribute('aria-labelledby')).toBe(false)
+  // Media events update the player outside React's control, so wait for them inside act.
+  await act(async () => {
+    await expect.poll(() => player.querySelector('audio')!.readyState).toBeGreaterThan(0)
+    await new Promise(resolve => setTimeout(resolve, 200))
+  })
+  expect(player.querySelector('[data-slot="audio-player-time"]')!.textContent).toBe('0:00 / 0:02')
+  expect(diagnostics.filter(d => d.component === 'AudioPlayer')).toEqual([])
+})
+
+test('keeps native audio controls and reports once when the labels are missing', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const messages = surfaceOf([
+    column('clip'),
+    { id: 'clip', component: 'AudioPlayer', url: MEDIA_AUDIO_URL, description: 'Clip' }
+  ])
+  const surface = (
+    <A2uiSurface
+      surfaceId={MEDIA_SURFACE_ID}
+      labels={{ audioPlay: 'Play', audioPause: 'Pause' }}
+      onDiagnostic={d => diagnostics.push(d)}
+      messages={messages}
+    />
+  )
+  const { host, render } = await mount(surface)
+  await render(surface)
+  const audio = host.querySelector<HTMLAudioElement>('figure audio')!
+  expect(audio.controls).toBe(true)
+  expect(host.querySelector('[data-slot~="audio-player"]')).toBeNull()
+  expect(diagnostics.filter(d => d.component === 'AudioPlayer')).toEqual([
+    expect.objectContaining({ kind: 'defaulted', nodeId: 'clip', prop: 'controls', used: 'native' })
+  ])
+})
+
+test('passes labels.audioError to a failing player, and keeps native controls without a usable URL', async () => {
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId={MEDIA_SURFACE_ID}
+      labels={{ ...audioLabels, audioError: 'This clip cannot be played.' }}
+      messages={surfaceOf([
+        column('broken', 'unsafe'),
+        {
+          id: 'broken',
+          component: 'AudioPlayer',
+          url: 'data:audio/wav;base64,AAAA',
+          description: 'Broken'
+        },
+        { id: 'unsafe', component: 'AudioPlayer', url: 'javascript:void 0', description: 'Unsafe' }
+      ])}
+    />
+  )
+  const [broken, unsafe] = Array.from(host.querySelectorAll<HTMLElement>('figure'))
+  const player = broken!.querySelector<HTMLElement>('[data-slot~="audio-player"]')!
+  await act(async () => {
+    await expect.poll(() => player.querySelector('audio')!.error).not.toBeNull()
+  })
+  expect(player.dataset.state).toBe('error')
+  expect(player.querySelector('output')!.textContent).toBe('This clip cannot be played.')
+  expect(unsafe!.querySelector('[data-slot~="audio-player"]')).toBeNull()
+  expect(unsafe!.querySelector('audio')!.hasAttribute('src')).toBe(false)
 })

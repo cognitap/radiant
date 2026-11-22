@@ -184,6 +184,16 @@ export const componentRegistry = {
   },
   form: { gap: 'css' },
   carousel: { gap: 'css', slideGap: 'css', radius: 'css' },
+  audioPlayer: {
+    gap: 'css',
+    padding: 'css',
+    radius: 'css',
+    background: 'css',
+    borderWidth: 'css',
+    borderColor: 'css',
+    timeColor: 'css',
+    timeSize: 'css'
+  },
   buttonGroup: { radius: 'css' },
   otpField: { gap: 'css', slotSize: 'css' },
   tag: { gap: 'css' },

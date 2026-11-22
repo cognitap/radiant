@@ -18,6 +18,33 @@ export const MEDIA_IMAGE_URL = svgDataUrl(
 export const MEDIA_VIDEO_URL = 'data:video/mp4;base64,'
 export const MEDIA_AUDIO_URL = 'data:audio/mpeg;base64,'
 
+/** A mono 8-bit PCM WAV tone as a data URL, so audio stories and tests need no network. */
+export function toneDataUrl(seconds: number, rate = 8000): string {
+  const samples = Math.round(seconds * rate)
+  const bytes = new Uint8Array(44 + samples)
+  const view = new DataView(bytes.buffer)
+  const text = (offset: number, value: string) =>
+    [...value].forEach((char, i) => view.setUint8(offset + i, char.charCodeAt(0)))
+  text(0, 'RIFF')
+  view.setUint32(4, 36 + samples, true)
+  text(8, 'WAVE')
+  text(12, 'fmt ')
+  view.setUint32(16, 16, true)
+  view.setUint16(20, 1, true)
+  view.setUint16(22, 1, true)
+  view.setUint32(24, rate, true)
+  view.setUint32(28, rate, true)
+  view.setUint16(32, 1, true)
+  view.setUint16(34, 8, true)
+  text(36, 'data')
+  view.setUint32(40, samples, true)
+  for (let i = 0; i < samples; i++)
+    bytes[44 + i] = 128 + Math.round(24 * Math.sin((2 * Math.PI * 440 * i) / rate))
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return `data:audio/wav;base64,${btoa(binary)}`
+}
+
 /** Decorative, labelled, and SVG-path icons, plus one icon-only button named by its icon. */
 export const iconFixtureMessages = surface([
   {

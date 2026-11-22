@@ -481,7 +481,13 @@ test.for(Object.keys(fixtures).flatMap(name => WIDTHS.map(width => [name, width]
         surfaceId={createSurfaceOf(messages).surfaceId}
         messages={messages}
         registry={radiantA2uiExtensionRegistry}
-        labels={{ notifications: 'Notifications', filter: 'Filter {label}' }}
+        labels={{
+          notifications: 'Notifications',
+          filter: 'Filter {label}',
+          audioPlay: 'Play',
+          audioPause: 'Pause',
+          audioSeek: 'Seek'
+        }}
       />,
       width
     )

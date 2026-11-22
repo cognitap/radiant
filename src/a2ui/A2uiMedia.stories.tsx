@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, waitFor, within } from 'storybook/test'
 import { A2uiSurface } from './A2uiSurface.js'
+import { A2UI_BASIC_CATALOG_ID, A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
 import { A2uiMediaProvider } from './media.js'
 import { lucideA2uiIcons } from './lucide.js'
 import {
@@ -8,6 +9,7 @@ import {
   iconFixtureMessages,
   imageFixtureMessages,
   MEDIA_SURFACE_ID,
+  toneDataUrl,
   videoFixtureMessages
 } from './mediaFixtures.js'
 
@@ -63,5 +65,42 @@ export const AudioPlayer: Story = {
     const canvas = within(canvasElement)
     await expect(await canvas.findByText('Morning birdsong at the lake')).toBeVisible()
     await expect(canvasElement.querySelector('audio')!.controls).toBe(true)
+  }
+}
+
+export const AudioPlayerWithLabels: Story = {
+  args: {
+    messages: [
+      {
+        version: A2UI_PROTOCOL_VERSION,
+        createSurface: {
+          surfaceId: MEDIA_SURFACE_ID,
+          catalogId: A2UI_BASIC_CATALOG_ID,
+          components: [
+            { id: 'root', component: 'Column', children: ['clip'] },
+            {
+              id: 'clip',
+              component: 'AudioPlayer',
+              url: toneDataUrl(12),
+              description: 'Morning birdsong at the lake'
+            }
+          ]
+        }
+      }
+    ],
+    labels: {
+      audioPlay: 'Play',
+      audioPause: 'Pause',
+      audioSeek: 'Seek',
+      audioError: 'This clip cannot be played.'
+    }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      await canvas.findByRole('group', { name: 'Morning birdsong at the lake' })
+    ).toBeVisible()
+    await waitFor(() => expect(canvas.getByRole('slider', { name: 'Seek' })).toBeEnabled())
+    await expect(canvas.getByRole('button', { name: 'Play' })).toBeEnabled()
   }
 }
