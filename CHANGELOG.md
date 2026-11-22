@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Add `Stage`, a frame for custom widgets with `StageHeader`, `StageTitle`, `StageDescription`, `StageActions`, `StageBody`, and `StageFooter`. Stage is a size container: its header and footer lay out by its own width. `StageBody` `aspectRatio` holds the body size while content streams in. Themes style it through `components.stage`. The canonical catalog and A2UI extension catalog add `Stage` (`title`, `description`, `aspectRatio`, `padding`, `actions`, `child`, `footer`), and `validateA2uiAccessibility` flags a Stage without a title.
+
 ## 0.0.94
 
 - Add `A2UI_BASIC_CATALOG_REVISION` to `@cognitap/radiant/a2ui`, pinning the `@a2ui/web_core` release and specification basic catalog that Radiant's A2UI rendering was tested against and naming that release in the `catalog.json` description; the official basic `catalogId` is unchanged.

@@ -724,7 +724,24 @@ export const componentRegistry = {
     indicatorShadow: 'css'
   },
   scrollArea: { size: 'css', radius: 'css', thumbColor: 'css', trackColor: 'css' },
-  radioGroup: { gap: 'css' }
+  radioGroup: { gap: 'css' },
+  stage: {
+    radius: 'css',
+    background: 'css',
+    color: 'css',
+    borderWidth: 'css',
+    borderStyle: 'css',
+    borderColor: 'css',
+    shadow: 'css',
+    padding: 'css',
+    gap: 'css',
+    headerGap: 'css',
+    actionsGap: 'css',
+    footerGap: 'css',
+    titleSize: 'css',
+    titleWeight: 'weight',
+    descriptionColor: 'css'
+  }
 } as const
 
 type ValueKind = 'css' | 'weight' | 'number' | 'opacity'

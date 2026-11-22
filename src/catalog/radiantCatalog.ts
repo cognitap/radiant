@@ -1130,6 +1130,54 @@ export const radiantCatalog: Catalog = defineCatalog({
           scope: 'outbound'
         }
       }
+    },
+
+    Stage: {
+      name: 'Stage',
+      category: 'layout',
+      description:
+        'Frames one interactive widget with a titled header, actions, a body and a footer.',
+      guidance: {
+        whenToUse:
+          'Placing an app widget, such as a map or editor, in its `child` with a `title`; set `aspectRatio` when its size is known.',
+        whenNotToUse: 'Grouping static content (Card) or focused tasks (Modal).',
+        examples: [
+          'map with a zoom Button in `actions`, `aspectRatio: 1.5`',
+          'drawing canvas with Undo and Clear in `footer`'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['title'],
+        properties: {
+          title: { type: 'string', minLength: 1, description: 'Widget heading.' },
+          description: { type: 'string', description: 'Optional supporting summary.' },
+          aspectRatio: {
+            type: 'number',
+            exclusiveMinimum: 0,
+            description: 'Body width divided by height, held while the body content streams in.'
+          },
+          padding: spacingSchema
+        }
+      },
+      slots: {
+        actions: {
+          description: 'Optional controls beside the title.',
+          cardinality: 'many'
+        },
+        child: {
+          description: 'The widget rendered in the body.',
+          cardinality: 'single',
+          required: true
+        },
+        footer: {
+          description: 'Optional content after the body.',
+          cardinality: 'many'
+        }
+      },
+      bindings: {},
+      actions: {}
     }
   }
 })

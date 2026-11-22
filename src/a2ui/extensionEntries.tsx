@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { ResolvedBinding, type NodeAction } from '@a2ui/web_core/resolution'
+import { Fragment, useEffect, useRef } from 'react'
+import { ResolvedBinding, type ComponentNode, type NodeAction } from '@a2ui/web_core/resolution'
 import type { ControlSize } from '../presentation.js'
 import {
   Combobox,
@@ -22,6 +22,15 @@ import {
   SelectTrigger,
   SelectValue
 } from '../components/Select/Select.js'
+import {
+  Stage,
+  StageActions,
+  StageBody,
+  StageDescription,
+  StageFooter,
+  StageHeader,
+  StageTitle
+} from '../components/Stage/Stage.js'
 import { Switch } from '../components/Switch/Switch.js'
 import { Textarea } from '../components/Textarea/Textarea.js'
 import { radiantCatalog } from '../catalog/index.js'
@@ -32,6 +41,8 @@ import {
   type A2uiJsonSchema
 } from './catalogGenerator.js'
 import { createA2uiRegistry, createA2uiRegistryEntry } from './registry.js'
+import { isA2uiChildNode } from './adapterValues.js'
+import type { A2uiAccessibilityRule } from './accessibilityRules.js'
 import { controlLabelRule } from './accessibilityRules.js'
 import {
   radiantA2uiRegistry,
@@ -390,7 +401,73 @@ const textareaEntry = createA2uiRegistryEntry({
   }
 })
 
-const extensionEntries = [selectEntry, comboboxEntry, radioGroupEntry, switchEntry, textareaEntry]
+/** Requires a Stage to have a non-empty `title` that names its widget. */
+const stageTitleRule: A2uiAccessibilityRule = {
+  id: 'stage-title',
+  check(component) {
+    const title = component.title
+    if (typeof title === 'string' && title.trim()) return
+    return {
+      prop: 'title',
+      message: `Stage "${String(component.id)}" has no title to name its widget.`
+    }
+  }
+}
+
+const STAGE_PADDING: readonly string[] = ['tight', 'normal', 'airy']
+
+const stageEntry = createA2uiRegistryEntry({
+  name: 'Stage',
+  accessibility: [stageTitleRule],
+  component: [Stage, StageBody],
+  schema: extensionSchema('Stage'),
+  description: extensionSchema('Stage').description as string,
+  adapter(props, context) {
+    const title = unwrapDisplayText(props.title).trim()
+    const description = unwrapString(props.description)?.trim()
+    const ratio = props.aspectRatio
+    const nodes = (value: unknown) => (Array.isArray(value) ? value.filter(isA2uiChildNode) : [])
+    const render = (children: readonly ComponentNode[]) =>
+      children.map(child => <Fragment key={child.id}>{context.renderNode(child)}</Fragment>)
+    const actions = nodes(props.actions)
+    const footer = nodes(props.footer)
+    return (
+      <Stage
+        data-slot="a2ui-stage"
+        padding={
+          typeof props.padding === 'string' && STAGE_PADDING.includes(props.padding)
+            ? (props.padding as 'tight' | 'normal' | 'airy')
+            : undefined
+        }
+      >
+        {title || description || actions.length ? (
+          <StageHeader>
+            {title ? <StageTitle>{title}</StageTitle> : null}
+            {description ? <StageDescription>{description}</StageDescription> : null}
+            {actions.length ? <StageActions>{render(actions)}</StageActions> : null}
+          </StageHeader>
+        ) : null}
+        <StageBody
+          aspectRatio={
+            typeof ratio === 'number' && Number.isFinite(ratio) && ratio > 0 ? ratio : undefined
+          }
+        >
+          {isA2uiChildNode(props.child) ? context.renderNode(props.child) : null}
+        </StageBody>
+        {footer.length ? <StageFooter>{render(footer)}</StageFooter> : null}
+      </Stage>
+    )
+  }
+})
+
+const extensionEntries = [
+  selectEntry,
+  comboboxEntry,
+  radioGroupEntry,
+  switchEntry,
+  textareaEntry,
+  stageEntry
+]
 
 /**
  * Radiant's A2UI extension registry: the basic catalog plus Radiant form controls.

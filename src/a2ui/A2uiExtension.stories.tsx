@@ -9,6 +9,7 @@ import {
   switchFixtureMessages,
   textareaFixtureMessages
 } from './extensionFixtures.js'
+import { STAGE_SURFACE_ID, stageFixtureMessages } from './stageFixtures.js'
 
 const meta = {
   title: 'A2UI/Extension',
@@ -65,5 +66,14 @@ export const Textarea: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(await canvas.findByRole('textbox', { name: /Bio/ })).toHaveAttribute('rows', '3')
+  }
+}
+
+export const Stage: Story = {
+  args: { surfaceId: STAGE_SURFACE_ID, messages: stageFixtureMessages },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByRole('heading', { name: 'Route map' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Share route' })).toBeVisible()
   }
 }

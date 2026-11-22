@@ -617,7 +617,8 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
   { a2uiName: 'Progress', sourceEntry: 'Progress' },
   { a2uiName: 'Accordion', sourceEntry: 'Accordion' },
   { a2uiName: 'Table', sourceEntry: 'Table' },
-  { a2uiName: 'Toast', sourceEntry: 'Toast' }
+  { a2uiName: 'Toast', sourceEntry: 'Toast' },
+  { a2uiName: 'Stage', sourceEntry: 'Stage' }
 ]
 
 const DYNAMIC_REF_BY_BINDING_TYPE: Record<CatalogBindingValueType, string> = {

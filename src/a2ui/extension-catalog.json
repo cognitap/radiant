@@ -5,7 +5,7 @@
   "protocolVersion": "1.0",
   "title": "Radiant A2UI 1.0 Extension Catalog",
   "description": "The A2UI basic catalog plus Radiant form controls, generated from @cognitap/radiant/catalog.",
-  "instructions": "Pick each component by intent; the host theme owns appearance.\n- Button runs actions and never navigates. Leave navigation to the host.\n- Bind input values to surface state; named actions receive a snapshot of that state.\n- Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.\n- Control size (small, medium, large) scales controls; keep one size within a group.",
+  "instructions": "Pick each component by intent; the host theme owns appearance.\n- Button runs actions and never navigates. Leave navigation to the host.\n- Bind input values to surface state; named actions receive a snapshot of that state.\n- Button `variant`: primary only for the main action, default for secondary actions, borderless for low emphasis such as Cancel.\n- Control size (small, medium, large) scales controls; keep one size within a group.\n- Spacing (tight, normal, airy) is semantic; never request pixel values.",
   "components": {
     "Column": {
       "description": "Arranges child elements vertically with semantic spacing and alignment.\nUse: Stacking sections, form fields or a card body top to bottom.\nAvoid: Side-by-side peers (Row) or data-driven repeats (List).\nExamples: form fields followed by a submit Button; heading and paragraph, `align: start`.",
@@ -1076,6 +1076,51 @@
           "required": ["component", "label", "value"]
         }
       ]
+    },
+    "Stage": {
+      "description": "Frames one interactive widget with a titled header, actions, a body and a footer.\nUse: Placing an app widget, such as a map or editor, in its `child` with a `title`; set `aspectRatio` when its size is known.\nAvoid: Grouping static content (Card) or focused tasks (Modal).\nExamples: map with a zoom Button in `actions`, `aspectRatio: 1.5`; drawing canvas with Undo and Clear in `footer`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Stage"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Widget heading."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional supporting summary."
+        },
+        "aspectRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Body width divided by height, held while the body content streams in."
+        },
+        "padding": {
+          "type": "string",
+          "enum": ["tight", "normal", "airy"],
+          "default": "normal",
+          "description": "Semantic spacing scale owned by Radiant."
+        },
+        "actions": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Optional controls beside the title."
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "The widget rendered in the body."
+        },
+        "footer": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Optional content after the body."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "title", "child"]
     }
   },
   "functions": {
@@ -1525,6 +1570,9 @@
         },
         {
           "$ref": "#/components/Textarea"
+        },
+        {
+          "$ref": "#/components/Stage"
         }
       ],
       "discriminator": {
