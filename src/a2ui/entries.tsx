@@ -19,7 +19,6 @@ import {
 import { Button, type ButtonVariant } from '../components/Button/Button.js'
 import { Card } from '../components/Card/Card.js'
 import { Checkbox } from '../components/Checkbox/Checkbox.js'
-import { CheckboxGroup } from '../components/CheckboxGroup/CheckboxGroup.js'
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../components/Dialog/Dialog.js'
 import {
   Field,
@@ -28,7 +27,7 @@ import {
   WithoutField
 } from '../components/Field/Field.js'
 import { Input } from '../components/Input/Input.js'
-import { Radio, RadioGroup } from '../components/RadioGroup/RadioGroup.js'
+import { Radio } from '../components/RadioGroup/RadioGroup.js'
 import { Separator } from '../components/Separator/Separator.js'
 import { Slider } from '../components/Slider/Slider.js'
 import { Stack, type StackAlign, type StackJustify } from '../components/Stack/Stack.js'
@@ -679,7 +678,6 @@ function readChoiceOptions(raw: unknown): readonly ChoiceOptionItem[] {
 }
 
 function A2uiChoicePicker({
-  ref,
   label,
   srOnly,
   error,
@@ -690,7 +688,6 @@ function A2uiChoicePicker({
   filterable,
   onSelect
 }: {
-  ref?: Ref<HTMLElement>
   label: string
   srOnly: boolean
   error?: string
@@ -702,20 +699,15 @@ function A2uiChoicePicker({
   onSelect: (next: string[]) => void
 }) {
   const [query, setQuery] = useState('')
+  const name = useId()
   const needle = query.trim().toLowerCase()
   const visible =
     filterable && needle ? options.filter(o => o.label.toLowerCase().includes(needle)) : options
-  const parts = srOnly ? SR_ONLY_LABEL_PARTS : undefined
-  const filterInput = filterable ? (
-    <Input
-      type="search"
-      aria-label={`Filter ${label}`}
-      placeholder={`Filter ${label}`}
-      value={query}
-      onChange={e => setQuery(e.currentTarget.value)}
-    />
-  ) : null
+  // Toggles keep selections the filter hides.
+  const toggle = (value: string, checked: boolean) =>
+    onSelect(checked ? [...selected, value] : selected.filter(v => v !== value))
 
+  let choices: ReactNode
   if (chips) {
     const items = visible.map(o => (
       <ChoiceChip
@@ -725,76 +717,83 @@ function A2uiChoicePicker({
         {o.label}
       </ChoiceChip>
     ))
-    return (
-      <OwnedControls owns={visible.length > 0}>
-        <Field
-          ref={ref as Ref<HTMLFieldSetElement>}
-          layout="group"
-          label={label}
-          error={error}
-          parts={parts}
-        >
-          <WithoutField>{filterInput}</WithoutField>
-          {multiple ? (
-            <ToggleGroup
-              type="multiple"
-              aria-label={label}
-              value={[...selected]}
-              onValueChange={onSelect}
-            >
-              {items}
-            </ToggleGroup>
+    choices = multiple ? (
+      <ToggleGroup
+        type="multiple"
+        aria-label={label}
+        value={[...selected]}
+        onValueChange={onSelect}
+      >
+        {items}
+      </ToggleGroup>
+    ) : (
+      <ToggleGroup
+        type="single"
+        aria-label={label}
+        value={selected[0] ?? null}
+        onValueChange={next => onSelect(next ? [next] : [])}
+      >
+        {items}
+      </ToggleGroup>
+    )
+  } else {
+    choices = (
+      <div
+        data-slot={multiple ? 'checkbox-group-options' : 'radio-group-options'}
+        className={
+          multiple
+            ? 'grid min-w-0 justify-items-start gap-[var(--rad-checkbox-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
+            : 'grid min-w-0 justify-items-start gap-[var(--rad-radio-group-gap,var(--rad-spacing-group-gap,0.75rem))]'
+        }
+      >
+        {visible.map(o =>
+          multiple ? (
+            <Checkbox
+              key={o.value}
+              value={o.value}
+              label={o.label}
+              checked={selected.includes(o.value)}
+              onChange={e => toggle(o.value, e.currentTarget.checked)}
+            />
           ) : (
-            <ToggleGroup
-              type="single"
-              aria-label={label}
-              value={selected[0] ?? null}
-              onValueChange={next => onSelect(next ? [next] : [])}
-            >
-              {items}
-            </ToggleGroup>
-          )}
-        </Field>
-      </OwnedControls>
+            <Radio
+              key={o.value}
+              name={name}
+              value={o.value}
+              label={o.label}
+              checked={selected[0] === o.value}
+              onChange={() => onSelect([o.value])}
+            />
+          )
+        )}
+      </div>
     )
   }
 
-  const group = multiple ? (
-    <CheckboxGroup
-      label={label}
-      error={error}
-      parts={parts}
-      items={visible}
-      value={[...selected]}
-      onValueChange={onSelect}
-    />
-  ) : (
-    <RadioGroup
-      label={label}
-      error={error}
-      parts={parts}
-      value={selected[0] ?? null}
-      onValueChange={next => onSelect([next])}
-    >
-      {visible.map(o => (
-        <Radio
-          key={o.value}
-          value={o.value}
-          label={o.label}
-        />
-      ))}
-    </RadioGroup>
-  )
-
+  // Options carry the invalid state and error; the filter never does.
   return (
-    <div
-      ref={ref as Ref<HTMLDivElement>}
-      data-slot="a2ui-choice-picker"
-      className="grid gap-2"
-    >
-      {filterInput}
-      {group}
-    </div>
+    <OwnedControls owns={visible.length > 0}>
+      <Field
+        layout="group"
+        label={label}
+        error={error}
+        parts={srOnly ? SR_ONLY_LABEL_PARTS : undefined}
+        data-slot="a2ui-choice-picker"
+      >
+        <WithoutField>
+          {filterable ? (
+            <Input
+              type="search"
+              aria-label={`Filter ${label}`}
+              placeholder={`Filter ${label}`}
+              value={query}
+              onChange={e => setQuery(e.currentTarget.value)}
+            />
+          ) : null}
+        </WithoutField>
+        {choices}
+      </Field>
+    </OwnedControls>
   )
 }
 
@@ -813,7 +812,7 @@ function ChoiceChip({ value, children }: { value: string; children: ReactNode })
 const choicePickerEntry = createA2uiRegistryEntry({
   name: 'ChoicePicker',
   accessibility: [controlLabelRule({ alternatives: ['accessibility.label'] })],
-  component: [RadioGroup, Radio, CheckboxGroup, ToggleGroup, ToggleGroupItem, Input, Field],
+  component: [Radio, Checkbox, ToggleGroup, ToggleGroupItem, Input, Field],
   schema: basicSchema('ChoicePicker'),
   description: basicDescription('ChoicePicker'),
   adapter(props, context) {
