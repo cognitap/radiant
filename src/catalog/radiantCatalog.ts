@@ -1386,6 +1386,87 @@ export const radiantCatalog: Catalog = defineCatalog({
       actions: {}
     },
 
+    RelationGraph: {
+      name: 'RelationGraph',
+      category: 'data',
+      description:
+        'Nodes and directed, labelled edges, laid out as a tree, in layers or on a circle.',
+      guidance: {
+        whenToUse:
+          'Relations between named things, such as an org chart, dependencies or a cycle of states. A layered `layout` suits nodes with several parents. Keep labels short.',
+        whenNotToUse: 'Steps without branches (Stepper) or nested items to expand (Tree).',
+        examples: [
+          'org chart in a tree `layout` with one node `emphasis` highlighted',
+          'state machine on a circle with labelled `edges` and a loop'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'layout', 'nodes'],
+        properties: {
+          label: { type: 'string', minLength: 1, description: 'Accessible name of the graph.' },
+          layout: {
+            type: 'string',
+            enum: ['tree', 'layered', 'circular'],
+            description:
+              '`tree` puts each node under its first parent, `layered` follows edge direction, `circular` keeps node order.'
+          },
+          nodes: {
+            type: 'array',
+            minItems: 1,
+            description: 'Nodes in order; edges refer to them by `id`.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['id', 'label'],
+              properties: {
+                id: { type: 'string', minLength: 1, description: 'Unique node id.' },
+                label: { type: 'string', minLength: 1, description: 'Node text.' },
+                series: seriesSchema,
+                emphasis: {
+                  type: 'string',
+                  enum: ['highlighted', 'muted'],
+                  description: 'Draws the node stronger or fainter; say why in `description`.'
+                },
+                description: {
+                  type: 'string',
+                  description: 'Text announced after the connections, such as a state.'
+                }
+              }
+            }
+          },
+          edges: {
+            type: 'array',
+            description: 'Directed edges; cycles and loops are allowed.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['from', 'to'],
+              properties: {
+                from: { type: 'string', minLength: 1, description: 'Source node id.' },
+                to: { type: 'string', minLength: 1, description: 'Target node id.' },
+                label: { type: 'string', description: 'Optional relation name.' },
+                series: seriesSchema,
+                emphasis: {
+                  type: 'string',
+                  enum: ['highlighted', 'muted'],
+                  description: 'Draws the edge stronger or fainter; say why in `description`.'
+                },
+                description: {
+                  type: 'string',
+                  description: 'Text both nodes announce after this connection.'
+                }
+              }
+            }
+          }
+        }
+      },
+      slots: {},
+      bindings: {},
+      actions: {}
+    },
+
     Toast: {
       name: 'Toast',
       category: 'feedback',

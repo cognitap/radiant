@@ -230,6 +230,25 @@ const seeds: Record<string, Seed> = {
       pins: [{ x: 150, y: 60, label: 'Fire exit' }]
     }
   },
+  RelationGraph: {
+    root: {
+      label: 'Pipeline',
+      layout: 'layered',
+      nodes: [
+        { id: 'build', label: 'Build', series: 1 },
+        { id: 'test', label: 'Test', series: 1, emphasis: 'highlighted' },
+        { id: 'review', label: 'Review', emphasis: 'muted' },
+        { id: 'deploy', label: 'Deploy', series: 3 }
+      ],
+      edges: [
+        { from: 'build', to: 'test', label: 'artifacts' },
+        { from: 'test', to: 'deploy', emphasis: 'highlighted' },
+        { from: 'build', to: 'review', emphasis: 'muted' },
+        { from: 'review', to: 'deploy', series: 2 },
+        { from: 'test', to: 'build', label: 'retry', series: 8 }
+      ]
+    }
+  },
   Split: {
     root: { main: 'main', secondary: 'aside' },
     nodes: [text('main', 'Main column content.'), text('aside', 'Aside')]

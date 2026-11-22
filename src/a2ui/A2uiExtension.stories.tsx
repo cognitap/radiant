@@ -18,6 +18,7 @@ import {
 import { STAGE_SURFACE_ID, stageFixtureMessages } from './stageFixtures.js'
 import { ANNOTATED_TEXT_SURFACE_ID, annotatedTextFixtureMessages } from './annotatedTextFixtures.js'
 import { REGION_STAGE_SURFACE_ID, regionStageFixtureMessages } from './regionStageFixtures.js'
+import { RELATION_GRAPH_SURFACE_ID, relationGraphFixtureMessages } from './relationGraphFixtures.js'
 
 const meta = {
   title: 'A2UI/Extension',
@@ -164,5 +165,14 @@ export const RegionStage: Story = {
       'true'
     )
     await expect(canvas.getByRole('button', { name: 'Zoom in' })).toBeVisible()
+  }
+}
+
+export const RelationGraph: Story = {
+  args: { surfaceId: RELATION_GRAPH_SURFACE_ID, messages: relationGraphFixtureMessages },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByRole('group', { name: 'Release pipeline' })).toBeVisible()
+    await expect(canvas.getByRole('listitem', { name: 'Deploy' })).toBeVisible()
   }
 }

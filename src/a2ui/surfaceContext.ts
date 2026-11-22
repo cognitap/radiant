@@ -63,6 +63,15 @@ export type A2uiSurfaceLabels = {
   readonly zoomIn?: string
   readonly zoomOut?: string
   readonly zoomReset?: string
+  /**
+   * What a RelationGraph node announces for an edge to another node, such as `to {node}` with
+   * that node's label, or a function of that label and the edge label; an edge label follows a
+   * template after `: `. Keep a function's identity stable. Without it or `relationIncoming`,
+   * connections use arrow symbols and the graph reports a `defaulted` diagnostic.
+   */
+  readonly relationOutgoing?: string | ((node: string, label?: string) => string)
+  /** What a RelationGraph node announces for an edge from another node, such as `from {node}`. */
+  readonly relationIncoming?: string | ((node: string, label?: string) => string)
 }
 
 /** A SortableList announcement template or function; keep a function's identity stable. */

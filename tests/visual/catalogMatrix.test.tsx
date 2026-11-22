@@ -37,7 +37,9 @@ const labels = {
   audioSeek: 'Seek',
   zoomIn: 'Zoom in',
   zoomOut: 'Zoom out',
-  zoomReset: 'Reset view'
+  zoomReset: 'Reset view',
+  relationOutgoing: 'to {node}',
+  relationIncoming: 'from {node}'
 }
 const mounted: { host: HTMLElement; root: Root }[] = []
 

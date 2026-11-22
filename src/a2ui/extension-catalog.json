@@ -2028,6 +2028,106 @@
         }
       },
       "required": ["component", "label", "viewBox", "regions"]
+    },
+    "RelationGraph": {
+      "description": "Nodes and directed, labelled edges, laid out as a tree, in layers or on a circle.\nUse: Relations between named things, such as an org chart, dependencies or a cycle of states. A layered `layout` suits nodes with several parents. Keep labels short.\nAvoid: Steps without branches (Stepper) or nested items to expand (Tree).\nExamples: org chart in a tree `layout` with one node `emphasis` highlighted; state machine on a circle with labelled `edges` and a loop.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "RelationGraph"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Accessible name of the graph."
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["tree", "layered", "circular"],
+          "description": "`tree` puts each node under its first parent, `layered` follows edge direction, `circular` keeps node order."
+        },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Nodes in order; edges refer to them by `id`.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Unique node id."
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Node text."
+              },
+              "series": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8,
+                "description": "Categorical color from 1 to 8; one number per concept."
+              },
+              "emphasis": {
+                "type": "string",
+                "enum": ["highlighted", "muted"],
+                "description": "Draws the node stronger or fainter; say why in `description`."
+              },
+              "description": {
+                "type": "string",
+                "description": "Text announced after the connections, such as a state."
+              }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "description": "Directed edges; cycles and loops are allowed.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Source node id."
+              },
+              "to": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Target node id."
+              },
+              "label": {
+                "type": "string",
+                "description": "Optional relation name."
+              },
+              "series": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8,
+                "description": "Categorical color from 1 to 8; one number per concept."
+              },
+              "emphasis": {
+                "type": "string",
+                "enum": ["highlighted", "muted"],
+                "description": "Draws the edge stronger or fainter; say why in `description`."
+              },
+              "description": {
+                "type": "string",
+                "description": "Text both nodes announce after this connection."
+              }
+            }
+          }
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "label", "layout", "nodes"]
     }
   },
   "functions": {
@@ -2525,6 +2625,9 @@
         },
         {
           "$ref": "#/components/RegionStage"
+        },
+        {
+          "$ref": "#/components/RelationGraph"
         }
       ],
       "discriminator": {
