@@ -3,12 +3,48 @@
 > [!WARNING]  
 > Radiant is under heavy development. Things _will_ change and things _will_ break. Use at your own risk.
 
-React components built on native HTML elements, with shared themes. Published
-as [`@cognitap/radiant`](https://www.npmjs.com/package/@cognitap/radiant) under
-the [MIT license](LICENSE). Radiant is experimental during 0.x.
+Radiant is the component library agents compose interfaces from: React
+components on native HTML elements, with shared themes. Published as
+[`@cognitap/radiant`](https://www.npmjs.com/package/@cognitap/radiant) under the
+[MIT license](LICENSE). Radiant is experimental during 0.x.
 
-Its component families cover actions, forms, overlays, navigation, feedback, layout
-and data display. Charts ship at `@cognitap/radiant/charts`.
+Radiant never calls a model and needs no API key. Your agent writes
+[A2UI](https://a2ui.org) messages from the catalog that
+`radiantA2uiExtensionRegistry.toCatalogJson()` describes, and Radiant renders
+them in the browser:
+
+```tsx
+'use client'
+import '@cognitap/radiant/styles.css'
+import { A2uiSurface, type A2uiMessage } from '@cognitap/radiant/a2ui'
+
+export function AgentReply({ messages }: { messages: A2uiMessage[] }) {
+  return (
+    <A2uiSurface
+      surfaceId="reply"
+      messages={messages}
+      onAction={({ action, state }) => sendToAgent(action, state)}
+    />
+  )
+}
+```
+
+Run the accessibility check on the server before storing a surface. Props are
+coerced to the schema at render, or earlier with `coerceA2uiMessages`.
+
+```ts
+import { validateA2uiAccessibility } from '@cognitap/radiant/a2ui'
+
+const { errors, messages: fixed } = validateA2uiAccessibility(messages, {
+  fix: true
+})
+```
+
+Apps add their own components to the catalog, and
+`@cognitap/radiant/catalog` holds its protocol-independent form for other
+adapters. The same families, covering actions, forms, overlays, navigation,
+feedback, layout and data display, work directly in React. Charts ship at
+`@cognitap/radiant/charts`.
 
 ## Install
 
@@ -60,7 +96,8 @@ in `className` replace the matching defaults, including `hover:` and
 ## Documentation
 
 - [Docs site](https://radiant-docs.pages.dev): a guide and live example for each component
-- [Architecture](docs/architecture.md): how the families fit together and why
+- [Agent guide](https://radiant-docs.pages.dev/docs/agents/): render, validate and extend A2UI surfaces
+- [Architecture](docs/architecture.md): how the families and the agent layer fit together and why
 - [Theming](docs/theming.md): tokens, presets, fonts and modes
 - [Motion](docs/motion.md): opt-in spring animation
 - [Accessibility](docs/accessibility.md): support targets and manual checks
