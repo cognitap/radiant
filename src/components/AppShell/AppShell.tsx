@@ -36,6 +36,10 @@ import { focusRingClass, focusRingInsetClass } from '../shared/focusStyles.js'
 export type AppShellProps = Omit<ComponentProps<'div'>, 'style'> &
   StateOwner<'collapsed', boolean> &
   StateOwner<'open', boolean> & {
+    /**
+     * `--rad-sidebar-width` and `--rad-sidebar-collapsed-width` take lengths. The sidebar sizes its
+     * own column, so a percentage has no definite width to resolve against.
+     */
     style?: ThemeStyle
     'data-slot'?: string
     onCollapsedChange?: (collapsed: boolean) => void
@@ -89,6 +93,13 @@ function toggleFocus(root: HTMLElement | null) {
     root?.querySelector<HTMLElement>('[data-slot~="app-shell-main"]')
   )?.focus({ preventScroll: true })
 }
+// Matches the sidebar slot's style breakpoint: the shell's own content width under 40rem.
+function isNarrow(node: HTMLElement, width?: number) {
+  const view = node.ownerDocument.defaultView!,
+    box = view.getComputedStyle(node)
+  width ??= node.clientWidth - parseFloat(box.paddingLeft) - parseFloat(box.paddingRight)
+  return width < 40 * parseFloat(view.getComputedStyle(node.ownerDocument.documentElement).fontSize)
+}
 export function AppShell({
   collapsed,
   defaultCollapsed,
@@ -137,20 +148,16 @@ export function AppShell({
   useEffect(() => {
     const node = root.current
     if (!node) return
-    const doc = node.ownerDocument,
-      view = doc.defaultView!
     let narrow: boolean | undefined
-    // Matches the sidebar slot's style breakpoint: the shell's own content width under 40rem.
-    const measure = (width: number) => {
-      const next = width < 40 * parseFloat(view.getComputedStyle(doc.documentElement).fontSize)
+    const measure = (next: boolean) => {
       if (next === narrow) return
       if (narrow && !next) latestOpen.current(false)
       narrow = next
       setMobile(next)
     }
-    measure(node.clientWidth)
-    const observer = new view.ResizeObserver(([entry]) =>
-      measure(entry!.contentBoxSize[0]?.inlineSize ?? entry!.contentRect.width)
+    measure(isNarrow(node))
+    const observer = new node.ownerDocument.defaultView!.ResizeObserver(([entry]) =>
+      measure(isNarrow(node, entry!.contentBoxSize[0]?.inlineSize ?? entry!.contentRect.width))
     )
     observer.observe(node)
     return () => observer.disconnect()
@@ -214,7 +221,7 @@ export function AppShell({
           }
           data-motion={motion}
           className={cn(
-            '@container/app-shell [contain-intrinsic-inline-size:64rem] relative grid h-dvh min-h-0 min-w-0 grid-cols-[auto_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] [--_rad-shell-sidebar:var(--rad-sidebar-width,16rem)] data-collapsed:[--_rad-shell-sidebar:var(--rad-sidebar-collapsed-width,5rem)] bg-[var(--rad-app-shell-background,var(--rad-color-surface,white))] text-[var(--rad-app-shell-color,var(--rad-color-foreground,black))]',
+            '@container/app-shell [contain-intrinsic-inline-size:min(64rem,100dvw)] relative max-w-full grid h-dvh min-h-0 min-w-0 grid-cols-[auto_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] [--_rad-shell-sidebar:var(--rad-sidebar-width,16rem)] data-collapsed:[--_rad-shell-sidebar:var(--rad-sidebar-collapsed-width,5rem)] bg-[var(--rad-app-shell-background,var(--rad-color-surface,white))] text-[var(--rad-app-shell-color,var(--rad-color-foreground,black))]',
             className
           )}
           onFocusCapture={event => {
@@ -225,9 +232,16 @@ export function AppShell({
           onBlurCapture={event => {
             onBlurCapture?.(event)
             // The shell's width query can hide the sidebar before the drawer takes it: remember
-            // focus lost that way so the sidebar can restore it.
+            // focus lost that way, only while that layout change is pending, so the sidebar can
+            // restore it.
+            const node = root.current
             hidden.current =
-              !event.relatedTarget && !event.target.checkVisibility() ? event.target : null
+              !event.relatedTarget &&
+              event.target.checkVisibility?.() === false &&
+              node &&
+              isNarrow(node) !== mobile
+                ? event.target
+                : null
           }}
         >
           {props.children}

@@ -566,3 +566,58 @@ test('the shell collapses to its mobile layout by its own width inside a wide vi
   expect(nav(wide).getBoundingClientRect().width).toBeCloseTo(256)
   expect(toggle(wide).getAttribute('aria-haspopup')).toBeNull()
 })
+
+test('a shell in a parent that sizes to its content stays within a narrow frame and goes mobile', async () => {
+  const f = await frame()
+  try {
+    f.node.style.width = '375px'
+    await mount(
+      createPortal(
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Sample style={{ width: undefined, maxWidth: undefined }} />
+          </div>
+          <div style={{ display: 'inline-block' }}>
+            <Sample style={{ width: undefined, maxWidth: undefined }} />
+          </div>
+        </>,
+        f.doc.body
+      )
+    )
+    await pause(60)
+    const shells = f.doc.querySelectorAll<HTMLElement>('[data-slot~="app-shell"]')
+    expect(shells).toHaveLength(2)
+    for (const shell of shells) {
+      expect(shell.getBoundingClientRect().width).toBeLessThanOrEqual(375)
+      expect(shell.getAttribute('data-mobile')).toBe('')
+    }
+    expect(f.doc.documentElement.scrollWidth).toBeLessThanOrEqual(375)
+  } finally {
+    await act(async () => f.node.remove())
+  }
+})
+
+test('focus hidden long before the shell narrows stays where it is', async () => {
+  const f = await frame()
+  try {
+    f.node.style.width = '720px'
+    await mount(createPortal(<Sample />, f.doc.body))
+    await pause(60)
+    const link = f.doc.querySelector<HTMLElement>('[data-slot~="sidebar"] a')!
+    await act(async () => link.focus())
+    expect(f.doc.activeElement).toBe(link)
+    await act(async () => {
+      link.style.display = 'none'
+    })
+    await pause(100)
+    expect(f.doc.activeElement).toBe(f.doc.body)
+    await act(async () => {
+      f.node.style.width = '320px'
+    })
+    await pause(100)
+    expect(f.doc.querySelector('[data-slot~="app-shell"]')!.getAttribute('data-mobile')).toBe('')
+    expect(f.doc.activeElement).toBe(f.doc.body)
+  } finally {
+    await act(async () => f.node.remove())
+  }
+})
