@@ -59,13 +59,6 @@ const choiceOptionSchema: CatalogJsonSchema = {
   }
 }
 
-const matrixSeriesSchema: CatalogJsonSchema = {
-  type: 'integer',
-  minimum: 1,
-  maximum: 8,
-  description: 'Categorical color from the theme series, 1 to 8.'
-}
-
 const matrixHeaderSchema = (description: string): CatalogJsonSchema => ({
   type: 'object',
   additionalProperties: false,
@@ -88,7 +81,7 @@ const matrixCellSchema: CatalogJsonSchema = {
       enum: ['active', 'muted', 'highlighted'],
       description: 'Emphasis: active stands out, highlighted draws attention, muted steps back.'
     },
-    series: matrixSeriesSchema,
+    series: seriesSchema,
     marker: {
       type: 'object',
       additionalProperties: false,
@@ -1290,7 +1283,7 @@ export const radiantCatalog: Catalog = defineCatalog({
                   description: 'Columns spanned.'
                 },
                 label: { type: 'string', minLength: 1, description: 'Visible region label.' },
-                series: matrixSeriesSchema
+                series: seriesSchema
               }
             }
           }

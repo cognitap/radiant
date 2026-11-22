@@ -261,6 +261,7 @@ export {
 export type {
   PublicThemeToken,
   SeriesIndex,
+  SeriesNumber,
   SeriesTokens,
   SharedTokens,
   ThemeAppearanceSettings,
@@ -496,7 +497,6 @@ export type {
   AnnotatedTextArc,
   AnnotatedTextArcText,
   AnnotatedTextProps,
-  AnnotatedTextSeries,
   AnnotatedTextSpan,
   AnnotatedTextToken
 } from './components/AnnotatedText/AnnotatedText.js'
@@ -509,8 +509,7 @@ export type {
   RelationGraphEmphasis,
   RelationGraphLayout,
   RelationGraphNode,
-  RelationGraphProps,
-  RelationGraphSeries
+  RelationGraphProps
 } from './components/RelationGraph/RelationGraph.js'
 
 export {
@@ -525,7 +524,6 @@ export type {
   RegionStagePinProps,
   RegionStageProps,
   RegionStageRegionProps,
-  RegionStageSeries,
   RegionStageViewportProps
 } from './components/RegionStage/RegionStage.js'
 

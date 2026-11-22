@@ -193,7 +193,10 @@ export interface SharedTokens {
   series: Record<SeriesIndex, SeriesTokens>
 }
 
+/** Key of a series in `tokens.series`. */
 export type SeriesIndex = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
+
+export type { SeriesNumber } from '../internal/series.js'
 
 /** `solid` marks and fills on the surface; `soft` and `border` frame a tag that holds `text`. */
 export interface SeriesTokens {

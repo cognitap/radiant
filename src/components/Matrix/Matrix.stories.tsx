@@ -11,7 +11,7 @@ import {
   MatrixRow,
   MatrixRowHeader,
   type MatrixCellState,
-  type SeriesIndex
+  type SeriesNumber
 } from '../../index.js'
 
 const meta = {
@@ -81,7 +81,7 @@ function Seats({ disabled }: { disabled?: boolean }) {
         rowSpan={2}
         columnSpan={2}
         label="Quiet"
-        series="3"
+        series={3}
       />
     </Matrix>
   )
@@ -104,15 +104,15 @@ export const Default: Story = {
 const hours = ['9', '10', '11', '12', '13', '14']
 const rooms: {
   name: string
-  cells: (null | { state?: MatrixCellState; series?: SeriesIndex })[]
+  cells: (null | { state?: MatrixCellState; series?: SeriesNumber })[]
 }[] = [
   {
     name: 'Atlas',
-    cells: [{ series: '1' }, { series: '1' }, null, null, { series: '2' }, null]
+    cells: [{ series: 1 }, { series: 1 }, null, null, { series: 2 }, null]
   },
   {
     name: 'Birch',
-    cells: [null, { series: '3', state: 'active' }, { series: '3' }, null, null, null]
+    cells: [null, { series: 3, state: 'active' }, { series: 3 }, null, null, null]
   },
   {
     name: 'Cove',
@@ -191,7 +191,7 @@ export const Markers: Story = {
           {[0, 1, 2, 3, 4].map(day => (
             <MatrixCell
               key={day}
-              series={(day + row) % 2 ? '4' : undefined}
+              series={(day + row) % 2 ? 4 : undefined}
               altText={(day + row) % 3 ? `Reading ${day + 1}` : 'No reading'}
             >
               <MatrixMarker variant={(day + row) % 3 ? 'solid' : 'outline'}>

@@ -232,7 +232,7 @@ test('a region spans its cells, shows its label and describes every cell inside 
           rowSpan={2}
           columnSpan={3}
           label="Reserved"
-          series="2"
+          series={2}
         />
       }
     />
@@ -381,7 +381,7 @@ test('cell states, series and markers stay distinct in forced colors', async () 
       <MatrixRow>
         <MatrixCell
           state="active"
-          series="1"
+          series={1}
         >
           <MatrixMarker>1</MatrixMarker>
         </MatrixCell>
@@ -429,7 +429,7 @@ test('a solid marker inverts with its selected cell', async () => {
       <MatrixRow>
         <MatrixCell
           value="on"
-          series="2"
+          series={2}
         >
           <MatrixMarker>1</MatrixMarker>
         </MatrixCell>
@@ -581,7 +581,19 @@ test('Matrix rejects values outside its documented unions', async () => {
         columns={1}
       >
         <MatrixRow>
-          <MatrixCell series={'9' as '1'} />
+          <MatrixCell series={9 as never} />
+        </MatrixRow>
+      </Matrix>
+    )
+  ).toThrow('MatrixCell series must be one of 1 to 8.')
+  expect(() =>
+    renderToString(
+      <Matrix
+        aria-label="Bad"
+        columns={1}
+      >
+        <MatrixRow>
+          <MatrixCell series={'3' as never} />
         </MatrixRow>
       </Matrix>
     )

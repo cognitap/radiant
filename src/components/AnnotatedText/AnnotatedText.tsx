@@ -12,7 +12,6 @@ import {
   validateAnnotatedText,
   type AnnotatedTextArc,
   type AnnotatedTextArcText,
-  type AnnotatedTextSeries,
   type AnnotatedTextSpan,
   type AnnotatedTextToken,
   type ArcGeometry
@@ -21,12 +20,12 @@ import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useRovingFocus } from '../../react/useRovingFocus.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import type { SeriesNumber } from '../../internal/series.js'
 import { focusRingClass } from '../shared/focusStyles.js'
 
 export type {
   AnnotatedTextArc,
   AnnotatedTextArcText,
-  AnnotatedTextSeries,
   AnnotatedTextSpan,
   AnnotatedTextToken
 } from '../../internal/annotatedText.js'
@@ -60,7 +59,7 @@ export type AnnotatedTextProps = Omit<
   }
 
 // Each series sets private color slots that the span and arc classes read.
-const seriesClass: Record<AnnotatedTextSeries, string> = {
+const seriesClass: Record<SeriesNumber, string> = {
   1: '[--_at-solid:var(--rad-series-1-solid)] [--_at-soft:var(--rad-series-1-soft)] [--_at-border:var(--rad-series-1-border)] [--_at-text:var(--rad-series-1-text)]',
   2: '[--_at-solid:var(--rad-series-2-solid)] [--_at-soft:var(--rad-series-2-soft)] [--_at-border:var(--rad-series-2-border)] [--_at-text:var(--rad-series-2-text)]',
   3: '[--_at-solid:var(--rad-series-3-solid)] [--_at-soft:var(--rad-series-3-soft)] [--_at-border:var(--rad-series-3-border)] [--_at-text:var(--rad-series-3-text)]',

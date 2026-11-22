@@ -34,7 +34,6 @@ import {
   viewTransform,
   zoomAt,
   type RegionStageBox,
-  type RegionStageSeries,
   type RegionStageView
 } from '../../internal/regionStage.js'
 import {
@@ -48,9 +47,8 @@ import { useComposedRefs } from '../../react/useComposedRefs.js'
 import { useControllableState } from '../../react/useControllableState.js'
 import type { StateOwner, ValueOwner } from '../../react/useNativeOwner.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
+import type { SeriesNumber } from '../../internal/series.js'
 import type { ControlSize } from '../../presentation.js'
-
-export type { RegionStageSeries } from '../../internal/regionStage.js'
 
 type Base = Omit<ComponentProps<'div'>, 'style' | 'role' | 'defaultValue' | 'children'> &
   AccessibleName & {
@@ -123,7 +121,7 @@ export type RegionStageRegionProps = Omit<
   AccessibleName & {
     value: string
     d?: string
-    series?: RegionStageSeries
+    series?: SeriesNumber
     style?: ThemeStyle
     'data-slot'?: string
   }
@@ -201,7 +199,7 @@ const ITEMS = '[data-slot~="region-stage-region"], [data-slot~="region-stage-pin
 const STEP = 1.5
 const DURATION = 200
 
-const seriesClass: Record<RegionStageSeries, string> = {
+const seriesClass: Record<SeriesNumber, string> = {
   1: '[--_rs-solid:var(--rad-series-1-solid)] [--_rs-soft:var(--rad-series-1-soft)] [--_rs-border:var(--rad-series-1-border)]',
   2: '[--_rs-solid:var(--rad-series-2-solid)] [--_rs-soft:var(--rad-series-2-soft)] [--_rs-border:var(--rad-series-2-border)]',
   3: '[--_rs-solid:var(--rad-series-3-solid)] [--_rs-soft:var(--rad-series-3-soft)] [--_rs-border:var(--rad-series-3-border)]',
