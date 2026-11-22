@@ -1453,6 +1453,146 @@
         }
       },
       "required": ["component", "title"]
+    },
+    "Split": {
+      "description": "Places a main area beside a secondary area, stacking them when space is narrow.\nUse: Main content with supporting content; set `side` and `ratio` instead of widths.\nAvoid: Equal peers (Grid) or options weighed against each other (Compare).\nExamples: article with a summary Card, `side: end`; filters beside results, `side: start`, `ratio: main`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Split"
+        },
+        "side": {
+          "type": "string",
+          "enum": ["start", "end"],
+          "default": "end",
+          "description": "Side of the secondary area; at start it also comes first when stacked."
+        },
+        "ratio": {
+          "type": "string",
+          "enum": ["balanced", "main"],
+          "default": "main",
+          "description": "Equal widths, or two thirds for the main area."
+        },
+        "gap": {
+          "type": "string",
+          "enum": ["tight", "normal", "airy"],
+          "default": "normal",
+          "description": "Semantic spacing scale owned by Radiant."
+        },
+        "main": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Primary content."
+        },
+        "secondary": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Supporting content, such as filters or a summary."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "main", "secondary"]
+    },
+    "Grid": {
+      "description": "Lays out equal items in as many columns as fit, up to a maximum.\nUse: Equal items such as cards or tiles; set `maxColumns` and Radiant fits the columns to the width.\nAvoid: Areas of different weight (Split) or one line of peers (Row).\nExamples: course cards, `maxColumns: 3`; photo tiles, `maxColumns: 4`, `gap: tight`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Grid"
+        },
+        "maxColumns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 3,
+          "description": "Most columns shown; fewer appear when space is narrow."
+        },
+        "gap": {
+          "type": "string",
+          "enum": ["tight", "normal", "airy"],
+          "default": "normal",
+          "description": "Semantic spacing scale owned by Radiant."
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Ordered equal items."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "children"]
+    },
+    "Compare": {
+      "description": "Shows two to four options side by side with aligned rows, stacking when narrow.\nUse: Two to four options weighed side by side; each of `children` is a CompareItem.\nAvoid: Records with shared fields (Table) or equal items (Grid).\nExamples: three plans with prices and a Choose Button each; two laptops with specs in each body.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Compare"
+        },
+        "gap": {
+          "type": "string",
+          "enum": ["tight", "normal", "airy"],
+          "default": "normal",
+          "description": "Semantic spacing scale owned by Radiant."
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Two to four CompareItem options."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "children"]
+    },
+    "CompareItem": {
+      "description": "One option in a Compare, with rows that line up with the other options.\nUse: Each option in a Compare: `header` names it, `body` describes it, `footer` holds its action.\nAvoid: Content outside a Compare (Card).\nExamples: plan name and price in `header`, a Button in `footer`; method name in `header`, trade-offs in `body`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "CompareItem"
+        },
+        "header": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Names the option."
+        },
+        "body": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Describes the option."
+        },
+        "footer": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "Optional action or note."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "header"]
+    },
+    "Reveal": {
+      "description": "Shows content one step at a time with previous and next controls labelled by the host.\nUse: Content read one part at a time, such as recipe or setup `steps`.\nAvoid: Content needed at once (Column) or sections opened in any order (Accordion).\nExamples: four recipe steps; setup instructions in three parts, `gap: airy`.",
+      "type": "object",
+      "properties": {
+        "component": {
+          "const": "Reveal"
+        },
+        "gap": {
+          "type": "string",
+          "enum": ["tight", "normal", "airy"],
+          "default": "normal",
+          "description": "Semantic spacing scale owned by Radiant."
+        },
+        "steps": {
+          "$ref": "common_types.json#/$defs/ChildList",
+          "description": "Ordered steps, one shown at a time."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        }
+      },
+      "required": ["component", "steps"]
     }
   },
   "functions": {
@@ -1923,6 +2063,21 @@
         },
         {
           "$ref": "#/components/Toast"
+        },
+        {
+          "$ref": "#/components/Split"
+        },
+        {
+          "$ref": "#/components/Grid"
+        },
+        {
+          "$ref": "#/components/Compare"
+        },
+        {
+          "$ref": "#/components/CompareItem"
+        },
+        {
+          "$ref": "#/components/Reveal"
         }
       ],
       "discriminator": {

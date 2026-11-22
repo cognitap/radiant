@@ -682,7 +682,12 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
       }
     }
   },
-  { a2uiName: 'Stage', sourceEntry: 'Stage' }
+  { a2uiName: 'Stage', sourceEntry: 'Stage' },
+  { a2uiName: 'Split', sourceEntry: 'Split' },
+  { a2uiName: 'Grid', sourceEntry: 'Grid' },
+  { a2uiName: 'Compare', sourceEntry: 'Compare' },
+  { a2uiName: 'CompareItem', sourceEntry: 'CompareItem' },
+  { a2uiName: 'Reveal', sourceEntry: 'Reveal' }
 ]
 
 const DYNAMIC_REF_BY_BINDING_TYPE: Record<CatalogBindingValueType, string> = {

@@ -14,6 +14,16 @@ export type A2uiSurfaceLabels = {
   readonly notifications?: string
   /** Text of the close button inside each Toast; Escape and the timeout (5 s unless set) also dismiss. */
   readonly toastClose?: string
+  /** Text of each Reveal's previous-step button. */
+  readonly revealPrevious?: string
+  /** Text of each Reveal's next-step button. */
+  readonly revealNext?: string
+  /**
+   * Reveal position text, such as `Step {index} of {count}` with `{index}` counting from 1, or a
+   * function of the zero-based index and count; keep a function's identity stable. Without it or
+   * either button label, a Reveal shows every step in order and reports a `defaulted` diagnostic.
+   */
+  readonly revealPosition?: string | ((index: number, count: number) => string)
 }
 
 const EMPTY_LABELS: A2uiSurfaceLabels = {}
