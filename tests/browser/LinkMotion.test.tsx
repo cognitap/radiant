@@ -88,9 +88,14 @@ test('lost capture releases the same physical spring as Button and forwards the 
     'font-size',
     'border-radius'
   ]) {
-    expect(getComputedStyle(link).getPropertyValue(property)).toBe(
-      getComputedStyle(button).getPropertyValue(property)
-    )
+    // Colors are still transitioning from hover, so compare once both have settled.
+    await expect
+      .poll(
+        () =>
+          getComputedStyle(link).getPropertyValue(property) ===
+          getComputedStyle(button).getPropertyValue(property)
+      )
+      .toBe(true)
   }
   pointer(link, 'lostpointercapture')
   pointer(button, 'lostpointercapture')
