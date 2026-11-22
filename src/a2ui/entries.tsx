@@ -2,6 +2,7 @@
 
 import {
   useContext,
+  useEffect,
   useId,
   useMemo,
   useState,
@@ -690,6 +691,34 @@ function readChoiceOptions(raw: unknown): readonly ChoiceOptionItem[] {
   return items
 }
 
+/** Resolves the filter input's text from host labels; reports when a filterable picker lacks it. */
+function useChoiceFilterLabel(
+  filterable: boolean,
+  label: string,
+  context: A2uiAdapterContext
+): string | undefined {
+  const template = useA2uiLabels().filter
+  const text = (
+    typeof template === 'function' ? template(label) : template?.replaceAll('{label}', label)
+  )?.trim()
+  const missing = filterable && !text
+  const nodeId = context.node.componentId
+  const report = context.reportDiagnostic
+  useEffect(() => {
+    if (!missing) return
+    report?.({
+      kind: 'defaulted',
+      nodeId,
+      component: 'ChoicePicker',
+      prop: 'filterable',
+      received: true,
+      used: false,
+      reason: 'A2uiSurface labels lack filter; every option is shown without a filter input.'
+    })
+  }, [missing, nodeId, report])
+  return filterable ? text || undefined : undefined
+}
+
 function A2uiChoicePicker({
   label,
   srOnly,
@@ -699,6 +728,7 @@ function A2uiChoicePicker({
   multiple,
   chips,
   filterable,
+  context,
   onSelect
 }: {
   label: string
@@ -709,13 +739,15 @@ function A2uiChoicePicker({
   multiple: boolean
   chips: boolean
   filterable: boolean
+  context: A2uiAdapterContext
   onSelect: (next: string[]) => void
 }) {
+  const filterLabel = useChoiceFilterLabel(filterable, label, context)
   const [query, setQuery] = useState('')
   const name = useId()
   const needle = query.trim().toLowerCase()
   const visible =
-    filterable && needle ? options.filter(o => o.label.toLowerCase().includes(needle)) : options
+    filterLabel && needle ? options.filter(o => o.label.toLowerCase().includes(needle)) : options
   // Toggles keep selections the filter hides.
   const toggle = (value: string, checked: boolean) =>
     onSelect(checked ? [...new Set([...selected, value])] : selected.filter(v => v !== value))
@@ -799,11 +831,11 @@ function A2uiChoicePicker({
         data-slot="a2ui-choice-picker"
       >
         <WithoutField>
-          {filterable ? (
+          {filterLabel ? (
             <Input
               type="search"
-              aria-label={`Filter ${label}`}
-              placeholder={`Filter ${label}`}
+              aria-label={filterLabel}
+              placeholder={filterLabel}
               value={query}
               onChange={e => setQuery(e.currentTarget.value)}
             />
@@ -845,6 +877,7 @@ const choicePickerEntry = createA2uiRegistryEntry({
         multiple={props.variant === 'multipleSelection'}
         chips={props.displayStyle === 'chips'}
         filterable={props.filterable === true}
+        context={context}
         onSelect={next => writeBinding(props.value, next)}
       />
     )

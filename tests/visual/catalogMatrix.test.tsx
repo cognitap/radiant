@@ -24,7 +24,8 @@ const labels = {
   toastClose: 'Dismiss',
   revealPrevious: 'Previous',
   revealNext: 'Next',
-  revealPosition: 'Step {index} of {count}'
+  revealPosition: 'Step {index} of {count}',
+  filter: 'Filter {label}'
 }
 const mounted: { host: HTMLElement; root: Root }[] = []
 

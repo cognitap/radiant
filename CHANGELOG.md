@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- A2UI `ChoicePicker` takes its filter input's name and placeholder from the new `A2uiSurface` `labels.filter`, a `{label}` template or a function of the picker's label, instead of fixed English text. Without it, a `filterable` picker shows every option with no filter and reports a `defaulted` diagnostic.
 - `Cascader` columns switch to compact padding by their own width instead of the viewport width. Columns shrink to fit a popup narrowed by a small viewport, and keep wide padding on a wide screen however many levels are open.
 - A horizontal `TabsList` whose tabs overflow fades the logical edge that hides more tabs and marks it with `data-overflow-start` or `data-overflow-end`, so the A2UI `Tabs` shows it too; forced colors keep the system scrollbar instead. Focus, arrow keys, Home, End and a new selection scroll only the list to bring the tab clear of the fade, smoothly unless reduced motion is on.
 - `AppShell` switches to its mobile layout, with the sidebar in a `Drawer`, when the shell itself is narrower than 40rem. Before, it followed the viewport, so a shell in a narrow preview pane or iframe region of a wide window kept its 16rem sidebar; now a shell narrower than 40rem in a wide window uses the drawer. In a box that sizes to its content, the shell is 64rem wide, or the viewport width when that is narrower, and never wider than its containing block, so on a phone it fits the screen and uses the drawer. `--rad-sidebar-width` and `--rad-sidebar-collapsed-width` take lengths, not percentages.

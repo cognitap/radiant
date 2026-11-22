@@ -729,6 +729,7 @@ test('ChoicePicker defaults to single selection, honors chips and filtering with
     <A2uiSurface
       surfaceId="s_choice_opts"
       messages={messages}
+      labels={{ filter: 'Filter {label}' }}
       onAction={onAction}
       onDiagnostic={d => diagnostics.push(d)}
     />
@@ -1721,6 +1722,8 @@ test('keeps wire history independent of local nested edits across identical deep
   )
 })
 
+const CHOICE_FILTER_LABELS = { filter: 'Filter {label}' }
+
 test('keeps focus on the same ChoicePicker radio when filtering is enabled', async () => {
   const step0: A2uiMessage[] = [
     surfaceMessage(
@@ -1747,6 +1750,7 @@ test('keeps focus on the same ChoicePicker radio when filtering is enabled', asy
     <A2uiSurface
       surfaceId="s_choice_filter_focus"
       messages={step0}
+      labels={CHOICE_FILTER_LABELS}
     />
   )
 
@@ -1760,6 +1764,7 @@ test('keeps focus on the same ChoicePicker radio when filtering is enabled', asy
   await view.render(
     <A2uiSurface
       surfaceId="s_choice_filter_focus"
+      labels={CHOICE_FILTER_LABELS}
       messages={[
         ...step0,
         updateComponentsMsg('s_choice_filter_focus', [

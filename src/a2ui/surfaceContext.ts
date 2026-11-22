@@ -24,6 +24,12 @@ export type A2uiSurfaceLabels = {
    * either button label, a Reveal shows every step in order and reports a `defaulted` diagnostic.
    */
   readonly revealPosition?: string | ((index: number, count: number) => string)
+  /**
+   * Name and placeholder of a filterable ChoicePicker's filter input, such as `Filter {label}`
+   * with the picker's label, or a function of that label; keep a function's identity stable.
+   * Without it, filterable pickers show every option and report a `defaulted` diagnostic.
+   */
+  readonly filter?: string | ((label: string) => string)
 }
 
 const EMPTY_LABELS: A2uiSurfaceLabels = {}
