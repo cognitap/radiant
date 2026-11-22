@@ -8,6 +8,7 @@ import * as profileFixtures from './fixtures.js'
 import * as inputFixtures from './inputFixtures.js'
 import * as layoutFixtures from './layoutFixtures.js'
 import * as layoutIntentFixtures from './layoutIntentFixtures.js'
+import * as matrixFixtures from './matrixFixtures.js'
 import * as mediaFixtures from './mediaFixtures.js'
 import * as stageFixtures from './stageFixtures.js'
 import * as annotatedTextFixtures from './annotatedTextFixtures.js'
@@ -46,7 +47,8 @@ const FIXTURE_MODULES: Readonly<Record<string, Readonly<Record<string, unknown>>
   'stageFixtures.ts': stageFixtures,
   'annotatedTextFixtures.ts': annotatedTextFixtures,
   'feedbackFixtures.ts': feedbackFixtures,
-  'layoutIntentFixtures.ts': layoutIntentFixtures
+  'layoutIntentFixtures.ts': layoutIntentFixtures,
+  'matrixFixtures.ts': matrixFixtures
 }
 
 /** Fixture files in `src/a2ui/` that the conformance suite reads. */

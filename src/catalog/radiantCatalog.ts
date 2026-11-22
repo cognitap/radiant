@@ -59,6 +59,57 @@ const choiceOptionSchema: CatalogJsonSchema = {
   }
 }
 
+const matrixSeriesSchema: CatalogJsonSchema = {
+  type: 'integer',
+  minimum: 1,
+  maximum: 8,
+  description: 'Categorical color from the theme series, 1 to 8.'
+}
+
+const matrixHeaderSchema = (description: string): CatalogJsonSchema => ({
+  type: 'object',
+  additionalProperties: false,
+  required: ['label'],
+  properties: { label: { type: 'string', minLength: 1, description } }
+})
+
+const matrixCellSchema: CatalogJsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    text: { type: 'string', description: 'Visible cell contents.' },
+    value: {
+      type: 'string',
+      minLength: 1,
+      description: 'Stable value; selectable when `selection` is single or multiple.'
+    },
+    state: {
+      type: 'string',
+      enum: ['active', 'muted', 'highlighted'],
+      description: 'Emphasis: active stands out, highlighted draws attention, muted steps back.'
+    },
+    series: matrixSeriesSchema,
+    marker: {
+      type: 'object',
+      additionalProperties: false,
+      description: 'A round mark in the cell, with optional short text.',
+      properties: {
+        text: { type: 'string', maxLength: 3, description: 'Short text inside the mark.' },
+        ring: {
+          type: 'boolean',
+          default: false,
+          description: 'Draws a ring instead of a filled mark, for an open or empty one.'
+        }
+      }
+    },
+    description: {
+      type: 'string',
+      description: 'Announced instead of the contents, for cells that only hold a marker.'
+    },
+    disabled: { type: 'boolean', default: false, description: 'Prevents selecting the cell.' }
+  }
+}
+
 export const RADIANT_CATALOG_ID = 'radiant/canonical'
 export const RADIANT_CATALOG_VERSION = '1.0.0'
 
@@ -1168,6 +1219,91 @@ export const radiantCatalog: Catalog = defineCatalog({
       },
       slots: {},
       bindings: {},
+      actions: {}
+    },
+
+    Matrix: {
+      name: 'Matrix',
+      category: 'data',
+      description:
+        'A grid of cells under column and row headers, with cell states, series colors, markers and labelled regions.',
+      guidance: {
+        whenToUse:
+          'Values placed by two axes, such as a heatmap, seat map or weekly schedule; with `selection`, a cell `value` makes it selectable.',
+        whenNotToUse: 'Records with named fields (Table) or a few options (Choice).',
+        examples: [
+          'seat map, `selection: multiple`, taken seats `disabled`',
+          'busy hours by weekday with `series` colors and a labelled region'
+        ]
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'columns', 'rows'],
+        properties: {
+          label: { type: 'string', minLength: 1, description: 'Accessible name of the grid.' },
+          selection: {
+            type: 'string',
+            enum: ['none', 'single', 'multiple'],
+            default: 'none',
+            description: 'Whether cells with a value can be selected, one or many.'
+          },
+          columns: {
+            type: 'array',
+            minItems: 1,
+            description: 'Column headers in order.',
+            items: matrixHeaderSchema('Column header text.')
+          },
+          rows: {
+            type: 'array',
+            minItems: 1,
+            description: 'Rows in order, each with one cell per column.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['label', 'cells'],
+              properties: {
+                label: { type: 'string', minLength: 1, description: 'Row header text.' },
+                cells: {
+                  type: 'array',
+                  description: 'Cells in column order; missing cells are empty.',
+                  items: matrixCellSchema
+                }
+              }
+            }
+          },
+          regions: {
+            type: 'array',
+            description: 'Labelled blocks of cells, counted from the first cell row and column.',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['row', 'column', 'label'],
+              properties: {
+                row: { type: 'integer', minimum: 1, description: 'First cell row, from 1.' },
+                column: { type: 'integer', minimum: 1, description: 'First cell column, from 1.' },
+                rowSpan: { type: 'integer', minimum: 1, default: 1, description: 'Rows spanned.' },
+                columnSpan: {
+                  type: 'integer',
+                  minimum: 1,
+                  default: 1,
+                  description: 'Columns spanned.'
+                },
+                label: { type: 'string', minLength: 1, description: 'Visible region label.' },
+                series: matrixSeriesSchema
+              }
+            }
+          }
+        }
+      },
+      slots: {},
+      bindings: {
+        value: {
+          description: 'Values of the selected cells.',
+          valueType: 'string[]',
+          direction: 'two-way'
+        }
+      },
       actions: {}
     },
 

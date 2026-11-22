@@ -119,7 +119,7 @@ Shared geometry:
 
 ## Spacing scale
 
-`tokens.spacing.tight`, `normal`, and `airy` (`--rad-spacing-tight`, and so on) are the semantic gap steps that the model-facing catalog names for layout `gap` props. `normal` defaults to the same 1rem as `surface.gap` but does not follow it. Role-named tokens (`labelGap`, `fieldGap`, `surface.gap`, `surface.padding`) stay independent and keep owning today's layout. `components.grid.minItemWidth` (12rem) is the narrowest `Grid` column.
+`tokens.spacing.tight`, `normal`, and `airy` (`--rad-spacing-tight`, and so on) are the semantic gap steps that the model-facing catalog names for layout `gap` props. `normal` defaults to the same 1rem as `surface.gap` but does not follow it. Role-named tokens (`labelGap`, `fieldGap`, `surface.gap`, `surface.padding`) stay independent and keep owning today's layout. `components.grid.minItemWidth` (12rem) is the narrowest `Grid` column. `components.matrix.cellSize` (2.75rem) is the smallest `Matrix` cell.
 
 Padding and density keep their own steps, so `normal` is today's value and `airy` cell padding is not a layout gap:
 

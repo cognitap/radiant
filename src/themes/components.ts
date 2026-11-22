@@ -760,7 +760,15 @@ export const componentRegistry = {
     expandedWidth: 'css',
     panelWidth: 'css'
   },
-  grid: { minItemWidth: 'css' }
+  grid: { minItemWidth: 'css' },
+  matrix: {
+    cellSize: 'css',
+    gap: 'css',
+    radius: 'css',
+    cellTextSize: 'css',
+    headerSize: 'css',
+    regionBorderWidth: 'css'
+  }
 } as const
 
 type ValueKind = 'css' | 'weight' | 'number' | 'opacity'
