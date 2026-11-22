@@ -4,7 +4,7 @@
 
 ## Unreleased
 
-- Add `Stage`, a frame for custom widgets with `StageHeader`, `StageTitle`, `StageDescription`, `StageActions`, `StageBody`, and `StageFooter`. Stage is a size container: its header and footer lay out by its own width. `StageBody` `aspectRatio` holds the body size while content streams in. Themes style it through `components.stage`. The canonical catalog and A2UI extension catalog add `Stage` (`title`, `description`, `aspectRatio`, `padding`, `actions`, `child`, `footer`), and `validateA2uiAccessibility` flags a Stage without a title.
+- Add `Stage`, a frame for custom widgets with `StageHeader`, `StageTitle`, `StageDescription`, `StageActions`, `StageBody`, and `StageFooter`. Stage is an inline-size container: its header and footer lay out by its own width, and it takes 20rem in a box that sizes to its content. `StageBody` `aspectRatio` holds the body size while content streams in, clips taller content, and leaves room for a body-filling control's focus ring. Themes style it through `components.stage`. The canonical catalog and A2UI extension catalog add `Stage` (`title`, `description`, `aspectRatio`, `padding`, `actions`, `child`, `footer`); the A2UI Stage is a group named by its title, and `validateA2uiAccessibility` flags a Stage without a title.
 
 ## 0.0.94
 

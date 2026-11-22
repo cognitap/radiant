@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A passive div frame for custom widgets with StageHeader, StageTitle, StageDescription, StageActions, StageBody and StageFooter parts. Stage is a size container: below 30rem the actions sit under the title and footer items stack; wider, the actions sit beside the title and footer items share a row. StageBody `aspectRatio` holds the body size while content changes. Stage gives actions and footer no meaning; the app fills them.'
+          'A passive div frame for custom widgets with StageHeader, StageTitle, StageDescription, StageActions, StageBody and StageFooter parts. Stage is an inline-size container: below 30rem the actions sit under the title and footer items stack; wider, the actions sit beside the title and footer items share a row. StageBody `aspectRatio` holds the body size while content changes and clips taller content. Stage gives actions and footer no meaning; the app fills them.'
       }
     }
   }

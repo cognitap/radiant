@@ -13,11 +13,11 @@ const colorMotionClass =
 const stageVariants = cva(
   [
     colorMotionClass,
-    '@container/stage',
+    '@container/stage [contain-intrinsic-inline-size:20rem]',
     'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-body-letter-spacing,-0.011em)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] font-[number:var(--rad-typography-roles-ui-body-weight,400)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
-    'box-border grid w-full min-w-0 gap-[var(--rad-stage-gap,var(--rad-spacing-normal,1rem))] text-start antialiased',
+    'box-border grid w-full min-w-0 gap-[var(--rad-stage-gap,var(--rad-surface-gap,1rem))] text-start antialiased',
     'rounded-[var(--rad-stage-radius,var(--rad-surface-radius,0.75rem))]',
-    '[corner-shape:var(--rad-surface-corner-shape,round)]',
+    '[corner-shape:var(--rad-stage-corner-shape,var(--rad-surface-corner-shape,round))]',
     '[border-width:var(--rad-stage-border-width,var(--rad-surface-border-width,1px))]',
     '[border-style:var(--rad-stage-border-style,var(--rad-surface-border-style,solid))]',
     '[border-color:var(--rad-stage-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
@@ -40,7 +40,7 @@ const stageVariants = cva(
 )
 
 const stageHeaderVariants = cva([
-  'grid min-w-0 items-start gap-x-[var(--rad-stage-gap,var(--rad-spacing-normal,1rem))] gap-y-[var(--rad-stage-header-gap,var(--rad-spacing-header-gap,0.375rem))]',
+  'grid min-w-0 items-start gap-x-[var(--rad-stage-gap,var(--rad-surface-gap,1rem))] gap-y-[var(--rad-stage-header-gap,var(--rad-spacing-header-gap,0.375rem))]',
   '@min-[30rem]/stage:has-[>[data-slot~=stage-actions]]:grid-cols-[minmax(0,1fr)_auto]'
 ])
 
@@ -58,7 +58,7 @@ const stageDescriptionVariants = cva([
   'm-0 min-w-0 break-words @min-[30rem]/stage:col-start-1',
   '[color:var(--rad-stage-description-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
   'font-[family-name:var(--rad-typography-roles-ui-supporting-family,system-ui,sans-serif)] font-[number:var(--rad-typography-roles-ui-supporting-weight,400)] tracking-[var(--rad-typography-roles-ui-supporting-letter-spacing,0em)]',
-  'text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)]',
+  'text-[length:var(--rad-stage-description-size,var(--rad-typography-roles-ui-supporting-size,0.8125rem))] leading-[var(--rad-typography-roles-ui-supporting-line-height,1.5)]',
   'forced-colors:text-[CanvasText]'
 ])
 
@@ -68,6 +68,12 @@ const stageActionsVariants = cva([
 ])
 
 const stageBodyVariants = cva(['grid min-w-0 break-words'])
+
+// A ratio box clips its content, so it pads by the focus ring's reach and pulls that padding
+// back with negative margins: content lines up with the header and a ring drawn around a
+// body-filling control stays inside the clip. The ratio applies to the content box.
+const stageRatioBodyClass =
+  '[--_stage-ring:calc(var(--rad-focus-width,2px)+max(var(--rad-focus-offset,2px),0px))] box-content p-[var(--_stage-ring)] -m-[var(--_stage-ring)]'
 
 const stageFooterVariants = cva([
   'flex min-w-0 flex-col items-stretch gap-[var(--rad-stage-footer-gap,var(--rad-spacing-footer-gap,0.5rem))]',
@@ -81,7 +87,10 @@ type StagePartProps<Host extends 'div' | 'h2' | 'p'> = Omit<ComponentProps<Host>
   'data-slot'?: string
 }
 
-/** Passive div host and size container; its parts lay out by the Stage's own width. */
+/**
+ * Passive div host and inline-size container; its parts lay out by the Stage's own width.
+ * In a box that sizes to its content, Stage takes 20rem.
+ */
 export type StageProps = StagePartProps<'div'> & {
   /** Step of the stage padding scale; `normal` keeps `--rad-stage-padding`. */
   padding?: Spacing
@@ -100,9 +109,12 @@ export type StageDescriptionProps = StagePartProps<'p'>
 /** Div host for app controls; it sits beside the title once the Stage is wide enough. */
 export type StageActionsProps = StagePartProps<'div'>
 
-/** Div host for the widget, or an AspectRatio host when `aspectRatio` is set. */
+/** Div host for the widget, or an AspectRatio host (`ratio`) when `aspectRatio` is set. */
 export type StageBodyProps = StagePartProps<'div'> & {
-  /** Width divided by height. Holds the body size while its content changes or streams in. */
+  /**
+   * Width divided by height. Holds the body size while its content changes or streams in;
+   * taller content is clipped.
+   */
   aspectRatio?: number
 }
 
@@ -177,7 +189,7 @@ export function StageBody({ aspectRatio, className, ...props }: StageBodyProps) 
     <AspectRatio
       {...props}
       ratio={aspectRatio}
-      className={cn(stageBodyVariants(), className)}
+      className={cn(stageBodyVariants(), stageRatioBodyClass, className)}
       data-slot={slot}
     />
   )

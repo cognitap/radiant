@@ -727,6 +727,7 @@ export const componentRegistry = {
   radioGroup: { gap: 'css' },
   stage: {
     radius: 'css',
+    cornerShape: 'css',
     background: 'css',
     color: 'css',
     borderWidth: 'css',
@@ -740,7 +741,8 @@ export const componentRegistry = {
     footerGap: 'css',
     titleSize: 'css',
     titleWeight: 'weight',
-    descriptionColor: 'css'
+    descriptionColor: 'css',
+    descriptionSize: 'css'
   }
 } as const
 
