@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- `Cascader` columns size to the popup, which stays within the element around the trigger, instead of to the viewport. Before, a Cascader in a narrow panel on a wide screen got wide columns and its popup overflowed the panel; now the columns shrink to fit and use compact padding below 24rem.
+
 ## 0.0.97
 
 - An invalid grouped `Field` (`RadioGroup`, `CheckboxGroup`, `Rating`, `ColorPicker`, `Fieldset`, and A2UI `ChoicePicker`, chips included) puts `aria-invalid` and its error on each control inside, so screen readers announce the error on focus; the `<fieldset>` keeps its description and caller `aria-describedby`, and keeps `aria-invalid` and the error only while some control inside lacks them, such as one in a nested `Field`. A plain `Input`, `Select`, or other Radiant control placed directly in a group now turns invalid and reads the group error. A caller `aria-invalid` on a group now also marks its controls and paints it invalid.

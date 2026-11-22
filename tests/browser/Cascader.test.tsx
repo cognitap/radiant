@@ -214,3 +214,31 @@ test('empty async branches stay branches and let users return without committing
   expect(change).not.toHaveBeenCalled()
   expect(loadEmpty).toHaveBeenCalledTimes(1)
 })
+
+test('columns fit a narrow panel on a wide viewport', async () => {
+  expect(window.innerWidth).toBeGreaterThanOrEqual(1280)
+  const { host } = await mount(
+    <section style={{ width: 360 }}>
+      <Cascader
+        aria-label="Destination"
+        items={destinations}
+        columnLabels={['Country', 'Region', 'City']}
+        defaultValue="ottawa"
+      />
+    </section>
+  )
+  const { trigger, popup, columns } = picker(host)
+  await click(trigger)
+  expect(columns()).toHaveLength(3)
+  const viewport = popup.querySelector<HTMLElement>('[data-slot~="select-viewport"]')!
+  await expect.poll(() => popup.getBoundingClientRect().width).toBeLessThanOrEqual(360)
+  expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth)
+  const bounds = viewport.getBoundingClientRect()
+  for (const column of columns()) {
+    const rect = column.getBoundingClientRect()
+    expect(rect.left).toBeGreaterThanOrEqual(bounds.left - 0.5)
+    expect(rect.right).toBeLessThanOrEqual(bounds.right + 0.5)
+  }
+  const option = popup.querySelector<HTMLElement>('[data-value="ottawa"]')!
+  expect(getComputedStyle(option).paddingInlineStart).toBe('8px')
+})
