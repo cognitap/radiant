@@ -198,7 +198,7 @@ const reveal = (props: Partial<RevealProps> = {}) => (
       { value: 'city', children: <p>City step</p> },
       { value: 'done', children: <p>Done step</p> }
     ]}
-    {...props}
+    {...(props as object)}
   />
 )
 

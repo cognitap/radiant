@@ -25,6 +25,8 @@ const labels = {
   revealPrevious: 'Previous',
   revealNext: 'Next',
   revealPosition: 'Step {index} of {count}',
+  revealPlay: 'Play',
+  revealPause: 'Pause',
   filter: 'Filter {label}',
   sortableInstructions:
     'Press Space to pick up. Use the arrow keys to move, Space to drop and Escape to cancel.',

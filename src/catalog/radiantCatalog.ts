@@ -1698,13 +1698,32 @@ export const radiantCatalog: Catalog = defineCatalog({
       guidance: {
         whenToUse: 'Content read one part at a time, such as recipe or setup `steps`.',
         whenNotToUse:
-          'Content needed at once (Column) or sections opened in any order (Accordion).',
-        examples: ['four recipe steps', 'setup instructions in three parts, `gap: airy`']
+          'Content needed at once (Column), sections opened in any order (Accordion), or playback for steps the user acts in, such as forms.',
+        examples: ['four recipe steps', 'release history the user plays through, `playback`']
       },
       propsSchema: {
         type: 'object',
         additionalProperties: false,
-        properties: { gap: spacingSchema }
+        properties: {
+          gap: spacingSchema,
+          playback: {
+            type: 'boolean',
+            default: false,
+            description: 'Adds a play and pause toggle; once played, steps advance on a timer.'
+          },
+          interval: {
+            type: 'integer',
+            minimum: 1000,
+            maximum: 60000,
+            default: 5000,
+            description: 'Milliseconds each step shows during playback.'
+          },
+          loop: {
+            type: 'boolean',
+            default: false,
+            description: 'Playback returns to the first step after the last instead of stopping.'
+          }
+        }
       },
       slots: {
         steps: {

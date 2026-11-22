@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- `Reveal` adds optional playback: `playback` with `playLabel` and `pauseLabel` adds a play and pause toggle, timed by `interval` (1000–60000 ms, default 5000; `RevealItem.interval` overrides it) and wrapping with `loop`. The catalog and A2UI `Reveal` add `playback`, `interval` and `loop`; `A2uiSurface` `labels` gains `revealPlay` and `revealPause`.
+
 ## 0.0.101
 
 - `RelationGraph` keeps edge labels clear of each other and of nodes: a label that would overlap slides along its own edge, and `tree` and `layered` rows move further apart when no spot along the edge is clear. Before, labels of edges from different parents into one node could sit on top of each other in `layered` graphs.

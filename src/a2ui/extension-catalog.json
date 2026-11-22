@@ -1646,7 +1646,7 @@
       "required": ["component", "header"]
     },
     "Reveal": {
-      "description": "Shows content one step at a time with previous and next controls labelled by the host.\nUse: Content read one part at a time, such as recipe or setup `steps`.\nAvoid: Content needed at once (Column) or sections opened in any order (Accordion).\nExamples: four recipe steps; setup instructions in three parts, `gap: airy`.",
+      "description": "Shows content one step at a time with previous and next controls labelled by the host.\nUse: Content read one part at a time, such as recipe or setup `steps`.\nAvoid: Content needed at once (Column), sections opened in any order (Accordion), or playback for steps the user acts in, such as forms.\nExamples: four recipe steps; release history the user plays through, `playback`.",
       "type": "object",
       "properties": {
         "component": {
@@ -1657,6 +1657,23 @@
           "enum": ["tight", "normal", "airy"],
           "default": "normal",
           "description": "Semantic spacing scale owned by Radiant."
+        },
+        "playback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Adds a play and pause toggle; once played, steps advance on a timer."
+        },
+        "interval": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 60000,
+          "default": 5000,
+          "description": "Milliseconds each step shows during playback."
+        },
+        "loop": {
+          "type": "boolean",
+          "default": false,
+          "description": "Playback returns to the first step after the last instead of stopping."
         },
         "steps": {
           "$ref": "common_types.json#/$defs/ChildList",

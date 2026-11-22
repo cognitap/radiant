@@ -10,7 +10,7 @@ import {
   CompareItemHeader
 } from '../components/Compare/Compare.js'
 import { Grid, type GridColumns } from '../components/Grid/Grid.js'
-import { Reveal } from '../components/Reveal/Reveal.js'
+import { Reveal, type RevealPlayback } from '../components/Reveal/Reveal.js'
 import { Split, SplitMain, SplitSecondary } from '../components/Split/Split.js'
 import { Stack } from '../components/Stack/Stack.js'
 import type { Spacing } from '../presentation.js'
@@ -223,10 +223,12 @@ function positionFrom(
 function A2uiReveal({
   steps,
   gap,
+  playback,
   context
 }: {
   steps: readonly ComponentNode[]
   gap: Spacing
+  playback: { enabled: boolean; interval?: number; loop: boolean }
   context: A2uiAdapterContext
 }) {
   const labels = useA2uiLabels()
@@ -235,8 +237,27 @@ function A2uiReveal({
   const nextLabel = labels.revealNext?.trim()
   const positionLabel = positionFrom(labels.revealPosition)
   const labelled = Boolean(previousLabel && nextLabel && positionLabel)
+  const playLabel = labels.revealPlay?.trim()
+  const pauseLabel = labels.revealPause?.trim()
+  const playable = playback.enabled && Boolean(playLabel && pauseLabel)
+  const playbackProps: RevealPlayback =
+    playable && playLabel && pauseLabel
+      ? { playback: true, playLabel, pauseLabel, interval: playback.interval, loop: playback.loop }
+      : {}
   const nodeId = context.node.componentId
   const report = context.reportDiagnostic
+  useEffect(() => {
+    if (!labelled || !playback.enabled || playable) return
+    report?.({
+      kind: 'defaulted',
+      nodeId,
+      component: 'Reveal',
+      prop: 'playback',
+      received: true,
+      used: false,
+      reason: 'A2uiSurface labels lack revealPlay or revealPause; playback is not offered.'
+    })
+  }, [labelled, playback.enabled, playable, nodeId, report])
   useEffect(() => {
     if (labelled) return
     report?.({
@@ -271,6 +292,7 @@ function A2uiReveal({
       previousLabel={previousLabel}
       nextLabel={nextLabel}
       positionLabel={positionLabel}
+      {...playbackProps}
       // A patch that removes the shown step falls back to the first one.
       value={chosen !== null && values.includes(chosen) ? chosen : values[0]!}
       onValueChange={setChosen}
@@ -293,6 +315,11 @@ const revealEntry = createA2uiRegistryEntry({
       <A2uiReveal
         steps={childList(props.steps)}
         gap={readGap(props)}
+        playback={{
+          enabled: props.playback === true,
+          interval: typeof props.interval === 'number' ? props.interval : undefined,
+          loop: props.loop === true
+        }}
         context={context}
       />
     )

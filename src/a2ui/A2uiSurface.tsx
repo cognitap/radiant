@@ -829,6 +829,8 @@ export function A2uiSurface({
   const revealPrevious = labels?.revealPrevious
   const revealNext = labels?.revealNext
   const revealPosition = labels?.revealPosition
+  const revealPlay = labels?.revealPlay
+  const revealPause = labels?.revealPause
   const filter = labels?.filter
   const sortableInstructions = labels?.sortableInstructions
   const sortablePickUp = labels?.sortablePickUp
@@ -853,6 +855,8 @@ export function A2uiSurface({
       revealPrevious,
       revealNext,
       revealPosition,
+      revealPlay,
+      revealPause,
       filter,
       sortableInstructions,
       sortablePickUp,
@@ -877,6 +881,8 @@ export function A2uiSurface({
       revealPrevious,
       revealNext,
       revealPosition,
+      revealPlay,
+      revealPause,
       filter,
       sortableInstructions,
       sortablePickUp,
