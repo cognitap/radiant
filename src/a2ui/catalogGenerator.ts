@@ -699,7 +699,8 @@ const EXTENSION_PROJECTIONS: readonly ExtensionProjection[] = [
     bindable: ['items'],
     requireBindings: true
   },
-  { a2uiName: 'RegionStage', sourceEntry: 'RegionStage' }
+  { a2uiName: 'RegionStage', sourceEntry: 'RegionStage' },
+  { a2uiName: 'RelationGraph', sourceEntry: 'RelationGraph' }
 ]
 
 /**

@@ -761,6 +761,18 @@ export const componentRegistry = {
     pinColor: 'css',
     pinRing: 'css'
   },
+  relationGraph: {
+    maxHeight: 'css',
+    background: 'css',
+    nodeRadius: 'css',
+    nodeBackground: 'css',
+    nodeBorderColor: 'css',
+    labelWeight: 'weight',
+    labelSize: 'css',
+    edgeColor: 'css',
+    selectedColor: 'css',
+    mutedOpacity: 'css'
+  },
   stage: {
     radius: 'css',
     cornerShape: 'css',

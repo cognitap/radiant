@@ -68,6 +68,7 @@ import { annotatedTextEntries } from './annotatedTextEntries.js'
 import { matrixEntry } from './matrixEntry.js'
 import { regionStageEntries } from './regionStageEntries.js'
 import { useA2uiLabels, type A2uiSortableText } from './surfaceContext.js'
+import { relationGraphEntries } from './relationGraphEntries.js'
 
 const extensionCatalog = generateA2uiCatalogs(radiantCatalog).extension
 
@@ -641,7 +642,8 @@ const extensionEntries = [
   ...layoutIntentEntries,
   ...annotatedTextEntries,
   matrixEntry,
-  ...regionStageEntries
+  ...regionStageEntries,
+  ...relationGraphEntries
 ]
 
 /**

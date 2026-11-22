@@ -501,6 +501,18 @@ export type {
   AnnotatedTextToken
 } from './components/AnnotatedText/AnnotatedText.js'
 
+export { RelationGraph } from './components/RelationGraph/RelationGraph.js'
+export type {
+  RelationGraphConnection,
+  RelationGraphConnectionText,
+  RelationGraphEdge,
+  RelationGraphEmphasis,
+  RelationGraphLayout,
+  RelationGraphNode,
+  RelationGraphProps,
+  RelationGraphSeries
+} from './components/RelationGraph/RelationGraph.js'
+
 export {
   RegionStage,
   RegionStageControls,
