@@ -6,6 +6,12 @@
 
 - Add `seriesPalette(palette)` to `@cognitap/radiant/color` and the root: light and dark `tokens.series` solids for a `recommendColorPalette` result, moved in lightness only where the palette's surface, canvas, or foreground needs it, with `checks` and `pass` for the series contrast and color-vision targets (types `SeriesPalette`, `SeriesPaletteCheck`, `SeriesSolids`, and `SeriesVision`).
 - Breaking: `chartPalette(palette)` is deprecated and its colors change. Before, it returned `series1` to `series6` from the `primary`, `support`, `success`, `warning`, and `danger` fills and the `neutral` foreground, so success sat next to danger; now it returns `series1` to `series8` equal to `seriesPalette(palette)`, so it also sets the `series7` and `series8` chart overrides. Migrate by setting `seriesPalette(palette).light` and `.dark` as `tokens.series` in each mode instead of `components.chart`.
+- Add `--rad-typography-flow-component` (default `spacing.airy`) and `--rad-typography-flow-component-gap` (default `spacing.normal`), set at `typography.flow.component` and `componentGap`: inside `data-rad-prose` they space text from components and components from each other, and a direct child with `data-rad-flow="text"` spaces as text.
+- Add `HeadingLevelProvider` and `useHeadingLevel(depth)`. Without `level`, `StageTitle`, `AlertTitle`, `EmptyStateTitle`, and `AccordionTrigger` use the provided level; a titled Stage and `AccordionContent` put their content one level deeper.
+- `A2uiSurface` takes `headingLevel`, the level of the surface's top headings, and `prose`, which renders a root Column as a prose flow with prose text roles; another root reports a `fallback` diagnostic. Adapters receive `flow` (new `A2uiFlow` type).
+- `LineChart`, `BarChart`, `AreaChart`, `PieChart`, `Timeline`, and grouped `Field` reset their margins in the components layer instead of with a utility, so prose spacing applies to them.
+- Breaking: a `data-rad-prose` container no longer caps its own width. Before, it was limited to the body measure; now only its text children are, and components span the container. Add `max-inline-size: var(--rad-typography-roles-prose-body-measure)` to the container to keep the old width.
+- Breaking: headings inside a titled Stage are one level below the title. Before, an Alert title in an A2UI Stage or a `StageBody` was `h2`, like the Stage title; now it is `h3`.
 
 ## 0.0.95
 

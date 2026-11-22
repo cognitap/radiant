@@ -169,7 +169,7 @@ function Chart({
       data-slot={joinIds('chart', `${kind}-chart`, props['data-slot'])}
       data-kind={kind}
       className={cn(
-        'm-0 grid min-w-0 gap-[var(--rad-chart-gap,var(--rad-spacing-group-gap,1rem))] text-[var(--rad-color-foreground)] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
+        'grid min-w-0 gap-[var(--rad-chart-gap,var(--rad-spacing-group-gap,1rem))] text-[var(--rad-color-foreground)] font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--rad-typography-roles-ui-body-size,0.875rem)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
         className
       )}
     >

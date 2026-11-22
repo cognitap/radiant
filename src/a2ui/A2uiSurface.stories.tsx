@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, within } from 'storybook/test'
 import type { CatalogActionEvent, CatalogDiagnostic } from '../catalog/index.js'
 import { Button } from '../components/Button/Button.js'
-import { A2UI_PROTOCOL_VERSION } from './catalogGenerator.js'
+import { A2UI_PROTOCOL_VERSION, RADIANT_A2UI_EXTENSION_CATALOG_ID } from './catalogGenerator.js'
 import { A2uiSurface, type A2uiActionPayload } from './A2uiSurface.js'
 import type { A2uiMessage } from './sanitize.js'
 import {
@@ -388,5 +388,64 @@ export const InputsAndChecks: Story = {
     await expect(canvas.getByText('Only March 20 has seats left.')).toBeVisible()
     await expect(date).toHaveAttribute('aria-invalid', 'true')
     await expect(date).toHaveAccessibleDescription('Only March 20 has seats left.')
+  }
+}
+
+const proseText = (id: string, text: string, variant?: string) => ({
+  id,
+  component: 'Text',
+  text,
+  ...(variant ? { variant } : {})
+})
+const proseMessages: readonly A2uiMessage[] = [
+  {
+    version: A2UI_PROTOCOL_VERSION,
+    createSurface: {
+      surfaceId: 'lesson',
+      catalogId: RADIANT_A2UI_EXTENSION_CATALOG_ID,
+      components: [
+        {
+          id: 'root',
+          component: 'Column',
+          children: ['intro', 'detail', 'stage', 'steps', 'note']
+        },
+        proseText('intro', 'Fractions name parts of a whole. Read the example, then try one.'),
+        proseText(
+          'detail',
+          'The bottom number counts the parts; the top number counts the ones you take.'
+        ),
+        { id: 'stage', component: 'Stage', title: 'Try one', child: 'task' },
+        proseText('task', 'Shade three of the eight slices.'),
+        { id: 'steps', component: 'List', children: ['step_one', 'step_two'] },
+        proseText('step_one', 'Count the slices.'),
+        proseText('step_two', 'Shade three of them.'),
+        proseText(
+          'note',
+          'Spacing between text and components comes from the rhythm tokens.',
+          'caption'
+        )
+      ]
+    }
+  }
+]
+
+/** A prose surface at a narrow and a wide width; its top heading sits at level 3. */
+export const ProseSurface: Story = {
+  args: { surfaceId: 'lesson', messages: proseMessages, prose: true, headingLevel: 3 },
+  render: args => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'start' }}>
+      {[360, 720].map(width => (
+        <div
+          key={width}
+          style={{ inlineSize: `${width}px`, maxInlineSize: '100%' }}
+        >
+          <A2uiSurface {...args} />
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const headings = within(canvasElement).getAllByRole('heading', { level: 3, name: 'Try one' })
+    await expect(headings).toHaveLength(2)
   }
 }

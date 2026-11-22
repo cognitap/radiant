@@ -161,9 +161,11 @@ function readChildNodes(value: unknown): ComponentNode[] {
 /** Wraps a Row or Column child in a box that grows by the child's positive `weight`. */
 function A2uiFlexChild({
   node,
+  flow,
   children
 }: {
   readonly node: ComponentNode
+  readonly flow: boolean
   readonly children: ReactNode
 }) {
   const weight = useSignalValue(node.props)?.weight
@@ -171,6 +173,8 @@ function A2uiFlexChild({
   return (
     <div
       data-slot="a2ui-flex-item"
+      // In a prose flow, Text items space as text and everything else as a component.
+      data-rad-flow={flow && node.type === 'Text' ? 'text' : undefined}
       className="grid min-w-0"
       style={grows ? { flexGrow: weight, flexBasis: 0 } : undefined}
     >
@@ -187,9 +191,13 @@ function flexEntry(name: 'Row' | 'Column', orientation: Orientation) {
     schema: basicSchema(name),
     description: basicDescription(name),
     adapter(props, context) {
+      // A prose surface's root Column is the reading flow; prose rhythm replaces the gap.
+      const flow = name === 'Column' && context.flow === 'root'
       return (
         <Stack
           data-slot={`a2ui-${name.toLowerCase()}`}
+          data-rad-prose={flow ? '' : undefined}
+          className={flow ? 'gap-0' : undefined}
           orientation={orientation}
           justify={translate(STACK_JUSTIFY, props.justify, 'start')}
           align={translate(STACK_ALIGN, props.align, 'stretch')}
@@ -198,8 +206,9 @@ function flexEntry(name: 'Row' | 'Column', orientation: Orientation) {
             <A2uiFlexChild
               key={child.id}
               node={child}
+              flow={flow}
             >
-              {context.renderNode(child)}
+              {context.renderNode(child, flow ? { flow: 'block' } : undefined)}
             </A2uiFlexChild>
           ))}
         </Stack>
@@ -433,6 +442,18 @@ const textEntry = createA2uiRegistryEntry({
         >
           {text}
         </span>
+      )
+    }
+    if (context.flow === 'block') {
+      return (
+        <p
+          data-slot="a2ui-text"
+          data-variant={variant}
+          data-rad-text={variant === 'caption' ? 'prose-small' : 'prose-body'}
+          className={`m-0 ${variant === 'caption' ? '[color:var(--rad-color-muted-foreground,oklch(0.45_0.01_286))]' : '[color:var(--rad-color-foreground,oklch(0.21_0.006_286))]'}${reserve}`}
+        >
+          {text}
+        </p>
       )
     }
     if (variant === 'caption') {

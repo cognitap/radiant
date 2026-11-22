@@ -163,6 +163,8 @@
   --rad-typography-flow-paragraph: 1.25em;
   --rad-typography-flow-heading-before: 2em;
   --rad-typography-flow-heading-after: 0.625em;
+  --rad-typography-flow-component: var(--rad-spacing-airy);
+  --rad-typography-flow-component-gap: var(--rad-spacing-normal);
   --rad-typography-family: system-ui, sans-serif;
   --rad-typography-body-size: 0.875rem;
   --rad-typography-small-size: 0.8125rem;

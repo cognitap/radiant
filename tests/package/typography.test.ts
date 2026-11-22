@@ -28,7 +28,9 @@ test('accepted role calculations use independent font-aware rhythms and rem/cont
   assert.deepEqual(t.tokens.flow, {
     paragraph: '1.25em',
     headingBefore: '2em',
-    headingAfter: '.625em'.replace(/^\./, '0.')
+    headingAfter: '.625em'.replace(/^\./, '0.'),
+    component: 'var(--rad-spacing-airy)',
+    componentGap: 'var(--rad-spacing-normal)'
   })
   assert.equal(generateTypography({ preset: 'source-serif' }).prose.size, 21)
   assert.equal(generateTypography({ preset: 'plex' }).prose.lineHeight, 1.6)

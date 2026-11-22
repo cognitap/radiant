@@ -2,7 +2,8 @@ import type { ComponentProps } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
-import { headings, type HeadingLevel } from '../../internal/headings.js'
+import type { HeadingLevel } from '../../internal/headings.js'
+import { InheritedHeading } from '../../react/useHeadingLevel.js'
 import { actionTone } from '../shared/actionStyles.js'
 import type { Tone } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
@@ -39,7 +40,10 @@ export type EmptyStateIconProps = Omit<
   'aria-hidden' | 'aria-label' | 'aria-labelledby' | 'role' | 'tabIndex' | 'contentEditable'
 >
 export type EmptyStateHeadingLevel = HeadingLevel
-export type EmptyStateTitleProps = Part<'h2'> & { level?: EmptyStateHeadingLevel }
+export type EmptyStateTitleProps = Part<'h2'> & {
+  /** Defaults to `HeadingLevelProvider`'s level or 2. */
+  level?: EmptyStateHeadingLevel
+}
 export type EmptyStateDescriptionProps = Part<'p'>
 export type EmptyStateActionsProps = Part<'div'>
 /** Content presentation only; applications own data, recovery and announcements. */
@@ -73,11 +77,12 @@ export function EmptyStateIcon({ className, ...props }: EmptyStateIconProps) {
     />
   )
 }
-export function EmptyStateTitle({ level = 2, className, ...props }: EmptyStateTitleProps) {
-  const Heading = headings[level]
+export function EmptyStateTitle({ level, className, ...props }: EmptyStateTitleProps) {
   return (
-    <Heading
+    <InheritedHeading
       {...props}
+      level={level}
+      fallback={2}
       data-slot={joinIds('empty-state-title', props['data-slot'])}
       className={cn(
         'm-0 min-w-0 break-words font-[family-name:var(--rad-typography-roles-ui-title-family,system-ui,sans-serif)] text-[length:var(--rad-empty-state-title-size,var(--rad-typography-roles-ui-title-size,1.125rem))] font-[number:var(--rad-empty-state-title-weight,var(--rad-typography-roles-ui-title-weight,600))] leading-[var(--rad-typography-roles-ui-title-line-height,1.3)] tracking-[var(--rad-typography-roles-ui-title-letter-spacing,-0.015em)]',

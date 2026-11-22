@@ -13,6 +13,7 @@ import {
   type Selection
 } from '../../internal/selection.js'
 import { useControllableState } from '../../react/useControllableState.js'
+import { HeadingLevelNest, useHeadingLevel } from '../../react/useHeadingLevel.js'
 import type { ValueOwner } from '../../react/useNativeOwner.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../Collapsible/Collapsible.js'
 import type {
@@ -68,7 +69,10 @@ export type AccordionItemProps = Omit<
 }
 
 export type AccordionTriggerProps = CollapsibleTriggerProps & {
-  /** Heading inside the native summary; null leaves heading composition to the caller. */
+  /**
+   * Heading inside the native summary, defaulting to `HeadingLevelProvider`'s level or 3; null
+   * leaves heading composition to the caller.
+   */
   level?: AccordionHeadingLevel | null
 }
 
@@ -200,7 +204,7 @@ export function AccordionItem({
 }
 
 export function AccordionTrigger({
-  level = 3,
+  level,
   className,
   children,
   tabIndex,
@@ -209,6 +213,7 @@ export function AccordionTrigger({
   ...props
 }: AccordionTriggerProps) {
   const item = useAccordionItemContext()
+  const inherited = useHeadingLevel() ?? 3
   return (
     <CollapsibleTrigger
       {...props}
@@ -224,17 +229,20 @@ export function AccordionTrigger({
         event => item.disabled && (event.key === 'Enter' || event.key === ' ')
       )}
     >
-      <TriggerHeading level={level}>{children}</TriggerHeading>
+      <TriggerHeading level={level === undefined ? inherited : level}>{children}</TriggerHeading>
     </CollapsibleTrigger>
   )
 }
 
-export function AccordionContent(props: AccordionContentProps) {
+/** Headings inside sit one level below the provided trigger level (3 without a provider). */
+export function AccordionContent({ children, ...props }: AccordionContentProps) {
   useAccordionItemContext()
   return (
     <CollapsibleContent
       {...props}
       data-slot={joinIds('accordion-content', props['data-slot'])}
-    />
+    >
+      <HeadingLevelNest fallback={3}>{children}</HeadingLevelNest>
+    </CollapsibleContent>
   )
 }

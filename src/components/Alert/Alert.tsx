@@ -1,4 +1,5 @@
-import { headings, type HeadingLevel } from '../../internal/headings.js'
+import type { HeadingLevel } from '../../internal/headings.js'
+import { InheritedHeading } from '../../react/useHeadingLevel.js'
 import type { ComponentProps } from 'react'
 import { cn } from 'cn'
 import { actionTone } from '../shared/actionStyles.js'
@@ -23,6 +24,7 @@ export type AlertHeadingLevel = HeadingLevel
 export type AlertTitleProps = Omit<ComponentProps<'h2'>, 'style'> & {
   style?: ThemeStyle
   'data-slot'?: string
+  /** Defaults to `HeadingLevelProvider`'s level or 2. */
   level?: AlertHeadingLevel
 }
 export type AlertDescriptionProps = Omit<ComponentProps<'p'>, 'style'> & {
@@ -66,11 +68,12 @@ export function Alert({ announce = 'off', tone = 'neutral', className, ...props 
     />
   )
 }
-export function AlertTitle({ level = 2, className, ...props }: AlertTitleProps) {
-  const Tag = headings[level]
+export function AlertTitle({ level, className, ...props }: AlertTitleProps) {
   return (
-    <Tag
+    <InheritedHeading
       {...props}
+      level={level}
+      fallback={2}
       data-slot={joinIds('alert-title', props['data-slot'])}
       className={cn(
         colorMotion,

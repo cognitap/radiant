@@ -164,11 +164,21 @@ const themeDocument = updateThemeAppearance(
 
 `@cognitap/radiant/typography`, also exported from the root, compiles a typesetting preset (`'inter'`, `'source-serif'`, or `'plex'`) into 16 text roles (`typographyRoles`) and prose and UI flow variables. Set it at `sections.typography.typesetting`, with `prose` and `styles` overrides, and compile the document.
 
-| Attribute                 | Effect                                                                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `data-rad-text="<role>"`  | Sets one text role. The element keeps its own semantics                                                       |
-| `data-rad-prose`          | Styles direct child headings, paragraphs, lists, blockquotes, and code. `data-rad-not-prose` opts a child out |
-| `data-rad-type-container` | Heading sizes scale with container width from `24rem` to `56rem`                                              |
+| Attribute                 | Effect                                                                                                                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-rad-text="<role>"`  | Sets one text role. The element keeps its own semantics                                                                                |
+| `data-rad-prose`          | Styles direct child headings, paragraphs, lists, blockquotes, and code, and spaces its children. `data-rad-not-prose` opts a child out |
+| `data-rad-type-container` | Heading sizes scale with container width from `24rem` to `56rem`                                                                       |
+
+### Prose layer
+
+A `data-rad-prose` container mixes text and components in one reading flow. Each direct child is text (`p`, `ul`, `ol`, `blockquote`, `pre`, or `h1` to `h6` without `data-slot` or `data-rad-not-prose`; an element with `data-rad-text`; or a wrapper with `data-rad-flow="text"`) or a component (anything else, such as `figure`, `table`, `dl`, `hr`, `details`, and Radiant families). Hidden elements, `script`, `style`, `template`, and closed `dialog` get no spacing.
+
+- **Reading width:** each text child keeps its role's measure (`64ch` body text by default, from `prose.measure`). Components take the container's full width; the container sets no width.
+- **Rhythm:** `--rad-typography-flow-paragraph` separates two texts, `--rad-typography-flow-component` separates text and a component in either order, `--rad-typography-flow-component-gap` separates two components, and `--rad-typography-flow-heading-before` and `--rad-typography-flow-heading-after` surround headings. The component tokens default to `spacing.airy` and `spacing.normal`; override them at `tokens.typography.flow`.
+- **Headings:** `HeadingLevelProvider level` sets the level at which a subtree's headings start; `useHeadingLevel(depth)` returns that level plus `depth`, clamped to 6, or `undefined` outside a provider. Without a `level` prop, `StageTitle`, `AlertTitle`, `EmptyStateTitle`, and `AccordionTrigger` use it. A Stage with a `StageTitle` in its `StageHeader` puts its other parts one level below the title, and `AccordionContent` sits one level below the provided trigger level. `CardTitle` stays static: pass `level`, from `useHeadingLevel()` in client code.
+
+`A2uiSurface` `prose` makes the surface a type container and its root Column a prose flow: top-level `Text` uses `prose-body` or `prose-small`, and nested Text keeps interface type. Another root type reports a `fallback` diagnostic. Adapters read `flow` and forward it through `renderNode` only for a wrapped node. `headingLevel` sets the level of the surface's top headings, which otherwise follow an enclosing provider.
 
 ## Color
 
