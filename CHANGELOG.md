@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.96
+
 - Add `seriesPalette(palette)` to `@cognitap/radiant/color` and the root: light and dark `tokens.series` solids for a `recommendColorPalette` result, moved in lightness only where the palette's surface, canvas, or foreground needs it, with `checks` and `pass` for the series contrast and color-vision targets (types `SeriesPalette`, `SeriesPaletteCheck`, `SeriesSolids`, and `SeriesVision`).
 - Breaking: `chartPalette(palette)` is deprecated and its colors change. Before, it returned `series1` to `series6` from the `primary`, `support`, `success`, `warning`, and `danger` fills and the `neutral` foreground, so success sat next to danger; now it returns `series1` to `series8` equal to `seriesPalette(palette)`, so it also sets the `series7` and `series8` chart overrides. Migrate by setting `seriesPalette(palette).light` and `.dark` as `tokens.series` in each mode instead of `components.chart`.
 - Add `--rad-typography-flow-component` (default `spacing.airy`) and `--rad-typography-flow-component-gap` (default `spacing.normal`), set at `typography.flow.component` and `componentGap`: inside `data-rad-prose` they space text from components and components from each other, and a direct child with `data-rad-flow="text"` spaces as text.
