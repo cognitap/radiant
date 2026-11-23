@@ -259,7 +259,8 @@ const cases = [...new Set([defaultTheme, ...themes]), ...compiled, ...generated]
         mode,
         name: `${theme.id}/${mode} on ${canvas}`,
         canvas: resolve(values, canvas, backdrop),
-        color: token => resolve(values, values[token], backdrop)
+        color: token => resolve(values, values[token], backdrop),
+        ink: value => resolve(values, value, backdrop)
       }
     })
   })
@@ -323,4 +324,19 @@ test('seriesPalette reports, without throwing, palettes it cannot fit', () => {
   assert.equal(darkForeground.checks.dark.pass, false)
   assert.equal(darkForeground.checks.dark.contrast.pair, 'text on soft')
   assert.ok(darkForeground.checks.dark.contrast.ratio < 4.5)
+})
+
+// DragAndDrop draws its full message in this mix of danger and foreground on neutral.
+const fullInk = 'color-mix(in oklab, var(--rad-color-danger) 79%, var(--rad-color-foreground))'
+
+test('foreground text, and the danger ink in built-in themes, reach 4.5:1 on neutral', () => {
+  const builtIn = new Set([defaultTheme, ...themes].map(theme => theme.id))
+  const complete = new Set([...builtIn, ...compiled.map(theme => theme.id)])
+  for (const { theme, name, color, ink } of cases.filter(({ theme }) => complete.has(theme))) {
+    const neutral = color('--rad-color-neutral')
+    const ratios = { foreground: contrast(color('--rad-color-foreground'), neutral) }
+    if (builtIn.has(theme)) ratios['danger ink'] = contrast(ink(fullInk), neutral)
+    for (const [pair, ratio] of Object.entries(ratios))
+      assert.ok(ratio >= 4.5, `${name} ${pair} on neutral is ${ratio.toFixed(2)}:1`)
+  }
 })
