@@ -10,3 +10,4 @@ galactica.html
 .env.*
 !.env.example
 .DS_Store
+.pnpm-store/
