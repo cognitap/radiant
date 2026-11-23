@@ -900,7 +900,7 @@ const boxClass = [
   'box-border flex min-w-0 flex-col gap-[var(--rad-spacing-tight,0.5rem)] p-[var(--rad-drag-and-drop-container-padding,0.75rem)]',
   'rounded-[var(--rad-drag-and-drop-container-radius,var(--rad-surface-radius,0.75rem))] [corner-shape:var(--rad-surface-corner-shape,round)]',
   '[border-width:var(--rad-drag-and-drop-container-border-width,var(--rad-control-border-width,1px))] [border-style:solid] [border-color:var(--rad-drag-and-drop-container-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
-  'bg-[var(--rad-drag-and-drop-container-background,var(--rad-color-muted,oklch(0.967_0.001_286)))] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]',
+  'bg-[var(--rad-drag-and-drop-container-background,var(--rad-color-neutral,oklch(0.955_0.004_286)))] [color:var(--rad-color-foreground,oklch(0.21_0.006_286))]',
   'transition-[border-color,box-shadow] duration-[var(--rad-motion-color-duration,150ms)] motion-reduce:transition-none',
   // While an item is held, every container takes a tap.
   'data-droppable:cursor-pointer data-droppable:[border-style:dashed]',
@@ -1002,7 +1002,7 @@ export function DragAndDropContainer({
         <p
           data-slot="drag-and-drop-full"
           aria-hidden="true"
-          className="m-0 min-w-0 break-words text-[length:var(--rad-typography-roles-ui-caption-size,0.75rem)] [color:var(--rad-drag-and-drop-full-color,var(--rad-color-danger,oklch(0.577_0.245_27)))] forced-colors:[color:CanvasText]"
+          className="m-0 min-w-0 break-words text-[length:var(--rad-typography-roles-ui-caption-size,0.75rem)] [color:var(--rad-drag-and-drop-full-color,color-mix(in_oklab,var(--rad-color-danger,oklch(0.577_0.245_27))_79%,var(--rad-color-foreground,oklch(0.21_0.006_286))))] forced-colors:[color:CanvasText]"
         >
           {full}
         </p>

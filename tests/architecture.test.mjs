@@ -229,3 +229,16 @@ test('native scroll boxes draw the themed scrollbar unless they hide it', () => 
     assert.match(text, /\bscrollbarClass\b/, `${file} scrolls natively without scrollbarClass`)
   }
 })
+
+test('shared token variables in source are ones the theme declares', () => {
+  const baseline = readFileSync(resolve(source, 'themes/baseline.css'), 'utf8')
+  const declared = new Set(baseline.match(/--rad-[\w-]+(?=:)/g))
+  const families = new Set([...declared].map(name => name.split('-')[3]))
+  for (const file of readdirSync(source, { recursive: true })) {
+    if (!/\.tsx?$/.test(file)) continue
+    const text = readFileSync(resolve(source, file), 'utf8')
+    for (const [, name, family] of text.matchAll(/var\((--rad-([a-z]+)-[\w-]*\w)/g))
+      if (families.has(family))
+        assert.ok(declared.has(name), `${file} reads ${name}, which no theme token sets`)
+  }
+})

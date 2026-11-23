@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- `DragAndDrop` containers take the theme's `color.neutral` background. Before, they read an undeclared colour variable and fell back to light grey in every theme and mode, which left labels unreadable on dark themes. The full message now mixes danger toward the foreground so it reaches 4.5:1 on the container.
+
 ## 0.0.102
 
 - `Reveal` adds optional playback: `playback` with `playLabel` and `pauseLabel` adds a play and pause toggle, timed by `interval` (1000–60000 ms, default 5000; `RevealItem.interval` overrides it) and wrapping with `loop`. The catalog and A2UI `Reveal` add `playback`, `interval` and `loop`; `A2uiSurface` `labels` gains `revealPlay` and `revealPause`.
