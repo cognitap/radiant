@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.103
+
 - `DragAndDrop` containers take the theme's `color.neutral` background. Before, they read an undeclared colour variable and fell back to light grey in every theme and mode, which left labels unreadable on dark themes. The full message now mixes danger toward the foreground so it reaches 4.5:1 on the container.
 
 ## 0.0.102
