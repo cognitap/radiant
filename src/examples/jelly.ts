@@ -110,11 +110,7 @@ export const jellyDefinition: ThemeDefinition = {
       backdrop: 'rgb(26 17 30 / 0.45)',
       backdropFilter: 'none'
     },
-    focus: {
-      width: '4px',
-      offset: '3px',
-      style: 'solid'
-    },
+    focus: { width: '4px' },
     motion: {
       pressDuration: '110ms',
       pressEase: snap,

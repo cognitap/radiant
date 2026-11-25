@@ -77,7 +77,7 @@ const stageBodyVariants = cva(['grid min-w-0 break-words'])
 // back with negative margins: content lines up with the header and a ring drawn around a
 // body-filling control stays inside the clip. The ratio applies to the content box.
 const stageRatioBodyClass =
-  '[--_stage-ring:calc(var(--rad-focus-width,2px)+max(var(--rad-focus-offset,2px),0px))] box-content p-[var(--_stage-ring)] -m-[var(--_stage-ring)]'
+  '[--_stage-ring:calc(var(--rad-focus-width,2px)+max(var(--rad-focus-offset,0px),0px))] box-content p-[var(--_stage-ring)] -m-[var(--_stage-ring)]'
 
 const stageFooterVariants = cva([
   'flex min-w-0 flex-col items-stretch gap-[var(--rad-stage-footer-gap,var(--rad-spacing-footer-gap,0.5rem))]',

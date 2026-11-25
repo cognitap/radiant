@@ -87,11 +87,6 @@ export const radiantDefinition: ThemeDefinition = {
       overlayShadow: '0 20px 60px rgb(0 0 0 / 0.22)',
       backdrop: 'rgb(15 12 25 / 0.45)'
     },
-    focus: {
-      width: '2px',
-      offset: '2px',
-      style: 'solid'
-    },
     motion: {
       pressDuration: '80ms',
       pressEase: snap,

@@ -386,7 +386,7 @@ const light: SharedTokens = {
     backdrop: 'rgb(0 0 0 / 0.45)',
     backdropFilter: 'none'
   },
-  focus: { width: '2px', offset: '2px', style: 'solid' },
+  focus: { width: '2px', offset: '0px', style: 'solid' },
   motion: {
     pressDuration: '80ms',
     pressEase: 'cubic-bezier(0.3, 0, 0, 1)',

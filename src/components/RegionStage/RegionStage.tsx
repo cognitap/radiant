@@ -225,7 +225,7 @@ const viewportClass = [
   'rounded-[var(--rad-region-stage-radius,var(--rad-control-radius,0.5rem))]',
   '[border:var(--rad-region-stage-border-width,1px)_solid_var(--rad-region-stage-border-color,var(--rad-color-border,oklch(0.885_0.005_286)))]',
   'bg-[var(--rad-region-stage-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  'focus-visible:outline-[color:var(--rad-color-focus,oklch(0.55_0.13_255))] focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-2 focus-visible:outline-solid',
+  'focus-visible:outline-[length:var(--rad-focus-width,2px)] focus-visible:outline-offset-0 focus-visible:outline-solid focus-visible:rad-focus-edge',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:focus-visible:outline-[CanvasText]'
 ].join(' ')
 

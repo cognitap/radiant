@@ -108,11 +108,6 @@ export const glassDefinition: ThemeDefinition = {
       backdrop: 'rgb(40 30 80 / 0.25)',
       backdropFilter: blur
     },
-    focus: {
-      width: '2px',
-      offset: '3px',
-      style: 'dashed'
-    },
     motion: {
       pressDuration: '120ms',
       pressEase: snap,

@@ -231,7 +231,7 @@
   --rad-surface-backdrop: var(--_rad-light, rgb(0 0 0 / 0.45)) var(--_rad-dark, rgb(0 0 0 / 0.65));
   --rad-surface-backdrop-filter: none;
   --rad-focus-width: 2px;
-  --rad-focus-offset: 2px;
+  --rad-focus-offset: 0px;
   --rad-focus-style: solid;
   --rad-motion-press-duration: 80ms;
   --rad-motion-press-ease: cubic-bezier(0.3, 0, 0, 1);

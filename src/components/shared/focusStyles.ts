@@ -5,7 +5,7 @@
 
 /** The ring for a host that takes keyboard focus itself. */
 export const focusRingClass =
-  'focus-visible:outline-[color:var(--_rad-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-visible:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] focus-visible:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,2px))] focus-visible:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:focus-visible:outline-[Highlight]'
+  'focus-visible:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] focus-visible:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,0px))] focus-visible:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:focus-visible:outline-[Highlight] focus-visible:rad-focus-edge'
 
 /** A scroll box draws its ring inside its edge, where overflow cannot clip it. */
 export const focusRingInsetClass =
@@ -13,16 +13,16 @@ export const focusRingInsetClass =
 
 /** The ring for a visible stand-in that follows a focused `peer` input. */
 export const peerFocusRingClass =
-  'peer-focus-visible:outline-[color:var(--_rad-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] peer-focus-visible:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] peer-focus-visible:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,2px))] peer-focus-visible:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:peer-focus-visible:outline-[Highlight]'
+  'peer-focus-visible:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] peer-focus-visible:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,0px))] peer-focus-visible:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:peer-focus-visible:outline-[Highlight] peer-focus-visible:rad-focus-edge'
 
 /** The ring for a field shell around a focused child control. */
 export const focusWithinRingClass =
-  'focus-within:outline-[color:var(--_rad-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] focus-within:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] focus-within:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,2px))] focus-within:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:focus-within:outline-[Highlight]'
+  'focus-within:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] focus-within:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,0px))] focus-within:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:focus-within:outline-[Highlight] focus-within:rad-focus-edge'
 
 /** The ring for a field shell whose direct input child has keyboard focus. */
 export const childFocusRingClass =
-  'has-[>input:focus-visible]:outline-[color:var(--_rad-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] has-[>input:focus-visible]:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] has-[>input:focus-visible]:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,2px))] has-[>input:focus-visible]:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:has-[>input:focus-visible]:outline-[Highlight]'
+  'has-[>input:focus-visible]:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] has-[>input:focus-visible]:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,0px))] has-[>input:focus-visible]:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:has-[>input:focus-visible]:outline-[Highlight] has-[>input:focus-visible]:rad-focus-edge'
 
 /** The ring for a slot that shows where a hidden input's caret is. */
 export const activeRingClass =
-  'data-active:outline-[color:var(--_rad-focus-color,var(--rad-color-focus,oklch(0.55_0.13_255)))] data-active:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] data-active:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,2px))] data-active:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:data-active:outline-[Highlight]'
+  'data-active:outline-[length:var(--_rad-focus-width,var(--rad-focus-width,2px))] data-active:outline-offset-[var(--_rad-focus-offset,var(--rad-focus-offset,0px))] data-active:[outline-style:var(--_rad-focus-style,var(--rad-focus-style,solid))] forced-colors:data-active:outline-[Highlight] data-active:rad-focus-edge'

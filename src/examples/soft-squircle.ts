@@ -105,11 +105,6 @@ export const softDefinition: ThemeDefinition = {
       backdrop: 'rgb(16 24 42 / 0.35)',
       backdropFilter: 'none'
     },
-    focus: {
-      width: '2px',
-      offset: '4px',
-      style: 'solid'
-    },
     motion: {
       pressDuration: '90ms',
       pressEase: snap,

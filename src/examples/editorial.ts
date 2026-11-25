@@ -103,11 +103,7 @@ export const editorialDefinition: ThemeDefinition = {
       backdrop: 'rgb(247 243 234 / 0.8)',
       backdropFilter: 'none'
     },
-    focus: {
-      width: '1px',
-      offset: '3px',
-      style: 'solid'
-    },
+    focus: { width: '1px' },
     motion: {
       pressDuration: '80ms',
       pressEase: settle,
