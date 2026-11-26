@@ -74,7 +74,7 @@ export type TreeProps = AccessibleName &
   )
 
 const rowClass =
-  'box-border flex min-h-8 items-center gap-2 rounded-[var(--rad-control-radius,0.5rem)] [corner-shape:var(--rad-control-corner-shape,round)] py-1 pe-2 data-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] not-data-disabled:cursor-pointer not-data-disabled:hover:bg-[var(--rad-color-neutral)] data-selected:bg-[var(--rad-control-selected-background,var(--rad-color-neutral))] data-selected:font-semibold data-selected:[color:var(--rad-control-selected-foreground,var(--rad-color-foreground))] group-focus-visible/tree:data-active:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/tree:data-active:outline-offset-[-2px] group-focus-visible/tree:forced-colors:data-active:outline-[Highlight] forced-colors:data-selected:underline'
+  'box-border flex min-h-8 items-center gap-2 rounded-[var(--rad-control-radius,0.5rem)] [corner-shape:var(--rad-control-corner-shape,round)] py-1 pe-2 data-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)] not-data-disabled:cursor-pointer not-data-disabled:hover:bg-[var(--rad-color-neutral)] data-selected:bg-[var(--rad-control-selected-background,var(--rad-color-neutral))] data-selected:font-semibold data-selected:[color:var(--rad-control-selected-foreground,var(--rad-color-foreground))] group-focus-visible/tree:data-active:outline-2 group-focus-visible/tree:data-active:outline-solid group-focus-visible/tree:data-active:outline-offset-[-2px] group-focus-visible/tree:data-active:rad-focus-edge group-focus-visible/tree:forced-colors:data-active:outline-[Highlight] forced-colors:data-selected:underline'
 
 export function treeValues(value: Selection, multiple: boolean, name: string) {
   if (

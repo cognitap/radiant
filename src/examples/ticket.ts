@@ -104,11 +104,6 @@ export const ticketDefinition: ThemeDefinition = {
       backdrop: 'rgb(60 40 20 / 0.4)',
       backdropFilter: 'none'
     },
-    focus: {
-      width: '2px',
-      offset: '4px',
-      style: 'solid'
-    },
     motion: {
       pressDuration: '100ms',
       pressEase: snap,

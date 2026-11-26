@@ -72,7 +72,7 @@ const optionClass = [
   'cursor-default data-disabled:opacity-[var(--rad-state-disabled-opacity,0.5)]',
   'data-selected:bg-[var(--rad-control-selected-background,transparent)] data-selected:text-[var(--rad-control-selected-foreground,currentColor)]',
   'data-selected:[box-shadow:inset_0_0_0_var(--rad-control-border-width,1px)_var(--rad-control-selected-border-color,transparent)]',
-  'group-focus-visible/list-box:data-active:outline-2 group-focus-visible/list-box:data-active:-outline-offset-2 group-focus-visible/list-box:data-active:outline-[var(--rad-color-focus)]',
+  'group-focus-visible/list-box:data-active:outline-2 group-focus-visible/list-box:data-active:outline-solid group-focus-visible/list-box:data-active:-outline-offset-2 group-focus-visible/list-box:data-active:rad-focus-edge',
   'forced-colors:data-selected:bg-[Highlight] forced-colors:data-selected:text-[HighlightText]',
   'forced-colors:group-focus-visible/list-box:data-active:outline-[CanvasText] forced-colors:data-disabled:text-[GrayText]'
 ].join(' ')

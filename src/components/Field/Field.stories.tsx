@@ -1,7 +1,6 @@
 import type { ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Checkbox, Field, Input } from '../../index.js'
-import { themes } from '../../examples/index.js'
+import { Checkbox, Field, Input, type FieldProps } from '../../index.js'
 import { FieldValidationExample } from '../../../.storybook/examples/FieldExamples.js'
 
 function ToneInput(props: ComponentProps<'input'>) {
@@ -29,6 +28,17 @@ function ToneInput(props: ComponentProps<'input'>) {
   )
 }
 
+function exampleProps({
+  label,
+  description,
+  error,
+  required,
+  disabled,
+  requiredIndicator
+}: FieldProps) {
+  return { label, description, error, required, disabled, requiredIndicator }
+}
+
 const meta = {
   title: 'Components/Field',
   component: Field,
@@ -46,7 +56,7 @@ const meta = {
     requiredIndicator: { control: 'text' },
     disabled: { control: 'boolean' },
     controlId: { control: 'text' },
-    layout: { control: 'inline-radio', options: ['control', 'group'] }
+    layout: { control: false }
   },
   parameters: {
     docs: {
@@ -63,7 +73,10 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: args => (
-    <Field {...args}>
+    <Field
+      {...exampleProps(args)}
+      controlId={args.controlId}
+    >
       <Input
         autoComplete="email"
         name="email"
@@ -77,7 +90,8 @@ export const States: Story = {
   render: args => (
     <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '24rem' }}>
       <Field
-        {...args}
+        {...exampleProps(args)}
+        controlId={args.controlId}
         label="Email with error"
         error="Enter an email."
       >
@@ -103,7 +117,6 @@ export const States: Story = {
 export const Customisation: Story = {
   name: 'Native control adapter',
   args: { controlId: 'work-email', requiredIndicator: '(required)' },
-  argTypes: { layout: { control: false } },
   parameters: {
     docs: {
       description: {
@@ -112,15 +125,10 @@ export const Customisation: Story = {
       }
     }
   },
-  render: ({ label, description, error, required, disabled, requiredIndicator, controlId }) => (
+  render: args => (
     <Field
-      label={label}
-      description={description}
-      error={error}
-      required={required}
-      disabled={disabled}
-      requiredIndicator={requiredIndicator}
-      controlId={controlId}
+      {...exampleProps(args)}
+      controlId={args.controlId}
       parts={{ label: { className: 'italic' }, required: { className: 'font-normal' } }}
     >
       {control => (
@@ -137,14 +145,16 @@ export const Customisation: Story = {
 
 export const Group: Story = {
   args: {
-    layout: 'group',
     label: 'Notifications',
-    description: 'Choose any',
-    error: 'Pick at least one.',
+    description: 'Choose one or both.',
     required: true
   },
+  argTypes: { controlId: { control: false } },
   render: args => (
-    <Field {...args}>
+    <Field
+      {...exampleProps(args)}
+      layout="group"
+    >
       <Checkbox
         label="Email"
         name="channels"
@@ -165,14 +175,9 @@ export const LiveValidation: Story = {
     docs: {
       description: {
         story:
-          'Copyable public APIs: useSpringLayout moves dedicated wrappers around Fields. Help and error relationships update immediately, without scaling native controls. Validation belongs to the form. Try motion off or change your system reduced-motion preference.'
+          'Submit the form to show errors and focus the first invalid field. Edit the fields to clear errors as you type, or select a publishing channel to clear the group error.'
       }
     }
   },
-  render: (_args, context) => (
-    <FieldValidationExample
-      theme={themes.find(theme => theme.id === context.globals.theme)}
-      mode={context.globals.mode === 'dark' ? 'dark' : 'light'}
-    />
-  )
+  render: () => <FieldValidationExample />
 }

@@ -1,6 +1,29 @@
 @import './themes/baseline.css';
 @import './typography.css';
 
+@property --_rad-focus-ink {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+
+@property --_rad-invalid-border {
+  syntax: '*';
+  inherits: false;
+}
+
+@utility rad-focus-edge {
+  @media (forced-colors: none) {
+    --_rad-focus-edge-color: var(
+      --_rad-invalid-border,
+      var(--_rad-focus-color, var(--rad-color-accent, var(--rad-color-focus, oklch(0.55 0.13 255))))
+    );
+    --_rad-focus-ink: color-mix(in oklab, var(--_rad-focus-edge-color) 50%, transparent);
+    outline-color: var(--_rad-focus-ink);
+    border-color: var(--_rad-focus-edge-color);
+  }
+}
+
 @source '.';
 @source not './**/*.stories.*';
 @source not './**/*.test.*';

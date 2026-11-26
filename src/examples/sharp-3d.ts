@@ -105,11 +105,6 @@ export const sharpDefinition: ThemeDefinition = {
       backdrop: 'rgb(244 241 234 / 0.7)',
       backdropFilter: 'none'
     },
-    focus: {
-      width: '2px',
-      offset: '3px',
-      style: 'solid'
-    },
     motion: {
       pressDuration: '60ms',
       pressEase: snap,

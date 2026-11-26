@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Focused controls use a primary-colored border with a solid outline in the same color at 50% opacity. Invalid text inputs and checkboxes use their error border color for the outline. The outline touches the border and uses the system focus color in forced colors.
+
 ## 0.0.103
 
 - `DragAndDrop` containers take the theme's `color.neutral` background. Before, they read an undeclared colour variable and fell back to light grey in every theme and mode, which left labels unreadable on dark themes. The full message now mixes danger toward the foreground so it reaches 4.5:1 on the container.

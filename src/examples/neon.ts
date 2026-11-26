@@ -113,11 +113,6 @@ export const neonDefinition: ThemeDefinition = {
       backdrop: 'rgb(4 12 18 / 0.55)',
       backdropFilter: 'none'
     },
-    focus: {
-      width: '2px',
-      offset: '3px',
-      style: 'dotted'
-    },
     motion: {
       pressDuration: '50ms',
       pressEase: snap,

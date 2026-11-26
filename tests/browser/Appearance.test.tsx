@@ -1,4 +1,4 @@
-import { act, createRef, type ReactNode } from 'react'
+import { act, createRef, useState, type ReactNode } from 'react'
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
@@ -12,6 +12,8 @@ import {
   ContextMenuTrigger,
   Field,
   Input,
+  InputGroup,
+  InputGroupInput,
   Menu,
   MenuContent,
   MenuItem,
@@ -237,6 +239,110 @@ for (const mode of ['light', 'dark'] as const) {
     })
   }
 }
+
+test('focus joins a primary border to a translucent outline without changing the shadow', async () => {
+  await mount(
+    <ThemeScope theme={defaultTheme}>
+      <span
+        data-test="accent"
+        style={{ color: 'var(--rad-color-accent)' }}
+      />
+      <Button>Start</Button>
+      <Input aria-label="Name" />
+      <InputGroup>
+        <InputGroupInput aria-label="Email" />
+      </InputGroup>
+    </ThemeScope>
+  )
+  const name = page.getByRole('textbox', { name: 'Name' }).element()
+  const email = page.getByRole('textbox', { name: 'Email' }).element()
+  const shell = email.parentElement!
+  const nameShadow = getComputedStyle(name).boxShadow
+  const shellShadow = getComputedStyle(shell).boxShadow
+  const accent = getComputedStyle(host.querySelector('[data-test=accent]')!).color
+  await act(async () => userEvent.click(page.getByRole('button', { name: 'Start' })))
+  await act(async () => userEvent.tab())
+  expect(name).toBe(document.activeElement)
+  const style = getComputedStyle(name)
+  expect(style.outlineOffset).toBe('0px')
+  expect(style.outlineStyle).toBe('solid')
+  expect(style.outlineWidth).toBe('2px')
+  const halfAccent = systemColor(`color-mix(in oklab, ${accent} 50%, transparent)`)
+  expect(style.outlineColor).toBe(halfAccent)
+  expect(style.borderTopColor).toBe(accent)
+  expect(style.boxShadow).toBe(nameShadow)
+
+  await act(async () => userEvent.tab())
+  expect(email).toBe(document.activeElement)
+  expect(getComputedStyle(email).outlineWidth).toBe('0px')
+  expect(getComputedStyle(shell).borderTopColor).toBe(accent)
+  expect(getComputedStyle(shell).outlineColor).toBe(halfAccent)
+  expect(getComputedStyle(shell).boxShadow).toBe(shellShadow)
+
+  await commands.emulatePreferences({ forcedColors: 'active' })
+  expect(getComputedStyle(shell).boxShadow).toBe('none')
+  expect(getComputedStyle(shell).outlineStyle).toBe('solid')
+  expect(getComputedStyle(shell).outlineColor).toBe(systemColor('Highlight'))
+})
+
+test('a focused invalid input and its outline use the same error color until corrected', async () => {
+  const theme = defineTheme({
+    id: 'field-errors',
+    name: 'Field errors',
+    components: {
+      input: { invalidBorder: '#bb251f', focusColor: '#1450ad' },
+      inputGroup: { invalidBorder: '#ad2456' }
+    }
+  })
+
+  function ValidationExample() {
+    const [invalid, setInvalid] = useState(true)
+    return (
+      <ThemeScope theme={theme}>
+        <Field
+          label="Name"
+          error={invalid ? 'Enter a name' : undefined}
+        >
+          <Input onChange={() => setInvalid(false)} />
+        </Field>
+        <Field
+          label="Address"
+          error="Enter an address"
+        >
+          <InputGroup>
+            <InputGroupInput />
+          </InputGroup>
+        </Field>
+      </ThemeScope>
+    )
+  }
+
+  await mount(<ValidationExample />)
+  async function expectColors(element: Element, color: string) {
+    await expect
+      .poll(() => {
+        const style = getComputedStyle(element)
+        return [style.borderTopColor, style.outlineColor]
+      })
+      .toEqual([systemColor(color), systemColor(`color-mix(in oklab, ${color} 50%, transparent)`)])
+  }
+
+  await act(async () => userEvent.tab())
+  const name = page.getByRole('textbox', { name: 'Name' })
+  await expect.element(name).toHaveFocus()
+  await expectColors(name.element(), '#bb251f')
+  await act(async () => name.fill('Ada'))
+  await expect.element(name).toHaveFocus()
+  await expectColors(name.element(), '#1450ad')
+
+  await act(async () => userEvent.tab())
+  const address = page.getByRole('textbox', { name: 'Address' })
+  await expect.element(address).toHaveFocus()
+  const group = address.element().parentElement!
+  await expectColors(group, '#ad2456')
+  await commands.emulatePreferences({ forcedColors: 'active' })
+  expect(getComputedStyle(group).outlineColor).toBe(systemColor('Highlight'))
+})
 
 test('every keyboard focus ring follows the shared focus tokens and family overrides', async () => {
   const theme = defineTheme({

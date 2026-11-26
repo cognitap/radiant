@@ -154,7 +154,7 @@ export function CascaderColumn({
                 data-active={item.value === active?.value ? '' : undefined}
                 className={cn(
                   selectItemClass,
-                  '@max-[10rem]/cascader-column:gap-1 @max-[10rem]/cascader-column:px-2 not-data-disabled:cursor-pointer not-data-disabled:hover:bg-[var(--rad-color-neutral)] group-focus-visible/cascader:data-active:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/cascader:data-active:outline-offset-[-2px] group-focus-visible/cascader:forced-colors:data-active:outline-[Highlight]'
+                  '@max-[10rem]/cascader-column:gap-1 @max-[10rem]/cascader-column:px-2 not-data-disabled:cursor-pointer not-data-disabled:hover:bg-[var(--rad-color-neutral)] group-focus-visible/cascader:data-active:outline-2 group-focus-visible/cascader:data-active:outline-solid group-focus-visible/cascader:data-active:outline-offset-[-2px] group-focus-visible/cascader:data-active:rad-focus-edge group-focus-visible/cascader:forced-colors:data-active:outline-[Highlight]'
                 )}
               >
                 {item.item.icon && (
@@ -188,7 +188,7 @@ export function CascaderColumn({
             className={cn(
               selectItemClass,
               failed ? 'cursor-pointer underline' : '[color:var(--rad-color-muted-foreground)]',
-              '@max-[10rem]/cascader-column:px-2 group-focus-visible/cascader:[outline:2px_solid_var(--rad-color-focus)] group-focus-visible/cascader:outline-offset-[-2px]'
+              '@max-[10rem]/cascader-column:px-2 group-focus-visible/cascader:outline-2 group-focus-visible/cascader:outline-solid group-focus-visible/cascader:outline-offset-[-2px] group-focus-visible/cascader:rad-focus-edge'
             )}
           >
             {status}

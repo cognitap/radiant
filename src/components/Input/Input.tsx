@@ -31,7 +31,7 @@ export const inputVariants = cva([
   'placeholder:[color:var(--rad-input-placeholder,var(--rad-color-placeholder,oklch(0.5_0.01_286)))]',
   focusRingClass,
   'focus-visible:[--_rad-focus-color:var(--rad-input-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-input-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-input-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-input-focus-style)]',
-  'data-invalid:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'data-invalid:[--_rad-invalid-border:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] data-invalid:[border-color:var(--_rad-invalid-border)]',
   'disabled:cursor-not-allowed',
   'disabled:[background:var(--rad-input-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText] forced-colors:text-[CanvasText]',

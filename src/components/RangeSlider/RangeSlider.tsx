@@ -46,8 +46,8 @@ const thumbClass = [
   'pointer-events-none absolute inset-0 w-full',
   '[&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto',
   'focus-visible:z-10 focus-visible:outline-none',
-  'focus-visible:[&::-webkit-slider-thumb]:outline-2 focus-visible:[&::-webkit-slider-thumb]:outline-offset-2 focus-visible:[&::-webkit-slider-thumb]:outline-[var(--rad-color-focus)]',
-  'focus-visible:[&::-moz-range-thumb]:outline-2 focus-visible:[&::-moz-range-thumb]:outline-offset-2 focus-visible:[&::-moz-range-thumb]:outline-[var(--rad-color-focus)]',
+  'focus-visible:[&::-webkit-slider-thumb]:outline-2 focus-visible:[&::-webkit-slider-thumb]:outline-solid focus-visible:[&::-webkit-slider-thumb]:outline-offset-0 focus-visible:[&::-webkit-slider-thumb]:rad-focus-edge',
+  'focus-visible:[&::-moz-range-thumb]:outline-2 focus-visible:[&::-moz-range-thumb]:outline-solid focus-visible:[&::-moz-range-thumb]:outline-offset-0 focus-visible:[&::-moz-range-thumb]:rad-focus-edge',
   'forced-colors:[&::-webkit-slider-thumb]:bg-[ButtonText] forced-colors:[&::-moz-range-thumb]:bg-[ButtonText]',
   'forced-colors:focus-visible:[&::-webkit-slider-thumb]:outline-[Highlight] forced-colors:focus-visible:[&::-moz-range-thumb]:outline-[Highlight]'
 ].join(' ')

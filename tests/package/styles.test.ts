@@ -143,10 +143,7 @@ test('the four public CSS routes compile to self-contained text', () => {
 test('the compiled stylesheet includes focus, disabled, and forced-colors rules', () => {
   const css = readExport('styles.css')
 
-  assert.match(
-    css,
-    /:focus-visible\s*\{[^}]*outline-color:\s*var\(--_rad-focus-color,var\(--rad-color-focus/
-  )
+  assert.match(css, /outline-color:\s*var\(--_rad-focus-ink\)/)
   assert.match(css, /:focus-visible\s*\{[^}]*--_rad-focus-color:\s*var\(--rad-button-focus-color\)/)
   assert.match(
     css,

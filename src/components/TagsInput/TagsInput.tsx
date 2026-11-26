@@ -42,7 +42,7 @@ const wellClass = [
   'rounded-[var(--rad-input-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-input-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-input-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
   childFocusRingClass,
   'has-[>input:focus-visible]:[--_rad-focus-color:var(--rad-input-focus-color)] has-[>input:focus-visible]:[--_rad-focus-width:var(--rad-input-focus-width)] has-[>input:focus-visible]:[--_rad-focus-offset:var(--rad-input-focus-offset)] has-[>input:focus-visible]:[--_rad-focus-style:var(--rad-input-focus-style)]',
-  'has-[>input[data-invalid]]:[border-color:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'has-[>input[data-invalid]]:[--_rad-invalid-border:var(--rad-input-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] has-[>input[data-invalid]]:[border-color:var(--_rad-invalid-border)]',
   'has-[>input:disabled]:cursor-not-allowed has-[>input:disabled]:bg-[var(--rad-input-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas]'
 ].join(' ')
