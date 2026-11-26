@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.104
+
 - Focused controls use a primary-colored border with a solid outline in the same color at 50% opacity. Invalid text inputs and checkboxes use their error border color for the outline. The outline touches the border and uses the system focus color in forced colors.
 
 ## 0.0.103
