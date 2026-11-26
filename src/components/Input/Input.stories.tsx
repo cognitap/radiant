@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Field, Input, type ThemeStyle } from '../../index.js'
-import { themes } from '../../examples/index.js'
-import {
-  InputProfileExample,
-  InputSizeComparison
-} from '../../../.storybook/examples/InputExamples.js'
+import { Field, Input } from '../../index.js'
 
 function ControlledDisplayName() {
   const [value, setValue] = useState('Hello')
@@ -40,14 +35,6 @@ const meta = {
     placeholder: { control: 'text' },
     disabled: { control: 'boolean' },
     controlSize: { control: 'inline-radio', options: ['small', 'medium', 'large'] }
-  },
-  parameters: {
-    docs: {
-      description: {
-        component:
-          'A native input with value/onChange or defaultValue, form attributes and ref. Keep one owner per mount. size is native character width; controlSize selects shared small/medium/large visual metrics. Field owns its ID, required/error relationships and disabled inheritance. className/style/ref target the input, identified by data-slot="input".'
-      }
-    }
   }
 } satisfies Meta<typeof Input>
 
@@ -55,6 +42,25 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const WithField: Story = {
+  render: args => (
+    <Field
+      description="Work address"
+      label="Work email"
+      required
+    >
+      <Input
+        {...args}
+        aria-label={undefined}
+      />
+    </Field>
+  )
+}
+
+export const Controlled: Story = {
+  render: () => <ControlledDisplayName />
+}
 
 export const States: Story = {
   render: args => {
@@ -93,63 +99,4 @@ export const States: Story = {
       </div>
     )
   }
-}
-
-export const Customisation: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'A local component variable changes this input only; the selected global theme remains active.'
-      }
-    }
-  },
-  render: args => {
-    const local: ThemeStyle = { '--rad-input-radius': '999px' }
-    return (
-      <Input
-        {...args}
-        style={local}
-      />
-    )
-  }
-}
-
-export const WithField: Story = {
-  render: args => (
-    <Field
-      description="Work address"
-      label="Email"
-      required
-    >
-      <Input {...args} />
-    </Field>
-  )
-}
-
-export const Controlled: Story = {
-  render: () => <ControlledDisplayName />
-}
-
-export const ProfileEditor: Story = {
-  parameters: {
-    controls: { disable: true },
-    docs: {
-      description: {
-        story:
-          'A controlled display name and browser-owned email, with native validation, reset and a local save simulation. Public spring hooks animate a decorative focus cue and surrounding validation space. The inputs keep native editing and focus. Expand the comparison to inspect shared Input, Checkbox and RadioGroup metrics.'
-      }
-    }
-  },
-  render: (_args, context) => (
-    <InputProfileExample
-      theme={themes.find(theme => theme.id === context.globals.theme)}
-      mode={context.globals.mode === 'dark' ? 'dark' : 'light'}
-    />
-  )
-}
-
-export const SharedControlSizes: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <InputSizeComparison />
 }

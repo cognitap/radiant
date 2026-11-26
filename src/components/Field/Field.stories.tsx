@@ -57,14 +57,6 @@ const meta = {
     disabled: { control: 'boolean' },
     controlId: { control: 'text' },
     layout: { control: false }
-  },
-  parameters: {
-    docs: {
-      description: {
-        component:
-          'Single-control Field renders a div; layout="group" renders a fieldset and legend. Native props and refs target that host. The consumer owns values and validation. Radiant controls read useField; native/custom controls explicitly forward children(controlProps). Set controlId on Field to name the control. parts.label/description/error/required accept className and style while Field keeps their IDs and relationships.'
-      }
-    }
   }
 } satisfies Meta<typeof Field>
 

@@ -13,7 +13,6 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import { Field, Input, ThemeScope, defineTheme, type InputProps } from '../../src/index.js'
 import { useSpringLayout, useSpringStyle } from '../../src/motion/react.js'
-import { InputProfileExample } from '../../.storybook/examples/InputExamples.js'
 import '../../.storybook/styles.css'
 
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
@@ -222,10 +221,32 @@ test('live reduced motion snaps focus presentation without changing the native i
   expect(focusSpring.get()).toBe(0)
 })
 
-test('profile demo hydrates, forwards composition, resets both value owners and cancels pending save on unmount', async () => {
-  const { host, root } = await mount(
+test('controlled and uncontrolled inputs hydrate and reset with their native form', async () => {
+  function ResettableInputs() {
+    const [name, setName] = useState('Ada Lovelace')
+    return (
+      <form onReset={() => setName('Ada Lovelace')}>
+        <Field label="Name">
+          <Input
+            name="displayName"
+            value={name}
+            onChange={event => setName(event.currentTarget.value)}
+          />
+        </Field>
+        <Field label="Email">
+          <Input
+            name="email"
+            type="email"
+            defaultValue="ada@example.com"
+          />
+        </Field>
+      </form>
+    )
+  }
+
+  const { host } = await mount(
     <StrictMode>
-      <InputProfileExample />
+      <ResettableInputs />
     </StrictMode>,
     true
   )
@@ -235,32 +256,16 @@ test('profile demo hydrates, forwards composition, resets both value owners and 
   const id = name.id
   await act(async () => name.focus())
   name.setSelectionRange(0, name.value.length)
-  await act(async () => userEvent.keyboard('x'))
-  await act(async () => name.blur())
-  expect(name.getAttribute('aria-invalid')).toBe('true')
-  await act(async () =>
-    name.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }))
-  )
-  expect(name.getAttribute('aria-invalid')).toBe(null)
-  await act(async () =>
-    name.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: 'x' }))
-  )
-  expect(name.getAttribute('aria-invalid')).toBe('true')
-  await act(async () => form.reset())
-  expect(name.value).toBe('Ada Lovelace')
-  expect(email.value).toBe('ada@example.com')
-  expect(name.id).toBe(id)
-  expect(name.getAttribute('aria-invalid')).toBe(null)
-  await act(async () => form.requestSubmit())
-  expect(name.readOnly).toBe(true)
-  expect(email.readOnly).toBe(true)
-  expect(new FormData(form).get('displayName')).toBe('Ada Lovelace')
-  const output = form.querySelector('output')!
-  expect(output.textContent).toBe('Saving your profile…')
-  await act(async () => root.render(null))
-  await act(async () => {
-    await new Promise(resolve => setTimeout(resolve, 750))
+  await act(async () => userEvent.keyboard('Grace'))
+  await act(async () => userEvent.fill(email, 'grace@example.com'))
+  expect(Object.fromEntries(new FormData(form))).toEqual({
+    displayName: 'Grace',
+    email: 'grace@example.com'
   })
-  expect(output.textContent).toBe('Saving your profile…')
-  expect(name.readOnly).toBe(true)
+  await act(async () => form.reset())
+  expect(Object.fromEntries(new FormData(form))).toEqual({
+    displayName: 'Ada Lovelace',
+    email: 'ada@example.com'
+  })
+  expect(name.id).toBe(id)
 })

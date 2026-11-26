@@ -202,7 +202,6 @@ function definedProps(props: FieldControlProps): FieldControlProps {
   ) as FieldControlProps
 }
 
-/** Owns label/help/error relationships; the consumer owns values, validation and focus. */
 export function Field(props: FieldProps) {
   const {
     label,

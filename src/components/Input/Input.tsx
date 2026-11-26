@@ -48,7 +48,6 @@ export type InputProps = Omit<ComponentProps<'input'>, 'value' | 'defaultValue' 
     'data-slot'?: string
   }
 
-/** Native editing, selection, events and ref; Field supplies owned form relationships. */
 export function Input(props: InputProps) {
   return (
     <InputRoot
