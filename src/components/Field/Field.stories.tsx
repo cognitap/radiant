@@ -1,7 +1,6 @@
 import type { ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Checkbox, Field, Input, type FieldProps } from '../../index.js'
-import { themes } from '../../examples/index.js'
 import { FieldValidationExample } from '../../../.storybook/examples/FieldExamples.js'
 
 function ToneInput(props: ComponentProps<'input'>) {
@@ -147,8 +146,7 @@ export const Customisation: Story = {
 export const Group: Story = {
   args: {
     label: 'Notifications',
-    description: 'Choose any',
-    error: 'Pick at least one.',
+    description: 'Choose one or both.',
     required: true
   },
   argTypes: { controlId: { control: false } },
@@ -177,14 +175,9 @@ export const LiveValidation: Story = {
     docs: {
       description: {
         story:
-          'Copyable public APIs: useSpringLayout moves dedicated wrappers around Fields. Help and error relationships update immediately, without scaling native controls. Validation belongs to the form. Try motion off or change your system reduced-motion preference.'
+          'Submit the form to show errors and focus the first invalid field. Edit the fields to clear errors as you type, or select a publishing channel to clear the group error.'
       }
     }
   },
-  render: (_args, context) => (
-    <FieldValidationExample
-      theme={themes.find(theme => theme.id === context.globals.theme)}
-      mode={context.globals.mode === 'dark' ? 'dark' : 'light'}
-    />
-  )
+  render: () => <FieldValidationExample />
 }

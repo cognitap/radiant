@@ -11,7 +11,7 @@ export const comboboxInputClass = [
   'rounded-[var(--rad-combobox-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-combobox-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-combobox-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
   focusRingClass,
   'focus-visible:[--_rad-focus-color:var(--rad-combobox-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-combobox-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-combobox-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-combobox-focus-style)]',
-  'data-invalid:[border-color:var(--rad-color-invalid)] placeholder:[color:var(--rad-combobox-placeholder,var(--rad-color-placeholder))] disabled:cursor-not-allowed disabled:bg-[var(--rad-color-disabled-background)]',
+  'data-invalid:[--_rad-invalid-border:var(--rad-color-invalid)] data-invalid:[border-color:var(--_rad-invalid-border)] placeholder:[color:var(--rad-combobox-placeholder,var(--rad-color-placeholder))] disabled:cursor-not-allowed disabled:bg-[var(--rad-color-disabled-background)]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:disabled:text-[GrayText]'
 ].join(' ')
 
@@ -55,7 +55,7 @@ export const comboboxWellClass = [
   'rounded-[var(--rad-combobox-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-combobox-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-combobox-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
   childFocusRingClass,
   'has-[>input:focus-visible]:[--_rad-focus-color:var(--rad-combobox-focus-color)] has-[>input:focus-visible]:[--_rad-focus-width:var(--rad-combobox-focus-width)] has-[>input:focus-visible]:[--_rad-focus-offset:var(--rad-combobox-focus-offset)] has-[>input:focus-visible]:[--_rad-focus-style:var(--rad-combobox-focus-style)]',
-  'has-[>input[data-invalid]]:[border-color:var(--rad-color-invalid,oklch(0.56_0.19_25))]',
+  'has-[>input[data-invalid]]:[--_rad-invalid-border:var(--rad-color-invalid,oklch(0.56_0.19_25))] has-[>input[data-invalid]]:[border-color:var(--_rad-invalid-border)]',
   'has-[>input:disabled]:cursor-not-allowed has-[>input:disabled]:bg-[var(--rad-color-disabled-background,oklch(0.96_0.005_286))]',
   'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]'
 ].join(' ')

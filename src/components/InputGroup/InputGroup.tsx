@@ -64,7 +64,7 @@ export function InputGroup({
           'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--_rad-control-font-size)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
           focusWithinRingClass,
           'focus-within:[--_rad-focus-color:var(--rad-input-group-focus-color)] focus-within:[--_rad-focus-width:var(--rad-input-group-focus-width)] focus-within:[--_rad-focus-offset:var(--rad-input-group-focus-offset)] focus-within:[--_rad-focus-style:var(--rad-input-group-focus-style)]',
-          'has-[>[data-invalid],[data-slot~=input-group-input][data-invalid]]:[border-color:var(--rad-input-group-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+          'has-[>[data-invalid],[data-slot~=input-group-input][data-invalid]]:[--_rad-invalid-border:var(--rad-input-group-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] has-[>[data-invalid],[data-slot~=input-group-input][data-invalid]]:[border-color:var(--_rad-invalid-border)]',
           'has-[>input:disabled,[data-slot~=input-group-input]:disabled]:cursor-not-allowed has-[>textarea:disabled]:cursor-not-allowed has-[>input:disabled,[data-slot~=input-group-input]:disabled]:bg-[var(--rad-color-disabled-background,oklch(0.96_0.005_286))] has-[>textarea:disabled]:bg-[var(--rad-color-disabled-background,oklch(0.96_0.005_286))]',
           'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]',
           className

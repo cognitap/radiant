@@ -1,4 +1,4 @@
-import { act, createRef, type ReactNode } from 'react'
+import { act, createRef, useState, type ReactNode } from 'react'
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
@@ -283,6 +283,65 @@ test('focus joins a primary border to a translucent outline without changing the
   expect(getComputedStyle(shell).boxShadow).toBe('none')
   expect(getComputedStyle(shell).outlineStyle).toBe('solid')
   expect(getComputedStyle(shell).outlineColor).toBe(systemColor('Highlight'))
+})
+
+test('a focused invalid input and its outline use the same error color until corrected', async () => {
+  const theme = defineTheme({
+    id: 'field-errors',
+    name: 'Field errors',
+    components: {
+      input: { invalidBorder: '#bb251f', focusColor: '#1450ad' },
+      inputGroup: { invalidBorder: '#ad2456' }
+    }
+  })
+
+  function ValidationExample() {
+    const [invalid, setInvalid] = useState(true)
+    return (
+      <ThemeScope theme={theme}>
+        <Field
+          label="Name"
+          error={invalid ? 'Enter a name' : undefined}
+        >
+          <Input onChange={() => setInvalid(false)} />
+        </Field>
+        <Field
+          label="Address"
+          error="Enter an address"
+        >
+          <InputGroup>
+            <InputGroupInput />
+          </InputGroup>
+        </Field>
+      </ThemeScope>
+    )
+  }
+
+  await mount(<ValidationExample />)
+  async function expectColors(element: Element, color: string) {
+    await expect
+      .poll(() => {
+        const style = getComputedStyle(element)
+        return [style.borderTopColor, style.outlineColor]
+      })
+      .toEqual([systemColor(color), systemColor(`color-mix(in oklab, ${color} 50%, transparent)`)])
+  }
+
+  await act(async () => userEvent.tab())
+  const name = page.getByRole('textbox', { name: 'Name' })
+  await expect.element(name).toHaveFocus()
+  await expectColors(name.element(), '#bb251f')
+  await act(async () => name.fill('Ada'))
+  await expect.element(name).toHaveFocus()
+  await expectColors(name.element(), '#1450ad')
+
+  await act(async () => userEvent.tab())
+  const address = page.getByRole('textbox', { name: 'Address' })
+  await expect.element(address).toHaveFocus()
+  const group = address.element().parentElement!
+  await expectColors(group, '#ad2456')
+  await commands.emulatePreferences({ forcedColors: 'active' })
+  expect(getComputedStyle(group).outlineColor).toBe(systemColor('Highlight'))
 })
 
 test('every keyboard focus ring follows the shared focus tokens and family overrides', async () => {

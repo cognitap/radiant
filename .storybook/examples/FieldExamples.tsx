@@ -1,90 +1,35 @@
-import { useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useId, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Button,
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   Checkbox,
   Field,
-  Input,
-  ThemeScope,
-  type ControlSize,
-  type Theme,
-  type ThemeMode,
-  type ThemeStyle
+  Input
 } from '../../src/index.js'
-import { radiant } from '../../src/examples/index.js'
-import { MotionProvider, useReducedMotion, useSpringLayout } from '../../src/motion/react.js'
+import { MotionProvider, useSpringLayout } from '../../src/motion/react.js'
 
 const subscribe = () => () => {}
 const clientSnapshot = () => true
 const serverSnapshot = () => false
-const nativeStyle: ThemeStyle = {
-  boxSizing: 'border-box',
-  width: '100%',
-  minWidth: 0,
-  minHeight: 'var(--rad-control-medium-height)',
-  padding: '.5rem .75rem',
-  border: '1px solid var(--rad-color-border)',
-  borderRadius: 'var(--rad-control-radius)',
-  background: 'var(--rad-color-surface)',
-  color: 'var(--rad-color-foreground)',
-  font: 'inherit'
-}
 
-export function FieldValidationExample({
-  theme = radiant,
-  mode = 'light',
-  controlSize = 'medium'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-  controlSize?: ControlSize
-}) {
-  const [off, setOff] = useState(false)
-  const motionTheme = useMemo<Theme>(
-    () => ({
-      ...theme,
-      motion: {
-        ...theme.motion,
-        mode: off ? 'off' : theme.motion.mode
-      }
-    }),
-    [theme, off]
-  )
+export function FieldValidationExample() {
   return (
-    <ThemeScope
-      theme={motionTheme}
-      mode={mode}
-      style={{ maxWidth: '40rem' }}
-    >
-      <MotionProvider>
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          <Checkbox
-            label="Turn off spatial motion"
-            checked={off}
-            onChange={event => setOff(event.target.checked)}
-          />
-          <FieldValidationForm
-            controlSize={controlSize}
-            off={motionTheme.motion.mode === 'off'}
-          />
-        </div>
-      </MotionProvider>
-    </ThemeScope>
+    <MotionProvider>
+      <FieldValidationForm />
+    </MotionProvider>
   )
 }
 
-function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; off: boolean }) {
+function FieldValidationForm() {
   const form = useRef<HTMLFormElement>(null)
   const nameInput = useRef<HTMLInputElement>(null)
   const addressInput = useRef<HTMLInputElement>(null)
   const firstChannel = useRef<HTMLInputElement>(null)
   // Only dedicated wrappers move. Field, its input and its live error remain native.
   useSpringLayout(form)
-  const reduced = useReducedMotion()
   const ready = useSyncExternalStore(subscribe, clientSnapshot, serverSnapshot)
   const id = useId()
   const [name, setName] = useState('')
@@ -102,13 +47,9 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
   const channelError =
     !locked && channels.length === 0 ? 'Choose at least one publishing channel.' : ''
   return (
-    <Card style={{ minWidth: 0 }}>
+    <Card style={{ minWidth: 0, maxWidth: '40rem' }}>
       <CardHeader>
-        <CardDescription>WORKSPACE / FIRST STEPS</CardDescription>
-        <CardTitle>Make room for a good idea.</CardTitle>
-        <CardDescription>
-          Give your team a home and choose where its updates appear.
-        </CardDescription>
+        <CardTitle>Create a workspace</CardTitle>
       </CardHeader>
       <CardContent>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -127,7 +68,7 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
           ref={form}
           aria-label="Create a workspace"
           noValidate
-          style={{ display: 'grid', gap: '1.5rem', overflowX: 'clip', overflowClipMargin: '.5rem' }}
+          style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '1.5rem' }}
           onReset={() => {
             setName('')
             setAddress('orbit-studio')
@@ -172,7 +113,6 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
                   ref={nameInput}
                   name="workspace"
                   value={name}
-                  controlSize={controlSize}
                   autoComplete="organization"
                   onChange={event => setName(event.target.value)}
                   onBlur={() => setTouched(state => ({ ...state, name: true }))}
@@ -188,30 +128,18 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
               <Field
                 label="Workspace address"
                 required
-                description={
-                  help ? 'A native input, connected through the children callback.' : undefined
-                }
+                description={help ? 'Use lowercase letters, numbers, and hyphens.' : undefined}
                 error={touched.address ? addressError : undefined}
               >
-                {control => (
-                  <input
-                    {...control}
-                    ref={addressInput}
-                    name="address"
-                    value={address}
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    style={{
-                      ...nativeStyle,
-                      minHeight: `var(--rad-control-${controlSize}-height)`,
-                      borderColor: control['aria-invalid']
-                        ? 'var(--rad-color-invalid)'
-                        : 'var(--rad-color-border)'
-                    }}
-                    onChange={event => setAddress(event.target.value)}
-                    onBlur={() => setTouched(state => ({ ...state, address: true }))}
-                  />
-                )}
+                <Input
+                  ref={addressInput}
+                  name="address"
+                  value={address}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  onChange={event => setAddress(event.target.value)}
+                  onBlur={() => setTouched(state => ({ ...state, address: true }))}
+                />
               </Field>
             </div>
           </div>
@@ -225,11 +153,7 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
                 label="Publishing channels"
                 required
                 disabled={locked}
-                description={
-                  help
-                    ? 'Choose one or both. A required group does not require every checkbox.'
-                    : undefined
-                }
+                description={help ? 'Choose one or both channels.' : undefined}
                 error={touched.channels ? channelError : undefined}
               >
                 {['Email digest', 'Team feed'].map((label, index) => (
@@ -239,7 +163,6 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
                     label={label}
                     name="channels"
                     value={label}
-                    controlSize={controlSize}
                     checked={channels.includes(label)}
                     onChange={event => {
                       setChannels(values =>
@@ -279,10 +202,6 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
                 </Button>
               </div>
               <output style={{ overflowWrap: 'anywhere' }}>{feedback}</output>
-              <CardDescription>
-                Spatial motion: {reduced ? 'reduced by system' : off ? 'off' : 'on'}. Validation and
-                focus update immediately.
-              </CardDescription>
             </div>
           </div>
         </form>

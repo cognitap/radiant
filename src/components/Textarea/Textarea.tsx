@@ -35,7 +35,7 @@ const textareaVariants = cva([
   'placeholder:[color:var(--rad-textarea-placeholder,var(--rad-color-placeholder,oklch(0.5_0.01_286)))]',
   focusRingClass,
   'focus-visible:[--_rad-focus-color:var(--rad-textarea-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-textarea-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-textarea-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-textarea-focus-style)]',
-  'data-invalid:[border-color:var(--rad-textarea-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'data-invalid:[--_rad-invalid-border:var(--rad-textarea-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] data-invalid:[border-color:var(--_rad-invalid-border)]',
   'disabled:cursor-not-allowed',
   'disabled:[background:var(--rad-textarea-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText] forced-colors:text-[CanvasText]',
