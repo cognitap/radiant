@@ -16,7 +16,7 @@ const textareaVariants = cva([
   controlBorderClass,
   'box-border w-full min-w-0',
   'min-h-[var(--rad-textarea-min-height,var(--_rad-control-height))]',
-  'resize-y overflow-auto',
+  'resize-y overflow-auto rad-textarea-resizer',
   scrollbarClass,
   'py-[var(--rad-textarea-padding-block,calc((var(--_rad-control-height)_-_1lh)/2_-_var(--rad-textarea-border-width,var(--rad-control-border-width,1px))))]',
   'px-[var(--rad-textarea-padding,var(--_rad-control-padding))]',
@@ -28,9 +28,9 @@ const textareaVariants = cva([
   'bg-[var(--rad-textarea-background,var(--rad-control-field-background,var(--rad-color-surface,oklch(1_0_0))))]',
   '[border-width:var(--rad-textarea-border-width,var(--rad-control-border-width,1px))]',
   '[border-style:var(--rad-textarea-border-style,var(--rad-control-border-style,solid))]',
-  '[border-color:var(--rad-textarea-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
-  'rounded-[var(--rad-textarea-radius,var(--rad-control-radius,0.5rem))]',
-  '[corner-shape:var(--rad-textarea-corner-shape,var(--rad-control-corner-shape,round))]',
+  '[--_rad-textarea-border-color:var(--rad-textarea-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))] [border-color:var(--_rad-textarea-border-color)]',
+  '[--_rad-textarea-radius:var(--rad-textarea-radius,min(var(--rad-control-radius,0.5rem),calc(var(--_rad-control-height)/2)))] rounded-[var(--_rad-textarea-radius)]',
+  '[--_rad-textarea-corner:var(--rad-textarea-corner-shape,var(--rad-control-corner-shape,round))] [corner-shape:var(--_rad-textarea-corner)]',
   '[box-shadow:var(--rad-textarea-shadow,var(--rad-control-field-shadow,none))] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)]',
   'placeholder:[color:var(--rad-textarea-placeholder,var(--rad-color-placeholder,oklch(0.5_0.01_286)))]',
   focusRingClass,
@@ -57,7 +57,6 @@ export type TextareaProps = Omit<
     'data-slot'?: string
   }
 
-/** Native editing, selection, events and ref; Field supplies owned form relationships. */
 export function Textarea(props: TextareaProps) {
   return (
     <TextareaRoot
