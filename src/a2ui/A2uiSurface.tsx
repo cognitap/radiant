@@ -3,6 +3,7 @@
 import {
   cloneElement,
   Component,
+  createContext,
   Fragment,
   isValidElement,
   memo,
@@ -308,6 +309,9 @@ type A2uiNodeRendererProps = {
 
 const LAYOUT_TYPES = new Set(['Column', 'Row', 'List'])
 
+// True while the surface's latest message was refused: pending nodes render nothing instead of a Skeleton.
+const A2uiRefusedContext = createContext(false)
+
 const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   node,
   registry,
@@ -316,6 +320,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   onDiagnostic,
   runtime
 }: A2uiNodeRendererProps): ReactNode {
+  const refused = useContext(A2uiRefusedContext)
   const props = useSignalValue(node.props)
   const resolved = Boolean(props) && node.state === 'resolved'
   const entry = resolved ? getRegistryEntry(registry, node.type) : undefined
@@ -383,6 +388,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   }, [active, inline, node.id, node.instanceId, runtime])
 
   if (node.state === 'pending') {
+    if (refused) return null
     return (
       <A2uiPlaceholder
         nodeId={node.componentId}
@@ -468,7 +474,8 @@ function createSurfaceStore(
   let phase: SurfacePhase = 'awaiting'
   // True while the latest message addressed to this surface was refused.
   let refused = false
-  // Counts protocol errors for this surface, so each apply can tell whether its message was refused.
+  // Running count of this surface's protocol errors, expression errors aside. Only its change
+  // across one apply matters: a change means that message was refused.
   let refusals = 0
   // Updates that arrive before their createSurface wait here instead of failing.
   let bufferedUpdates: A2uiMessage[] = []
@@ -952,7 +959,7 @@ export function A2uiSurface({
       ref={surfaceRef}
       tabIndex={-1}
       className={focusRingClass}
-      aria-busy={waiting || placeholders > 0 ? true : undefined}
+      aria-busy={waiting || (placeholders > 0 && phase !== 'refused') ? true : undefined}
       data-slot="a2ui-surface"
       data-surface-id={surfaceId}
       data-rad-type-container={prose ? '' : undefined}
@@ -960,18 +967,20 @@ export function A2uiSurface({
       style={prose ? { containIntrinsicInlineSize: '20rem' } : undefined}
     >
       {rootNode ? (
-        <A2uiLabelsContext.Provider value={labelValue}>
-          <A2uiHeadingScope level={headingLevel}>
-            <A2uiNodeRenderer
-              node={rootNode}
-              registry={registry}
-              inline={false}
-              flow={prose ? 'root' : undefined}
-              onDiagnostic={store.reportDiagnostic}
-              runtime={runtime}
-            />
-          </A2uiHeadingScope>
-        </A2uiLabelsContext.Provider>
+        <A2uiRefusedContext.Provider value={phase === 'refused'}>
+          <A2uiLabelsContext.Provider value={labelValue}>
+            <A2uiHeadingScope level={headingLevel}>
+              <A2uiNodeRenderer
+                node={rootNode}
+                registry={registry}
+                inline={false}
+                flow={prose ? 'root' : undefined}
+                onDiagnostic={store.reportDiagnostic}
+                runtime={runtime}
+              />
+            </A2uiHeadingScope>
+          </A2uiLabelsContext.Provider>
+        </A2uiRefusedContext.Provider>
       ) : waiting ? (
         <A2uiPlaceholder
           inline={false}

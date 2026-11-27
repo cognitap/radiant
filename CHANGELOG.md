@@ -4,7 +4,7 @@
 
 ## Unreleased
 
-- `A2uiSurface` stops showing a busy placeholder when its latest message is refused, such as a component with an invalid ID; it still reports the error to `onDiagnostic`, and a later valid message, including a corrected `createSurface`, renders normally.
+- When a message is refused, such as a component with an invalid ID, `A2uiSurface` drops its loading placeholders and clears `aria-busy` until the next accepted message, and still reports the error to `onDiagnostic`. A refused `createSurface` no longer blocks a corrected one.
 
 ## 0.0.105
 

@@ -472,11 +472,13 @@ test('a refused createSurface settles and a corrected one renders', async () => 
   const diagnostics: CatalogDiagnostic[] = []
   const refusedCreate = create('refused', { components: refusedComponents })
   const surface = (messages: readonly A2uiMessage[]) => (
-    <A2uiSurface
-      surfaceId="refused"
-      messages={messages}
-      onDiagnostic={d => diagnostics.push(d)}
-    />
+    <StrictMode>
+      <A2uiSurface
+        surfaceId="refused"
+        messages={messages}
+        onDiagnostic={d => diagnostics.push(d)}
+      />
+    </StrictMode>
   )
   const view = await mount(surface([refusedCreate]))
   expect(placeholderIds(view.host)).toEqual([])
@@ -526,4 +528,58 @@ test('a stream waiting for its root keeps its placeholder until a message is ref
   await view.render(surface(5))
   expect(view.host.textContent).toBe('HelloBye')
   expect(busy()).toBe(false)
+})
+
+test('a refused update after the root drops pending placeholders until the next accepted one', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const update = (components: unknown) =>
+    message({ updateComponents: { surfaceId: 'children', components } })
+  const stream = [
+    create('children', {
+      components: [{ id: 'root', component: 'Column', children: ['first', 'second'] }]
+    }),
+    update([{ id: 'first', component: 'Text', text: 'One' }]),
+    update([
+      { id: 'second', component: 'Column', children: ['item1-header'] },
+      ...refusedComponents.slice(1)
+    ]),
+    update([{ id: 'second', component: 'Text', text: 'Two' }])
+  ]
+  const surface = (count: number) => (
+    <A2uiSurface
+      surfaceId="children"
+      messages={stream.slice(0, count)}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  const view = await mount(surface(2))
+  const busy = () => surfaceOf(view.host).getAttribute('aria-busy') === 'true'
+  expect(placeholderIds(view.host)).toEqual(['second'])
+  expect(busy()).toBe(true)
+
+  await view.render(surface(3))
+  expect(placeholderIds(view.host)).toEqual([])
+  expect(busy()).toBe(false)
+  expect(view.host.textContent).toBe('One')
+  expect(errorsOf(diagnostics).map(d => d.code)).toEqual(['VALIDATION_FAILED'])
+
+  await view.render(surface(4))
+  expect(view.host.textContent).toBe('OneTwo')
+  expect(busy()).toBe(false)
+})
+
+test('a duplicate createSurface keeps the existing surface', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const { host } = await mount(
+    <A2uiSurface
+      surfaceId="duplicate"
+      messages={[
+        create('duplicate', { components: rootText('First') }),
+        create('duplicate', { components: rootText('Second') })
+      ]}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  expect(host.textContent).toBe('First')
+  expect(errorsOf(diagnostics).map(d => d.code)).toEqual(['INTEGRITY_ERROR'])
 })
