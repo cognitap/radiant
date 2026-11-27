@@ -3,6 +3,7 @@
 import {
   cloneElement,
   Component,
+  createContext,
   Fragment,
   isValidElement,
   memo,
@@ -308,6 +309,9 @@ type A2uiNodeRendererProps = {
 
 const LAYOUT_TYPES = new Set(['Column', 'Row', 'List'])
 
+// True while the surface's latest message was refused: pending nodes render nothing instead of a Skeleton.
+const A2uiRefusedContext = createContext(false)
+
 const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   node,
   registry,
@@ -316,6 +320,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   onDiagnostic,
   runtime
 }: A2uiNodeRendererProps): ReactNode {
+  const refused = useContext(A2uiRefusedContext)
   const props = useSignalValue(node.props)
   const resolved = Boolean(props) && node.state === 'resolved'
   const entry = resolved ? getRegistryEntry(registry, node.type) : undefined
@@ -383,6 +388,7 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
   }, [active, inline, node.id, node.instanceId, runtime])
 
   if (node.state === 'pending') {
+    if (refused) return null
     return (
       <A2uiPlaceholder
         nodeId={node.componentId}
@@ -436,6 +442,8 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
 })
 
 type SurfacePhase = 'awaiting' | 'live' | 'closed'
+// A live surface whose latest message was refused reads as `refused`, so it settles without a root.
+type SurfaceStatus = SurfacePhase | 'refused'
 
 function createSurfaceStore(
   initialSurfaceId: string,
@@ -464,6 +472,11 @@ function createSurfaceStore(
   let errorMode: 'direct' | 'queue' | 'suppress' = 'direct'
   // `awaiting` until createSurface succeeds; `closed` after deleteSurface or a failed create.
   let phase: SurfacePhase = 'awaiting'
+  // True while the latest message addressed to this surface was refused.
+  let refused = false
+  // Running count of this surface's protocol errors, expression errors aside. Only its change
+  // across one apply matters: a change means that message was refused.
+  let refusals = 0
   // Updates that arrive before their createSurface wait here instead of failing.
   let bufferedUpdates: A2uiMessage[] = []
   // Unknown components and icon names report once per node and value for each engine build.
@@ -591,8 +604,23 @@ function createSurfaceStore(
       }
       return coerced
     }
-    const apply = (message: A2uiMessage) =>
+    const apply = (message: A2uiMessage) => {
+      const existed = Boolean(target.getSurface(surfaceId))
+      const before = refusals
       target.processMessages([message] as readonly ProcessableMessage[])
+      if (
+        !createsSurface(message, surfaceId) &&
+        !updatesSurface(message, surfaceId) &&
+        !deletesSurface(message, surfaceId)
+      ) {
+        return
+      }
+      refused = refusals > before
+      // web_core adds the surface before validating its components; undo it so the create fails whole.
+      if (refused && !existed && createsSurface(message, surfaceId)) {
+        target.model.deleteSurface(surfaceId)
+      }
+    }
     for (const raw of batch.map(message => cloneMessageValue(message))) {
       if (phase === 'awaiting' && updatesSurface(raw, surfaceId)) {
         bufferedUpdates.push(raw)
@@ -629,6 +657,8 @@ function createSurfaceStore(
     surfaceId = nextSurfaceId
     registry = nextRegistry
     bufferedUpdates = []
+    refused = false
+    refusals = 0
     reportedUnknown = new Set()
     reportedExpressions = new Set()
     runtime.pendingText.clear()
@@ -660,8 +690,10 @@ function createSurfaceStore(
       { version: A2UI_PROTOCOL_VERSION, reportErrorsOnly: true }
     )
     const errorSubscription = processor.model.onError.subscribe(error => {
-      if (errorMode === 'suppress' || (error.surfaceId && error.surfaceId !== surfaceId)) return
+      if (error.surfaceId && error.surfaceId !== surfaceId) return
       const diagnostic = protocolErrorDiagnostic(error)
+      if (diagnostic.code !== 'EXPRESSION_ERROR') refusals++
+      if (errorMode === 'suppress') return
       if (diagnostic.code === 'EXPRESSION_ERROR') {
         if (reportedExpressions.has(diagnostic.reason)) return
         reportedExpressions.add(diagnostic.reason)
@@ -697,7 +729,7 @@ function createSurfaceStore(
     getSnapshot() {
       return resolver ? peekValue(resolver.rootNode) : undefined
     },
-    getPhase: () => phase,
+    getPhase: (): SurfaceStatus => (phase === 'live' && refused ? 'refused' : phase),
     reportDiagnostic(diagnostic: CatalogDiagnostic) {
       diagnosticHandler?.(diagnostic)
     },
@@ -822,7 +854,7 @@ export function A2uiSurface({
     runtime.placeholders.getSnapshot,
     zeroPlaceholders
   )
-  const waiting = !rootNode && phase !== 'closed'
+  const waiting = !rootNode && phase !== 'closed' && phase !== 'refused'
   const modalClose = labels?.modalClose
   const toastClose = labels?.toastClose
   const notifications = labels?.notifications?.trim()
@@ -927,7 +959,7 @@ export function A2uiSurface({
       ref={surfaceRef}
       tabIndex={-1}
       className={focusRingClass}
-      aria-busy={waiting || placeholders > 0 ? true : undefined}
+      aria-busy={waiting || (placeholders > 0 && phase !== 'refused') ? true : undefined}
       data-slot="a2ui-surface"
       data-surface-id={surfaceId}
       data-rad-type-container={prose ? '' : undefined}
@@ -935,18 +967,20 @@ export function A2uiSurface({
       style={prose ? { containIntrinsicInlineSize: '20rem' } : undefined}
     >
       {rootNode ? (
-        <A2uiLabelsContext.Provider value={labelValue}>
-          <A2uiHeadingScope level={headingLevel}>
-            <A2uiNodeRenderer
-              node={rootNode}
-              registry={registry}
-              inline={false}
-              flow={prose ? 'root' : undefined}
-              onDiagnostic={store.reportDiagnostic}
-              runtime={runtime}
-            />
-          </A2uiHeadingScope>
-        </A2uiLabelsContext.Provider>
+        <A2uiRefusedContext.Provider value={phase === 'refused'}>
+          <A2uiLabelsContext.Provider value={labelValue}>
+            <A2uiHeadingScope level={headingLevel}>
+              <A2uiNodeRenderer
+                node={rootNode}
+                registry={registry}
+                inline={false}
+                flow={prose ? 'root' : undefined}
+                onDiagnostic={store.reportDiagnostic}
+                runtime={runtime}
+              />
+            </A2uiHeadingScope>
+          </A2uiLabelsContext.Provider>
+        </A2uiRefusedContext.Provider>
       ) : waiting ? (
         <A2uiPlaceholder
           inline={false}

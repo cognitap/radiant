@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- When a message is refused, such as a component with an invalid ID, `A2uiSurface` drops its loading placeholders and clears `aria-busy` until the next accepted message, and still reports the error to `onDiagnostic`. A refused `createSurface` no longer blocks a corrected one.
+
 ## 0.0.105
 
 - Textarea caps its inherited corner radius at half the height of a single-line control, so the corners keep their shape as the textarea grows.
