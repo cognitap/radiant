@@ -461,3 +461,69 @@ test('a finished surface with a text-less Text reserves the line and is not busy
   expect(placeholderIds(host)).toEqual([])
   expect(surfaceOf(host).hasAttribute('aria-busy')).toBe(false)
 })
+
+// Not a UAX #31 identifier, so the payload validator refuses the message that carries it.
+const refusedComponents = [
+  { id: 'root', component: 'Column', children: ['item1-header'] },
+  { id: 'item1-header', component: 'Text', text: 'Hi' }
+]
+
+test('a refused createSurface settles and a corrected one renders', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const refusedCreate = create('refused', { components: refusedComponents })
+  const surface = (messages: readonly A2uiMessage[]) => (
+    <A2uiSurface
+      surfaceId="refused"
+      messages={messages}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  const view = await mount(surface([refusedCreate]))
+  expect(placeholderIds(view.host)).toEqual([])
+  expect(surfaceOf(view.host).hasAttribute('aria-busy')).toBe(false)
+  expect(errorsOf(diagnostics).map(d => d.code)).toEqual(['VALIDATION_FAILED'])
+
+  await view.render(
+    surface([refusedCreate, create('refused', { components: rootText('Corrected') })])
+  )
+  expect(view.host.textContent).toBe('Corrected')
+  expect(errorsOf(diagnostics).map(d => d.code)).toEqual(['VALIDATION_FAILED'])
+})
+
+test('a stream waiting for its root keeps its placeholder until a message is refused', async () => {
+  const diagnostics: CatalogDiagnostic[] = []
+  const update = (components: unknown) =>
+    message({ updateComponents: { surfaceId: 'partial', components } })
+  const stream = [
+    create('partial'),
+    update([{ id: 'intro', component: 'Text', text: 'Hello' }]),
+    update(refusedComponents),
+    update([{ id: 'outro', component: 'Text', text: 'Bye' }]),
+    update([{ id: 'root', component: 'Column', children: ['intro', 'outro'] }])
+  ]
+  const surface = (count: number) => (
+    <A2uiSurface
+      surfaceId="partial"
+      messages={stream.slice(0, count)}
+      onDiagnostic={d => diagnostics.push(d)}
+    />
+  )
+  const view = await mount(surface(2))
+  const busy = () => surfaceOf(view.host).getAttribute('aria-busy') === 'true'
+  expect(placeholderIds(view.host)).toEqual(['(root)'])
+  expect(busy()).toBe(true)
+
+  await view.render(surface(3))
+  expect(placeholderIds(view.host)).toEqual([])
+  expect(busy()).toBe(false)
+  expect(errorsOf(diagnostics).map(d => d.code)).toEqual(['VALIDATION_FAILED'])
+
+  // An accepted message resumes the stream, so the surface waits for its root again
+  await view.render(surface(4))
+  expect(placeholderIds(view.host)).toEqual(['(root)'])
+  expect(busy()).toBe(true)
+
+  await view.render(surface(5))
+  expect(view.host.textContent).toBe('HelloBye')
+  expect(busy()).toBe(false)
+})

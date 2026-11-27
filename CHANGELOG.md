@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- `A2uiSurface` stops showing a busy placeholder when its latest message is refused, such as a component with an invalid ID; it still reports the error to `onDiagnostic`, and a later valid message, including a corrected `createSurface`, renders normally.
+
 ## 0.0.105
 
 - Textarea caps its inherited corner radius at half the height of a single-line control, so the corners keep their shape as the textarea grows.

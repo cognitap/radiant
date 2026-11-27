@@ -436,6 +436,8 @@ const A2uiNodeRenderer = memo(function A2uiNodeRenderer({
 })
 
 type SurfacePhase = 'awaiting' | 'live' | 'closed'
+// A live surface whose latest message was refused reads as `refused`, so it settles without a root.
+type SurfaceStatus = SurfacePhase | 'refused'
 
 function createSurfaceStore(
   initialSurfaceId: string,
@@ -464,6 +466,10 @@ function createSurfaceStore(
   let errorMode: 'direct' | 'queue' | 'suppress' = 'direct'
   // `awaiting` until createSurface succeeds; `closed` after deleteSurface or a failed create.
   let phase: SurfacePhase = 'awaiting'
+  // True while the latest message addressed to this surface was refused.
+  let refused = false
+  // Counts protocol errors for this surface, so each apply can tell whether its message was refused.
+  let refusals = 0
   // Updates that arrive before their createSurface wait here instead of failing.
   let bufferedUpdates: A2uiMessage[] = []
   // Unknown components and icon names report once per node and value for each engine build.
@@ -591,8 +597,23 @@ function createSurfaceStore(
       }
       return coerced
     }
-    const apply = (message: A2uiMessage) =>
+    const apply = (message: A2uiMessage) => {
+      const existed = Boolean(target.getSurface(surfaceId))
+      const before = refusals
       target.processMessages([message] as readonly ProcessableMessage[])
+      if (
+        !createsSurface(message, surfaceId) &&
+        !updatesSurface(message, surfaceId) &&
+        !deletesSurface(message, surfaceId)
+      ) {
+        return
+      }
+      refused = refusals > before
+      // web_core adds the surface before validating its components; undo it so the create fails whole.
+      if (refused && !existed && createsSurface(message, surfaceId)) {
+        target.model.deleteSurface(surfaceId)
+      }
+    }
     for (const raw of batch.map(message => cloneMessageValue(message))) {
       if (phase === 'awaiting' && updatesSurface(raw, surfaceId)) {
         bufferedUpdates.push(raw)
@@ -629,6 +650,8 @@ function createSurfaceStore(
     surfaceId = nextSurfaceId
     registry = nextRegistry
     bufferedUpdates = []
+    refused = false
+    refusals = 0
     reportedUnknown = new Set()
     reportedExpressions = new Set()
     runtime.pendingText.clear()
@@ -660,8 +683,10 @@ function createSurfaceStore(
       { version: A2UI_PROTOCOL_VERSION, reportErrorsOnly: true }
     )
     const errorSubscription = processor.model.onError.subscribe(error => {
-      if (errorMode === 'suppress' || (error.surfaceId && error.surfaceId !== surfaceId)) return
+      if (error.surfaceId && error.surfaceId !== surfaceId) return
       const diagnostic = protocolErrorDiagnostic(error)
+      if (diagnostic.code !== 'EXPRESSION_ERROR') refusals++
+      if (errorMode === 'suppress') return
       if (diagnostic.code === 'EXPRESSION_ERROR') {
         if (reportedExpressions.has(diagnostic.reason)) return
         reportedExpressions.add(diagnostic.reason)
@@ -697,7 +722,7 @@ function createSurfaceStore(
     getSnapshot() {
       return resolver ? peekValue(resolver.rootNode) : undefined
     },
-    getPhase: () => phase,
+    getPhase: (): SurfaceStatus => (phase === 'live' && refused ? 'refused' : phase),
     reportDiagnostic(diagnostic: CatalogDiagnostic) {
       diagnosticHandler?.(diagnostic)
     },
@@ -822,7 +847,7 @@ export function A2uiSurface({
     runtime.placeholders.getSnapshot,
     zeroPlaceholders
   )
-  const waiting = !rootNode && phase !== 'closed'
+  const waiting = !rootNode && phase !== 'closed' && phase !== 'refused'
   const modalClose = labels?.modalClose
   const toastClose = labels?.toastClose
   const notifications = labels?.notifications?.trim()

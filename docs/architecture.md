@@ -117,7 +117,7 @@ Apps add components: `createA2uiExtensionEntry` derives schema and guidance from
 
 The host's `ThemeScope` owns appearance, so the surface strips agent theme hints: a model cannot restyle the app or break its contrast. `headingLevel`, `prose`, and `labels` fit the surface into the host page.
 
-Components stream in any order: missing ones become `aria-hidden` Skeletons, and the surface sets `aria-busy` until none remain. Updates sent before `createSurface` wait. Identical replays and appended patches keep the engine and surviving controls (state, focus, scroll, drags); edits to applied history rebuild it. In an active document, focus lost in a patch returns to its moved control, the nearest surviving tabbable control, or the surface root (`tabIndex={-1}`), never `document.body`. Deleted or failed surfaces render nothing.
+Components stream in any order: missing ones become `aria-hidden` Skeletons, and `aria-busy` holds until none remain. Updates sent before `createSurface` wait. Identical replays and appended patches keep the engine and surviving controls (state, focus, scroll, drags); edits to applied history rebuild it. In an active document, focus lost in a patch returns to its moved control, the nearest surviving tabbable control, or the surface root (`tabIndex={-1}`), never `document.body`. Deleted, failed, or refused surfaces render nothing.
 
 `A2uiMediaProvider` supplies `icons` (`/a2ui/lucide` maps `lucide-react`) and `urlPolicy`. Unmapped icons report `UNKNOWN_ICON`; media URLs outside http(s), blob, or data, or rejected by `urlPolicy`, report `UNSAFE_URL` and never load. Also set CSP `img-src` and `media-src`.
 
