@@ -280,6 +280,13 @@ export {
   LocaleProvider,
   type LocaleProviderProps
 } from './components/LocaleProvider/LocaleProvider.js'
+export { IconProvider, type IconProviderProps } from './components/IconProvider/IconProvider.js'
+export {
+  ICON_NAMES,
+  type IconComponent,
+  type IconName,
+  type IconSet
+} from './components/IconProvider/iconNames.js'
 export { getLocaleAttributes } from './internal/locale.js'
 export {
   HeadingLevelProvider,

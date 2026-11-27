@@ -4,6 +4,7 @@ import { cn } from 'cn'
 import { CalendarRoot } from '../Calendar/Calendar.js'
 import { PopoverTrigger, PopoverContentRoot } from '../Popover/Popover.js'
 import { inlineActionClass } from '../shared/actionStyles.js'
+import { StandardIcon } from '../IconProvider/IconProvider.js'
 import { requireAccessibleName } from '../../internal/accessibleName.js'
 import type { ControlSize } from '../../presentation.js'
 import type { ComponentProps } from 'react'
@@ -31,24 +32,29 @@ export function DateCalendarTrigger({
       data-slot="date-picker-trigger"
       className={cn(inlineActionClass, 'ms-1')}
     >
-      <svg
-        viewBox="0 0 24 24"
-        width="16"
-        height="16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        aria-hidden="true"
-      >
-        <rect
-          x="3"
-          y="5"
-          width="18"
-          height="16"
-          rx="2"
-        />
-        <path d="M7 3v4m10-4v4M3 10h18" />
-      </svg>
+      <StandardIcon
+        name="calendar"
+        fallback={
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            aria-hidden="true"
+          >
+            <rect
+              x="3"
+              y="5"
+              width="18"
+              height="16"
+              rx="2"
+            />
+            <path d="M7 3v4m10-4v4M3 10h18" />
+          </svg>
+        }
+      />
     </PopoverTrigger>
   )
 }

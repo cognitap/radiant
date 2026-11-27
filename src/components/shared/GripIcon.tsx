@@ -1,5 +1,18 @@
-/** Six-dot grip drawn in the current color, hidden from assistive technology. */
+'use client'
+
+import { StandardIcon } from '../IconProvider/IconProvider.js'
+
+/** The app's grip icon, or a six-dot grip in the current color, hidden from assistive technology. */
 export function GripIcon() {
+  return (
+    <StandardIcon
+      name="grip"
+      fallback={<GripDots />}
+    />
+  )
+}
+
+function GripDots() {
   return (
     <svg
       aria-hidden="true"

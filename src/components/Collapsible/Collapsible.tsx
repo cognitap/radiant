@@ -5,6 +5,7 @@ import { createContext, useContext, useId, useLayoutEffect, useRef } from 'react
 import { cva } from 'class-variance-authority'
 import { useTransitionHost } from '../../motion/host.js'
 import { cn } from 'cn'
+import { StandardIcon, useHasIcon } from '../IconProvider/IconProvider.js'
 import { joinIds } from '../../internal/ids.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import { useControllableState } from '../../react/useControllableState.js'
@@ -170,7 +171,8 @@ export function CollapsibleRoot({
             transition.ready &&
             '[&::details-content]:[content-visibility:visible] [&::details-content]:transition-none [&:not([open])::details-content]:h-[var(--_rad-spring-details-height,var(--_rad-disclosure-preview,0px))] open:[&::details-content]:h-[var(--_rad-spring-details-height,auto)]',
           previewHeight !== undefined && '[&::details-content]:[content-visibility:visible]',
-          motionOff && '[&::details-content]:transition-none [&>summary>svg]:transition-none',
+          motionOff &&
+            '[&::details-content]:transition-none [&>summary>[data-slot=collapsible-marker]]:transition-none',
           className
         )}
         data-slot={joinIds('collapsible', props['data-slot'])}
@@ -230,10 +232,27 @@ export function CollapsibleContent({ className, ...props }: CollapsibleContentPr
 }
 
 function Marker() {
+  if (useHasIcon('chevronRight'))
+    return (
+      <span
+        aria-hidden="true"
+        className={cn(
+          collapsibleMarkerVariants(),
+          'inline-flex items-center justify-center [&>svg]:size-full'
+        )}
+        data-slot="collapsible-marker"
+      >
+        <StandardIcon
+          name="chevronRight"
+          fallback={null}
+        />
+      </span>
+    )
   return (
     <svg
       aria-hidden="true"
       className={collapsibleMarkerVariants()}
+      data-slot="collapsible-marker"
       fill="none"
       viewBox="0 0 16 16"
     >

@@ -17,6 +17,7 @@ import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Butt
 import { useField, useFieldControl } from '../Field/Field.js'
 import type { DistributiveOmit } from '../../internal/types.js'
 import { cn } from 'cn'
+import { StandardIcon } from '../IconProvider/IconProvider.js'
 import { joinIds } from '../../internal/ids.js'
 import { controlMetrics, itemGroupLabelClass } from '../shared/controlStyles.js'
 import { matchSelectText, moveSelectFocus } from '../../internal/select.js'
@@ -436,18 +437,23 @@ export function SelectIcon({ children, className, ...props }: SelectIconProps) {
       className={cn('shrink-0', className)}
     >
       {children ?? (
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-        >
-          <path
-            d="m4 6 4 4 4-4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-        </svg>
+        <StandardIcon
+          name="chevronDown"
+          fallback={
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="m4 6 4 4 4-4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+            </svg>
+          }
+        />
       )}
     </span>
   )
@@ -629,7 +635,12 @@ export function SelectItemIndicator({ children, className, ...props }: SelectIco
       aria-hidden="true"
       className={cn('shrink-0', select.value !== item.value && 'invisible', className)}
     >
-      {children ?? '✓'}
+      {children ?? (
+        <StandardIcon
+          name="check"
+          fallback="✓"
+        />
+      )}
     </span>
   )
 }

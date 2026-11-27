@@ -7,6 +7,8 @@ import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Butt
 import { callerOwnsPress } from '../../motion/pressPolicy.js'
 import { useTransitionHost } from '../../motion/host.js'
 import { cn } from 'cn'
+import { StandardIcon } from '../IconProvider/IconProvider.js'
+import { requireAccessibleName } from '../../internal/accessibleName.js'
 import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
 import { useComposedRefs } from '../../react/useComposedRefs.js'
@@ -352,12 +354,42 @@ export function DialogDescription({ className, ...props }: DialogDescriptionProp
   )
 }
 
+/** In a dialog or drawer, a close without children draws the close icon and requires `aria-label` or `aria-labelledby`. */
 export function DialogClose(props: DialogCloseProps) {
+  const family = useDialogFamily()
+  const iconOnly =
+    (family === 'dialog' || family === 'drawer') &&
+    (props.children === undefined || props.children === null)
+  if (iconOnly) requireAccessibleName(family === 'drawer' ? 'DrawerClose' : 'DialogClose', props)
   return (
     <DialogAction
+      iconOnly={iconOnly || undefined}
       {...props}
       action="close"
-    />
+    >
+      {iconOnly ? (
+        <StandardIcon
+          name="close"
+          fallback={
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="m5 5 6 6m0-6-6 6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+            </svg>
+          }
+        />
+      ) : (
+        props.children
+      )}
+    </DialogAction>
   )
 }
 

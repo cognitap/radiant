@@ -28,6 +28,7 @@ import type { ValueOwner } from '../../react/useNativeOwner.js'
 import type { ControlSize } from '../../presentation.js'
 import { Button } from '../Button/Button.js'
 import { inlineActionClass } from '../shared/actionStyles.js'
+import { StandardIcon } from '../IconProvider/IconProvider.js'
 
 /** ISO civil dates. A null end means the user is choosing the second endpoint. */
 export type CalendarRange = { start: string; end: string | null }
@@ -247,12 +248,18 @@ export function CalendarRoot(props: CalendarProps & { onDaySelect?: (date: strin
         className={inlineActionClass}
         onClick={() => move(target)}
       >
-        <span
-          aria-hidden="true"
-          className="text-xl rtl:rotate-180"
-        >
-          {offset < 0 ? '‹' : '›'}
-        </span>
+        <StandardIcon
+          name={offset < 0 ? 'chevronLeft' : 'chevronRight'}
+          className="rtl:rotate-180"
+          fallback={
+            <span
+              aria-hidden="true"
+              className="text-xl rtl:rotate-180"
+            >
+              {offset < 0 ? '‹' : '›'}
+            </span>
+          }
+        />
       </Button>
     )
   }

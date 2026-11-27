@@ -22,6 +22,7 @@ import {
 import { scrollbarClass } from '../shared/scrollbarStyles.js'
 import { Drawer, DrawerContent, DrawerTitle, DrawerClose, useDrawer } from '../Drawer/Drawer.js'
 import { cn } from 'cn'
+import { StandardIcon, useHasIcon } from '../IconProvider/IconProvider.js'
 import { joinIds } from '../../internal/ids.js'
 import { composeAction } from '../../internal/events.js'
 import type { WithoutToggle, DistributiveOmit } from '../../internal/types.js'
@@ -351,7 +352,8 @@ export function Sidebar({
     desktop = useRef<HTMLDivElement>(null),
     dock = useRef<HTMLDivElement>(null),
     [container, setContainer] = useState<HTMLDivElement | null>(null),
-    collapsed = shell.collapsed && !shell.mobile
+    collapsed = shell.collapsed && !shell.mobile,
+    closeIcon = useHasIcon('close')
   if (
     label === null ||
     label === undefined ||
@@ -470,10 +472,19 @@ export function Sidebar({
             variant="ghost"
             tone="neutral"
             controlSize="small"
+            iconOnly={closeIcon || undefined}
+            aria-label={closeIcon ? closeLabel : undefined}
             className={parts?.close?.className}
             style={parts?.close?.style}
           >
-            {closeLabel}
+            {closeIcon ? (
+              <StandardIcon
+                name="close"
+                fallback={null}
+              />
+            ) : (
+              closeLabel
+            )}
           </DrawerClose>
         </div>
         <div
