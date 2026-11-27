@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- InputGroup focuses the field when you click its padding or the gap between the field and an addon.
+- InputGroup keeps the default corners at the control radius when a grouped textarea grows.
+
 ## 0.0.106
 
 - When a message is refused, such as a component with an invalid ID, `A2uiSurface` drops its loading placeholders and clears `aria-busy` until the next accepted message, and still reports the error to `onDiagnostic`. A refused `createSurface` no longer blocks a corrected one.
