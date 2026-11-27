@@ -4,10 +4,7 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import { Field, Input, Textarea, ThemeScope, defineTheme } from '../../src/index.js'
-import {
-  TextareaAutoGrowExample,
-  TextareaDraftExample
-} from '../../.storybook/examples/TextareaExamples.js'
+import { TextareaAutoGrowExample } from '../../.storybook/examples/TextareaExamples.js'
 import '../../.storybook/styles.css'
 
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
@@ -73,6 +70,48 @@ for (const controlSize of ['small', 'medium', 'large'] as const) {
     expect(one.getBoundingClientRect().width).toBe(280)
   })
 }
+
+test('pill-shaped themes keep multiline corners the size of one line', async () => {
+  const theme = defineTheme({
+    id: 'textarea-pill',
+    name: 'Textarea pill',
+    tokens: { control: { radius: '9999px', cornerShape: 'superellipse(1.5)' } }
+  })
+  const { host } = await mount(
+    <ThemeScope theme={theme}>
+      {(['small', 'medium', 'large'] as const).map(controlSize => (
+        <div
+          key={controlSize}
+          style={{ width: 280 }}
+        >
+          <Input
+            aria-label={`${controlSize} title`}
+            controlSize={controlSize}
+          />
+          <Textarea
+            aria-label={`${controlSize} notes`}
+            controlSize={controlSize}
+            rows={5}
+          />
+        </div>
+      ))}
+    </ThemeScope>
+  )
+  const inputs = host.querySelectorAll('input')
+  host.querySelectorAll('textarea').forEach((textarea, index) => {
+    const input = inputs[index]
+    const corners = getComputedStyle(textarea)
+    expect(parseFloat(corners.borderTopLeftRadius)).toBe(input.getBoundingClientRect().height / 2)
+    expect(corners.getPropertyValue('corner-top-left-shape')).toBe(
+      getComputedStyle(input).getPropertyValue('corner-top-left-shape')
+    )
+    if (CSS.supports('border-shape', 'shape(from 0 0, line to 1px 1px)')) {
+      const grip = getComputedStyle(textarea, '::-webkit-resizer')
+      expect(grip.getPropertyValue('border-shape').match(/curve to/g)).toHaveLength(2)
+      expect(grip.borderBottomColor).toBe(corners.borderBottomColor)
+    }
+  })
+})
 
 test('multiline keyboard editing, selection, validation focus, submission and reset stay native after hydration', async () => {
   const ref = createRef<HTMLTextAreaElement>(),
@@ -286,6 +325,14 @@ test('dragging the native resize grip changes height while preserving width and 
     />
   )
   const textarea = host.querySelector('textarea')!
+  if (CSS.supports('selector(::-webkit-resizer)')) {
+    const resizer = getComputedStyle(textarea, '::-webkit-resizer')
+    expect(resizer.boxShadow).toContain('inset')
+    expect(resizer.borderEndEndRadius).toBe(getComputedStyle(textarea).borderEndEndRadius)
+    expect(resizer.getPropertyValue('corner-shape')).toBe(
+      getComputedStyle(textarea).getPropertyValue('corner-shape')
+    )
+  }
   textarea.focus()
   textarea.setSelectionRange(1, 4)
   const before = textarea.getBoundingClientRect()
@@ -369,53 +416,70 @@ test('Field relationships, external form association, cancellation and ref clean
   expect(cleanup).toHaveBeenCalledTimes(1)
 })
 
-test('workspace example validates, submits multiline values and resets both value owners', async () => {
-  const { host } = await mount(<TextareaDraftExample />)
-  const [introduction, notes] = host.querySelectorAll('textarea')
-  const [save, reset] = host.querySelectorAll('button')
+test('controlled and uncontrolled textareas submit and reset multiline values', async () => {
+  function ResettableNotes() {
+    const [draft, setDraft] = useState('Draft\nNotes')
+    return (
+      <form onReset={() => setDraft('Draft\nNotes')}>
+        <Textarea
+          aria-label="Draft"
+          name="draft"
+          value={draft}
+          onChange={event => setDraft(event.currentTarget.value)}
+        />
+        <Textarea
+          aria-label="Notes"
+          name="notes"
+          defaultValue={'First\nSecond'}
+        />
+      </form>
+    )
+  }
+
+  const { host } = await mount(<ResettableNotes />)
+  const form = host.querySelector('form')!
+  const [draft, notes] = form.querySelectorAll('textarea')
   await act(async () => {
-    await userEvent.clear(introduction)
+    await userEvent.fill(draft, 'Draft\nEdited')
+    await userEvent.fill(notes, 'Notes\nEdited')
   })
-  await act(async () => {
-    await userEvent.click(save)
+  expect(Object.fromEntries(new FormData(form))).toEqual({
+    draft: 'Draft\nEdited',
+    notes: 'Notes\nEdited'
   })
-  expect(document.activeElement).toBe(introduction)
-  expect(introduction.getAttribute('aria-invalid')).toBe('true')
-  await act(async () => {
-    await userEvent.fill(introduction, 'Make room for ideas.\nOne small step at a time.')
-    await userEvent.fill(notes, 'Invite the team.')
+  await act(async () => form.reset())
+  expect(Object.fromEntries(new FormData(form))).toEqual({
+    draft: 'Draft\nNotes',
+    notes: 'First\nSecond'
   })
-  await act(async () => {
-    await userEvent.click(save)
-  })
-  expect(host.querySelector('output')!.textContent).toContain(
-    'Saved locally: Make room for ideas.\nOne small step at a time. · Invite the team.'
-  )
-  expect(introduction.hasAttribute('aria-invalid')).toBe(false)
-  await act(async () => {
-    await userEvent.click(reset)
-  })
-  expect(introduction.value).toBe(
-    'A quiet place to turn an idea into something useful.\nStart with a small sketch.'
-  )
-  expect(notes.value).toBe('Share a first draft on Friday.')
-  expect(host.querySelector('[role=alert]')).toBe(null)
 })
 
-test('auto-grow example starts at one line, grows with content and scrolls past its cap', async () => {
-  const { host } = await mount(<TextareaAutoGrowExample />)
+test('auto-grow keeps its width, grows vertically and scrolls past its cap', async () => {
+  const { host } = await mount(
+    <div style={{ width: 280 }}>
+      <div style={{ display: 'inline-block', maxWidth: '100%' }}>
+        <TextareaAutoGrowExample />
+      </div>
+    </div>
+  )
   const textarea = host.querySelector('textarea')!
   const line = parseFloat(getComputedStyle(textarea).lineHeight)
-  const empty = textarea.getBoundingClientRect().height
-  expect(empty).toBeCloseTo(parseFloat(getComputedStyle(textarea).minHeight), 0)
+  const empty = textarea.getBoundingClientRect()
+  expect(empty.height).toBeCloseTo(parseFloat(getComputedStyle(textarea).minHeight), 0)
+  expect(empty.width).toBeLessThanOrEqual(280)
+  await act(async () => {
+    await userEvent.fill(textarea, 'A')
+  })
+  expect(textarea.getBoundingClientRect().width).toBe(empty.width)
   await act(async () => {
     await userEvent.fill(textarea, 'One\nTwo\nThree\nFour')
   })
-  expect(textarea.getBoundingClientRect().height - empty).toBeCloseTo(3 * line, 0)
+  expect(textarea.getBoundingClientRect().height - empty.height).toBeCloseTo(3 * line, 0)
+  expect(textarea.getBoundingClientRect().width).toBe(empty.width)
   expect(textarea.scrollHeight).toBe(textarea.clientHeight)
   await act(async () => {
     await userEvent.fill(textarea, Array.from({ length: 30 }, (_, i) => `Line ${i}`).join('\n'))
   })
-  expect(textarea.getBoundingClientRect().height).toBeLessThan(empty + 10 * line)
+  expect(textarea.getBoundingClientRect().height).toBeLessThan(empty.height + 10 * line)
   expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight)
 })

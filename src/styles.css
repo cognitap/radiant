@@ -24,6 +24,130 @@
   }
 }
 
+@utility rad-textarea-resizer {
+  @media (forced-colors: none) {
+    --_rad-textarea-grip-color: var(--_rad-invalid-border, var(--_rad-textarea-border-color));
+
+    &:focus-visible {
+      --_rad-textarea-grip-color: var(--_rad-focus-edge-color);
+    }
+
+    &::-webkit-resizer {
+      --_rad-grip-inline-edge: right;
+      --_rad-grip-inline-direction: -1;
+      border-block-end: 2px solid transparent;
+      border-inline-end: 2px solid transparent;
+      border-end-end-radius: inherit;
+      corner-shape: inherit;
+      box-shadow: inset calc(var(--_rad-grip-inline-direction) * 1px) -1px
+        var(--_rad-textarea-grip-fallback, var(--_rad-textarea-grip-color));
+    }
+
+    &:dir(rtl)::-webkit-resizer {
+      --_rad-grip-inline-edge: left;
+      --_rad-grip-inline-direction: 1;
+    }
+
+    @container style(--_rad-textarea-border-color: transparent) {
+      &:not(:focus-visible, [data-invalid])::-webkit-resizer {
+        --_rad-textarea-grip-fallback: var(--rad-color-muted-foreground, currentColor);
+      }
+    }
+
+    /* The native grip box is too small to render these squircle radii without clamping. */
+    @supports (border-shape: shape(from 0 0, line to 1px 1px)) {
+      @container style(--_rad-textarea-corner: superellipse(1.5)) or style(--_rad-textarea-corner: squircle) or style(--_rad-textarea-corner: superellipse(2)) {
+        &::-webkit-resizer {
+          --_rad-grip-border-width: var(
+            --rad-textarea-border-width,
+            var(--rad-control-border-width, 1px)
+          );
+          --_rad-grip-offset: calc(var(--_rad-grip-border-width) + 2px + 0.5px);
+          --_rad-grip-curve-1-5: if(
+            style(--_rad-textarea-corner: superellipse(1.5)): true; else: false
+          );
+
+          /* Each point pairs a trimmed squircle Bézier with its inward unit normal.
+             Offset the stroke center by the border, the gap and half the stroke. */
+          --_rad-grip-start-far: calc(
+            if(
+                style(--_rad-grip-curve-1-5: true): 0.631425 * var(--_rad-textarea-radius) +
+                  0.161697 * var(--_rad-grip-offset); else: 0.533588 * var(--_rad-textarea-radius) +
+                  0.099296 * var(--_rad-grip-offset)
+              ) -
+              var(--_rad-grip-border-width)
+          );
+          --_rad-grip-start-near: calc(
+            if(
+                style(--_rad-grip-curve-1-5: true): 0.02207 * var(--_rad-textarea-radius) + 0.98684
+                  * var(--_rad-grip-offset); else: 0.012201 * var(--_rad-textarea-radius) + 0.995058
+                  * var(--_rad-grip-offset)
+              ) -
+              var(--_rad-grip-border-width)
+          );
+          --_rad-grip-first-far: calc(
+            if(
+                style(--_rad-grip-curve-1-5: true): 0.475539 * var(--_rad-textarea-radius) + 0.28935
+                  * var(--_rad-grip-offset); else: 0.368026 * var(--_rad-textarea-radius) + 0.207069
+                  * var(--_rad-grip-offset)
+              ) -
+              var(--_rad-grip-border-width)
+          );
+          --_rad-grip-first-near: calc(
+            if(
+                style(--_rad-grip-curve-1-5: true): 0.047612 * var(--_rad-textarea-radius) +
+                  0.965924 * var(--_rad-grip-offset); else: 0.028722 * var(--_rad-textarea-radius) +
+                  0.984303 * var(--_rad-grip-offset)
+              ) -
+              var(--_rad-grip-border-width)
+          );
+          --_rad-grip-second-far: calc(
+            if(
+                style(--_rad-grip-curve-1-5: true): 0.3326 * var(--_rad-textarea-radius) + 0.526202
+                  * var(--_rad-grip-offset); else: 0.250602 * var(--_rad-textarea-radius) + 0.504782
+                  * var(--_rad-grip-offset)
+              ) -
+              var(--_rad-grip-border-width)
+          );
+          --_rad-grip-second-near: calc(
+            if(
+                style(--_rad-grip-curve-1-5: true): 0.102092 * var(--_rad-textarea-radius) +
+                  0.888012 * var(--_rad-grip-offset); else: 0.067605 * var(--_rad-textarea-radius) +
+                  0.909431 * var(--_rad-grip-offset)
+              ) -
+              var(--_rad-grip-border-width)
+          );
+          --_rad-grip-mid: calc(
+            if(
+                style(--_rad-grip-curve-1-5: true): 0.217346 * var(--_rad-textarea-radius) +
+                  0.707107 * var(--_rad-grip-offset); else: 0.159104 * var(--_rad-textarea-radius) +
+                  0.707107 * var(--_rad-grip-offset)
+              ) -
+              var(--_rad-grip-border-width)
+          );
+          border: 1px solid;
+          border-color: var(--_rad-textarea-grip-fallback, inherit);
+          box-shadow: none;
+          border-shape: shape(
+              from var(--_rad-grip-inline-edge) var(--_rad-grip-start-far) bottom
+                var(--_rad-grip-start-near),
+              curve to var(--_rad-grip-inline-edge) var(--_rad-grip-mid) bottom var(--_rad-grip-mid)
+                with var(--_rad-grip-inline-edge) var(--_rad-grip-first-far) bottom
+                var(--_rad-grip-first-near) / var(--_rad-grip-inline-edge)
+                var(--_rad-grip-second-far) bottom var(--_rad-grip-second-near),
+              curve to var(--_rad-grip-inline-edge) var(--_rad-grip-start-near) bottom
+                var(--_rad-grip-start-far) with var(--_rad-grip-inline-edge)
+                var(--_rad-grip-second-near) bottom var(--_rad-grip-second-far) /
+                var(--_rad-grip-inline-edge) var(--_rad-grip-first-near) bottom
+                var(--_rad-grip-first-far)
+            )
+            border-box;
+        }
+      }
+    }
+  }
+}
+
 @source '.';
 @source not './**/*.stories.*';
 @source not './**/*.test.*';
