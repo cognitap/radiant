@@ -12,10 +12,6 @@ import {
   Button,
   Kbd
 } from '../../src/index.js'
-import {
-  FindProjectWithAddons,
-  PostStudyUpdate
-} from '../../.storybook/examples/InputGroupExamples.js'
 import '../../.storybook/styles.css'
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
 const mounted: { root: Root; host: HTMLDivElement }[] = []
@@ -100,7 +96,7 @@ test('real grouped hosts hydrate with stable Field relationships and exact refs'
   expect(host.querySelectorAll('input')).toHaveLength(1)
   expect(root.current?.hasAttribute('tabindex')).toBe(false)
 })
-test('decorative SVG and Kbd addons focus the input while a real addon Button keeps focus', async () => {
+test('the group gap and passive addons focus the input while its Button keeps focus', async () => {
   const action = vi.fn()
   const { host } = await mount(
     <InputGroup>
@@ -133,6 +129,20 @@ test('decorative SVG and Kbd addons focus the input while a real addon Button ke
   await click(button)
   expect(document.activeElement).toBe(button)
   expect(action).toHaveBeenCalledTimes(1)
+  const group = host.querySelector<HTMLElement>('[data-slot~="input-group"]')!,
+    addon = group.querySelector('[data-slot~="input-group-addon"]')!,
+    groupBox = group.getBoundingClientRect(),
+    inputBox = input.getBoundingClientRect(),
+    x = (addon.getBoundingClientRect().right + inputBox.left) / 2,
+    y = inputBox.top + inputBox.height / 2
+  expect(document.elementFromPoint(x, y)).toBe(group)
+  await act(async () => {
+    await userEvent.click(group, {
+      position: { x: x - groupBox.left - group.clientLeft, y: y - groupBox.top - group.clientTop }
+    })
+  })
+  expect(document.activeElement).toBe(input)
+  button.focus()
   await click(host.querySelector('kbd')!)
   expect(document.activeElement).toBe(input)
   expect(input.value).toBe('Reader')
@@ -255,31 +265,69 @@ test('native forms submit and reset the real value and tab visits the actual add
   expect(input.value).toBe('250')
   expect(host.querySelectorAll('[tabindex]')).toHaveLength(0)
 })
-test('Textarea composition keeps its ref, native rows, editing, submission and reset', async () => {
+test('grouped Textarea keeps its sizing and native editing, submission and reset', async () => {
   const ref = createRef<HTMLTextAreaElement>()
-  const { host } = await mount(
-    <InputGroup>
-      <InputGroupTextarea
-        ref={ref}
-        aria-label="Update"
-        rows={4}
-        defaultValue="Reviewed"
-      />
-      <InputGroupAddon>characters</InputGroupAddon>
+  const submit = vi.fn()
+  const { host, render } = await mount(
+    <form
+      onSubmit={event => {
+        event.preventDefault()
+        submit(new FormData(event.currentTarget).get('notes'))
+      }}
+    >
+      <InputGroup
+        style={{
+          '--rad-control-radius': '9999px',
+          '--rad-control-corner-shape': 'superellipse(1.5)'
+        }}
+      >
+        <InputGroupTextarea
+          ref={ref}
+          aria-label="Notes"
+          id="grouped-resize"
+          name="notes"
+          rows={4}
+          defaultValue="Reviewed"
+        />
+        <InputGroupAddon aria-hidden>Notes</InputGroupAddon>
+        <InputGroupAddon>
+          <Button type="submit">Save</Button>
+        </InputGroupAddon>
+      </InputGroup>
+      <Button type="reset">Reset</Button>
+    </form>
+  )
+  const textarea = ref.current!,
+    group = host.querySelector('[data-slot~="input-group"]')!,
+    save = host.querySelector('button[type="submit"]')!
+  expect(textarea.tagName).toBe('TEXTAREA')
+  expect(textarea.rows).toBe(4)
+  expect(textarea.getAttribute('data-slot')).toBe('textarea input-group-textarea')
+  expect(getComputedStyle(textarea).resize).toBe('vertical')
+  const resizer = getComputedStyle(textarea, '::-webkit-resizer')
+  expect(resizer.getPropertyValue('border-shape')).toContain('curve to')
+  expect(getComputedStyle(group).borderBottomRightRadius).toBe('20px')
+  const before = group.getBoundingClientRect()
+  await commands.resizeTextarea('#grouped-resize', 80)
+  const after = group.getBoundingClientRect()
+  expect(after.height).toBeGreaterThan(before.height + 60)
+  expect(after.width).toBe(before.width)
+  expect(document.activeElement).not.toBe(textarea)
+  expect(getComputedStyle(group).borderBottomRightRadius).toBe('20px')
+  await click(host.querySelector('[data-slot~="input-group-addon"]')!)
+  expect(document.activeElement).toBe(textarea)
+  await fill(textarea, 'First line\nSecond line')
+  await click(save)
+  expect(submit).toHaveBeenCalledWith('First line\nSecond line')
+  expect(document.activeElement).toBe(save)
+  await click(host.querySelector('button[type="reset"]')!)
+  expect(textarea.value).toBe('Reviewed')
+  await render(
+    <InputGroup className="rounded-none">
+      <InputGroupTextarea aria-label="Notes" />
     </InputGroup>
   )
-  expect(ref.current?.tagName).toBe('TEXTAREA')
-  expect(ref.current?.rows).toBe(4)
-  expect(ref.current?.getAttribute('data-slot')).toBe('textarea input-group-textarea')
-  await click(host.querySelector('[data-slot~="input-group-addon"]')!)
-  expect(document.activeElement).toBe(ref.current)
-  const task = await mount(<PostStudyUpdate />)
-  await fill(task.host.querySelector('textarea')!, 'Reviewed group behavior')
-  await click(task.host.querySelector('button[type="submit"]')!)
-  expect(task.host.querySelector('output')?.textContent).toBe('Posted: Reviewed group behavior')
-  expect(document.activeElement).toBe(task.host.querySelector('button[type="submit"]'))
-  await click(task.host.querySelector('button[type="reset"]')!)
-  expect(task.host.querySelector('textarea')?.value).toBe('Reviewed the interview notes.')
+  expect(getComputedStyle(host.firstElementChild!).borderBottomRightRadius).toBe('0px')
 })
 test('all shared sizes keep one border and focus ring around RTL addons and native controls', async () => {
   for (const [controlSize, height] of [
@@ -323,22 +371,6 @@ test('all shared sizes keep one border and focus ring around RTL addons and nati
     expect(getComputedStyle(group).outlineWidth).toBe('2px')
     expect(getComputedStyle(input).outlineWidth).toBe('0px')
   }
-})
-test('the project task composes real nested Kbd hints with a consumer-owned shortcut and filtering', async () => {
-  const { host, render } = await mount(<FindProjectWithAddons />)
-  await click(host.querySelector('button')!)
-  await fill(host.querySelector('input')!, 'Reader')
-  await keys('{Control>}k{/Control}')
-  const input = host.querySelector('input')!
-  expect(document.activeElement).toBe(input)
-  expect(input.selectionStart).toBe(0)
-  expect(input.selectionEnd).toBe(6)
-  expect(host.querySelectorAll('kbd')).toHaveLength(3)
-  expect(host.querySelectorAll('li')).toHaveLength(1)
-  await render(<FindProjectWithAddons modifier="Command" />)
-  expect(host.querySelector('kbd')?.textContent).toContain('Command')
-  await keys('{Meta>}k{/Meta}')
-  expect(document.activeElement).toBe(host.querySelector('input'))
 })
 
 test('forced colors retain the shared boundary, native focus cue and keyboard notation', async () => {

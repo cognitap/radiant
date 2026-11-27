@@ -39,15 +39,18 @@ export function InputGroup({
         onPointerDown={event => {
           onPointerDown?.(event)
           if (event.defaultPrevented || event.button !== 0 || !event.isPrimary) return
-          const view = event.currentTarget.ownerDocument.defaultView
-          if (!view || !(event.target instanceof view.Element)) return
-          const addon = event.target.closest('[data-slot~="input-group-addon"]')
-          if (!addon || addon.closest('[data-slot~="input-group"]') !== event.currentTarget) return
-          const interactive = event.target.closest(
-            'button,a[href],input,textarea,select,summary,label,iframe,audio[controls],video[controls],[tabindex],[contenteditable]:not([contenteditable="false"])'
-          )
-          if (interactive && addon.contains(interactive)) return
-          const control = event.currentTarget.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          const { currentTarget: group, target } = event
+          const view = group.ownerDocument.defaultView
+          if (!view || !(target instanceof view.Element)) return
+          if (target !== group) {
+            const addon = target.closest('[data-slot~="input-group-addon"]')
+            if (!addon || addon.closest('[data-slot~="input-group"]') !== group) return
+            const interactive = target.closest(
+              'button,a[href],input,textarea,select,summary,label,iframe,audio[controls],video[controls],[tabindex],[contenteditable]:not([contenteditable="false"])'
+            )
+            if (interactive && addon.contains(interactive)) return
+          }
+          const control = group.querySelector<HTMLInputElement | HTMLTextAreaElement>(
             ':scope > [data-slot~="input-group-input"],:scope > [data-slot~="input-group-textarea"]'
           )
           if (!control || control.matches(':disabled')) return
@@ -59,7 +62,8 @@ export function InputGroup({
           controlBorderClass,
           controlMetrics({ controlSize }),
           'box-border flex w-full min-w-0 items-center gap-[var(--rad-input-group-gap,0.5rem)] px-[var(--rad-input-group-padding-inline,0.75rem)]',
-          'rounded-[var(--rad-input-group-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)] [border-width:var(--rad-input-group-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-control-border-style,solid)] [box-shadow:var(--rad-control-field-shadow,none)] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)] [border-color:var(--rad-input-group-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
+          '[--_rad-input-group-default-radius:var(--rad-control-radius,0.5rem)] has-[>[data-slot~=input-group-textarea]]:[--_rad-input-group-default-radius:min(var(--rad-control-radius,0.5rem),calc(var(--_rad-control-height)/2))]',
+          'rounded-[var(--rad-input-group-radius,var(--_rad-input-group-default-radius))] [corner-shape:var(--rad-control-corner-shape,round)] [border-width:var(--rad-input-group-border-width,var(--rad-control-border-width,1px))] [border-style:var(--rad-control-border-style,solid)] [box-shadow:var(--rad-control-field-shadow,none)] [backdrop-filter:var(--rad-control-field-backdrop-filter,none)] [border-color:var(--rad-input-group-border-color,var(--rad-control-field-border-color,var(--_rad-control-border)))]',
           'bg-[var(--rad-input-group-background,var(--rad-control-field-background,var(--rad-color-surface,oklch(1_0_0))))] [color:var(--rad-input-group-color,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))]',
           'font-[family-name:var(--rad-typography-roles-ui-body-family,system-ui,sans-serif)] text-[length:var(--_rad-control-font-size)] leading-[var(--rad-typography-roles-ui-body-line-height,1.5)]',
           focusWithinRingClass,
