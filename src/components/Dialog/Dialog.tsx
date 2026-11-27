@@ -354,10 +354,13 @@ export function DialogDescription({ className, ...props }: DialogDescriptionProp
   )
 }
 
-/** Without children, draws the close icon and requires `aria-label` or `aria-labelledby`. */
+/** In a dialog or drawer, a close without children draws the close icon and requires `aria-label` or `aria-labelledby`. */
 export function DialogClose(props: DialogCloseProps) {
-  const iconOnly = props.children === undefined || props.children === null
-  if (iconOnly) requireAccessibleName('DialogClose', props)
+  const family = useDialogFamily()
+  const iconOnly =
+    (family === 'dialog' || family === 'drawer') &&
+    (props.children === undefined || props.children === null)
+  if (iconOnly) requireAccessibleName(family === 'drawer' ? 'DrawerClose' : 'DialogClose', props)
   return (
     <DialogAction
       iconOnly={iconOnly || undefined}

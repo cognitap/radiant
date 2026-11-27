@@ -174,19 +174,19 @@ import { IconProvider, ThemeScope } from '@cognitap/radiant'
 ```
 
 - Each icon takes `className` and `aria-hidden`, like `A2uiIconComponent`. Radiant passes a one-em size and its placement classes. Draw in `currentColor` so the icon follows the control's color in every theme and mode. Inside a button, the button's icon size applies.
-- `ICON_NAMES` lists the names. Unknown names throw. A nested provider overrides only the names it sets.
+- `ICON_NAMES` lists the names. Unknown names throw. A nested provider overrides only the names it sets to an icon.
 - Without a supplied icon, a component keeps its built-in drawing.
 - `Spinner` spins the supplied icon; its `track` and `indicator` parts style only the built-in drawing.
 
-| Icon                          | Drawn by                                                                           |
-| ----------------------------- | ---------------------------------------------------------------------------------- |
-| `check`, `indeterminate`      | `Checkbox` marks; `check` also marks the chosen `Select` item                      |
-| `chevronDown`                 | `Select` and `Combobox` triggers                                                   |
-| `chevronLeft`, `chevronRight` | `Calendar` month buttons, also in `DatePicker`; `chevronRight` marks `Collapsible` |
-| `close`                       | `Combobox` clear, `Sidebar` drawer close (then icon-only), childless `DialogClose` |
-| `calendar`                    | `DatePicker` and `DateRangePicker` triggers                                        |
-| `grip`                        | `SortableList` and `DragAndDrop` handles                                           |
-| `spinner`                     | `Spinner`, including pending buttons                                               |
+| Icon                          | Drawn by                                                                                             |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `check`, `indeterminate`      | `Checkbox` marks; `check` also marks the chosen `Select` item                                        |
+| `chevronDown`                 | `Select` and `Combobox` triggers                                                                     |
+| `chevronLeft`, `chevronRight` | `Calendar` month buttons, also in `DatePicker`; `chevronRight` marks `Collapsible`                   |
+| `close`                       | `Combobox` clear, `Sidebar` drawer close (then icon-only), childless `DialogClose` and `DrawerClose` |
+| `calendar`                    | `DatePicker` and `DateRangePicker` triggers                                                          |
+| `grip`                        | `SortableList` and `DragAndDrop` handles                                                             |
+| `spinner`                     | `Spinner`, including pending buttons                                                                 |
 
 No built-in component draws `chevronUp` yet.
 

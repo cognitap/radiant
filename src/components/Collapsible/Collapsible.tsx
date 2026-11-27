@@ -236,7 +236,10 @@ function Marker() {
     return (
       <span
         aria-hidden="true"
-        className={cn(collapsibleMarkerVariants(), 'inline-flex items-center justify-center')}
+        className={cn(
+          collapsibleMarkerVariants(),
+          'inline-flex items-center justify-center [&>svg]:size-full'
+        )}
         data-slot="collapsible-marker"
       >
         <StandardIcon

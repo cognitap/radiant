@@ -1,6 +1,10 @@
 import { createRef, type ReactNode } from 'react'
 import { expect, test } from 'vitest'
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogTitle,
   AppShell,
   AppShellHeader,
   AppShellMain,
@@ -10,12 +14,21 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
   Combobox,
+  Command,
+  CommandClose,
+  CommandContent,
+  CommandTitle,
   DatePicker,
   Dialog,
   DialogClose,
   DialogContent,
   DialogTitle,
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTitle,
   IconProvider,
+  LocaleProvider,
   ICON_NAMES,
   Select,
   Sidebar,
@@ -251,3 +264,90 @@ function DialogCloseAlone() {
     </Dialog>
   )
 }
+
+test('an undefined name inherits the outer icon, and an inline icon set keeps consumers still', async () => {
+  let renders = 0
+  const Counted = (props: { className?: string; 'aria-hidden'?: true }) => {
+    renders++
+    return (
+      <svg
+        {...props}
+        data-icon="counted"
+      />
+    )
+  }
+  const child = (
+    <Checkbox
+      aria-label="Agree"
+      defaultChecked
+    />
+  )
+  const close = probe('close')
+  const tree = () => (
+    <IconProvider icons={{ check: Counted }}>
+      <IconProvider icons={{ check: undefined, close }}>{child}</IconProvider>
+    </IconProvider>
+  )
+  const { host, render } = await mount(tree())
+  expect(host.querySelector('[data-icon="counted"]')).toBeTruthy()
+  const before = renders
+  await render(tree())
+  expect(renders).toBe(before)
+})
+
+test('supplied calendar chevrons point backward and forward in right-to-left text', async () => {
+  const { host } = await mount(
+    <LocaleProvider locale="ar-EG">
+      <IconProvider icons={icons}>
+        <Calendar aria-label="Month" />
+      </IconProvider>
+    </LocaleProvider>
+  )
+  const previous = host.querySelector('[data-slot~="calendar-previous"] [data-icon="chevronLeft"]')!
+  const next = host.querySelector('[data-slot~="calendar-next"] [data-icon="chevronRight"]')!
+  expect(getComputedStyle(previous).rotate).toBe('180deg')
+  expect(getComputedStyle(next).rotate).toBe('180deg')
+  expect(previous.getBoundingClientRect().left).toBeGreaterThan(next.getBoundingClientRect().left)
+})
+
+test('the close icon applies to childless Dialog and Drawer closes only, and errors name the part', async () => {
+  const { host } = await mount(
+    <IconProvider icons={icons}>
+      <AlertDialog>
+        <AlertDialogContent>
+          <AlertDialogTitle>Delete?</AlertDialogTitle>
+          <AlertDialogCancel />
+        </AlertDialogContent>
+      </AlertDialog>
+      <Command
+        items={[]}
+        onAction={() => {}}
+      >
+        <CommandContent>
+          <CommandTitle>Actions</CommandTitle>
+          <CommandClose />
+        </CommandContent>
+      </Command>
+      <Drawer>
+        <DrawerContent>
+          <DrawerTitle>Settings</DrawerTitle>
+          <DrawerClose aria-label="Close settings" />
+        </DrawerContent>
+      </Drawer>
+    </IconProvider>
+  )
+  const close = (slot: string) => host.querySelector<HTMLElement>(`[data-slot~="${slot}"]`)!
+  expect(close('alert-dialog-cancel').querySelector('svg')).toBe(null)
+  expect(close('command-close').querySelector('svg')).toBe(null)
+  expect(close('drawer-close').querySelector('[data-icon="close"]')).toBeTruthy()
+  await expect(
+    mount(
+      <Drawer>
+        <DrawerContent>
+          <DrawerTitle>Settings</DrawerTitle>
+          <DrawerClose />
+        </DrawerContent>
+      </Drawer>
+    )
+  ).rejects.toThrow('DrawerClose requires aria-label')
+})

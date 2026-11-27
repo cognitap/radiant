@@ -4,6 +4,7 @@ import {
   DialogTransitionExample
 } from '../../../.storybook/examples/DialogExamples.js'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, within } from 'storybook/test'
 import {
   Button,
   Dialog,
@@ -249,6 +250,36 @@ export const NonModal: Story = {
       </DialogContent>
     </Dialog>
   )
+}
+
+export const IconClose: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A DialogClose without children draws the close icon, from IconProvider when one supplies it, and takes its name from aria-label.'
+      }
+    }
+  },
+  render: () => (
+    <Dialog>
+      <DialogTrigger>Edit profile</DialogTrigger>
+      <DialogContent>
+        <DialogClose
+          aria-label="Close"
+          style={{ justifySelf: 'end' }}
+        />
+        <DialogTitle>Edit profile</DialogTitle>
+        <DialogDescription>This name is visible to your team.</DialogDescription>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Edit profile' }))
+    const close = within(canvasElement.ownerDocument.body).getByRole('button', { name: 'Close' })
+    await expect(close.querySelector('svg')).toBeTruthy()
+    await userEvent.click(close)
+  }
 }
 
 export const Dismissal: Story = {

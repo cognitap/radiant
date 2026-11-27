@@ -77,7 +77,7 @@ export function Spinner({
           width="24"
           height="24"
         >
-          <span className="flex size-full items-center justify-center fill-current stroke-none text-[length:24px]">
+          <span className="flex size-full items-center justify-center fill-current text-[length:24px]">
             <StandardIcon
               name="spinner"
               fallback={null}
