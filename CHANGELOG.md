@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.105
+
 - Textarea caps its inherited corner radius at half the height of a single-line control, so the corners keep their shape as the textarea grows.
 - Textarea draws an inset resize grip that follows the corner shape in browsers that support grip styling.
 
