@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.107
+
 - InputGroup focuses the field when you click its padding or the gap between the field and an addon.
 - InputGroup keeps the default corners at the control radius when a grouped textarea grows.
 
