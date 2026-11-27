@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+    # Reevaluate Visual matrix when the visual-baselines label starts or ends a refresh.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   workflow_dispatch:
 
 permissions:
