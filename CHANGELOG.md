@@ -5,6 +5,7 @@
 ## Unreleased
 
 - When a message is refused, such as a component with an invalid ID, `A2uiSurface` drops its loading placeholders and clears `aria-busy` until the next accepted message, and still reports the error to `onDiagnostic`. A refused `createSurface` no longer blocks a corrected one.
+- `IconProvider` lets an app supply the check, indeterminate, chevron, close, calendar, grip and spinner icons that Checkbox, Select, Combobox, Collapsible, Calendar, DatePicker, SortableList, DragAndDrop, Sidebar, DialogClose and Spinner draw. A `DialogClose` without children now draws a close icon and requires `aria-label` or `aria-labelledby`.
 
 ## 0.0.105
 

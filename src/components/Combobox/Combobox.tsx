@@ -26,6 +26,7 @@ import { useArrayFormBridge } from '../../react/useArrayFormBridge.js'
 import { useField, useFieldControl } from '../Field/Field.js'
 import type { DistributiveOmit, WithoutToggle } from '../../internal/types.js'
 import { cn } from 'cn'
+import { StandardIcon } from '../IconProvider/IconProvider.js'
 import { joinIds } from '../../internal/ids.js'
 import { controlMetrics } from '../shared/controlStyles.js'
 import {
@@ -885,19 +886,24 @@ export function ComboboxTrigger({
       }}
     >
       {children ?? (
-        <svg
-          aria-hidden="true"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-        >
-          <path
-            d="m4 6 4 4 4-4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-        </svg>
+        <StandardIcon
+          name="chevronDown"
+          fallback={
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="m4 6 4 4 4-4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+            </svg>
+          }
+        />
       )}
     </Button>
   )
@@ -959,19 +965,24 @@ export function ComboboxClear({
       }}
     >
       {children ?? (
-        <svg
-          aria-hidden="true"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-        >
-          <path
-            d="m5 5 6 6m0-6-6 6"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-        </svg>
+        <StandardIcon
+          name="close"
+          fallback={
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="m5 5 6 6m0-6-6 6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+            </svg>
+          }
+        />
       )}
     </Button>
   )

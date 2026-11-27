@@ -160,6 +160,36 @@ const themeDocument = updateThemeAppearance(
 
 `defaultTheme` ships in `@cognitap/radiant`. Example themes in `@cognitap/radiant/examples` are `radiant`, `soft`, `sharp`, `glass`, `jelly`, `ticket`, `neon`, and `editorial`, also collected in the `themes` and `themeDefinitions` arrays. Themes name font families and do not download them. Load those families in the app, or they fall back to system fonts.
 
+## Icons
+
+A theme stays JSON, so icons come from `IconProvider`, a React context like `LocaleProvider`. Place it around or inside `ThemeScope`:
+
+```tsx
+import { Check, ChevronDown, X } from 'lucide-react'
+import { IconProvider, ThemeScope } from '@cognitap/radiant'
+
+;<IconProvider icons={{ check: Check, chevronDown: ChevronDown, close: X }}>
+  <ThemeScope theme={garden}>{app}</ThemeScope>
+</IconProvider>
+```
+
+- Each icon takes `className` and `aria-hidden`, like `A2uiIconComponent`. Radiant passes a one-em size and its placement classes. Draw in `currentColor` so the icon follows the control's color in every theme and mode. Inside a button, the button's icon size applies.
+- `ICON_NAMES` lists the names. Unknown names throw. A nested provider overrides only the names it sets.
+- Without a supplied icon, a component keeps its built-in drawing.
+- `Spinner` spins the supplied icon; its `track` and `indicator` parts style only the built-in drawing.
+
+| Icon                          | Drawn by                                                                           |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| `check`, `indeterminate`      | `Checkbox` marks; `check` also marks the chosen `Select` item                      |
+| `chevronDown`                 | `Select` and `Combobox` triggers                                                   |
+| `chevronLeft`, `chevronRight` | `Calendar` month buttons, also in `DatePicker`; `chevronRight` marks `Collapsible` |
+| `close`                       | `Combobox` clear, `Sidebar` drawer close (then icon-only), childless `DialogClose` |
+| `calendar`                    | `DatePicker` and `DateRangePicker` triggers                                        |
+| `grip`                        | `SortableList` and `DragAndDrop` handles                                           |
+| `spinner`                     | `Spinner`, including pending buttons                                               |
+
+No built-in component draws `chevronUp` yet.
+
 ## Typography
 
 `@cognitap/radiant/typography`, also exported from the root, compiles a typesetting preset (`'inter'`, `'source-serif'`, or `'plex'`) into 16 text roles (`typographyRoles`) and prose and UI flow variables. Set it at `sections.typography.typesetting`, with `prose` and `styles` overrides, and compile the document.

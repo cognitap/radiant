@@ -4,6 +4,7 @@ import { useContext, type ComponentProps } from 'react'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
 import { MotionProfileContext } from '../../motion/context.js'
+import { StandardIcon, useHasIcon } from '../IconProvider/IconProvider.js'
 import type { ControlSize, PartStyle } from '../../presentation.js'
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 
@@ -27,6 +28,7 @@ export type SpinnerProps = Omit<
   motion?: 'inherit' | 'off'
   style?: ThemeStyle
   'data-slot'?: string
+  /** Style the built-in drawing; an icon from `IconProvider` replaces both. */
   parts?: { track?: PartStyle; indicator?: PartStyle }
 }
 
@@ -42,6 +44,7 @@ export function Spinner({
   const profile = useContext(MotionProfileContext)
   if (label !== undefined && !label.trim()) throw new TypeError('Spinner label must not be empty.')
   const off = motion === 'off' || profile.mode === 'off'
+  const supplied = useHasIcon('spinner')
   return (
     <svg
       {...props}
@@ -65,26 +68,46 @@ export function Spinner({
             : 'size-[var(--rad-spinner-size,1.25rem)]',
         off ? 'animate-none' : 'animate-spin motion-reduce:animate-none',
         '[animation-duration:var(--rad-spinner-duration,1s)]',
+        supplied && '[&_foreignObject_svg]:size-full',
         className
       )}
     >
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        stroke="currentColor"
-        data-slot="spinner-track"
-        style={parts?.track?.style}
-        className={cn('opacity-[var(--rad-spinner-track-opacity,0.25)]', parts?.track?.className)}
-      />
-      <path
-        d="M12 3a9 9 0 0 1 9 9"
-        stroke="currentColor"
-        strokeLinecap="round"
-        data-slot="spinner-indicator"
-        className={parts?.indicator?.className}
-        style={parts?.indicator?.style}
-      />
+      {supplied ? (
+        <foreignObject
+          width="24"
+          height="24"
+        >
+          <span className="flex size-full items-center justify-center fill-current stroke-none text-[length:24px]">
+            <StandardIcon
+              name="spinner"
+              fallback={null}
+            />
+          </span>
+        </foreignObject>
+      ) : (
+        <>
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+            stroke="currentColor"
+            data-slot="spinner-track"
+            style={parts?.track?.style}
+            className={cn(
+              'opacity-[var(--rad-spinner-track-opacity,0.25)]',
+              parts?.track?.className
+            )}
+          />
+          <path
+            d="M12 3a9 9 0 0 1 9 9"
+            stroke="currentColor"
+            strokeLinecap="round"
+            data-slot="spinner-indicator"
+            className={parts?.indicator?.className}
+            style={parts?.indicator?.style}
+          />
+        </>
+      )}
     </svg>
   )
 }

@@ -10,6 +10,7 @@ import { controlBorderClass, controlMetrics, indicatorPressClass } from '../shar
 import type { ThemeStyle } from '../../themes/defineTheme.js'
 import type { ControlSize, ControlParts } from '../../presentation.js'
 import { useFieldControl } from '../Field/Field.js'
+import { StandardIcon, useHasIcon } from '../IconProvider/IconProvider.js'
 import { focusRingClass } from '../shared/focusStyles.js'
 
 const checkboxVariants = cva([
@@ -43,6 +44,9 @@ const checkboxVariants = cva([
 
 const markClass =
   'pointer-events-none absolute inset-0 size-full scale-65 [color:var(--rad-checkbox-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-checkbox-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
+
+const checkMarkClass = 'opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-0'
+const indeterminateMarkClass = 'opacity-0 peer-indeterminate:opacity-100'
 
 const rowClass =
   'inline-flex min-h-6 min-w-0 max-w-full cursor-pointer items-center gap-[var(--rad-checkbox-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
@@ -113,6 +117,8 @@ export function Checkbox({
     [indeterminate, controlled]
   )
   const hostRef = useComposedRefs(initialise, ref)
+  const hasCheck = useHasIcon('check')
+  const hasIndeterminate = useHasIcon('indeterminate')
   useLayoutEffect(() => {
     if (nodeRef.current) {
       nodeRef.current.indeterminate = indeterminate
@@ -141,45 +147,67 @@ export function Checkbox({
         data-slot={joinIds('checkbox', slot)}
         type="checkbox"
       />
-      <svg
-        aria-hidden="true"
-        className={cn(
-          markClass,
-          'opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-0',
-          parts?.indicator?.className
-        )}
-        style={parts?.indicator?.style}
-        data-slot="checkbox-indicator"
-        fill="none"
-        viewBox="0 0 16 16"
-      >
-        <path
-          d="M3.5 8.5 6.5 11.5 12.5 4.5"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-        />
-      </svg>
-      <svg
-        aria-hidden="true"
-        className={cn(
-          markClass,
-          'opacity-0 peer-indeterminate:opacity-100',
-          parts?.indicator?.className
-        )}
-        style={parts?.indicator?.style}
-        data-slot="checkbox-indicator"
-        fill="none"
-        viewBox="0 0 16 16"
-      >
-        <path
-          d="M3.5 8h9"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="2"
-        />
-      </svg>
+      {hasCheck ? (
+        <span
+          aria-hidden="true"
+          className={cn(markClass, checkMarkClass, parts?.indicator?.className)}
+          style={parts?.indicator?.style}
+          data-slot="checkbox-indicator"
+        >
+          <StandardIcon
+            name="check"
+            className="block size-full"
+            fallback={null}
+          />
+        </span>
+      ) : (
+        <svg
+          aria-hidden="true"
+          className={cn(markClass, checkMarkClass, parts?.indicator?.className)}
+          style={parts?.indicator?.style}
+          data-slot="checkbox-indicator"
+          fill="none"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M3.5 8.5 6.5 11.5 12.5 4.5"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+          />
+        </svg>
+      )}
+      {hasIndeterminate ? (
+        <span
+          aria-hidden="true"
+          className={cn(markClass, indeterminateMarkClass, parts?.indicator?.className)}
+          style={parts?.indicator?.style}
+          data-slot="checkbox-indicator"
+        >
+          <StandardIcon
+            name="indeterminate"
+            className="block size-full"
+            fallback={null}
+          />
+        </span>
+      ) : (
+        <svg
+          aria-hidden="true"
+          className={cn(markClass, indeterminateMarkClass, parts?.indicator?.className)}
+          style={parts?.indicator?.style}
+          data-slot="checkbox-indicator"
+          fill="none"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M3.5 8h9"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="2"
+          />
+        </svg>
+      )}
     </span>
   )
 
