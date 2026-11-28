@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- InlineCode has one Storybook example that shows code inside a sentence.
+
 ## 0.2.5
 
 - Toolbar Storybook examples focus on formatting and menu navigation.
