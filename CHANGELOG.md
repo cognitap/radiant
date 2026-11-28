@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- NumberField joins the stepper buttons and aligns the group’s inset and corners with the field.
+
 ## 0.0.108
 
 - PasswordInput supports press-and-hold reveal and custom show and hide icons in either reveal mode.
