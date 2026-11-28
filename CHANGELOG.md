@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.1.1
+
 - CheckboxGroup Storybook examples focus on group selection and Field states.
 - Checkbox shows a hollow inset square for its mixed state.
 
