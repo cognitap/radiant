@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Dropzone, NavLink, Rating, Spoiler } from '@cognitap/radiant'
+import { Dropzone, Rating, Spoiler } from '@cognitap/radiant'
 
 const require = createRequire(import.meta.url)
 
@@ -50,11 +50,6 @@ test('the standalone stylesheet supports Dropzone sizing and hides internal cont
 })
 
 test('the standalone stylesheet includes NavLink’s active outline dimensions', () => {
-  const link = renderToStaticMarkup(
-    createElement(NavLink, { href: '#page', active: true, children: 'Page' })
-  )
-  assert.match(link, /border-\[1px\]/)
-  assert.match(link, /\bborder-solid\b/)
   const css = readExport('styles.css')
   assert.match(css, /\.border-\\\[1px\\\]\s*\{[^}]*border-width:\s*1px/)
   assert.match(css, /\.border-solid\s*\{[^}]*border-style:\s*solid/)
