@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+## 0.2.7
+
+- Link Storybook examples focus on inline and action variants.
+
 ## 0.2.6
 
 - InlineCode has one Storybook example that shows code inside a sentence.
