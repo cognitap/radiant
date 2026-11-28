@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.1.0
+
 - Breaking: ButtonGroup keeps each button's shape and uses half the theme's normal spacing. It previously joined buttons at their borders. Set `components.buttonGroup.gap` to customize spacing and style corners through Button.
 
 ## 0.0.111
