@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Button Storybook examples focus on the default, pressed, and pending submit states.
+
 ## 0.0.109
 
 - NumberField joins the stepper buttons and aligns the group’s inset and corners with the field.
