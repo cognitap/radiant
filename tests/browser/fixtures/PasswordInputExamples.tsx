@@ -6,8 +6,8 @@ import {
   NativeSelect,
   PasswordInput,
   type PasswordInputProps
-} from '../../src/index.js'
-export type PasswordInputTaskOptions = Pick<
+} from '../../../src/index.js'
+type PasswordInputTaskOptions = Pick<
   PasswordInputProps,
   | 'controlSize'
   | 'dir'

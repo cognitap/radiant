@@ -9,7 +9,7 @@ import {
   PrepareWorkspaceSignIn,
   ChooseWorkspacePassword,
   ReviewConnectionPassword
-} from '../../.storybook/examples/PasswordInputExamples.js'
+} from './fixtures/PasswordInputExamples.js'
 import '../../.storybook/styles.css'
 vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
 const mounted: { root: Root; host: HTMLDivElement }[] = []
@@ -154,6 +154,73 @@ test('reveal action announces one state: its name says what activating it does n
     false,
     'password'
   ])
+})
+test('hold reveal lasts until key release, blur or form reset and keeps its accessible name', async () => {
+  const { host } = await mount(
+      <form>
+        <PasswordInput
+          aria-label="Password"
+          defaultValue="demo-password"
+          revealMode="hold"
+          showIcon={<span>Eye</span>}
+          hideIcon={<span>Slashed eye</span>}
+        />
+        <Button>After</Button>
+      </form>
+    ),
+    input = host.querySelector('input')!,
+    toggle = host.querySelector('button')!,
+    form = host.querySelector('form')!
+  expect(toggle.getAttribute('aria-label')).toBe('Hold to show password')
+  expect(toggle.querySelector('[aria-hidden=true]')?.textContent).toBe('Eye')
+  expect(input.type).toBe('password')
+
+  await act(async () => {
+    toggle.focus()
+    await userEvent.keyboard('{Space>}')
+  })
+  expect(input.type).toBe('text')
+  expect(toggle.getAttribute('aria-label')).toBe('Hold to show password')
+  expect(toggle.querySelector('[aria-hidden=true]')?.textContent).toBe('Slashed eye')
+  await act(async () => userEvent.keyboard('{/Space}'))
+  expect(input.type).toBe('password')
+
+  await act(async () => userEvent.keyboard('{Enter>}'))
+  expect(input.type).toBe('text')
+  await act(async () => userEvent.keyboard('{Tab}'))
+  expect(input.type).toBe('password')
+  await act(async () => userEvent.keyboard('{/Enter}'))
+
+  await act(async () => {
+    toggle.focus()
+    await userEvent.keyboard('{Enter>}')
+  })
+  expect(input.type).toBe('text')
+  await act(async () => form.reset())
+  expect(input.type).toBe('password')
+  await act(async () => userEvent.keyboard('{/Enter}'))
+  expect(host.querySelector('input')).toBe(input)
+  expect(input.value).toBe('demo-password')
+})
+test('icons work in click-to-toggle mode with custom labels and a text fallback', async () => {
+  const { host } = await mount(
+      <PasswordInput
+        aria-label="Password"
+        showLabel="Reveal password"
+        hideLabel="Mask password"
+        showIcon={<span>Eye</span>}
+      />
+    ),
+    input = host.querySelector('input')!,
+    toggle = host.querySelector('button')!
+  expect(toggle.getAttribute('aria-label')).toBe('Reveal password')
+  expect(toggle.querySelector('[aria-hidden=true]')?.textContent).toBe('Eye')
+  await click(toggle)
+  expect(input.type).toBe('text')
+  expect(toggle.textContent).toBe('Mask password')
+  expect(toggle.hasAttribute('aria-label')).toBe(false)
+  await click(toggle)
+  expect(input.type).toBe('password')
 })
 test('submit hides synchronously before consumer handlers and preserves one successful native value', async () => {
   const snapshots: { type: string; value: FormDataEntryValue | null }[] = [],
@@ -329,7 +396,38 @@ test('actual host and named parts honor styles, theme composition, size and dire
     expect(getComputedStyle(button).borderRadius).toBe('2px')
     expect(Math.abs(wrapper.getBoundingClientRect().height - height)).toBeLessThan(0.5)
     expect(getComputedStyle(input).direction).toBe('rtl')
+    const bounds = wrapper.getBoundingClientRect(),
+      toggle = button.getBoundingClientRect()
+    const endInset = toggle.left - bounds.left
+    expect(toggle.top - bounds.top).toBeCloseTo(endInset)
+    expect(bounds.bottom - toggle.bottom).toBeCloseTo(endInset)
   }
+})
+test('the reveal button follows the field corner shape and subtracts its inset from the radius', async () => {
+  const { host } = await mount(
+      <PasswordInput
+        aria-label="Password"
+        parts={{
+          wrapper: {
+            style: {
+              '--rad-input-group-radius': '15px',
+              '--rad-input-group-border-width': '2px',
+              '--rad-control-corner-shape': 'squircle',
+              '--rad-button-radius': '25px',
+              '--rad-button-corner-shape': 'round'
+            }
+          }
+        }}
+      />
+    ),
+    toggle = host.querySelector('button')!,
+    wrapper = toggle.closest('[data-slot~="password-input-wrapper"]')!,
+    corner = getComputedStyle(toggle)
+  expect(getComputedStyle(wrapper).borderBottomRightRadius).toBe('15px')
+  expect(corner.borderBottomRightRadius).toBe('10px')
+  expect(corner.getPropertyValue('corner-bottom-right-shape')).toBe(
+    getComputedStyle(wrapper).getPropertyValue('corner-bottom-right-shape')
+  )
 })
 test('real task forms preserve private values, controlled resets and record-specific reveal ownership', async () => {
   const signIn = await mount(<PrepareWorkspaceSignIn />),

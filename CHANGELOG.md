@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- PasswordInput supports press-and-hold reveal and custom show and hide icons in either reveal mode.
+- PasswordInput aligns the reveal button’s inset and corners with the field.
+
 ## 0.0.107
 
 - InputGroup focuses the field when you click its padding or the gap between the field and an addon.
