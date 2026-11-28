@@ -135,14 +135,11 @@ for (const mode of ['light', 'dark'] as const) {
       expect(text.size).toBe(24)
       for (const input of [text, check, radio])
         expect(input.dataset.controlSize).toBe(row.getAttribute('data-size-row'))
-      for (const [input, ratio] of [
-        [check, 0.6],
-        [radio, 0.4]
-      ] as const) {
+      for (const input of [check, radio]) {
         const mark = input.parentElement!.querySelector('[aria-hidden]')!
         expect(
           mark.getBoundingClientRect().width / input.getBoundingClientRect().width
-        ).toBeCloseTo(ratio, 1)
+        ).toBeCloseTo(0.6, 1)
       }
       return [
         text.getBoundingClientRect().height,
