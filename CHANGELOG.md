@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.4
+
 - Highlight adds even padding around whole-word matches.
 
 ## 0.2.3
