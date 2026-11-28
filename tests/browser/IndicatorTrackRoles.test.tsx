@@ -10,7 +10,8 @@ import {
   Skeleton,
   Slider,
   Switch,
-  ThemeScope
+  ThemeScope,
+  defineTheme
 } from '../../src/index.js'
 import { jelly } from '../../src/examples/jelly.js'
 import { sharp } from '../../src/examples/sharp-3d.js'
@@ -122,6 +123,42 @@ test('a checked checkbox draws a smaller square using the outer corner shape', a
   expect(getComputedStyle(mark).getPropertyValue('corner-shape')).toBe(
     getComputedStyle(input).getPropertyValue('corner-shape')
   )
+})
+
+test.each([1, 1.5, 2])('a mixed checkbox matches the filled mark and a %ipx edge', async width => {
+  const theme = defineTheme({
+    id: 'checkbox-stroke',
+    name: 'Checkbox stroke',
+    components: { checkbox: { borderWidth: `${width}px`, radius: '6px' } }
+  })
+  const { host } = await mount(
+    <ThemeScope theme={theme}>
+      <Checkbox label="Unchecked" />
+      <Checkbox
+        label="Mixed"
+        defaultChecked
+        indeterminate
+      />
+    </ThemeScope>
+  )
+  const [unchecked, mixed] = host.querySelectorAll('input')
+  expect(mixed.indeterminate).toBe(true)
+  const [filled, outlined] = mixed.parentElement!.querySelectorAll(
+    '[data-slot="checkbox-indicator"]'
+  )
+  const outline = getComputedStyle(outlined)
+  expect(outline.opacity).toBe('1')
+  expect(getComputedStyle(filled).opacity).toBe('0')
+  expect(outline.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(outline.borderTopWidth).toBe(getComputedStyle(mixed).borderTopWidth)
+  expect(outline.borderTopColor).toBe(getComputedStyle(filled).backgroundColor)
+  expect(outline.scale).toBe('none')
+  expect(parseFloat(outline.borderTopLeftRadius)).toBeCloseTo(3.6, 2)
+  expect(outlined.getBoundingClientRect().width / mixed.getBoundingClientRect().width).toBeCloseTo(
+    0.6,
+    2
+  )
+  expect(getComputedStyle(mixed).backgroundColor).toBe(getComputedStyle(unchecked).backgroundColor)
 })
 
 test('checkbox labels use regular weight and allow a caller to make them bold', async () => {
