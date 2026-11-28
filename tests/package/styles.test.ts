@@ -50,7 +50,9 @@ test('the standalone stylesheet supports Dropzone sizing and hides internal cont
 })
 
 test('the standalone stylesheet includes NavLink’s active outline dimensions', () => {
-  const link = renderToStaticMarkup(createElement(NavLink, { href: '#page', active: true }, 'Page'))
+  const link = renderToStaticMarkup(
+    createElement(NavLink, { href: '#page', active: true, children: 'Page' })
+  )
   assert.match(link, /border-\[1px\]/)
   assert.match(link, /\bborder-solid\b/)
   const css = readExport('styles.css')
