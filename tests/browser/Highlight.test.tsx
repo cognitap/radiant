@@ -62,6 +62,39 @@ test('uses locale case mapping and retains the original text', async () => {
   expect(Array.from(host.querySelectorAll('mark'), mark => mark.textContent)).toEqual(['İ', 'i'])
 })
 
+test('adds equal padding on all sides only when a match covers whole words', async () => {
+  const text =
+    'Turn the light off. Adjust the backlighting. Follow the lighthouse. Wait for daylight.'
+  const { host, render } = await mount(
+    <Highlight
+      text={text}
+      query="light"
+    />
+  )
+  const getPadding = () =>
+    Array.from(host.querySelectorAll('mark'), mark => {
+      const style = getComputedStyle(mark)
+      return [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]
+    })
+  const [wholeWord, ...partialWords] = getPadding()
+  expect(wholeWord).toEqual(['2px', '2px', '2px', '2px'])
+  expect(partialWords).toEqual([
+    ['0px', '0px', '0px', '0px'],
+    ['0px', '0px', '0px', '0px'],
+    ['0px', '0px', '0px', '0px']
+  ])
+  expect(host.textContent).toBe(text)
+
+  await render(
+    <Highlight
+      text="Café!"
+      query="cafe"
+      ignoreDiacritics
+    />
+  )
+  expect(getPadding()).toEqual([wholeWord])
+})
+
 test('Combobox marks its query while keeping the full option name and keyboard selection', async () => {
   const { host } = await mount(<MatchDestination />)
   const input = host.querySelector('input[role="combobox"]')!
