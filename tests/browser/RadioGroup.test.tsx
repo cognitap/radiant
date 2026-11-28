@@ -184,12 +184,19 @@ test('only an invalid group paints and marks its radios invalid', async () => {
       </RadioGroup>
     </div>
   )
-  const [invalid, valid] = [...host.querySelectorAll('input')].map(
-    radio => getComputedStyle(radio).borderTopColor
-  )
-  expect(invalid).not.toBe(valid)
-  expect(host.querySelector('[value="invalid"]')!.getAttribute('aria-invalid')).toBe('true')
-  expect(host.querySelector('[value="valid"]')!.hasAttribute('aria-invalid')).toBe(false)
+  const invalid = host.querySelector<HTMLInputElement>('[value="invalid"]')!
+  const valid = host.querySelector<HTMLInputElement>('[value="valid"]')!
+  const errorColor = getComputedStyle(invalid).borderTopColor
+  expect(errorColor).not.toBe(getComputedStyle(valid).borderTopColor)
+  expect(invalid.getAttribute('aria-invalid')).toBe('true')
+  expect(valid.hasAttribute('aria-invalid')).toBe(false)
+
+  await userEvent.tab()
+  expect(document.activeElement).toBe(invalid)
+  const reference = document.createElement('span')
+  reference.style.color = `color-mix(in oklab, ${errorColor} 50%, transparent)`
+  host.append(reference)
+  expect(getComputedStyle(invalid).outlineColor).toBe(getComputedStyle(reference).color)
 })
 
 test('each radio carries the group error before its own ids; the fieldset keeps help and caller ids', async () => {
@@ -238,6 +245,10 @@ test('each radio carries the group error before its own ids; the fieldset keeps 
   expect(text(group!)).toEqual(['Billed monthly', 'Group note'])
   for (const radio of [pro, free, marked]) expect(radio!.getAttribute('aria-invalid')).toBe('true')
   expect(text(pro!)).toEqual(['Choose a plan', 'For teams', 'Option note'])
+  const option = pro!.closest('[data-slot~="radio-wrapper"]')!
+  const label = option.querySelector('[data-slot~="radio-label"]')!
+  const description = option.querySelector('[data-slot~="radio-description"]')!
+  expect(description.getBoundingClientRect().left).toBeCloseTo(label.getBoundingClientRect().left)
   expect(text(free!)).toEqual(['Choose a plan'])
   expect(marked!.hasAttribute('aria-describedby')).toBe(false)
   expect(pro!.required && free!.required).toBe(true)

@@ -215,20 +215,21 @@ for (const mode of ['light', 'dark'] as const) {
         if (!input.checked && !input.indeterminate) continue
         const mark =
           input.parentElement!.querySelectorAll('[aria-hidden]')[input.indeterminate ? 1 : 0]
+        const radio = input.type === 'radio'
         const square = input.matches('[data-slot~="checkbox"]:checked:not(:indeterminate)')
         const outline = input.matches('[data-slot~="checkbox"]:indeterminate')
         const markStyle = getComputedStyle(mark)
         const fill = getComputedStyle(input).backgroundColor
         const ink = outline
           ? markStyle.borderTopColor
-          : input.type === 'radio' || square
+          : radio || square
             ? markStyle.backgroundColor
             : markStyle.color
         expect(markStyle.opacity).toBe('1')
         expect(ink).not.toBe(fill)
         const systemInk = input.disabled
           ? 'GrayText'
-          : square || outline
+          : radio || square || outline
             ? 'Highlight'
             : 'HighlightText'
         expect(ink).toBe(systemColor(systemInk, input.parentElement!))

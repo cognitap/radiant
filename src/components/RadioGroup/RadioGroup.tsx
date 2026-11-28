@@ -34,24 +34,23 @@ const radioVariants = cva([
   '[border-style:var(--rad-radio-border-style,var(--rad-control-border-style,solid))]',
   '[border-color:var(--rad-radio-border-color,var(--_rad-control-border))]',
   'bg-[var(--rad-radio-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  'checked:bg-[var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
-  'checked:[border-color:var(--rad-radio-checked-border,var(--rad-radio-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  'checked:bg-[var(--rad-radio-checked-background,var(--rad-radio-background,var(--rad-color-surface,oklch(1_0_0))))]',
+  'checked:[border-color:var(--rad-radio-checked-border,var(--rad-radio-border-color,var(--_rad-control-border)))]',
   '[box-shadow:var(--rad-control-indicator-shadow,none)]',
   'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
-  'data-invalid:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
-  'in-[[data-slot~=radio-group][data-invalid]]:[border-color:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'data-invalid:[--_rad-invalid-border:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] data-invalid:[border-color:var(--_rad-invalid-border)]',
+  'in-[[data-slot~=radio-group][data-invalid]]:[--_rad-invalid-border:var(--rad-radio-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] in-[[data-slot~=radio-group][data-invalid]]:[border-color:var(--_rad-invalid-border)]',
   focusRingClass,
   'focus-visible:[--_rad-focus-color:var(--rad-radio-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-radio-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-radio-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-radio-focus-style)]',
   'disabled:cursor-not-allowed',
   'disabled:[border-color:var(--rad-radio-disabled-border,var(--rad-color-disabled-border,oklch(0.88_0.005_286)))]',
   'disabled:checked:bg-[var(--rad-radio-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
-  'forced-colors:border-[CanvasText]',
-  'forced-colors:checked:bg-[Highlight]',
-  'forced-colors:disabled:border-[GrayText] forced-colors:disabled:bg-[Canvas]'
+  'forced-colors:border-[CanvasText] forced-colors:bg-[Canvas]',
+  'forced-colors:disabled:border-[GrayText]'
 ])
 
 const dotClass =
-  'pointer-events-none absolute inset-[30%] rounded-[var(--rad-radio-radius,999px)] [corner-shape:var(--rad-radio-corner-shape,round)] bg-[var(--rad-radio-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:bg-[HighlightText] forced-colors:peer-disabled:bg-[GrayText]'
+  'pointer-events-none absolute inset-[20%] rounded-[var(--rad-radio-radius,999px)] [corner-shape:var(--rad-radio-corner-shape,round)] bg-[var(--rad-radio-mark,var(--rad-color-accent,oklch(0.21_0.006_286)))] peer-disabled:bg-[var(--rad-radio-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] opacity-0 peer-checked:opacity-100 forced-colors:[forced-color-adjust:none] forced-colors:bg-[Highlight] forced-colors:peer-disabled:bg-[GrayText]'
 
 const rowClass =
   'inline-flex min-h-6 min-w-0 max-w-full cursor-pointer items-center gap-[var(--rad-radio-label-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
@@ -237,6 +236,7 @@ export function Radio({
       className={cn(
         'relative inline-grid shrink-0',
         indicatorPressClass,
+        'motion-safe:in-[[data-physis-scope]]:has-[>input:active:enabled]:scale-none',
         !labelled && !described && parts?.wrapper?.className
       )}
       style={!labelled && !described ? parts?.wrapper?.style : undefined}
@@ -304,7 +304,11 @@ export function Radio({
     >
       {row}
       <span
-        className={cn(descriptionClass, parts?.description?.className)}
+        className={cn(
+          descriptionClass,
+          controlMetrics({ controlSize }),
+          parts?.description?.className
+        )}
         style={parts?.description?.style}
         data-slot="radio-description"
         id={descriptionId}
