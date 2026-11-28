@@ -7,15 +7,51 @@ import {
   NavLinkGroupTrigger,
   NavLinkGroupContent,
   ThemeScope,
-  defineTheme
+  defineTheme,
+  type NavLinkRenderProps
 } from '../../src/index.js'
-import {
-  BrowseStudyWorkspace,
-  BrowseProjectLibrary,
-  NavigateTeamSettings,
-  NavRouterAnchor
-} from '../../.storybook/examples/NavLinkExamples.js'
+import { NavLinkExample } from '../../.storybook/examples/NavLinkExamples.js'
 import { mount, click, key, pause } from './familyHarness.js'
+
+function NavRouterAnchor({
+  navigate,
+  onClick,
+  href,
+  target,
+  download,
+  children,
+  ...props
+}: NavLinkRenderProps & { navigate: (href: string) => void }) {
+  return (
+    <a
+      {...props}
+      href={href}
+      target={target}
+      download={download}
+      onClick={event => {
+        onClick?.(event)
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          (target && target !== '_self') ||
+          (download !== undefined && download !== false) ||
+          new URL(href, event.currentTarget.ownerDocument.baseURI).origin !==
+            event.currentTarget.ownerDocument.location.origin
+        )
+          return
+        event.preventDefault()
+        navigate(href)
+      }}
+    >
+      {children}
+    </a>
+  )
+}
+
 test('active navigation hydrates as labelled native anchors with actual refs and protected identities', async () => {
   const ref = createRef<HTMLAnchorElement>(),
     tree = (active: boolean) => (
@@ -114,48 +150,34 @@ test('native group keyboard disclosure excludes closed links from Tab and preser
   expect(request).toHaveBeenCalledExactlyOnceWith(true)
   expect(ref.current?.open).toBe(false)
 })
-test('native task routes update records and current links, focus accepted content and follow history observations', async () => {
+test('sidebar destinations update the current link and focus through browser history', async () => {
   const original = location.href
   try {
-    const { host } = await mount(<BrowseStudyWorkspace />),
-      links = host.querySelectorAll('a'),
-      content = host.querySelector('section')!
+    const { host } = await mount(<NavLinkExample grouped />)
+    const details = host.querySelector('details')!
+    const summary = host.querySelector('summary')!
+    expect(details.open).toBe(false)
+    expect(host.querySelector('a[aria-current="page"]')?.textContent).toBe('Overview')
+    summary.focus()
+    await key('{Enter}')
+    await expect.poll(() => details.open).toBe(true)
+
+    const links = host.querySelectorAll('a')
     await click(links[1]!)
-    await pause(20)
-    expect(content.textContent).toContain('Maya — confirmed')
+    const visiblePage = () => host.querySelector('section:not([hidden])')
+    await expect.poll(() => visiblePage()?.textContent).toContain('See who has access')
     expect(links[1]?.getAttribute('aria-current')).toBe('page')
-    expect(document.activeElement).toBe(content)
+    expect(document.activeElement).toBe(visiblePage())
+
     history.replaceState(null, '', links[2]!.href)
     await act(async () => window.dispatchEvent(new PopStateEvent('popstate')))
-    expect(content.textContent).toContain('Participant roster.csv')
+    expect(visiblePage()?.textContent).toContain('Choose your workspace defaults')
     expect(links[2]?.getAttribute('aria-current')).toBe('page')
     history.replaceState(null, '', location.pathname + location.search)
     await act(async () => window.dispatchEvent(new PopStateEvent('popstate')))
-    expect(content.textContent).toContain('Reader study overview')
+    expect(visiblePage()?.textContent).toContain('See the latest workspace activity')
     expect(links[0]?.getAttribute('aria-current')).toBe('page')
-    expect(document.activeElement).toBe(content)
-
-    const projects = await mount(<BrowseProjectLibrary />)
-    await click(projects.host.querySelectorAll('a')[1]!)
-    await pause(20)
-    expect(projects.host.querySelector('section')?.textContent).toContain('8 participants')
-  } finally {
-    history.replaceState(null, '', original)
-  }
-})
-test('router task preserves native adapters and exposes accepted settings data without a global router', async () => {
-  const original = location.href
-  try {
-    const { host } = await mount(<NavigateTeamSettings />),
-      link = host.querySelectorAll('a')[1]!,
-      summary = host.querySelector('summary')!
-    await click(link)
-    expect(location.hash).toBe(new URL(link.href).hash)
-    expect(host.querySelector('section')?.textContent).toContain('Two administrators')
-    expect(document.activeElement).toBe(host.querySelector('section'))
-    await click(summary)
-    await pause(30)
-    expect(host.querySelector('details')?.open).toBe(false)
+    expect(document.activeElement).toBe(visiblePage())
   } finally {
     history.replaceState(null, '', original)
   }
@@ -244,6 +266,7 @@ test('theme, host and part styles preserve active hover contrast, narrow wrappin
         gap: '11px',
         activeBackground: 'rgb(20, 30, 40)',
         activeColor: 'rgb(250, 250, 250)',
+        indicatorColor: 'rgb(70, 110, 190)',
         indent: '19px'
       }
     }
@@ -287,7 +310,12 @@ test('theme, host and part styles preserve active hover contrast, narrow wrappin
     expect(link.getBoundingClientRect().height).toBe(height)
     expect(summary.getBoundingClientRect().height).toBe(height)
     expect(getComputedStyle(link).gap).toBe('11px')
-    expect(getComputedStyle(link).borderRightWidth).toBe('3px')
+    const linkStyle = getComputedStyle(link)
+    expect(linkStyle.borderWidth).toBe('1px')
+    expect(linkStyle.borderColor).toBe('rgb(70, 110, 190)')
+    const summaryStyle = getComputedStyle(summary)
+    expect(summaryStyle.borderBottomLeftRadius).toBe(summaryStyle.borderTopLeftRadius)
+    expect(summaryStyle.borderBottomRightRadius).toBe(summaryStyle.borderTopRightRadius)
     expect(getComputedStyle(content).paddingRight).toBe('19px')
     expect(host.querySelector('details')!.scrollWidth).toBeLessThanOrEqual(220)
     await userEvent.hover(link)

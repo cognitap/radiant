@@ -500,8 +500,11 @@ test('disclosures, hierarchy, menus, navigation, stepper and timeline mirror arr
   }
 
   const navLink = host.querySelector<HTMLAnchorElement>('[data-slot~="nav-link"]')!
-  expect(getComputedStyle(navLink).borderRightWidth).toBe('3px')
-  expect(getComputedStyle(navLink).borderLeftWidth).toBe('0px')
+  const navLinkStyle = getComputedStyle(navLink)
+  expect(navLinkStyle.direction).toBe('rtl')
+  expect(navLink).toHaveAttribute('aria-current', 'page')
+  expect(navLinkStyle.borderWidth).toBe('1px')
+  expect(navLinkStyle.borderColor).toBe('rgba(0, 0, 0, 0)')
 
   const tree = host.querySelector<HTMLElement>('[role="tree"]')!
   await act(async () => tree.focus())
