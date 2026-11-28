@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.8
+
 - CodeBlock Storybook shows copying and line numbers in one example.
 - CodeBlock copy actions show the shared copy icon and confirm success inside the button.
 
