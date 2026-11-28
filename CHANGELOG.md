@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.5
+
 - Toolbar Storybook examples focus on formatting and menu navigation.
 
 ## 0.2.4
