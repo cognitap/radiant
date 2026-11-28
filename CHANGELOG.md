@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Kbd uses regular-weight text for keys and combinations.
+
 ## 0.2.0
 
 - Breaking: CopyButton puts the success label inside the button with a checkmark. It previously showed success beside the button. Style the success label through Button and supply the copy glyph through `IconProvider`.

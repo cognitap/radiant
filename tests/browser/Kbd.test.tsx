@@ -83,8 +83,10 @@ test('combinations stay unboxed while keys retain keycaps and native style overr
   expect(style.borderWidth).toBe('0px')
   expect(style.padding).toBe('0px')
   expect(style.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(style.fontWeight).toBe('400')
   expect(style.boxShadow).not.toContain('inset')
   expect(getComputedStyle(key).boxShadow).toContain('inset')
+  expect(getComputedStyle(key).fontWeight).toBe('400')
   expect(getComputedStyle(key).borderRadius).toBe('0px')
   expect(key.style.color).toBe('red')
 })
@@ -103,6 +105,7 @@ test('key hints never intercept Tab or native Button activation', async () => {
     </>
   )
   const buttons = host.querySelectorAll('button')
+  expect(getComputedStyle(buttons[1]!.querySelector('kbd')!).fontWeight).toBe('400')
   await click(buttons[0]!)
   await keys('{Tab}')
   expect(document.activeElement).toBe(buttons[1])
