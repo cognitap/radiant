@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.1
+
 - Kbd uses regular-weight text for keys and combinations.
 
 ## 0.2.0
