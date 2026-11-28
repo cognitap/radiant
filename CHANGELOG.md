@@ -4,7 +4,6 @@
 
 ## Unreleased
 
-- ToggleGroup Storybook examples focus on single and multiple selection.
 - RadioGroup Storybook examples focus on selection and Field states.
 - Radio option descriptions align with their labels.
 - Radio focus outlines match the invalid border color.
