@@ -6,9 +6,9 @@ import { composeAction } from '../../internal/events.js'
 import { joinIds } from '../../internal/ids.js'
 import type { DistributiveOmit, WithoutToggle } from '../../internal/types.js'
 import type { PartStyle } from '../../presentation.js'
-import { useClipboardCopy } from '../../react/useClipboardCopy.js'
+import { copyConfirmationDelay, useClipboardCopy } from '../../react/useClipboardCopy.js'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
-import { StandardIcon } from '../IconProvider/IconProvider.js'
+import { CopyButtonContent } from './CopyButtonContent.js'
 
 export type CopyButtonRenderProps = ButtonRenderProps
 export type CopyButtonProps = WithoutToggle<DistributiveOmit<ButtonProps, 'type' | 'value'>> & {
@@ -23,7 +23,7 @@ export type CopyButtonProps = WithoutToggle<DistributiveOmit<ButtonProps, 'type'
 
 export function CopyButton({
   value,
-  resetDelay = 2000,
+  resetDelay = copyConfirmationDelay,
   copiedText = 'Copied',
   errorText = 'Could not copy. Try again or copy the text manually.',
   onClick,
@@ -42,9 +42,6 @@ export function CopyButton({
   const copied = phase === 'success'
   const failed = phase === 'error'
   const label = children ?? 'Copy'
-  const defaultIcon = typeof label === 'string' || typeof label === 'number'
-  const contentClass =
-    'col-start-1 row-start-1 inline-flex min-w-0 items-center justify-center gap-[0.5em]'
 
   return (
     <>
@@ -63,26 +60,12 @@ export function CopyButton({
           void copy(event.currentTarget.ownerDocument.defaultView)
         })}
       >
-        <span className="inline-grid min-w-0">
-          <span
-            className={cn(contentClass, copied && 'invisible')}
-            aria-hidden={copied}
-          >
-            {defaultIcon && <CopyGlyph name="copy" />}
-            {defaultIcon ? (
-              <span className={iconOnly ? 'sr-only' : 'min-w-0'}>{label}</span>
-            ) : (
-              label
-            )}
-          </span>
-          <span
-            className={cn(contentClass, !copied && 'invisible')}
-            aria-hidden={!copied}
-          >
-            <CopyGlyph name="check" />
-            <span className={iconOnly ? 'sr-only' : 'min-w-0'}>{copiedText || label}</span>
-          </span>
-        </span>
+        <CopyButtonContent
+          label={label}
+          copied={copied}
+          copiedText={copiedText}
+          iconOnly={iconOnly}
+        />
       </Button>
       <output
         id={statusId}
@@ -99,39 +82,5 @@ export function CopyButton({
         {copied ? copiedText : failed ? errorText : ''}
       </output>
     </>
-  )
-}
-
-function CopyGlyph({ name }: { name: 'copy' | 'check' }) {
-  return (
-    <StandardIcon
-      name={name}
-      fallback={
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.75"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {name === 'copy' ? (
-            <>
-              <rect
-                x="8"
-                y="8"
-                width="12"
-                height="12"
-                rx="2"
-              />
-              <path d="M15 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" />
-            </>
-          ) : (
-            <path d="m5 12 4 4 10-10" />
-          )}
-        </svg>
-      }
-    />
   )
 }

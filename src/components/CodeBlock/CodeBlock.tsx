@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useId, type ComponentProps } from 'react'
 import { Button, type ButtonProps, type ButtonRenderProps } from '../Button/Button.js'
+import { CopyButtonContent } from '../CopyButton/CopyButtonContent.js'
 import { ScrollArea, type ScrollAreaProps } from '../ScrollArea/ScrollArea.js'
 import { cn } from 'cn'
 import { joinIds } from '../../internal/ids.js'
@@ -36,6 +37,7 @@ type Context = {
   language?: string
   lineNumbers: boolean
   pending: boolean
+  copied: boolean
   statusId: string
   copy: (win: Window | null) => Promise<void>
 }
@@ -70,7 +72,9 @@ export function CodeBlock({
           ? errorText
           : ''
   return (
-    <CodeContext.Provider value={{ code, language, lineNumbers, pending, statusId, copy }}>
+    <CodeContext.Provider
+      value={{ code, language, lineNumbers, pending, copied: phase === 'success', statusId, copy }}
+    >
       <div
         {...props}
         data-slot={joinIds('code-block', props['data-slot'])}
@@ -92,7 +96,7 @@ export function CodeBlock({
           aria-atomic="true"
           className={cn(
             'block m-0 break-words text-[length:var(--rad-typography-roles-ui-supporting-size,0.8125rem)] [color:var(--rad-code-block-status-color,var(--rad-color-muted-foreground))] forced-colors:text-[CanvasText]',
-            message && 'px-[var(--rad-code-block-padding,1rem)] py-2',
+            phase === 'error' ? 'px-[var(--rad-code-block-padding,1rem)] py-2' : 'sr-only',
             parts?.status?.className
           )}
           style={parts?.status?.style}
@@ -177,6 +181,7 @@ export function CodeBlockContent({ children, className, ...props }: CodeBlockCon
 export function CodeBlockCopy({
   onClick,
   children = 'Copy code',
+  iconOnly,
   pending = false,
   ...props
 }: CodeBlockCopyProps) {
@@ -189,6 +194,7 @@ export function CodeBlockCopy({
       onPressedChange={undefined}
       aria-pressed={undefined}
       type="button"
+      iconOnly={iconOnly}
       pending={pending || context.pending}
       data-slot={joinIds('code-block-copy', props['data-slot'])}
       aria-describedby={joinIds(props['aria-describedby'], context.statusId)}
@@ -196,7 +202,11 @@ export function CodeBlockCopy({
         void context.copy(event.currentTarget.ownerDocument.defaultView)
       })}
     >
-      {children}
+      <CopyButtonContent
+        label={children}
+        copied={context.copied}
+        iconOnly={iconOnly}
+      />
     </Button>
   )
 }

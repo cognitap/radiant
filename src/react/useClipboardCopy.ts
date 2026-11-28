@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from 'react'
 type Phase = 'idle' | 'pending' | 'success' | 'error'
 type Feedback = { source: string; phase: Phase }
 
-export function useClipboardCopy(source: string, resetDelay?: number) {
+export const copyConfirmationDelay = 2000
+
+export function useClipboardCopy(source: string, resetDelay = copyConfirmationDelay) {
   const [feedback, setFeedback] = useState<Feedback>({ source, phase: 'idle' })
   const [pending, setPending] = useState(false)
   const busy = useRef(false)
@@ -42,7 +44,7 @@ export function useClipboardCopy(source: string, resetDelay?: number) {
     setPending(false)
     const result: Feedback = { source, phase }
     setFeedback(current => (current.source === source ? result : current))
-    if (phase === 'success' && win && resetDelay !== undefined) {
+    if (phase === 'success' && win) {
       const id = win.setTimeout(() => {
         setFeedback(current => (current === result ? { source, phase: 'idle' } : current))
       }, resetDelay)
