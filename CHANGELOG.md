@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.111
+
 - Checkbox uses a regular-weight label and shows an inset square when checked.
 
 ## 0.0.110
