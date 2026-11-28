@@ -15,7 +15,7 @@ export type ButtonGroupProps = Omit<
   'data-slot'?: string
 }
 
-/** Joined presentation only: each real Button keeps its native focus and activation. */
+/** Closely spaced actions with independent focus and activation. */
 export function ButtonGroup({ orientation = 'horizontal', className, ...props }: ButtonGroupProps) {
   if (orientation !== 'horizontal' && orientation !== 'vertical')
     throw new TypeError('ButtonGroup orientation must be horizontal or vertical.')
@@ -27,10 +27,8 @@ export function ButtonGroup({ orientation = 'horizontal', className, ...props }:
       data-slot={joinIds('button-group', props['data-slot'])}
       data-orientation={orientation}
       className={cn(
-        'isolate inline-flex max-w-full items-stretch align-middle [&>button]:relative [&>button]:rounded-none! [&>button:focus-visible]:z-10',
-        orientation === 'horizontal'
-          ? 'flex-row [&>button:not(:first-of-type)]:-ms-[var(--rad-button-border-width,var(--rad-control-border-width,1px))] [&>button:first-of-type]:rounded-s-[var(--rad-button-group-radius,var(--rad-button-radius,var(--rad-control-radius,0.5rem)))]! [&>button:last-of-type]:rounded-e-[var(--rad-button-group-radius,var(--rad-button-radius,var(--rad-control-radius,0.5rem)))]!'
-          : 'flex-col [&>button:not(:first-of-type)]:-mt-[var(--rad-button-border-width,var(--rad-control-border-width,1px))] [&>button:first-of-type]:rounded-t-[var(--rad-button-group-radius,var(--rad-button-radius,var(--rad-control-radius,0.5rem)))]! [&>button:last-of-type]:rounded-b-[var(--rad-button-group-radius,var(--rad-button-radius,var(--rad-control-radius,0.5rem)))]!',
+        'inline-flex max-w-full items-stretch gap-[var(--rad-button-group-gap,calc(var(--rad-spacing-normal,1rem)/2))] align-middle',
+        orientation === 'horizontal' ? 'flex-row' : 'flex-col',
         className
       )}
     />

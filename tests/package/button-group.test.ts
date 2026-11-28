@@ -29,7 +29,7 @@ test('ButtonGroup is a passive div group and preserves every real native Button'
   assert.match(html, /type="reset"/)
   assert.doesNotMatch(html, /tabindex=|role="toolbar"|aria-orientation=/)
 })
-test('vertical grouping and radius tokens are typed without introducing a state owner', () => {
+test('vertical grouping and spacing tokens are typed without introducing a state owner', () => {
   const html = renderToStaticMarkup(
     h(
       ThemeScope,
@@ -37,13 +37,13 @@ test('vertical grouping and radius tokens are typed without introducing a state 
         theme: defineTheme({
           id: 'group',
           name: 'Group',
-          components: { buttonGroup: { radius: '9px' } }
+          components: { buttonGroup: { gap: '9px' } }
         })
       },
       h(ButtonGroup, { orientation: 'vertical' }, h(Button, {}, 'Action'))
     )
   )
-  assert.match(html, /--rad-button-group-radius:9px/)
+  assert.match(html, /--rad-button-group-gap:9px/)
   assert.match(html, /data-orientation="vertical"/)
   assert.throws(
     () => renderToStaticMarkup(h(ButtonGroup, JSON.parse('{"orientation":"grid"}'))),

@@ -194,7 +194,7 @@ export const componentRegistry = {
     timeColor: 'css',
     timeSize: 'css'
   },
-  buttonGroup: { radius: 'css' },
+  buttonGroup: { gap: 'css' },
   otpField: { gap: 'css', slotSize: 'css' },
   tag: { gap: 'css' },
   multiSelect: { gap: 'css' },

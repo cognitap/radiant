@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import {
   ButtonGroup,
   Button,
@@ -12,6 +13,7 @@ import {
   type ButtonGroupProps,
   type ButtonProps
 } from '../../src/index.js'
+import { StandardIcon } from '../../src/components/IconProvider/IconProvider.js'
 export type ButtonGroupTaskOptions = Pick<
   ButtonGroupProps,
   'orientation' | 'dir' | 'className' | 'style'
@@ -101,7 +103,15 @@ export function PublishReportActions({
             iconOnly
             aria-label="More publication actions"
           >
-            <span aria-hidden="true">▾</span>
+            <StandardIcon
+              name="chevronDown"
+              fallback={
+                <ChevronDown
+                  aria-hidden
+                  strokeWidth={1.75}
+                />
+              }
+            />
           </MenuTrigger>
           <MenuPortal>
             <MenuContent>
@@ -116,55 +126,6 @@ export function PublishReportActions({
         </Menu>
       </ButtonGroup>
       <output aria-live="polite">{message}</output>
-    </div>
-  )
-}
-export function BrowseReviewWeeks({
-  orientation,
-  dir,
-  className,
-  style,
-  ...buttons
-}: ButtonGroupTaskOptions) {
-  const [week, setWeek] = useState(0)
-  return (
-    <div
-      dir={dir}
-      style={{ display: 'grid', gap: '1rem', width: 'min(30rem,100%)' }}
-    >
-      <ButtonGroup
-        aria-label="Review week"
-        orientation={orientation}
-        className={className}
-        style={style}
-      >
-        <Button
-          {...buttons}
-          variant="outline"
-          onClick={() => setWeek(current => current - 1)}
-        >
-          Previous week
-        </Button>
-        <Button
-          {...buttons}
-          variant="outline"
-          onClick={() => setWeek(0)}
-        >
-          This week
-        </Button>
-        <Button
-          {...buttons}
-          variant="outline"
-          onClick={() => setWeek(current => current + 1)}
-        >
-          Next week
-        </Button>
-      </ButtonGroup>
-      <output aria-live="polite">
-        {week === 0
-          ? 'Showing this week.'
-          : `Showing ${Math.abs(week)} ${Math.abs(week) === 1 ? 'week' : 'weeks'} ${week < 0 ? 'before' : 'after'} this week.`}
-      </output>
     </div>
   )
 }
