@@ -446,11 +446,33 @@ test('steppers={false} removes the buttons and keeps keyboard stepping, bounds a
   expect(input.value).toBe('0')
 })
 
-test('steppers render by default', async () => {
+test('steppers form an evenly inset group with equal buttons', async () => {
   const { host } = await mount(
     <form>
       <Amount defaultValue={5} />
     </form>
   )
   expect(host.querySelectorAll('button')).toHaveLength(2)
+  const wrapper = host.querySelector('[data-slot~="number-field-wrapper"]')!
+  const actions = host.querySelector('[data-slot~="number-field-actions"]')!
+  const decrement = host.querySelector('[data-slot~="number-field-decrement"]')!
+  const increment = host.querySelector('[data-slot~="number-field-increment"]')!
+  const box = wrapper.getBoundingClientRect()
+  const group = actions.getBoundingClientRect()
+  const minus = decrement.getBoundingClientRect()
+  const plus = increment.getBoundingClientRect()
+  const inset = box.right - group.right
+  expect(group.top - box.top).toBeCloseTo(inset)
+  expect(box.bottom - group.bottom).toBeCloseTo(inset)
+  expect(minus.width).toBeCloseTo(plus.width)
+  expect(minus.right).toBeCloseTo(plus.left)
+  expect(parseFloat(getComputedStyle(actions).borderBottomRightRadius)).toBe(
+    parseFloat(getComputedStyle(wrapper).borderBottomRightRadius) - inset
+  )
+  expect(getComputedStyle(decrement).borderTopRightRadius).toBe(
+    getComputedStyle(actions).borderTopRightRadius
+  )
+  expect(getComputedStyle(increment).borderTopLeftRadius).toBe(
+    getComputedStyle(actions).borderTopLeftRadius
+  )
 })

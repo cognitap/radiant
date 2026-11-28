@@ -54,7 +54,6 @@ export type NumberFieldProps = DistributiveOmit<
     steppers?: boolean
     parts?: { wrapper?: PartStyle; increment?: PartStyle; decrement?: PartStyle }
   }
-/** One editable Input host and one raw native form value. Label with Field or a native label. */
 export function NumberField({
   value,
   defaultValue,
@@ -179,14 +178,17 @@ export function NumberField({
     state.value !== null && addNumberStep(state.value, -step, min, max) === state.value
   const atMaximum =
     state.value !== null && addNumberStep(state.value, step, min, max) === state.value
-  const actionClass =
-    'h-[calc(var(--_rad-control-height)_-_2*var(--rad-input-group-border-width,var(--rad-control-border-width,1px)))] min-h-0 shrink-0 px-2'
   return (
     <InputGroup
       controlSize={controlSize}
       dir={props.dir}
       data-slot="number-field-wrapper"
-      className={cn('gap-[var(--rad-number-field-gap,0.5rem)]', parts?.wrapper?.className)}
+      className={cn(
+        'gap-[var(--rad-number-field-gap,0.5rem)]',
+        steppers &&
+          '[--_rad-number-field-stepper-inset:3px] pe-[var(--_rad-number-field-stepper-inset)]',
+        parts?.wrapper?.className
+      )}
       style={parts?.wrapper?.style}
     >
       <InputGroupInputRoot
@@ -274,7 +276,16 @@ export function NumberField({
         data-slot="number-field-value"
       />
       {steppers && (
-        <InputGroupAddon data-slot="number-field-actions">
+        <InputGroupAddon
+          data-slot="number-field-actions"
+          className={cn(
+            '[--_rad-number-field-stepper-offset:calc(var(--rad-input-group-border-width,var(--rad-control-border-width,1px))_+_var(--_rad-number-field-stepper-inset))]',
+            '[--_rad-number-field-stepper-size:calc(var(--_rad-control-height)_-_var(--_rad-number-field-stepper-offset)_-_var(--_rad-number-field-stepper-offset))]',
+            '[--_rad-number-field-stepper-radius:max(0px,calc(var(--rad-input-group-radius,var(--_rad-input-group-default-radius))_-_var(--_rad-number-field-stepper-offset)))]',
+            'gap-0 overflow-hidden rounded-(--_rad-number-field-stepper-radius) [corner-shape:var(--rad-control-corner-shape,round)]',
+            'bg-[color-mix(in_oklab,var(--rad-color-foreground,currentColor)_5%,transparent)]'
+          )}
+        >
           {([-1, 1] as const).map(sign => (
             <Button
               key={sign}
@@ -290,7 +301,8 @@ export function NumberField({
               data-slot={sign === 1 ? 'number-field-increment' : 'number-field-decrement'}
               className={cn(
                 inlineActionClass,
-                actionClass,
+                'size-(--_rad-number-field-stepper-size) min-h-0 min-w-6 px-0 [--rad-button-focus-offset:calc(0px_-_var(--rad-button-focus-width,var(--rad-focus-width,2px)))]',
+                '[--rad-button-radius:var(--_rad-number-field-stepper-radius)] [--rad-button-corner-shape:var(--rad-control-corner-shape,round)]',
                 (sign === 1 ? parts?.increment : parts?.decrement)?.className
               )}
               style={(sign === 1 ? parts?.increment : parts?.decrement)?.style}
