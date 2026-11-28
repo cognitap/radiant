@@ -216,12 +216,21 @@ for (const mode of ['light', 'dark'] as const) {
         const mark =
           input.parentElement!.querySelectorAll('[aria-hidden]')[input.indeterminate ? 1 : 0]
         const square = input.matches('[data-slot~="checkbox"]:checked:not(:indeterminate)')
+        const outline = input.matches('[data-slot~="checkbox"]:indeterminate')
         const markStyle = getComputedStyle(mark)
         const fill = getComputedStyle(input).backgroundColor
-        const ink = input.type === 'radio' || square ? markStyle.backgroundColor : markStyle.color
+        const ink = outline
+          ? markStyle.borderTopColor
+          : input.type === 'radio' || square
+            ? markStyle.backgroundColor
+            : markStyle.color
         expect(markStyle.opacity).toBe('1')
         expect(ink).not.toBe(fill)
-        const systemInk = input.disabled ? 'GrayText' : square ? 'Highlight' : 'HighlightText'
+        const systemInk = input.disabled
+          ? 'GrayText'
+          : square || outline
+            ? 'Highlight'
+            : 'HighlightText'
         expect(ink).toBe(systemColor(systemInk, input.parentElement!))
       }
       const disabled = host.querySelector<HTMLButtonElement>('button:disabled')!
