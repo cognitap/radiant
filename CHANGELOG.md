@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+## 0.2.3
+
+- ToggleGroup Storybook examples focus on single and multiple selection.
+
 ## 0.2.2
 
 - RadioGroup Storybook examples focus on selection and Field states.
