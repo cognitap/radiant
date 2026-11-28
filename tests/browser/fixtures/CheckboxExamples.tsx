@@ -14,9 +14,9 @@ import {
   type ControlSize,
   type Theme,
   type ThemeMode
-} from '../../src/index.js'
-import { radiant } from '../../src/examples/index.js'
-import { MotionProvider, useReducedMotion, useSpring } from '../../src/motion/react.js'
+} from '../../../src/index.js'
+import { radiant } from '../../../src/examples/index.js'
+import { MotionProvider, useReducedMotion, useSpring } from '../../../src/motion/react.js'
 
 const subscribe = () => () => {}
 const clientSnapshot = () => true
