@@ -10,6 +10,7 @@ export const ICON_NAMES = [
   'chevronRight',
   'close',
   'calendar',
+  'copy',
   'grip',
   'spinner'
 ] as const

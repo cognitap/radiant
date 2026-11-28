@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Breaking: CopyButton puts the success label inside the button with a checkmark. It previously showed success beside the button. Style the success label through Button and supply the copy glyph through `IconProvider`.
+
 ## 0.1.1
 
 - CheckboxGroup Storybook examples focus on group selection and Field states.
