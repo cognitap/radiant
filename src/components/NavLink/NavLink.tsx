@@ -46,7 +46,7 @@ const itemClass = [
   'box-border flex w-full min-w-0 items-center text-start no-underline hover:no-underline min-h-[var(--_rad-control-height)]',
   'gap-[var(--rad-nav-link-gap,0.5rem)] px-[var(--rad-nav-link-padding-inline,var(--_rad-control-padding))] py-[var(--rad-nav-link-padding-block,0.375rem)] rounded-[var(--rad-nav-link-radius,var(--rad-control-radius,0.5rem))] [corner-shape:var(--rad-control-corner-shape,round)]',
   'font-[family-name:var(--rad-nav-link-font-family,var(--rad-typography-roles-ui-label-family,system-ui,sans-serif))] text-[length:var(--rad-nav-link-font-size,var(--_rad-control-font-size))] font-[number:var(--rad-nav-link-font-weight,var(--rad-typography-roles-ui-label-weight,550))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]',
-  '[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:bg-[var(--rad-nav-link-hover-background,var(--rad-color-neutral))]',
+  '[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:[color:var(--rad-nav-link-color,var(--rad-color-foreground))] hover:bg-[var(--rad-nav-link-hover-background,color-mix(in_oklch,var(--rad-color-foreground)_6%,transparent))]',
   'forced-colors:bg-[Canvas] forced-colors:text-[CanvasText] forced-colors:hover:bg-[ButtonFace] forced-colors:hover:text-[CanvasText]',
   focusRingClass,
   'focus-visible:[--_rad-focus-color:var(--rad-nav-link-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-nav-link-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-nav-link-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-nav-link-focus-style)]'
@@ -118,9 +118,9 @@ export function NavLink({
       className={cn(
         controlMetrics({ controlSize }),
         itemClass,
-        'border-s-[3px] border-s-transparent data-selected:[border-inline-start-color:var(--rad-nav-link-indicator-color,var(--rad-control-selected-border-color,var(--rad-color-accent)))] data-selected:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] data-selected:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))] data-selected:[box-shadow:var(--rad-control-selected-shadow,none)] data-selected:font-[number:var(--rad-typography-heading-weight,600)]',
+        'border border-transparent py-[max(0px,calc(var(--rad-nav-link-padding-block,0.375rem)-1px))] data-selected:[border-color:var(--rad-nav-link-indicator-color,transparent)] data-selected:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] data-selected:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))] data-selected:[box-shadow:var(--rad-control-selected-shadow,none)] data-selected:font-[number:var(--rad-typography-heading-weight,600)]',
         'data-selected:[&_[data-slot=nav-link-description]]:[color:inherit] data-selected:hover:bg-[var(--rad-nav-link-active-background,var(--rad-control-selected-background,var(--rad-color-neutral)))] data-selected:hover:[color:var(--rad-nav-link-active-color,var(--rad-control-selected-foreground,var(--rad-color-foreground)))]',
-        'forced-colors:data-selected:[border-inline-start-color:Highlight] forced-colors:data-selected:bg-[Highlight] forced-colors:data-selected:text-[HighlightText] forced-colors:data-selected:hover:bg-[Highlight] forced-colors:data-selected:hover:text-[HighlightText]',
+        'forced-colors:data-selected:border-[Highlight] forced-colors:data-selected:bg-[Highlight] forced-colors:data-selected:text-[HighlightText] forced-colors:data-selected:hover:bg-[Highlight] forced-colors:data-selected:hover:text-[HighlightText]',
         className
       )}
     >
@@ -134,7 +134,10 @@ export function NavLinkGroup({ className, 'data-slot': slot, ...props }: NavLink
     <Collapsible
       {...props}
       data-slot={joinIds('nav-link-group', slot)}
-      className={cn('gap-0 rounded-none [border-width:0px] bg-transparent', className)}
+      className={cn(
+        'gap-0 rounded-none [border-width:0px] bg-transparent [box-shadow:none] [backdrop-filter:none] [&::details-content]:overflow-clip [&::details-content]:[overflow-clip-margin:0.375rem]',
+        className
+      )}
     />
   )
 }
@@ -160,7 +163,12 @@ export function NavLinkGroupTrigger({
       {...native}
       data-slot={joinIds('nav-link-group-trigger', slot)}
       data-control-size={controlSize}
-      className={cn(controlMetrics({ controlSize }), itemClass, className)}
+      className={cn(
+        controlMetrics({ controlSize }),
+        itemClass,
+        '[details[open]>&]:rounded-b-[var(--rad-nav-link-radius,var(--rad-control-radius,0.5rem))]',
+        className
+      )}
     >
       <Content {...{ icon, description, parts, children }} />
     </CollapsibleTrigger>
@@ -175,7 +183,7 @@ export function NavLinkGroupContent({
     <CollapsibleContent
       {...props}
       data-slot={joinIds('nav-link-group-content', slot)}
-      className={cn('px-0 pb-0 ps-[var(--rad-nav-link-indent,1rem)]', className)}
+      className={cn('pt-2 pb-2 pe-2 ps-[var(--rad-nav-link-indent,1rem)]', className)}
     />
   )
 }

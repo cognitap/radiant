@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- NavLink Storybook examples focus on current-page links and groups.
+- NavLink uses a filled active row. A custom `indicatorColor` now outlines the whole row.
+- NavLink group triggers keep their rounded shape and leave space around nested links.
+
 ## 0.2.8
 
 - CodeBlock Storybook shows copying and line numbers in one example.
