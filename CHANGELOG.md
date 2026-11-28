@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Toolbar Storybook examples focus on formatting and menu navigation.
+
 ## 0.2.4
 
 - Highlight adds even padding around whole-word matches.

@@ -1,332 +1,152 @@
-import { useId, useRef, useState } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, within } from 'storybook/test'
 import {
-  Toolbar,
   Button,
-  Link,
-  ToggleGroup,
-  ToggleGroupItem,
-  Separator,
   Menu,
-  MenuTrigger,
-  MenuPortal,
   MenuContent,
   MenuItem,
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-  DialogClose,
-  Checkbox,
-  Field,
-  Textarea,
+  MenuPortal,
+  MenuTrigger,
+  Separator,
+  ToggleGroup,
+  ToggleGroupItem,
+  Toolbar,
   type ToolbarProps
 } from '../../index.js'
 import { MotionProvider } from '../../motion/react.js'
-type Options = Pick<ToolbarProps, 'orientation' | 'loop' | 'dir' | 'className' | 'style'>
-const layout = {
-  display: 'grid',
-  gap: '1rem',
-  width: 'min(36rem, calc(100vw - 2rem))',
-  maxWidth: '100%'
-}
+
+type ToolbarOptions = Pick<ToolbarProps, 'orientation' | 'dir' | 'loop'>
+
 const meta = {
   title: 'Components/Toolbar',
   component: Toolbar,
-  args: { 'aria-label': 'Editor toolbar', orientation: 'horizontal', loop: true, dir: 'ltr' },
+  args: { 'aria-label': 'Formatting', orientation: 'horizontal', dir: 'ltr', loop: true },
   argTypes: {
-    'aria-label': { control: false },
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
-    loop: { control: 'boolean' },
-    dir: { control: 'inline-radio', options: ['ltr', 'rtl'] }
+    dir: { control: 'inline-radio', options: ['ltr', 'rtl'] },
+    loop: { control: 'boolean' }
   },
-  render: args => <Editor {...args} />
+  parameters: { controls: { include: ['orientation', 'dir', 'loop'] } }
 } satisfies Meta<typeof Toolbar>
+
 export default meta
 type Story = StoryObj<typeof meta>
-function Editor(options: Options) {
-  const [text, setText] = useState('Make the next step clear.'),
-    [history, setHistory] = useState<string[]>([]),
-    [format, setFormat] = useState(['bold']),
-    [message, setMessage] = useState('No export requested.')
+
+const layout = { display: 'grid', gap: '1rem', maxWidth: '100%' }
+
+function FormatText(options: ToolbarOptions) {
+  const [format, setFormat] = useState<string[]>([])
+
   return (
-    <div style={layout}>
-      <Toolbar
-        {...options}
-        aria-label="Document editor"
-      >
-        <Button
-          variant="outline"
-          disabled={history.length === 0}
-          onClick={() => {
-            const previous = history.at(-1)
-            if (previous !== undefined) {
-              setText(previous)
-              setHistory(history.slice(0, -1))
-            }
-          }}
-        >
-          Undo
-        </Button>
-        <Separator
-          decorative
-          orientation={options.orientation === 'vertical' ? 'horizontal' : 'vertical'}
-        />
-        <ToggleGroup
+    <MotionProvider>
+      <div style={layout}>
+        <Toolbar
+          {...options}
           aria-label="Formatting"
-          type="multiple"
-          defaultValue={['bold']}
-          orientation={options.orientation}
-          onValueChange={setFormat}
         >
-          <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
-          <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
-        </ToggleGroup>
-        <Menu>
-          <MenuTrigger variant="outline">More</MenuTrigger>
-          <MenuPortal>
-            <MenuContent>
-              <MenuItem
-                onSelect={() => setMessage(`Export requested for ${text.length} characters.`)}
-              >
-                Export document
-              </MenuItem>
-              <MenuItem
-                onSelect={() => {
-                  setHistory([...history, text])
-                  setText('')
-                }}
-              >
-                Clear draft
-              </MenuItem>
-            </MenuContent>
-          </MenuPortal>
-        </Menu>
-      </Toolbar>
-      <Field label="Draft">
-        <Textarea
-          value={text}
-          onChange={event => {
-            setHistory([...history, text])
-            setText(event.target.value)
-          }}
+          <Button
+            variant="outline"
+            disabled={format.length === 0}
+            onClick={() => setFormat([])}
+          >
+            Clear
+          </Button>
+          <Separator
+            decorative
+            orientation={options.orientation === 'vertical' ? 'horizontal' : 'vertical'}
+          />
+          <ToggleGroup
+            aria-label="Text style"
+            orientation={options.orientation}
+            type="multiple"
+            value={format}
+            onValueChange={setFormat}
+          >
+            <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+            <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
+          </ToggleGroup>
+        </Toolbar>
+        <p
           style={{
+            margin: 0,
             fontWeight: format.includes('bold') ? 700 : 400,
             fontStyle: format.includes('italic') ? 'italic' : 'normal'
           }}
-        />
-      </Field>
-      <output aria-live="polite">{message}</output>
-    </div>
+        >
+          Project notes
+        </p>
+      </div>
+    </MotionProvider>
   )
 }
+
 export const Default: Story = {
-  play: async ({ canvasElement, userEvent }) => {
-    const canvas = within(canvasElement),
-      italic = canvas.getByRole('button', { name: 'Italic' })
-    await userEvent.click(italic)
-    await expect(italic).toHaveAttribute('aria-pressed', 'true')
-    await expect(canvas.getByRole('button', { name: 'Bold' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    )
+  render: ({ orientation, dir, loop }) => <FormatText {...{ orientation, dir, loop }} />,
+  play: async ({ canvasElement, userEvent, args, step }) => {
+    const toolbar = within(canvasElement).getByRole('toolbar', { name: 'Formatting' })
+    const { getByRole } = within(toolbar)
+    const bold = getByRole('button', { name: 'Bold' })
+    const italic = getByRole('button', { name: 'Italic' })
+    const clear = getByRole('button', { name: 'Clear' })
+    const next =
+      args.orientation === 'vertical'
+        ? 'ArrowDown'
+        : args.dir === 'rtl'
+          ? 'ArrowLeft'
+          : 'ArrowRight'
+
+    await step('Arrow keys move focus without applying formatting', async () => {
+      await expect(clear).toBeDisabled()
+      await expect(bold).toHaveAttribute('tabindex', '0')
+      bold.focus()
+      await userEvent.keyboard(`{${next}}`)
+      await expect(italic).toHaveFocus()
+      await expect(italic).toHaveAttribute('aria-pressed', 'false')
+    })
+    await step('Space toggles the focused action', async () => {
+      await userEvent.keyboard(' ')
+      await expect(italic).toHaveAttribute('aria-pressed', 'true')
+      await expect(clear).toBeEnabled()
+      await userEvent.click(clear)
+      await expect(italic).toHaveAttribute('aria-pressed', 'false')
+    })
   }
 }
-function DocumentActions(options: Options) {
-  const [drafts, setDrafts] = useState(1),
-    [pending, setPending] = useState(false),
-    [density, setDensity] = useState<string | null>('comfortable'),
-    [message, setMessage] = useState('Draft ready.')
+
+function ZoomActions(options: ToolbarOptions) {
+  const [zoom, setZoom] = useState(100)
+
   return (
-    <div style={layout}>
-      <Toolbar
-        {...options}
-        aria-label="Document actions"
-      >
-        <Button
-          variant="outline"
-          onClick={() => setDrafts(drafts + 1)}
-        >
-          New draft
-        </Button>
-        <Dialog>
-          <DialogTrigger variant="outline">Reading settings</DialogTrigger>
-          <DialogContent>
-            <DialogTitle>Reading settings</DialogTitle>
-            <ToggleGroup
-              aria-label="Reading density"
-              variant="segmented"
-              defaultValue="comfortable"
-              onValueChange={setDensity}
-            >
-              <ToggleGroupItem value="compact">Compact</ToggleGroupItem>
-              <ToggleGroupItem value="comfortable">Comfortable</ToggleGroupItem>
-            </ToggleGroup>
-            <p style={{ lineHeight: density === 'compact' ? 1.2 : 1.8 }}>
-              Related actions keep their own keyboard navigation inside the dialog.
-            </p>
-            <DialogClose>Done</DialogClose>
-          </DialogContent>
-        </Dialog>
-        <Button
-          pending={pending}
-          onClick={() => setMessage('Publish requested.')}
-        >
-          Publish
-        </Button>
-      </Toolbar>
-      <Checkbox
-        label="Publishing in progress"
-        checked={pending}
-        onChange={event => setPending(event.target.checked)}
-      />
-      <output aria-live="polite">
-        {drafts} drafts. {message}
-      </output>
-    </div>
-  )
-}
-export const ManagingDocumentActions: Story = {
-  render: args => (
     <MotionProvider>
-      <DocumentActions {...args} />
-    </MotionProvider>
-  )
-}
-function Resources(options: Options) {
-  const id = useId(),
-    [refreshes, setRefreshes] = useState(0)
-  return (
-    <div style={layout}>
-      <Toolbar
-        {...options}
-        aria-label="Project resources"
-        style={{
-          '--rad-toolbar-padding': '.5rem',
-          '--rad-toolbar-background': 'var(--rad-color-neutral)',
-          ...options.style
-        }}
-      >
-        <Button
-          variant="ghost"
-          onClick={() => setRefreshes(refreshes + 1)}
-        >
-          Refresh project
-        </Button>
-        <Separator
-          decorative
-          orientation={options.orientation === 'vertical' ? 'horizontal' : 'vertical'}
-        />
-        <Link
-          href={`#${id}-brief`}
-          variant="soft"
-          tone="neutral"
-        >
-          Read brief
-        </Link>
-        <Link
-          href={`#${id}-notes`}
-          variant="soft"
-          tone="neutral"
-        >
-          Meeting notes
-        </Link>
-      </Toolbar>
-      <output aria-live="polite">Refreshed {refreshes} times.</output>
-      <section
-        id={`${id}-brief`}
-        tabIndex={-1}
-      >
-        <h3>Project brief</h3>
-        <p>Build a quieter workspace.</p>
-      </section>
-      <section
-        id={`${id}-notes`}
-        tabIndex={-1}
-      >
-        <h3>Meeting notes</h3>
-        <p>Keep commands and navigation distinct.</p>
-      </section>
-    </div>
-  )
-}
-export const OpeningProjectResources: Story = {
-  render: args => (
-    <MotionProvider>
-      <Resources {...args} />
-    </MotionProvider>
-  )
-}
-function CanvasTools(options: Options) {
-  const id = useId(),
-    ref = useRef<HTMLDivElement>(null),
-    [tool, setTool] = useState('move')
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'start',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        maxWidth: '100%'
-      }}
-    >
-      <div style={{ display: 'grid', gap: '1rem' }}>
-        <h3
-          id={id}
-          style={{ margin: 0 }}
-        >
-          Canvas tools
-        </h3>
+      <div style={layout}>
         <Toolbar
           {...options}
-          ref={ref}
-          aria-label={undefined}
-          aria-labelledby={id}
+          aria-label="Zoom actions"
         >
-          {['move', 'select', 'draw'].map(value => (
-            <Button
-              key={value}
-              variant="outline"
-              pressed={tool === value}
-              onPressedChange={pressed => {
-                if (pressed) setTool(value)
-              }}
-            >
-              {value === 'move' ? 'Move' : value === 'select' ? 'Select' : 'Draw'}
-            </Button>
-          ))}
+          <Button
+            variant="outline"
+            onClick={() => setZoom(value => value + 10)}
+          >
+            Zoom in
+          </Button>
+          <Menu>
+            <MenuTrigger variant="outline">Presets</MenuTrigger>
+            <MenuPortal>
+              <MenuContent>
+                <MenuItem onSelect={() => setZoom(100)}>100%</MenuItem>
+                <MenuItem onSelect={() => setZoom(200)}>200%</MenuItem>
+              </MenuContent>
+            </MenuPortal>
+          </Menu>
         </Toolbar>
-        <Button
-          variant="ghost"
-          onClick={() => ref.current?.querySelector<HTMLElement>('[tabindex="0"]')?.focus()}
-        >
-          Focus canvas tools
-        </Button>
+        <output>{zoom}%</output>
       </div>
-      <section
-        aria-label="Canvas preview"
-        style={{
-          display: 'grid',
-          placeItems: 'center',
-          width: '16rem',
-          height: '12rem',
-          border: '1px solid var(--rad-color-border)',
-          borderRadius: 'var(--rad-control-radius)',
-          background: 'var(--rad-color-surface)'
-        }}
-      >
-        <output aria-live="polite">{tool} tool selected</output>
-      </section>
-    </div>
-  )
-}
-export const ChoosingCanvasTools: Story = {
-  args: { orientation: 'vertical', loop: false },
-  render: args => (
-    <MotionProvider>
-      <CanvasTools {...args} />
     </MotionProvider>
   )
+}
+
+export const WithMenu: Story = {
+  args: { 'aria-label': 'Zoom actions' },
+  render: ({ orientation, dir, loop }) => <ZoomActions {...{ orientation, dir, loop }} />
 }
