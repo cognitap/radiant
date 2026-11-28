@@ -1,7 +1,7 @@
 import { act, createRef, StrictMode } from 'react'
 import { createPortal } from 'react-dom'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { commands, userEvent } from 'vitest/browser'
+import { commands } from 'vitest/browser'
 import {
   CodeBlock,
   CodeBlockHeader,
