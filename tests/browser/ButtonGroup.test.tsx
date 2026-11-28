@@ -44,7 +44,7 @@ const keys = (text: string) =>
 const actions = (props: ButtonGroupProps = {}) => (
   <ButtonGroup
     aria-label="Actions"
-    style={{ '--rad-button-group-radius': '9px' }}
+    style={{ '--rad-spacing-normal': '20px', '--rad-button-radius': '9px' }}
     {...props}
   >
     <Button variant="outline">Save</Button>
@@ -103,53 +103,27 @@ test('each enabled or pending Button retains its own Tab stop and arrows do not 
   await keys('{Tab}')
   expect(document.activeElement?.textContent).toBe('After')
 })
-test('logical corners and one shared border follow live horizontal LTR/RTL and vertical layout', async () => {
+test('separate corners and half spacing follow horizontal LTR, RTL and vertical layout', async () => {
   const { host, render } = await mount(actions())
-  let nodes = buttons(host),
-    a = nodes[0]!.getBoundingClientRect(),
-    b = nodes[1]!.getBoundingClientRect()
-  expect(getComputedStyle(nodes[0]!).borderTopLeftRadius).toBe('9px')
-  expect(getComputedStyle(nodes[0]!).borderTopRightRadius).toBe('0px')
-  expect(getComputedStyle(nodes[2]!).borderTopRightRadius).toBe('9px')
-  expect(Math.abs(a.right - b.left - 1)).toBeLessThan(0.2)
+  const [first, middle, last] = buttons(host)
+  for (const button of [first, middle, last]) {
+    expect(getComputedStyle(button!).borderRadius).toBe('9px')
+  }
+  function currentGap(axis: 'ltr' | 'rtl' | 'vertical') {
+    const a = first!.getBoundingClientRect()
+    const b = middle!.getBoundingClientRect()
+    if (axis === 'vertical') return b.top - a.bottom
+    return axis === 'rtl' ? a.left - b.right : b.left - a.right
+  }
+  expect(currentGap('ltr')).toBeCloseTo(10)
   await render(actions({ dir: 'rtl' }))
-  nodes = buttons(host)
-  a = nodes[0]!.getBoundingClientRect()
-  b = nodes[1]!.getBoundingClientRect()
-  await expect.poll(() => getComputedStyle(nodes[0]!).borderTopRightRadius).toBe('9px')
-  expect(getComputedStyle(nodes[0]!).borderTopLeftRadius).toBe('0px')
-  expect(getComputedStyle(nodes[2]!).borderTopLeftRadius).toBe('9px')
-  expect(Math.abs(b.right - a.left - 1)).toBeLessThan(0.2)
+  expect(currentGap('rtl')).toBeCloseTo(10)
   await render(actions({ orientation: 'vertical', dir: 'rtl' }))
-  nodes = buttons(host)
-  a = nodes[0]!.getBoundingClientRect()
-  b = nodes[1]!.getBoundingClientRect()
-  await expect.poll(() => getComputedStyle(nodes[0]!).borderTopLeftRadius).toBe('9px')
-  expect(getComputedStyle(nodes[0]!).borderBottomLeftRadius).toBe('0px')
-  expect(getComputedStyle(nodes[2]!).borderBottomLeftRadius).toBe('9px')
-  expect(Math.abs(a.bottom - b.top - 1)).toBeLessThan(0.2)
+  expect(currentGap('vertical')).toBeCloseTo(10)
+  await render(actions({ style: { '--rad-button-group-gap': '6px' } }))
+  expect(currentGap('ltr')).toBeCloseTo(6)
 })
-test('a single Button and dynamic membership receive complete outer corners', async () => {
-  const { host, render } = await mount(actions())
-  await render(
-    <ButtonGroup style={{ '--rad-button-group-radius': '9px' }}>
-      <Button>Only</Button>
-    </ButtonGroup>
-  )
-  const button = buttons(host)[0]!
-  await expect
-    .poll(() => {
-      const style = getComputedStyle(button)
-      return [
-        style.borderTopLeftRadius,
-        style.borderTopRightRadius,
-        style.borderBottomLeftRadius,
-        style.borderBottomRightRadius
-      ]
-    })
-    .toEqual(['9px', '9px', '9px', '9px'])
-})
-test('joined submit and reset actions retain native form submission and reset', async () => {
+test('grouped submit and reset actions retain native form submission and reset', async () => {
   const { host } = await mount(<EditProjectActions />)
   await act(async () => {
     await userEvent.fill(host.querySelector('input')!, 'North star')
@@ -161,18 +135,17 @@ test('joined submit and reset actions retain native form submission and reset', 
   expect(host.querySelector('input')?.value).toBe('Reader study')
   expect(host.querySelector('output')?.textContent).toBe('Project title restored.')
 })
-test('a real MenuTrigger keeps the final corners, native menu keyboard behavior and return focus', async () => {
-  const { host } = await mount(
-    <PublishReportActions style={{ '--rad-button-group-radius': '9px' }} />
-  )
+test('a grouped MenuTrigger keeps its corners, native menu keyboard behavior and return focus', async () => {
+  const { host } = await mount(<PublishReportActions style={{ '--rad-button-radius': '9px' }} />)
   const nodes = buttons(host)
   expect(nodes).toHaveLength(2)
   expect(nodes[1]?.getAttribute('data-slot')).toContain('menu-trigger')
-  expect(getComputedStyle(nodes[1]!).borderTopRightRadius).toBe('9px')
+  expect(nodes[1]?.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+  expect(getComputedStyle(nodes[1]!).borderRadius).toBe('9px')
   await click(nodes[1]!)
   await keys('{Escape}')
   expect(document.activeElement).toBe(nodes[1])
-  expect(getComputedStyle(nodes[1]!).borderTopRightRadius).toBe('9px')
+  expect(getComputedStyle(nodes[1]!).borderRadius).toBe('9px')
   await click(nodes[1]!)
   const item = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
     node => node.textContent === 'Schedule for tomorrow'

@@ -794,9 +794,9 @@ test('inputs, sliders, dates, times, color picker, table and indicator preserve 
   )
   expectRtlOrder(groupButtons[0]!, groupButtons[2]!)
   expect(parseFloat(getComputedStyle(groupButtons[0]!).borderTopRightRadius)).toBeGreaterThan(0)
-  expect(parseFloat(getComputedStyle(groupButtons[0]!).borderTopLeftRadius)).toBe(0)
+  expect(parseFloat(getComputedStyle(groupButtons[0]!).borderTopLeftRadius)).toBeGreaterThan(0)
   expect(parseFloat(getComputedStyle(groupButtons[2]!).borderTopLeftRadius)).toBeGreaterThan(0)
-  expect(parseFloat(getComputedStyle(groupButtons[2]!).borderTopRightRadius)).toBe(0)
+  expect(parseFloat(getComputedStyle(groupButtons[2]!).borderTopRightRadius)).toBeGreaterThan(0)
 
   const headers = host.querySelectorAll<HTMLElement>('table thead th')
   expectRtlOrder(headers[0]!, headers[1]!)
