@@ -23,10 +23,8 @@ const checkboxVariants = cva([
   '[border-style:var(--rad-checkbox-border-style,var(--rad-control-border-style,solid))]',
   '[border-color:var(--rad-checkbox-border-color,var(--_rad-control-border))]',
   'bg-[var(--rad-checkbox-background,var(--rad-color-surface,oklch(1_0_0)))]',
-  'checked:bg-[var(--rad-checkbox-checked-background,var(--_rad-checkbox-icon-fill,var(--rad-checkbox-background,var(--rad-color-surface,oklch(1_0_0)))))]',
-  'checked:[border-color:var(--rad-checkbox-checked-border,var(--_rad-checkbox-icon-edge,var(--rad-checkbox-border-color,var(--_rad-control-border))))]',
-  'indeterminate:bg-[var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))]',
-  'indeterminate:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
+  'checked:not-indeterminate:bg-[var(--rad-checkbox-checked-background,var(--_rad-checkbox-icon-fill,var(--rad-checkbox-background,var(--rad-color-surface,oklch(1_0_0)))))]',
+  'checked:not-indeterminate:[border-color:var(--rad-checkbox-checked-border,var(--_rad-checkbox-icon-edge,var(--rad-checkbox-border-color,var(--_rad-control-border))))]',
   '[box-shadow:var(--rad-control-indicator-shadow,none)]',
   'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)] indeterminate:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
   'data-invalid:[--_rad-invalid-border:var(--rad-checkbox-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] data-invalid:[border-color:var(--_rad-invalid-border)]',
@@ -38,12 +36,15 @@ const checkboxVariants = cva([
   'disabled:checked:bg-[var(--rad-checkbox-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'disabled:indeterminate:bg-[var(--rad-checkbox-disabled-background,var(--rad-color-disabled-background,oklch(0.96_0.005_286)))]',
   'forced-colors:border-[CanvasText]',
-  'forced-colors:indeterminate:bg-[Highlight]',
   'forced-colors:disabled:border-[GrayText] forced-colors:disabled:bg-[Canvas]'
 ])
 
 const markClass =
-  'pointer-events-none absolute inset-0 size-full scale-65 [color:var(--rad-checkbox-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-checkbox-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
+  'pointer-events-none absolute [color:var(--rad-checkbox-mark,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-checkbox-mark,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
+
+const iconMarkClass = 'inset-0 size-full scale-65'
+const squareMarkClass =
+  '[--_rad-checkbox-square:0.6] [corner-shape:var(--rad-checkbox-corner-shape,var(--rad-control-corner-shape,round))] [color:var(--rad-checkbox-mark,var(--rad-color-accent,oklch(0.21_0.006_286)))] forced-colors:text-[Highlight] forced-colors:[forced-color-adjust:none]'
 
 const checkMarkClass = 'opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-0'
 const indeterminateMarkClass = 'opacity-0 peer-indeterminate:opacity-100'
@@ -146,7 +147,9 @@ export function Checkbox({
           checkboxVariants(),
           controlMetrics({ controlSize }),
           hasCheck &&
-            '[--_rad-checkbox-icon-fill:var(--rad-color-accent,oklch(0.21_0.006_286))] [--_rad-checkbox-icon-edge:var(--rad-checkbox-checked-background,var(--_rad-checkbox-icon-fill))] forced-colors:checked:bg-[Highlight]',
+            '[--_rad-checkbox-icon-fill:var(--rad-color-accent,oklch(0.21_0.006_286))] [--_rad-checkbox-icon-edge:var(--rad-checkbox-checked-background,var(--_rad-checkbox-icon-fill))] forced-colors:checked:not-indeterminate:bg-[Highlight]',
+          hasIndeterminate &&
+            'indeterminate:bg-[var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286)))] indeterminate:[border-color:var(--rad-checkbox-checked-border,var(--rad-checkbox-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))] forced-colors:indeterminate:bg-[Highlight]',
           className
         )}
         data-control-size={controlSize}
@@ -156,7 +159,7 @@ export function Checkbox({
       {hasCheck ? (
         <span
           aria-hidden="true"
-          className={cn(markClass, checkMarkClass, parts?.indicator?.className)}
+          className={cn(markClass, iconMarkClass, checkMarkClass, parts?.indicator?.className)}
           style={parts?.indicator?.style}
           data-slot="checkbox-indicator"
         >
@@ -172,9 +175,8 @@ export function Checkbox({
           className={cn(
             markClass,
             checkMarkClass,
-            '[--_rad-checkbox-square:0.6] scale-[var(--_rad-checkbox-square)]',
-            'rounded-[var(--rad-checkbox-radius,min(var(--rad-control-radius,0.5rem),25%))] bg-current [corner-shape:var(--rad-checkbox-corner-shape,var(--rad-control-corner-shape,round))]',
-            '[color:var(--rad-checkbox-mark,var(--rad-color-accent,oklch(0.21_0.006_286)))] forced-colors:text-[Highlight] forced-colors:[forced-color-adjust:none]',
+            squareMarkClass,
+            'inset-0 size-full scale-[var(--_rad-checkbox-square)] rounded-[var(--rad-checkbox-radius,min(var(--rad-control-radius,0.5rem),25%))] bg-current',
             parts?.indicator?.className
           )}
           style={parts?.indicator?.style}
@@ -184,7 +186,12 @@ export function Checkbox({
       {hasIndeterminate ? (
         <span
           aria-hidden="true"
-          className={cn(markClass, indeterminateMarkClass, parts?.indicator?.className)}
+          className={cn(
+            markClass,
+            iconMarkClass,
+            indeterminateMarkClass,
+            parts?.indicator?.className
+          )}
           style={parts?.indicator?.style}
           data-slot="checkbox-indicator"
         >
@@ -195,21 +202,21 @@ export function Checkbox({
           />
         </span>
       ) : (
-        <svg
+        <span
           aria-hidden="true"
-          className={cn(markClass, indeterminateMarkClass, parts?.indicator?.className)}
+          className={cn(
+            markClass,
+            indeterminateMarkClass,
+            squareMarkClass,
+            'inset-[calc((1_-_var(--_rad-checkbox-square))*50%)] box-border border-solid border-current',
+            '[--_rad-checkbox-ring:var(--rad-checkbox-border-width,var(--rad-control-border-width,1px))] border-[length:var(--_rad-checkbox-ring)]',
+            '[--_rad-checkbox-ring-radius:calc(var(--rad-checkbox-radius)_*_var(--_rad-checkbox-square))]',
+            'rounded-[var(--_rad-checkbox-ring-radius,min(25%,calc(var(--rad-control-radius,0.5rem)_*_var(--_rad-checkbox-square))))]',
+            parts?.indicator?.className
+          )}
           style={parts?.indicator?.style}
           data-slot="checkbox-indicator"
-          fill="none"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M3.5 8h9"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="2"
-          />
-        </svg>
+        />
       )}
     </span>
   )
