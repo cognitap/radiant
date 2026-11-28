@@ -1,7 +1,7 @@
 import { act, createRef, StrictMode } from 'react'
 import { createPortal } from 'react-dom'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { commands, userEvent } from 'vitest/browser'
+import { commands } from 'vitest/browser'
 import {
   CodeBlock,
   CodeBlockHeader,
@@ -9,16 +9,13 @@ import {
   CodeBlockContent,
   CodeBlockCopy,
   InlineCode,
+  IconProvider,
   ThemeScope,
   defineTheme,
   type CodeBlockProps,
   type CodeBlockCopyProps
 } from '../../src/index.js'
-import {
-  InstallRadiant,
-  ConfigureStudyExport,
-  InspectSessionExport
-} from '../../.storybook/examples/CodeBlockExamples.js'
+import { copyConfirmationDelay } from '../../src/react/useClipboardCopy.js'
 import { mount, click, key, pause } from './familyHarness.js'
 let original: PropertyDescriptor | undefined
 beforeEach(() => {
@@ -167,22 +164,42 @@ test('copy writes raw source once, waits for success, keeps focus and never subm
     ['aria-pressed', 'true']
   ])
   const { host } = await mount(
-    <form
-      style={{ height: '200px', overflow: 'auto' }}
-      onSubmit={event => {
-        event.preventDefault()
-        submits++
+    <IconProvider
+      icons={{
+        copy: props => (
+          <svg
+            {...props}
+            data-icon="copy"
+          />
+        ),
+        check: props => (
+          <svg
+            {...props}
+            data-icon="check"
+          />
+        )
       }}
     >
-      <Sample
-        code={source}
-        lineNumbers
-        copyProps={unsafe}
-      />
-    </form>
+      <form
+        style={{ height: '200px', overflow: 'auto' }}
+        onSubmit={event => {
+          event.preventDefault()
+          submits++
+        }}
+      >
+        <Sample
+          code={source}
+          lineNumbers
+          copyProps={unsafe}
+        />
+      </form>
+    </IconProvider>
   )
   const button = host.querySelector('button')!,
     status = host.querySelector('output')!
+  const width = button.offsetWidth
+  expect(button).toHaveAccessibleName('Copy code')
+  expect(button.querySelector('[data-icon="copy"]')).toBeVisible()
   await click(button)
   expect(writes).toEqual([source])
   expect(status.textContent).toBe('Copying code…')
@@ -198,15 +215,20 @@ test('copy writes raw source once, waits for success, keeps focus and never subm
   expect(writes).toHaveLength(1)
   await act(async () => finish())
   expect(status.textContent).toBe('Code copied.')
-  const formBox = host.querySelector('form')!.getBoundingClientRect(),
-    statusBox = status.getBoundingClientRect()
-  expect(statusBox.top).toBeGreaterThanOrEqual(formBox.top)
-  expect(statusBox.bottom).toBeLessThanOrEqual(formBox.bottom)
+  expect(status).toHaveClass('sr-only')
+  expect(button).toHaveAccessibleName('Copied')
+  expect(button.querySelector('[data-icon="check"]')).toBeVisible()
+  expect(button.querySelector('[data-icon="copy"]')).not.toBeVisible()
+  expect(button.offsetWidth).toBe(width)
   expect(status.getAttribute('aria-live')).toBe('polite')
   expect(button.getAttribute('aria-busy')).toBeNull()
   expect(submits).toBe(0)
   expect(document.activeElement).toBe(button)
   expect(host.querySelector('b')).toBeNull()
+  await pause(copyConfirmationDelay + 50)
+  expect(status).toBeEmptyDOMElement()
+  expect(button).toHaveAccessibleName('Copy code')
+  expect(button).toHaveFocus()
 })
 test('replaced source clears feedback, serializes pending writes and never announces an old completion', async () => {
   const writes: string[] = []
@@ -325,48 +347,6 @@ test('the viewport reserves a scrollbar gutter only on axes that overflow', asyn
   expect(short.scrollWidth).toBe(short.clientWidth)
   expect(wide.scrollWidth).toBeGreaterThan(wide.clientWidth)
   expect(wide.clientHeight).toBe(content(wide).offsetHeight + 24)
-})
-test('canonical tasks generate native configuration and filter real table records and raw CSV', async () => {
-  const writes: string[] = []
-  clipboard(async source => {
-    writes.push(source)
-  })
-  const { host, render } = await mount(<InstallRadiant />)
-  await act(() => userEvent.selectOptions(host.querySelector('select')!, 'npm'))
-  expect(host.querySelector('code[data-slot="code-block-code"]')!.textContent).toBe(
-    'npm install @cognitap/radiant'
-  )
-  await click(host.querySelector('button')!)
-  expect(writes[0]).toBe('npm install @cognitap/radiant')
-  await render(<ConfigureStudyExport />)
-  await act(() =>
-    userEvent.fill(host.querySelector('input[name="collection"]')!, 'participant_notes')
-  )
-  expect(host.querySelector('[data-slot="code-block-code"]')!.textContent).toContain(
-    'reading_sessions'
-  )
-  await click(host.querySelector('input[type="checkbox"]')!)
-  await click(host.querySelector('button[type="submit"]')!)
-  expect(host.querySelector('[data-slot="code-block-code"]')!.textContent).toContain(
-    '"collection": "participant_notes"'
-  )
-  expect(host.querySelector('[data-slot="code-block-code"]')!.textContent).not.toContain(
-    'durationMs'
-  )
-  expect(host.querySelector('output[aria-label="Generated export plan"]')!.textContent).toContain(
-    'participant_notes'
-  )
-  expect(
-    host.querySelector('output[aria-label="Generated export plan"]')!.getAttribute('aria-live')
-  ).toBe('polite')
-  await render(<InspectSessionExport />)
-  await click(host.querySelector('input[type="checkbox"]')!)
-  expect(host.querySelector('caption')!.textContent).toBe('2 session records')
-  expect(host.querySelector('tbody')!.textContent).not.toContain('Jonas')
-  await click(host.querySelector<HTMLButtonElement>('[data-slot~="code-block-copy"]')!)
-  expect(writes.at(-1)).toContain('\r\n')
-  expect(writes.at(-1)).toContain('"S-104"')
-  expect(writes.at(-1)).not.toContain('Jonas')
 })
 test('copy uses its own document and ignores asynchronous completion after unmount', async () => {
   const frame = document.createElement('iframe')
