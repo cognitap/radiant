@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Checkbox uses a regular-weight label and shows an inset square when checked.
+
 ## 0.0.110
 
 - Button Storybook examples focus on the default, pressed, and pending submit states.

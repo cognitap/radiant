@@ -103,6 +103,41 @@ test('a large radius caps tracks at half their thickness', async () => {
   expect(getComputedStyle(progress).boxShadow).toContain('inset')
 })
 
+test('a checked checkbox draws a smaller square using the outer corner shape', async () => {
+  const { host } = await mount(
+    <ThemeScope theme={jelly}>
+      <Checkbox
+        label="Choice"
+        defaultChecked
+      />
+    </ThemeScope>
+  )
+  const input = host.querySelector('input')!
+  const mark = host.querySelector('[data-slot="checkbox-indicator"]')!
+  const square = mark.getBoundingClientRect()
+  expect(square.width).toBeCloseTo(square.height)
+  expect(square.width).toBeLessThan(input.getBoundingClientRect().width)
+  expect(getComputedStyle(mark).backgroundColor).toBe(getComputedStyle(mark).color)
+  expect(getComputedStyle(mark).backgroundColor).not.toBe(getComputedStyle(input).backgroundColor)
+  expect(getComputedStyle(mark).getPropertyValue('corner-shape')).toBe(
+    getComputedStyle(input).getPropertyValue('corner-shape')
+  )
+})
+
+test('checkbox labels use regular weight and allow a caller to make them bold', async () => {
+  const { host } = await mount(
+    <ThemeScope theme={jelly}>
+      <Checkbox label="Default" />
+      <Checkbox
+        label="Custom"
+        parts={{ label: { className: 'font-bold' } }}
+      />
+    </ThemeScope>
+  )
+  const labels = [...host.querySelectorAll('[data-slot="checkbox-label"]')]
+  expect(labels.map(label => getComputedStyle(label).fontWeight)).toEqual(['400', '700'])
+})
+
 test('pressing a checkbox scales its box and mark together, never under reduced motion', async () => {
   const { host } = await mount(<ThemeScope theme={jelly}>{family}</ThemeScope>)
   const { checkbox } = parts(host)

@@ -4,10 +4,7 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import { Checkbox, Field, ThemeScope, defineTheme, type CheckboxProps } from '../../src/index.js'
-import {
-  CheckboxFeedback,
-  CheckboxPermissionsExample
-} from '../../.storybook/examples/CheckboxExamples.js'
+import { CheckboxFeedback, CheckboxPermissionsExample } from './fixtures/CheckboxExamples.js'
 import { useReducedMotion } from '../../src/motion/react.js'
 import '../../.storybook/styles.css'
 
@@ -180,7 +177,9 @@ test('mixed state, Field disable, live off/reduced motion, custom parts and clea
   const custom = { indicator: { style: { scale: '.8', opacity: 0.6 } } }
   await act(async () => root.render(tree(true, false, false, false, custom)))
   expect(wrapper.style.getPropertyValue('--example-checkbox-feedback')).toBe('')
-  for (const mark of host.querySelectorAll<SVGElement>('svg')) {
+  for (const mark of host.querySelectorAll<HTMLElement | SVGElement>(
+    '[data-slot="checkbox-indicator"]'
+  )) {
     expect(mark.style.scale).toBe('0.8')
     expect(mark.style.opacity).toBe('0.6')
   }

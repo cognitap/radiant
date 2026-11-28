@@ -80,10 +80,10 @@ function workspace(theme: Theme, mode: ThemeMode) {
   )
 }
 
-function systemColor(color: string) {
+function systemColor(color: string, scope: Element = host) {
   const probe = document.createElement('span')
   probe.style.cssText = `color:${color};forced-color-adjust:none`
-  host.append(probe)
+  scope.append(probe)
   const result = getComputedStyle(probe).color
   probe.remove()
   return result
@@ -215,14 +215,14 @@ for (const mode of ['light', 'dark'] as const) {
         if (!input.checked && !input.indeterminate) continue
         const mark =
           input.parentElement!.querySelectorAll('[aria-hidden]')[input.indeterminate ? 1 : 0]
+        const square = input.matches('[data-slot~="checkbox"]:checked:not(:indeterminate)')
+        const markStyle = getComputedStyle(mark)
         const fill = getComputedStyle(input).backgroundColor
-        const ink =
-          input.type === 'radio'
-            ? getComputedStyle(mark).backgroundColor
-            : getComputedStyle(mark).color
-        expect(getComputedStyle(mark).opacity).toBe('1')
+        const ink = input.type === 'radio' || square ? markStyle.backgroundColor : markStyle.color
+        expect(markStyle.opacity).toBe('1')
         expect(ink).not.toBe(fill)
-        expect(ink).toBe(systemColor(input.disabled ? 'GrayText' : 'HighlightText'))
+        const systemInk = input.disabled ? 'GrayText' : square ? 'Highlight' : 'HighlightText'
+        expect(ink).toBe(systemColor(systemInk, input.parentElement!))
       }
       const disabled = host.querySelector<HTMLButtonElement>('button:disabled')!
       expect(getComputedStyle(disabled).opacity).toBe('1')
