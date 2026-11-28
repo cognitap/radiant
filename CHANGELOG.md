@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+- Switch Storybook examples focus on the default and Field states.
+- Switch focus outlines match the invalid border color.
+- The Switch thumb follows the track’s Physis contour.
+- Switch labels use regular weight. The thumb slides and the colors ease when the setting changes.
+- A mouse drag can start after leaving the Switch while the button is held.
+
 ## 0.2.5
 
 - Toolbar Storybook examples focus on formatting and menu navigation.

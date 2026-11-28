@@ -29,7 +29,8 @@ const switchVariants = cva([
   'checked:[border-color:var(--rad-switch-checked-border,var(--rad-switch-checked-background,var(--rad-color-accent,oklch(0.21_0.006_286))))]',
   '[box-shadow:var(--rad-control-indicator-shadow,none)]',
   'checked:[box-shadow:var(--rad-control-indicator-checked-shadow,none)]',
-  'data-invalid:[border-color:var(--rad-switch-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))]',
+  'motion-safe:transition-[background-color,border-color] motion-safe:duration-[var(--rad-motion-color-duration,150ms)] ease-in-out motion-safe:focus-visible:transition-[background-color] forced-colors:transition-none',
+  'data-invalid:[--_rad-invalid-border:var(--rad-switch-invalid-border,var(--rad-color-invalid,oklch(0.56_0.19_25)))] data-invalid:[border-color:var(--_rad-invalid-border)]',
   focusRingClass,
   'focus-visible:[--_rad-focus-color:var(--rad-switch-focus-color)] focus-visible:[--_rad-focus-width:var(--rad-switch-focus-width)] focus-visible:[--_rad-focus-offset:var(--rad-switch-focus-offset)] focus-visible:[--_rad-focus-style:var(--rad-switch-focus-style)]',
   'disabled:cursor-not-allowed',
@@ -43,13 +44,14 @@ const switchVariants = cva([
 // The thumb sits 3px inside the track: its corner is the track corner minus 3px, capped at half its own size.
 const thumbClass =
   'block size-full shrink-0 forced-colors:[forced-color-adjust:none] rounded-[var(--rad-switch-thumb-radius,max(0px,min(calc(var(--rad-switch-radius,var(--rad-control-radius,0.5rem))-3px),50%)))] [corner-shape:var(--rad-switch-corner-shape,var(--rad-control-corner-shape,round))] [box-shadow:var(--rad-control-indicator-thumb-shadow,none)] bg-current forced-colors:[box-shadow:none]'
+// The fractional columns share the rail space left over by the square thumb.
 const indicatorClass =
-  'pointer-events-none absolute inset-[3px] flex justify-start peer-checked:justify-end [color:var(--rad-switch-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] peer-checked:[color:var(--rad-switch-checked-thumb,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-switch-disabled-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[CanvasText] forced-colors:peer-checked:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
+  'pointer-events-none absolute inset-[3px] grid grid-rows-[100%] grid-cols-[0fr_auto_1fr] peer-checked:grid-cols-[1fr_auto_0fr] motion-safe:transition-[color,grid-template-columns] motion-safe:duration-[var(--rad-motion-color-duration,150ms)] ease-in-out forced-colors:transition-none peer-data-[dragging]:transition-none [color:var(--rad-switch-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] peer-checked:[color:var(--rad-switch-checked-thumb,var(--rad-color-accent-foreground,oklch(0.985_0_0)))] peer-disabled:[color:var(--rad-switch-disabled-thumb,var(--rad-color-muted-foreground,oklch(0.45_0.01_286)))] forced-colors:text-[CanvasText] forced-colors:peer-checked:text-[HighlightText] forced-colors:peer-disabled:text-[GrayText]'
 
 const rowClass =
   'inline-flex min-h-6 min-w-0 max-w-full cursor-default items-center gap-[var(--rad-switch-gap,var(--rad-spacing-label-gap,0.5rem))] select-none has-disabled:cursor-not-allowed'
 const labelClass =
-  'min-w-0 break-words font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-[number:var(--rad-typography-roles-ui-label-weight,400)] [color:var(--rad-switch-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-switch-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
+  'min-w-0 break-words font-[family-name:var(--rad-typography-roles-ui-label-family,system-ui,sans-serif)] tracking-[var(--rad-typography-roles-ui-label-letter-spacing,-0.011em)] font-normal [color:var(--rad-switch-label-color,var(--rad-color-foreground,oklch(0.21_0.006_286)))] text-[length:var(--rad-switch-label-size,var(--_rad-control-font-size))] leading-[var(--rad-typography-roles-ui-label-line-height,1.4)]'
 
 export type SwitchProps = Omit<
   ComponentProps<'input'>,
@@ -66,7 +68,6 @@ export type SwitchProps = Omit<
     parts?: ControlParts
   }
 
-/** Native on/off setting. Read checked for state and value for submitted data. */
 export function Switch({
   className,
   controlSize = 'medium',
@@ -150,13 +151,18 @@ export function Switch({
       >
         <span
           ref={handleRef}
-          className="h-full w-auto shrink-0 aspect-square"
+          className="col-start-2 row-start-1 h-full w-auto aspect-square"
         >
           <span
-            className={cn(thumbClass, parts?.indicator?.className)}
-            style={parts?.indicator?.style}
-            data-slot="switch-indicator"
-          />
+            className="block size-full"
+            data-physis-switch-thumb=""
+          >
+            <span
+              className={cn(thumbClass, parts?.indicator?.className)}
+              style={parts?.indicator?.style}
+              data-slot="switch-indicator"
+            />
+          </span>
         </span>
       </span>
     </span>
