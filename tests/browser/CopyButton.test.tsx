@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { CopyButton } from '../../src/index.js'
+import { CopyButton, IconProvider } from '../../src/index.js'
 import { click, key, mount, pause } from './familyHarness.js'
 
 let originalClipboard: PropertyDescriptor | undefined
@@ -33,15 +33,22 @@ test('keyboard writes the exact value, announces success, preserves focus and cl
   await key('{Tab}')
   const button = host.querySelector('button')!
   expect(button).toHaveFocus()
+  const width = button.offsetWidth
+  expect(button).toHaveAccessibleName('Copy invoice ID')
   await key('{Enter}')
   expect(writeText).toHaveBeenCalledExactlyOnceWith(' INV-004\n')
   const status = host.querySelector('output')!
   expect(status).toHaveRole('status')
-  expect(status).toHaveTextContent('Copied.')
+  expect(status).toHaveTextContent('Copied')
+  expect(status).toHaveClass('sr-only')
+  expect(button).toHaveAccessibleName('Copied')
+  expect(button.offsetWidth).toBe(width)
   expect(button).toHaveFocus()
   expect(submit).not.toHaveBeenCalled()
   await pause(475)
   expect(status).toBeEmptyDOMElement()
+  expect(button).toHaveAccessibleName('Copy invoice ID')
+  expect(button.offsetWidth).toBe(width)
 })
 
 test('reports a denied write and clears old feedback when the source changes', async () => {
@@ -62,8 +69,47 @@ test('reports a denied write and clears old feedback when the source changes', a
   await click(button)
   expect(status).toBeVisible()
   expect(status).toHaveTextContent('Clipboard access denied.')
+  expect(button).toHaveAttribute('aria-describedby', status.id)
   await click(button)
-  expect(status).toHaveTextContent('Copied.')
+  expect(status).toHaveTextContent('Copied')
+  expect(button).toHaveAccessibleName('Copied')
+  expect(button).not.toHaveAttribute('aria-describedby')
   await render(example('new'))
   expect(status).toBeEmptyDOMElement()
+})
+
+test('icon-only actions use supplied glyphs and announce success with a stable button name', async () => {
+  stubClipboard(async () => {})
+  const { host } = await mount(
+    <IconProvider
+      icons={{
+        copy: props => (
+          <svg
+            data-icon="copy"
+            {...props}
+          />
+        ),
+        check: props => (
+          <svg
+            data-icon="check"
+            {...props}
+          />
+        )
+      }}
+    >
+      <CopyButton
+        value="INV-004"
+        iconOnly
+        aria-label="Copy invoice ID"
+        copiedText="Invoice number copied"
+      />
+    </IconProvider>
+  )
+  const button = host.querySelector('button')!
+  expect(button.querySelector('[data-icon="copy"]')).toBeVisible()
+  await click(button)
+  expect(button.querySelector('[data-icon="check"]')).toBeVisible()
+  expect(button.querySelector('[data-icon="copy"]')).not.toBeVisible()
+  expect(button).toHaveAccessibleName('Copy invoice ID')
+  expect(host.querySelector('output')).toHaveTextContent('Invoice number copied')
 })
