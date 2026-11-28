@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- NavLink’s optional active outline renders with the standalone stylesheet.
+
 ## 0.2.9
 
 - NavLink Storybook examples focus on current-page links and groups.
