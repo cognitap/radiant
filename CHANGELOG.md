@@ -6,6 +6,7 @@
 
 ## 0.2.6
 
+- InlineCode has one Storybook example that shows code inside a sentence.
 - Switch Storybook examples focus on the default and Field states.
 - Switch focus outlines match the invalid border color.
 - The Switch thumb follows the track’s Physis contour.
