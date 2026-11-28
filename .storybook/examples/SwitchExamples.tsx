@@ -6,10 +6,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Checkbox,
   Field,
-  Switch,
-  type ControlSize
+  Switch
 } from '../../src/index.js'
 
 export function SwitchSettingsExample() {
@@ -79,30 +77,5 @@ export function SwitchSettingsExample() {
         </form>
       </CardContent>
     </Card>
-  )
-}
-
-export function SwitchSizeComparison() {
-  const sizes: ControlSize[] = ['small', 'medium', 'large']
-  return (
-    <div style={{ display: 'grid', gap: '1.5rem', minWidth: 0 }}>
-      {sizes.map(controlSize => (
-        <div
-          key={controlSize}
-          style={{ display: 'grid', gap: '.75rem', minWidth: 0 }}
-        >
-          <Switch
-            label={`${controlSize} notifications`}
-            controlSize={controlSize}
-            defaultChecked
-          />
-          <Checkbox
-            label={`${controlSize} include a summary in the next export`}
-            controlSize={controlSize}
-            defaultChecked
-          />
-        </div>
-      ))}
-    </div>
   )
 }

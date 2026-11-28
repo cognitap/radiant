@@ -117,7 +117,7 @@ for (const phase of ['cancel', 'escape', 'lostcapture'] as const) {
     )
     const input = host.querySelector('input')!,
       thumb = host.querySelector<HTMLElement>('[data-slot=switch-indicator]')!
-    const handle = thumb.parentElement!,
+    const rail = thumb.closest<HTMLElement>('[aria-hidden=true]')!,
       before = thumb.getBoundingClientRect().x
     const parent = host.parentElement!
     parent.addEventListener('keydown', parentKey)
@@ -127,8 +127,8 @@ for (const phase of ['cancel', 'escape', 'lostcapture'] as const) {
       })
       expect(input.checked).toBe(false)
       expect(change).not.toHaveBeenCalled()
-      expect(handle.style.transform).toBe('')
-      expect(thumb.getBoundingClientRect().x).toBe(before)
+      expect(rail.style.gridTemplateColumns).toBe('')
+      await expect.poll(() => thumb.getBoundingClientRect().x).toBe(before)
       expect(input.hasAttribute('data-dragging')).toBe(false)
       if (phase === 'escape') expect(parentKey).not.toHaveBeenCalled()
     } finally {
@@ -136,6 +136,24 @@ for (const phase of ['cancel', 'escape', 'lostcapture'] as const) {
     }
   })
 }
+
+test('a mouse drag can start after the pressed thumb leaves the track vertically', async () => {
+  const change = vi.fn()
+  const { host } = await mount(
+    <Switch
+      id="outside-first"
+      label="Outside"
+      onChange={change}
+    />
+  )
+  await act(async () => {
+    const samples = await commands.dragSwitch('#outside-first', 26, 'release', false, -34, true)
+    expect(samples?.during.dragging).toBe('')
+    expect(samples?.during.thumb!.x).toBeGreaterThan(samples!.before.thumb!.x + 10)
+  })
+  expect(host.querySelector('input')!.checked).toBe(true)
+  expect(change).toHaveBeenCalledOnce()
+})
 
 test('touch cancellation and vertical scroll intent do not commit a value', async () => {
   const change = vi.fn()
@@ -173,13 +191,13 @@ test('controlled refusal and accepted prop sync settle to the value owner', asyn
   )
   const { host, render } = await mount(tree(false))
   const input = host.querySelector('input')!,
-    handle = host.querySelector<HTMLElement>('[data-slot=switch-indicator]')!.parentElement!
+    rail = host.querySelector<HTMLElement>('[aria-hidden=true]')!
   await act(async () => {
     await commands.dragSwitch('#controlled-drag', 25)
   })
   expect(input.checked).toBe(false)
   expect(change.mock.calls).toEqual([[true]])
-  expect(handle.style.transform).toBe('')
+  expect(rail.style.gridTemplateColumns).toBe('')
   await render(tree(true))
   await act(async () => {
     await commands.dragSwitch('#controlled-drag', -25)
@@ -240,13 +258,13 @@ test('disable, reset and unmount during capture clear the gesture without commit
   )
   const { host, render } = await mount(tree())
   const input = ref.current!,
-    handle = host.querySelector<HTMLElement>('[data-slot=switch-indicator]')!.parentElement!
+    rail = host.querySelector<HTMLElement>('[aria-hidden=true]')!
   await act(async () => {
     await commands.dragSwitch('#interrupt-drag', 25, 'hold')
   })
   expect(input.hasAttribute('data-dragging')).toBe(true)
   await render(tree(true))
-  expect(handle.style.transform).toBe('')
+  expect(rail.style.gridTemplateColumns).toBe('')
   expect(input.hasAttribute('data-dragging')).toBe(false)
   await act(async () => {
     await commands.dragSwitch('', 0, 'finish')
@@ -259,7 +277,7 @@ test('disable, reset and unmount during capture clear the gesture without commit
   await act(async () => {
     host.querySelector('form')!.reset()
   })
-  expect(handle.style.transform).toBe('')
+  expect(rail.style.gridTemplateColumns).toBe('')
   await act(async () => {
     await commands.dragSwitch('', 0, 'finish')
   })
@@ -268,7 +286,7 @@ test('disable, reset and unmount during capture clear the gesture without commit
     await commands.dragSwitch('#interrupt-drag', 25, 'hold')
   })
   await render(null)
-  expect(handle.style.transform).toBe('')
+  expect(rail.style.gridTemplateColumns).toBe('')
   expect(ref.current).toBe(null)
   await act(async () => {
     await commands.dragSwitch('', 0, 'finish')

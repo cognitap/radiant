@@ -68,8 +68,9 @@ for (const direction of ['ltr', 'rtl']) {
     expect(control).toHaveAccessibleName('Desktop notifications')
     expect(changes).toHaveBeenCalledExactlyOnceWith(true)
     expect(new FormData(host.querySelector('form')!).get('desktop')).toBe('enabled')
-    const after = dot.getBoundingClientRect()
-    expect(direction === 'ltr' ? after.x > before.x : after.x < before.x).toBe(true)
+    const rail = dot.closest('[aria-hidden=true]')!.getBoundingClientRect()
+    const end = direction === 'ltr' ? rail.right - before.width : rail.left
+    await expect.poll(() => dot.getBoundingClientRect().x).toBeCloseTo(end, 1)
     expect(getComputedStyle(control).backgroundColor).not.toBe(offTrack)
     expect(getComputedStyle(dot).backgroundColor).not.toBe(offThumb)
     expect(dot.closest('[aria-hidden=true]')).not.toBe(null)
@@ -220,6 +221,15 @@ test('Field owns IDs, help/error relationships and additive required state', asy
   const ids = control.getAttribute('aria-describedby')!.split(' ')
   expect(ids).toHaveLength(3)
   expect(ids.every(id => document.getElementById(id))).toBe(true)
+
+  const errorColor = getComputedStyle(control).borderTopColor
+  await act(async () => userEvent.tab())
+  expect(control.matches(':focus-visible')).toBe(true)
+  const reference = document.createElement('span')
+  reference.style.color = `color-mix(in oklab, ${errorColor} 50%, transparent)`
+  host.append(reference)
+  expect(getComputedStyle(control).outlineColor).toBe(getComputedStyle(reference).color)
+
   await act(async () => {
     form.reportValidity()
   })
@@ -359,7 +369,7 @@ test('themes, caller styles and part replacements remain independent of Checkbox
   await act(async () => {
     control.click()
   })
-  expect(getComputedStyle(dot).backgroundColor).toBe('rgb(20, 120, 10)')
+  await expect.poll(() => getComputedStyle(dot).backgroundColor).toBe('rgb(20, 120, 10)')
   expect(getComputedStyle(host.querySelector('[data-slot=switch-label]')!).fontStyle).toBe('italic')
   expect(getComputedStyle(host.querySelector('[data-slot=checkbox]')!).borderRadius).toBe('25px')
   expect(

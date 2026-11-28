@@ -12,15 +12,14 @@ type Gesture = {
   checked: boolean
   direction: number
   travel: number
-  cssTravel: number
+  startProgress: number
   progress: number
   moved: boolean
-  transform: string
   form: HTMLFormElement | null
   cleanup(): void
 }
 
-/** Preview on a private thumb wrapper; commit through the input's native activation. */
+/** Preview on the decorative thumb rail; commit through the input's native activation. */
 export function bindSwitchDrag(
   input: HTMLInputElement,
   rail: HTMLElement,
@@ -31,22 +30,23 @@ export function bindSwitchDrag(
   let gesture: Gesture | null = null
   let suppressClick = false
   const blocked = () => input.matches(':disabled') || !input.isConnected
-  const metrics = () => ({
-    travel: Math.max(0, rail.getBoundingClientRect().width - handle.getBoundingClientRect().width),
-    cssTravel: Math.max(
-      0,
-      parseFloat(view.getComputedStyle(rail).width) -
-        parseFloat(view.getComputedStyle(handle).width)
-    ),
-    direction: view.getComputedStyle(rail).direction === 'rtl' ? -1 : 1
-  })
+  const metrics = () => {
+    const track = rail.getBoundingClientRect()
+    const thumb = handle.getBoundingClientRect()
+    const direction = view.getComputedStyle(rail).direction === 'rtl' ? -1 : 1
+    return {
+      travel: track.width - thumb.width,
+      direction,
+      thumbOffset: direction === 1 ? thumb.left - track.left : track.right - thumb.right
+    }
+  }
   function finish() {
     const current = gesture
     if (!current) return
     gesture = null
     suppressClick = current.moved
     current.cleanup()
-    handle.style.transform = current.transform
+    rail.style.removeProperty('grid-template-columns')
     input.removeAttribute('data-dragging')
     if (input.hasPointerCapture(current.pointer)) input.releasePointerCapture(current.pointer)
     return current
@@ -62,7 +62,11 @@ export function bindSwitchDrag(
       return
     }
     const dx = event.clientX - current.x
-    if (!current.moved && Math.abs(event.clientY - current.y) > Math.max(4, Math.abs(dx))) {
+    if (
+      !current.moved &&
+      event.pointerType !== 'mouse' &&
+      Math.abs(event.clientY - current.y) > Math.max(4, Math.abs(dx))
+    ) {
       cancel()
       return
     }
@@ -82,9 +86,9 @@ export function bindSwitchDrag(
     event.preventDefault()
     current.progress = Math.max(
       0,
-      Math.min(1, Number(current.checked) + (dx * current.direction) / current.travel)
+      Math.min(1, current.startProgress + (dx * current.direction) / current.travel)
     )
-    handle.style.transform = `translateX(${(current.progress - Number(current.checked)) * current.cssTravel * current.direction}px)`
+    rail.style.gridTemplateColumns = `${current.progress}fr auto ${1 - current.progress}fr`
   }
   function up(event: PointerEvent) {
     const current = gesture
@@ -122,8 +126,9 @@ export function bindSwitchDrag(
       )
         return
       suppressClick = false
-      const measured = metrics()
-      if (!(measured.travel > 0 && measured.cssTravel > 0)) return
+      const { travel, direction, thumbOffset } = metrics()
+      if (travel <= 0) return
+      const startProgress = Math.max(0, Math.min(1, thumbOffset / travel))
       const observer = new view.MutationObserver(() => {
         if (blocked()) cancel()
       })
@@ -137,10 +142,11 @@ export function bindSwitchDrag(
         x: event.clientX,
         y: event.clientY,
         checked: input.checked,
-        ...measured,
-        progress: Number(input.checked),
+        travel,
+        direction,
+        startProgress,
+        progress: startProgress,
         moved: false,
-        transform: handle.style.transform,
         form,
         cleanup() {
           document.removeEventListener('pointermove', move)

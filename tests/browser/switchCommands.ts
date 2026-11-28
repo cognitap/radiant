@@ -8,7 +8,8 @@ export async function dragSwitch(
   delta: number,
   phase: Phase = 'release',
   touch = false,
-  deltaY = 0
+  deltaY = 0,
+  outsideFirst = false
 ) {
   if (phase === 'finish') {
     await context.page.mouse.up()
@@ -43,6 +44,7 @@ export async function dragSwitch(
     } else {
       await context.page.mouse.move(x, y)
       await context.page.mouse.down()
+      if (outsideFirst) await context.page.mouse.move(x, y + deltaY, { steps: 4 })
       await context.page.mouse.move(x + delta, y + deltaY, { steps: 6 })
     }
     const during = await sample()
@@ -72,7 +74,8 @@ declare module 'vitest/browser' {
       delta: number,
       phase?: Phase,
       touch?: boolean,
-      deltaY?: number
+      deltaY?: number,
+      outsideFirst?: boolean
     ): Promise<{
       before: {
         checked: boolean
