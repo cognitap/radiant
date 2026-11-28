@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+- RadioGroup Storybook examples focus on selection and Field states.
+- Radio option descriptions align with their labels.
+- Radio focus outlines match the invalid border color.
+- Selected radios show a primary-colored dot with a gap around it.
+
 ## 0.2.1
 
 - Kbd uses regular-weight text for keys and combinations.
