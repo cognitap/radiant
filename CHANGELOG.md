@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Highlight adds even padding around whole-word matches.
+
 ## 0.2.3
 
 - ToggleGroup Storybook examples focus on single and multiple selection.

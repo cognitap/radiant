@@ -73,24 +73,33 @@ export function Highlight({
   ...props
 }: HighlightProps) {
   const locale = useLocale()
-  const segmenter = useMemo(
-    () => new Intl.Segmenter(supportedLocale(Intl.Segmenter, locale)),
-    [locale]
-  )
+  const [graphemes, words] = useMemo(() => {
+    const supported = supportedLocale(Intl.Segmenter, locale)
+    return [new Intl.Segmenter(supported), new Intl.Segmenter(supported, { granularity: 'word' })]
+  }, [locale])
   const ranges = useMemo(
-    () => findRanges(text, query, segmenter, caseSensitive, ignoreDiacritics),
-    [text, query, segmenter, caseSensitive, ignoreDiacritics]
+    () => findRanges(text, query, graphemes, caseSensitive, ignoreDiacritics),
+    [text, query, graphemes, caseSensitive, ignoreDiacritics]
   )
+  const wordSegments = ranges.length ? words.segment(text) : undefined
   const content: ReactNode[] = []
   let cursor = 0
   for (const { start, end } of ranges) {
     if (start > cursor) content.push(text.slice(cursor, start))
+    const firstWord = wordSegments?.containing(start)
+    const lastWord = wordSegments?.containing(end - 1)
+    const wholeWords =
+      firstWord?.isWordLike &&
+      firstWord.index === start &&
+      lastWord?.isWordLike &&
+      lastWord.index + lastWord.segment.length === end
     content.push(
       <mark
         key={start}
         data-slot="highlight-mark"
         className={cn(
           'rounded-[min(0.125rem,var(--rad-control-radius,0.125rem))] bg-[var(--rad-color-accent)] [color:var(--rad-color-accent-foreground)] [box-decoration-break:clone] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
+          wholeWords && 'p-0.5',
           parts?.mark?.className
         )}
         style={parts?.mark?.style}
