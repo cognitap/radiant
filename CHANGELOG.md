@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.10
+
 - NavLink’s optional active outline renders with the standalone stylesheet.
 
 ## 0.2.9
