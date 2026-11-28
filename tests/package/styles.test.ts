@@ -49,6 +49,12 @@ test('the standalone stylesheet supports Dropzone sizing and hides internal cont
   assert.match(css, /\[hidden\]\s*\{\s*display:\s*none/)
 })
 
+test('the standalone stylesheet includes NavLink’s active outline dimensions', () => {
+  const css = readExport('styles.css')
+  assert.match(css, /\.border-\\\[1px\\\]\s*\{[^}]*border-width:\s*1px/)
+  assert.match(css, /\.border-solid\s*\{[^}]*border-style:\s*solid/)
+})
+
 function tailwind(input: string) {
   const manifestURL = new URL(import.meta.resolve('@tailwindcss/cli/package.json'))
   const manifest = JSON.parse(readFileSync(manifestURL, 'utf8')) as { bin: { tailwindcss: string } }
