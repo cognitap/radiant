@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.0.108
+
 - PasswordInput supports press-and-hold reveal and custom show and hide icons in either reveal mode.
 - PasswordInput aligns the reveal button’s inset and corners with the field.
 
